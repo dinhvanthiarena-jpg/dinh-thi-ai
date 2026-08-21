@@ -26,7 +26,7 @@ exports.dashboard = async (req, res) => {
   });
 
   res.render('admin/index', {
-    title: 'Bang dieu khien quan tri',
+    title: 'Bảng điều khiển quản trị',
     stats: { courseCount, studentCount, postCount, orderCount: paidOrders.length, revenue },
     recentOrders,
   });
@@ -35,18 +35,18 @@ exports.dashboard = async (req, res) => {
 // --- Courses ---
 exports.courseList = async (req, res) => {
   const courses = await Course.findAll({ order: [['createdAt', 'DESC']] });
-  res.render('admin/courses', { title: 'Quan ly khoa hoc', courses });
+  res.render('admin/courses', { title: 'Quản lý khóa học', courses });
 };
 
 exports.courseNewForm = (req, res) => {
-  res.render('admin/course-form', { title: 'Them khoa hoc', course: {}, lessons: [] });
+  res.render('admin/course-form', { title: 'Thêm khóa học', course: {}, lessons: [] });
 };
 
 exports.courseEditForm = async (req, res, next) => {
   const course = await Course.findByPk(req.params.id);
   if (!course) return next();
   const lessons = await Lesson.findAll({ where: { CourseId: course.id }, order: [['order', 'ASC']] });
-  res.render('admin/course-form', { title: 'Sua khoa hoc', course, lessons });
+  res.render('admin/course-form', { title: 'Sửa khóa học', course, lessons });
 };
 
 exports.courseCreate = async (req, res) => {
@@ -59,7 +59,7 @@ exports.courseCreate = async (req, res) => {
     level: body.level,
     price: Number(body.price) || 0,
     salePrice: body.salePrice ? Number(body.salePrice) : null,
-    instructorName: body.instructorName || 'Dinh Thi Ai',
+    instructorName: body.instructorName || 'Đinh Thi Ai',
     durationHours: Number(body.durationHours) || 0,
     outcomes: (body.outcomes || '').split('\n').map((s) => s.trim()).filter(Boolean),
     requirements: (body.requirements || '').split('\n').map((s) => s.trim()).filter(Boolean),
@@ -68,7 +68,7 @@ exports.courseCreate = async (req, res) => {
     thumbnailUrl: req.file ? `/uploads/${req.file.filename}` : undefined,
   });
 
-  req.flash('success', 'Da tao khoa hoc moi.');
+  req.flash('success', 'Đã tạo khóa học mới.');
   res.redirect(`/admin/courses/${course.id}/edit`);
 };
 
@@ -85,7 +85,7 @@ exports.courseUpdate = async (req, res, next) => {
     level: body.level,
     price: Number(body.price) || 0,
     salePrice: body.salePrice ? Number(body.salePrice) : null,
-    instructorName: body.instructorName || 'Dinh Thi Ai',
+    instructorName: body.instructorName || 'Đinh Thi Ai',
     durationHours: Number(body.durationHours) || 0,
     outcomes: (body.outcomes || '').split('\n').map((s) => s.trim()).filter(Boolean),
     requirements: (body.requirements || '').split('\n').map((s) => s.trim()).filter(Boolean),
@@ -94,14 +94,14 @@ exports.courseUpdate = async (req, res, next) => {
     ...(req.file ? { thumbnailUrl: `/uploads/${req.file.filename}` } : {}),
   });
 
-  req.flash('success', 'Da cap nhat khoa hoc.');
+  req.flash('success', 'Đã cập nhật khóa học.');
   res.redirect(`/admin/courses/${course.id}/edit`);
 };
 
 exports.courseDelete = async (req, res) => {
   await Lesson.destroy({ where: { CourseId: req.params.id } });
   await Course.destroy({ where: { id: req.params.id } });
-  req.flash('success', 'Da xoa khoa hoc.');
+  req.flash('success', 'Đã xóa khóa học.');
   res.redirect('/admin/courses');
 };
 
@@ -121,7 +121,7 @@ exports.lessonCreate = async (req, res, next) => {
     isPreview: req.body.isPreview === 'on',
   });
 
-  req.flash('success', 'Da them bai hoc.');
+  req.flash('success', 'Đã thêm bài học.');
   res.redirect(`/admin/courses/${course.id}/edit`);
 };
 
@@ -129,24 +129,24 @@ exports.lessonDelete = async (req, res) => {
   const lesson = await Lesson.findByPk(req.params.lessonId);
   const courseId = lesson ? lesson.CourseId : req.params.id;
   if (lesson) await lesson.destroy();
-  req.flash('success', 'Da xoa bai hoc.');
+  req.flash('success', 'Đã xóa bài học.');
   res.redirect(`/admin/courses/${courseId}/edit`);
 };
 
 // --- Blog ---
 exports.blogList = async (req, res) => {
   const posts = await BlogPost.findAll({ order: [['createdAt', 'DESC']] });
-  res.render('admin/blog', { title: 'Quan ly bai viet', posts });
+  res.render('admin/blog', { title: 'Quản lý bài viết', posts });
 };
 
 exports.blogNewForm = (req, res) => {
-  res.render('admin/blog-form', { title: 'Them bai viet', post: {} });
+  res.render('admin/blog-form', { title: 'Thêm bài viết', post: {} });
 };
 
 exports.blogEditForm = async (req, res, next) => {
   const post = await BlogPost.findByPk(req.params.id);
   if (!post) return next();
-  res.render('admin/blog-form', { title: 'Sua bai viet', post });
+  res.render('admin/blog-form', { title: 'Sửa bài viết', post });
 };
 
 exports.blogCreate = async (req, res) => {
@@ -161,7 +161,7 @@ exports.blogCreate = async (req, res) => {
     coverImageUrl: req.file ? `/uploads/${req.file.filename}` : undefined,
   });
 
-  req.flash('success', 'Da dang bai viet.');
+  req.flash('success', 'Đã đăng bài viết.');
   res.redirect('/admin/blog');
 };
 
@@ -179,13 +179,13 @@ exports.blogUpdate = async (req, res, next) => {
     ...(req.file ? { coverImageUrl: `/uploads/${req.file.filename}` } : {}),
   });
 
-  req.flash('success', 'Da cap nhat bai viet.');
+  req.flash('success', 'Đã cập nhật bài viết.');
   res.redirect('/admin/blog');
 };
 
 exports.blogDelete = async (req, res) => {
   await BlogPost.destroy({ where: { id: req.params.id } });
-  req.flash('success', 'Da xoa bai viet.');
+  req.flash('success', 'Đã xóa bài viết.');
   res.redirect('/admin/blog');
 };
 
@@ -198,18 +198,18 @@ exports.orderList = async (req, res) => {
     ],
     order: [['createdAt', 'DESC']],
   });
-  res.render('admin/orders', { title: 'Don hang', orders });
+  res.render('admin/orders', { title: 'Đơn hàng', orders });
 };
 
 exports.studentList = async (req, res) => {
   const students = await User.findAll({ where: { role: 'student' }, order: [['createdAt', 'DESC']] });
-  res.render('admin/students', { title: 'Hoc vien', students });
+  res.render('admin/students', { title: 'Học viên', students });
 };
 
 // --- Messages ---
 exports.messageList = async (req, res) => {
   const messages = await ContactMessage.findAll({ order: [['createdAt', 'DESC']] });
-  res.render('admin/messages', { title: 'Tin nhan lien he', messages });
+  res.render('admin/messages', { title: 'Tin nhắn liên hệ', messages });
 };
 
 exports.messageMarkRead = async (req, res) => {

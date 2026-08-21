@@ -14,7 +14,7 @@ exports.list = async (req, res) => {
   });
 
   res.render('blog/index', {
-    title: 'Kien thuc AI',
+    title: 'Kiến thức AI',
     posts,
     page,
     totalPages: Math.ceil(total / perPage),

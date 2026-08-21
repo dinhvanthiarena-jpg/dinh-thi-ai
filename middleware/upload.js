@@ -19,7 +19,7 @@ const allowedTypes = ['.jpg', '.jpeg', '.png', '.webp'];
 function fileFilter(req, file, cb) {
   const ext = path.extname(file.originalname).toLowerCase();
   if (!allowedTypes.includes(ext)) {
-    return cb(new Error('Chi cho phep anh JPG, PNG hoac WEBP.'));
+    return cb(new Error('Chỉ cho phép ảnh JPG, PNG hoặc WEBP.'));
   }
   cb(null, true);
 }

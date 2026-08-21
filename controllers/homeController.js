@@ -20,7 +20,7 @@ exports.index = async (req, res) => {
   ]);
 
   res.render('home', {
-    title: 'Dinh Thi Ai - Dao tao cong nghe AI ung dung',
+    title: 'Đinh Thi Ai - Đào tạo công nghệ AI ứng dụng',
     featuredCourses,
     latestPosts,
     topReviews,
@@ -28,5 +28,5 @@ exports.index = async (req, res) => {
 };
 
 exports.about = (req, res) => {
-  res.render('about', { title: 'Ve Dinh Thi Ai' });
+  res.render('about', { title: 'Về Đinh Thi Ai' });
 };

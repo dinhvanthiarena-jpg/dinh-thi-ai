@@ -23,7 +23,7 @@ async function attachUser(req, res, next) {
 
 function requireAuth(req, res, next) {
   if (!req.user) {
-    req.flash('error', 'Vui long dang nhap de tiep tuc.');
+    req.flash('error', 'Vui lòng đăng nhập để tiếp tục.');
     return res.redirect(`/auth/login?next=${encodeURIComponent(req.originalUrl)}`);
   }
   next();
@@ -31,7 +31,7 @@ function requireAuth(req, res, next) {
 
 function requireAdmin(req, res, next) {
   if (!req.user || req.user.role !== 'admin') {
-    req.flash('error', 'Ban khong co quyen truy cap trang nay.');
+    req.flash('error', 'Bạn không có quyền truy cập trang này.');
     return res.redirect('/');
   }
   next();

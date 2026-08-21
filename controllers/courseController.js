@@ -26,7 +26,7 @@ exports.list = async (req, res) => {
   const categories = categoryRows.map((c) => c.category);
 
   res.render('courses/index', {
-    title: 'Khoa hoc AI',
+    title: 'Khóa học AI',
     courses,
     categories,
     query: req.query,

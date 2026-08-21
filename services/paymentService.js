@@ -18,7 +18,7 @@ async function createPayment({ order, req }) {
     };
   }
 
-  throw new Error(`Payment provider "${provider}" chua duoc cau hinh. Xem services/paymentService.js`);
+  throw new Error(`Payment provider "${provider}" chưa được cấu hình. Xem services/paymentService.js`);
 }
 
 function generateTransactionRef() {

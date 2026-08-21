@@ -26,7 +26,7 @@ const Course = sequelize.define(
     price: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     salePrice: { type: DataTypes.INTEGER, allowNull: true },
     thumbnailUrl: { type: DataTypes.STRING, defaultValue: '/images/course-placeholder.svg' },
-    instructorName: { type: DataTypes.STRING, defaultValue: 'Dinh Thi Ai' },
+    instructorName: { type: DataTypes.STRING, defaultValue: 'Đinh Thi Ai' },
     durationHours: { type: DataTypes.INTEGER, defaultValue: 0 },
     outcomes: { type: DataTypes.JSON, defaultValue: [] },
     requirements: { type: DataTypes.JSON, defaultValue: [] },

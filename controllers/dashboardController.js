@@ -20,7 +20,7 @@ exports.index = async (req, res) => {
   });
 
   res.render('dashboard/index', {
-    title: 'Khu vuc hoc tap',
+    title: 'Khu vực học tập',
     enrollments,
     orders,
   });
@@ -32,7 +32,7 @@ exports.learn = async (req, res, next) => {
 
   const enrollment = await Enrollment.findOne({ where: { UserId: req.user.id, CourseId: course.id } });
   if (!enrollment) {
-    req.flash('error', 'Ban chua so huu khoa hoc nay.');
+    req.flash('error', 'Bạn chưa sở hữu khóa học này.');
     return res.redirect(`/courses/${course.slug}`);
   }
 
@@ -108,6 +108,6 @@ exports.submitReview = async (req, res, next) => {
     });
   }
 
-  req.flash('success', 'Cam on ban da danh gia khoa hoc!');
+  req.flash('success', 'Cảm ơn bạn đã đánh giá khóa học!');
   res.redirect(`/dashboard/learn/${course.slug}`);
 };

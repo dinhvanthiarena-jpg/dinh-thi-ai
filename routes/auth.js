@@ -9,9 +9,9 @@ router.post(
   '/register',
   redirectIfAuthenticated,
   [
-    body('name').trim().notEmpty().withMessage('Vui long nhap ho ten.'),
-    body('email').isEmail().withMessage('Email khong hop le.'),
-    body('password').isLength({ min: 6 }).withMessage('Mat khau toi thieu 6 ky tu.'),
+    body('name').trim().notEmpty().withMessage('Vui lòng nhập họ tên.'),
+    body('email').isEmail().withMessage('Email không hợp lệ.'),
+    body('password').isLength({ min: 6 }).withMessage('Mật khẩu tối thiểu 6 ký tự.'),
   ],
   authController.register
 );

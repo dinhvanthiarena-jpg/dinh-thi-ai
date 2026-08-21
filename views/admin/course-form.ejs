@@ -22,7 +22,7 @@
       <div>
         <label class="label">Danh mục *</label>
         <select class="input" name="category" required>
-          <% ['AI co ban','Machine Learning','Deep Learning','Generative AI','AI cho doanh nghiep','Prompt Engineering'].forEach(function(cat) { %>
+          <% ['AI cơ bản','Machine Learning','Deep Learning','Generative AI','AI cho doanh nghiệp','Prompt Engineering'].forEach(function(cat) { %>
             <option value="<%= cat %>" <%= course.category === cat ? 'selected' : '' %>><%= cat %></option>
           <% }); %>
         </select>
@@ -30,7 +30,7 @@
       <div>
         <label class="label">Cấp độ</label>
         <select class="input" name="level">
-          <% ['Co ban','Trung cap','Nang cao'].forEach(function(lv) { %>
+          <% ['Cơ bản','Trung cấp','Nâng cao'].forEach(function(lv) { %>
             <option value="<%= lv %>" <%= course.level === lv ? 'selected' : '' %>><%= lv %></option>
           <% }); %>
         </select>
@@ -98,7 +98,7 @@
       <% lessons.forEach(function(l, i) { %>
         <li class="flex items-center justify-between py-3 text-sm">
           <span class="text-ink"><%= i + 1 %>. <%= l.title %> <span class="text-muted">(<%= l.durationMinutes %> phút)</span></span>
-          <form action="/admin/courses/<%= course._id %>/lessons/<%= l._id %>/delete" method="POST" onsubmit="return confirm('Xoa bai hoc nay?');">
+          <form action="/admin/courses/<%= course._id %>/lessons/<%= l._id %>/delete" method="POST" onsubmit="return confirm('Xóa bài học này?');">
             <button type="submit" class="text-danger hover:underline cursor-pointer">Xóa</button>
           </form>
         </li>

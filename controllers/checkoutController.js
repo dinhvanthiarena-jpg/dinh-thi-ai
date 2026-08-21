@@ -9,11 +9,11 @@ exports.showCheckout = async (req, res, next) => {
 
   const alreadyEnrolled = await Enrollment.findOne({ where: { UserId: req.user.id, CourseId: course.id } });
   if (alreadyEnrolled) {
-    req.flash('success', 'Ban da so huu khoa hoc nay.');
+    req.flash('success', 'Bạn đã sở hữu khóa học này.');
     return res.redirect(`/dashboard/learn/${course.slug}`);
   }
 
-  res.render('courses/checkout', { title: `Thanh toan - ${course.title}`, course });
+  res.render('courses/checkout', { title: `Thanh toán - ${course.title}`, course });
 };
 
 exports.startPayment = async (req, res, next) => {
@@ -41,7 +41,7 @@ exports.mockPayPage = async (req, res, next) => {
   if (order.status === 'paid') {
     return res.redirect(`/dashboard/learn/${order.course.slug}`);
   }
-  res.render('courses/mock-pay', { title: 'Xac nhan thanh toan', order });
+  res.render('courses/mock-pay', { title: 'Xác nhận thanh toán', order });
 };
 
 exports.mockPayConfirm = async (req, res, next) => {
@@ -57,6 +57,6 @@ exports.mockPayConfirm = async (req, res, next) => {
     await Course.increment('enrollmentCount', { by: 1, where: { id: order.course.id } });
   }
 
-  req.flash('success', `Thanh toan thanh cong! Ban da co the hoc "${order.course.title}".`);
+  req.flash('success', `Thanh toán thành công! Bạn đã có thể học "${order.course.title}".`);
   res.redirect(`/dashboard/learn/${order.course.slug}`);
 };
