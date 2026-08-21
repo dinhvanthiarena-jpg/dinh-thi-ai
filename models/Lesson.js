@@ -1,18 +1,19 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const lessonSchema = new mongoose.Schema(
+const Lesson = sequelize.define(
+  'Lesson',
   {
-    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true, index: true },
-    title: { type: String, required: true },
-    order: { type: Number, required: true, default: 0 },
-    videoUrl: { type: String, default: '' },
-    contentText: { type: String, default: '' },
-    durationMinutes: { type: Number, default: 0 },
-    isPreview: { type: Boolean, default: false },
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    _id: { type: DataTypes.VIRTUAL, get() { return this.id; } },
+    title: { type: DataTypes.STRING, allowNull: false },
+    order: { type: DataTypes.INTEGER, defaultValue: 0 },
+    videoUrl: { type: DataTypes.STRING, defaultValue: '' },
+    contentText: { type: DataTypes.TEXT, defaultValue: '' },
+    durationMinutes: { type: DataTypes.INTEGER, defaultValue: 0 },
+    isPreview: { type: DataTypes.BOOLEAN, defaultValue: false },
   },
-  { timestamps: true }
+  { tableName: 'lessons' }
 );
 
-lessonSchema.index({ course: 1, order: 1 });
-
-module.exports = mongoose.model('Lesson', lessonSchema);
+module.exports = Lesson;

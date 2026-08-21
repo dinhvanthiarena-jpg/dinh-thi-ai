@@ -1,27 +1,32 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
 const slugify = require('slugify');
+const { sequelize } = require('../config/db');
 
-const blogPostSchema = new mongoose.Schema(
+const BlogPost = sequelize.define(
+  'BlogPost',
   {
-    title: { type: String, required: true },
-    slug: { type: String, unique: true, index: true },
-    excerpt: { type: String, default: '' },
-    content: { type: String, required: true },
-    coverImageUrl: { type: String, default: '/images/blog-placeholder.svg' },
-    author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    tags: [{ type: String }],
-    isPublished: { type: Boolean, default: true },
-    publishedAt: { type: Date, default: Date.now },
-    viewCount: { type: Number, default: 0 },
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    _id: { type: DataTypes.VIRTUAL, get() { return this.id; } },
+    title: { type: DataTypes.STRING, allowNull: false },
+    slug: { type: DataTypes.STRING, unique: true },
+    excerpt: { type: DataTypes.STRING, defaultValue: '' },
+    content: { type: DataTypes.TEXT, allowNull: false },
+    coverImageUrl: { type: DataTypes.STRING, defaultValue: '/images/blog-placeholder.svg' },
+    tags: { type: DataTypes.JSON, defaultValue: [] },
+    isPublished: { type: DataTypes.BOOLEAN, defaultValue: true },
+    publishedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    viewCount: { type: DataTypes.INTEGER, defaultValue: 0 },
   },
-  { timestamps: true }
+  {
+    tableName: 'blog_posts',
+    hooks: {
+      beforeValidate: (post) => {
+        if (post.title && !post.slug) {
+          post.slug = `${slugify(post.title, { lower: true, strict: true })}-${Date.now().toString(36)}`;
+        }
+      },
+    },
+  }
 );
 
-blogPostSchema.pre('validate', function generateSlug(next) {
-  if (this.title && !this.slug) {
-    this.slug = `${slugify(this.title, { lower: true, strict: true })}-${Date.now().toString(36)}`;
-  }
-  next();
-});
-
-module.exports = mongoose.model('BlogPost', blogPostSchema);
+module.exports = BlogPost;

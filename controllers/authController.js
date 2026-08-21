@@ -32,7 +32,7 @@ exports.register = async (req, res) => {
   }
 
   const { name, email, password } = req.body;
-  const existing = await User.findOne({ email: email.toLowerCase() });
+  const existing = await User.findOne({ where: { email: email.toLowerCase() } });
   if (existing) {
     return res.status(400).render('auth/register', {
       title: 'Dang ky tai khoan',
@@ -56,7 +56,7 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
   const nextUrl = req.body.next || '/dashboard';
 
-  const user = await User.findOne({ email: (email || '').toLowerCase() }).select('+password');
+  const user = await User.findOne({ where: { email: (email || '').toLowerCase() } });
   const valid = user && (await user.comparePassword(password));
 
   if (!valid) {

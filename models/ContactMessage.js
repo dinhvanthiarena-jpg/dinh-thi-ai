@@ -1,15 +1,19 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const contactMessageSchema = new mongoose.Schema(
+const ContactMessage = sequelize.define(
+  'ContactMessage',
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    phone: { type: String, default: '' },
-    subject: { type: String, default: 'Tu van khoa hoc' },
-    message: { type: String, required: true },
-    isRead: { type: Boolean, default: false },
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    _id: { type: DataTypes.VIRTUAL, get() { return this.id; } },
+    name: { type: DataTypes.STRING, allowNull: false },
+    email: { type: DataTypes.STRING, allowNull: false },
+    phone: { type: DataTypes.STRING, defaultValue: '' },
+    subject: { type: DataTypes.STRING, defaultValue: 'Tu van khoa hoc' },
+    message: { type: DataTypes.TEXT, allowNull: false },
+    isRead: { type: DataTypes.BOOLEAN, defaultValue: false },
   },
-  { timestamps: true }
+  { tableName: 'contact_messages' }
 );
 
-module.exports = mongoose.model('ContactMessage', contactMessageSchema);
+module.exports = ContactMessage;

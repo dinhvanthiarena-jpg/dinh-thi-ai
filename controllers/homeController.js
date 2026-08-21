@@ -1,17 +1,22 @@
+const { Op } = require('sequelize');
 const Course = require('../models/Course');
 const BlogPost = require('../models/BlogPost');
 const Review = require('../models/Review');
+const User = require('../models/User');
 
 exports.index = async (req, res) => {
   const [featuredCourses, latestPosts, topReviews] = await Promise.all([
-    Course.find({ isPublished: true, isFeatured: true }).limit(6).lean(),
-    BlogPost.find({ isPublished: true }).sort({ publishedAt: -1 }).limit(3).lean(),
-    Review.find({ rating: { $gte: 4 } })
-      .populate('user', 'name avatarUrl')
-      .populate('course', 'title')
-      .sort({ createdAt: -1 })
-      .limit(6)
-      .lean(),
+    Course.findAll({ where: { isPublished: true, isFeatured: true }, limit: 6 }),
+    BlogPost.findAll({ where: { isPublished: true }, order: [['publishedAt', 'DESC']], limit: 3 }),
+    Review.findAll({
+      where: { rating: { [Op.gte]: 4 } },
+      include: [
+        { model: User, as: 'user', attributes: ['name', 'avatarUrl'] },
+        { model: Course, as: 'course', attributes: ['title'] },
+      ],
+      order: [['createdAt', 'DESC']],
+      limit: 6,
+    }),
   ]);
 
   res.render('home', {

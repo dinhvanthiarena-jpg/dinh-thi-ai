@@ -1,18 +1,20 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const enrollmentSchema = new mongoose.Schema(
+const Enrollment = sequelize.define(
+  'Enrollment',
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true, index: true },
-    order: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
-    completedLessons: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Lesson' }],
-    progressPercent: { type: Number, default: 0 },
-    completedAt: { type: Date, default: null },
-    certificateIssued: { type: Boolean, default: false },
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    _id: { type: DataTypes.VIRTUAL, get() { return this.id; } },
+    completedLessons: { type: DataTypes.JSON, defaultValue: [] },
+    progressPercent: { type: DataTypes.INTEGER, defaultValue: 0 },
+    completedAt: { type: DataTypes.DATE, allowNull: true },
+    certificateIssued: { type: DataTypes.BOOLEAN, defaultValue: false },
   },
-  { timestamps: true }
+  {
+    tableName: 'enrollments',
+    indexes: [{ unique: true, fields: ['UserId', 'CourseId'] }],
+  }
 );
 
-enrollmentSchema.index({ user: 1, course: 1 }, { unique: true });
-
-module.exports = mongoose.model('Enrollment', enrollmentSchema);
+module.exports = Enrollment;

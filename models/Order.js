@@ -1,19 +1,21 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const orderSchema = new mongoose.Schema(
+const Order = sequelize.define(
+  'Order',
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
-    amount: { type: Number, required: true },
-    currency: { type: String, default: 'VND' },
-    couponCode: { type: String, default: '' },
-    discountAmount: { type: Number, default: 0 },
-    provider: { type: String, enum: ['mock', 'vnpay', 'stripe'], default: 'mock' },
-    status: { type: String, enum: ['pending', 'paid', 'failed', 'refunded'], default: 'pending', index: true },
-    transactionRef: { type: String, default: '' },
-    paidAt: { type: Date, default: null },
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    _id: { type: DataTypes.VIRTUAL, get() { return this.id; } },
+    amount: { type: DataTypes.INTEGER, allowNull: false },
+    currency: { type: DataTypes.STRING, defaultValue: 'VND' },
+    couponCode: { type: DataTypes.STRING, defaultValue: '' },
+    discountAmount: { type: DataTypes.INTEGER, defaultValue: 0 },
+    provider: { type: DataTypes.ENUM('mock', 'vnpay', 'stripe'), defaultValue: 'mock' },
+    status: { type: DataTypes.ENUM('pending', 'paid', 'failed', 'refunded'), defaultValue: 'pending' },
+    transactionRef: { type: DataTypes.STRING, defaultValue: '' },
+    paidAt: { type: DataTypes.DATE, allowNull: true },
   },
-  { timestamps: true }
+  { tableName: 'orders' }
 );
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = Order;

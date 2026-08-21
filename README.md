@@ -1,6 +1,6 @@
 # Đinh Thi Ai — Nền tảng đào tạo công nghệ AI
 
-Website đào tạo trực tuyến (LMS) xây dựng bằng **Node.js + Express + EJS + MongoDB**, bao gồm:
+Website đào tạo trực tuyến (LMS) xây dựng bằng **Node.js + Express + EJS + MySQL (Sequelize)**, bao gồm:
 
 - Trang chủ, giới thiệu, blog kiến thức AI, liên hệ tư vấn
 - Danh mục khóa học, trang chi tiết khóa học, đánh giá học viên
@@ -13,7 +13,7 @@ Website đào tạo trực tuyến (LMS) xây dựng bằng **Node.js + Express 
 
 ### Yêu cầu
 - Node.js >= 18
-- MongoDB (dùng [MongoDB Atlas](https://www.mongodb.com/atlas) miễn phí, hoặc MongoDB cài local)
+- MySQL 5.7+ hoặc MariaDB 10.2+ (hầu hết hosting cPanel đều có sẵn miễn phí; hoặc cài local)
 
 ### Các bước
 
@@ -25,9 +25,11 @@ cp .env.example .env
 ```
 
 Mở `.env` và điền:
-- `MONGO_URI`: chuỗi kết nối MongoDB Atlas
+- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`: thông tin kết nối MySQL (tạo database + user qua cPanel "MySQL Database Wizard" hoặc phpMyAdmin nếu chưa có)
 - `JWT_SECRET`, `SESSION_SECRET`: chuỗi ngẫu nhiên dài (dùng `openssl rand -hex 32` để tạo)
 - `ADMIN_EMAIL`, `ADMIN_PASSWORD`: tài khoản quản trị sẽ được tạo khi seed
+
+Bảng dữ liệu (users, courses, lessons...) sẽ tự động được tạo khi server khởi động lần đầu (Sequelize `sync()`), không cần chạy migration thủ công.
 
 Build CSS (Tailwind) và tạo dữ liệu mẫu:
 
@@ -56,7 +58,7 @@ npm run watch:css
 config/         Kết nối database
 controllers/    Xử lý logic từng nhóm chức năng
 middleware/     Auth, upload file, xử lý lỗi
-models/         Schema MongoDB (User, Course, Lesson, Order, Enrollment, BlogPost, Review, ContactMessage)
+models/         Sequelize models (User, Course, Lesson, Order, Enrollment, BlogPost, Review, ContactMessage)
 routes/         Định tuyến Express
 views/          Giao diện EJS (layouts, partials, pages)
 public/         CSS/JS/ảnh tĩnh, file upload
@@ -88,52 +90,64 @@ git push -u origin main
 **Lưu ý:** file `.env` đã được loại trừ trong `.gitignore` — không bao giờ commit thông tin nhạy cảm
 (mật khẩu, chuỗi kết nối database, secret key).
 
-## 5. Deploy lên Hostinger
+## 5. Deploy lên hosting cPanel (đã kiểm chứng thực tế)
 
-Node.js cần một tiến trình server chạy liên tục — khác với hosting PHP tĩnh. Có 2 cách trên Hostinger:
+Nhiều gói shared hosting cPanel (kể cả gói rẻ như "Turbo Hosting") **chặn kết nối ra ngoài tới các cổng
+không phải 80/443** (ví dụ MongoDB Atlas dùng cổng 27017) — đây là lý do dự án này dùng MySQL thay vì MongoDB,
+vì MySQL chạy ngay trên cùng server (`localhost`), không cần mở cổng ra ngoài.
 
-### Cách A — Hostinger VPS (khuyến nghị cho LMS có database)
+### Bước 1 — Tạo database MySQL
 
-1. Thuê gói **VPS** (KVM 1/2), cài hệ điều hành Ubuntu.
-2. SSH vào VPS, cài Node.js, Nginx, PM2:
-   ```bash
-   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-   sudo apt install -y nodejs nginx
-   sudo npm install -g pm2
-   ```
-3. Clone repo và cài đặt:
-   ```bash
-   git clone https://github.com/<your-username>/dinh-thi-ai.git
-   cd dinh-thi-ai
-   npm install --production
-   cp .env.example .env   # rồi điền giá trị production
-   npm run build:css
-   npm run seed            # chỉ chạy lần đầu
-   ```
-4. Chạy app bằng PM2 (tự khởi động lại khi crash hoặc reboot server):
-   ```bash
-   pm2 start server.js --name dinh-thi-ai
-   pm2 save
-   pm2 startup
-   ```
-5. Cấu hình Nginx làm reverse proxy (trỏ domain vào app chạy ở cổng 3000), rồi bật SSL miễn phí bằng Certbot:
-   ```bash
-   sudo certbot --nginx -d dinhthiai.com -d www.dinhthiai.com
-   ```
-6. Khi cập nhật code mới: `git pull && npm install --production && npm run build:css && pm2 restart dinh-thi-ai`
+Trong cPanel: **MySQL® Database Wizard** → tạo database + user + gán full privileges. Ghi lại tên database/user
+đầy đủ tiền tố (cPanel tự thêm tiền tố dạng `tenkhoan_tendatabase`).
 
-### Cách B — Hostinger hPanel "Node.js App" (gói Business/Cloud hỗ trợ)
+### Bước 2 — Đưa code lên server qua Git
 
-1. Trong hPanel, chọn **Website > Node.js** > Create Application.
-2. Chọn phiên bản Node.js >= 18, entry file là `server.js`.
-3. Kết nối GitHub repo (hPanel hỗ trợ deploy từ Git) hoặc upload code qua File Manager/FTP.
-4. Khai báo các biến môi trường (`.env`) trong phần **Environment Variables** của hPanel.
-5. Chạy `npm install`, `npm run build:css` qua terminal tích hợp của hPanel, rồi Restart Application.
+Trong cPanel: **Git™ Version Control** → Create → bật "Clone a Repository", dán URL repo GitHub (ví dụ
+`https://github.com/<username>/dinh-thi-ai.git`), đặt Repository Path (ví dụ `dinh-thi-ai`) → Create.
 
-### Database khi deploy
+### Bước 3 — Tạo Node.js App
 
-Nên dùng **MongoDB Atlas** (cloud) thay vì tự cài MongoDB trên Hostinger — không cần quản trị, có gói miễn phí,
-kết nối được từ cả VPS lẫn hPanel Node App. Nhớ whitelist địa chỉ IP của server Hostinger trong Atlas Network Access.
+Trong cPanel: **Setup Node.js App** → Create Application:
+- Node.js version: chọn bản mới nhất có sẵn (>= 18)
+- Application mode: **Production**
+- Application root: thư mục vừa clone ở Bước 2 (ví dụ `dinh-thi-ai`)
+- Application URL: chọn domain sẽ dùng cho web
+- Application startup file: `server.js`
+- Thêm toàn bộ biến môi trường trong `.env.example` vào phần **Environment variables** (bao gồm `DB_HOST=localhost`,
+  `DB_NAME`, `DB_USER`, `DB_PASSWORD` lấy từ Bước 1)
+
+Bấm **Create**, sau đó bấm **Run NPM Install**. Nếu giao diện báo lỗi "web application is inaccessible" ngay sau khi
+tạo — thường không sao, đó chỉ là bước tự kiểm tra domain trong lúc DNS/SSL chưa sẵn sàng; kiểm tra qua **Terminal**
+(cPanel có sẵn) bằng lệnh sau để xác nhận cài đặt thật sự thành công:
+
+```bash
+source ~/nodevenv/<app-root>/<node-version>/bin/activate
+cd ~/<app-root>
+npm install
+tail -n 30 stderr.log
+```
+
+### Bước 4 — Build CSS và khởi động
+
+Vẫn trong Terminal (đã activate virtualenv ở trên):
+```bash
+npm run build:css
+npm run seed   # chỉ chạy lần đầu để tạo tài khoản admin + dữ liệu mẫu
+```
+Quay lại **Setup Node.js App**, bấm **Restart**.
+
+### Cập nhật code sau này
+
+```bash
+# Trong cPanel Git Version Control, bấm "Pull" hoặc "Update from Remote"
+# rồi trong Terminal:
+source ~/nodevenv/<app-root>/<node-version>/bin/activate
+cd ~/<app-root>
+npm install
+npm run build:css
+# rồi bấm Restart trong Setup Node.js App
+```
 
 ## 6. Checklist trước khi ra mắt
 
@@ -143,4 +157,4 @@ kết nối được từ cả VPS lẫn hPanel Node App. Nhớ whitelist địa
 - [ ] Thay logo, ảnh minh họa trong `public/images`
 - [ ] Cấu hình cổng thanh toán thật (VNPay/Momo/Stripe)
 - [ ] Cấu hình SMTP nếu muốn gửi email xác nhận/tư vấn
-- [ ] Bật backup định kỳ cho MongoDB Atlas
+- [ ] Bật backup định kỳ cho database MySQL (cPanel có sẵn Backup Wizard)

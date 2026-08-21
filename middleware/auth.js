@@ -9,7 +9,7 @@ async function attachUser(req, res, next) {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(payload.id);
+    const user = await User.findByPk(payload.id);
     if (user && user.isActive) {
       req.user = user;
       res.locals.currentUser = user;

@@ -8,19 +8,22 @@ const ContactMessage = require('../models/ContactMessage');
 // --- Dashboard ---
 exports.dashboard = async (req, res) => {
   const [courseCount, studentCount, postCount, paidOrders] = await Promise.all([
-    Course.countDocuments(),
-    User.countDocuments({ role: 'student' }),
-    BlogPost.countDocuments(),
-    Order.find({ status: 'paid' }).lean(),
+    Course.count(),
+    User.count({ where: { role: 'student' } }),
+    BlogPost.count(),
+    Order.findAll({ where: { status: 'paid' } }),
   ]);
 
   const revenue = paidOrders.reduce((sum, o) => sum + o.amount, 0);
-  const recentOrders = await Order.find({ status: 'paid' })
-    .populate('user', 'name email')
-    .populate('course', 'title')
-    .sort({ createdAt: -1 })
-    .limit(8)
-    .lean();
+  const recentOrders = await Order.findAll({
+    where: { status: 'paid' },
+    include: [
+      { model: User, as: 'user', attributes: ['name', 'email'] },
+      { model: Course, as: 'course', attributes: ['title'] },
+    ],
+    order: [['createdAt', 'DESC']],
+    limit: 8,
+  });
 
   res.render('admin/index', {
     title: 'Bang dieu khien quan tri',
@@ -31,7 +34,7 @@ exports.dashboard = async (req, res) => {
 
 // --- Courses ---
 exports.courseList = async (req, res) => {
-  const courses = await Course.find().sort({ createdAt: -1 }).lean();
+  const courses = await Course.findAll({ order: [['createdAt', 'DESC']] });
   res.render('admin/courses', { title: 'Quan ly khoa hoc', courses });
 };
 
@@ -40,15 +43,15 @@ exports.courseNewForm = (req, res) => {
 };
 
 exports.courseEditForm = async (req, res, next) => {
-  const course = await Course.findById(req.params.id).lean();
+  const course = await Course.findByPk(req.params.id);
   if (!course) return next();
-  const lessons = await Lesson.find({ course: course._id }).sort({ order: 1 }).lean();
+  const lessons = await Lesson.findAll({ where: { CourseId: course.id }, order: [['order', 'ASC']] });
   res.render('admin/course-form', { title: 'Sua khoa hoc', course, lessons });
 };
 
 exports.courseCreate = async (req, res) => {
   const body = req.body;
-  const course = new Course({
+  const course = await Course.create({
     title: body.title,
     subtitle: body.subtitle,
     description: body.description,
@@ -62,23 +65,19 @@ exports.courseCreate = async (req, res) => {
     requirements: (body.requirements || '').split('\n').map((s) => s.trim()).filter(Boolean),
     isPublished: body.isPublished === 'on',
     isFeatured: body.isFeatured === 'on',
+    thumbnailUrl: req.file ? `/uploads/${req.file.filename}` : undefined,
   });
 
-  if (req.file) {
-    course.thumbnailUrl = `/uploads/${req.file.filename}`;
-  }
-
-  await course.save();
   req.flash('success', 'Da tao khoa hoc moi.');
-  res.redirect(`/admin/courses/${course._id}/edit`);
+  res.redirect(`/admin/courses/${course.id}/edit`);
 };
 
 exports.courseUpdate = async (req, res, next) => {
-  const course = await Course.findById(req.params.id);
+  const course = await Course.findByPk(req.params.id);
   if (!course) return next();
 
   const body = req.body;
-  Object.assign(course, {
+  await course.update({
     title: body.title,
     subtitle: body.subtitle,
     description: body.description,
@@ -92,32 +91,28 @@ exports.courseUpdate = async (req, res, next) => {
     requirements: (body.requirements || '').split('\n').map((s) => s.trim()).filter(Boolean),
     isPublished: body.isPublished === 'on',
     isFeatured: body.isFeatured === 'on',
+    ...(req.file ? { thumbnailUrl: `/uploads/${req.file.filename}` } : {}),
   });
 
-  if (req.file) {
-    course.thumbnailUrl = `/uploads/${req.file.filename}`;
-  }
-
-  await course.save();
   req.flash('success', 'Da cap nhat khoa hoc.');
-  res.redirect(`/admin/courses/${course._id}/edit`);
+  res.redirect(`/admin/courses/${course.id}/edit`);
 };
 
 exports.courseDelete = async (req, res) => {
-  await Course.findByIdAndDelete(req.params.id);
-  await Lesson.deleteMany({ course: req.params.id });
+  await Lesson.destroy({ where: { CourseId: req.params.id } });
+  await Course.destroy({ where: { id: req.params.id } });
   req.flash('success', 'Da xoa khoa hoc.');
   res.redirect('/admin/courses');
 };
 
 // --- Lessons (nested under a course) ---
 exports.lessonCreate = async (req, res, next) => {
-  const course = await Course.findById(req.params.id);
+  const course = await Course.findByPk(req.params.id);
   if (!course) return next();
 
-  const count = await Lesson.countDocuments({ course: course._id });
+  const count = await Lesson.count({ where: { CourseId: course.id } });
   await Lesson.create({
-    course: course._id,
+    CourseId: course.id,
     title: req.body.title,
     order: count + 1,
     videoUrl: req.body.videoUrl,
@@ -127,18 +122,20 @@ exports.lessonCreate = async (req, res, next) => {
   });
 
   req.flash('success', 'Da them bai hoc.');
-  res.redirect(`/admin/courses/${course._id}/edit`);
+  res.redirect(`/admin/courses/${course.id}/edit`);
 };
 
 exports.lessonDelete = async (req, res) => {
-  const lesson = await Lesson.findByIdAndDelete(req.params.lessonId);
+  const lesson = await Lesson.findByPk(req.params.lessonId);
+  const courseId = lesson ? lesson.CourseId : req.params.id;
+  if (lesson) await lesson.destroy();
   req.flash('success', 'Da xoa bai hoc.');
-  res.redirect(`/admin/courses/${lesson ? lesson.course : req.params.id}/edit`);
+  res.redirect(`/admin/courses/${courseId}/edit`);
 };
 
 // --- Blog ---
 exports.blogList = async (req, res) => {
-  const posts = await BlogPost.find().sort({ createdAt: -1 }).lean();
+  const posts = await BlogPost.findAll({ order: [['createdAt', 'DESC']] });
   res.render('admin/blog', { title: 'Quan ly bai viet', posts });
 };
 
@@ -147,81 +144,75 @@ exports.blogNewForm = (req, res) => {
 };
 
 exports.blogEditForm = async (req, res, next) => {
-  const post = await BlogPost.findById(req.params.id).lean();
+  const post = await BlogPost.findByPk(req.params.id);
   if (!post) return next();
   res.render('admin/blog-form', { title: 'Sua bai viet', post });
 };
 
 exports.blogCreate = async (req, res) => {
   const body = req.body;
-  const post = new BlogPost({
+  const post = await BlogPost.create({
     title: body.title,
     excerpt: body.excerpt,
     content: body.content,
     tags: (body.tags || '').split(',').map((s) => s.trim()).filter(Boolean),
     isPublished: body.isPublished === 'on',
-    author: req.user._id,
+    AuthorId: req.user.id,
+    coverImageUrl: req.file ? `/uploads/${req.file.filename}` : undefined,
   });
 
-  if (req.file) {
-    post.coverImageUrl = `/uploads/${req.file.filename}`;
-  }
-
-  await post.save();
   req.flash('success', 'Da dang bai viet.');
   res.redirect('/admin/blog');
 };
 
 exports.blogUpdate = async (req, res, next) => {
-  const post = await BlogPost.findById(req.params.id);
+  const post = await BlogPost.findByPk(req.params.id);
   if (!post) return next();
 
   const body = req.body;
-  Object.assign(post, {
+  await post.update({
     title: body.title,
     excerpt: body.excerpt,
     content: body.content,
     tags: (body.tags || '').split(',').map((s) => s.trim()).filter(Boolean),
     isPublished: body.isPublished === 'on',
+    ...(req.file ? { coverImageUrl: `/uploads/${req.file.filename}` } : {}),
   });
 
-  if (req.file) {
-    post.coverImageUrl = `/uploads/${req.file.filename}`;
-  }
-
-  await post.save();
   req.flash('success', 'Da cap nhat bai viet.');
   res.redirect('/admin/blog');
 };
 
 exports.blogDelete = async (req, res) => {
-  await BlogPost.findByIdAndDelete(req.params.id);
+  await BlogPost.destroy({ where: { id: req.params.id } });
   req.flash('success', 'Da xoa bai viet.');
   res.redirect('/admin/blog');
 };
 
 // --- Orders & Students ---
 exports.orderList = async (req, res) => {
-  const orders = await Order.find()
-    .populate('user', 'name email')
-    .populate('course', 'title')
-    .sort({ createdAt: -1 })
-    .lean();
+  const orders = await Order.findAll({
+    include: [
+      { model: User, as: 'user', attributes: ['name', 'email'] },
+      { model: Course, as: 'course', attributes: ['title'] },
+    ],
+    order: [['createdAt', 'DESC']],
+  });
   res.render('admin/orders', { title: 'Don hang', orders });
 };
 
 exports.studentList = async (req, res) => {
-  const students = await User.find({ role: 'student' }).sort({ createdAt: -1 }).lean();
+  const students = await User.findAll({ where: { role: 'student' }, order: [['createdAt', 'DESC']] });
   res.render('admin/students', { title: 'Hoc vien', students });
 };
 
 // --- Messages ---
 exports.messageList = async (req, res) => {
-  const messages = await ContactMessage.find().sort({ createdAt: -1 }).lean();
+  const messages = await ContactMessage.findAll({ order: [['createdAt', 'DESC']] });
   res.render('admin/messages', { title: 'Tin nhan lien he', messages });
 };
 
 exports.messageMarkRead = async (req, res) => {
-  await ContactMessage.findByIdAndUpdate(req.params.id, { isRead: true });
+  await ContactMessage.update({ isRead: true }, { where: { id: req.params.id } });
   res.redirect('/admin/messages');
 };

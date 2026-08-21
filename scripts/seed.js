@@ -136,7 +136,7 @@ async function seed() {
   await connectDB();
 
   const adminEmail = (process.env.ADMIN_EMAIL || 'admin@dinhthiai.com').toLowerCase();
-  let admin = await User.findOne({ email: adminEmail });
+  let admin = await User.findOne({ where: { email: adminEmail } });
   if (!admin) {
     admin = await User.create({
       name: process.env.ADMIN_NAME || 'Dinh Thi Ai',
@@ -149,23 +149,23 @@ async function seed() {
     console.log(`[seed] Tai khoan admin da ton tai: ${admin.email}`);
   }
 
-  const existingCourses = await Course.countDocuments();
+  const existingCourses = await Course.count();
   if (existingCourses === 0) {
     for (const seed of courseSeeds) {
       const { lessons, ...courseData } = seed;
       const course = await Course.create(courseData);
-      const lessonDocs = lessons.map((l, i) => ({ ...l, course: course._id, order: i + 1 }));
-      await Lesson.insertMany(lessonDocs);
+      const lessonDocs = lessons.map((l, i) => ({ ...l, CourseId: course.id, order: i + 1 }));
+      await Lesson.bulkCreate(lessonDocs);
       console.log(`[seed] Da tao khoa hoc: ${course.title}`);
     }
   } else {
     console.log('[seed] Da co khoa hoc, bo qua seed khoa hoc.');
   }
 
-  const existingPosts = await BlogPost.countDocuments();
+  const existingPosts = await BlogPost.count();
   if (existingPosts === 0) {
     for (const post of blogSeeds) {
-      await BlogPost.create({ ...post, author: admin._id });
+      await BlogPost.create({ ...post, AuthorId: admin.id });
       console.log(`[seed] Da tao bai viet: ${post.title}`);
     }
   } else {
