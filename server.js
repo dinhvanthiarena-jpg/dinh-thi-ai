@@ -16,6 +16,14 @@ const connectDB = require('./config/db');
 const { attachUser } = require('./middleware/auth');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
+// Express 4 does not catch errors thrown inside async route handlers, so an
+// unhandled rejection there would otherwise crash the whole process (Node
+// terminates on unhandled rejections by default). Log and keep serving
+// instead — a single bad request should never take the whole site down.
+process.on('unhandledRejection', (err) => {
+  console.error('[unhandledRejection]', err);
+});
+
 const indexRoutes = require('./routes/index');
 const authRoutes = require('./routes/auth');
 const courseRoutes = require('./routes/courses');

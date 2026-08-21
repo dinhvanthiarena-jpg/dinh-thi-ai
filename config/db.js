@@ -23,10 +23,13 @@ async function connectDB() {
 
   await sequelize.authenticate();
   console.log(`[db] MySQL connected: ${process.env.DB_HOST || 'localhost'}/${process.env.DB_NAME}`);
-
-  require('../models');
   await sequelize.sync();
 }
 
 module.exports = connectDB;
 module.exports.sequelize = sequelize;
+
+// Load all models and set up their associations synchronously, right here,
+// so every model is fully associated before any other file can require it —
+// regardless of when/whether connectDB() has run yet.
+require('../models');
