@@ -1,0 +1,28 @@
+<a href="/courses/<%= course.slug %>" class="card group overflow-hidden flex flex-col hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+  <div class="aspect-video bg-primary-50 overflow-hidden">
+    <img src="<%= course.thumbnailUrl %>" alt="<%= course.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+  </div>
+  <div class="p-5 flex flex-col flex-1">
+    <span class="badge bg-primary-50 text-primary-700 w-fit mb-2"><%= course.category %></span>
+    <h3 class="font-semibold text-ink leading-snug line-clamp-2 group-hover:text-primary-700"><%= course.title %></h3>
+    <p class="text-sm text-muted mt-1 line-clamp-2"><%= course.subtitle %></p>
+    <div class="mt-3 flex items-center gap-1 text-sm text-amber-500">
+      <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+      <span class="font-medium text-ink"><%= (course.ratingAverage || 0).toFixed(1) %></span>
+      <span class="text-muted">(<%= course.ratingCount || 0 %>)</span>
+    </div>
+    <div class="mt-auto pt-4 flex items-center justify-between">
+      <div>
+        <% if (course.salePrice != null) { %>
+          <span class="text-lg font-bold text-primary-700"><%= course.salePrice.toLocaleString('vi-VN') %>đ</span>
+          <span class="text-sm text-slate-400 line-through ml-1"><%= course.price.toLocaleString('vi-VN') %>đ</span>
+        <% } else if (course.price === 0) { %>
+          <span class="text-lg font-bold text-success">Miễn phí</span>
+        <% } else { %>
+          <span class="text-lg font-bold text-primary-700"><%= course.price.toLocaleString('vi-VN') %>đ</span>
+        <% } %>
+      </div>
+      <span class="text-xs text-muted"><%= course.durationHours %>h học</span>
+    </div>
+  </div>
+</a>

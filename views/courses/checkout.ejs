@@ -1,0 +1,33 @@
+<section class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-16">
+  <h1 class="text-2xl sm:text-3xl font-extrabold text-ink mb-8">Xác nhận đăng ký khóa học</h1>
+
+  <div class="card p-6 flex gap-4">
+    <img src="<%= course.thumbnailUrl %>" alt="<%= course.title %>" class="w-32 h-20 object-cover rounded-lg flex-shrink-0" />
+    <div>
+      <h2 class="font-semibold text-ink"><%= course.title %></h2>
+      <p class="text-sm text-muted mt-1"><%= course.subtitle %></p>
+    </div>
+  </div>
+
+  <div class="card p-6 mt-6">
+    <div class="flex justify-between text-sm mb-2">
+      <span class="text-muted">Học phí</span>
+      <span class="text-ink"><%= course.price.toLocaleString('vi-VN') %>đ</span>
+    </div>
+    <% if (course.salePrice != null) { %>
+      <div class="flex justify-between text-sm mb-2">
+        <span class="text-muted">Ưu đãi</span>
+        <span class="text-success">-<%= (course.price - course.salePrice).toLocaleString('vi-VN') %>đ</span>
+      </div>
+    <% } %>
+    <div class="flex justify-between font-bold text-lg pt-3 border-t border-primary-100 mt-3">
+      <span>Tổng thanh toán</span>
+      <span class="text-primary-700"><%= (course.salePrice != null ? course.salePrice : course.price).toLocaleString('vi-VN') %>đ</span>
+    </div>
+  </div>
+
+  <form action="/courses/<%= course.slug %>/checkout" method="POST" class="mt-6">
+    <button type="submit" class="btn-primary w-full text-base py-3">Tiến hành thanh toán</button>
+  </form>
+  <p class="text-xs text-muted text-center mt-3">Bằng việc thanh toán, bạn đồng ý với điều khoản dịch vụ của Đinh Thi Ai.</p>
+</section>

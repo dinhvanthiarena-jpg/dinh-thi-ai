@@ -1,0 +1,35 @@
+<section class="mx-auto max-w-md px-4 sm:px-6 lg:px-8 py-16">
+  <div class="text-center mb-8">
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-ink">Tạo tài khoản</h1>
+    <p class="mt-2 text-muted">Bắt đầu hành trình học AI cùng Đinh Thi Ai</p>
+  </div>
+
+  <div class="card p-8">
+    <% if (errors && errors.length) { %>
+      <div class="mb-5 rounded-lg bg-red-50 border border-danger/30 px-4 py-3 text-sm text-red-800">
+        <% errors.forEach(function(e) { %><p><%= e.msg %></p><% }); %>
+      </div>
+    <% } %>
+
+    <form action="/auth/register" method="POST" class="space-y-5">
+      <div>
+        <label class="label" for="name">Họ và tên</label>
+        <input class="input" type="text" id="name" name="name" value="<%= old.name || '' %>" required autofocus />
+      </div>
+      <div>
+        <label class="label" for="email">Email</label>
+        <input class="input" type="email" id="email" name="email" value="<%= old.email || '' %>" required />
+      </div>
+      <div>
+        <label class="label" for="password">Mật khẩu</label>
+        <input class="input" type="password" id="password" name="password" minlength="6" required />
+        <p class="text-xs text-muted mt-1">Tối thiểu 6 ký tự.</p>
+      </div>
+      <button type="submit" class="btn-primary w-full">Đăng ký</button>
+    </form>
+
+    <p class="text-sm text-muted text-center mt-6">
+      Đã có tài khoản? <a href="/auth/login" class="text-primary-700 font-medium hover:underline">Đăng nhập</a>
+    </p>
+  </div>
+</section>

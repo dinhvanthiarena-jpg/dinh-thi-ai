@@ -1,0 +1,61 @@
+<header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-primary-100">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex h-16 items-center justify-between">
+      <a href="/" class="flex items-center gap-2 group">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-600 to-accent-600 text-white font-bold">AI</span>
+        <span class="text-lg font-bold text-ink group-hover:text-primary-700 transition-colors">Đinh Thi Ai</span>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-1">
+        <a href="/courses" class="px-3 py-2 rounded-lg text-sm font-medium <%= currentPath && currentPath.startsWith('/courses') ? 'text-primary-700 bg-primary-50' : 'text-ink hover:text-primary-700 hover:bg-primary-50' %>">Khóa học</a>
+        <a href="/blog" class="px-3 py-2 rounded-lg text-sm font-medium <%= currentPath && currentPath.startsWith('/blog') ? 'text-primary-700 bg-primary-50' : 'text-ink hover:text-primary-700 hover:bg-primary-50' %>">Kiến thức AI</a>
+        <a href="/gioi-thieu" class="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-primary-700 hover:bg-primary-50">Giới thiệu</a>
+        <a href="/lien-he" class="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-primary-700 hover:bg-primary-50">Liên hệ</a>
+      </nav>
+
+      <div class="hidden md:flex items-center gap-3">
+        <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+          <% if (currentUser.role === 'admin') { %>
+            <a href="/admin" class="btn-ghost">Quản trị</a>
+          <% } %>
+          <a href="/dashboard" class="btn-ghost">Khu vực học tập</a>
+          <form action="/auth/logout" method="POST">
+            <button type="submit" class="btn-outline">Đăng xuất</button>
+          </form>
+        <% } else { %>
+          <a href="/auth/login" class="btn-ghost">Đăng nhập</a>
+          <a href="/auth/register" class="btn-primary">Đăng ký miễn phí</a>
+        <% } %>
+      </div>
+
+      <button id="mobile-menu-btn" type="button" class="md:hidden inline-flex items-center justify-center rounded-lg p-2 text-ink hover:bg-primary-50 cursor-pointer" aria-label="Mở menu" aria-expanded="false" aria-controls="mobile-menu">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="hidden md:hidden border-t border-primary-100 bg-white">
+    <div class="space-y-1 px-4 py-3">
+      <a href="/courses" class="block px-3 py-2 rounded-lg text-sm font-medium text-ink hover:bg-primary-50">Khóa học</a>
+      <a href="/blog" class="block px-3 py-2 rounded-lg text-sm font-medium text-ink hover:bg-primary-50">Kiến thức AI</a>
+      <a href="/gioi-thieu" class="block px-3 py-2 rounded-lg text-sm font-medium text-ink hover:bg-primary-50">Giới thiệu</a>
+      <a href="/lien-he" class="block px-3 py-2 rounded-lg text-sm font-medium text-ink hover:bg-primary-50">Liên hệ</a>
+      <div class="pt-2 border-t border-primary-100 mt-2 flex flex-col gap-2">
+        <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+          <% if (currentUser.role === 'admin') { %>
+            <a href="/admin" class="btn-ghost w-full">Quản trị</a>
+          <% } %>
+          <a href="/dashboard" class="btn-ghost w-full">Khu vực học tập</a>
+          <form action="/auth/logout" method="POST">
+            <button type="submit" class="btn-outline w-full">Đăng xuất</button>
+          </form>
+        <% } else { %>
+          <a href="/auth/login" class="btn-ghost w-full">Đăng nhập</a>
+          <a href="/auth/register" class="btn-primary w-full">Đăng ký miễn phí</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</header>

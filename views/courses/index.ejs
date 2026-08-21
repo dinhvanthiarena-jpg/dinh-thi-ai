@@ -1,0 +1,35 @@
+<section class="bg-gradient-to-br from-primary-50 to-white border-b border-primary-100">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-ink">Khóa học AI</h1>
+    <p class="mt-2 text-muted">Chọn lộ trình phù hợp với mục tiêu của bạn</p>
+
+    <form action="/courses" method="GET" class="mt-6 flex flex-col sm:flex-row gap-3">
+      <input type="text" name="q" value="<%= query.q || '' %>" placeholder="Tìm khóa học..." class="input sm:max-w-xs" />
+      <select name="category" class="input sm:max-w-xs">
+        <option value="">Tất cả danh mục</option>
+        <% categories.forEach(function(cat) { %>
+          <option value="<%= cat %>" <%= query.category === cat ? 'selected' : '' %>><%= cat %></option>
+        <% }); %>
+      </select>
+      <select name="sort" class="input sm:max-w-xs">
+        <option value="">Mới nhất</option>
+        <option value="popular" <%= query.sort === 'popular' ? 'selected' : '' %>>Phổ biến nhất</option>
+        <option value="price-asc" <%= query.sort === 'price-asc' ? 'selected' : '' %>>Giá tăng dần</option>
+        <option value="price-desc" <%= query.sort === 'price-desc' ? 'selected' : '' %>>Giá giảm dần</option>
+      </select>
+      <button type="submit" class="btn-primary">Lọc</button>
+    </form>
+  </div>
+</section>
+
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+  <% if (courses.length) { %>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% courses.forEach(function(course) { %>
+        <%- include('../partials/course-card', { course }) %>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <div class="card p-12 text-center text-muted">Không tìm thấy khóa học phù hợp.</div>
+  <% } %>
+</section>

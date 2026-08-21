@@ -1,0 +1,37 @@
+<article class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
+  <span class="badge bg-primary-100 text-primary-700 mb-4"><%= new Date(post.publishedAt).toLocaleDateString('vi-VN') %></span>
+  <h1 class="text-3xl sm:text-4xl font-extrabold text-ink leading-tight"><%= post.title %></h1>
+  <p class="mt-4 text-sm text-muted">Tác giả: <%= post.author ? post.author.name : 'Đinh Thi Ai' %> &middot; <%= post.viewCount %> lượt xem</p>
+
+  <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full rounded-2xl mt-8 aspect-video object-cover" />
+
+  <div class="prose prose-slate max-w-none mt-8 whitespace-pre-line text-ink leading-relaxed">
+    <%= post.content %>
+  </div>
+
+  <% if (post.tags && post.tags.length) { %>
+    <div class="flex flex-wrap gap-2 mt-8">
+      <% post.tags.forEach(function(tag) { %>
+        <span class="badge bg-primary-50 text-primary-700">#<%= tag %></span>
+      <% }); %>
+    </div>
+  <% } %>
+</article>
+
+<% if (relatedPosts.length) { %>
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
+  <h2 class="text-xl font-bold text-ink mb-6">Bài viết liên quan</h2>
+  <div class="grid sm:grid-cols-3 gap-6">
+    <% relatedPosts.forEach(function(p) { %>
+      <a href="/blog/<%= p.slug %>" class="card overflow-hidden group">
+        <div class="aspect-video bg-primary-50 overflow-hidden">
+          <img src="<%= p.coverImageUrl %>" alt="<%= p.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+        </div>
+        <div class="p-4">
+          <h3 class="font-semibold text-sm text-ink line-clamp-2 group-hover:text-primary-700"><%= p.title %></h3>
+        </div>
+      </a>
+    <% }); %>
+  </div>
+</section>
+<% } %>

@@ -1,0 +1,86 @@
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 grid lg:grid-cols-3 gap-8">
+  <div class="lg:col-span-2 space-y-6">
+    <div>
+      <a href="/dashboard" class="text-sm text-primary-700 hover:underline">&larr; Quay lại khu vực học tập</a>
+      <h1 class="text-2xl font-extrabold text-ink mt-2"><%= course.title %></h1>
+    </div>
+
+    <div class="card overflow-hidden">
+      <div class="aspect-video bg-ink flex items-center justify-center">
+        <% if (activeLesson && activeLesson.videoUrl) { %>
+          <iframe class="w-full h-full" src="<%= activeLesson.videoUrl %>" title="<%= activeLesson.title %>" allowfullscreen frameborder="0"></iframe>
+        <% } else { %>
+          <p class="text-white/60 text-sm">Chưa có video cho bài học này</p>
+        <% } %>
+      </div>
+      <div class="p-6">
+        <h2 class="font-semibold text-ink text-lg"><%= activeLesson ? activeLesson.title : 'Chưa có bài học' %></h2>
+        <% if (activeLesson && activeLesson.contentText) { %>
+          <p class="text-muted mt-3 whitespace-pre-line leading-relaxed"><%= activeLesson.contentText %></p>
+        <% } %>
+
+        <% if (activeLesson) { %>
+          <form action="/dashboard/learn/<%= course.slug %>/lesson/<%= activeLesson._id %>/complete" method="POST" class="mt-5">
+            <% const isDone = enrollment.completedLessons.some(id => id.toString() === activeLesson._id.toString()); %>
+            <button type="submit" class="<%= isDone ? 'btn-outline' : 'btn-primary' %>" <%= isDone ? 'disabled' : '' %>>
+              <%= isDone ? 'Đã hoàn thành' : 'Đánh dấu hoàn thành' %>
+            </button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (enrollment.progressPercent >= 100) { %>
+      <div class="card p-6">
+        <h2 class="font-semibold text-ink mb-3">Đánh giá khóa học</h2>
+        <form action="/dashboard/learn/<%= course.slug %>/review" method="POST" class="space-y-4">
+          <div>
+            <label class="label">Số sao</label>
+            <select name="rating" class="input max-w-[120px]">
+              <% for (let i = 5; i >= 1; i--) { %>
+                <option value="<%= i %>" <%= existingReview && existingReview.rating === i ? 'selected' : '' %>><%= i %> sao</option>
+              <% } %>
+            </select>
+          </div>
+          <div>
+            <label class="label">Nhận xét</label>
+            <textarea name="comment" rows="3" class="input"><%= existingReview ? existingReview.comment : '' %></textarea>
+          </div>
+          <button type="submit" class="btn-primary"><%= existingReview ? 'Cập nhật đánh giá' : 'Gửi đánh giá' %></button>
+        </form>
+      </div>
+    <% } %>
+  </div>
+
+  <aside class="lg:col-span-1">
+    <div class="card p-5 sticky top-24">
+      <div class="mb-4">
+        <div class="flex justify-between text-xs text-muted mb-1">
+          <span>Tiến độ</span>
+          <span><%= enrollment.progressPercent %>%</span>
+        </div>
+        <div class="h-2 rounded-full bg-primary-50 overflow-hidden">
+          <div class="h-full bg-primary-600" style="width: <%= enrollment.progressPercent %>%"></div>
+        </div>
+      </div>
+
+      <h3 class="font-semibold text-ink mb-3">Nội dung khóa học</h3>
+      <ul class="space-y-1 max-h-[28rem] overflow-y-auto">
+        <% lessons.forEach(function(lesson, i) { %>
+          <% const done = enrollment.completedLessons.some(id => id.toString() === lesson._id.toString()); %>
+          <li>
+            <a href="/dashboard/learn/<%= course.slug %>?lesson=<%= lesson._id %>"
+               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm <%= activeLesson && activeLesson._id.toString() === lesson._id.toString() ? 'bg-primary-50 text-primary-700 font-medium' : 'text-ink hover:bg-primary-50' %>">
+              <% if (done) { %>
+                <svg class="h-4 w-4 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+              <% } else { %>
+                <span class="h-4 w-4 flex-shrink-0 rounded-full border border-primary-200"></span>
+              <% } %>
+              <span class="line-clamp-1"><%= i + 1 %>. <%= lesson.title %></span>
+            </a>
+          </li>
+        <% }); %>
+      </ul>
+    </div>
+  </aside>
+</section>

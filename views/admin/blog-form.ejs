@@ -1,0 +1,39 @@
+<% const isEdit = post && post._id; %>
+<form action="<%= isEdit ? '/admin/blog/' + post._id : '/admin/blog' %>" method="POST" enctype="multipart/form-data" class="space-y-5 max-w-3xl">
+  <div class="card p-6 space-y-5">
+    <div>
+      <label class="label">Tiêu đề *</label>
+      <input class="input" type="text" name="title" value="<%= post.title || '' %>" required />
+    </div>
+
+    <div>
+      <label class="label">Mô tả ngắn</label>
+      <input class="input" type="text" name="excerpt" value="<%= post.excerpt || '' %>" />
+    </div>
+
+    <div>
+      <label class="label">Nội dung *</label>
+      <textarea class="input" name="content" rows="10" required><%= post.content || '' %></textarea>
+    </div>
+
+    <div>
+      <label class="label">Ảnh bìa</label>
+      <% if (post.coverImageUrl) { %>
+        <img src="<%= post.coverImageUrl %>" class="w-40 h-24 object-cover rounded-lg mb-2" alt="" />
+      <% } %>
+      <input type="file" name="cover" accept=".jpg,.jpeg,.png,.webp" class="text-sm" />
+    </div>
+
+    <div>
+      <label class="label">Tags (cách nhau bởi dấu phẩy)</label>
+      <input class="input" type="text" name="tags" value="<%= (post.tags || []).join(', ') %>" />
+    </div>
+
+    <label class="flex items-center gap-2 text-sm text-ink">
+      <input type="checkbox" name="isPublished" <%= post.isPublished !== false ? 'checked' : '' %> />
+      Xuất bản
+    </label>
+  </div>
+
+  <button type="submit" class="btn-primary"><%= isEdit ? 'Cập nhật bài viết' : 'Đăng bài viết' %></button>
+</form>

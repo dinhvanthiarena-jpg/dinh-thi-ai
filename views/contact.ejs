@@ -1,0 +1,42 @@
+<section class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
+  <div class="text-center mb-10">
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-ink">Liên hệ tư vấn</h1>
+    <p class="mt-3 text-muted">Để lại thông tin, đội ngũ Đinh Thi Ai sẽ liên hệ tư vấn khóa học phù hợp trong 24h.</p>
+  </div>
+
+  <div class="card p-8">
+    <% if (errors && errors.length) { %>
+      <div class="mb-6 rounded-lg bg-red-50 border border-danger/30 px-4 py-3 text-sm text-red-800">
+        <% errors.forEach(function(e) { %><p><%= e.msg %></p><% }); %>
+      </div>
+    <% } %>
+
+    <form action="/lien-he" method="POST" class="space-y-5">
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <label class="label" for="name">Họ và tên *</label>
+          <input class="input" type="text" id="name" name="name" value="<%= old.name || '' %>" required />
+        </div>
+        <div>
+          <label class="label" for="email">Email *</label>
+          <input class="input" type="email" id="email" name="email" value="<%= old.email || '' %>" required />
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <label class="label" for="phone">Số điện thoại</label>
+          <input class="input" type="tel" id="phone" name="phone" value="<%= old.phone || '' %>" />
+        </div>
+        <div>
+          <label class="label" for="subject">Chủ đề</label>
+          <input class="input" type="text" id="subject" name="subject" value="<%= old.subject || '' %>" placeholder="Tư vấn khóa học" />
+        </div>
+      </div>
+      <div>
+        <label class="label" for="message">Nội dung *</label>
+        <textarea class="input" id="message" name="message" rows="5" required><%= old.message || '' %></textarea>
+      </div>
+      <button type="submit" class="btn-primary w-full sm:w-auto">Gửi yêu cầu tư vấn</button>
+    </form>
+  </div>
+</section>

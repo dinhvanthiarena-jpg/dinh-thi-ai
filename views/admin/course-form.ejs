@@ -1,0 +1,138 @@
+<% const isEdit = course && course._id; %>
+<form action="<%= isEdit ? '/admin/courses/' + course._id : '/admin/courses' %>" method="POST" enctype="multipart/form-data" class="space-y-8 max-w-4xl">
+  <div class="card p-6 space-y-5">
+    <h2 class="font-semibold text-ink">Thông tin cơ bản</h2>
+
+    <div>
+      <label class="label">Tên khóa học *</label>
+      <input class="input" type="text" name="title" value="<%= course.title || '' %>" required />
+    </div>
+
+    <div>
+      <label class="label">Mô tả ngắn</label>
+      <input class="input" type="text" name="subtitle" value="<%= course.subtitle || '' %>" />
+    </div>
+
+    <div>
+      <label class="label">Mô tả chi tiết *</label>
+      <textarea class="input" name="description" rows="5" required><%= course.description || '' %></textarea>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-5">
+      <div>
+        <label class="label">Danh mục *</label>
+        <select class="input" name="category" required>
+          <% ['AI co ban','Machine Learning','Deep Learning','Generative AI','AI cho doanh nghiep','Prompt Engineering'].forEach(function(cat) { %>
+            <option value="<%= cat %>" <%= course.category === cat ? 'selected' : '' %>><%= cat %></option>
+          <% }); %>
+        </select>
+      </div>
+      <div>
+        <label class="label">Cấp độ</label>
+        <select class="input" name="level">
+          <% ['Co ban','Trung cap','Nang cao'].forEach(function(lv) { %>
+            <option value="<%= lv %>" <%= course.level === lv ? 'selected' : '' %>><%= lv %></option>
+          <% }); %>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-3 gap-5">
+      <div>
+        <label class="label">Giá gốc (VND) *</label>
+        <input class="input" type="number" min="0" name="price" value="<%= course.price != null ? course.price : 0 %>" required />
+      </div>
+      <div>
+        <label class="label">Giá khuyến mãi (VND)</label>
+        <input class="input" type="number" min="0" name="salePrice" value="<%= course.salePrice != null ? course.salePrice : '' %>" />
+      </div>
+      <div>
+        <label class="label">Thời lượng (giờ)</label>
+        <input class="input" type="number" min="0" name="durationHours" value="<%= course.durationHours || 0 %>" />
+      </div>
+    </div>
+
+    <div>
+      <label class="label">Giảng viên</label>
+      <input class="input" type="text" name="instructorName" value="<%= course.instructorName || 'Dinh Thi Ai' %>" />
+    </div>
+
+    <div>
+      <label class="label">Ảnh đại diện khóa học</label>
+      <% if (course.thumbnailUrl) { %>
+        <img src="<%= course.thumbnailUrl %>" class="w-40 h-24 object-cover rounded-lg mb-2" alt="" />
+      <% } %>
+      <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp" class="text-sm" />
+    </div>
+
+    <div>
+      <label class="label">Kết quả đạt được (mỗi dòng một ý)</label>
+      <textarea class="input" name="outcomes" rows="4"><%= (course.outcomes || []).join('\n') %></textarea>
+    </div>
+
+    <div>
+      <label class="label">Yêu cầu (mỗi dòng một ý)</label>
+      <textarea class="input" name="requirements" rows="3"><%= (course.requirements || []).join('\n') %></textarea>
+    </div>
+
+    <div class="flex gap-6">
+      <label class="flex items-center gap-2 text-sm text-ink">
+        <input type="checkbox" name="isPublished" <%= course.isPublished !== false ? 'checked' : '' %> />
+        Xuất bản
+      </label>
+      <label class="flex items-center gap-2 text-sm text-ink">
+        <input type="checkbox" name="isFeatured" <%= course.isFeatured ? 'checked' : '' %> />
+        Khóa học nổi bật
+      </label>
+    </div>
+  </div>
+
+  <button type="submit" class="btn-primary"><%= isEdit ? 'Cập nhật khóa học' : 'Tạo khóa học' %></button>
+</form>
+
+<% if (isEdit) { %>
+  <div class="card p-6 mt-8 max-w-4xl">
+    <h2 class="font-semibold text-ink mb-4">Bài học (<%= lessons.length %>)</h2>
+
+    <ul class="divide-y divide-primary-100 mb-6">
+      <% lessons.forEach(function(l, i) { %>
+        <li class="flex items-center justify-between py-3 text-sm">
+          <span class="text-ink"><%= i + 1 %>. <%= l.title %> <span class="text-muted">(<%= l.durationMinutes %> phút)</span></span>
+          <form action="/admin/courses/<%= course._id %>/lessons/<%= l._id %>/delete" method="POST" onsubmit="return confirm('Xoa bai hoc nay?');">
+            <button type="submit" class="text-danger hover:underline cursor-pointer">Xóa</button>
+          </form>
+        </li>
+      <% }); %>
+      <% if (!lessons.length) { %>
+        <li class="py-3 text-muted text-sm">Chưa có bài học nào.</li>
+      <% } %>
+    </ul>
+
+    <form action="/admin/courses/<%= course._id %>/lessons" method="POST" class="space-y-4 border-t border-primary-100 pt-6">
+      <h3 class="font-medium text-ink text-sm">Thêm bài học mới</h3>
+      <div>
+        <label class="label">Tên bài học *</label>
+        <input class="input" type="text" name="title" required />
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="label">Video URL (embed)</label>
+          <input class="input" type="text" name="videoUrl" placeholder="https://www.youtube.com/embed/..." />
+        </div>
+        <div>
+          <label class="label">Thời lượng (phút)</label>
+          <input class="input" type="number" min="0" name="durationMinutes" value="0" />
+        </div>
+      </div>
+      <div>
+        <label class="label">Nội dung / ghi chú bài học</label>
+        <textarea class="input" name="contentText" rows="3"></textarea>
+      </div>
+      <label class="flex items-center gap-2 text-sm text-ink">
+        <input type="checkbox" name="isPreview" />
+        Cho phép xem trước (miễn phí)
+      </label>
+      <button type="submit" class="btn-outline">+ Thêm bài học</button>
+    </form>
+  </div>
+<% } %>

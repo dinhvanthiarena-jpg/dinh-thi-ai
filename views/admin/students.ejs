@@ -1,0 +1,25 @@
+<div class="card overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-primary-50 text-ink">
+      <tr>
+        <th class="text-left px-5 py-3 font-semibold">Họ tên</th>
+        <th class="text-left px-5 py-3 font-semibold">Email</th>
+        <th class="text-left px-5 py-3 font-semibold">Điện thoại</th>
+        <th class="text-right px-5 py-3 font-semibold">Ngày tham gia</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-primary-50">
+      <% students.forEach(function(s) { %>
+        <tr>
+          <td class="px-5 py-3 text-ink font-medium"><%= s.name %></td>
+          <td class="px-5 py-3 text-muted"><%= s.email %></td>
+          <td class="px-5 py-3 text-muted"><%= s.phone || '—' %></td>
+          <td class="px-5 py-3 text-right text-muted"><%= new Date(s.createdAt).toLocaleDateString('vi-VN') %></td>
+        </tr>
+      <% }); %>
+      <% if (!students.length) { %>
+        <tr><td colspan="4" class="px-5 py-8 text-center text-muted">Chưa có học viên nào.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,41 @@
+<div class="flex justify-between items-center mb-6">
+  <p class="text-muted text-sm">Tổng số: <%= courses.length %> khóa học</p>
+  <a href="/admin/courses/new" class="btn-primary">+ Thêm khóa học</a>
+</div>
+
+<div class="card overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-primary-50 text-ink">
+      <tr>
+        <th class="text-left px-5 py-3 font-semibold">Khóa học</th>
+        <th class="text-left px-5 py-3 font-semibold">Danh mục</th>
+        <th class="text-right px-5 py-3 font-semibold">Giá</th>
+        <th class="text-right px-5 py-3 font-semibold">Học viên</th>
+        <th class="text-center px-5 py-3 font-semibold">Trạng thái</th>
+        <th class="text-right px-5 py-3 font-semibold">Hành động</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-primary-50">
+      <% courses.forEach(function(c) { %>
+        <tr>
+          <td class="px-5 py-3 text-ink font-medium"><%= c.title %></td>
+          <td class="px-5 py-3 text-muted"><%= c.category %></td>
+          <td class="px-5 py-3 text-right text-ink"><%= c.price.toLocaleString('vi-VN') %>đ</td>
+          <td class="px-5 py-3 text-right text-muted"><%= c.enrollmentCount %></td>
+          <td class="px-5 py-3 text-center">
+            <span class="badge <%= c.isPublished ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600' %>"><%= c.isPublished ? 'Đã xuất bản' : 'Bản nháp' %></span>
+          </td>
+          <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
+            <a href="/admin/courses/<%= c._id %>/edit" class="text-primary-700 hover:underline">Sửa</a>
+            <form action="/admin/courses/<%= c._id %>/delete" method="POST" class="inline" onsubmit="return confirm('Xoa khoa hoc nay?');">
+              <button type="submit" class="text-danger hover:underline cursor-pointer">Xóa</button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!courses.length) { %>
+        <tr><td colspan="6" class="px-5 py-8 text-center text-muted">Chưa có khóa học nào.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

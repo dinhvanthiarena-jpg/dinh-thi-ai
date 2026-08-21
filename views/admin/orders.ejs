@@ -1,0 +1,32 @@
+<div class="card overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-primary-50 text-ink">
+      <tr>
+        <th class="text-left px-5 py-3 font-semibold">Mã đơn</th>
+        <th class="text-left px-5 py-3 font-semibold">Học viên</th>
+        <th class="text-left px-5 py-3 font-semibold">Khóa học</th>
+        <th class="text-right px-5 py-3 font-semibold">Số tiền</th>
+        <th class="text-center px-5 py-3 font-semibold">Trạng thái</th>
+        <th class="text-right px-5 py-3 font-semibold">Ngày</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-primary-50">
+      <% orders.forEach(function(o) { %>
+        <tr>
+          <td class="px-5 py-3 text-muted"><%= o.transactionRef %></td>
+          <td class="px-5 py-3 text-ink"><%= o.user ? o.user.name : '—' %></td>
+          <td class="px-5 py-3 text-ink"><%= o.course ? o.course.title : '—' %></td>
+          <td class="px-5 py-3 text-right font-medium text-ink"><%= o.amount.toLocaleString('vi-VN') %>đ</td>
+          <td class="px-5 py-3 text-center">
+            <% const statusMap = { paid: ['Đã thanh toán','bg-green-50 text-green-700'], pending: ['Chờ xử lý','bg-amber-50 text-amber-700'], failed: ['Thất bại','bg-red-50 text-red-700'], refunded: ['Hoàn tiền','bg-slate-100 text-slate-600'] }; const [label, cls] = statusMap[o.status] || [o.status, 'bg-slate-100']; %>
+            <span class="badge <%= cls %>"><%= label %></span>
+          </td>
+          <td class="px-5 py-3 text-right text-muted"><%= new Date(o.createdAt).toLocaleDateString('vi-VN') %></td>
+        </tr>
+      <% }); %>
+      <% if (!orders.length) { %>
+        <tr><td colspan="6" class="px-5 py-8 text-center text-muted">Chưa có đơn hàng nào.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

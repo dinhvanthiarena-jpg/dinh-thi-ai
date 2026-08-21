@@ -1,0 +1,21 @@
+<% if (typeof flashSuccess !== 'undefined' && flashSuccess.length) { %>
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4 space-y-2">
+    <% flashSuccess.forEach(function(msg) { %>
+      <div class="flex items-start gap-3 rounded-lg border border-success/30 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">
+        <svg class="h-5 w-5 flex-shrink-0 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+        <span><%= msg %></span>
+      </div>
+    <% }); %>
+  </div>
+<% } %>
+
+<% if (typeof flashError !== 'undefined' && flashError.length) { %>
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4 space-y-2">
+    <% flashError.forEach(function(msg) { %>
+      <div class="flex items-start gap-3 rounded-lg border border-danger/30 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+        <svg class="h-5 w-5 flex-shrink-0 text-danger" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+        <span><%= msg %></span>
+      </div>
+    <% }); %>
+  </div>
+<% } %>

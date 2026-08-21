@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title + ' | ' + appName : appName %></title>
+  <meta name="description" content="Dinh Thi Ai - Nen tang dao tao cong nghe AI ung dung cho nguoi di lam, tu chuyen gia thuc chien." />
+  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/css/output.css" />
+</head>
+<body class="min-h-screen flex flex-col">
+  <%- include('../partials/header') %>
+
+  <main class="flex-1">
+    <%- include('../partials/flash') %>
+    <%- body %>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <script src="/js/main.js" defer></script>
+</body>
+</html>
