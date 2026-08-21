@@ -1,0 +1,17 @@
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="b6" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#0891B2"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#b6)"/>
+  <circle cx="70" cy="70" r="90" fill="#ffffff" opacity="0.08"/>
+  <circle cx="570" cy="300" r="100" fill="#ffffff" opacity="0.08"/>
+  <g transform="translate(255,145)">
+    <rect x="0" y="0" width="52" height="52" rx="12" fill="#ffffff" opacity="0.85"/>
+    <rect x="66" y="0" width="52" height="52" rx="12" fill="#67E8F9"/>
+    <rect x="0" y="66" width="52" height="52" rx="12" fill="#FBBF24"/>
+    <rect x="66" y="66" width="52" height="52" rx="12" fill="#ffffff" opacity="0.85"/>
+  </g>
+  <text x="40" y="330" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#ffffff">Công cụ AI miễn phí</text>
+</svg>

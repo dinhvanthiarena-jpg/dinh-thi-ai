@@ -1,0 +1,21 @@
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="b2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#4C1D95"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#b2)"/>
+  <circle cx="560" cy="70" r="100" fill="#ffffff" opacity="0.08"/>
+  <circle cx="60" cy="300" r="80" fill="#06B6D4" opacity="0.18"/>
+  <rect x="220" y="110" width="260" height="140" rx="18" fill="#ffffff" opacity="0.14"/>
+  <path d="M245 235l35-100 12 0 35 100-12 0-9-27h-40l-9 27z" fill="none"/>
+  <g fill="#ffffff">
+    <path d="M255 150l90 0" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+    <path d="M255 175l140 0" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.8"/>
+    <path d="M255 200l110 0" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+    <path d="M255 225l70 0" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.4"/>
+  </g>
+  <path d="M430 205l30-30 12 12-30 30z" fill="#FBBF24"/>
+  <path d="M455 200l6 3-6 3-3 6-3-6-6-3 6-3 3-6z" fill="#67E8F9"/>
+  <text x="40" y="330" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#ffffff">Hướng dẫn Prompt</text>
+</svg>

@@ -27,6 +27,7 @@ exports.list = async (req, res) => {
 
   res.render('courses/index', {
     title: 'Khóa học AI',
+    description: 'Danh sách khóa học AI ứng dụng: Prompt Engineering, Generative AI, AI cho doanh nghiệp — cùng chuyên gia Đinh Thi Ai.',
     courses,
     categories,
     query: req.query,
@@ -61,6 +62,25 @@ exports.show = async (req, res, next) => {
 
   res.render('courses/show', {
     title: course.title,
+    description: course.subtitle || course.description.slice(0, 155),
+    ogImage: course.thumbnailUrl,
+    ogType: 'product',
+    structuredData: {
+      '@context': 'https://schema.org',
+      '@type': 'Course',
+      name: course.title,
+      description: course.description,
+      provider: { '@type': 'Organization', name: 'Đinh Thi Ai' },
+      ...(course.ratingCount
+        ? {
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: course.ratingAverage,
+              ratingCount: course.ratingCount,
+            },
+          }
+        : {}),
+    },
     course,
     lessons,
     reviews,

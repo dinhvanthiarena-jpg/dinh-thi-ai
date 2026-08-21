@@ -15,6 +15,7 @@ exports.list = async (req, res) => {
 
   res.render('blog/index', {
     title: 'Kiến thức AI',
+    description: 'Kiến thức, hướng dẫn và xu hướng AI ứng dụng mới nhất — cập nhật thường xuyên bởi Đinh Thi Ai.',
     posts,
     page,
     totalPages: Math.ceil(total / perPage),
@@ -42,5 +43,21 @@ exports.show = async (req, res, next) => {
     .filter((p) => (p.tags || []).some((t) => postTags.includes(t)))
     .slice(0, 3);
 
-  res.render('blog/show', { title: post.title, post, relatedPosts });
+  res.render('blog/show', {
+    title: post.title,
+    description: post.excerpt,
+    ogImage: post.coverImageUrl,
+    ogType: 'article',
+    structuredData: {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: post.title,
+      description: post.excerpt,
+      datePublished: post.publishedAt,
+      author: { '@type': 'Person', name: post.author ? post.author.name : 'Đinh Thi Ai' },
+      publisher: { '@type': 'Organization', name: 'Đinh Thi Ai' },
+    },
+    post,
+    relatedPosts,
+  });
 };

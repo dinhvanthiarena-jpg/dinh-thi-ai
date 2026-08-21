@@ -15,6 +15,7 @@ const expressLayouts = require('express-ejs-layouts');
 const connectDB = require('./config/db');
 const { attachUser } = require('./middleware/auth');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
+const { startScheduler } = require('./services/contentScheduler');
 
 // Express 4 does not catch errors thrown inside async route handlers, so an
 // unhandled rejection there would otherwise crash the whole process (Node
@@ -79,6 +80,8 @@ app.use(attachUser);
 
 app.use((req, res, next) => {
   res.locals.appName = process.env.APP_NAME || 'Dinh Thi Ai';
+  res.locals.appUrl = (process.env.APP_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  res.locals.canonicalUrl = `${res.locals.appUrl}${req.originalUrl}`;
   res.locals.currentPath = req.path;
   res.locals.flashSuccess = req.flash('success');
   res.locals.flashError = req.flash('error');
@@ -103,6 +106,7 @@ connectDB()
     app.listen(PORT, () => {
       console.log(`[server] Dinh Thi Ai dang chay tai http://localhost:${PORT}`);
     });
+    startScheduler();
   })
   .catch((err) => {
     console.error('[server] Khong the ket noi database:', err.message);

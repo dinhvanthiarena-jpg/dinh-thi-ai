@@ -1,0 +1,18 @@
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="b8" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0E7490"/><stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#b8)"/>
+  <circle cx="70" cy="300" r="90" fill="#ffffff" opacity="0.08"/>
+  <g transform="translate(320,175)">
+    <circle cx="-90" cy="0" r="46" fill="#ffffff" opacity="0.85"/>
+    <circle cx="0" cy="0" r="52" fill="#67E8F9"/>
+    <circle cx="90" cy="0" r="46" fill="#FBBF24" opacity="0.9"/>
+    <text x="-90" y="7" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#4C1D95" text-anchor="middle">GPT</text>
+    <text x="0" y="7" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#0E7490" text-anchor="middle">?</text>
+    <text x="90" y="7" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#4C1D95" text-anchor="middle">Claude</text>
+  </g>
+  <text x="40" y="330" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#ffffff">So sánh AI</text>
+</svg>

@@ -5,8 +5,8 @@
 
   <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full rounded-2xl mt-8 aspect-video object-cover" />
 
-  <div class="prose prose-slate max-w-none mt-8 whitespace-pre-line text-ink leading-relaxed">
-    <%= post.content %>
+  <div class="prose prose-slate max-w-none mt-8 text-ink leading-relaxed">
+    <%- post.content %>
   </div>
 
   <% if (post.tags && post.tags.length) { %>

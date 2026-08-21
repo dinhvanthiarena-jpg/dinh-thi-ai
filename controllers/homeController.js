@@ -21,6 +21,8 @@ exports.index = async (req, res) => {
 
   res.render('home', {
     title: 'Đinh Thi Ai - Đào tạo công nghệ AI ứng dụng',
+    description:
+      'Khóa học AI ứng dụng thực chiến cho người đi làm: Prompt Engineering, Generative AI, triển khai AI cho doanh nghiệp — cùng chuyên gia Đinh Thi Ai.',
     featuredCourses,
     latestPosts,
     topReviews,
@@ -28,5 +30,8 @@ exports.index = async (req, res) => {
 };
 
 exports.about = (req, res) => {
-  res.render('about', { title: 'Về Đinh Thi Ai' });
+  res.render('about', {
+    title: 'Về Đinh Thi Ai',
+    description: 'Đinh Thi Ai - chuyên gia đào tạo công nghệ AI ứng dụng, đồng hành cùng hàng nghìn học viên đi làm.',
+  });
 };

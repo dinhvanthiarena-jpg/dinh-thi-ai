@@ -4,9 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= typeof title !== 'undefined' ? title + ' | ' + appName : appName %></title>
-  <meta name="description" content="Đinh Thi Ai - Nền tảng đào tạo công nghệ AI ứng dụng cho người đi làm, từ chuyên gia thực chiến." />
+  <% const metaDesc = typeof description !== 'undefined' && description ? description : 'Đinh Thi Ai - Nền tảng đào tạo công nghệ AI ứng dụng cho người đi làm, từ chuyên gia thực chiến.'; %>
+  <% const rawImage = typeof ogImage !== 'undefined' && ogImage ? ogImage : '/images/hero-illustration.svg'; %>
+  <% const metaImage = /^https?:\/\//.test(rawImage) ? rawImage : `${appUrl}${rawImage}`; %>
+  <% const pageUrl = typeof canonicalUrl !== 'undefined' ? canonicalUrl : ''; %>
+  <meta name="description" content="<%= metaDesc %>" />
+  <% if (pageUrl) { %><link rel="canonical" href="<%= pageUrl %>" /><% } %>
+
+  <meta property="og:site_name" content="Đinh Thi Ai" />
+  <meta property="og:type" content="<%= typeof ogType !== 'undefined' ? ogType : 'website' %>" />
+  <meta property="og:title" content="<%= typeof title !== 'undefined' ? title : appName %>" />
+  <meta property="og:description" content="<%= metaDesc %>" />
+  <meta property="og:image" content="<%= metaImage %>" />
+  <% if (pageUrl) { %><meta property="og:url" content="<%= pageUrl %>" /><% } %>
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="<%= typeof title !== 'undefined' ? title : appName %>" />
+  <meta name="twitter:description" content="<%= metaDesc %>" />
+  <meta name="twitter:image" content="<%= metaImage %>" />
+
   <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/css/output.css" />
+
+  <script type="application/ld+json">
+  <%- JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "Đinh Thi Ai",
+    "url": appUrl,
+    "logo": `${appUrl}/images/favicon.svg`,
+    "description": "Nền tảng đào tạo công nghệ AI ứng dụng cho người đi làm và doanh nghiệp tại Việt Nam.",
+    "sameAs": []
+  }) %>
+  </script>
+  <% if (typeof structuredData !== 'undefined' && structuredData) { %>
+  <script type="application/ld+json"><%- JSON.stringify(structuredData) %></script>
+  <% } %>
 </head>
 <body class="min-h-screen flex flex-col">
   <%- include('../partials/header') %>
