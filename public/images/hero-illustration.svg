@@ -1,25 +1,119 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 460">
   <defs>
-    <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#7C3AED"/>
+    <linearGradient id="hg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#A78BFA"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+    <linearGradient id="hg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22D3EE"/>
       <stop offset="100%" stop-color="#0891B2"/>
     </linearGradient>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F5F3FF"/>
+      <stop offset="100%" stop-color="#ECFEFF"/>
+    </linearGradient>
+    <radialGradient id="glowPurple" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C4B5FD" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#C4B5FD" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowCyan" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#67E8F9" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#67E8F9" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowAmber" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FDE68A" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#FDE68A" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#4C1D95" flood-opacity="0.18"/>
+    </filter>
+    <filter id="soft-sm" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0F172A" flood-opacity="0.16"/>
+    </filter>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.6" fill="#C4B5FD" opacity="0.45"/>
+    </pattern>
+    <clipPath id="frame">
+      <rect width="560" height="460" rx="28"/>
+    </clipPath>
   </defs>
-  <rect width="500" height="400" rx="24" fill="#F5F3FF"/>
-  <circle cx="400" cy="80" r="70" fill="#DDD6FE" opacity="0.5"/>
-  <circle cx="90" cy="330" r="60" fill="#CFFAFE" opacity="0.6"/>
 
-  <rect x="90" y="90" width="320" height="220" rx="16" fill="white" stroke="#DDD6FE" stroke-width="2"/>
-  <rect x="115" y="115" width="270" height="24" rx="6" fill="url(#hg)"/>
-  <rect x="115" y="155" width="180" height="14" rx="4" fill="#EDE9FE"/>
-  <rect x="115" y="178" width="230" height="14" rx="4" fill="#EDE9FE"/>
-  <rect x="115" y="201" width="140" height="14" rx="4" fill="#EDE9FE"/>
+  <g clip-path="url(#frame)">
+    <rect width="560" height="460" fill="url(#bgGrad)"/>
+    <rect width="560" height="460" fill="url(#dots)"/>
 
-  <circle cx="330" cy="250" r="40" fill="url(#hg)"/>
-  <path d="M315 250 L326 261 L348 236" stroke="white" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- glow blobs -->
+    <circle cx="460" cy="80" r="170" fill="url(#glowPurple)"/>
+    <circle cx="50" cy="400" r="150" fill="url(#glowCyan)"/>
+    <circle cx="500" cy="420" r="90" fill="url(#glowAmber)"/>
 
-  <g transform="translate(150,240)">
-    <circle r="26" fill="#0891B2" opacity="0.15"/>
-    <circle r="16" fill="#0891B2"/>
+    <!-- orbiting ring accent -->
+    <circle cx="280" cy="230" r="205" fill="none" stroke="#DDD6FE" stroke-width="1.5" opacity="0.6" stroke-dasharray="2 10"/>
+
+    <!-- sparkles -->
+    <path d="M56 96l7 18 18 7-18 7-7 18-7-18-18-7 18-7z" fill="#A78BFA"/>
+    <path d="M498 214l6 15 15 6-15 6-6 15-6-15-15-6 15-6z" fill="#22D3EE"/>
+    <path d="M420 60l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#FBBF24"/>
+
+    <!-- main assistant card -->
+    <g transform="rotate(-2.5 285 235)" filter="url(#soft)">
+      <rect x="108" y="86" width="330" height="292" rx="26" fill="#ffffff"/>
+
+      <!-- browser-style top bar -->
+      <rect x="108" y="86" width="330" height="40" rx="26" fill="#F8FAFC"/>
+      <rect x="108" y="106" width="330" height="20" fill="#F8FAFC"/>
+      <circle cx="130" cy="106" r="5" fill="#FCA5A5"/>
+      <circle cx="148" cy="106" r="5" fill="#FCD34D"/>
+      <circle cx="166" cy="106" r="5" fill="#86EFAC"/>
+      <rect x="330" y="98" width="90" height="16" rx="8" fill="#EEF2F7"/>
+
+      <!-- header: avatar + status -->
+      <circle cx="146" cy="156" r="20" fill="url(#hg1)"/>
+      <circle cx="146" cy="148" r="4.4" fill="#ffffff"/>
+      <path d="M137 163c1.6-5.4 5.4-7.6 9-7.6s7.4 2.2 9 7.6" stroke="#ffffff" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <text x="178" y="152" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#1E1B4B">Trợ lý AI</text>
+      <circle cx="180" cy="167" r="4" fill="#34D399"/>
+      <text x="190" y="171" font-family="Arial, sans-serif" font-size="11" fill="#16A34A">Đang hoạt động</text>
+
+      <!-- AI bubble -->
+      <rect x="132" y="196" width="240" height="48" rx="16" fill="#F5F3FF"/>
+      <text x="150" y="217" font-family="Arial, sans-serif" font-size="13" fill="#4C1D95">Xin chào! Tôi có thể giúp gì</text>
+      <text x="150" y="234" font-family="Arial, sans-serif" font-size="13" fill="#4C1D95">cho công việc của bạn?</text>
+
+      <!-- user bubble -->
+      <rect x="178" y="254" width="220" height="42" rx="16" fill="url(#hg1)"/>
+      <text x="198" y="280" font-family="Arial, sans-serif" font-size="13" fill="#ffffff">Viết bài đăng marketing giúp tôi</text>
+
+      <!-- AI bubble with result -->
+      <rect x="132" y="308" width="258" height="60" rx="16" fill="#ECFEFF"/>
+      <text x="150" y="330" font-family="Arial, sans-serif" font-size="13" fill="#0E7490">Đây là bản nháp đầu tiên,</text>
+      <text x="150" y="348" font-family="Arial, sans-serif" font-size="13" fill="#0E7490">bạn xem thử nhé ✨</text>
+
+      <!-- input row -->
+      <rect x="132" y="382" width="258" height="30" rx="15" fill="#F8FAFC" stroke="#E2E8F0"/>
+      <circle cx="365" cy="397" r="10" fill="url(#hg2)"/>
+      <path d="M361 397l3 3 6-6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- floating completion badge -->
+    <g transform="rotate(6 470 150)" filter="url(#soft-sm)">
+      <rect x="406" y="104" width="128" height="92" rx="20" fill="#ffffff"/>
+      <circle cx="444" cy="144" r="24" fill="url(#hg2)"/>
+      <path d="M433 144l7.5 7.5 15-15" stroke="#ffffff" stroke-width="4.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="478" y="140" font-family="Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1E1B4B">Hoàn thành</text>
+      <text x="478" y="157" font-family="Arial, sans-serif" font-size="11.5" fill="#0891B2">khóa học</text>
+      <path d="M420 176l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#FBBF24"/>
+    </g>
+
+    <!-- floating progress chip -->
+    <g transform="rotate(-4 86 424)" filter="url(#soft-sm)">
+      <rect x="26" y="389" width="120" height="70" rx="18" fill="#ffffff"/>
+      <circle cx="62" cy="424" r="22" fill="none" stroke="#EDE9FE" stroke-width="6.5"/>
+      <circle cx="62" cy="424" r="22" fill="none" stroke="url(#hg1)" stroke-width="6.5" stroke-linecap="round"
+        stroke-dasharray="106 138" transform="rotate(-90 62 424)"/>
+      <text x="62" y="429" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#4C1D95" text-anchor="middle">92%</text>
+      <text x="98" y="418" font-family="Arial, sans-serif" font-size="11.5" fill="#475569">Tiến độ</text>
+      <text x="98" y="434" font-family="Arial, sans-serif" font-size="11.5" fill="#475569">học tập</text>
+    </g>
   </g>
 </svg>
