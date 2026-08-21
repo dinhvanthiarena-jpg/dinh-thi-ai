@@ -1,0 +1,23 @@
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#0E7490"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg2)"/>
+  <circle cx="60" cy="60" r="100" fill="#ffffff" opacity="0.08"/>
+  <circle cx="590" cy="320" r="90" fill="#ffffff" opacity="0.08"/>
+  <circle cx="540" cy="90" r="40" fill="#06B6D4" opacity="0.2"/>
+
+  <rect x="200" y="110" width="240" height="140" rx="20" fill="#ffffff" opacity="0.14"/>
+  <g font-family="'Courier New', monospace" font-size="30" fill="#ffffff">
+    <text x="228" y="165">&gt; write a</text>
+    <text x="228" y="200">  prompt<tspan fill="#67E8F9">_</tspan></text>
+  </g>
+  <circle cx="238" cy="146" r="6" fill="#F87171"/>
+  <circle cx="258" cy="146" r="6" fill="#FBBF24"/>
+  <circle cx="278" cy="146" r="6" fill="#34D399"/>
+
+  <text x="40" y="330" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#ffffff" opacity="0.9">Prompt Engineering</text>
+</svg>
