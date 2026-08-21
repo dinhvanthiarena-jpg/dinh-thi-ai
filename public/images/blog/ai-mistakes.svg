@@ -1,0 +1,11 @@
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="c8" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0891B2"/><stop offset="100%" stop-color="#6D28D9"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#c8)"/>
+  <circle cx="580" cy="300" r="100" fill="#ffffff" opacity="0.08"/>
+  <g transform="translate(300,170)">
+    <circle r="55" fill="#ffffff" opacity="0.9"/>
+    <line x1="-18" y1="-18" x2="18" y2="18" stroke="#DC2626" stroke-width="9" stroke-linecap="round"/>
+    <line x1="18" y1="-18" x2="-18" y2="18" stroke="#DC2626" stroke-width="9" stroke-linecap="round"/>
+  </g>
+  <text x="40" y="330" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#ffffff">5 sai lầm khi học AI</text>
+</svg>

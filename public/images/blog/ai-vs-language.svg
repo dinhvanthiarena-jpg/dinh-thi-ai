@@ -1,0 +1,13 @@
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="c5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0E7490"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#c5)"/>
+  <circle cx="70" cy="290" r="90" fill="#ffffff" opacity="0.08"/>
+  <g transform="translate(300,175)">
+    <circle cx="-70" cy="0" r="50" fill="#ffffff" opacity="0.85"/>
+    <circle cx="70" cy="0" r="50" fill="#FBBF24" opacity="0.9"/>
+    <text x="-70" y="7" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#4C1D95" text-anchor="middle">AI</text>
+    <text x="70" y="7" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#4C1D95" text-anchor="middle">Ngoại ngữ</text>
+    <text x="0" y="7" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle">vs</text>
+  </g>
+  <text x="40" y="330" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#ffffff">Học gì trước?</text>
+</svg>
