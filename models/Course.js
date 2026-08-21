@@ -13,16 +13,16 @@ const Course = sequelize.define(
     description: { type: DataTypes.TEXT, allowNull: false },
     category: {
       type: DataTypes.ENUM(
-        'AI co ban',
+        'AI cơ bản',
         'Machine Learning',
         'Deep Learning',
         'Generative AI',
-        'AI cho doanh nghiep',
+        'AI cho doanh nghiệp',
         'Prompt Engineering'
       ),
       allowNull: false,
     },
-    level: { type: DataTypes.ENUM('Co ban', 'Trung cap', 'Nang cao'), defaultValue: 'Co ban' },
+    level: { type: DataTypes.ENUM('Cơ bản', 'Trung cấp', 'Nâng cao'), defaultValue: 'Cơ bản' },
     price: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     salePrice: { type: DataTypes.INTEGER, allowNull: true },
     thumbnailUrl: { type: DataTypes.STRING, defaultValue: '/images/course-placeholder.svg' },
