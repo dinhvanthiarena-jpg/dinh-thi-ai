@@ -13,6 +13,12 @@
           <p class="text-white/60 text-sm">Chưa có video cho bài học này</p>
         <% } %>
       </div>
+      <% const ytMatch = activeLesson && activeLesson.videoUrl ? activeLesson.videoUrl.match(/youtube\.com\/embed\/([^?]+)/) : null; %>
+      <% if (ytMatch) { %>
+        <div class="px-6 py-2 bg-primary-50 text-xs text-muted text-center">
+          Video không hiển thị được? <a class="text-primary-700 font-medium hover:underline" href="https://www.youtube.com/watch?v=<%= ytMatch[1] %>" target="_blank" rel="noopener noreferrer">Xem trực tiếp trên YouTube</a>
+        </div>
+      <% } %>
       <div class="p-6">
         <h2 class="font-semibold text-ink text-lg"><%= activeLesson ? activeLesson.title : 'Chưa có bài học' %></h2>
         <% if (activeLesson && activeLesson.contentText) { %>
