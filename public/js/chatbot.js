@@ -64,7 +64,7 @@
     panel.classList.add('flex');
     opened = true;
     if (!messagesEl.childElementCount) {
-      appendMessage('assistant', 'Chào anh/chị 👋 Em là trợ lý AI của Đinh Thi Ai. Anh/chị cần tư vấn khóa học nào ạ?');
+      appendMessage('assistant', 'Chào anh chị, em có thể giúp gì cho anh chị không ạ?');
     }
     input.focus();
   }
