@@ -35,4 +35,11 @@ router.get('/students', adminController.studentList);
 router.get('/messages', adminController.messageList);
 router.post('/messages/:id/read', adminController.messageMarkRead);
 
+router.get('/gallery', adminController.galleryList);
+router.get('/gallery/new', adminController.galleryNewForm);
+router.post('/gallery', upload.single('image'), adminController.galleryCreate);
+router.get('/gallery/:id/edit', adminController.galleryEditForm);
+router.post('/gallery/:id', upload.single('image'), adminController.galleryUpdate);
+router.post('/gallery/:id/delete', adminController.galleryDelete);
+
 module.exports = router;

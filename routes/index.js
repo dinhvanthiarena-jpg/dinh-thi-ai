@@ -3,9 +3,11 @@ const router = express.Router();
 const homeController = require('../controllers/homeController');
 const contactController = require('../controllers/contactController');
 const seoController = require('../controllers/seoController');
+const galleryController = require('../controllers/galleryController');
 
 router.get('/', homeController.index);
 router.get('/gioi-thieu', homeController.about);
+router.get('/hoat-dong', galleryController.list);
 router.get('/lien-he', contactController.showForm);
 router.post('/lien-he', contactController.submit);
 

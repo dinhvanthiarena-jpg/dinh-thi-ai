@@ -1,0 +1,34 @@
+<% const isEdit = photo && photo._id; %>
+<form action="<%= isEdit ? '/admin/gallery/' + photo._id : '/admin/gallery' %>" method="POST" enctype="multipart/form-data" class="space-y-5 max-w-2xl">
+  <div class="card p-6 space-y-5">
+    <div>
+      <label class="label">Tiêu đề *</label>
+      <input class="input" type="text" name="title" value="<%= photo.title || '' %>" required />
+    </div>
+
+    <div>
+      <label class="label">Mô tả</label>
+      <textarea class="input" name="description" rows="3"><%= photo.description || '' %></textarea>
+    </div>
+
+    <div>
+      <label class="label">Ngày diễn ra</label>
+      <input class="input" type="date" name="eventDate" value="<%= photo.eventDate ? new Date(photo.eventDate).toISOString().slice(0,10) : '' %>" />
+    </div>
+
+    <div>
+      <label class="label">Ảnh <%= isEdit ? '' : '*' %></label>
+      <% if (photo.imageUrl) { %>
+        <img src="<%= photo.imageUrl %>" class="w-40 h-24 object-cover rounded-lg mb-2" alt="" />
+      <% } %>
+      <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" class="text-sm" <%= isEdit ? '' : 'required' %> />
+    </div>
+
+    <label class="flex items-center gap-2 text-sm text-ink">
+      <input type="checkbox" name="isPublished" <%= photo.isPublished !== false ? 'checked' : '' %> />
+      Hiển thị công khai
+    </label>
+  </div>
+
+  <button type="submit" class="btn-primary"><%= isEdit ? 'Cập nhật ảnh' : 'Thêm ảnh' %></button>
+</form>

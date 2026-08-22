@@ -10,6 +10,7 @@
         <a href="/courses" class="px-3 py-2 rounded-lg text-sm font-medium <%= currentPath && currentPath.startsWith('/courses') ? 'text-primary-700 bg-primary-50' : 'text-ink hover:text-primary-700 hover:bg-primary-50' %>">Khóa học</a>
         <a href="/blog" class="px-3 py-2 rounded-lg text-sm font-medium <%= currentPath && currentPath.startsWith('/blog') ? 'text-primary-700 bg-primary-50' : 'text-ink hover:text-primary-700 hover:bg-primary-50' %>">Kiến thức AI</a>
         <a href="/gioi-thieu" class="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-primary-700 hover:bg-primary-50">Giới thiệu</a>
+        <a href="/hoat-dong" class="px-3 py-2 rounded-lg text-sm font-medium <%= currentPath === '/hoat-dong' ? 'text-primary-700 bg-primary-50' : 'text-ink hover:text-primary-700 hover:bg-primary-50' %>">Hoạt động</a>
         <a href="/lien-he" class="px-3 py-2 rounded-lg text-sm font-medium text-ink hover:text-primary-700 hover:bg-primary-50">Liên hệ</a>
       </nav>
 
@@ -41,6 +42,7 @@
       <a href="/courses" class="block px-3 py-2 rounded-lg text-sm font-medium text-ink hover:bg-primary-50">Khóa học</a>
       <a href="/blog" class="block px-3 py-2 rounded-lg text-sm font-medium text-ink hover:bg-primary-50">Kiến thức AI</a>
       <a href="/gioi-thieu" class="block px-3 py-2 rounded-lg text-sm font-medium text-ink hover:bg-primary-50">Giới thiệu</a>
+      <a href="/hoat-dong" class="block px-3 py-2 rounded-lg text-sm font-medium text-ink hover:bg-primary-50">Hoạt động</a>
       <a href="/lien-he" class="block px-3 py-2 rounded-lg text-sm font-medium text-ink hover:bg-primary-50">Liên hệ</a>
       <div class="pt-2 border-t border-primary-100 mt-2 flex flex-col gap-2">
         <% if (typeof currentUser !== 'undefined' && currentUser) { %>

@@ -4,6 +4,7 @@ const BlogPost = require('../models/BlogPost');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const ContactMessage = require('../models/ContactMessage');
+const GalleryPhoto = require('../models/GalleryPhoto');
 
 // --- Dashboard ---
 exports.dashboard = async (req, res) => {
@@ -215,4 +216,62 @@ exports.messageList = async (req, res) => {
 exports.messageMarkRead = async (req, res) => {
   await ContactMessage.update({ isRead: true }, { where: { id: req.params.id } });
   res.redirect('/admin/messages');
+};
+
+// --- Gallery ---
+exports.galleryList = async (req, res) => {
+  const photos = await GalleryPhoto.findAll({ order: [['eventDate', 'DESC']] });
+  res.render('admin/gallery', { title: 'Ảnh hoạt động', photos });
+};
+
+exports.galleryNewForm = (req, res) => {
+  res.render('admin/gallery-form', { title: 'Thêm ảnh hoạt động', photo: {} });
+};
+
+exports.galleryEditForm = async (req, res, next) => {
+  const photo = await GalleryPhoto.findByPk(req.params.id);
+  if (!photo) return next();
+  res.render('admin/gallery-form', { title: 'Sửa ảnh hoạt động', photo });
+};
+
+exports.galleryCreate = async (req, res) => {
+  const body = req.body;
+  if (!req.file) {
+    req.flash('error', 'Vui lòng chọn ảnh để tải lên.');
+    return res.redirect('/admin/gallery/new');
+  }
+
+  await GalleryPhoto.create({
+    title: body.title,
+    description: body.description,
+    eventDate: body.eventDate || undefined,
+    isPublished: body.isPublished === 'on',
+    imageUrl: `/uploads/${req.file.filename}`,
+  });
+
+  req.flash('success', 'Đã thêm ảnh hoạt động.');
+  res.redirect('/admin/gallery');
+};
+
+exports.galleryUpdate = async (req, res, next) => {
+  const photo = await GalleryPhoto.findByPk(req.params.id);
+  if (!photo) return next();
+
+  const body = req.body;
+  await photo.update({
+    title: body.title,
+    description: body.description,
+    eventDate: body.eventDate || undefined,
+    isPublished: body.isPublished === 'on',
+    ...(req.file ? { imageUrl: `/uploads/${req.file.filename}` } : {}),
+  });
+
+  req.flash('success', 'Đã cập nhật ảnh hoạt động.');
+  res.redirect('/admin/gallery');
+};
+
+exports.galleryDelete = async (req, res) => {
+  await GalleryPhoto.destroy({ where: { id: req.params.id } });
+  req.flash('success', 'Đã xóa ảnh hoạt động.');
+  res.redirect('/admin/gallery');
 };

@@ -1,0 +1,29 @@
+<section class="bg-gradient-to-br from-primary-50 to-white border-b border-primary-100">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-ink">Hoạt động</h1>
+    <p class="mt-2 text-muted">Hình ảnh các buổi giảng dạy, sự kiện và hoạt động thực tế cùng chuyên gia Đinh Thi Ai</p>
+  </div>
+</section>
+
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+  <% if (photos.length) { %>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% photos.forEach(function(photo) { %>
+        <div class="card overflow-hidden group">
+          <div class="aspect-video bg-primary-50 overflow-hidden">
+            <img src="<%= photo.imageUrl %>" alt="<%= photo.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          </div>
+          <div class="p-5">
+            <h3 class="font-semibold text-ink"><%= photo.title %></h3>
+            <% if (photo.description) { %>
+              <p class="text-sm text-muted mt-2"><%= photo.description %></p>
+            <% } %>
+            <p class="text-xs text-muted mt-4"><%= new Date(photo.eventDate).toLocaleDateString('vi-VN') %></p>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <div class="card p-12 text-center text-muted">Chưa có ảnh hoạt động nào.</div>
+  <% } %>
+</section>

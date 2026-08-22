@@ -23,7 +23,7 @@ exports.sitemap = async (req, res) => {
     BlogPost.findAll({ where: { isPublished: true }, attributes: ['slug', 'updatedAt'] }),
   ]);
 
-  const staticUrls = ['', '/courses', '/blog', '/gioi-thieu', '/lien-he'];
+  const staticUrls = ['', '/courses', '/blog', '/gioi-thieu', '/hoat-dong', '/lien-he'];
 
   const urls = [
     ...staticUrls.map((p) => ({ loc: `${appUrl}${p}`, priority: p === '' ? '1.0' : '0.8' })),
