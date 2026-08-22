@@ -47,7 +47,15 @@ const upload = multer({
 async function compressToDisk(file, { maxWidth, quality }) {
   const filename = `${Date.now()}-${Math.round(Math.random() * 1e9)}.webp`;
   try {
-    await sharp(file.path, { sequentialRead: true, limitInputPixels: 60_000_000 })
+    await sharp(file.path, {
+      sequentialRead: true,
+      limitInputPixels: 60_000_000,
+      // Some export tools (screenshot tools, AI image generators, etc.)
+      // produce PNGs with minor, non-fatal chunk issues that browsers
+      // render fine but libvips' strict libspng decoder rejects outright.
+      // failOn: 'none' tells it to decode as much as it can regardless.
+      failOn: 'none',
+    })
       .rotate() // auto-orient using the photo's EXIF data before stripping it
       .resize({ width: maxWidth, withoutEnlargement: true })
       .webp({ quality, effort: 2 })
