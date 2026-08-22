@@ -52,9 +52,19 @@ exports.showLogin = (req, res) => {
   res.render('auth/login', { title: 'Đăng nhập', errors: [], old: {}, next: req.query.next || '' });
 };
 
+function safeRedirectPath(candidate) {
+  // Only allow same-site, relative paths ("/dashboard") — reject
+  // protocol-relative ("//evil.com") or absolute URLs that `startsWith('/')`
+  // would otherwise let slip through as an open-redirect.
+  if (typeof candidate !== 'string' || !candidate.startsWith('/') || candidate.startsWith('//')) {
+    return '/dashboard';
+  }
+  return candidate;
+}
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-  const nextUrl = req.body.next || '/dashboard';
+  const nextUrl = safeRedirectPath(req.body.next);
 
   const user = await User.findOne({ where: { email: (email || '').toLowerCase() } });
   const valid = user && (await user.comparePassword(password));
@@ -71,7 +81,7 @@ exports.login = async (req, res) => {
   const token = signToken(user);
   setAuthCookie(res, token);
   req.flash('success', `Chào mừng trở lại, ${user.name}!`);
-  res.redirect(nextUrl.startsWith('/') ? nextUrl : '/dashboard');
+  res.redirect(nextUrl);
 };
 
 exports.logout = (req, res) => {
