@@ -1,33 +1,28 @@
 <!-- Hero -->
 <section class="relative overflow-hidden bg-gradient-to-br from-primary-50 via-white to-accent-50">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24 grid <%= latestPhotos.length ? 'lg:grid-cols-2' : '' %> gap-12 items-center">
-    <div class="<%= latestPhotos.length ? '' : 'max-w-3xl mx-auto text-center' %>">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+    <div class="max-w-3xl mx-auto text-center">
       <span class="badge bg-primary-100 text-primary-700 mb-4">Đào tạo AI ứng dụng #1 dành cho người đi làm</span>
       <h1 class="text-4xl sm:text-5xl font-extrabold text-ink leading-tight">
         Làm chủ <span class="text-primary-600">công nghệ AI</span> cùng chuyên gia Đinh Thi Ai
       </h1>
-      <p class="mt-5 text-lg text-muted <%= latestPhotos.length ? 'max-w-xl' : 'max-w-2xl mx-auto' %>">
+      <p class="mt-5 text-lg text-muted max-w-2xl mx-auto">
         Khóa học thực chiến giúp bạn ứng dụng AI vào công việc: từ Prompt Engineering, Generative AI đến triển khai AI cho doanh nghiệp — không cần nền tảng lập trình.
       </p>
-      <div class="mt-8 flex flex-wrap gap-4 <%= latestPhotos.length ? '' : 'justify-center' %>">
+      <div class="mt-8 flex flex-wrap gap-4 justify-center">
         <a href="/courses" class="btn-primary text-base px-6 py-3">Khám phá khóa học</a>
         <a href="/gioi-thieu" class="btn-outline text-base px-6 py-3">Về chuyên gia đào tạo</a>
       </div>
-      <div class="mt-10 flex items-center gap-8 text-sm text-muted <%= latestPhotos.length ? '' : 'justify-center' %>">
+      <div class="mt-10 flex items-center gap-8 text-sm text-muted justify-center">
         <div><span class="block text-2xl font-bold text-ink">5,000+</span>học viên</div>
         <div><span class="block text-2xl font-bold text-ink">30+</span>khóa học</div>
         <div><span class="block text-2xl font-bold text-ink">4.8/5</span>đánh giá</div>
       </div>
     </div>
-    <% if (latestPhotos.length) { %>
-      <div class="grid grid-cols-2 gap-4">
-        <% latestPhotos.slice(0, 4).forEach(function(photo, i) { %>
-          <div class="rounded-2xl overflow-hidden shadow-card <%= i % 3 === 0 ? 'row-span-2' : '' %>">
-            <img src="<%= photo.imageUrl %>" alt="<%= photo.title %>" class="w-full h-full object-cover" loading="lazy" />
-          </div>
-        <% }); %>
-      </div>
-    <% } %>
+
+    <div class="mt-12 rounded-3xl overflow-hidden shadow-card">
+      <img src="/images/hero-banner.svg" alt="Đinh Thi Ai - Đào tạo công nghệ AI ứng dụng" class="w-full h-auto aspect-[10/3] sm:aspect-[16/5] object-cover" />
+    </div>
   </div>
 </section>
 

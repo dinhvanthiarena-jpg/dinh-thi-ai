@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 480">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6D28D9"/>
+      <stop offset="55%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#0891B2"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#A78BFA"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#67E8F9" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#67E8F9" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#ffffff" stroke-opacity="0.06"/>
+    </pattern>
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.6" fill="#ffffff" opacity="0.18"/>
+    </pattern>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#1E1B4B" flood-opacity="0.25"/>
+    </filter>
+    <clipPath id="frame">
+      <rect width="1600" height="480" rx="32"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="1600" height="480" fill="url(#bgGrad)"/>
+    <rect width="1600" height="480" fill="url(#grid)"/>
+    <rect width="1600" height="480" fill="url(#dots)"/>
+
+    <circle cx="1420" cy="70" r="220" fill="url(#glow1)"/>
+    <circle cx="150" cy="430" r="240" fill="url(#glow2)"/>
+    <circle cx="800" cy="40" r="140" fill="url(#glow1)"/>
+
+    <!-- orbit rings -->
+    <circle cx="1250" cy="240" r="190" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="1.5" stroke-dasharray="2 10"/>
+    <circle cx="1250" cy="240" r="140" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="1.5" stroke-dasharray="2 10"/>
+
+    <!-- sparkles -->
+    <path d="M120 110l7 18 18 7-18 7-7 18-7-18-18-7 18-7z" fill="#FDE68A"/>
+    <path d="M1500 340l6 15 15 6-15 6-6 15-6-15-15-6 15-6z" fill="#67E8F9"/>
+    <path d="M700 380l5 12 12 5-12 5-5 12-5-12-12-5 12-5z" fill="#ffffff" opacity="0.85"/>
+
+    <!-- headline glyph: graduation cap -->
+    <g transform="translate(150,150)" filter="url(#soft)">
+      <path d="M0 40 L140 0 L280 40 L140 80 Z" fill="#ffffff"/>
+      <path d="M50 58 L50 105 C50 122 90 134 140 134 C190 134 230 122 230 105 L230 58" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+      <line x1="256" y1="48" x2="256" y2="112" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="256" cy="126" r="9" fill="#FDE68A"/>
+    </g>
+
+    <!-- central AI chip / network card -->
+    <g transform="translate(560,90)" filter="url(#soft)">
+      <rect x="0" y="0" width="330" height="300" rx="26" fill="#ffffff" opacity="0.98"/>
+      <rect x="0" y="0" width="330" height="46" rx="26" fill="#F5F3FF"/>
+      <rect x="0" y="24" width="330" height="22" fill="#F5F3FF"/>
+      <circle cx="26" cy="23" r="6" fill="#FCA5A5"/>
+      <circle cx="48" cy="23" r="6" fill="#FCD34D"/>
+      <circle cx="70" cy="23" r="6" fill="#86EFAC"/>
+
+      <circle cx="60" cy="100" r="22" fill="url(#cardGrad)"/>
+      <path d="M48 100c2-8 7-11 12-11s10 3 12 11" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="60" cy="90" r="5" fill="#ffffff"/>
+      <text x="96" y="96" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#1E1B4B">Trợ lý AI</text>
+      <circle cx="98" cy="112" r="4.5" fill="#34D399"/>
+      <text x="110" y="116" font-family="Arial, sans-serif" font-size="12.5" fill="#16A34A">Đang hoạt động</text>
+
+      <rect x="30" y="140" width="270" height="46" rx="16" fill="#F5F3FF"/>
+      <text x="46" y="163" font-family="Arial, sans-serif" font-size="13.5" fill="#4C1D95">Xây dựng lộ trình AI cho</text>
+      <text x="46" y="180" font-family="Arial, sans-serif" font-size="13.5" fill="#4C1D95">doanh nghiệp của bạn</text>
+
+      <rect x="70" y="196" width="230" height="40" rx="16" fill="url(#cardGrad)"/>
+      <text x="88" y="220" font-family="Arial, sans-serif" font-size="13.5" fill="#ffffff">Bắt đầu học ngay hôm nay</text>
+
+      <rect x="30" y="250" width="120" height="34" rx="17" fill="#ECFEFF"/>
+      <text x="46" y="271" font-family="Arial, sans-serif" font-size="12.5" fill="#0E7490">30+ khóa học</text>
+      <rect x="164" y="250" width="136" height="34" rx="17" fill="#ECFEFF"/>
+      <text x="180" y="271" font-family="Arial, sans-serif" font-size="12.5" fill="#0E7490">5,000+ học viên</text>
+    </g>
+
+    <!-- network nodes right side -->
+    <g stroke="#ffffff" stroke-opacity="0.35" stroke-width="1.5">
+      <line x1="980" y1="130" x2="1120" y2="90"/>
+      <line x1="980" y1="130" x2="1100" y2="200"/>
+      <line x1="1100" y1="200" x2="1230" y2="150"/>
+      <line x1="1100" y1="200" x2="1180" y2="300"/>
+      <line x1="1230" y1="150" x2="1340" y2="210"/>
+      <line x1="1180" y1="300" x2="1310" y2="330"/>
+    </g>
+    <g>
+      <circle cx="980" cy="130" r="9" fill="#ffffff"/>
+      <circle cx="1120" cy="90" r="7" fill="#FDE68A"/>
+      <circle cx="1100" cy="200" r="11" fill="#67E8F9"/>
+      <circle cx="1230" cy="150" r="8" fill="#ffffff"/>
+      <circle cx="1340" cy="210" r="9" fill="#FDE68A"/>
+      <circle cx="1180" cy="300" r="8" fill="#ffffff"/>
+      <circle cx="1310" cy="330" r="10" fill="#67E8F9"/>
+    </g>
+
+    <!-- floating badge -->
+    <g transform="rotate(5 1400 360)" filter="url(#soft)">
+      <rect x="1330" y="325" width="150" height="80" rx="20" fill="#ffffff"/>
+      <circle cx="1364" cy="365" r="21" fill="url(#cardGrad)"/>
+      <path d="M1354 365l7 7 14-14" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="1394" y="361" font-family="Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1E1B4B">Chứng chỉ</text>
+      <text x="1394" y="378" font-family="Arial, sans-serif" font-size="11.5" fill="#0891B2">hoàn thành</text>
+    </g>
+  </g>
+</svg>
