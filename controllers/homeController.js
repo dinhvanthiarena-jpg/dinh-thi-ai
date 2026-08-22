@@ -48,7 +48,7 @@ exports.about = (req, res) => {
       image: `${appUrl}/images/about-illustration.svg`,
       worksFor: { '@type': 'EducationalOrganization', name: 'Đinh Thi Ai', url: appUrl },
       knowsAbout: ['Trí tuệ nhân tạo', 'Prompt Engineering', 'Generative AI', 'AI cho doanh nghiệp'],
-      sameAs: [],
+      sameAs: ['https://www.facebook.com/3dvietpro', 'https://www.youtube.com/@dinhvanthi'],
     },
   });
 };
