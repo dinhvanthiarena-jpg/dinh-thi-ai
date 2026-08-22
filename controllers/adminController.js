@@ -236,20 +236,23 @@ exports.galleryEditForm = async (req, res, next) => {
 
 exports.galleryCreate = async (req, res) => {
   const body = req.body;
-  if (!req.file) {
-    req.flash('error', 'Vui lòng chọn ảnh để tải lên.');
+  const files = req.files || [];
+  if (!files.length) {
+    req.flash('error', 'Vui lòng chọn ít nhất một ảnh để tải lên.');
     return res.redirect('/admin/gallery/new');
   }
 
-  await GalleryPhoto.create({
-    title: body.title,
-    description: body.description,
-    eventDate: body.eventDate || undefined,
-    isPublished: body.isPublished === 'on',
-    imageUrl: `/uploads/${req.file.filename}`,
-  });
+  await GalleryPhoto.bulkCreate(
+    files.map((file, i) => ({
+      title: files.length > 1 ? `${body.title} (${i + 1})` : body.title,
+      description: body.description,
+      eventDate: body.eventDate || undefined,
+      isPublished: body.isPublished === 'on',
+      imageUrl: `/uploads/${file.filename}`,
+    }))
+  );
 
-  req.flash('success', 'Đã thêm ảnh hoạt động.');
+  req.flash('success', files.length > 1 ? `Đã thêm ${files.length} ảnh hoạt động.` : 'Đã thêm ảnh hoạt động.');
   res.redirect('/admin/gallery');
 };
 

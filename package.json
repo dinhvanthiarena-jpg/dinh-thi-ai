@@ -32,6 +32,7 @@
     "sequelize": "^6.37.3",
     "morgan": "^1.10.0",
     "multer": "^2.0.0",
+    "sharp": "^0.33.5",
     "slugify": "^1.6.6"
   },
   "devDependencies": {
