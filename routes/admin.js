@@ -35,6 +35,9 @@ router.get('/students', adminController.studentList);
 router.get('/messages', adminController.messageList);
 router.post('/messages/:id/read', adminController.messageMarkRead);
 
+router.get('/chats', adminController.chatList);
+router.get('/chats/:channel/:sessionId', adminController.chatDetail);
+
 router.get('/gallery', adminController.galleryList);
 router.get('/gallery/new', adminController.galleryNewForm);
 router.post('/gallery', upload.array('images', 20), upload.processImage({ maxWidth: 1920 }), adminController.galleryCreate);

@@ -32,6 +32,8 @@ const checkoutRoutes = require('./routes/checkout');
 const dashboardRoutes = require('./routes/dashboard');
 const blogRoutes = require('./routes/blog');
 const adminRoutes = require('./routes/admin');
+const chatRoutes = require('./routes/chat');
+const webhookRoutes = require('./routes/webhook');
 
 const app = express();
 
@@ -61,7 +63,17 @@ app.use(
 );
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.urlencoded({ extended: true, limit: '200kb' }));
-app.use(express.json({ limit: '200kb' }));
+app.use(
+  express.json({
+    limit: '200kb',
+    // Keep the raw bytes around so the Messenger webhook can verify Facebook's
+    // X-Hub-Signature-256 HMAC, which must be computed over the exact body
+    // bytes, not a re-serialized JSON.stringify(req.body).
+    verify: (req, res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
 app.use(cookieParser());
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -113,6 +125,8 @@ app.use('/checkout', checkoutRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/blog', blogRoutes);
 app.use('/admin', adminRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/webhook', webhookRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -1,0 +1,47 @@
+<div id="chatbot-root" class="fixed bottom-5 right-24 z-50">
+  <button
+    id="chatbot-toggle"
+    type="button"
+    aria-label="Mở trợ lý AI tư vấn"
+    title="Trợ lý AI tư vấn"
+    class="flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-transform hover:scale-110"
+    style="background: linear-gradient(135deg,#8B5CF6,#0891B2)"
+  >
+    <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M12 3C7.03 3 3 6.58 3 11c0 2.39 1.19 4.53 3.06 6.01-.1.98-.42 2.2-1.25 3.3-.15.2.01.49.26.45 1.7-.28 3.02-.98 3.9-1.58.94.27 1.96.42 3.03.42 4.97 0 9-3.58 9-8s-4.03-8-9-8Z" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="8.5" cy="11" r="1" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="11" r="1" fill="currentColor" stroke="none"/>
+      <circle cx="15.5" cy="11" r="1" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+
+  <div
+    id="chatbot-panel"
+    class="hidden flex-col absolute bottom-16 right-0 w-[92vw] max-w-sm h-[70vh] max-h-[560px] rounded-2xl bg-white shadow-2xl border border-primary-100 overflow-hidden"
+  >
+    <div class="flex items-center gap-3 px-4 py-3 text-white" style="background: linear-gradient(135deg,#8B5CF6,#0891B2)">
+      <span class="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 font-bold text-sm">AI</span>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm leading-tight">Trợ lý Đinh Thi Ai</p>
+        <p class="text-xs text-white/80 leading-tight">Thường trả lời ngay</p>
+      </div>
+      <button id="chatbot-close" type="button" aria-label="Đóng" class="h-8 w-8 flex items-center justify-center rounded-full hover:bg-white/20 cursor-pointer">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div id="chatbot-messages" class="flex-1 overflow-y-auto px-4 py-3 space-y-3 text-sm bg-surface"></div>
+
+    <form id="chatbot-form" class="flex items-center gap-2 border-t border-primary-100 p-3">
+      <input
+        id="chatbot-input"
+        type="text"
+        maxlength="2000"
+        autocomplete="off"
+        placeholder="Nhập câu hỏi về khóa học..."
+        class="flex-1 input"
+      />
+      <button type="submit" class="btn-primary px-4 py-2 text-sm">Gửi</button>
+    </form>
+  </div>
+</div>

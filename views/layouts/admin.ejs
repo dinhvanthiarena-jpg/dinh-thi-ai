@@ -22,6 +22,7 @@
         <a href="/admin/orders" class="flex items-center gap-3 px-3 py-2.5 rounded-lg <%= currentPath === '/admin/orders' ? 'bg-white/10 text-white' : 'text-indigo-200 hover:bg-white/5' %>">Đơn hàng</a>
         <a href="/admin/students" class="flex items-center gap-3 px-3 py-2.5 rounded-lg <%= currentPath === '/admin/students' ? 'bg-white/10 text-white' : 'text-indigo-200 hover:bg-white/5' %>">Học viên</a>
         <a href="/admin/messages" class="flex items-center gap-3 px-3 py-2.5 rounded-lg <%= currentPath === '/admin/messages' ? 'bg-white/10 text-white' : 'text-indigo-200 hover:bg-white/5' %>">Tin nhắn</a>
+        <a href="/admin/chats" class="flex items-center gap-3 px-3 py-2.5 rounded-lg <%= currentPath && currentPath.startsWith('/admin/chats') ? 'bg-white/10 text-white' : 'text-indigo-200 hover:bg-white/5' %>">Chat AI</a>
       </nav>
       <div class="p-4 border-t border-white/10 space-y-2">
         <a href="/" class="block text-sm text-indigo-200 hover:text-white">&larr; Về trang chủ</a>

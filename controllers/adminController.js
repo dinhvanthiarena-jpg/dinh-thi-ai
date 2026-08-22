@@ -5,6 +5,7 @@ const Order = require('../models/Order');
 const User = require('../models/User');
 const ContactMessage = require('../models/ContactMessage');
 const GalleryPhoto = require('../models/GalleryPhoto');
+const ChatMessage = require('../models/ChatMessage');
 
 // --- Dashboard ---
 exports.dashboard = async (req, res) => {
@@ -216,6 +217,42 @@ exports.messageList = async (req, res) => {
 exports.messageMarkRead = async (req, res) => {
   await ContactMessage.update({ isRead: true }, { where: { id: req.params.id } });
   res.redirect('/admin/messages');
+};
+
+// --- Chatbot conversations ---
+exports.chatList = async (req, res) => {
+  const rows = await ChatMessage.findAll({ order: [['createdAt', 'DESC']], limit: 500 });
+
+  const conversations = new Map();
+  for (const m of rows) {
+    const key = `${m.channel}:${m.sessionId}`;
+    if (!conversations.has(key)) {
+      conversations.set(key, {
+        channel: m.channel,
+        sessionId: m.sessionId,
+        customerName: m.customerName,
+        lastMessage: m.content,
+        lastAt: m.createdAt,
+        handedOff: false,
+        count: 0,
+      });
+    }
+    const convo = conversations.get(key);
+    convo.count += 1;
+    if (m.handedOff) convo.handedOff = true;
+    if (!convo.customerName && m.customerName) convo.customerName = m.customerName;
+  }
+
+  res.render('admin/chats', { title: 'Chat AI khách hàng', conversations: Array.from(conversations.values()) });
+};
+
+exports.chatDetail = async (req, res) => {
+  const { channel, sessionId } = req.params;
+  const messages = await ChatMessage.findAll({
+    where: { channel, sessionId },
+    order: [['createdAt', 'ASC']],
+  });
+  res.render('admin/chat-detail', { title: 'Chi tiết hội thoại', channel, sessionId, messages });
 };
 
 // --- Gallery ---

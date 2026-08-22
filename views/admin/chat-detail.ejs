@@ -1,0 +1,15 @@
+<a href="/admin/chats" class="text-sm text-primary-600 hover:underline">&larr; Danh sách hội thoại</a>
+
+<div class="card p-5 mt-4 space-y-3">
+  <% messages.forEach(function(m) { %>
+    <div class="flex <%= m.role === 'user' ? 'justify-start' : 'justify-end' %>">
+      <div class="max-w-[75%] rounded-2xl px-4 py-2 text-sm <%= m.role === 'user' ? 'bg-surface border border-primary-100 text-ink' : 'bg-primary-600 text-white' %> <%= m.handedOff ? 'ring-2 ring-amber-400' : '' %>">
+        <p class="whitespace-pre-line"><%= m.content %></p>
+        <p class="text-[11px] mt-1 opacity-70"><%= new Date(m.createdAt).toLocaleString('vi-VN') %></p>
+      </div>
+    </div>
+  <% }); %>
+  <% if (!messages.length) { %>
+    <p class="text-muted text-center">Không có tin nhắn.</p>
+  <% } %>
+</div>
