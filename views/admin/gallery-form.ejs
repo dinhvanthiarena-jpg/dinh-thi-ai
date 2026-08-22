@@ -20,11 +20,11 @@
       <% if (isEdit) { %>
         <label class="label">Ảnh</label>
         <img src="<%= photo.imageUrl %>" class="w-40 h-24 object-cover rounded-lg mb-2" alt="" />
-        <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" class="text-sm" />
+        <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" class="text-sm" data-compress />
       <% } else { %>
         <label class="label">Ảnh * (chọn được nhiều ảnh cùng lúc)</label>
-        <input type="file" name="images" accept=".jpg,.jpeg,.png,.webp" class="text-sm" multiple required />
-        <p class="text-xs text-muted mt-1">Nếu chọn nhiều ảnh, tiêu đề bên trên sẽ tự đánh số (1), (2)... cho từng ảnh — thầy có thể sửa lại tên riêng từng ảnh sau.</p>
+        <input type="file" name="images" accept=".jpg,.jpeg,.png,.webp" class="text-sm" multiple required data-compress />
+        <p class="text-xs text-muted mt-1">Nếu chọn nhiều ảnh, tiêu đề bên trên sẽ tự đánh số (1), (2)... cho từng ảnh — thầy có thể sửa lại tên riêng từng ảnh sau. Ảnh lớn sẽ tự động được giảm dung lượng trước khi tải lên.</p>
       <% } %>
     </div>
 
@@ -36,3 +36,5 @@
 
   <button type="submit" class="btn-primary"><%= isEdit ? 'Cập nhật ảnh' : 'Thêm ảnh' %></button>
 </form>
+
+<script src="/js/image-compress.js"></script>

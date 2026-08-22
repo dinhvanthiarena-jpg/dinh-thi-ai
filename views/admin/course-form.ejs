@@ -62,7 +62,7 @@
       <% if (course.thumbnailUrl) { %>
         <img src="<%= course.thumbnailUrl %>" class="w-40 h-24 object-cover rounded-lg mb-2" alt="" />
       <% } %>
-      <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp" class="text-sm" />
+      <input type="file" name="thumbnail" accept=".jpg,.jpeg,.png,.webp" class="text-sm" data-compress />
     </div>
 
     <div>
@@ -89,6 +89,8 @@
 
   <button type="submit" class="btn-primary"><%= isEdit ? 'Cập nhật khóa học' : 'Tạo khóa học' %></button>
 </form>
+
+<script src="/js/image-compress.js"></script>
 
 <% if (isEdit) { %>
   <div class="card p-6 mt-8 max-w-4xl">
