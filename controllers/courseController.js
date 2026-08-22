@@ -5,6 +5,15 @@ const Review = require('../models/Review');
 const Enrollment = require('../models/Enrollment');
 const User = require('../models/User');
 
+const AI_CATEGORIES = [
+  'AI cơ bản',
+  'Machine Learning',
+  'Deep Learning',
+  'Generative AI',
+  'AI cho doanh nghiệp',
+  'Prompt Engineering',
+];
+
 exports.list = async (req, res) => {
   const { category, level, q, sort } = req.query;
   const where = { isPublished: true };
@@ -25,10 +34,15 @@ exports.list = async (req, res) => {
   });
   const categories = categoryRows.map((c) => c.category);
 
+  const aiCourses = courses.filter((c) => AI_CATEGORIES.includes(c.category));
+  const creativeCourses = courses.filter((c) => !AI_CATEGORIES.includes(c.category));
+
   res.render('courses/index', {
-    title: 'Khóa học AI',
-    description: 'Danh sách khóa học AI ứng dụng: Prompt Engineering, Generative AI, AI cho doanh nghiệp — cùng chuyên gia Đinh Thi Ai.',
+    title: 'Khóa học',
+    description: 'Danh sách khóa học AI ứng dụng và khóa học đồ họa, làm phim hoạt hình — cùng chuyên gia Đinh Thi Ai.',
     courses,
+    aiCourses,
+    creativeCourses,
     categories,
     query: req.query,
   });

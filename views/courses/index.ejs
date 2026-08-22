@@ -1,6 +1,6 @@
 <section class="bg-gradient-to-br from-primary-50 to-white border-b border-primary-100">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-    <h1 class="text-3xl sm:text-4xl font-extrabold text-ink">Khóa học AI</h1>
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-ink">Khóa học</h1>
     <p class="mt-2 text-muted">Chọn lộ trình phù hợp với mục tiêu của bạn</p>
 
     <form action="/courses" method="GET" class="mt-6 flex flex-col sm:flex-row gap-3">
@@ -22,14 +22,40 @@
   </div>
 </section>
 
-<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-  <% if (courses.length) { %>
+<% if (!courses.length) { %>
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+    <div class="card p-12 text-center text-muted">Không tìm thấy khóa học phù hợp.</div>
+  </section>
+<% } else if (query.category) { %>
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <% courses.forEach(function(course) { %>
         <%- include('../partials/course-card', { course }) %>
       <% }); %>
     </div>
-  <% } else { %>
-    <div class="card p-12 text-center text-muted">Không tìm thấy khóa học phù hợp.</div>
+  </section>
+<% } else { %>
+  <% if (aiCourses.length) { %>
+    <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12">
+      <h2 class="text-2xl sm:text-3xl font-bold text-ink mb-1">Khóa học AI</h2>
+      <p class="text-muted mb-6">Ứng dụng AI vào công việc: Prompt Engineering, Generative AI, AI cho doanh nghiệp</p>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% aiCourses.forEach(function(course) { %>
+          <%- include('../partials/course-card', { course }) %>
+        <% }); %>
+      </div>
+    </section>
   <% } %>
-</section>
+
+  <% if (creativeCourses.length) { %>
+    <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+      <h2 class="text-2xl sm:text-3xl font-bold text-ink mb-1">Khóa học Đồ họa & Làm phim hoạt hình</h2>
+      <p class="text-muted mb-6">Photoshop, dựng hình 3D và làm phim hoạt hình chuyên nghiệp</p>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% creativeCourses.forEach(function(course) { %>
+          <%- include('../partials/course-card', { course }) %>
+        <% }); %>
+      </div>
+    </section>
+  <% } %>
+<% } %>

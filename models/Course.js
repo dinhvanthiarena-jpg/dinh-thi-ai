@@ -18,7 +18,10 @@ const Course = sequelize.define(
         'Deep Learning',
         'Generative AI',
         'AI cho doanh nghiệp',
-        'Prompt Engineering'
+        'Prompt Engineering',
+        'Đồ họa & Dựng hình',
+        'Làm phim hoạt hình',
+        'Sáng tạo nội dung & Kênh video'
       ),
       allowNull: false,
     },
