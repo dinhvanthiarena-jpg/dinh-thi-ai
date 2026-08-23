@@ -6,6 +6,8 @@ exports.verify = (req, res) => {
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
+  console.error('[webhook debug] mode=%s token=%s envToken=%s match=%s', mode, token, process.env.FB_VERIFY_TOKEN, token === process.env.FB_VERIFY_TOKEN);
+
   if (mode === 'subscribe' && token && token === process.env.FB_VERIFY_TOKEN) {
     return res.status(200).send(challenge);
   }
