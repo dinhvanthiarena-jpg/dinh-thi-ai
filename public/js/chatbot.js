@@ -28,6 +28,24 @@
     }
   }
 
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // Renders the limited markdown Claude is prompted to use (links, bold,
+  // line breaks) as real HTML. Input is HTML-escaped first so nothing the
+  // model outputs can inject markup outside these specific patterns.
+  function renderRichText(text) {
+    var escaped = escapeHtml(text);
+    var withLinks = escaped.replace(/\[([^\]]+)\]\((\/[^\s)]*|https?:\/\/[^\s)]+)\)/g, function (match, label, url) {
+      return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="text-primary-600 underline hover:text-primary-700">' + label + '</a>';
+    });
+    var withBold = withLinks.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    return withBold.replace(/\n/g, '<br>');
+  }
+
   function appendMessage(role, text) {
     var wrap = document.createElement('div');
     wrap.className = role === 'user' ? 'flex justify-end' : 'flex justify-start';
@@ -35,9 +53,13 @@
     var bubble = document.createElement('div');
     bubble.className =
       role === 'user'
-        ? 'max-w-[80%] rounded-2xl rounded-br-sm bg-primary-600 text-white px-3 py-2'
-        : 'max-w-[80%] rounded-2xl rounded-bl-sm bg-white border border-primary-100 text-ink px-3 py-2';
-    bubble.textContent = text;
+        ? 'max-w-[80%] rounded-2xl rounded-br-sm bg-primary-600 text-white px-3 py-2 whitespace-pre-line'
+        : 'max-w-[80%] rounded-2xl rounded-bl-sm bg-white border border-primary-100 text-ink px-3 py-2 leading-relaxed';
+    if (role === 'user') {
+      bubble.textContent = text;
+    } else {
+      bubble.innerHTML = renderRichText(text);
+    }
 
     wrap.appendChild(bubble);
     messagesEl.appendChild(wrap);
@@ -49,7 +71,9 @@
     wrap.id = 'chatbot-typing';
     wrap.className = 'flex justify-start';
     wrap.innerHTML =
-      '<div class="rounded-2xl rounded-bl-sm bg-white border border-primary-100 text-muted px-3 py-2 text-xs">Đang trả lời...</div>';
+      '<div class="rounded-2xl rounded-bl-sm bg-white border border-primary-100 px-4 py-3 flex items-center gap-1">' +
+      '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>' +
+      '</div>';
     messagesEl.appendChild(wrap);
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
@@ -99,6 +123,14 @@
     input.value = '';
     input.disabled = true;
     appendTyping();
+    var typingStartedAt = Date.now();
+    var MIN_TYPING_MS = 900;
+
+    function showAfterMinDelay(fn) {
+      var elapsed = Date.now() - typingStartedAt;
+      var wait = Math.max(0, MIN_TYPING_MS - elapsed);
+      setTimeout(fn, wait);
+    }
 
     fetch('/api/chat/message', {
       method: 'POST',
@@ -109,19 +141,23 @@
         return res.json();
       })
       .then(function (data) {
-        removeTyping();
-        var reply = data.reply || 'Xin lỗi anh/chị, em chưa nhận được phản hồi. Vui lòng thử lại.';
-        appendMessage('assistant', reply);
-        history.push({ role: 'assistant', text: reply });
-        saveHistory(history);
+        var reply = data.reply || 'Xin lỗi bạn, em chưa nhận được phản hồi. Vui lòng thử lại.';
+        showAfterMinDelay(function () {
+          removeTyping();
+          appendMessage('assistant', reply);
+          history.push({ role: 'assistant', text: reply });
+          saveHistory(history);
+          input.disabled = false;
+          input.focus();
+        });
       })
       .catch(function () {
-        removeTyping();
-        appendMessage('assistant', 'Có lỗi kết nối, anh/chị vui lòng thử lại sau ít phút.');
-      })
-      .finally(function () {
-        input.disabled = false;
-        input.focus();
+        showAfterMinDelay(function () {
+          removeTyping();
+          appendMessage('assistant', 'Có lỗi kết nối, bạn vui lòng thử lại sau ít phút.');
+          input.disabled = false;
+          input.focus();
+        });
       });
   });
 })();
