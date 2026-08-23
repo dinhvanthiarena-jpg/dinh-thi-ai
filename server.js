@@ -126,7 +126,11 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/blog', blogRoutes);
 app.use('/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/webhook', webhookRoutes);
+// Mounted as /fb-events rather than /webhook: hosting's security layer
+// blocks GET requests to any "/webhook*" path (a common signature used by
+// scanners to probe for SSRF), which also silently ate Facebook's own
+// GET-based webhook verification handshake.
+app.use('/fb-events', webhookRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
