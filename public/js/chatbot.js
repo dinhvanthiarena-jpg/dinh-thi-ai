@@ -124,11 +124,19 @@
     input.disabled = true;
     appendTyping();
     var typingStartedAt = Date.now();
-    var MIN_TYPING_MS = 900;
+    var BASE_TYPING_MS = 1600;
+    var MS_PER_CHAR = 28;
+    var MAX_TYPING_MS = 4500;
 
-    function showAfterMinDelay(fn) {
+    // Scales the simulated "typing" delay with reply length so short and
+    // long answers don't both appear after the same fixed pause.
+    function showAfterMinDelay(fn, replyText) {
+      var target = Math.min(
+        BASE_TYPING_MS + (replyText ? replyText.length * MS_PER_CHAR : 0),
+        MAX_TYPING_MS
+      );
       var elapsed = Date.now() - typingStartedAt;
-      var wait = Math.max(0, MIN_TYPING_MS - elapsed);
+      var wait = Math.max(0, target - elapsed);
       setTimeout(fn, wait);
     }
 
@@ -149,7 +157,7 @@
           saveHistory(history);
           input.disabled = false;
           input.focus();
-        });
+        }, reply);
       })
       .catch(function () {
         showAfterMinDelay(function () {
