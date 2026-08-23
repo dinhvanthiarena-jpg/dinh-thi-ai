@@ -7,6 +7,26 @@ const ContactMessage = require('../models/ContactMessage');
 const GalleryPhoto = require('../models/GalleryPhoto');
 const ChatMessage = require('../models/ChatMessage');
 
+// Admin pastes whatever YouTube link they copied (watch?v=, youtu.be/, shorts/,
+// or already an /embed/ link) — normalize all of them to the /embed/ form the
+// <iframe> on the lesson page needs. Anything that isn't a recognizable
+// YouTube link (e.g. a Vimeo URL) is left untouched.
+function normalizeVideoUrl(url) {
+  if (!url) return url;
+  const trimmed = url.trim();
+  const patterns = [
+    /youtube\.com\/watch\?v=([\w-]{11})/,
+    /youtu\.be\/([\w-]{11})/,
+    /youtube\.com\/shorts\/([\w-]{11})/,
+    /youtube\.com\/embed\/([\w-]{11})/,
+  ];
+  for (const re of patterns) {
+    const match = trimmed.match(re);
+    if (match) return `https://www.youtube.com/embed/${match[1]}`;
+  }
+  return trimmed;
+}
+
 // --- Dashboard ---
 exports.dashboard = async (req, res) => {
   const [courseCount, studentCount, postCount, paidOrders] = await Promise.all([
@@ -117,7 +137,7 @@ exports.lessonCreate = async (req, res, next) => {
     CourseId: course.id,
     title: req.body.title,
     order: count + 1,
-    videoUrl: req.body.videoUrl,
+    videoUrl: normalizeVideoUrl(req.body.videoUrl),
     contentText: req.body.contentText,
     durationMinutes: Number(req.body.durationMinutes) || 0,
     isPreview: req.body.isPreview === 'on',
