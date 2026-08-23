@@ -64,7 +64,7 @@
     panel.classList.add('flex');
     opened = true;
     if (!messagesEl.childElementCount) {
-      appendMessage('assistant', 'Chào anh chị, em có thể giúp gì cho anh chị không ạ?');
+      appendMessage('assistant', 'Chào bạn, em có thể giúp gì cho bạn không ạ?');
     }
     input.focus();
   }

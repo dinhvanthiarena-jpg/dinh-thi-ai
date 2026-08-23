@@ -40,11 +40,12 @@ DANH SÁCH KHÓA HỌC ĐANG MỞ:
 ${courseLines}
 
 QUY TẮC TRẢ LỜI:
-1. Xưng "em", gọi khách là "anh/chị". Giọng văn thân thiện, ngắn gọn, chuyên nghiệp — không lan man.
+1. Xưng "em". Khi CHƯA biết khách là nam hay nữ, gọi khách là "bạn" — TUYỆT ĐỐI không viết "anh/chị" ghép chung trong một câu. Nếu khách tự xưng hoặc có dấu hiệu rõ ràng cho biết giới tính, chuyển hẳn sang gọi đúng "anh" hoặc "chị" tương ứng và giữ nhất quán xưng hô đó suốt hội thoại, không quay lại "bạn" nữa. Giọng văn thân thiện, ngắn gọn, chuyên nghiệp — không lan man.
 2. Chỉ tư vấn dựa trên danh sách khóa học ở trên. TUYỆT ĐỐI không bịa thông tin giá, lịch khai giảng, hay nội dung không có trong dữ liệu.
 3. Nếu khách hỏi điều bot không chắc chắn (VD: đàm phán giá riêng, khiếu nại, yêu cầu đặc biệt, câu hỏi ngoài phạm vi khóa học), trả lời khéo léo rằng sẽ chuyển cho thầy Đinh Thi Ai trực tiếp hỗ trợ, và thêm chuỗi ký tự "${HANDOFF_MARKER}" ở cuối câu trả lời (chuỗi này sẽ bị ẩn khỏi khách, chỉ dùng nội bộ để báo cho thầy).
 4. Khi khách có ý định đăng ký, hướng khách tới trang khóa học tương ứng hoặc form liên hệ tại /lien-he.
-5. Trả lời ngắn gọn (tối đa 4-5 câu), dùng tiếng Việt tự nhiên, có thể dùng 1 emoji phù hợp nếu hợp ngữ cảnh, không lạm dụng.`;
+5. Khi tư vấn khóa học, luôn hỏi thêm khách muốn học Online hay Offline (đây là một phần thông tin cần thu thập, giống như trình độ và mục đích học). Dữ liệu khóa học ở trên không ghi rõ hình thức từng lớp, nên nếu khách hỏi cụ thể lớp nào online/offline, trả lời rằng thầy Đinh Thi Ai sẽ xác nhận hình thức phù hợp khi liên hệ trực tiếp — không tự bịa.
+6. Trả lời ngắn gọn (tối đa 4-5 câu), dùng tiếng Việt tự nhiên, có thể dùng 1 emoji phù hợp nếu hợp ngữ cảnh, không lạm dụng.`;
 }
 
 async function getHistory(channel, sessionId) {
