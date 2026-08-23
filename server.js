@@ -133,11 +133,18 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
+// cPanel's Passenger integration hijacks the first http.Server#listen() call
+// in the process to wire up its own request routing, so it must happen
+// synchronously at startup — not after an awaited DB connection. Calling it
+// late (or more than once, e.g. if Passenger spawns a fresh process per
+// request while still waiting on that promise) throws "listen() was called
+// more than once", which used to get mis-logged here as a DB error.
+app.listen(PORT, () => {
+  console.log(`[server] Dinh Thi Ai dang chay tai http://localhost:${PORT}`);
+});
+
 connectDB()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`[server] Dinh Thi Ai dang chay tai http://localhost:${PORT}`);
-    });
     startScheduler();
   })
   .catch((err) => {
