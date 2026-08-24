@@ -70,6 +70,31 @@ async function sendPrivateReply(commentId, text) {
   return true;
 }
 
+// Public follow-up under the original comment, so anyone browsing the post
+// sees the person was already helped (Meta's own auto-reply UI calls this
+// the "Trả lời bình luận" — it's separate from the private_replies DM above).
+async function postPublicCommentReply(commentId, text) {
+  const pageToken = process.env.FB_PAGE_ACCESS_TOKEN;
+  if (!pageToken) {
+    console.error('[facebookMessengerService] Missing FB_PAGE_ACCESS_TOKEN, cannot post public reply');
+    return false;
+  }
+
+  const res = await fetch(
+    `https://graph.facebook.com/v19.0/${commentId}/comments?access_token=${encodeURIComponent(pageToken)}`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ message: text }),
+    }
+  );
+  if (!res.ok) {
+    console.error('[facebookMessengerService] Public comment reply error', res.status, await res.text());
+    return false;
+  }
+  return true;
+}
+
 // Meta doesn't expose a public profile URL for a page-scoped id (PSID) —
 // only first/last name and picture — for privacy reasons. first_name/
 // last_name still require the person to have messaged the Page recently.
@@ -104,4 +129,4 @@ function isValidSignature(rawBody, signatureHeader) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-module.exports = { sendTextMessage, sendPrivateReply, getUserProfile, isValidSignature };
+module.exports = { sendTextMessage, sendPrivateReply, postPublicCommentReply, getUserProfile, isValidSignature };

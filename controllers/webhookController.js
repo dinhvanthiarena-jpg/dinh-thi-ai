@@ -34,6 +34,10 @@ Thầy/cô chỉ cần tải về, giải nén và bấm vào file exe là dùng
 
 Chúc thầy/cô có những giờ lên lớp thật vui và hiệu quả! 📚✨`;
 
+const TOOL_PUBLIC_REPLY_MESSAGE =
+  process.env.FB_TOOL_PUBLIC_REPLY_MESSAGE ||
+  `Em đã gửi ạ, cảm ơn thầy/cô! Em là trợ lý ảo của thầy Đinh Thi Ai. Nếu thầy/cô muốn tìm hiểu thêm về các khóa đào tạo AI ứng dụng x100 của thầy (có cả các gói miễn phí), thầy/cô ghé web 3dvietpro.com hoặc Page Facebook để được tư vấn nhé ạ. Cảm ơn thầy/cô nhiều! 🙏`;
+
 async function handleFeedComment(change) {
   const value = change.value || {};
   if (value.item !== 'comment' || value.verb !== 'add') return;
@@ -48,6 +52,7 @@ async function handleFeedComment(change) {
   const sent = await facebookMessengerService.sendPrivateReply(commentId, TOOL_REPLY_MESSAGE);
   if (sent) {
     console.log(`[webhookController] Auto-sent tool link for comment ${commentId}`);
+    await facebookMessengerService.postPublicCommentReply(commentId, TOOL_PUBLIC_REPLY_MESSAGE);
   } else {
     // Let it be retried on the next matching webhook delivery instead of
     // silently dropping the person who asked.
