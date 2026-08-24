@@ -1,5 +1,34 @@
 const chatbotService = require('../services/chatbotService');
 const facebookMessengerService = require('../services/facebookMessengerService');
+const RepliedComment = require('../models/RepliedComment');
+
+// Page-post "comment a keyword, get the thing in your inbox" campaigns.
+// Case-insensitive substring match against the comment text.
+const TOOL_KEYWORD = (process.env.FB_TOOL_KEYWORD || 'tool').toLowerCase();
+const TOOL_REPLY_MESSAGE =
+  process.env.FB_TOOL_REPLY_MESSAGE ||
+  `Dạ em gửi thầy/cô link tool ạ: ${process.env.FB_TOOL_LINK || ''}\n\nChúc thầy/cô có những giờ lên lớp thật hiệu quả!`;
+
+async function handleFeedComment(change) {
+  const value = change.value || {};
+  if (value.item !== 'comment' || value.verb !== 'add') return;
+
+  const commentId = value.comment_id;
+  const message = value.message || '';
+  if (!commentId || !message.toLowerCase().includes(TOOL_KEYWORD)) return;
+
+  const [, created] = await RepliedComment.findOrCreate({ where: { fbCommentId: commentId } });
+  if (!created) return; // already handled (duplicate webhook delivery)
+
+  const sent = await facebookMessengerService.sendPrivateReply(commentId, TOOL_REPLY_MESSAGE);
+  if (sent) {
+    console.log(`[webhookController] Auto-sent tool link for comment ${commentId}`);
+  } else {
+    // Let it be retried on the next matching webhook delivery instead of
+    // silently dropping the person who asked.
+    await RepliedComment.destroy({ where: { fbCommentId: commentId } });
+  }
+}
 
 exports.verify = (req, res) => {
   const mode = req.query['hub.mode'];
@@ -44,6 +73,14 @@ exports.receive = async (req, res) => {
         await facebookMessengerService.sendTextMessage(senderPsid, reply);
       } catch (err) {
         console.error('[webhookController] Failed to process Messenger message', err);
+      }
+    }
+
+    for (const change of entry.changes || []) {
+      try {
+        await handleFeedComment(change);
+      } catch (err) {
+        console.error('[webhookController] Failed to process feed comment', err);
       }
     }
   }

@@ -44,6 +44,32 @@ async function sendTextMessage(recipientPsid, text) {
   }
 }
 
+// Sends a Messenger DM in reply to a specific Page-post comment, using the
+// comment's own id rather than a PSID — this is the one Send API path Meta
+// allows outside the normal 24h messaging window, meant exactly for "comment
+// a keyword to get something in your inbox" campaigns.
+async function sendPrivateReply(commentId, text) {
+  const pageToken = process.env.FB_PAGE_ACCESS_TOKEN;
+  if (!pageToken) {
+    console.error('[facebookMessengerService] Missing FB_PAGE_ACCESS_TOKEN, cannot send private reply');
+    return false;
+  }
+
+  const res = await fetch(
+    `https://graph.facebook.com/v19.0/${commentId}/private_replies?access_token=${encodeURIComponent(pageToken)}`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ message: text }),
+    }
+  );
+  if (!res.ok) {
+    console.error('[facebookMessengerService] Private reply error', res.status, await res.text());
+    return false;
+  }
+  return true;
+}
+
 function isValidSignature(rawBody, signatureHeader) {
   const appSecret = process.env.FB_APP_SECRET;
   if (!appSecret || !signatureHeader || !rawBody) return false;
@@ -54,4 +80,4 @@ function isValidSignature(rawBody, signatureHeader) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-module.exports = { sendTextMessage, isValidSignature };
+module.exports = { sendTextMessage, sendPrivateReply, isValidSignature };

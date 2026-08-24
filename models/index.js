@@ -9,6 +9,7 @@ const ContactMessage = require('./ContactMessage');
 const GalleryPhoto = require('./GalleryPhoto');
 const ChatMessage = require('./ChatMessage');
 const SocialPost = require('./SocialPost');
+const RepliedComment = require('./RepliedComment');
 
 Course.hasMany(Lesson, { foreignKey: 'CourseId', onDelete: 'CASCADE' });
 Lesson.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
@@ -45,4 +46,5 @@ module.exports = {
   GalleryPhoto,
   ChatMessage,
   SocialPost,
+  RepliedComment,
 };
