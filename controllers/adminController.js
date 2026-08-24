@@ -272,7 +272,8 @@ exports.chatDetail = async (req, res) => {
     where: { channel, sessionId },
     order: [['createdAt', 'ASC']],
   });
-  res.render('admin/chat-detail', { title: 'Chi tiết hội thoại', channel, sessionId, messages });
+  const customerName = (messages.find((m) => m.customerName) || {}).customerName || '';
+  res.render('admin/chat-detail', { title: 'Chi tiết hội thoại', channel, sessionId, customerName, messages });
 };
 
 // --- Gallery ---

@@ -70,6 +70,30 @@ async function sendPrivateReply(commentId, text) {
   return true;
 }
 
+// Meta doesn't expose a public profile URL for a page-scoped id (PSID) —
+// only first/last name and picture — for privacy reasons. first_name/
+// last_name still require the person to have messaged the Page recently.
+async function getUserProfile(psid) {
+  const pageToken = process.env.FB_PAGE_ACCESS_TOKEN;
+  if (!pageToken) return null;
+
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/v19.0/${psid}?fields=first_name,last_name&access_token=${encodeURIComponent(pageToken)}`
+    );
+    if (!res.ok) {
+      console.error('[facebookMessengerService] getUserProfile error', res.status, await res.text());
+      return null;
+    }
+    const data = await res.json();
+    const name = [data.first_name, data.last_name].filter(Boolean).join(' ');
+    return name || null;
+  } catch (err) {
+    console.error('[facebookMessengerService] getUserProfile failed', err);
+    return null;
+  }
+}
+
 function isValidSignature(rawBody, signatureHeader) {
   const appSecret = process.env.FB_APP_SECRET;
   if (!appSecret || !signatureHeader || !rawBody) return false;
@@ -80,4 +104,4 @@ function isValidSignature(rawBody, signatureHeader) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-module.exports = { sendTextMessage, sendPrivateReply, isValidSignature };
+module.exports = { sendTextMessage, sendPrivateReply, getUserProfile, isValidSignature };

@@ -1,6 +1,21 @@
 const chatbotService = require('../services/chatbotService');
 const facebookMessengerService = require('../services/facebookMessengerService');
 const RepliedComment = require('../models/RepliedComment');
+const ChatMessage = require('../models/ChatMessage');
+
+// Only hit the Graph API for a PSID's name once — after that it's already
+// saved on a prior ChatMessage row, so reuse it instead of re-fetching on
+// every single incoming message.
+async function resolveCustomerName(psid) {
+  const existing = await ChatMessage.findOne({
+    where: { channel: 'messenger', sessionId: psid },
+    order: [['createdAt', 'DESC']],
+  });
+  if (existing && existing.customerName) return existing.customerName;
+
+  const name = await facebookMessengerService.getUserProfile(psid);
+  return name || '';
+}
 
 // Page-post "comment a keyword, get the thing in your inbox" campaigns.
 // Case-insensitive substring match against the comment text.
@@ -74,10 +89,11 @@ exports.receive = async (req, res) => {
       if (!senderPsid || !text || event.message.is_echo) continue;
 
       try {
+        const customerName = await resolveCustomerName(senderPsid);
         const reply = await chatbotService.getReply({
           channel: 'messenger',
           sessionId: senderPsid,
-          customerName: '',
+          customerName,
           userMessage: text,
         });
         await facebookMessengerService.sendTextMessage(senderPsid, reply);

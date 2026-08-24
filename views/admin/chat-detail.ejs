@@ -1,6 +1,18 @@
 <a href="/admin/chats" class="text-sm text-primary-600 hover:underline">&larr; Danh sách hội thoại</a>
 
-<div class="card p-5 mt-4 space-y-3">
+<div class="flex items-center justify-between mt-4 mb-2">
+  <h2 class="font-semibold text-ink"><%= customerName || 'Khách vãng lai' %></h2>
+  <% if (channel === 'messenger') { %>
+    <a
+      href="https://www.facebook.com/messages/t/<%= sessionId %>"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-sm text-[#0084FF] hover:underline"
+    >Mở hội thoại trên Facebook &rarr;</a>
+  <% } %>
+</div>
+
+<div class="card p-5 space-y-3">
   <% messages.forEach(function(m) { %>
     <div class="flex <%= m.role === 'user' ? 'justify-start' : 'justify-end' %>">
       <div class="max-w-[75%] rounded-2xl px-4 py-2 text-sm <%= m.role === 'user' ? 'bg-surface border border-primary-100 text-ink' : 'bg-primary-600 text-white' %> <%= m.handedOff ? 'ring-2 ring-amber-400' : '' %>">
