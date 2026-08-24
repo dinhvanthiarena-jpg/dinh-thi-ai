@@ -110,6 +110,17 @@ app.use(['/auth/login', '/auth/register'], authLimiter);
 
 app.use(attachUser);
 
+// The hosting's LiteSpeed edge cache defaults to caching any GET response
+// that doesn't explicitly opt out, including dynamic, per-session pages like
+// the admin panel — silently serving one point-in-time snapshot to every
+// later request until the cache entry itself expires. Every non-static
+// response here is generated per-request (sessions, DB reads), so none of it
+// should ever be cached.
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+
 app.use((req, res, next) => {
   res.locals.appName = process.env.APP_NAME || 'Dinh Thi Ai';
   res.locals.appUrl = (process.env.APP_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
