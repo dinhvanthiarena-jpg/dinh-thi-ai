@@ -4,6 +4,8 @@
 // long-lived Node process — no external cron needed on shared hosting.
 const { Op } = require('sequelize');
 const BlogPost = require('../models/BlogPost');
+const SocialPost = require('../models/SocialPost');
+const facebookPostService = require('./facebookPostService');
 
 async function publishDuePosts() {
   const [count] = await BlogPost.update(
@@ -15,11 +17,30 @@ async function publishDuePosts() {
   }
 }
 
+// Posts once per calendar day to the Facebook Page — checked hourly (piggybacking
+// on the same interval as publishDuePosts) rather than run-once-at-startup, so a
+// server restart mid-day doesn't skip the day or double-post.
+async function postDailySocialContent() {
+  if (!process.env.FB_PAGE_ACCESS_TOKEN) return;
+
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const alreadyPostedToday = await SocialPost.findOne({
+    where: { postedAt: { [Op.gte]: startOfToday } },
+  });
+  if (alreadyPostedToday) return;
+
+  await facebookPostService.postDailyContent();
+}
+
 function startScheduler() {
   publishDuePosts().catch((err) => console.error('[scheduler] error', err));
+  postDailySocialContent().catch((err) => console.error('[scheduler] facebook post error', err));
   setInterval(() => {
     publishDuePosts().catch((err) => console.error('[scheduler] error', err));
+    postDailySocialContent().catch((err) => console.error('[scheduler] facebook post error', err));
   }, 60 * 60 * 1000);
 }
 
-module.exports = { startScheduler, publishDuePosts };
+module.exports = { startScheduler, publishDuePosts, postDailySocialContent };

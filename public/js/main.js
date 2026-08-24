@@ -1,3 +1,9 @@
+window.fbAsyncInit = function () {
+  if (window.FB) {
+    FB.init({ xfbml: true, version: 'v21.0' });
+  }
+};
+
 document.addEventListener('DOMContentLoaded', function () {
   var btn = document.getElementById('mobile-menu-btn');
   var menu = document.getElementById('mobile-menu');

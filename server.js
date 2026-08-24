@@ -48,11 +48,11 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", 'https://connect.facebook.net'],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
         imgSrc: ["'self'", 'data:', 'https:'],
-        connectSrc: ["'self'"],
+        connectSrc: ["'self'", 'https://connect.facebook.net', 'https://*.facebook.com'],
         frameSrc: ["'self'", 'https:'],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
