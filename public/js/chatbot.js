@@ -88,7 +88,14 @@
     panel.classList.add('flex');
     opened = true;
     if (!messagesEl.childElementCount) {
-      appendMessage('assistant', 'Chào bạn, em có thể giúp gì cho bạn không ạ?');
+      appendTyping();
+      setTimeout(function () {
+        removeTyping();
+        appendMessage(
+          'assistant',
+          'Dạ em chào anh/chị ạ! Em có thể giúp gì cho anh/chị không ạ? Cho em hỏi mình là anh hay chị để em xưng hô cho đúng nhé 😊'
+        );
+      }, 1400);
     }
     input.focus();
   }
@@ -124,9 +131,9 @@
     input.disabled = true;
     appendTyping();
     var typingStartedAt = Date.now();
-    var BASE_TYPING_MS = 1600;
-    var MS_PER_CHAR = 28;
-    var MAX_TYPING_MS = 4500;
+    var BASE_TYPING_MS = 2000;
+    var MS_PER_CHAR = 32;
+    var MAX_TYPING_MS = 6000;
 
     // Scales the simulated "typing" delay with reply length so short and
     // long answers don't both appear after the same fixed pause.
@@ -149,7 +156,7 @@
         return res.json();
       })
       .then(function (data) {
-        var reply = data.reply || 'Xin lỗi bạn, em chưa nhận được phản hồi. Vui lòng thử lại.';
+        var reply = data.reply || 'Xin lỗi anh/chị, em chưa nhận được phản hồi. Vui lòng thử lại.';
         showAfterMinDelay(function () {
           removeTyping();
           appendMessage('assistant', reply);
@@ -162,7 +169,7 @@
       .catch(function () {
         showAfterMinDelay(function () {
           removeTyping();
-          appendMessage('assistant', 'Có lỗi kết nối, bạn vui lòng thử lại sau ít phút.');
+          appendMessage('assistant', 'Có lỗi kết nối, anh/chị vui lòng thử lại sau ít phút.');
           input.disabled = false;
           input.focus();
         });
