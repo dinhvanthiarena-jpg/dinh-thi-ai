@@ -93,7 +93,7 @@
         removeTyping();
         appendMessage(
           'assistant',
-          'Dạ em chào anh/chị ạ! Em có thể giúp gì cho anh/chị không ạ? Cho em hỏi mình là anh hay chị để em xưng hô cho đúng nhé 😊'
+          'Dạ em chào anh/chị ạ! Em có thể giúp gì cho anh/chị không ạ? Không biết em có thể gọi anh/chị là gì để tiện xưng hô nhé 😊'
         );
       }, 1400);
     }
