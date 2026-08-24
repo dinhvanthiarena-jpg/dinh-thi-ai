@@ -9,29 +9,11 @@ const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
 const GRAPH_API_VERSION = 'v21.0';
 const PAGE_ID = process.env.FB_PAGE_ID || '484619608292305';
 
-// Rotates through published courses first (they drive revenue) then blog
-// posts, so the Page always has fresh, varied content to post about instead
-// of the same item every day.
+// Rotates through published blog posts first — thầy's own "Kiến thức AI mới
+// nhất" content is the source he asked for — then falls back to courses once
+// the blog queue runs dry, so the Page always has fresh, varied content to
+// post about instead of the same item every day.
 async function pickNextContent() {
-  const postedCourseIds = (
-    await SocialPost.findAll({ where: { sourceType: 'course' }, attributes: ['sourceId'] })
-  ).map((p) => p.sourceId);
-
-  const nextCourse = await Course.findOne({
-    where: { isPublished: true, id: { [Op.notIn]: postedCourseIds.length ? postedCourseIds : [0] } },
-    order: [['isFeatured', 'DESC'], ['createdAt', 'DESC']],
-  });
-  if (nextCourse) {
-    return {
-      sourceType: 'course',
-      sourceId: nextCourse.id,
-      title: nextCourse.title,
-      description: nextCourse.subtitle || nextCourse.description,
-      category: nextCourse.category,
-      url: `${process.env.APP_URL}/courses/${nextCourse.slug}`,
-    };
-  }
-
   const postedBlogIds = (
     await SocialPost.findAll({ where: { sourceType: 'blog' }, attributes: ['sourceId'] })
   ).map((p) => p.sourceId);
@@ -48,6 +30,25 @@ async function pickNextContent() {
       description: nextBlog.excerpt || nextBlog.content.slice(0, 300),
       category: (nextBlog.tags || []).join(', '),
       url: `${process.env.APP_URL}/blog/${nextBlog.slug}`,
+    };
+  }
+
+  const postedCourseIds = (
+    await SocialPost.findAll({ where: { sourceType: 'course' }, attributes: ['sourceId'] })
+  ).map((p) => p.sourceId);
+
+  const nextCourse = await Course.findOne({
+    where: { isPublished: true, id: { [Op.notIn]: postedCourseIds.length ? postedCourseIds : [0] } },
+    order: [['isFeatured', 'DESC'], ['createdAt', 'DESC']],
+  });
+  if (nextCourse) {
+    return {
+      sourceType: 'course',
+      sourceId: nextCourse.id,
+      title: nextCourse.title,
+      description: nextCourse.subtitle || nextCourse.description,
+      category: nextCourse.category,
+      url: `${process.env.APP_URL}/courses/${nextCourse.slug}`,
     };
   }
 
