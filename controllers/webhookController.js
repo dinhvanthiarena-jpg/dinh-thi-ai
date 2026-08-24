@@ -7,7 +7,17 @@ const RepliedComment = require('../models/RepliedComment');
 const TOOL_KEYWORD = (process.env.FB_TOOL_KEYWORD || 'tool').toLowerCase();
 const TOOL_REPLY_MESSAGE =
   process.env.FB_TOOL_REPLY_MESSAGE ||
-  `Dạ em gửi thầy/cô link tool ạ: ${process.env.FB_TOOL_LINK || ''}\n\nChúc thầy/cô có những giờ lên lớp thật hiệu quả!`;
+  `Dạ em chào thầy/cô ạ! 🎉
+
+Cảm ơn thầy/cô đã quan tâm đến bộ công cụ "Toán Học Vui Nhộn" ạ. Em xin gửi thầy/cô link tải tool bên dưới:
+
+${process.env.FB_TOOL_LINK || ''}
+
+Thầy/cô chỉ cần tải về, giải nén và bấm vào file exe là dùng được ngay trên máy tính để dạy học ạ.
+
+🤖 Tiết lộ nhỏ: bộ tool này và cả tin nhắn tự động thầy/cô đang đọc đây đều được tạo ra nhờ ứng dụng công nghệ AI mới nhất — do chính thầy Đinh Thi Ai xây dựng đó ạ! Nếu thầy/cô cũng muốn tự tay làm chủ AI để soạn bài, thiết kế bài giảng, tự động hóa công việc dạy học... thầy Đinh Thi Ai đang có khóa đào tạo "Ứng dụng AI thực chiến" dành cho người đi làm, rất phù hợp với thầy/cô đó ạ. Tìm hiểu thêm tại: https://3dvietpro.com
+
+Chúc thầy/cô có những giờ lên lớp thật vui và hiệu quả! 📚✨`;
 
 async function handleFeedComment(change) {
   const value = change.value || {};
