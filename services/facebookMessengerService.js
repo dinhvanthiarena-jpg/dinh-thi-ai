@@ -2,6 +2,20 @@ const crypto = require('crypto');
 
 const GRAPH_API_URL = 'https://graph.facebook.com/v19.0/me/messages';
 
+// Messenger text messages render no markdown, so the [label](/path) and
+// **bold** syntax the chatbot prompt is instructed to use (for the web
+// widget's own renderer) has to be turned into something a plain-text
+// message actually shows: the full absolute URL (Messenger auto-links
+// plain URLs) followed by the label, and bold markers just stripped.
+function formatForMessenger(text) {
+  const appUrl = (process.env.APP_URL || 'https://3dvietpro.com').replace(/\/$/, '');
+  const withLinks = text.replace(/\[([^\]]+)\]\((\/[^\s)]*|https?:\/\/[^\s)]+)\)/g, (match, label, url) => {
+    const absoluteUrl = url.startsWith('http') ? url : `${appUrl}${url}`;
+    return `${label}: ${absoluteUrl}`;
+  });
+  return withLinks.replace(/\*\*([^*]+)\*\*/g, '$1');
+}
+
 async function sendTextMessage(recipientPsid, text) {
   const pageToken = process.env.FB_PAGE_ACCESS_TOKEN;
   if (!pageToken) {
@@ -9,8 +23,10 @@ async function sendTextMessage(recipientPsid, text) {
     return;
   }
 
+  const formatted = formatForMessenger(text);
+
   // Messenger caps a single text message at 2000 chars.
-  const chunks = text.match(/[\s\S]{1,1900}/g) || [text];
+  const chunks = formatted.match(/[\s\S]{1,1900}/g) || [formatted];
 
   for (const chunk of chunks) {
     const res = await fetch(`${GRAPH_API_URL}?access_token=${encodeURIComponent(pageToken)}`, {
