@@ -12,15 +12,16 @@
           <% if (c.handedOff) { %>
             <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Cần thầy trả lời</span>
           <% } %>
-          <p class="font-semibold text-ink truncate"><%= c.customerName || 'Khách vãng lai' %></p>
           <% if (c.channel === 'messenger') { %>
             <a
               href="https://www.facebook.com/messages/t/<%= c.sessionId %>"
               target="_blank"
               rel="noopener noreferrer"
               onclick="event.stopPropagation()"
-              class="text-xs text-[#0084FF] hover:underline flex-shrink-0"
-            >Xem trên Facebook</a>
+              class="font-semibold text-[#0084FF] hover:underline truncate"
+            ><%= c.customerName || 'Khách vãng lai' %></a>
+          <% } else { %>
+            <p class="font-semibold text-ink truncate"><%= c.customerName || 'Khách vãng lai' %></p>
           <% } %>
         </div>
         <p class="text-sm text-muted mt-1 truncate max-w-xl"><%= c.lastMessage %></p>

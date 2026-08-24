@@ -1,14 +1,15 @@
 <a href="/admin/chats" class="text-sm text-primary-600 hover:underline">&larr; Danh sách hội thoại</a>
 
-<div class="flex items-center justify-between mt-4 mb-2">
-  <h2 class="font-semibold text-ink"><%= customerName || 'Khách vãng lai' %></h2>
+<div class="mt-4 mb-2">
   <% if (channel === 'messenger') { %>
     <a
       href="https://www.facebook.com/messages/t/<%= sessionId %>"
       target="_blank"
       rel="noopener noreferrer"
-      class="text-sm text-[#0084FF] hover:underline"
-    >Mở hội thoại trên Facebook &rarr;</a>
+      class="text-lg font-semibold text-[#0084FF] hover:underline"
+    ><%= customerName || 'Khách vãng lai' %></a>
+  <% } else { %>
+    <h2 class="text-lg font-semibold text-ink"><%= customerName || 'Khách vãng lai' %></h2>
   <% } %>
 </div>
 
