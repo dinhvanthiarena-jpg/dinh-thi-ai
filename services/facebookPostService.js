@@ -169,6 +169,11 @@ async function postDailyContent() {
   const message = await generateCaption(content);
   const fbPostId = await publishToFacebook(message, content.url);
 
+  if (!fbPostId) {
+    console.log(`[facebookPostService] Failed to post "${content.title}" — not recording, will retry next run.`);
+    return;
+  }
+
   await SocialPost.create({
     sourceType: content.sourceType,
     sourceId: content.sourceId,
@@ -177,7 +182,7 @@ async function postDailyContent() {
     fbPostId,
   });
 
-  console.log(`[facebookPostService] Posted "${content.title}" to Facebook Page${fbPostId ? ' (id ' + fbPostId + ')' : ' (FAILED, see log above)'}`);
+  console.log(`[facebookPostService] Posted "${content.title}" to Facebook Page (id ${fbPostId})`);
 }
 
 module.exports = { postDailyContent, pickNextContent, generateCaption };
