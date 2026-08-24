@@ -16,6 +16,7 @@ const connectDB = require('./config/db');
 const { attachUser } = require('./middleware/auth');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const { startScheduler } = require('./services/contentScheduler');
+const telegramService = require('./services/telegramService');
 
 // Express 4 does not catch errors thrown inside async route handlers, so an
 // unhandled rejection there would otherwise crash the whole process (Node
@@ -34,6 +35,7 @@ const blogRoutes = require('./routes/blog');
 const adminRoutes = require('./routes/admin');
 const chatRoutes = require('./routes/chat');
 const webhookRoutes = require('./routes/webhook');
+const telegramRoutes = require('./routes/telegram');
 
 const app = express();
 
@@ -131,6 +133,7 @@ app.use('/api/chat', chatRoutes);
 // scanners to probe for SSRF), which also silently ate Facebook's own
 // GET-based webhook verification handshake.
 app.use('/fb-events', webhookRoutes);
+app.use('/tg-events', telegramRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
@@ -150,6 +153,7 @@ app.listen(PORT, () => {
 connectDB()
   .then(() => {
     startScheduler();
+    telegramService.ensureWebhook();
   })
   .catch((err) => {
     console.error('[server] Khong the ket noi database:', err.message);
