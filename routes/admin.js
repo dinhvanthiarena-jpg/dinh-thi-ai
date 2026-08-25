@@ -35,6 +35,8 @@ router.get('/students', adminController.studentList);
 router.get('/messages', adminController.messageList);
 router.post('/messages/:id/read', adminController.messageMarkRead);
 
+router.get('/game-installs', adminController.gameInstallList);
+
 router.get('/chats', adminController.chatList);
 router.get('/chats/:channel/:sessionId', adminController.chatDetail);
 

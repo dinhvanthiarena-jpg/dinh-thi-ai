@@ -1,0 +1,52 @@
+<div class="space-y-6">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="card p-5">
+      <p class="text-xs text-muted uppercase tracking-wide">Tổng số máy đã cài</p>
+      <p class="text-2xl font-bold text-ink mt-1"><%= installs.length %></p>
+    </div>
+    <div class="card p-5">
+      <p class="text-xs text-muted uppercase tracking-wide">Đã kích hoạt key</p>
+      <p class="text-2xl font-bold text-ink mt-1"><%= activatedCount %></p>
+    </div>
+    <div class="card p-5">
+      <p class="text-xs text-muted uppercase tracking-wide">Đang dùng thử</p>
+      <p class="text-2xl font-bold text-ink mt-1"><%= trialCount %></p>
+    </div>
+  </div>
+
+  <div class="card overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead>
+        <tr class="border-b border-line text-left text-xs text-muted uppercase tracking-wide">
+          <th class="px-4 py-3">Giáo viên</th>
+          <th class="px-4 py-3">Mã key</th>
+          <th class="px-4 py-3">Phiên bản</th>
+          <th class="px-4 py-3">Số lần mở</th>
+          <th class="px-4 py-3">Cài lần đầu</th>
+          <th class="px-4 py-3">Mở gần nhất</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% installs.forEach(function(i) { %>
+          <tr class="border-b border-line last:border-0">
+            <td class="px-4 py-3 font-medium text-ink"><%= i.teacherName || 'Chưa đặt tên' %></td>
+            <td class="px-4 py-3">
+              <% if (i.licenseKey) { %>
+                <span class="inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-semibold"><%= i.licenseKey %></span>
+              <% } else { %>
+                <span class="inline-block px-2 py-0.5 rounded bg-amber-100 text-amber-700 text-xs font-semibold">Dùng thử</span>
+              <% } %>
+            </td>
+            <td class="px-4 py-3 text-muted"><%= i.appVersion || '-' %></td>
+            <td class="px-4 py-3 text-muted"><%= i.pingCount %></td>
+            <td class="px-4 py-3 text-muted"><%= new Date(i.createdAt).toLocaleString('vi-VN') %></td>
+            <td class="px-4 py-3 text-muted"><%= new Date(i.lastSeenAt).toLocaleString('vi-VN') %></td>
+          </tr>
+        <% }); %>
+        <% if (!installs.length) { %>
+          <tr><td colspan="6" class="px-4 py-10 text-center text-muted">Chưa có máy nào cài game.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

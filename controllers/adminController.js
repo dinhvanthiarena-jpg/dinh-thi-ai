@@ -7,6 +7,7 @@ const ContactMessage = require('../models/ContactMessage');
 const GalleryPhoto = require('../models/GalleryPhoto');
 const ChatMessage = require('../models/ChatMessage');
 const Tool = require('../models/Tool');
+const GameInstall = require('../models/GameInstall');
 
 // Admin pastes whatever YouTube link they copied (watch?v=, youtu.be/, shorts/,
 // or already an /embed/ link) — normalize all of them to the /embed/ form the
@@ -238,6 +239,18 @@ exports.messageList = async (req, res) => {
 exports.messageMarkRead = async (req, res) => {
   await ContactMessage.update({ isRead: true }, { where: { id: req.params.id } });
   res.redirect('/admin/messages');
+};
+
+// --- Game installs (Toan Vui Cap 1) ---
+exports.gameInstallList = async (req, res) => {
+  const installs = await GameInstall.findAll({ order: [['lastSeenAt', 'DESC']] });
+  const activatedCount = installs.filter((i) => i.licenseKey).length;
+  res.render('admin/game-installs', {
+    title: 'Cài đặt Toán Vui Cấp 1',
+    installs,
+    activatedCount,
+    trialCount: installs.length - activatedCount,
+  });
 };
 
 // --- Chatbot conversations ---

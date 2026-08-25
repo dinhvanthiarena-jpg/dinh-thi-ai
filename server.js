@@ -37,6 +37,7 @@ const adminRoutes = require('./routes/admin');
 const chatRoutes = require('./routes/chat');
 const webhookRoutes = require('./routes/webhook');
 const telegramRoutes = require('./routes/telegram');
+const gameApiRoutes = require('./routes/gameApi');
 
 const app = express();
 
@@ -144,6 +145,7 @@ app.use('/blog', blogRoutes);
 app.use('/kho-tai-nguyen', toolRoutes);
 app.use('/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/game', gameApiRoutes);
 // Mounted as /fb-events rather than /webhook: hosting's security layer
 // blocks GET requests to any "/webhook*" path (a common signature used by
 // scanners to probe for SSRF), which also silently ate Facebook's own
