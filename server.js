@@ -138,7 +138,10 @@ app.use('/courses', courseRoutes);
 app.use('/checkout', checkoutRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/blog', blogRoutes);
-app.use('/tools', toolRoutes);
+// Mounted as /kho-tai-nguyen rather than /tools: hosting's security layer
+// blocks requests to common admin/dev-tool path signatures like "/tools",
+// the same way it blocks "/webhook*" (see the webhookRoutes mount below).
+app.use('/kho-tai-nguyen', toolRoutes);
 app.use('/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
 // Mounted as /fb-events rather than /webhook: hosting's security layer

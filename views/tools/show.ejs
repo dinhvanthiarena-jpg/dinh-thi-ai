@@ -1,6 +1,6 @@
 <section class="bg-gradient-to-br from-primary-50 to-white border-b border-primary-100">
   <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-14">
-    <a href="/tools" class="text-sm text-primary-600 hover:underline">&larr; Tất cả tool &amp; game</a>
+    <a href="/kho-tai-nguyen" class="text-sm text-primary-600 hover:underline">&larr; Tất cả tool &amp; game</a>
 
     <div class="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-6">
       <img src="<%= tool.coverImageUrl %>" alt="<%= tool.title %>" class="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover shadow-card flex-shrink-0" />
@@ -13,7 +13,7 @@
     </div>
 
     <a
-      href="/tools/<%= tool.slug %>/download"
+      href="/kho-tai-nguyen/<%= tool.slug %>/download"
       class="mt-8 inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-primary-600 to-accent-600 text-white text-lg sm:text-xl font-bold px-8 py-4 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
     >
       <svg class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12.5a1 1 0 0 1-.7-.29l-4-4a1 1 0 1 1 1.4-1.42L9 9.09V2a1 1 0 1 1 2 0v7.09l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-.7.29Z"/><path d="M4 13a1 1 0 0 1 1 1v2h10v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>
@@ -47,7 +47,7 @@
     <h2 class="text-xl font-bold text-ink mb-6">Tool &amp; game khác</h2>
     <div class="grid sm:grid-cols-3 gap-6">
       <% relatedTools.forEach(function(t) { %>
-        <a href="/tools/<%= t.slug %>" class="card overflow-hidden group">
+        <a href="/kho-tai-nguyen/<%= t.slug %>" class="card overflow-hidden group">
           <div class="aspect-video bg-primary-50 overflow-hidden">
             <img src="<%= t.coverImageUrl %>" alt="<%= t.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
           </div>

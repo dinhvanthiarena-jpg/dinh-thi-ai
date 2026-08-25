@@ -25,13 +25,13 @@ exports.sitemap = async (req, res) => {
     Tool.findAll({ where: { isPublished: true }, attributes: ['slug', 'updatedAt'] }),
   ]);
 
-  const staticUrls = ['', '/courses', '/blog', '/tools', '/gioi-thieu', '/hoat-dong', '/lien-he'];
+  const staticUrls = ['', '/courses', '/blog', '/kho-tai-nguyen', '/gioi-thieu', '/hoat-dong', '/lien-he'];
 
   const urls = [
     ...staticUrls.map((p) => ({ loc: `${appUrl}${p}`, priority: p === '' ? '1.0' : '0.8' })),
     ...courses.map((c) => ({ loc: `${appUrl}/courses/${c.slug}`, lastmod: c.updatedAt, priority: '0.9' })),
     ...posts.map((p) => ({ loc: `${appUrl}/blog/${p.slug}`, lastmod: p.updatedAt, priority: '0.6' })),
-    ...tools.map((t) => ({ loc: `${appUrl}/tools/${t.slug}`, lastmod: t.updatedAt, priority: '0.7' })),
+    ...tools.map((t) => ({ loc: `${appUrl}/kho-tai-nguyen/${t.slug}`, lastmod: t.updatedAt, priority: '0.7' })),
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
