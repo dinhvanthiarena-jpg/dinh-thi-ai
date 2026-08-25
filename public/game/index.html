@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; connect-src 'self';" />
+<meta name="theme-color" content="#2563EB" />
+<meta name="description" content="Game Toán Vui Cấp 1 - luyện toán vui nhộn cho học sinh lớp 1 đến lớp 5, chơi ngay trên trình duyệt." />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Toán Vui Cấp 1" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-180.png" />
+<title>Toán Vui Cấp 1</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <button id="soundToggle" class="icon-btn top-fixed sound-btn" aria-label="Bật/tắt âm thanh" title="Bật/tắt âm thanh">
+    <svg id="soundIconOn" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M4 9v6h4l5 5V4L8 9H4z"/><path fill="currentColor" d="M16.5 12a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12z"/><path fill="currentColor" d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+    <svg id="soundIconOff" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" hidden><path fill="currentColor" d="M4 9v6h4l5 5V4L8 9H4z"/><path fill="currentColor" d="M19.36 6.64l-1.42 1.42L19.36 9.5l1.42-1.42-1.42-1.44zm-2.83 2.83L15.11 8.05 13.7 9.46l1.42 1.41-1.42 1.42 1.41 1.41 1.42-1.42 1.42 1.42 1.41-1.41-1.42-1.42 1.42-1.42-1.41-1.41z"/></svg>
+  </button>
+
+  <button id="btnOpenSettings" class="icon-btn top-fixed settings-btn" aria-label="Tuỳ chỉnh giáo viên" title="Tuỳ chỉnh giáo viên">
+    <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.61l-1.92-3.32a.5.5 0 0 0-.58-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.58.22L2.71 8.87a.5.5 0 0 0 .12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94L2.81 14.52a.5.5 0 0 0-.12.61l1.92 3.32c.14.24.42.34.68.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.28.27.42.5.42h3.84c.24 0 .46-.14.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.26.1.54 0 .68-.22l1.92-3.32a.5.5 0 0 0-.12-.61l-2.02-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg>
+  </button>
+
+  <!-- SCREEN: LICENSE -->
+  <section id="screen-license" class="screen">
+    <div class="home-wrap">
+      <div class="mascot-hero" id="mascotLicense" aria-hidden="true"></div>
+      <p class="mascot-name js-teacher-name">Thầy Đinh Thi Ai</p>
+      <h1 class="license-title" id="licenseTitle">Cần kích hoạt</h1>
+      <p class="license-desc" id="licenseDesc">Vui lòng liên hệ Thầy Đinh Thi Ai để nhận mã key, sau đó nhập vào bên dưới để tiếp tục chơi nhé!</p>
+      <div class="license-form">
+        <input type="text" id="licenseKeyInput" class="license-input" placeholder="TVC1-XXXX-XXXX-XXXX" maxlength="19" autocomplete="off" spellcheck="false" />
+        <input type="text" id="licenseContactInput" class="license-input license-contact-input" placeholder="Email hoặc Facebook của thầy/cô (không bắt buộc)" maxlength="120" autocomplete="off" spellcheck="false" />
+        <button class="btn btn-primary btn-xl" id="btnActivateLicense">Kích hoạt</button>
+      </div>
+      <p class="license-contact-hint">Để lại email/Facebook giúp Thầy Đinh Thi Ai hỗ trợ thầy/cô nhanh hơn khi cần — hoàn toàn không bắt buộc.</p>
+      <p class="license-error" id="licenseError" hidden></p>
+    </div>
+
+    <div class="contact-footer">
+      <p class="contact-line">Liên hệ <strong>Thầy Đinh Thi Ai</strong> để nhận mã key kích hoạt</p>
+      <div class="contact-actions">
+        <span class="contact-phone">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+          0977 317 988
+        </span>
+        <button class="contact-fb-btn" id="btnContactFBLicense">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>
+          dinhthi.daotao
+        </button>
+        <button class="contact-web-btn" id="btnContactWebLicense">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm6.93 6h-2.95a15.7 15.7 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.93 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14a7.99 7.99 0 0 1 0-4h3.38a17.2 17.2 0 0 0 0 4H4.26zm.81 2h2.95a15.7 15.7 0 0 0 1.38 3.56A7.99 7.99 0 0 1 5.07 16zm2.95-8H5.07a7.99 7.99 0 0 1 4.33-3.56A15.7 15.7 0 0 0 8.02 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66a15.36 15.36 0 0 1 0-4h4.68a15.36 15.36 0 0 1 0 4zm.25 5.56A15.7 15.7 0 0 0 15.97 16h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14a17.2 17.2 0 0 0 0-4h3.38a7.99 7.99 0 0 1 0 4h-3.38z"/></svg>
+          3dvietpro.com
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN: HOME -->
+  <section id="screen-home" class="screen active">
+    <div class="home-wrap">
+      <div class="mascot-hero" id="mascotHome" aria-hidden="true"></div>
+      <p class="mascot-name js-teacher-name">Thầy Đinh Thi Ai</p>
+      <div class="title-badge" aria-hidden="false">
+        <h1 class="title-hero title-hero-boxed">TOÁN VUI<br/><span>CẤP 1</span></h1>
+        <div class="tagline-badge-row">
+          <svg class="tagline-badge-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2 14.6 8.6 21.8 9.3 16.3 13.9 18 21 12 17.3 6 21 7.7 13.9 2.2 9.3 9.4 8.6z"/></svg>
+          <p class="tagline-badge-text">Chơi mà học<span>Học mà chơi</span></p>
+        </div>
+      </div>
+      <p class="update-badge" id="updateBadge" hidden></p>
+      <div class="home-actions">
+        <button class="btn btn-primary btn-xl" id="btnPlay">
+          <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+          Bắt đầu chơi
+        </button>
+        <button class="btn btn-secondary btn-lg" id="btnHowTo">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-13c-1.66 0-3 1.34-3 3h2c0-.55.45-1 1-1s1 .45 1 1c0 1-1.5 1-1.5 3h2c0-1 1.5-1.5 1.5-3 0-1.66-1.34-3-3-3z"/></svg>
+          Cách chơi
+        </button>
+      </div>
+      <p class="app-version" id="appVersion"></p>
+    </div>
+
+    <div class="contact-footer">
+      <p class="contact-line">Một sản phẩm của <strong>Thầy Đinh Thi Ai</strong> kính tặng</p>
+      <div class="contact-actions">
+        <span class="contact-phone">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+          0977 317 988
+        </span>
+        <button class="contact-fb-btn" id="btnContactFB">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>
+          dinhthi.daotao
+        </button>
+        <button class="contact-web-btn" id="btnContactWeb">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm6.93 6h-2.95a15.7 15.7 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.93 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14a7.99 7.99 0 0 1 0-4h3.38a17.2 17.2 0 0 0 0 4H4.26zm.81 2h2.95a15.7 15.7 0 0 0 1.38 3.56A7.99 7.99 0 0 1 5.07 16zm2.95-8H5.07a7.99 7.99 0 0 1 4.33-3.56A15.7 15.7 0 0 0 8.02 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66a15.36 15.36 0 0 1 0-4h4.68a15.36 15.36 0 0 1 0 4zm.25 5.56A15.7 15.7 0 0 0 15.97 16h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14a17.2 17.2 0 0 0 0-4h3.38a7.99 7.99 0 0 1 0 4h-3.38z"/></svg>
+          3dvietpro.com
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN: SETUP -->
+  <section id="screen-setup" class="screen">
+    <div class="topbar">
+      <button class="icon-btn" id="btnBackFromSetup" aria-label="Quay lại">
+        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/></svg>
+      </button>
+      <h2 class="topbar-title">Chọn lớp &amp; dạng bài</h2>
+      <div style="width:44px"></div>
+    </div>
+
+    <div class="setup-wrap">
+      <div class="setup-group">
+        <h3 class="setup-label">1. Con học lớp mấy?</h3>
+        <div class="grade-row" id="gradeRow">
+          <button class="grade-card" data-grade="1"><span class="grade-num">1</span><span>Lớp 1</span></button>
+          <button class="grade-card" data-grade="2"><span class="grade-num">2</span><span>Lớp 2</span></button>
+          <button class="grade-card" data-grade="3"><span class="grade-num">3</span><span>Lớp 3</span></button>
+          <button class="grade-card" data-grade="4"><span class="grade-num">4</span><span>Lớp 4</span></button>
+          <button class="grade-card" data-grade="5"><span class="grade-num">5</span><span>Lớp 5</span></button>
+        </div>
+      </div>
+
+      <div class="setup-group">
+        <h3 class="setup-label">2. Chọn dạng toán</h3>
+        <div class="op-row" id="opRow">
+          <button class="op-card" data-op="add"><span class="op-sym">+</span>Phép cộng</button>
+          <button class="op-card" data-op="sub"><span class="op-sym">−</span>Phép trừ</button>
+          <button class="op-card" data-op="mul"><span class="op-sym">×</span>Phép nhân</button>
+          <button class="op-card" data-op="div"><span class="op-sym">÷</span>Phép chia</button>
+          <button class="op-card" data-op="mix"><span class="op-sym">★</span>Hỗn hợp</button>
+          <button class="op-card" data-op="word"><span class="op-sym"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></span>Toán đố</button>
+        </div>
+      </div>
+
+      <div class="setup-group">
+        <h3 class="setup-label">3. Chọn chế độ chơi</h3>
+        <div class="mode-row" id="modeRow">
+          <button class="mode-card" data-mode="practice">
+            <span class="mode-icon"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm0-14a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4zm0-6a2 2 0 1 0 2 2 2 2 0 0 0-2-2z"/></svg></span>
+            <span class="mode-title">Luyện tập</span>
+            <span class="mode-desc">20 câu, không giới hạn giờ, có 3 mạng</span>
+          </button>
+          <button class="mode-card" data-mode="timed">
+            <span class="mode-icon"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path fill="currentColor" d="M15 1H9v2h6zm-4 13h2V8h-2zm8.03-6.61l1.42-1.42a12.7 12.7 0 0 0-1.41-1.41l-1.42 1.42A9 9 0 1 0 20.94 12H23a11 11 0 1 1-3.97-8.61zM12 20a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/></svg></span>
+            <span class="mode-title">Thử thách</span>
+            <span class="mode-desc">Trả lời thật nhanh trong 60 giây</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="best-score-box" id="bestScoreBox" hidden>
+        <span>Điểm cao nhất:</span>
+        <strong id="bestScoreVal">0</strong>
+        <span class="best-stars" id="bestStarsVal"></span>
+      </div>
+
+      <button class="btn btn-primary btn-xl btn-start" id="btnStartGame" disabled>Bắt đầu!</button>
+    </div>
+  </section>
+
+  <!-- SCREEN: GAME -->
+  <section id="screen-game" class="screen">
+    <div class="game-hud">
+      <button class="icon-btn" id="btnQuit" aria-label="Thoát ván chơi">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+      <div class="hud-mid">
+        <div class="hud-lives" id="hudLives"></div>
+        <div class="hud-timerbar" id="hudTimerWrap" hidden>
+          <div class="hud-timerfill" id="hudTimerFill"></div>
+        </div>
+        <div class="hud-progress" id="hudProgress"></div>
+      </div>
+      <div class="hud-score">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        <span id="hudScore">0</span>
+      </div>
+    </div>
+
+    <div class="game-stage">
+      <div class="mascot-game" id="mascotGame" aria-hidden="true"></div>
+      <p class="mascot-name mascot-name-game js-teacher-name">Thầy Đinh Thi Ai</p>
+
+      <div class="streak-badge" id="streakBadge" hidden>
+        <span id="streakVal">0</span> câu liên tiếp!
+      </div>
+
+      <div class="question-card" id="questionCard">
+        <div class="thinking-dots" id="thinkingDots" hidden>
+          <span></span><span></span><span></span>
+        </div>
+        <div class="question-text" id="questionText">3 + 4</div>
+      </div>
+
+      <div class="answers-grid" id="answersGrid"></div>
+
+      <div class="activity-strip" id="activityStrip" hidden aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <div class="solution-box" id="solutionBox" hidden>
+        <span class="solution-tag">Lời giải</span>
+        <p class="solution-text" id="solutionText"></p>
+        <button class="btn btn-primary btn-lg" id="btnNextWord">Câu tiếp theo!</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN: RESULT -->
+  <section id="screen-result" class="screen">
+    <div class="result-wrap">
+      <div class="mascot-result" id="mascotResult" aria-hidden="true"></div>
+      <p class="mascot-name js-teacher-name">Thầy Đinh Thi Ai</p>
+      <h2 class="result-title" id="resultTitle">Giỏi quá!</h2>
+      <div class="stars-row" id="starsRow">
+        <span class="star" data-i="1">★</span>
+        <span class="star" data-i="2">★</span>
+        <span class="star" data-i="3">★</span>
+      </div>
+      <div class="result-stats">
+        <div class="stat-box">
+          <span class="stat-num" id="statCorrect">0</span>
+          <span class="stat-label">Câu đúng</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" id="statScore">0</span>
+          <span class="stat-label">Điểm số</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" id="statBestStreak">0</span>
+          <span class="stat-label">Chuỗi cao nhất</span>
+        </div>
+      </div>
+      <div class="new-record-badge" id="newRecordBadge" hidden>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M18 2H6v3H2v4a4 4 0 0 0 4 4h.34A6 6 0 0 0 11 16.9V19H7v2h10v-2h-4v-2.1a6 6 0 0 0 4.66-3.9H18a4 4 0 0 0 4-4V5h-4zM4 9V7h2v4.83A2 2 0 0 1 4 9zm16 0a2 2 0 0 1-2 2.83V7h2z"/></svg>
+        Kỷ lục mới!
+      </div>
+      <button class="contact-fb-btn share-fb-btn" id="btnShareFacebook">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>
+        Chia sẻ kết quả lên Facebook
+      </button>
+      <div class="result-actions">
+        <button class="btn btn-secondary btn-lg" id="btnResultHome">Trang chủ</button>
+        <button class="btn btn-primary btn-xl" id="btnResultRetry">Chơi lại</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL: HOW TO PLAY -->
+  <div class="modal-overlay" id="howToModal" hidden>
+    <div class="modal-box">
+      <button class="icon-btn modal-close" id="btnCloseHowTo" aria-label="Đóng">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+      <h2>Cách chơi</h2>
+      <ol class="howto-list">
+        <li>Chọn <strong>lớp</strong> của con và <strong>dạng toán</strong> muốn luyện — chọn <strong>Toán đố</strong> để làm bài toán có lời văn, có lời giải chi tiết!</li>
+        <li>Chọn chế độ <strong>Luyện tập</strong> (20 câu, thong thả) hoặc <strong>Thử thách</strong> (đua với đồng hồ 60 giây).</li>
+        <li>Đọc phép tính rồi bấm vào ô có <strong>đáp án đúng</strong>.</li>
+        <li>Trả lời đúng liên tiếp để được <strong>combo điểm thưởng</strong>!</li>
+        <li>Trả lời sai sẽ mất 1 trái tim — hết 3 trái tim là kết thúc ván chơi.</li>
+        <li>Cứ mỗi <strong>5 câu</strong>, con sẽ được <strong>giải lao vui</strong> với câu đố hài hước cùng Thầy Đinh Thi Ai!</li>
+        <li>Cuối ván, con sẽ nhận được <strong>sao thưởng</strong> tùy theo kết quả. Cố gắng đạt 3 sao nhé!</li>
+      </ol>
+      <button class="btn btn-primary btn-lg" id="btnHowToGotIt">Đã hiểu!</button>
+    </div>
+  </div>
+
+  <!-- OVERLAY: FUN BREAK -->
+  <div class="modal-overlay break-overlay" id="breakOverlay" hidden>
+    <div class="break-tiles" aria-hidden="true">
+      <span>+</span><span>×</span><span>−</span><span>÷</span><span>×</span><span>+</span>
+    </div>
+    <div class="modal-box break-box">
+      <div class="break-mascot" id="mascotBreak" aria-hidden="true"></div>
+      <p class="mascot-name mascot-name-break js-teacher-name">Thầy Đinh Thi Ai</p>
+      <span class="break-tag">Giải lao vui!</span>
+      <h2 class="break-heading" id="breakHeading">Đố vui cùng Thầy Đinh Thi Ai</h2>
+      <p class="break-joke-q" id="breakJokeQ">Câu đố...</p>
+      <p class="break-joke-a" id="breakJokeA" hidden></p>
+      <button class="btn btn-secondary btn-lg" id="btnRevealJoke">Bật mí đáp án!</button>
+      <button class="btn btn-primary btn-xl" id="btnContinueGame" hidden>Chơi tiếp!</button>
+    </div>
+  </div>
+
+  <!-- MODAL: CHOOSE BROWSER -->
+  <div class="modal-overlay" id="browserPickerModal" hidden>
+    <div class="modal-box browser-picker-box">
+      <button class="icon-btn modal-close" id="btnCloseBrowserPicker" aria-label="Đóng">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+      <h2>Chọn trình duyệt</h2>
+      <p class="browser-picker-desc" id="browserPickerDesc">Mở trang chia sẻ Facebook bằng trình duyệt nào?</p>
+      <div class="browser-picker-list" id="browserPickerList"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: TEACHER SETTINGS -->
+  <div class="modal-overlay" id="settingsModal" hidden>
+    <div class="modal-box">
+      <button class="icon-btn modal-close" id="btnCloseSettings" aria-label="Đóng">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+      <h2>Tuỳ chỉnh giáo viên</h2>
+      <p class="settings-desc">Đổi tên và ảnh đại diện hiển thị trong game thành của thầy/cô nhé!</p>
+
+      <div class="settings-avatar-row">
+        <img class="settings-avatar-preview" id="settingsAvatarPreview" src="assets/thay-avatar.png" alt="Ảnh đại diện" />
+        <div class="settings-avatar-actions">
+          <button class="btn btn-secondary btn-lg" id="btnPickAvatar">Đổi ảnh đại diện</button>
+          <input type="file" id="webAvatarFileInput" accept="image/*" hidden />
+          <button class="settings-reset-link" id="btnResetAvatar">Khôi phục ảnh mặc định</button>
+        </div>
+      </div>
+
+      <label class="settings-label" for="teacherNameInput">Tên giáo viên</label>
+      <input type="text" id="teacherNameInput" class="license-input settings-name-input" maxlength="60" autocomplete="off" placeholder="Thầy/Cô ..." />
+
+      <button class="btn btn-primary btn-xl" id="btnSaveSettings">Lưu thay đổi</button>
+      <p class="settings-saved-msg" id="settingsSavedMsg" hidden>Đã lưu!</p>
+    </div>
+  </div>
+
+  <div id="confettiLayer" aria-hidden="true"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
