@@ -19,6 +19,7 @@
       <thead>
         <tr class="border-b border-line text-left text-xs text-muted uppercase tracking-wide">
           <th class="px-4 py-3">Giáo viên</th>
+          <th class="px-4 py-3">Liên hệ</th>
           <th class="px-4 py-3">Mã key</th>
           <th class="px-4 py-3">Phiên bản</th>
           <th class="px-4 py-3">Số lần mở</th>
@@ -30,6 +31,7 @@
         <% installs.forEach(function(i) { %>
           <tr class="border-b border-line last:border-0">
             <td class="px-4 py-3 font-medium text-ink"><%= i.teacherName || 'Chưa đặt tên' %></td>
+            <td class="px-4 py-3 text-muted"><%= i.contactInfo || '-' %></td>
             <td class="px-4 py-3">
               <% if (i.licenseKey) { %>
                 <span class="inline-block px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-semibold"><%= i.licenseKey %></span>

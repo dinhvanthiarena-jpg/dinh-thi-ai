@@ -14,6 +14,7 @@ const GameInstall = sequelize.define(
     installId: { type: DataTypes.STRING, allowNull: false, unique: true },
     licenseKey: { type: DataTypes.STRING, defaultValue: null },
     teacherName: { type: DataTypes.STRING, defaultValue: null },
+    contactInfo: { type: DataTypes.STRING, defaultValue: null },
     appVersion: { type: DataTypes.STRING, defaultValue: null },
     pingCount: { type: DataTypes.INTEGER, defaultValue: 1 },
     lastSeenAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
