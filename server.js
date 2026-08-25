@@ -132,7 +132,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/pingtest123', (req, res) => res.send('PONG'));
 app.use('/', indexRoutes);
 app.use('/auth', authRoutes);
 app.use('/courses', courseRoutes);
