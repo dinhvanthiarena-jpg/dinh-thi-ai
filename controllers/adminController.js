@@ -6,6 +6,7 @@ const User = require('../models/User');
 const ContactMessage = require('../models/ContactMessage');
 const GalleryPhoto = require('../models/GalleryPhoto');
 const ChatMessage = require('../models/ChatMessage');
+const Tool = require('../models/Tool');
 
 // Admin pastes whatever YouTube link they copied (watch?v=, youtu.be/, shorts/,
 // or already an /embed/ link) — normalize all of them to the /embed/ form the
@@ -335,4 +336,74 @@ exports.galleryDelete = async (req, res) => {
   await GalleryPhoto.destroy({ where: { id: req.params.id } });
   req.flash('success', 'Đã xóa ảnh hoạt động.');
   res.redirect('/admin/gallery');
+};
+
+// --- Tools & Games ---
+exports.toolList = async (req, res) => {
+  const tools = await Tool.findAll({ order: [['createdAt', 'DESC']] });
+  res.render('admin/tools', { title: 'Tool & Game', tools });
+};
+
+exports.toolNewForm = (req, res) => {
+  res.render('admin/tool-form', { title: 'Thêm tool / game', tool: {} });
+};
+
+exports.toolEditForm = async (req, res, next) => {
+  const tool = await Tool.findByPk(req.params.id);
+  if (!tool) return next();
+  res.render('admin/tool-form', { title: 'Sửa tool / game', tool });
+};
+
+exports.toolCreate = async (req, res) => {
+  const body = req.body;
+  const files = req.files || {};
+  const cover = files.cover && files.cover[0];
+  const gallery = files.gallery || [];
+
+  await Tool.create({
+    title: body.title,
+    category: body.category,
+    shortDescription: body.shortDescription,
+    description: body.description,
+    driveUrl: body.driveUrl,
+    isPublished: body.isPublished === 'on',
+    coverImageUrl: cover ? `/uploads/${cover.filename}` : undefined,
+    galleryImages: gallery.map((f) => `/uploads/${f.filename}`),
+  });
+
+  req.flash('success', 'Đã thêm tool / game.');
+  res.redirect('/admin/tools');
+};
+
+exports.toolUpdate = async (req, res, next) => {
+  const tool = await Tool.findByPk(req.params.id);
+  if (!tool) return next();
+
+  const body = req.body;
+  const files = req.files || {};
+  const cover = files.cover && files.cover[0];
+  const gallery = files.gallery || [];
+  const keepExisting = body.keepGallery === 'on';
+
+  await tool.update({
+    title: body.title,
+    category: body.category,
+    shortDescription: body.shortDescription,
+    description: body.description,
+    driveUrl: body.driveUrl,
+    isPublished: body.isPublished === 'on',
+    ...(cover ? { coverImageUrl: `/uploads/${cover.filename}` } : {}),
+    ...(gallery.length
+      ? { galleryImages: [...(keepExisting ? tool.galleryImages || [] : []), ...gallery.map((f) => `/uploads/${f.filename}`)] }
+      : {}),
+  });
+
+  req.flash('success', 'Đã cập nhật tool / game.');
+  res.redirect('/admin/tools');
+};
+
+exports.toolDelete = async (req, res) => {
+  await Tool.destroy({ where: { id: req.params.id } });
+  req.flash('success', 'Đã xóa tool / game.');
+  res.redirect('/admin/tools');
 };

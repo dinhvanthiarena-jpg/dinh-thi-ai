@@ -1,0 +1,61 @@
+<section class="bg-gradient-to-br from-primary-50 to-white border-b border-primary-100">
+  <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-14">
+    <a href="/tools" class="text-sm text-primary-600 hover:underline">&larr; Tất cả tool &amp; game</a>
+
+    <div class="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-6">
+      <img src="<%= tool.coverImageUrl %>" alt="<%= tool.title %>" class="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl object-cover shadow-card flex-shrink-0" />
+      <div class="min-w-0">
+        <span class="badge <%= tool.category === 'Game' ? 'bg-accent-500 text-white' : tool.category === 'Công cụ' ? 'bg-amber-500 text-white' : 'bg-primary-600 text-white' %>"><%= tool.category %></span>
+        <h1 class="mt-3 text-2xl sm:text-4xl font-extrabold text-ink leading-tight"><%= tool.title %></h1>
+        <p class="mt-2 text-muted"><%= tool.shortDescription %></p>
+        <p class="mt-1 text-xs text-muted"><%= tool.downloadCount %> lượt tải</p>
+      </div>
+    </div>
+
+    <a
+      href="/tools/<%= tool.slug %>/download"
+      class="mt-8 inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-primary-600 to-accent-600 text-white text-lg sm:text-xl font-bold px-8 py-4 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
+    >
+      <svg class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12.5a1 1 0 0 1-.7-.29l-4-4a1 1 0 1 1 1.4-1.42L9 9.09V2a1 1 0 1 1 2 0v7.09l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-.7.29Z"/><path d="M4 13a1 1 0 0 1 1 1v2h10v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>
+      Tải <%= tool.title %> miễn phí
+    </a>
+  </div>
+</section>
+
+<% if (tool.description) { %>
+  <section class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-12">
+    <h2 class="text-xl font-bold text-ink mb-4">Giới thiệu</h2>
+    <div class="prose prose-slate max-w-none text-ink leading-relaxed whitespace-pre-line"><%= tool.description %></div>
+  </section>
+<% } %>
+
+<% if (tool.galleryImages && tool.galleryImages.length) { %>
+  <section class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pb-12">
+    <h2 class="text-xl font-bold text-ink mb-4">Hình ảnh</h2>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <% tool.galleryImages.forEach(function(img) { %>
+        <div class="aspect-video rounded-2xl overflow-hidden bg-primary-50 shadow-card">
+          <img src="<%= img %>" alt="<%= tool.title %>" class="w-full h-full object-cover" loading="lazy" />
+        </div>
+      <% }); %>
+    </div>
+  </section>
+<% } %>
+
+<% if (relatedTools.length) { %>
+  <section class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pb-16">
+    <h2 class="text-xl font-bold text-ink mb-6">Tool &amp; game khác</h2>
+    <div class="grid sm:grid-cols-3 gap-6">
+      <% relatedTools.forEach(function(t) { %>
+        <a href="/tools/<%= t.slug %>" class="card overflow-hidden group">
+          <div class="aspect-video bg-primary-50 overflow-hidden">
+            <img src="<%= t.coverImageUrl %>" alt="<%= t.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          </div>
+          <div class="p-4">
+            <h3 class="font-semibold text-sm text-ink line-clamp-1 group-hover:text-primary-700"><%= t.title %></h3>
+          </div>
+        </a>
+      <% }); %>
+    </div>
+  </section>
+<% } %>

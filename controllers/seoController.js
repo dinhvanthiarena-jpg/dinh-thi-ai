@@ -1,5 +1,6 @@
 const Course = require('../models/Course');
 const BlogPost = require('../models/BlogPost');
+const Tool = require('../models/Tool');
 
 exports.robots = (req, res) => {
   const appUrl = res.locals.appUrl;
@@ -18,17 +19,19 @@ exports.robots = (req, res) => {
 
 exports.sitemap = async (req, res) => {
   const appUrl = res.locals.appUrl;
-  const [courses, posts] = await Promise.all([
+  const [courses, posts, tools] = await Promise.all([
     Course.findAll({ where: { isPublished: true }, attributes: ['slug', 'updatedAt'] }),
     BlogPost.findAll({ where: { isPublished: true }, attributes: ['slug', 'updatedAt'] }),
+    Tool.findAll({ where: { isPublished: true }, attributes: ['slug', 'updatedAt'] }),
   ]);
 
-  const staticUrls = ['', '/courses', '/blog', '/gioi-thieu', '/hoat-dong', '/lien-he'];
+  const staticUrls = ['', '/courses', '/blog', '/tools', '/gioi-thieu', '/hoat-dong', '/lien-he'];
 
   const urls = [
     ...staticUrls.map((p) => ({ loc: `${appUrl}${p}`, priority: p === '' ? '1.0' : '0.8' })),
     ...courses.map((c) => ({ loc: `${appUrl}/courses/${c.slug}`, lastmod: c.updatedAt, priority: '0.9' })),
     ...posts.map((p) => ({ loc: `${appUrl}/blog/${p.slug}`, lastmod: p.updatedAt, priority: '0.6' })),
+    ...tools.map((t) => ({ loc: `${appUrl}/tools/${t.slug}`, lastmod: t.updatedAt, priority: '0.7' })),
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

@@ -1,0 +1,67 @@
+<% const isEdit = tool && tool._id; %>
+<form action="<%= isEdit ? '/admin/tools/' + tool._id : '/admin/tools' %>" method="POST" enctype="multipart/form-data" class="space-y-5 max-w-2xl">
+  <div class="card p-6 space-y-5">
+    <div>
+      <label class="label">Tên tool / game *</label>
+      <input class="input" type="text" name="title" value="<%= tool.title || '' %>" required />
+    </div>
+
+    <div>
+      <label class="label">Loại</label>
+      <select class="input" name="category">
+        <% ['Ứng dụng','Game','Công cụ'].forEach(function(cat) { %>
+          <option value="<%= cat %>" <%= tool.category === cat ? 'selected' : '' %>><%= cat %></option>
+        <% }); %>
+      </select>
+    </div>
+
+    <div>
+      <label class="label">Mô tả ngắn (hiện ở thẻ giới thiệu)</label>
+      <input class="input" type="text" name="shortDescription" value="<%= tool.shortDescription || '' %>" />
+    </div>
+
+    <div>
+      <label class="label">Mô tả chi tiết</label>
+      <textarea class="input" name="description" rows="6"><%= tool.description || '' %></textarea>
+    </div>
+
+    <div>
+      <label class="label">Link Google Drive *</label>
+      <input class="input" type="text" name="driveUrl" value="<%= tool.driveUrl || '' %>" placeholder="https://drive.google.com/file/d/..." required />
+      <p class="text-xs text-muted mt-1">Dán nguyên link chia sẻ từ Google Drive (nhớ để chế độ chia sẻ là "Bất kỳ ai có đường liên kết"). Web sẽ tự tạo link tải cho khách.</p>
+    </div>
+
+    <div>
+      <label class="label">Ảnh đại diện (icon/ảnh bìa)<%= isEdit ? '' : ' *' %></label>
+      <% if (isEdit && tool.coverImageUrl) { %>
+        <img src="<%= tool.coverImageUrl %>" class="w-40 h-24 object-cover rounded-lg mb-2" alt="" />
+      <% } %>
+      <input type="file" name="cover" accept=".jpg,.jpeg,.png,.webp" class="text-sm" data-compress <%= isEdit ? '' : 'required' %> />
+    </div>
+
+    <div>
+      <label class="label">Ảnh trưng bày (screenshot, chọn được nhiều ảnh)</label>
+      <% if (isEdit && tool.galleryImages && tool.galleryImages.length) { %>
+        <div class="flex flex-wrap gap-2 mb-2">
+          <% tool.galleryImages.forEach(function(img) { %>
+            <img src="<%= img %>" class="w-24 h-16 object-cover rounded-lg" alt="" />
+          <% }); %>
+        </div>
+        <label class="flex items-center gap-2 text-sm text-ink mb-2">
+          <input type="checkbox" name="keepGallery" checked />
+          Giữ ảnh cũ, chỉ thêm ảnh mới bên dưới
+        </label>
+      <% } %>
+      <input type="file" name="gallery" accept=".jpg,.jpeg,.png,.webp" class="text-sm" multiple data-compress />
+    </div>
+
+    <label class="flex items-center gap-2 text-sm text-ink">
+      <input type="checkbox" name="isPublished" <%= tool.isPublished !== false ? 'checked' : '' %> />
+      Hiển thị công khai
+    </label>
+  </div>
+
+  <button type="submit" class="btn-primary"><%= isEdit ? 'Cập nhật' : 'Thêm tool / game' %></button>
+</form>
+
+<script src="/js/image-compress.js"></script>

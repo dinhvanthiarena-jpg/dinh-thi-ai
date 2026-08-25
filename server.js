@@ -32,6 +32,7 @@ const courseRoutes = require('./routes/courses');
 const checkoutRoutes = require('./routes/checkout');
 const dashboardRoutes = require('./routes/dashboard');
 const blogRoutes = require('./routes/blog');
+const toolRoutes = require('./routes/tools');
 const adminRoutes = require('./routes/admin');
 const chatRoutes = require('./routes/chat');
 const webhookRoutes = require('./routes/webhook');
@@ -137,6 +138,7 @@ app.use('/courses', courseRoutes);
 app.use('/checkout', checkoutRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/blog', blogRoutes);
+app.use('/tools', toolRoutes);
 app.use('/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
 // Mounted as /fb-events rather than /webhook: hosting's security layer

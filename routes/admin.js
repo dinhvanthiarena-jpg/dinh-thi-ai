@@ -45,4 +45,15 @@ router.get('/gallery/:id/edit', adminController.galleryEditForm);
 router.post('/gallery/:id', upload.single('image'), upload.processImage({ maxWidth: 1920 }), adminController.galleryUpdate);
 router.post('/gallery/:id/delete', adminController.galleryDelete);
 
+const toolUpload = upload.fields([
+  { name: 'cover', maxCount: 1 },
+  { name: 'gallery', maxCount: 20 },
+]);
+router.get('/tools', adminController.toolList);
+router.get('/tools/new', adminController.toolNewForm);
+router.post('/tools', toolUpload, upload.processImage({ maxWidth: 1920 }), adminController.toolCreate);
+router.get('/tools/:id/edit', adminController.toolEditForm);
+router.post('/tools/:id', toolUpload, upload.processImage({ maxWidth: 1920 }), adminController.toolUpdate);
+router.post('/tools/:id/delete', adminController.toolDelete);
+
 module.exports = router;

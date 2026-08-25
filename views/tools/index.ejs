@@ -1,0 +1,35 @@
+<section class="bg-gradient-to-br from-primary-50 to-white border-b border-primary-100">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center">
+    <span class="badge bg-primary-100 text-primary-700 mb-4">Kho ứng dụng &amp; game</span>
+    <h1 class="text-3xl sm:text-5xl font-extrabold text-ink">Tool &amp; Game do Đinh Thi Ai xây dựng</h1>
+    <p class="mt-4 text-muted max-w-2xl mx-auto text-base sm:text-lg">Sản phẩm thực chiến được tạo ra bằng chính công nghệ AI ứng dụng — tải miễn phí, dùng ngay.</p>
+  </div>
+</section>
+
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
+  <% if (!tools.length) { %>
+    <div class="card p-16 text-center text-muted">Chưa có tool / game nào được đăng. Quay lại sau nhé!</div>
+  <% } else { %>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <% tools.forEach(function(t) { %>
+        <a href="/tools/<%= t.slug %>" class="group card overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+          <div class="relative aspect-[4/3] bg-gradient-to-br from-primary-100 to-accent-100 overflow-hidden">
+            <img src="<%= t.coverImageUrl %>" alt="<%= t.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+            <span class="absolute top-3 left-3 badge shadow-sm <%= t.category === 'Game' ? 'bg-accent-500 text-white' : t.category === 'Công cụ' ? 'bg-amber-500 text-white' : 'bg-primary-600 text-white' %>"><%= t.category %></span>
+          </div>
+          <div class="p-6 flex flex-col flex-1">
+            <h3 class="text-lg font-bold text-ink leading-snug line-clamp-1 group-hover:text-primary-700"><%= t.title %></h3>
+            <p class="text-sm text-muted mt-2 line-clamp-2 flex-1"><%= t.shortDescription %></p>
+            <div class="mt-5 flex items-center justify-between">
+              <span class="text-xs text-muted"><%= t.downloadCount %> lượt tải</span>
+              <span class="inline-flex items-center gap-1.5 rounded-full bg-primary-600 text-white text-sm font-semibold px-4 py-2 group-hover:bg-primary-700 transition-colors">
+                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12.5a1 1 0 0 1-.7-.29l-4-4a1 1 0 1 1 1.4-1.42L9 9.09V2a1 1 0 1 1 2 0v7.09l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-.7.29Z"/><path d="M4 13a1 1 0 0 1 1 1v2h10v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>
+                Tải về
+              </span>
+            </div>
+          </div>
+        </a>
+      <% }); %>
+    </div>
+  <% } %>
+</section>
