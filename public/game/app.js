@@ -1110,6 +1110,50 @@
     setTimeout(() => { settingsModal.hidden = true; }, 900);
   });
 
+  /* ================= INSTALL TO PHONE ================= */
+  if (IS_WEB) {
+    const btnInstallApp = $('btnInstallApp');
+    const iosInstallModal = $('iosInstallModal');
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    let deferredInstallPrompt = null;
+
+    if (!isStandalone) {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        btnInstallApp.hidden = false;
+      });
+      // iOS never fires beforeinstallprompt — show the button right away so
+      // tapping it opens the manual Share > Add to Home Screen instructions.
+      if (isIOS) btnInstallApp.hidden = false;
+
+      btnInstallApp.addEventListener('click', async () => {
+        sfx.click();
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice.catch(() => null);
+          deferredInstallPrompt = null;
+          if (choice && choice.outcome === 'accepted') btnInstallApp.hidden = true;
+          return;
+        }
+        if (isIOS && iosInstallModal) {
+          iosInstallModal.hidden = false;
+          return;
+        }
+        // Neither path available (e.g. already-installable criteria not yet
+        // met, or an unsupported desktop browser) — fall back silently.
+      });
+
+      window.addEventListener('appinstalled', () => { btnInstallApp.hidden = true; });
+    }
+
+    if (iosInstallModal) {
+      $('btnCloseIosInstall').addEventListener('click', () => { sfx.click(); iosInstallModal.hidden = true; });
+      iosInstallModal.addEventListener('click', (e) => { if (e.target.id === 'iosInstallModal') iosInstallModal.hidden = true; });
+    }
+  }
+
   /* ================= AUTO UPDATE ================= */
   const updateBadge = $('updateBadge');
   if (window.electronAPI && window.electronAPI.onUpdateStatus) {

@@ -1040,6 +1040,36 @@ button:focus-visible,
 #btnHowToGotIt { width: 100%; margin-top: 10px; }
 
 /* ==== Browser picker modal ==== */
+.btn-install {
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #8CF0AE 0%, #22C55E 55%, #0F6B31 100%);
+  color: #fff;
+  border-color: #0B4A22;
+  margin: 4px 0 18px;
+  animation: pop-in 300ms ease-out;
+}
+
+.ios-install-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ios-install-steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--color-foreground);
+  background: #fff;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+.ios-install-steps svg { color: var(--color-primary); flex-shrink: 0; }
+
 .browser-picker-desc {
   color: var(--color-muted-foreground);
   font-weight: 700;
