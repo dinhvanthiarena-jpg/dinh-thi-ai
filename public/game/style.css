@@ -1220,7 +1220,7 @@ button:focus-visible,
   gap: 12px;
   text-align: center;
 }
-.homework-back-btn { top: 18px; left: 18px; right: auto; }
+.homework-back-btn { top: calc(18px + env(safe-area-inset-top, 0px)); left: calc(18px + env(safe-area-inset-left, 0px)); right: auto; }
 .homework-title {
   font-family: var(--font-heading);
   font-weight: 800;
