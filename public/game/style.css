@@ -498,11 +498,16 @@ button:focus-visible,
   pointer-events: none;
 }
 .mascot-hero .mascot-photo {
+  /* Fixed px, not percentages — percentage height on an absolutely
+     positioned element needs an explicit (not inset-derived) height on
+     the containing block to resolve consistently, and iOS Safari was
+     falling back to resolving against the viewport instead of the
+     164x110 frame, blowing the photo up way past the ring's hole. */
   position: absolute;
-  width: 45%;
-  height: 67%;
-  left: 50%;
-  top: 51%;
+  width: 74px;
+  height: 74px;
+  left: 82px;
+  top: 56px;
   transform: translate(-50%, -50%);
   border: none;
   box-shadow: none;
