@@ -202,17 +202,35 @@ button:focus-visible,
   text-align: center;
 }
 
-.title-hero-img {
-  width: min(92vw, 520px);
-  height: auto;
+.title-hero {
+  font-family: 'Corbel', 'Calibri', var(--font-heading);
+  font-weight: 800;
+  -webkit-text-stroke: 3px rgba(255,255,255,0.92);
+  paint-order: stroke fill;
+  font-size: clamp(2.4rem, 6vw, 3.8rem);
+  line-height: 1.18;
+  letter-spacing: 0.5px;
   margin: 10px 0 0;
+  background: linear-gradient(90deg, #34D399 0%, #22D3EE 30%, #818CF8 55%, #C084FC 75%, #F472B6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   filter: drop-shadow(0 6px 10px rgba(0,0,0,0.45));
 }
+.title-hero .t-green, .title-hero .t-orange, .title-hero .t-blue { color: inherit; }
 
-.subtitle-img {
-  width: min(72vw, 320px);
-  height: auto;
-  margin: 10px 0 20px;
+.subtitle {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  color: #4A2E12;
+  background: linear-gradient(180deg, #F3D48A 0%, #C9963A 55%, #8B5E1F 100%);
+  border: 2px solid #6B4413;
+  border-radius: 999px;
+  padding: 7px 22px;
+  margin: 14px 0 26px;
+  font-weight: 800;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.55);
 }
 
 .update-badge {
@@ -245,32 +263,6 @@ button:focus-visible,
   gap: 18px;
   flex-wrap: wrap;
   justify-content: center;
-}
-
-/* Real cropped gem-button artwork instead of a CSS pill — button element
-   kept for click/keyboard behavior, just stripped of its own chrome. */
-.btn-gem-img {
-  background: none;
-  border: none;
-  padding: 0;
-  box-shadow: none;
-  cursor: pointer;
-  transition: transform 150ms ease-out;
-}
-.btn-gem-img:hover { transform: translateY(-3px); filter: brightness(1.06); }
-.btn-gem-img:active { transform: translateY(3px) scale(0.98); }
-.btn-gem-img img { display: block; height: 84px; width: auto; }
-
-.deco-corner {
-  position: absolute;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.9;
-}
-.deco-compass { top: 4vh; left: -6vw; width: 34vw; max-width: 220px; }
-.deco-astrolabe { top: 10vh; right: -4vw; width: 24vw; max-width: 170px; }
-@media (max-width: 480px) {
-  .deco-corner { opacity: 0.55; }
 }
 
 /* ==== License screen ==== */
@@ -482,11 +474,11 @@ button:focus-visible,
 .contact-web-btn:hover { transform: translateY(-2px); }
 .contact-web-btn:active { transform: translateY(1px) scale(0.97); }
 
-.mascot-game, .mascot-result {
+.mascot-hero, .mascot-game, .mascot-result {
   position: relative;
   padding: 6px;
 }
-.mascot-game::before, .mascot-result::before {
+.mascot-hero::before, .mascot-game::before, .mascot-result::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -500,37 +492,9 @@ button:focus-visible,
   box-shadow: 0 3px 8px rgba(0,0,0,0.35), inset 0 0 0 2px #6B4413;
   z-index: -1;
 }
+.mascot-hero { width: 120px; height: 120px; animation: floaty 3.2s ease-in-out infinite; }
 .mascot-game { width: 80px; height: 80px; margin: 0 auto 6px; transition: transform 200ms ease-out; }
 .mascot-result { width: 100px; height: 100px; margin: 0 auto; }
-
-/* Home/license/homework mascot: real cropped gear-frame artwork (with a
-   transparent hole) layered over the live photo, instead of a CSS ring. */
-.mascot-hero-wrap {
-  position: relative;
-  width: 139px;
-  height: 120px;
-  margin: 0 auto;
-  animation: floaty 3.2s ease-in-out infinite;
-}
-.mascot-hero { position: absolute; inset: 0; }
-.mascot-frame-overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-  pointer-events: none;
-}
-.mascot-hero .mascot-photo {
-  position: absolute;
-  width: 62%;
-  height: 55%;
-  left: 50%;
-  top: 45%;
-  transform: translate(-50%, -50%);
-  border: none;
-  box-shadow: none;
-}
 
 @keyframes floaty {
   0%, 100% { transform: translateY(0) rotate(-2deg); }
