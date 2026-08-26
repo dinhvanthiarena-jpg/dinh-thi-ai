@@ -330,6 +330,33 @@
     </div>
   </div>
 
+  <!-- MODAL: MAC SAFARI INSTALL GUIDE -->
+  <div class="modal-overlay ios-install-overlay" id="macInstallModal" hidden>
+    <div class="modal-box ios-install-box">
+      <button class="icon-btn modal-close" id="btnCloseMacInstall" aria-label="Đóng">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+      <h2>Cài vào máy Mac</h2>
+      <p class="settings-desc">Safari trên máy tính không cho web tự hiện hộp cài đặt. Thầy/cô làm theo cách sau:</p>
+      <div class="ios-arrow-hint">
+        <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path fill="currentColor" d="M12 21l-7-7 1.41-1.41L11 17.17V3h2v14.17l4.59-4.58L19 14z"/></svg>
+        <span>Mở menu "Tệp" (File) ở trên cùng màn hình 👆</span>
+      </div>
+      <p class="settings-desc" style="margin-top:6px;">Chọn <strong>"Thêm vào Dock"</strong> (Add to Dock). Xong! Icon game xuất hiện trong Dock như app thật.</p>
+    </div>
+  </div>
+
+  <!-- MODAL: GENERIC / UNSUPPORTED BROWSER INSTALL GUIDE -->
+  <div class="modal-overlay ios-install-overlay" id="genericInstallModal" hidden>
+    <div class="modal-box ios-install-box">
+      <button class="icon-btn modal-close" id="btnCloseGenericInstall" aria-label="Đóng">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+      <h2 id="genericInstallTitle">Trình duyệt này chưa hỗ trợ cài tự động</h2>
+      <p class="settings-desc" id="genericInstallDesc">Thầy/cô vẫn chơi được bình thường ngay trên trang web này — không bắt buộc phải cài. Để cài được icon vào máy/điện thoại, thầy/cô mở link này bằng <strong>Google Chrome</strong> hoặc <strong>Microsoft Edge</strong> rồi bấm lại nút "Cài đặt ngay" nhé.</p>
+    </div>
+  </div>
+
   <!-- MODAL: TEACHER SETTINGS -->
   <div class="modal-overlay" id="settingsModal" hidden>
     <div class="modal-box">

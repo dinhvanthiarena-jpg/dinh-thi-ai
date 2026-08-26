@@ -1124,23 +1124,31 @@
     setTimeout(() => { settingsModal.hidden = true; }, 900);
   });
 
-  /* ================= INSTALL TO PHONE ================= */
+  /* ================= INSTALL TO PHONE/MÁY TÍNH ================= */
   if (IS_WEB) {
     const btnInstallApp = $('btnInstallApp');
     const iosInstallModal = $('iosInstallModal');
+    const macInstallModal = $('macInstallModal');
+    const genericInstallModal = $('genericInstallModal');
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+    const ua = navigator.userAgent;
+    const isIOSDevice = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isIOSWrappedBrowser = isIOSDevice && /crios|fxios|edgios|opios/i.test(ua);
+    const isMacDesktopSafari = !isIOSDevice && /macintosh/i.test(ua) && /safari/i.test(ua) && !/chrome|chromium|edg|opr/i.test(ua);
     let deferredInstallPrompt = null;
 
     if (!isStandalone) {
+      // Show the button immediately on every browser — Chromium browsers
+      // (Chrome/Edge/Brave/Opera, desktop or Android) will later get a real
+      // beforeinstallprompt and the button just works; everyone else gets a
+      // browser-appropriate manual guide when they tap it.
+      btnInstallApp.hidden = false;
+
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredInstallPrompt = e;
-        btnInstallApp.hidden = false;
       });
-      // iOS never fires beforeinstallprompt — show the button right away so
-      // tapping it opens the manual Share > Add to Home Screen instructions.
-      if (isIOS) btnInstallApp.hidden = false;
 
       btnInstallApp.addEventListener('click', async () => {
         sfx.click();
@@ -1151,21 +1159,38 @@
           if (choice && choice.outcome === 'accepted') btnInstallApp.hidden = true;
           return;
         }
-        if (isIOS && iosInstallModal) {
-          iosInstallModal.hidden = false;
+        if (isIOSDevice) {
+          if (isIOSWrappedBrowser) {
+            $('genericInstallTitle').textContent = 'Thầy/cô đang dùng trình duyệt khác Safari';
+            $('genericInstallDesc').innerHTML = 'Trên iPhone/iPad, chỉ <strong>Safari</strong> cài được vào màn hình chính. Thầy/cô copy link này rồi dán vào Safari để mở, sau đó bấm lại nút "Cài đặt ngay" nhé.';
+            genericInstallModal.hidden = false;
+          } else if (iosInstallModal) {
+            iosInstallModal.hidden = false;
+          }
           return;
         }
-        // Neither path available (e.g. already-installable criteria not yet
-        // met, or an unsupported desktop browser) — fall back silently.
+        if (isMacDesktopSafari && macInstallModal) {
+          macInstallModal.hidden = false;
+          return;
+        }
+        // Firefox and any other browser without an install API.
+        $('genericInstallTitle').textContent = 'Trình duyệt này chưa hỗ trợ cài tự động';
+        $('genericInstallDesc').innerHTML = 'Thầy/cô vẫn chơi được bình thường ngay trên trang web này — không bắt buộc phải cài. Để cài được icon vào máy/điện thoại, thầy/cô mở link này bằng <strong>Google Chrome</strong> hoặc <strong>Microsoft Edge</strong> rồi bấm lại nút "Cài đặt ngay" nhé.';
+        genericInstallModal.hidden = false;
       });
 
       window.addEventListener('appinstalled', () => { btnInstallApp.hidden = true; });
     }
 
-    if (iosInstallModal) {
-      $('btnCloseIosInstall').addEventListener('click', () => { sfx.click(); iosInstallModal.hidden = true; });
-      iosInstallModal.addEventListener('click', (e) => { if (e.target.id === 'iosInstallModal') iosInstallModal.hidden = true; });
-    }
+    [
+      [iosInstallModal, 'btnCloseIosInstall'],
+      [macInstallModal, 'btnCloseMacInstall'],
+      [genericInstallModal, 'btnCloseGenericInstall'],
+    ].forEach(([modal, closeBtnId]) => {
+      if (!modal) return;
+      $(closeBtnId).addEventListener('click', () => { sfx.click(); modal.hidden = true; });
+      modal.addEventListener('click', (e) => { if (e.target === modal) modal.hidden = true; });
+    });
   }
 
   /* ================= AUTO UPDATE ================= */
