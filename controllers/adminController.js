@@ -398,7 +398,11 @@ exports.toolUpdate = async (req, res, next) => {
   const gallery = files.gallery || [];
   const keepExisting = body.keepGallery === 'on';
 
-  await tool.update({
+  // tool.update(data) restricts the SQL UPDATE to exactly Object.keys(data),
+  // so the beforeValidate hook's derived driveFileId (not in that list) gets
+  // computed in memory but silently never persisted. set()+save() saves
+  // every changed field, including hook-derived ones.
+  tool.set({
     title: body.title,
     category: body.category,
     shortDescription: body.shortDescription,
@@ -410,6 +414,7 @@ exports.toolUpdate = async (req, res, next) => {
       ? { galleryImages: [...(keepExisting ? tool.galleryImages || [] : []), ...gallery.map((f) => `/uploads/${f.filename}`)] }
       : {}),
   });
+  await tool.save();
 
   req.flash('success', 'Đã cập nhật tool / game.');
   res.redirect('/admin/tools');
