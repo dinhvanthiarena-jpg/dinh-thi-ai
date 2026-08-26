@@ -165,8 +165,8 @@
     osc.stop(t0 + dur + 0.02);
   }
 
-  // Gentle pop ballad: soft melody over a sustained I-V-vi-IV chord pad (in C major)
-  const MUSIC_STEP_DUR = 0.5;
+  // Slow, soothing lullaby pad: soft melody over a sustained I-V-vi-IV chord pad (in C major)
+  const MUSIC_STEP_DUR = 0.85;
   const MUSIC_MELODY = [
     783.99, 659.25, 523.25, 659.25, // over C
     493.88, 587.33, 783.99, 587.33, // over G
@@ -190,7 +190,7 @@
     while (musicNextTime < c.currentTime + 0.2) {
       const stepInLoop = musicStep % MUSIC_MELODY.length;
       const offset = musicNextTime - c.currentTime;
-      tone(MUSIC_MELODY[stepInLoop], offset, MUSIC_STEP_DUR * 0.85, 'triangle', 0.05);
+      tone(MUSIC_MELODY[stepInLoop], offset, MUSIC_STEP_DUR * 1.3, 'sine', 0.038);
       if (stepInLoop % 4 === 0) {
         const chord = MUSIC_CHORDS[(stepInLoop / 4) % MUSIC_CHORDS.length];
         chord.forEach((f) => padTone(f, offset, MUSIC_CHORD_DUR, 0.028));
