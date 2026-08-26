@@ -480,35 +480,39 @@ button:focus-visible,
 .mascot-result { width: 100px; height: 100px; margin: 0 auto; }
 
 /* Home/license/homework mascot: real cropped gear-frame artwork (with a
-   transparent hole) layered over the live photo, instead of a CSS ring. */
+   transparent hole) layered over the live photo, instead of a CSS ring.
+   Grid stacking (both layers in the same 1x1 cell) instead of
+   absolute+percentage+transform centering — that combination rendered
+   correctly in Chromium but put the photo well below/right of the hole
+   on iOS Safari; grid layering doesn't have that cross-browser edge case. */
 .mascot-hero-wrap {
-  position: relative;
+  display: grid;
   width: 164px;
   height: 110px;
   margin: 0 auto;
   animation: floaty 3.2s ease-in-out infinite;
 }
-.mascot-hero { position: absolute; inset: 0; }
+.mascot-hero-wrap > * { grid-area: 1 / 1; }
+.mascot-hero {
+  width: 74px;
+  height: 74px;
+  align-self: center;
+  justify-self: center;
+  /* Nudge from dead-center to the hole's actual center (very slightly
+     below and right of the frame's midpoint). */
+  transform: translate(1px, 3px);
+}
 .mascot-frame-overlay {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
+  align-self: center;
+  justify-self: center;
   z-index: 2;
   pointer-events: none;
 }
 .mascot-hero .mascot-photo {
-  /* Fixed px, not percentages — percentage height on an absolutely
-     positioned element needs an explicit (not inset-derived) height on
-     the containing block to resolve consistently, and iOS Safari was
-     falling back to resolving against the viewport instead of the
-     164x110 frame, blowing the photo up way past the ring's hole. */
-  position: absolute;
-  width: 74px;
-  height: 74px;
-  left: 82px;
-  top: 56px;
-  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
   border: none;
   box-shadow: none;
 }
