@@ -9,10 +9,10 @@
   --color-accent: #EC4899;
   --color-accent-dark: #DB2777;
   --color-on-accent: #000000;
-  --color-background: #2FA8E8;
+  --color-background: #131B45;
   --color-foreground: #0F172A;
   --color-on-bg: #FFFFFF;
-  --color-on-bg-muted: #E3F4FF;
+  --color-on-bg-muted: #C7D2FE;
   --color-card: #FFFFFF;
   --color-card-foreground: #0F172A;
   --color-muted: #F1F5FD;
@@ -42,9 +42,9 @@
   --font-heading: 'Segoe UI', Tahoma, Calibri, Arial, sans-serif;
   --font-body: 'Segoe UI', Tahoma, Calibri, Arial, sans-serif;
 
-  --glow-1: rgba(255, 255, 255, 0.4);
-  --glow-2: rgba(255, 255, 255, 0.28);
-  --glow-3: rgba(255, 255, 255, 0.22);
+  --glow-1: rgba(139, 92, 246, 0.35);
+  --glow-2: rgba(56, 189, 248, 0.3);
+  --glow-3: rgba(99, 102, 241, 0.28);
 }
 
 * { box-sizing: border-box; }
@@ -60,10 +60,20 @@ html, body {
 body {
   font-family: var(--font-body);
   background:
-    radial-gradient(circle at 12% 10%, var(--glow-1), transparent 30%),
-    radial-gradient(circle at 88% 16%, var(--glow-2), transparent 28%),
-    radial-gradient(circle at 30% 88%, var(--glow-3), transparent 32%),
-    linear-gradient(180deg, #6FCBF5 0%, #34AEEC 45%, #1D8FDB 100%);
+    radial-gradient(1.5px 1.5px at 15% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 42% 12%, #fff, transparent),
+    radial-gradient(2px 2px at 68% 28%, #fff, transparent),
+    radial-gradient(1px 1px at 85% 15%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 92% 55%, #fff, transparent),
+    radial-gradient(1px 1px at 25% 60%, #fff, transparent),
+    radial-gradient(2px 2px at 10% 78%, #fff, transparent),
+    radial-gradient(1px 1px at 55% 82%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 78% 90%, #fff, transparent),
+    radial-gradient(1px 1px at 5% 45%, #fff, transparent),
+    radial-gradient(circle at 20% 15%, var(--glow-1), transparent 40%),
+    radial-gradient(circle at 85% 25%, var(--glow-2), transparent 40%),
+    radial-gradient(circle at 45% 90%, var(--glow-3), transparent 45%),
+    linear-gradient(180deg, #0B1230 0%, #131B45 45%, #1B2A5E 100%);
   transition: background 600ms ease-out;
   color: var(--color-on-bg);
   user-select: none;
@@ -195,23 +205,32 @@ button:focus-visible,
 .title-hero {
   font-family: 'Corbel', 'Calibri', var(--font-heading);
   font-weight: 800;
-  -webkit-text-stroke: 3px #FFFFFF;
+  -webkit-text-stroke: 3px rgba(255,255,255,0.92);
   paint-order: stroke fill;
-  font-size: clamp(2.6rem, 6vw, 4rem);
-  line-height: 1.15;
+  font-size: clamp(2.4rem, 6vw, 3.8rem);
+  line-height: 1.18;
   letter-spacing: 0.5px;
   margin: 10px 0 0;
+  background: linear-gradient(90deg, #34D399 0%, #22D3EE 30%, #818CF8 55%, #C084FC 75%, #F472B6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.45));
 }
-.title-hero .t-green { color: #22C55E; text-shadow: 0 4px 0 #15803D, 0 8px 16px rgba(0,0,0,0.25); }
-.title-hero .t-orange { color: #FB923C; text-shadow: 0 4px 0 #C2410C, 0 8px 16px rgba(0,0,0,0.25); }
-.title-hero .t-blue { color: #38BDF8; text-shadow: 0 4px 0 #0369A1, 0 8px 16px rgba(0,0,0,0.25); }
+.title-hero .t-green, .title-hero .t-orange, .title-hero .t-blue { color: inherit; }
 
 .subtitle {
+  display: inline-block;
   font-family: var(--font-heading);
-  font-size: 1.2rem;
-  color: var(--color-on-bg-muted);
-  margin: 6px 0 30px;
+  font-size: 1.05rem;
+  color: #4A2E12;
+  background: linear-gradient(180deg, #F3D48A 0%, #C9963A 55%, #8B5E1F 100%);
+  border: 2px solid #6B4413;
+  border-radius: 999px;
+  padding: 7px 22px;
+  margin: 14px 0 26px;
   font-weight: 800;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.55);
 }
 
 .update-badge {
@@ -375,23 +394,26 @@ button:focus-visible,
 
 .contact-footer {
   position: absolute;
-  bottom: 18px;
+  bottom: 0;
   left: 0;
   right: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  padding: 0 20px;
+  padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, #8A5A2E 0%, #5C3417 100%);
+  border-top: 3px solid #3E2410;
+  box-shadow: 0 -4px 14px rgba(0,0,0,0.35);
 }
 .contact-line {
   font-family: var(--font-heading);
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--color-on-bg-muted);
+  color: #F3D48A;
   margin: 0;
 }
-.contact-line strong { color: var(--color-on-bg); }
+.contact-line strong { color: #FFE9BE; }
 .contact-actions {
   display: flex;
   align-items: center;
@@ -406,9 +428,10 @@ button:focus-visible,
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 0.85rem;
-  color: var(--color-primary);
-  background: var(--gloss-shine), linear-gradient(180deg, #FFFFFF 0%, #EDF2FC 55%, #D7E1F5 100%);
-  border: 2px solid #B9C6E0;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #7DD4FF 0%, #0891B2 55%, #0C4A5C 100%);
+  border: 2px solid #073642;
   border-radius: 999px;
   padding: 6px 14px;
   box-shadow: var(--gloss-shadow-sm);
@@ -460,8 +483,13 @@ button:focus-visible,
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: conic-gradient(from -20deg, #EF4444, #F59E0B, #FACC15, #22C55E, #38BDF8, #6366F1, #EC4899, #EF4444);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  background:
+    radial-gradient(circle 5px at 50% 3%, #34D399, transparent 62%),
+    radial-gradient(circle 5px at 97% 50%, #38BDF8, transparent 62%),
+    radial-gradient(circle 5px at 50% 97%, #34D399, transparent 62%),
+    radial-gradient(circle 5px at 3% 50%, #38BDF8, transparent 62%),
+    conic-gradient(from -20deg, #C9963A, #F3D48A, #C9963A, #8B5E1F, #C9963A, #F3D48A, #C9963A, #8B5E1F, #C9963A);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.35), inset 0 0 0 2px #6B4413;
   z-index: -1;
 }
 .mascot-hero { width: 120px; height: 120px; animation: floaty 3.2s ease-in-out infinite; }
@@ -534,13 +562,14 @@ button:focus-visible,
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 0.95rem;
-  color: #0F3D66;
-  background: linear-gradient(180deg, #FFFFFF 0%, #E4F3FF 100%);
-  border: 2px solid #BFE3FF;
+  color: #F3D48A;
+  background: linear-gradient(180deg, #1B2A5E 0%, #0F1838 100%);
+  border: 2px solid #C9963A;
   border-radius: 999px;
   padding: 3px 14px;
   margin: 8px 0 0;
   text-align: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
   box-shadow: var(--gloss-shadow-sm);
 }
 .mascot-name-game { margin: 6px 0 4px; }
