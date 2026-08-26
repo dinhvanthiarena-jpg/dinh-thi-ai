@@ -146,6 +146,35 @@
   };
 
   /* ================= BACKGROUND MUSIC ================= */
+  // Layers a fundamental + a few quiet upper partials (one slightly
+  // detuned, like real piano string inharmonicity) with a quick attack and
+  // long ring-out — reads as a clear, bright piano note rather than a flat
+  // sine/pad tone.
+  const PIANO_HARMONICS = [
+    { mult: 1, gain: 1 },
+    { mult: 2, gain: 0.32 },
+    { mult: 3, gain: 0.14 },
+    { mult: 4.01, gain: 0.06 },
+  ];
+  function pianoTone(freq, start, dur, peak) {
+    if (muted) return;
+    const c = ctx();
+    const t0 = c.currentTime + start;
+    const attack = 0.008;
+    PIANO_HARMONICS.forEach(({ mult, gain }) => {
+      const osc = c.createOscillator();
+      const g = c.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq * mult;
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(peak * gain, t0 + attack);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      osc.connect(g).connect(c.destination);
+      osc.start(t0);
+      osc.stop(t0 + dur + 0.02);
+    });
+  }
+
   function padTone(freq, start, dur, peak) {
     if (muted) return;
     const c = ctx();
@@ -190,7 +219,7 @@
     while (musicNextTime < c.currentTime + 0.2) {
       const stepInLoop = musicStep % MUSIC_MELODY.length;
       const offset = musicNextTime - c.currentTime;
-      tone(MUSIC_MELODY[stepInLoop], offset, MUSIC_STEP_DUR * 1.3, 'sine', 0.038);
+      pianoTone(MUSIC_MELODY[stepInLoop], offset, MUSIC_STEP_DUR * 1.3, 0.034);
       if (stepInLoop % 4 === 0) {
         const chord = MUSIC_CHORDS[(stepInLoop / 4) % MUSIC_CHORDS.length];
         chord.forEach((f) => padTone(f, offset, MUSIC_CHORD_DUR, 0.028));
