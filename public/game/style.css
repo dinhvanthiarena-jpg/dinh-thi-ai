@@ -539,7 +539,7 @@ button:focus-visible,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 20px 6px;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) 6px calc(20px + env(safe-area-inset-left, 0px));
 }
 .topbar-title {
   font-family: var(--font-heading);
@@ -709,7 +709,7 @@ button:focus-visible,
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 18px 20px 4px;
+  padding: calc(18px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) 4px calc(20px + env(safe-area-inset-left, 0px));
 }
 .hud-mid { flex: 1; display: flex; flex-direction: column; gap: 6px; align-items: center; }
 .hud-lives { display: flex; gap: 4px; }
