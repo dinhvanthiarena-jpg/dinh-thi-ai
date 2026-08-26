@@ -6,16 +6,28 @@ const https = require('https');
 
 const GEMINI_MODEL = 'gemini-3.6-flash';
 
+// Splits the model's reply into "slides" the student taps/swipes through
+// one at a time instead of reading one long wall of text.
+const STEP_DELIMITER = '%%%STEP%%%';
+
 function buildPrompt(strugglingMode) {
-  const base = `Bạn là một giáo viên tiểu học giỏi, tận tâm, đang dạy kèm 1-1 cho học sinh Việt Nam từ lớp 1 đến lớp 5. Nhìn vào bài tập toán trong ảnh và:
-1. Đọc lại đúng đề bài trong ảnh (nếu chữ viết tay khó đọc, đoán ý hợp lý nhất, ghi rõ nếu không chắc).
-2. Giải thích cách làm THEO TỪNG BƯỚC, dễ hiểu, có ví dụ minh hoạ nếu cần.
-3. Đưa ra đáp số cuối cùng rõ ràng, in đậm.
-4. Nếu có cách tính nhanh/mẹo hay phù hợp với bài này, hãy chỉ thêm ở cuối.
-Trả lời bằng tiếng Việt, giọng điệu ấm áp, khích lệ, xưng "thầy/cô", gọi học sinh là "con". Nếu ảnh không phải bài toán hoặc không đọc được, hãy nói rõ và nhẹ nhàng nhắc chụp lại.`;
+  const base = `Bạn là một giáo viên tiểu học giỏi, tận tâm, đang dạy kèm 1-1 cho học sinh Việt Nam từ lớp 1 đến lớp 5. Nhìn vào bài tập toán trong ảnh và dạy con làm bài đó, giống như đang ngồi cạnh giảng trực tiếp.
+
+Cấu trúc câu trả lời thành nhiều BƯỚC NHỎ, mỗi bước là một ý trọn vẹn, ngắn gọn (2-4 câu), để con đọc từng bước một, không bị rối:
+- Bước 1: đọc lại đúng đề bài trong ảnh (nếu chữ viết tay khó đọc, đoán ý hợp lý nhất và ghi rõ nếu không chắc).
+- Các bước tiếp theo: giảng cách làm, MỖI Ý CHÍNH LÀ MỘT BƯỚC RIÊNG (đừng dồn nhiều ý vào 1 bước), có ví dụ minh hoạ nếu cần.
+- Bước áp chót (nếu có): cách tính nhanh/mẹo hay phù hợp với bài này.
+- Bước cuối cùng: đáp số cuối cùng, in đậm, kèm một câu khích lệ động viên con.
+
+QUAN TRỌNG VỀ ĐỊNH DẠNG: giữa các bước, chèn ĐÚNG NGUYÊN VĂN dòng phân cách sau trên một dòng riêng, không thêm số thứ tự hay chữ "Bước" vào dòng phân cách đó:
+${STEP_DELIMITER}
+
+Ví dụ cấu trúc: <nội dung bước 1>\n${STEP_DELIMITER}\n<nội dung bước 2>\n${STEP_DELIMITER}\n<nội dung bước cuối>
+
+Trả lời bằng tiếng Việt, giọng điệu ấm áp, khích lệ, xưng "thầy/cô", gọi học sinh là "con". Nếu ảnh không phải bài toán hoặc không đọc được, hãy nói rõ và nhẹ nhàng nhắc chụp lại (không cần chia bước trong trường hợp này).`;
   const strugglingExtra = `
 
-QUAN TRỌNG: học sinh này bị MẤT GỐC (yếu kiến thức cơ bản) — hãy giảng CỰC KỲ chậm rãi, chia nhỏ từng bước nhỏ nhất có thể, giải thích cả những khái niệm nền tảng nhất liên quan (ví dụ: phép cộng/trừ là gì, hàng chục hàng đơn vị là gì...), không bỏ qua bước nào dù nhỏ, dùng từ ngữ đơn giản nhất, có thể lấy ví dụ đồ vật quen thuộc (kẹo, quả táo, ngón tay...) để minh hoạ cho dễ hình dung.`;
+QUAN TRỌNG: học sinh này bị MẤT GỐC (yếu kiến thức cơ bản) — hãy giảng CỰC KỲ chậm rãi, chia thành CÀNG NHIỀU BƯỚC CÀNG TỐT (mỗi bước chỉ một ý nhỏ nhất có thể), giải thích cả những khái niệm nền tảng nhất liên quan (ví dụ: phép cộng/trừ là gì, hàng chục hàng đơn vị là gì...), không bỏ qua bước nào dù nhỏ, dùng từ ngữ đơn giản nhất, có thể lấy ví dụ đồ vật quen thuộc (kẹo, quả táo, ngón tay...) để minh hoạ cho dễ hình dung.`;
   return base + (strugglingMode ? strugglingExtra : '');
 }
 
