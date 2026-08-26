@@ -178,14 +178,14 @@ button:focus-visible,
 }
 
 .btn-primary {
-  background: var(--gloss-shine-strong), linear-gradient(180deg, #7DAEFF 0%, #2563EB 55%, #1741A6 100%);
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #A0F0E8 0%, #2B8FA3 45%, #0E4A5C 100%);
   color: var(--color-on-primary);
-  border-color: #16265E;
+  border-color: #0A2E38;
 }
 .btn-secondary {
-  background: var(--gloss-shine-strong), linear-gradient(180deg, #D6B4FF 0%, #9333EA 55%, #6B21A8 100%);
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #D8A6FF 0%, #7C2D8F 45%, #3D0F4A 100%);
   color: #FFFFFF;
-  border-color: #4C1D95;
+  border-color: #2A0A33;
 }
 .btn-xl { padding: 20px 40px; font-size: 1.25rem; }
 .btn-lg { padding: 16px 28px; font-size: 1.05rem; }
@@ -211,7 +211,7 @@ button:focus-visible,
   line-height: 1.18;
   letter-spacing: 0.5px;
   margin: 10px 0 0;
-  background: linear-gradient(90deg, #34D399 0%, #22D3EE 30%, #818CF8 55%, #C084FC 75%, #F472B6 100%);
+  background: linear-gradient(90deg, #34D399 0%, #22D3EE 28%, #A78BFA 52%, #D946EF 68%, #FB923C 85%, #FBBF24 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
