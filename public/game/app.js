@@ -175,26 +175,8 @@
     });
   }
 
-  function padTone(freq, start, dur, peak) {
-    if (muted) return;
-    const c = ctx();
-    const osc = c.createOscillator();
-    const gain = c.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = freq;
-    const t0 = c.currentTime + start;
-    const attack = Math.min(0.35, dur * 0.3);
-    const release = Math.min(0.4, dur * 0.3);
-    gain.gain.setValueAtTime(0, t0);
-    gain.gain.linearRampToValueAtTime(peak, t0 + attack);
-    gain.gain.setValueAtTime(peak, t0 + dur - release);
-    gain.gain.linearRampToValueAtTime(0.0001, t0 + dur);
-    osc.connect(gain).connect(c.destination);
-    osc.start(t0);
-    osc.stop(t0 + dur + 0.02);
-  }
-
-  // Slow, soothing lullaby pad: soft melody over a sustained I-V-vi-IV chord pad (in C major)
+  // Slow, soothing piano melody in C major — no sustained bass pad
+  // underneath (used to, but it read as a droning hum on phone speakers).
   const MUSIC_STEP_DUR = 0.85;
   const MUSIC_MELODY = [
     783.99, 659.25, 523.25, 659.25, // over C
@@ -202,13 +184,6 @@
     440.00, 523.25, 659.25, 523.25, // over Am
     523.25, 440.00, 698.46, 440.00, // over F
   ];
-  const MUSIC_CHORDS = [
-    [130.81, 164.81, 196.00], // C
-    [196.00, 246.94, 293.66], // G
-    [220.00, 261.63, 329.63], // Am
-    [174.61, 220.00, 261.63], // F
-  ];
-  const MUSIC_CHORD_DUR = MUSIC_STEP_DUR * 4;
   let musicTimerId = null;
   let musicNextTime = 0;
   let musicStep = 0;
@@ -219,11 +194,9 @@
     while (musicNextTime < c.currentTime + 0.2) {
       const stepInLoop = musicStep % MUSIC_MELODY.length;
       const offset = musicNextTime - c.currentTime;
+      // No sustained low chord pad — it read as a droning hum, especially
+      // on phone speakers. Piano melody alone, nothing underneath it.
       pianoTone(MUSIC_MELODY[stepInLoop], offset, MUSIC_STEP_DUR * 1.3, 0.034);
-      if (stepInLoop % 4 === 0) {
-        const chord = MUSIC_CHORDS[(stepInLoop / 4) % MUSIC_CHORDS.length];
-        chord.forEach((f) => padTone(f, offset, MUSIC_CHORD_DUR, 0.028));
-      }
       musicNextTime += MUSIC_STEP_DUR;
       musicStep++;
     }
