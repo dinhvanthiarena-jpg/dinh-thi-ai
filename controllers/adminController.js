@@ -367,6 +367,18 @@ exports.toolEditForm = async (req, res, next) => {
   res.render('admin/tool-form', { title: 'Sửa tool / game', tool });
 };
 
+// Parses the Google Drive file id (if any) straight out of the pasted URL.
+// Computed explicitly here rather than left to the model's beforeValidate
+// hook, since a stale driveFileId from an earlier Drive link must be
+// overwritten with null the moment an admin switches driveUrl to a
+// non-Drive link (e.g. the game's own domain) — see git history for the
+// Sequelize update()-fields-restriction bug this used to hit.
+function parseDriveFileId(driveUrl) {
+  if (!driveUrl) return null;
+  const match = driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || driveUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : null;
+}
+
 exports.toolCreate = async (req, res) => {
   const body = req.body;
   const files = req.files || {};
@@ -379,6 +391,7 @@ exports.toolCreate = async (req, res) => {
     shortDescription: body.shortDescription,
     description: body.description,
     driveUrl: body.driveUrl,
+    driveFileId: parseDriveFileId(body.driveUrl),
     isPublished: body.isPublished === 'on',
     coverImageUrl: cover ? `/uploads/${cover.filename}` : undefined,
     galleryImages: gallery.map((f) => `/uploads/${f.filename}`),
@@ -399,15 +412,17 @@ exports.toolUpdate = async (req, res, next) => {
   const keepExisting = body.keepGallery === 'on';
 
   // tool.update(data) restricts the SQL UPDATE to exactly Object.keys(data),
-  // so the beforeValidate hook's derived driveFileId (not in that list) gets
-  // computed in memory but silently never persisted. set()+save() saves
-  // every changed field, including hook-derived ones.
+  // so a field not in that list never reaches the database even if a hook
+  // derives it in memory. set()+save() saves every changed field. driveFileId
+  // is also computed explicitly here (not left to the hook alone) so it's
+  // unambiguous and covered by the same Object.keys(data) set either way.
   tool.set({
     title: body.title,
     category: body.category,
     shortDescription: body.shortDescription,
     description: body.description,
     driveUrl: body.driveUrl,
+    driveFileId: parseDriveFileId(body.driveUrl),
     isPublished: body.isPublished === 'on',
     ...(cover ? { coverImageUrl: `/uploads/${cover.filename}` } : {}),
     ...(gallery.length
