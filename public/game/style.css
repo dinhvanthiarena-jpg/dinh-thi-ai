@@ -80,6 +80,12 @@ body {
   cursor: default;
 }
 
+/* Real background photo from thầy, home screen only — other screens keep
+   the CSS starfield since he scoped this image to "trang chủ". */
+#screen-home {
+  background: url('assets/ui/bg-home.jpg') center center / cover no-repeat;
+}
+
 button {
   font-family: inherit;
   cursor: pointer;
@@ -202,35 +208,16 @@ button:focus-visible,
   text-align: center;
 }
 
-.title-hero {
-  font-family: 'Corbel', 'Calibri', var(--font-heading);
-  font-weight: 800;
-  -webkit-text-stroke: 3px rgba(255,255,255,0.92);
-  paint-order: stroke fill;
-  font-size: clamp(2.4rem, 6vw, 3.8rem);
-  line-height: 1.18;
-  letter-spacing: 0.5px;
+.title-hero-img {
+  width: min(92vw, 480px);
+  height: auto;
   margin: 10px 0 0;
-  background: linear-gradient(90deg, #34D399 0%, #22D3EE 28%, #A78BFA 52%, #D946EF 68%, #FB923C 85%, #FBBF24 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.45));
 }
-.title-hero .t-green, .title-hero .t-orange, .title-hero .t-blue { color: inherit; }
 
-.subtitle {
-  display: inline-block;
-  font-family: var(--font-heading);
-  font-size: 1.05rem;
-  color: #4A2E12;
-  background: linear-gradient(180deg, #F3D48A 0%, #C9963A 55%, #8B5E1F 100%);
-  border: 2px solid #6B4413;
-  border-radius: 999px;
-  padding: 7px 22px;
-  margin: 14px 0 26px;
-  font-weight: 800;
-  box-shadow: 0 3px 0 rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.55);
+.subtitle-img {
+  width: min(70vw, 300px);
+  height: auto;
+  margin: 12px 0 22px;
 }
 
 .update-badge {
@@ -264,21 +251,38 @@ button:focus-visible,
   flex-wrap: wrap;
   justify-content: center;
 }
-/* Cut-corner "gem" silhouette + a diagonal facet-highlight streak, just for
-   the two big home buttons — kept scoped here so it doesn't clip text on
-   other buttons elsewhere that use .btn-primary/.btn-secondary. */
-.home-actions .btn {
-  position: relative;
-  clip-path: polygon(22px 0, calc(100% - 22px) 0, 100% 22px, 100% calc(100% - 22px), calc(100% - 22px) 100%, 22px 100%, 0 calc(100% - 22px), 0 22px);
-  overflow: hidden;
+/* Real cropped gem-button artwork — button element kept for click/keyboard
+   behavior, just stripped of its own chrome. */
+.btn-gem-img {
+  background: none;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  cursor: pointer;
+  transition: transform 150ms ease-out;
 }
-.home-actions .btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.5) 46%, rgba(255,255,255,0.15) 54%, transparent 68%);
-  pointer-events: none;
+.btn-gem-img:hover { transform: translateY(-3px); filter: brightness(1.06); }
+.btn-gem-img:active { transform: translateY(3px) scale(0.98); }
+.btn-gem-img img { display: block; height: 88px; width: auto; }
+
+/* Icon-only homework button (real photo/AI-teach icon comes later from
+   thầy — placeholder SVG for now). */
+.btn-homework-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 6px;
+  transition: transform 150ms ease-out;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
 }
+.btn-homework-icon img { width: 100%; height: 100%; object-fit: contain; }
+.btn-homework-icon:hover { transform: translateY(-2px) scale(1.04); }
+.btn-homework-icon:active { transform: translateY(2px) scale(0.96); }
 
 /* ==== License screen ==== */
 .license-title {
@@ -436,64 +440,29 @@ button:focus-visible,
   flex-wrap: wrap;
   justify-content: center;
 }
-.contact-phone {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 0.85rem;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  background: var(--gloss-shine-strong), linear-gradient(180deg, #7DD4FF 0%, #0891B2 55%, #0C4A5C 100%);
-  border: 2px solid #073642;
-  border-radius: 999px;
-  padding: 6px 14px;
-  box-shadow: var(--gloss-shadow-sm);
+.contact-phone-img img,
+.contact-img-btn img {
+  display: block;
+  height: 34px;
+  width: auto;
 }
-.contact-fb-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 0.85rem;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  background: var(--gloss-shine-strong), linear-gradient(180deg, #7DAEFF 0%, #2563EB 55%, #1741A6 100%);
-  border: 2px solid #16265E;
-  border-radius: 999px;
-  padding: 6px 14px;
-  box-shadow: var(--gloss-shadow-sm);
+.contact-img-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   transition: transform 150ms ease-out;
 }
-.contact-fb-btn:hover { transform: translateY(-2px); }
-.contact-fb-btn:active { transform: translateY(1px) scale(0.97); }
-
-.contact-web-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 0.85rem;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  background: var(--gloss-shine-strong), linear-gradient(180deg, #8CF0AE 0%, #22C55E 55%, #0F6B31 100%);
-  border: 2px solid #0B4A22;
-  border-radius: 999px;
-  padding: 6px 14px;
-  box-shadow: var(--gloss-shadow-sm);
-  transition: transform 150ms ease-out;
-}
+.contact-img-btn:hover { transform: translateY(-2px); }
+.contact-img-btn:active { transform: translateY(1px) scale(0.97); }
 .contact-web-btn:hover { transform: translateY(-2px); }
 .contact-web-btn:active { transform: translateY(1px) scale(0.97); }
 
-.mascot-hero, .mascot-game, .mascot-result {
+.mascot-game, .mascot-result {
   position: relative;
   padding: 6px;
 }
-.mascot-hero::before, .mascot-game::before, .mascot-result::before {
+.mascot-game::before, .mascot-result::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -507,9 +476,37 @@ button:focus-visible,
   box-shadow: 0 3px 8px rgba(0,0,0,0.35), inset 0 0 0 2px #6B4413;
   z-index: -1;
 }
-.mascot-hero { width: 120px; height: 120px; animation: floaty 3.2s ease-in-out infinite; }
 .mascot-game { width: 80px; height: 80px; margin: 0 auto 6px; transition: transform 200ms ease-out; }
 .mascot-result { width: 100px; height: 100px; margin: 0 auto; }
+
+/* Home/license/homework mascot: real cropped gear-frame artwork (with a
+   transparent hole) layered over the live photo, instead of a CSS ring. */
+.mascot-hero-wrap {
+  position: relative;
+  width: 164px;
+  height: 110px;
+  margin: 0 auto;
+  animation: floaty 3.2s ease-in-out infinite;
+}
+.mascot-hero { position: absolute; inset: 0; }
+.mascot-frame-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+.mascot-hero .mascot-photo {
+  position: absolute;
+  width: 45%;
+  height: 67%;
+  left: 50%;
+  top: 51%;
+  transform: translate(-50%, -50%);
+  border: none;
+  box-shadow: none;
+}
 
 @keyframes floaty {
   0%, 100% { transform: translateY(0) rotate(-2deg); }
