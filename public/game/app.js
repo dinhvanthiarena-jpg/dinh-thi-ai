@@ -145,76 +145,6 @@
     win() { tone(523, 0, 0.15, 'sine', 0.24); tone(659, 0.14, 0.15, 'sine', 0.24); tone(784, 0.28, 0.15, 'sine', 0.24); tone(1046, 0.42, 0.3, 'sine', 0.26); },
   };
 
-  /* ================= BACKGROUND MUSIC ================= */
-  // Layers a fundamental + a few quiet upper partials (one slightly
-  // detuned, like real piano string inharmonicity) with a quick attack and
-  // long ring-out — reads as a clear, bright piano note rather than a flat
-  // sine/pad tone.
-  const PIANO_HARMONICS = [
-    { mult: 1, gain: 1 },
-    { mult: 2, gain: 0.32 },
-    { mult: 3, gain: 0.14 },
-    { mult: 4.01, gain: 0.06 },
-  ];
-  function pianoTone(freq, start, dur, peak) {
-    if (muted) return;
-    const c = ctx();
-    const t0 = c.currentTime + start;
-    const attack = 0.008;
-    PIANO_HARMONICS.forEach(({ mult, gain }) => {
-      const osc = c.createOscillator();
-      const g = c.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq * mult;
-      g.gain.setValueAtTime(0, t0);
-      g.gain.linearRampToValueAtTime(peak * gain, t0 + attack);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-      osc.connect(g).connect(c.destination);
-      osc.start(t0);
-      osc.stop(t0 + dur + 0.02);
-    });
-  }
-
-  // Slow, soothing piano melody in C major — no sustained bass pad
-  // underneath (used to, but it read as a droning hum on phone speakers).
-  const MUSIC_STEP_DUR = 0.85;
-  const MUSIC_MELODY = [
-    783.99, 659.25, 523.25, 659.25, // over C
-    493.88, 587.33, 783.99, 587.33, // over G
-    440.00, 523.25, 659.25, 523.25, // over Am
-    523.25, 440.00, 698.46, 440.00, // over F
-  ];
-  let musicTimerId = null;
-  let musicNextTime = 0;
-  let musicStep = 0;
-
-  function scheduleMusicStep() {
-    if (muted) return;
-    const c = ctx();
-    while (musicNextTime < c.currentTime + 0.2) {
-      const stepInLoop = musicStep % MUSIC_MELODY.length;
-      const offset = musicNextTime - c.currentTime;
-      // No sustained low chord pad — it read as a droning hum, especially
-      // on phone speakers. Piano melody alone, nothing underneath it.
-      pianoTone(MUSIC_MELODY[stepInLoop], offset, MUSIC_STEP_DUR * 1.3, 0.034);
-      musicNextTime += MUSIC_STEP_DUR;
-      musicStep++;
-    }
-  }
-
-  function startMusic() {
-    if (musicTimerId || muted) return;
-    const c = ctx();
-    musicNextTime = c.currentTime + 0.05;
-    musicStep = 0;
-    musicTimerId = setInterval(scheduleMusicStep, 100);
-  }
-
-  function stopMusic() {
-    clearInterval(musicTimerId);
-    musicTimerId = null;
-  }
-
   /* ================= QUESTION GENERATION ================= */
   function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
   function pick(arr) { return arr[randInt(0, arr.length - 1)]; }
@@ -467,17 +397,11 @@
     muted = !muted;
     localStorage.setItem('mathgame_muted', muted ? '1' : '0');
     refreshSoundIcon();
-    if (muted) {
-      stopMusic();
-    } else {
-      sfx.click();
-      startMusic();
-    }
+    if (!muted) sfx.click();
   });
 
   function unlockAudio() {
     ctx();
-    if (!muted) startMusic();
   }
   ['pointerdown', 'touchstart', 'click'].forEach((evt) => {
     document.addEventListener(evt, unlockAudio, { once: true, passive: true });
