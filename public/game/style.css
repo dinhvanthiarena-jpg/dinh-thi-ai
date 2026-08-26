@@ -73,6 +73,8 @@ body {
 button {
   font-family: inherit;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 button:focus-visible,
 .icon-btn:focus-visible {
@@ -96,8 +98,17 @@ button:focus-visible,
   flex-direction: column;
   align-items: center;
   overflow-y: auto;
+  opacity: 0;
 }
-.screen.active { display: flex; }
+.screen.active {
+  display: flex;
+  opacity: 1;
+  animation: screen-fade-in 220ms ease-out;
+}
+@keyframes screen-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 /* ==== Sound toggle ==== */
 .top-fixed { position: fixed; top: calc(18px + env(safe-area-inset-top, 0px)); right: calc(18px + env(safe-area-inset-right, 0px)); z-index: 50; }
