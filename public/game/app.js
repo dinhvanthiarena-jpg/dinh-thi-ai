@@ -472,10 +472,24 @@
     }
   });
 
-  document.addEventListener('pointerdown', function firstInteraction() {
-    document.removeEventListener('pointerdown', firstInteraction);
+  function unlockAudio() {
+    ctx();
     if (!muted) startMusic();
-  }, { once: true });
+  }
+  ['pointerdown', 'touchstart', 'click'].forEach((evt) => {
+    document.addEventListener(evt, unlockAudio, { once: true, passive: true });
+  });
+  // iOS Safari can re-suspend the AudioContext after the tab is backgrounded
+  // (e.g. switching apps, the install-to-home-screen share sheet) — resume
+  // it as soon as the page is visible/focused again.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  });
+  window.addEventListener('focus', () => {
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  });
 
   /* ================= HOME ================= */
   $('btnPlay').addEventListener('click', () => { sfx.click(); showScreen('setup'); });
