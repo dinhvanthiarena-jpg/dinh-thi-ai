@@ -4,7 +4,7 @@
 // chatbotService.js uses for Anthropic.
 const https = require('https');
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-3.6-flash';
 
 function buildPrompt(strugglingMode) {
   const base = `Bạn là một giáo viên tiểu học giỏi, tận tâm, đang dạy kèm 1-1 cho học sinh Việt Nam từ lớp 1 đến lớp 5. Nhìn vào bài tập toán trong ảnh và:
