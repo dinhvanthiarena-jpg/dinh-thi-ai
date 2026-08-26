@@ -9,10 +9,10 @@
   --color-accent: #EC4899;
   --color-accent-dark: #DB2777;
   --color-on-accent: #000000;
-  --color-background: #000000;
+  --color-background: #2FA8E8;
   --color-foreground: #0F172A;
-  --color-on-bg: #F8FAFC;
-  --color-on-bg-muted: #94A3B8;
+  --color-on-bg: #FFFFFF;
+  --color-on-bg-muted: #E3F4FF;
   --color-card: #FFFFFF;
   --color-card-foreground: #0F172A;
   --color-muted: #F1F5FD;
@@ -42,9 +42,9 @@
   --font-heading: 'Segoe UI', Tahoma, Calibri, Arial, sans-serif;
   --font-body: 'Segoe UI', Tahoma, Calibri, Arial, sans-serif;
 
-  --glow-1: rgba(245, 158, 11, 0.28);
-  --glow-2: rgba(236, 72, 153, 0.24);
-  --glow-3: rgba(37, 99, 235, 0.26);
+  --glow-1: rgba(255, 255, 255, 0.4);
+  --glow-2: rgba(255, 255, 255, 0.28);
+  --glow-3: rgba(255, 255, 255, 0.22);
 }
 
 * { box-sizing: border-box; }
@@ -60,10 +60,10 @@ html, body {
 body {
   font-family: var(--font-body);
   background:
-    radial-gradient(circle at 10% 15%, var(--glow-1), transparent 40%),
-    radial-gradient(circle at 90% 20%, var(--glow-2), transparent 40%),
-    radial-gradient(circle at 50% 95%, var(--glow-3), transparent 45%),
-    var(--color-background);
+    radial-gradient(circle at 12% 10%, var(--glow-1), transparent 30%),
+    radial-gradient(circle at 88% 16%, var(--glow-2), transparent 28%),
+    radial-gradient(circle at 30% 88%, var(--glow-3), transparent 32%),
+    linear-gradient(180deg, #6FCBF5 0%, #34AEEC 45%, #1D8FDB 100%);
   transition: background 600ms ease-out;
   color: var(--color-on-bg);
   user-select: none;
@@ -145,7 +145,7 @@ button:focus-visible,
   justify-content: center;
   gap: 10px;
   border: 3px solid transparent;
-  border-radius: var(--radius-lg);
+  border-radius: 999px;
   font-family: var(--font-heading);
   font-weight: 800;
   letter-spacing: 0.3px;
@@ -173,11 +173,11 @@ button:focus-visible,
   border-color: #16265E;
 }
 .btn-secondary {
-  background: var(--gloss-shine-strong), linear-gradient(180deg, #FFE29A 0%, #F59E0B 55%, #B45F06 100%);
-  color: var(--color-on-secondary);
-  border-color: #6B3A02;
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #D6B4FF 0%, #9333EA 55%, #6B21A8 100%);
+  color: #FFFFFF;
+  border-color: #4C1D95;
 }
-.btn-xl { padding: 20px 40px; font-size: 1.25rem; border-radius: var(--radius-xl); }
+.btn-xl { padding: 20px 40px; font-size: 1.25rem; }
 .btn-lg { padding: 16px 28px; font-size: 1.05rem; }
 
 /* ==== HOME ==== */
@@ -195,19 +195,16 @@ button:focus-visible,
 .title-hero {
   font-family: 'Corbel', 'Calibri', var(--font-heading);
   font-weight: 800;
-  -webkit-text-stroke: 1.4px var(--color-primary);
+  -webkit-text-stroke: 3px #FFFFFF;
+  paint-order: stroke fill;
   font-size: clamp(2.6rem, 6vw, 4rem);
   line-height: 1.15;
   letter-spacing: 0.5px;
   margin: 10px 0 0;
-  color: var(--color-primary);
-  text-shadow: 0 3px 10px rgba(0,0,0,0.35), 0 0 26px rgba(37,99,235,0.5), 0 1px 0 rgba(255,255,255,0.5);
 }
-.title-hero span {
-  color: var(--color-accent);
-  -webkit-text-stroke: 1.4px var(--color-accent);
-  text-shadow: 0 3px 10px rgba(0,0,0,0.35), 0 0 26px rgba(236,72,153,0.5), 0 1px 0 rgba(255,255,255,0.5);
-}
+.title-hero .t-green { color: #22C55E; text-shadow: 0 4px 0 #15803D, 0 8px 16px rgba(0,0,0,0.25); }
+.title-hero .t-orange { color: #FB923C; text-shadow: 0 4px 0 #C2410C, 0 8px 16px rgba(0,0,0,0.25); }
+.title-hero .t-blue { color: #38BDF8; text-shadow: 0 4px 0 #0369A1, 0 8px 16px rgba(0,0,0,0.25); }
 
 .subtitle {
   font-family: var(--font-heading);
@@ -454,6 +451,19 @@ button:focus-visible,
 .contact-web-btn:hover { transform: translateY(-2px); }
 .contact-web-btn:active { transform: translateY(1px) scale(0.97); }
 
+.mascot-hero, .mascot-game, .mascot-result {
+  position: relative;
+  padding: 6px;
+}
+.mascot-hero::before, .mascot-game::before, .mascot-result::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from -20deg, #EF4444, #F59E0B, #FACC15, #22C55E, #38BDF8, #6366F1, #EC4899, #EF4444);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  z-index: -1;
+}
 .mascot-hero { width: 120px; height: 120px; animation: floaty 3.2s ease-in-out infinite; }
 .mascot-game { width: 80px; height: 80px; margin: 0 auto 6px; transition: transform 200ms ease-out; }
 .mascot-result { width: 100px; height: 100px; margin: 0 auto; }
@@ -524,14 +534,13 @@ button:focus-visible,
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 0.95rem;
-  color: var(--color-on-bg);
-  background: linear-gradient(180deg, #7DAEFF 0%, #2563EB 100%);
-  border: 2px solid #16265E;
+  color: #0F3D66;
+  background: linear-gradient(180deg, #FFFFFF 0%, #E4F3FF 100%);
+  border: 2px solid #BFE3FF;
   border-radius: 999px;
   padding: 3px 14px;
   margin: 8px 0 0;
   text-align: center;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
   box-shadow: var(--gloss-shadow-sm);
 }
 .mascot-name-game { margin: 6px 0 4px; }
