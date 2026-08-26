@@ -41,7 +41,10 @@
   <!-- SCREEN: LICENSE -->
   <section id="screen-license" class="screen">
     <div class="home-wrap">
-      <div class="mascot-hero" id="mascotLicense" aria-hidden="true"></div>
+      <div class="mascot-hero-wrap">
+        <div class="mascot-hero" id="mascotLicense" aria-hidden="true"></div>
+        <img class="mascot-frame-overlay" src="assets/ui/avatar-frame.png" alt="" aria-hidden="true" />
+      </div>
       <p class="mascot-name js-teacher-name">Thầy Đinh Thi Ai</p>
       <h1 class="license-title" id="licenseTitle">Cần kích hoạt</h1>
       <p class="license-desc" id="licenseDesc">Vui lòng liên hệ Thầy Đinh Thi Ai để nhận mã key, sau đó nhập vào bên dưới để tiếp tục chơi nhé!</p>
@@ -75,24 +78,27 @@
 
   <!-- SCREEN: HOME -->
   <section id="screen-home" class="screen active">
+    <img class="deco-corner deco-compass" src="assets/ui/deco-compass.png" alt="" aria-hidden="true" />
+    <img class="deco-corner deco-astrolabe" src="assets/ui/deco-astrolabe.png" alt="" aria-hidden="true" />
     <div class="home-wrap">
-      <div class="mascot-hero" id="mascotHome" aria-hidden="true"></div>
+      <div class="mascot-hero-wrap">
+        <div class="mascot-hero" id="mascotHome" aria-hidden="true"></div>
+        <img class="mascot-frame-overlay" src="assets/ui/avatar-frame.png" alt="" aria-hidden="true" />
+      </div>
       <p class="mascot-name js-teacher-name">Thầy Đinh Thi Ai</p>
-      <h1 class="title-hero"><span class="t-green">TOÁN</span> <span class="t-orange">VUI</span><br/><span class="t-blue">CẤP 1</span></h1>
-      <p class="subtitle">Chơi mà học – Học mà chơi!</p>
+      <img class="title-hero-img" src="assets/ui/title-hero.png" alt="Toán Vui Cấp 1" />
+      <img class="subtitle-img" src="assets/ui/subtitle-ribbon.png" alt="Chơi mà học – Học mà chơi!" />
       <p class="update-badge" id="updateBadge" hidden></p>
       <button class="btn btn-install" id="btnInstallApp" hidden>
         <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M12 3v10.59l3.3-3.3 1.4 1.42L12 17.4l-4.7-4.7 1.4-1.42 3.3 3.3V3h2zM5 19h14v2H5v-2z"/></svg>
         Cài đặt ngay vào điện thoại
       </button>
       <div class="home-actions">
-        <button class="btn btn-primary btn-xl" id="btnPlay">
-          <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
-          Bắt đầu chơi
+        <button class="btn-gem-img" id="btnPlay" aria-label="Bắt đầu chơi">
+          <img src="assets/ui/btn-play.png" alt="Bắt đầu chơi" />
         </button>
-        <button class="btn btn-secondary btn-lg" id="btnHowTo">
-          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-13c-1.66 0-3 1.34-3 3h2c0-.55.45-1 1-1s1 .45 1 1c0 1-1.5 1-1.5 3h2c0-1 1.5-1.5 1.5-3 0-1.66-1.34-3-3-3z"/></svg>
-          Cách chơi
+        <button class="btn-gem-img" id="btnHowTo" aria-label="Cách chơi">
+          <img src="assets/ui/btn-howto.png" alt="Cách chơi" />
         </button>
       </div>
       <button class="btn btn-homework" id="btnOpenHomework">
@@ -275,7 +281,10 @@
       <button class="icon-btn top-fixed homework-back-btn" id="btnHomeworkBack" aria-label="Về trang chủ">
         <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
       </button>
-      <div class="mascot-hero" id="mascotHomework" aria-hidden="true"></div>
+      <div class="mascot-hero-wrap">
+        <div class="mascot-hero" id="mascotHomework" aria-hidden="true"></div>
+        <img class="mascot-frame-overlay" src="assets/ui/avatar-frame.png" alt="" aria-hidden="true" />
+      </div>
       <p class="mascot-name js-teacher-name">Thầy Đinh Thi Ai</p>
       <h1 class="homework-title">Chụp bài tập, AI giảng bài</h1>
       <p class="settings-desc">Chụp hoặc chọn ảnh bài toán của con, AI sẽ giảng giải từng bước dễ hiểu.</p>
