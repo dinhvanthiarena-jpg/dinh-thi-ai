@@ -1201,6 +1201,13 @@
     const homeworkAnswerBox = $('homeworkAnswerBox');
     const homeworkErrorText = $('homeworkErrorText');
     const homeworkLoadingText = $('homeworkLoadingText');
+    const homeworkSlideProgress = $('homeworkSlideProgress');
+    const homeworkDots = $('homeworkDots');
+    const btnHomeworkPrev = $('btnHomeworkPrev');
+    const btnHomeworkNext = $('btnHomeworkNext');
+    const HOMEWORK_STEP_DELIMITER = '%%%STEP%%%';
+    let homeworkSlides = [];
+    let homeworkSlideIndex = 0;
     const homeworkSteps = {
       pick: $('homeworkStepPick'),
       preview: $('homeworkStepPreview'),
@@ -1229,6 +1236,8 @@
       homeworkFileInput.value = '';
       strugglingMode = false;
       btnToggleStruggling.setAttribute('aria-pressed', 'false');
+      homeworkSlides = [];
+      homeworkSlideIndex = 0;
       homeworkShowStep('pick');
     }
 
@@ -1259,6 +1268,38 @@
     function homeworkFormatAnswer(text) {
       const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       return escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    function homeworkRenderSlide() {
+      const total = homeworkSlides.length;
+      homeworkAnswerBox.innerHTML = homeworkFormatAnswer(homeworkSlides[homeworkSlideIndex]);
+      homeworkAnswerBox.scrollTop = 0;
+      homeworkAnswerBox.classList.remove('slide-anim');
+      void homeworkAnswerBox.offsetWidth; // restart animation
+      homeworkAnswerBox.classList.add('slide-anim');
+
+      homeworkSlideProgress.textContent = total > 1 ? `Bước ${homeworkSlideIndex + 1}/${total}` : 'Lời giảng';
+      homeworkSlideProgress.hidden = total <= 1;
+
+      homeworkDots.innerHTML = '';
+      homeworkDots.hidden = total <= 1;
+      for (let i = 0; i < total; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'dot' + (i === homeworkSlideIndex ? ' current' : '');
+        homeworkDots.appendChild(dot);
+      }
+
+      btnHomeworkPrev.disabled = homeworkSlideIndex === 0;
+      btnHomeworkPrev.hidden = total <= 1;
+      const isLast = homeworkSlideIndex === total - 1;
+      btnHomeworkNext.hidden = isLast || total <= 1;
+    }
+
+    function homeworkGoToSlide(index) {
+      if (index < 0 || index >= homeworkSlides.length) return;
+      homeworkSlideIndex = index;
+      sfx.click();
+      homeworkRenderSlide();
     }
 
     $('btnOpenHomework').addEventListener('click', () => {
@@ -1292,6 +1333,24 @@
     $('btnHomeworkAnother').addEventListener('click', () => { sfx.click(); homeworkResetToPick(); });
     $('btnHomeworkRetryError').addEventListener('click', () => { sfx.click(); homeworkShowStep(homeworkBlob ? 'preview' : 'pick'); });
 
+    btnHomeworkPrev.addEventListener('click', () => homeworkGoToSlide(homeworkSlideIndex - 1));
+    btnHomeworkNext.addEventListener('click', () => homeworkGoToSlide(homeworkSlideIndex + 1));
+
+    // Swipe left/right on the answer box to move between steps, same
+    // gesture as the iOS install guide — natural on a phone, no dead zones.
+    let homeworkTouchStartX = null;
+    homeworkAnswerBox.addEventListener('touchstart', (e) => {
+      homeworkTouchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    homeworkAnswerBox.addEventListener('touchend', (e) => {
+      if (homeworkTouchStartX === null) return;
+      const dx = e.changedTouches[0].clientX - homeworkTouchStartX;
+      homeworkTouchStartX = null;
+      const SWIPE_THRESHOLD = 40;
+      if (dx <= -SWIPE_THRESHOLD) homeworkGoToSlide(homeworkSlideIndex + 1);
+      else if (dx >= SWIPE_THRESHOLD) homeworkGoToSlide(homeworkSlideIndex - 1);
+    }, { passive: true });
+
     async function homeworkSubmit() {
       if (!homeworkBlob) return;
       homeworkShowStep('loading');
@@ -1315,7 +1374,13 @@
           sfx.wrong();
           return;
         }
-        homeworkAnswerBox.innerHTML = homeworkFormatAnswer(data.explanation);
+        homeworkSlides = data.explanation
+          .split(HOMEWORK_STEP_DELIMITER)
+          .map((s) => s.trim())
+          .filter(Boolean);
+        if (!homeworkSlides.length) homeworkSlides = [data.explanation];
+        homeworkSlideIndex = 0;
+        homeworkRenderSlide();
         homeworkShowStep('result');
         sfx.correct();
       } catch (e) {
