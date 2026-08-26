@@ -444,7 +444,7 @@
   /* ================= DOM refs ================= */
   const $ = (id) => document.getElementById(id);
   const screens = {
-    license: $('screen-license'), home: $('screen-home'), setup: $('screen-setup'), game: $('screen-game'), result: $('screen-result'),
+    license: $('screen-license'), home: $('screen-home'), setup: $('screen-setup'), game: $('screen-game'), result: $('screen-result'), homework: $('screen-homework'),
   };
   function showScreen(name) {
     Object.values(screens).forEach(s => s.classList.remove('active'));
@@ -1191,6 +1191,141 @@
       $(closeBtnId).addEventListener('click', () => { sfx.click(); modal.hidden = true; });
       modal.addEventListener('click', (e) => { if (e.target === modal) modal.hidden = true; });
     });
+  }
+
+  /* ================= HOMEWORK HELPER (AI đọc ảnh bài tập) ================= */
+  if (IS_WEB) {
+    const homeworkFileInput = $('homeworkFileInput');
+    const homeworkPreviewImg = $('homeworkPreviewImg');
+    const btnToggleStruggling = $('btnToggleStruggling');
+    const homeworkAnswerBox = $('homeworkAnswerBox');
+    const homeworkErrorText = $('homeworkErrorText');
+    const homeworkLoadingText = $('homeworkLoadingText');
+    const homeworkSteps = {
+      pick: $('homeworkStepPick'),
+      preview: $('homeworkStepPreview'),
+      loading: $('homeworkStepLoading'),
+      result: $('homeworkStepResult'),
+      error: $('homeworkStepError'),
+    };
+    let homeworkBlob = null;
+    let homeworkPreviewUrl = null;
+    let strugglingMode = false;
+    const LOADING_MESSAGES = [
+      'AI đang đọc bài và soạn lời giảng...',
+      'Đang chấm từng nét chữ của con...',
+      'Sắp xong rồi, thầy cô AI đang nắn nót câu chữ...',
+    ];
+    let loadingMsgTimer = null;
+
+    function homeworkShowStep(name) {
+      Object.values(homeworkSteps).forEach((el) => { el.hidden = true; });
+      homeworkSteps[name].hidden = false;
+    }
+
+    function homeworkResetToPick() {
+      homeworkBlob = null;
+      if (homeworkPreviewUrl) { URL.revokeObjectURL(homeworkPreviewUrl); homeworkPreviewUrl = null; }
+      homeworkFileInput.value = '';
+      strugglingMode = false;
+      btnToggleStruggling.setAttribute('aria-pressed', 'false');
+      homeworkShowStep('pick');
+    }
+
+    // Downscale to a reasonable max dimension before upload — keeps the
+    // request small/fast and well inside Gemini's free-tier limits.
+    function homeworkDownscaleToBlob(file, maxDim) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+            const w = Math.max(1, Math.round(img.width * scale));
+            const h = Math.max(1, Math.round(img.height * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('canvas toBlob failed'))), 'image/jpeg', 0.85);
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function homeworkFormatAnswer(text) {
+      const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    $('btnOpenHomework').addEventListener('click', () => {
+      sfx.click();
+      homeworkResetToPick();
+      setMascot($('mascotHomework'), 'idle');
+      showScreen('homework');
+    });
+    $('btnHomeworkBack').addEventListener('click', () => { sfx.click(); showScreen('home'); });
+
+    $('btnHomeworkPickPhoto').addEventListener('click', () => { sfx.click(); homeworkFileInput.click(); });
+    homeworkFileInput.addEventListener('change', async () => {
+      const file = homeworkFileInput.files && homeworkFileInput.files[0];
+      if (!file) return;
+      try {
+        homeworkBlob = await homeworkDownscaleToBlob(file, 1280);
+        if (homeworkPreviewUrl) URL.revokeObjectURL(homeworkPreviewUrl);
+        homeworkPreviewUrl = URL.createObjectURL(homeworkBlob);
+        homeworkPreviewImg.src = homeworkPreviewUrl;
+        homeworkShowStep('preview');
+      } catch (e) { /* unreadable file, ignore */ }
+    });
+
+    btnToggleStruggling.addEventListener('click', () => {
+      sfx.click();
+      strugglingMode = !strugglingMode;
+      btnToggleStruggling.setAttribute('aria-pressed', String(strugglingMode));
+    });
+
+    $('btnHomeworkRetake').addEventListener('click', () => { sfx.click(); homeworkResetToPick(); });
+    $('btnHomeworkAnother').addEventListener('click', () => { sfx.click(); homeworkResetToPick(); });
+    $('btnHomeworkRetryError').addEventListener('click', () => { sfx.click(); homeworkShowStep(homeworkBlob ? 'preview' : 'pick'); });
+
+    async function homeworkSubmit() {
+      if (!homeworkBlob) return;
+      homeworkShowStep('loading');
+      let msgIdx = 0;
+      homeworkLoadingText.textContent = LOADING_MESSAGES[0];
+      loadingMsgTimer = setInterval(() => {
+        msgIdx = (msgIdx + 1) % LOADING_MESSAGES.length;
+        homeworkLoadingText.textContent = LOADING_MESSAGES[msgIdx];
+      }, 3000);
+
+      try {
+        const formData = new FormData();
+        formData.append('image', homeworkBlob, 'homework.jpg');
+        formData.append('strugglingMode', strugglingMode ? 'true' : 'false');
+        const res = await fetch('/api/game/homework-help', { method: 'POST', body: formData });
+        const data = await res.json().catch(() => ({ ok: false }));
+        clearInterval(loadingMsgTimer);
+        if (!res.ok || !data.ok) {
+          homeworkErrorText.textContent = (data && data.message) || 'Có lỗi xảy ra, thầy/cô thử lại giúp em nhé.';
+          homeworkShowStep('error');
+          sfx.wrong();
+          return;
+        }
+        homeworkAnswerBox.innerHTML = homeworkFormatAnswer(data.explanation);
+        homeworkShowStep('result');
+        sfx.correct();
+      } catch (e) {
+        clearInterval(loadingMsgTimer);
+        homeworkErrorText.textContent = 'Không kết nối được, thầy/cô kiểm tra lại mạng giúp em nhé.';
+        homeworkShowStep('error');
+        sfx.wrong();
+      }
+    }
+    $('btnHomeworkSubmit').addEventListener('click', () => { sfx.click(); homeworkSubmit(); });
   }
 
   /* ================= AUTO UPDATE ================= */

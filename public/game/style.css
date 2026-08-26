@@ -1190,6 +1190,108 @@ button:focus-visible,
   to { transform: translateY(110vh) rotate(540deg); opacity: 0.9; }
 }
 
+/* ==== Homework helper ==== */
+.btn-homework {
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #C9A7FF 0%, #8B5CF6 55%, #5B21B6 100%);
+  color: #fff;
+  border-color: #3B1470;
+  font-size: 0.95rem;
+  padding: 12px 22px;
+  margin-top: 4px;
+}
+.homework-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 40px 20px;
+  gap: 12px;
+  text-align: center;
+}
+.homework-back-btn { top: 18px; left: 18px; right: auto; }
+.homework-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: var(--color-on-bg);
+  margin: 6px 0 0;
+}
+#homeworkStepPick,
+#homeworkStepPreview,
+#homeworkStepLoading,
+#homeworkStepResult,
+#homeworkStepError {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 480px;
+  margin-top: 10px;
+}
+.homework-preview-img {
+  width: 100%;
+  max-width: 320px;
+  max-height: 320px;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  border: 3px solid var(--color-border);
+  background: #fff;
+  box-shadow: var(--gloss-shadow-sm);
+}
+.btn-toggle-struggling {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--color-primary);
+  background: var(--gloss-shine), linear-gradient(180deg, #FFFFFF 0%, #EDF2FC 55%, #D7E1F5 100%);
+  border: 3px solid #B9C6E0;
+  border-radius: 999px;
+  padding: 10px 18px;
+  box-shadow: var(--gloss-shadow-sm);
+  transition: all 150ms ease-out;
+}
+.btn-toggle-struggling[aria-pressed="true"] {
+  color: #fff;
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #FF9FCB 0%, #EC4899 55%, #A3175C 100%);
+  border-color: #6B0F3A;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+.homework-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.homework-loading-text {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--color-on-bg-muted);
+}
+.homework-answer-box {
+  background: var(--gloss-shine), linear-gradient(180deg, #FFFFFF 0%, #F1F5FD 100%);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  text-align: left;
+  color: var(--color-foreground);
+  font-weight: 600;
+  line-height: 1.6;
+  max-height: 50vh;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  box-shadow: var(--gloss-shadow-sm);
+}
+.homework-error-text {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--color-destructive);
+}
+
 /* ==== Responsive ==== */
 @media (max-width: 700px) {
   .grade-row { grid-template-columns: repeat(5, 1fr); gap: 8px; }

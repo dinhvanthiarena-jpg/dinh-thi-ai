@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; connect-src 'self';" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data: blob:; connect-src 'self';" />
 <meta name="theme-color" content="#2563EB" />
 <meta name="description" content="Game Toán Vui Cấp 1 - luyện toán vui nhộn cho học sinh lớp 1 đến lớp 5, chơi ngay trên trình duyệt." />
 <meta name="mobile-web-app-capable" content="yes" />
@@ -95,6 +95,10 @@
           Cách chơi
         </button>
       </div>
+      <button class="btn btn-homework" id="btnOpenHomework">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M9 2 7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+        Chụp bài tập, AI giảng bài
+      </button>
       <p class="app-version" id="appVersion"></p>
     </div>
 
@@ -261,6 +265,56 @@
       <div class="result-actions">
         <button class="btn btn-secondary btn-lg" id="btnResultHome">Trang chủ</button>
         <button class="btn btn-primary btn-xl" id="btnResultRetry">Chơi lại</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN: HOMEWORK HELPER -->
+  <section id="screen-homework" class="screen">
+    <div class="homework-wrap">
+      <button class="icon-btn top-fixed homework-back-btn" id="btnHomeworkBack" aria-label="Về trang chủ">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      </button>
+      <div class="mascot-hero" id="mascotHomework" aria-hidden="true"></div>
+      <p class="mascot-name js-teacher-name">Thầy Đinh Thi Ai</p>
+      <h1 class="homework-title">Chụp bài tập, AI giảng bài</h1>
+      <p class="settings-desc">Chụp hoặc chọn ảnh bài toán của con, AI sẽ giảng giải từng bước dễ hiểu.</p>
+
+      <div id="homeworkStepPick">
+        <input type="file" id="homeworkFileInput" accept="image/*" capture="environment" hidden />
+        <button class="btn btn-primary btn-xl" id="btnHomeworkPickPhoto">
+          <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M9 2 7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
+          Chụp / chọn ảnh bài tập
+        </button>
+      </div>
+
+      <div id="homeworkStepPreview" hidden>
+        <img id="homeworkPreviewImg" class="homework-preview-img" alt="Ảnh bài tập" />
+        <button class="btn-toggle-struggling" id="btnToggleStruggling" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-2h2zm0-4h-2V7h2z"/></svg>
+          Con bị mất gốc — giảng thật chậm, thật dễ hiểu
+        </button>
+        <div class="homework-actions">
+          <button class="btn btn-secondary btn-lg" id="btnHomeworkRetake">Chụp lại</button>
+          <button class="btn btn-primary btn-xl" id="btnHomeworkSubmit">Nhờ AI giảng bài</button>
+        </div>
+      </div>
+
+      <div id="homeworkStepLoading" hidden>
+        <div class="activity-strip"><span></span><span></span><span></span><span></span><span></span></div>
+        <p class="homework-loading-text" id="homeworkLoadingText">AI đang đọc bài và soạn lời giảng...</p>
+      </div>
+
+      <div id="homeworkStepResult" hidden>
+        <div class="homework-answer-box" id="homeworkAnswerBox"></div>
+        <div class="homework-actions">
+          <button class="btn btn-secondary btn-lg" id="btnHomeworkAnother">Chụp bài khác</button>
+        </div>
+      </div>
+
+      <div id="homeworkStepError" hidden>
+        <p class="homework-error-text" id="homeworkErrorText">Có lỗi xảy ra.</p>
+        <button class="btn btn-primary btn-lg" id="btnHomeworkRetryError">Thử lại</button>
       </div>
     </div>
   </section>

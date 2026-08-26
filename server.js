@@ -55,7 +55,7 @@ app.use(
         scriptSrc: ["'self'", 'https://connect.facebook.net'],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-        imgSrc: ["'self'", 'data:', 'https:'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
         connectSrc: ["'self'", 'https://connect.facebook.net', 'https://*.facebook.com'],
         frameSrc: ["'self'", 'https:'],
         objectSrc: ["'none'"],

@@ -1,4 +1,5 @@
 const GameInstall = require('../models/GameInstall');
+const homeworkHelperService = require('../services/homeworkHelperService');
 
 // Called by the desktop game on every launch. Upserts by installId so the
 // same machine always updates one row instead of creating duplicates.
@@ -35,4 +36,33 @@ exports.ping = async (req, res) => {
   }
 
   res.json({ ok: true });
+};
+
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+// Called from the game's "Chụp bài tập" feature. Accepts one photo
+// (multipart, field "image") + an optional "strugglingMode" flag, sends it
+// to Gemini's free-tier vision model, and returns a step-by-step
+// explanation in Vietnamese.
+exports.homeworkHelp = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ ok: false, message: 'Thiếu ảnh bài tập.' });
+  }
+  if (!ALLOWED_MIME_TYPES.includes(req.file.mimetype)) {
+    return res.status(400).json({ ok: false, message: 'Chỉ nhận ảnh JPG, PNG hoặc WEBP.' });
+  }
+
+  const strugglingMode = req.body.strugglingMode === 'true';
+
+  try {
+    const explanation = await homeworkHelperService.explainHomeworkPhoto({
+      imageBase64: req.file.buffer.toString('base64'),
+      mimeType: req.file.mimetype,
+      strugglingMode,
+    });
+    res.json({ ok: true, explanation });
+  } catch (e) {
+    console.error('[homework-help]', e.message);
+    res.status(502).json({ ok: false, message: 'Thầy/cô AI chưa đọc được ảnh này, thử chụp lại rõ hơn giúp em nhé.' });
+  }
 };
