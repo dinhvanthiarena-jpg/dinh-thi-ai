@@ -48,7 +48,7 @@
     <div class="grid sm:grid-cols-3 gap-6">
       <% relatedTools.forEach(function(t) { %>
         <a href="/kho-tai-nguyen/<%= t.slug %>" class="card overflow-hidden group">
-          <div class="aspect-video bg-primary-50 overflow-hidden">
+          <div class="aspect-square bg-primary-50 overflow-hidden">
             <img src="<%= t.coverImageUrl %>" alt="<%= t.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
           </div>
           <div class="p-4">
