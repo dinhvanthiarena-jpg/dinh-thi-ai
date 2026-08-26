@@ -538,8 +538,12 @@ button:focus-visible,
   max-width: 900px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: calc(20px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) 6px calc(20px + env(safe-area-inset-left, 0px));
+  justify-content: flex-start;
+  gap: 14px;
+  /* space-between used to shove the title to the far right edge, straight
+     under the fixed settings/sound buttons pinned there — keep it next to
+     the back button instead, with enough right padding to clear those. */
+  padding: calc(20px + env(safe-area-inset-top, 0px)) calc(140px + env(safe-area-inset-right, 0px)) 6px calc(20px + env(safe-area-inset-left, 0px));
 }
 .topbar-title {
   font-family: var(--font-heading);
@@ -547,6 +551,7 @@ button:focus-visible,
   font-size: 1.6rem;
   color: var(--color-primary);
   margin: 0;
+  min-width: 0;
 }
 
 /* ==== Setup screen ==== */
@@ -709,7 +714,10 @@ button:focus-visible,
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: calc(18px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) 4px calc(20px + env(safe-area-inset-left, 0px));
+  /* Extra right padding keeps the score from sliding under the fixed
+     settings/sound buttons pinned to the top-right corner (settings sits
+     78-126px from the edge, sound sits 18-66px — 140px clears both). */
+  padding: calc(18px + env(safe-area-inset-top, 0px)) calc(140px + env(safe-area-inset-right, 0px)) 4px calc(20px + env(safe-area-inset-left, 0px));
 }
 .hud-mid { flex: 1; display: flex; flex-direction: column; gap: 6px; align-items: center; }
 .hud-lives { display: flex; gap: 4px; }
