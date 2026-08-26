@@ -127,6 +127,11 @@ button:focus-visible,
   box-shadow: var(--gloss-shadow-sm);
   transition: transform 150ms ease-out, box-shadow 150ms ease-out;
 }
+.icon-btn.is-muted {
+  color: #7C8698;
+  background: radial-gradient(ellipse 70% 55% at 32% 20%, rgba(255,255,255,0.35), rgba(255,255,255,0) 60%), linear-gradient(180deg, #C3CAD6 0%, #9AA4B4 55%, #7C8698 100%);
+  border-color: #5B6474;
+}
 .icon-btn:hover { transform: translateY(-2px); }
 .icon-btn:active {
   transform: translateY(2px) scale(0.96);

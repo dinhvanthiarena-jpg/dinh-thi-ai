@@ -458,6 +458,7 @@
   function refreshSoundIcon() {
     iconOn.hidden = muted;
     iconOff.hidden = !muted;
+    soundBtn.classList.toggle('is-muted', muted);
   }
   refreshSoundIcon();
   soundBtn.addEventListener('click', () => {
