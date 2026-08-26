@@ -11,7 +11,9 @@ const BlogPost = sequelize.define(
     slug: { type: DataTypes.STRING, unique: true },
     excerpt: { type: DataTypes.STRING, defaultValue: '' },
     content: { type: DataTypes.TEXT, allowNull: false },
-    coverImageUrl: { type: DataTypes.STRING, defaultValue: '/images/blog-placeholder.svg' },
+    // JPG, not SVG: Facebook's link-scraper can't read SVG dimensions and
+    // silently substitutes a wrong/generic image on auto-shared posts.
+    coverImageUrl: { type: DataTypes.STRING, defaultValue: '/images/blog/blog-placeholder-photo.jpg' },
     tags: { type: DataTypes.JSON, defaultValue: [] },
     isPublished: { type: DataTypes.BOOLEAN, defaultValue: true },
     publishedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
