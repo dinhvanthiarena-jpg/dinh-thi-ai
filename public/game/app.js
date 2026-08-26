@@ -1270,13 +1270,24 @@
       return escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     }
 
-    function homeworkRenderSlide() {
+    // fromOffsetPx: where the new content visually starts before easing to
+    // rest — 0 for the very first slide, a signed offset (matching swipe/
+    // button direction) for every step after, so the motion reads as one
+    // continuous glide rather than a hard cut.
+    function homeworkRenderSlide(fromOffsetPx) {
       const total = homeworkSlides.length;
       homeworkAnswerBox.innerHTML = homeworkFormatAnswer(homeworkSlides[homeworkSlideIndex]);
       homeworkAnswerBox.scrollTop = 0;
-      homeworkAnswerBox.classList.remove('slide-anim');
-      void homeworkAnswerBox.offsetWidth; // restart animation
-      homeworkAnswerBox.classList.add('slide-anim');
+
+      if (fromOffsetPx) {
+        homeworkAnswerBox.style.transition = 'none';
+        homeworkAnswerBox.style.transform = `translateX(${fromOffsetPx}px)`;
+        homeworkAnswerBox.style.opacity = '0.3';
+        void homeworkAnswerBox.offsetWidth; // force reflow so the next line animates
+      }
+      homeworkAnswerBox.style.transition = 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease-out';
+      homeworkAnswerBox.style.transform = 'translateX(0)';
+      homeworkAnswerBox.style.opacity = '1';
 
       homeworkSlideProgress.textContent = total > 1 ? `Bước ${homeworkSlideIndex + 1}/${total}` : 'Lời giảng';
       homeworkSlideProgress.hidden = total <= 1;
@@ -1295,11 +1306,11 @@
       btnHomeworkNext.hidden = isLast || total <= 1;
     }
 
-    function homeworkGoToSlide(index) {
+    function homeworkGoToSlide(index, fromOffsetPx) {
       if (index < 0 || index >= homeworkSlides.length) return;
       homeworkSlideIndex = index;
       sfx.click();
-      homeworkRenderSlide();
+      homeworkRenderSlide(fromOffsetPx || 0);
     }
 
     $('btnOpenHomework').addEventListener('click', () => {
@@ -1333,23 +1344,55 @@
     $('btnHomeworkAnother').addEventListener('click', () => { sfx.click(); homeworkResetToPick(); });
     $('btnHomeworkRetryError').addEventListener('click', () => { sfx.click(); homeworkShowStep(homeworkBlob ? 'preview' : 'pick'); });
 
-    btnHomeworkPrev.addEventListener('click', () => homeworkGoToSlide(homeworkSlideIndex - 1));
-    btnHomeworkNext.addEventListener('click', () => homeworkGoToSlide(homeworkSlideIndex + 1));
+    btnHomeworkPrev.addEventListener('click', () => homeworkGoToSlide(homeworkSlideIndex - 1, -36));
+    btnHomeworkNext.addEventListener('click', () => homeworkGoToSlide(homeworkSlideIndex + 1, 36));
 
-    // Swipe left/right on the answer box to move between steps, same
-    // gesture as the iOS install guide — natural on a phone, no dead zones.
-    let homeworkTouchStartX = null;
+    // Swipe left/right on the answer box to move between steps. The box
+    // tracks the finger 1:1 while dragging (soft, not a hard jump-cut),
+    // resists slightly past the first/last step, then either glides the
+    // rest of the way into the next step or eases back to rest.
+    let homeworkDragStartX = null;
+    let homeworkDragDeltaX = 0;
     homeworkAnswerBox.addEventListener('touchstart', (e) => {
-      homeworkTouchStartX = e.touches[0].clientX;
+      homeworkDragStartX = e.touches[0].clientX;
+      homeworkDragDeltaX = 0;
+      homeworkAnswerBox.style.transition = 'none';
     }, { passive: true });
-    homeworkAnswerBox.addEventListener('touchend', (e) => {
-      if (homeworkTouchStartX === null) return;
-      const dx = e.changedTouches[0].clientX - homeworkTouchStartX;
-      homeworkTouchStartX = null;
-      const SWIPE_THRESHOLD = 40;
-      if (dx <= -SWIPE_THRESHOLD) homeworkGoToSlide(homeworkSlideIndex + 1);
-      else if (dx >= SWIPE_THRESHOLD) homeworkGoToSlide(homeworkSlideIndex - 1);
+    homeworkAnswerBox.addEventListener('touchmove', (e) => {
+      if (homeworkDragStartX === null) return;
+      let dx = e.touches[0].clientX - homeworkDragStartX;
+      const atFirst = homeworkSlideIndex === 0;
+      const atLast = homeworkSlideIndex === homeworkSlides.length - 1;
+      if ((dx > 0 && atFirst) || (dx < 0 && atLast)) dx *= 0.3; // rubber-band at the ends
+      homeworkDragDeltaX = dx;
+      homeworkAnswerBox.style.transform = `translateX(${dx}px)`;
+      homeworkAnswerBox.style.opacity = String(Math.max(0.5, 1 - Math.abs(dx) / 500));
     }, { passive: true });
+    homeworkAnswerBox.addEventListener('touchend', () => {
+      if (homeworkDragStartX === null) return;
+      homeworkDragStartX = null;
+      const dx = homeworkDragDeltaX;
+      homeworkDragDeltaX = 0;
+      const SWIPE_THRESHOLD = 55;
+      const width = homeworkAnswerBox.clientWidth || 320;
+      const canNext = dx <= -SWIPE_THRESHOLD && homeworkSlideIndex < homeworkSlides.length - 1;
+      const canPrev = dx >= SWIPE_THRESHOLD && homeworkSlideIndex > 0;
+
+      if (canNext || canPrev) {
+        const exitX = canNext ? -width : width;
+        homeworkAnswerBox.style.transition = 'transform 190ms ease-out, opacity 190ms ease-out';
+        homeworkAnswerBox.style.transform = `translateX(${exitX}px)`;
+        homeworkAnswerBox.style.opacity = '0';
+        setTimeout(() => {
+          homeworkGoToSlide(homeworkSlideIndex + (canNext ? 1 : -1), -exitX * 0.6);
+        }, 180);
+      } else {
+        // Didn't cross the threshold (or no more steps that way) — glide back to rest.
+        homeworkAnswerBox.style.transition = 'transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 200ms ease-out';
+        homeworkAnswerBox.style.transform = 'translateX(0)';
+        homeworkAnswerBox.style.opacity = '1';
+      }
+    });
 
     async function homeworkSubmit() {
       if (!homeworkBlob) return;

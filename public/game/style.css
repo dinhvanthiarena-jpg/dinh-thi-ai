@@ -1304,11 +1304,6 @@ button:focus-visible,
   box-shadow: var(--gloss-shadow-sm);
   touch-action: pan-y;
 }
-.homework-answer-box.slide-anim { animation: homework-slide-in 200ms ease-out; }
-@keyframes homework-slide-in {
-  from { opacity: 0; transform: translateX(14px); }
-  to { opacity: 1; transform: translateX(0); }
-}
 .homework-dots {
   display: flex;
   gap: 8px;
