@@ -264,6 +264,21 @@ button:focus-visible,
   flex-wrap: wrap;
   justify-content: center;
 }
+/* Cut-corner "gem" silhouette + a diagonal facet-highlight streak, just for
+   the two big home buttons — kept scoped here so it doesn't clip text on
+   other buttons elsewhere that use .btn-primary/.btn-secondary. */
+.home-actions .btn {
+  position: relative;
+  clip-path: polygon(22px 0, calc(100% - 22px) 0, 100% 22px, 100% calc(100% - 22px), calc(100% - 22px) 100%, 22px 100%, 0 calc(100% - 22px), 0 22px);
+  overflow: hidden;
+}
+.home-actions .btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.5) 46%, rgba(255,255,255,0.15) 54%, transparent 68%);
+  pointer-events: none;
+}
 
 /* ==== License screen ==== */
 .license-title {
