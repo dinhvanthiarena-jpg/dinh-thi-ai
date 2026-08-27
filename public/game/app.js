@@ -1111,18 +1111,27 @@
       );
       return;
     }
-    // Web: open Facebook's own share dialog so the result posts straight to
-    // the PLAYER'S OWN personal timeline — not the generic OS share sheet
-    // (navigator.share), which just lets them pick one specific person/app
-    // to send it to instead of actually posting it on Facebook.
     const total = state.mode === 'practice' ? state.totalQuestions : state.answered;
     const shareText = `Con vừa đạt ${state.score} điểm (${state.correct}/${total} câu đúng) trong game Toán Vui Cấp 1! Cùng chơi thử nhé!`;
     const shareUrl = window.location.origin + window.location.pathname;
+
+    // Facebook's own sharer.php link is unreliable on phones: when the
+    // Facebook app is installed it often intercepts the link and just opens
+    // to the home feed instead of the share composer, ignoring the text/url
+    // entirely — a widely-reported Facebook-side quirk, not fixable from
+    // the web page. navigator.share() hands off to the OS share sheet
+    // instead, where Facebook registers as a real share target (an Android
+    // intent / iOS share extension) rather than a plain link — tapping the
+    // Facebook ICON there (not a friend's name) opens Facebook's actual
+    // native composer and posts to the player's own timeline. This is the
+    // reliable path on mobile, so prefer it whenever it's available.
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Toán Vui Cấp 1', text: shareText, url: shareUrl }); } catch (e) { /* user cancelled */ }
+      return;
+    }
+    // Desktop fallback (no Web Share API): Facebook's popup share dialog
+    // works fine here since there's no native app to hijack the link.
     const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
-    // window.open's popup form is unreliable on mobile browsers, and inside
-    // an installed/standalone PWA it can silently do nothing at all (no
-    // window chrome to pop into) without even returning null to detect it —
-    // a plain same-tab navigation is the only thing that works everywhere.
     window.location.href = fbShareUrl;
   });
 
