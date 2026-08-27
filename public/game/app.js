@@ -1150,7 +1150,7 @@
     const LOADING_MESSAGES = [
       'AI đang đọc bài và soạn lời giảng...',
       'Đang chấm từng nét chữ của con...',
-      'Sắp xong rồi, thầy cô AI đang nắn nót câu chữ...',
+      'Sắp xong rồi, cô AI đang nắn nót câu chữ...',
     ];
     let loadingMsgTimer = null;
 
