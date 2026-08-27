@@ -1395,6 +1395,16 @@ button:focus-visible,
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.08); }
 }
+.btn-download {
+  border-color: #E0C088;
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #FFF7E6 0%, #FBE4B0 55%, #E8BE6E 100%);
+  color: #7C4A1E;
+}
+.btn-download.is-saved {
+  color: #fff;
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #8CF0AE 0%, #22C55E 55%, #0F6B31 100%);
+  border-color: #0B4A22;
+}
 .homework-answer-box {
   background: var(--gloss-shine), linear-gradient(180deg, #FFFFFF 0%, #F1F5FD 100%);
   border: 3px solid var(--color-border);

@@ -1133,6 +1133,7 @@
     const btnHomeworkPrev = $('btnHomeworkPrev');
     const btnHomeworkNext = $('btnHomeworkNext');
     const btnHomeworkSpeak = $('btnHomeworkSpeak');
+    const btnHomeworkDownload = $('btnHomeworkDownload');
     const HOMEWORK_STEP_DELIMITER = '%%%STEP%%%';
     let homeworkSlides = [];
     let homeworkSlideIndex = 0;
@@ -1216,25 +1217,47 @@
       const voices = window.speechSynthesis.getVoices();
       const viVoices = voices.filter((v) => /^vi(-|_)?VN$/i.test(v.lang) || /vietnam/i.test(v.name));
       if (!viVoices.length) return null;
-      const female = viVoices.find((v) => /nữ|female|linh|mai|huong|hương|thu|hoa/i.test(v.name));
-      return female || viVoices[0];
+      // Not all "vi-VN" voices sound the same — legacy SAPI voices (old
+      // Windows "Microsoft An") are robotic, while neural/online voices
+      // (Edge "... Online (Natural)", Android "Google Tiếng Việt") sound
+      // much more natural. Score and prefer those when the device has them.
+      const scored = viVoices.map((v) => {
+        let score = 0;
+        if (/natural|online|neural/i.test(v.name)) score += 3;
+        if (/google/i.test(v.name)) score += 2;
+        if (/nữ|female|hoaimy|linh|mai|huong|hương|thu|hoa/i.test(v.name)) score += 1;
+        return { v, score };
+      });
+      scored.sort((a, b) => b.score - a.score);
+      return scored[0].v;
     }
     if ('speechSynthesis' in window) {
       window.speechSynthesis.onvoiceschanged = () => { homeworkSpeechVoice = homeworkPickVoice(); };
       homeworkSpeechVoice = homeworkPickVoice();
     }
+    // Speaking one giant utterance tends to sound flat/rushed on long text.
+    // Splitting on sentence boundaries and queueing them (speechSynthesis
+    // plays queued utterances back-to-back) gives each sentence its own
+    // natural rise/fall and a small breathing pause between them.
     function homeworkSpeak(text) {
       if (!('speechSynthesis' in window) || muted) return;
       window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(homeworkStripForSpeech(text));
-      utter.lang = 'vi-VN';
-      if (homeworkSpeechVoice) utter.voice = homeworkSpeechVoice;
-      utter.rate = 0.95;
-      utter.pitch = 1.05;
-      utter.onstart = () => btnHomeworkSpeak.classList.add('is-speaking');
-      utter.onend = () => btnHomeworkSpeak.classList.remove('is-speaking');
-      utter.onerror = () => btnHomeworkSpeak.classList.remove('is-speaking');
-      window.speechSynthesis.speak(utter);
+      const clean = homeworkStripForSpeech(text);
+      const sentences = clean.split(/(?<=[.!?…:])\s+/).map((s) => s.trim()).filter(Boolean);
+      const chunks = sentences.length ? sentences : [clean];
+      chunks.forEach((chunk, i) => {
+        const utter = new SpeechSynthesisUtterance(chunk);
+        utter.lang = 'vi-VN';
+        if (homeworkSpeechVoice) utter.voice = homeworkSpeechVoice;
+        utter.rate = 0.98;
+        utter.pitch = 1.0;
+        if (i === 0) utter.onstart = () => btnHomeworkSpeak.classList.add('is-speaking');
+        if (i === chunks.length - 1) {
+          utter.onend = () => btnHomeworkSpeak.classList.remove('is-speaking');
+          utter.onerror = () => btnHomeworkSpeak.classList.remove('is-speaking');
+        }
+        window.speechSynthesis.speak(utter);
+      });
     }
     function homeworkStopSpeak() {
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -1285,6 +1308,121 @@
       homeworkRenderSlide(fromOffsetPx || 0);
     }
 
+    // Lays out **bold**-aware, word-wrapped text into lines of styled runs
+    // so the download image can render markdown-style bold from the AI
+    // response without a full markdown/canvas library.
+    function homeworkWrapStyledLines(measureCtx, text, maxWidth, normalFont, boldFont) {
+      const lines = [];
+      text.split(/\n+/).forEach((para) => {
+        const tokens = para.split(/(\*\*[^*]+\*\*)/).filter(Boolean);
+        const words = [];
+        tokens.forEach((tok) => {
+          const bold = /^\*\*[^*]+\*\*$/.test(tok);
+          const clean = bold ? tok.slice(2, -2) : tok;
+          clean.split(/(\s+)/).forEach((w) => { if (w) words.push({ text: w, bold }); });
+        });
+        let line = [];
+        let lineWidth = 0;
+        words.forEach((w) => {
+          measureCtx.font = w.bold ? boldFont : normalFont;
+          const wWidth = measureCtx.measureText(w.text).width;
+          if (lineWidth + wWidth > maxWidth && line.length) {
+            lines.push(line);
+            line = [];
+            lineWidth = 0;
+            if (/^\s+$/.test(w.text)) return;
+          }
+          line.push(w);
+          lineWidth += wWidth;
+        });
+        lines.push(line.length ? line : [{ text: '', bold: false }]);
+      });
+      return lines;
+    }
+
+    // Renders the whole explanation (photo + every step) as one shareable
+    // PNG so the family can save/print it and review after the app closes.
+    function homeworkDownloadImage() {
+      if (!homeworkSlides.length) return;
+      sfx.click();
+      const width = 720;
+      const pad = 40;
+      const maxTextWidth = width - pad * 2;
+      const normalFont = '20px "Baloo 2", system-ui, sans-serif';
+      const boldFont = 'bold 20px "Baloo 2", system-ui, sans-serif';
+      const lineHeight = 30;
+
+      const measureCanvas = document.createElement('canvas');
+      const mctx = measureCanvas.getContext('2d');
+      const fullText = homeworkSlides
+        .map((s, i) => (homeworkSlides.length > 1 ? `Bước ${i + 1}:\n` : '') + s.trim())
+        .join('\n\n');
+      const lines = homeworkWrapStyledLines(mctx, fullText, maxTextWidth, normalFont, boldFont);
+
+      const headerHeight = 92;
+      const hasPhoto = !!(homeworkPreviewUrl && homeworkPreviewImg.naturalWidth);
+      const photoHeight = hasPhoto
+        ? Math.min(280, maxTextWidth * (homeworkPreviewImg.naturalHeight / homeworkPreviewImg.naturalWidth))
+        : 0;
+      const photoBlockHeight = hasPhoto ? photoHeight + 24 : 0;
+      const footerHeight = 50;
+      const totalHeight = Math.round(headerHeight + photoBlockHeight + lines.length * lineHeight + pad * 2 + footerHeight);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = totalHeight;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#FDF6E8';
+      ctx.fillRect(0, 0, width, totalHeight);
+
+      ctx.fillStyle = '#7C4A1E';
+      ctx.fillRect(0, 0, width, headerHeight);
+      ctx.fillStyle = '#FFD76A';
+      ctx.font = 'bold 24px "Baloo 2", system-ui, sans-serif';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText('Toán Vui Cấp 1 — Lời giảng của Cô', pad, 40);
+      ctx.font = '14px system-ui, sans-serif';
+      ctx.fillStyle = '#F5DEB3';
+      ctx.fillText(`Lưu lại ngày ${new Date().toLocaleDateString('vi-VN')} để học lại sau này`, pad, 66);
+
+      let y = headerHeight + pad;
+
+      if (hasPhoto) {
+        ctx.drawImage(homeworkPreviewImg, pad, y, maxTextWidth, photoHeight);
+        ctx.strokeStyle = '#D9B775';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(pad, y, maxTextWidth, photoHeight);
+        y += photoHeight + 24;
+      }
+
+      y += lineHeight - 8;
+      lines.forEach((line) => {
+        let x = pad;
+        line.forEach((w) => {
+          ctx.font = w.bold ? boldFont : normalFont;
+          ctx.fillStyle = w.bold ? '#7C4A1E' : '#3B2410';
+          ctx.fillText(w.text, x, y);
+          x += ctx.measureText(w.text).width;
+        });
+        y += lineHeight;
+      });
+
+      ctx.font = 'italic 13px system-ui, sans-serif';
+      ctx.fillStyle = '#8A6A3F';
+      ctx.fillText('Toán Vui Cấp 1 · 3dvietpro.com/game', pad, totalHeight - 18);
+
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `loi-giang-toan-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      btnHomeworkDownload.classList.add('is-saved');
+      setTimeout(() => btnHomeworkDownload.classList.remove('is-saved'), 1200);
+    }
+
     $('btnOpenHomework').addEventListener('click', () => {
       sfx.click();
       homeworkResetToPick();
@@ -1319,6 +1457,7 @@
     btnHomeworkPrev.addEventListener('click', () => homeworkGoToSlide(homeworkSlideIndex - 1, -36));
     btnHomeworkNext.addEventListener('click', () => homeworkGoToSlide(homeworkSlideIndex + 1, 36));
     btnHomeworkSpeak.addEventListener('click', () => { sfx.click(); homeworkSpeak(homeworkSlides[homeworkSlideIndex]); });
+    btnHomeworkDownload.addEventListener('click', homeworkDownloadImage);
 
     // Swipe left/right on the answer box to move between steps. The box
     // tracks the finger 1:1 while dragging (soft, not a hard jump-cut),
