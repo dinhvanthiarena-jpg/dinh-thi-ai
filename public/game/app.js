@@ -1119,7 +1119,11 @@
     const shareText = `Con vừa đạt ${state.score} điểm (${state.correct}/${total} câu đúng) trong game Toán Vui Cấp 1! Cùng chơi thử nhé!`;
     const shareUrl = window.location.origin + window.location.pathname;
     const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
-    window.open(fbShareUrl, '_blank', 'noopener,width=600,height=600');
+    // window.open's popup form is unreliable on mobile browsers, and inside
+    // an installed/standalone PWA it can silently do nothing at all (no
+    // window chrome to pop into) without even returning null to detect it —
+    // a plain same-tab navigation is the only thing that works everywhere.
+    window.location.href = fbShareUrl;
   });
 
   $('btnResultHome').addEventListener('click', () => { sfx.click(); showScreen('home'); });
