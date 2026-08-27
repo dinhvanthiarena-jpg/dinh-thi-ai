@@ -2,6 +2,27 @@ const Course = require('../models/Course');
 const BlogPost = require('../models/BlogPost');
 const Tool = require('../models/Tool');
 
+// Explicitly named alongside the general "User-agent: *" allow-all so it's
+// unambiguous to AI crawlers/answer engines (ChatGPT, Gemini, Perplexity,
+// Google AI Overviews, Bing Copilot) that they're welcome here — some of
+// these engines' operators say they respect their own named token even when
+// a wildcard rule would already cover them.
+const AI_CRAWLER_AGENTS = [
+  'GPTBot',
+  'ChatGPT-User',
+  'OAI-SearchBot',
+  'ClaudeBot',
+  'Claude-Web',
+  'anthropic-ai',
+  'PerplexityBot',
+  'Perplexity-User',
+  'Google-Extended',
+  'Applebot-Extended',
+  'CCBot',
+  'Bingbot',
+  'Amazonbot',
+];
+
 exports.robots = (req, res) => {
   const appUrl = res.locals.appUrl;
   res.type('text/plain').send(
@@ -12,6 +33,7 @@ exports.robots = (req, res) => {
       'Disallow: /dashboard',
       'Disallow: /checkout',
       '',
+      ...AI_CRAWLER_AGENTS.flatMap((agent) => [`User-agent: ${agent}`, 'Allow: /', '']),
       `Sitemap: ${appUrl}/sitemap.xml`,
     ].join('\n')
   );
@@ -25,7 +47,7 @@ exports.sitemap = async (req, res) => {
     Tool.findAll({ where: { isPublished: true }, attributes: ['slug', 'updatedAt'] }),
   ]);
 
-  const staticUrls = ['', '/courses', '/blog', '/kho-tai-nguyen', '/gioi-thieu', '/hoat-dong', '/lien-he'];
+  const staticUrls = ['', '/courses', '/blog', '/kho-tai-nguyen', '/gioi-thieu', '/hoat-dong', '/lien-he', '/game/'];
 
   const urls = [
     ...staticUrls.map((p) => ({ loc: `${appUrl}${p}`, priority: p === '' ? '1.0' : '0.8' })),

@@ -28,15 +28,57 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4780520729439921"
      crossorigin="anonymous"></script>
 
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-readable site summary" />
+
   <script type="application/ld+json">
   <%- JSON.stringify({
     "@context": "https://schema.org",
-    "@type": "EducationalOrganization",
-    "name": "Đinh Thi Ai",
-    "url": appUrl,
-    "logo": `${appUrl}/images/favicon.svg`,
-    "description": "Nền tảng đào tạo công nghệ AI ứng dụng cho người đi làm và doanh nghiệp tại Việt Nam.",
-    "sameAs": ["https://www.facebook.com/dinhthi.daotao", "https://www.youtube.com/@dinhvanthi"]
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${appUrl}/#website`,
+        "url": appUrl,
+        "name": "Đinh Thi Ai",
+        "description": "Nền tảng đào tạo công nghệ AI ứng dụng cho người đi làm và doanh nghiệp tại Việt Nam.",
+        "inLanguage": "vi-VN",
+        "publisher": { "@id": `${appUrl}/#organization` },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": { "@type": "EntryPoint", "urlTemplate": `${appUrl}/courses?q={search_term_string}` },
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "EducationalOrganization",
+        "@id": `${appUrl}/#organization`,
+        "name": "Đinh Thi Ai",
+        "url": appUrl,
+        "logo": `${appUrl}/images/favicon.svg`,
+        "description": "Nền tảng đào tạo công nghệ AI ứng dụng cho người đi làm và doanh nghiệp tại Việt Nam.",
+        "founder": { "@id": `${appUrl}/#person-dinhthiai` },
+        "areaServed": { "@type": "Country", "name": "Việt Nam" },
+        "sameAs": ["https://www.facebook.com/dinhthi.daotao", "https://www.youtube.com/@dinhvanthi"],
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+84-977-317-988",
+          "email": "dinhvanthi.arena@gmail.com",
+          "contactType": "customer service",
+          "areaServed": "VN",
+          "availableLanguage": ["Vietnamese"]
+        }
+      },
+      {
+        "@type": "Person",
+        "@id": `${appUrl}/#person-dinhthiai`,
+        "name": "Đinh Thi Ai",
+        "url": `${appUrl}/gioi-thieu`,
+        "jobTitle": "Chuyên gia đào tạo công nghệ AI ứng dụng",
+        "description": "Đinh Thi Ai là chuyên gia đào tạo công nghệ AI ứng dụng tại Việt Nam, đã đào tạo hơn 5.000 học viên với hơn 30 khóa học về Prompt Engineering, Generative AI và triển khai AI cho doanh nghiệp.",
+        "worksFor": { "@id": `${appUrl}/#organization` },
+        "knowsAbout": ["Trí tuệ nhân tạo", "Prompt Engineering", "Generative AI", "AI cho doanh nghiệp"],
+        "sameAs": ["https://www.facebook.com/dinhthi.daotao", "https://www.youtube.com/@dinhvanthi"]
+      }
+    ]
   }) %>
   </script>
   <% if (typeof structuredData !== 'undefined' && structuredData) { %>
