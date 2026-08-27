@@ -5,21 +5,30 @@
    * Chat-app in-app webviews can't show the "Add to Home Screen" install
    * prompt at all — thầy shares this link straight into Zalo/FB/Messenger
    * groups, so most students/parents arrive from inside one of these. Jump
-   * straight out to the real browser on Android (the trick works reliably);
-   * on iOS a script can't force it, so guide the user to the browser's own
-   * "Open in Safari" option instead. */
+   * straight to the real browser automatically, no manual tap required:
+   * Android's intent:// scheme reliably re-launches the URL in Chrome;
+   * iOS's x-safari-https:// scheme does the same for Safari and also works
+   * in most in-app webviews (Zalo, Messenger, Line, ...). A handful of apps
+   * (notably Facebook/Instagram's own) block that scheme outright — for
+   * those, and only those, fall back to a manual "open in Safari" banner
+   * since no script can force an escape there. */
   (function escapeInAppBrowser() {
     if (window.electronAPI) return; // desktop app, not a mobile in-app webview
     const ua = navigator.userAgent || '';
     const isInApp = /FBAN|FBAV|FB_IAB|Instagram|Line\/|Zalo|MicroMessenger|TikTok/i.test(ua);
     if (!isInApp) return;
+    const { protocol, host, pathname, search } = window.location;
     if (/android/i.test(ua)) {
-      const { protocol, host, pathname, search } = window.location;
       const intentUrl = `intent://${host}${pathname}${search}#Intent;scheme=${protocol.slice(0, -1)};action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end`;
       window.location.href = intentUrl;
       return;
     }
-    document.addEventListener('DOMContentLoaded', () => {
+    window.location.href = `x-safari-${protocol}//${host}${pathname}${search}`;
+    // If the scheme above actually launched Safari, this tab backgrounds
+    // immediately and the page below never becomes visible to the user —
+    // this timer only matters for the apps that silently blocked it.
+    setTimeout(() => {
+      if (document.hidden) return;
       const banner = document.createElement('div');
       banner.className = 'inapp-escape-banner';
       banner.innerHTML = `
@@ -34,7 +43,7 @@
           setTimeout(() => { btn.textContent = 'Sao chép link'; }, 2000);
         })) || Promise.resolve();
       });
-    });
+    }, 800);
   })();
 
   /* ================= MASCOT & TEACHER SETTINGS ================= */
