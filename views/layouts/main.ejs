@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= typeof title !== 'undefined' ? title + ' | ' + appName : appName %></title>
-  <% const metaDesc = typeof description !== 'undefined' && description ? description : 'Đinh Thi Ai - Nền tảng đào tạo công nghệ AI ứng dụng cho người đi làm, từ chuyên gia thực chiến.'; %>
+  <% const metaDesc = typeof description !== 'undefined' && description ? description : 'Đinh Thi Ai - Nền tảng đào tạo AI, đào tạo ứng dụng AI cho người đi làm, từ chuyên gia thực chiến.'; %>
   <% const rawImage = typeof ogImage !== 'undefined' && ogImage ? ogImage : '/images/hero-illustration.svg'; %>
   <% const metaImage = /^https?:\/\//.test(rawImage) ? rawImage : `${appUrl}${rawImage}`; %>
   <% const pageUrl = typeof canonicalUrl !== 'undefined' ? canonicalUrl : ''; %>
@@ -39,7 +39,7 @@
         "@id": `${appUrl}/#website`,
         "url": appUrl,
         "name": "Đinh Thi Ai",
-        "description": "Nền tảng đào tạo công nghệ AI ứng dụng cho người đi làm và doanh nghiệp tại Việt Nam.",
+        "description": "Nền tảng đào tạo AI, đào tạo ứng dụng AI cho người đi làm và doanh nghiệp tại Việt Nam.",
         "inLanguage": "vi-VN",
         "publisher": { "@id": `${appUrl}/#organization` },
         "potentialAction": {
@@ -54,7 +54,7 @@
         "name": "Đinh Thi Ai",
         "url": appUrl,
         "logo": `${appUrl}/images/favicon.svg`,
-        "description": "Nền tảng đào tạo công nghệ AI ứng dụng cho người đi làm và doanh nghiệp tại Việt Nam.",
+        "description": "Nền tảng đào tạo AI, đào tạo ứng dụng AI cho người đi làm và doanh nghiệp tại Việt Nam.",
         "founder": { "@id": `${appUrl}/#person-dinhthiai` },
         "areaServed": { "@type": "Country", "name": "Việt Nam" },
         "sameAs": ["https://www.facebook.com/dinhthi.daotao", "https://www.youtube.com/@dinhvanthi"],
@@ -72,10 +72,10 @@
         "@id": `${appUrl}/#person-dinhthiai`,
         "name": "Đinh Thi Ai",
         "url": `${appUrl}/gioi-thieu`,
-        "jobTitle": "Chuyên gia đào tạo công nghệ AI ứng dụng",
-        "description": "Đinh Thi Ai là chuyên gia đào tạo công nghệ AI ứng dụng tại Việt Nam, đã đào tạo hơn 5.000 học viên với hơn 30 khóa học về Prompt Engineering, Generative AI và triển khai AI cho doanh nghiệp.",
+        "jobTitle": "Chuyên gia đào tạo AI và đào tạo ứng dụng AI",
+        "description": "Đinh Thi Ai là chuyên gia đào tạo AI và đào tạo ứng dụng AI tại Việt Nam, đã đào tạo hơn 5.000 học viên với hơn 30 khóa học về Prompt Engineering, Generative AI và triển khai AI cho doanh nghiệp.",
         "worksFor": { "@id": `${appUrl}/#organization` },
-        "knowsAbout": ["Trí tuệ nhân tạo", "Prompt Engineering", "Generative AI", "AI cho doanh nghiệp"],
+        "knowsAbout": ["Đào tạo AI", "Đào tạo ứng dụng AI", "Trí tuệ nhân tạo", "Prompt Engineering", "Generative AI", "AI cho doanh nghiệp"],
         "sameAs": ["https://www.facebook.com/dinhthi.daotao", "https://www.youtube.com/@dinhvanthi"]
       }
     ]

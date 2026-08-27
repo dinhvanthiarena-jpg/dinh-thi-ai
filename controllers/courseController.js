@@ -38,8 +38,8 @@ exports.list = async (req, res) => {
   const creativeCourses = courses.filter((c) => !AI_CATEGORIES.includes(c.category));
 
   res.render('courses/index', {
-    title: 'Khóa học',
-    description: 'Danh sách khóa học AI ứng dụng và khóa học đồ họa, làm phim hoạt hình — cùng chuyên gia Đinh Thi Ai.',
+    title: 'Khóa học Đào tạo AI, Đào tạo Ứng dụng AI',
+    description: 'Danh sách khóa học đào tạo AI, đào tạo ứng dụng AI và khóa học đồ họa, làm phim hoạt hình — cùng chuyên gia Đinh Thi Ai.',
     courses,
     aiCourses,
     creativeCourses,

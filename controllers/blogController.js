@@ -14,8 +14,8 @@ exports.list = async (req, res) => {
   });
 
   res.render('blog/index', {
-    title: 'Kiến thức AI',
-    description: 'Kiến thức, hướng dẫn và xu hướng AI ứng dụng mới nhất — cập nhật thường xuyên bởi Đinh Thi Ai.',
+    title: 'Kiến thức Đào tạo AI, Đào tạo Ứng dụng AI',
+    description: 'Kiến thức, hướng dẫn đào tạo AI và đào tạo ứng dụng AI mới nhất — cập nhật thường xuyên bởi Đinh Thi Ai.',
     posts,
     page,
     totalPages: Math.ceil(total / perPage),

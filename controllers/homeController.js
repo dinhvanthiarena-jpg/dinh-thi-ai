@@ -13,10 +13,10 @@ const Tool = require('../models/Tool');
 const HOME_FAQS = [
   {
     q: 'Đinh Thi Ai là ai?',
-    a: 'Đinh Thi Ai là chuyên gia đào tạo công nghệ AI ứng dụng tại Việt Nam, đã đào tạo hơn 5.000 học viên qua hơn 30 khóa học về Prompt Engineering, Generative AI và ứng dụng AI cho doanh nghiệp.',
+    a: 'Đinh Thi Ai là chuyên gia đào tạo AI và đào tạo ứng dụng AI tại Việt Nam, đã đào tạo hơn 5.000 học viên qua hơn 30 khóa học về Prompt Engineering, Generative AI và ứng dụng AI cho doanh nghiệp.',
   },
   {
-    q: 'Khóa học AI ứng dụng của Đinh Thi Ai phù hợp với ai?',
+    q: 'Khóa học đào tạo AI, đào tạo ứng dụng AI của Đinh Thi Ai phù hợp với ai?',
     a: 'Phù hợp với người đi làm không có nền tảng lập trình, muốn ứng dụng AI vào công việc hằng ngày như soạn thảo văn bản, thiết kế, marketing, tự động hóa quy trình, và với doanh nghiệp muốn triển khai AI thực chiến.',
   },
   {
@@ -55,9 +55,9 @@ exports.index = async (req, res) => {
   ]);
 
   res.render('home', {
-    title: 'Đinh Thi Ai - Đào tạo công nghệ AI ứng dụng',
+    title: 'Đào tạo AI, Đào tạo Ứng dụng AI cho người đi làm - Đinh Thi Ai',
     description:
-      'Khóa học AI ứng dụng thực chiến cho người đi làm: Prompt Engineering, Generative AI, triển khai AI cho doanh nghiệp — cùng chuyên gia Đinh Thi Ai.',
+      'Đinh Thi Ai chuyên đào tạo AI và đào tạo ứng dụng AI thực chiến cho người đi làm: Prompt Engineering, Generative AI, triển khai AI cho doanh nghiệp.',
     structuredData: {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
@@ -79,16 +79,16 @@ exports.index = async (req, res) => {
 exports.about = (req, res) => {
   const appUrl = res.locals.appUrl;
   res.render('about', {
-    title: 'Về Đinh Thi Ai',
-    description: 'Đinh Thi Ai - chuyên gia đào tạo công nghệ AI ứng dụng, đồng hành cùng hàng nghìn học viên đi làm.',
+    title: 'Về Đinh Thi Ai - Chuyên gia Đào tạo AI, Đào tạo Ứng dụng AI',
+    description: 'Đinh Thi Ai - chuyên gia đào tạo AI và đào tạo ứng dụng AI, đồng hành cùng hàng nghìn học viên đi làm.',
     structuredData: {
       '@context': 'https://schema.org',
       '@type': 'Person',
       '@id': `${appUrl}/#person-dinhthiai`,
       name: 'Đinh Thi Ai',
-      jobTitle: 'Chuyên gia đào tạo công nghệ AI ứng dụng',
+      jobTitle: 'Chuyên gia đào tạo AI và đào tạo ứng dụng AI',
       description:
-        'Đinh Thi Ai là chuyên gia đào tạo công nghệ AI ứng dụng tại Việt Nam, đã đào tạo hơn 5.000 học viên với hơn 30 khóa học về Prompt Engineering, Generative AI và triển khai AI cho doanh nghiệp.',
+        'Đinh Thi Ai là chuyên gia đào tạo AI và đào tạo ứng dụng AI tại Việt Nam, đã đào tạo hơn 5.000 học viên với hơn 30 khóa học về Prompt Engineering, Generative AI và triển khai AI cho doanh nghiệp.',
       url: `${appUrl}/gioi-thieu`,
       image: `${appUrl}/images/about-illustration.svg`,
       worksFor: { '@id': `${appUrl}/#organization` },
