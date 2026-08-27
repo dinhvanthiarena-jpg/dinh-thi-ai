@@ -203,7 +203,10 @@ button:focus-visible,
   align-items: center;
   justify-content: center;
   min-height: 100%;
-  padding: 40px 20px;
+  /* Extra bottom padding so centered content never lands underneath the
+     fixed-height footer bar on shorter screens (it's opaque and would
+     just hide whatever sits behind it, like the homework button). */
+  padding: 40px 20px 150px;
   gap: 6px;
   text-align: center;
 }
