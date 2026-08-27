@@ -1132,6 +1132,7 @@
     const homeworkDots = $('homeworkDots');
     const btnHomeworkPrev = $('btnHomeworkPrev');
     const btnHomeworkNext = $('btnHomeworkNext');
+    const btnHomeworkSpeak = $('btnHomeworkSpeak');
     const HOMEWORK_STEP_DELIMITER = '%%%STEP%%%';
     let homeworkSlides = [];
     let homeworkSlideIndex = 0;
@@ -1158,6 +1159,7 @@
     }
 
     function homeworkResetToPick() {
+      homeworkStopSpeak();
       homeworkBlob = null;
       if (homeworkPreviewUrl) { URL.revokeObjectURL(homeworkPreviewUrl); homeworkPreviewUrl = null; }
       homeworkFileInput.value = '';
@@ -1197,6 +1199,48 @@
       return escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     }
 
+    // Reads each step aloud with the browser's free built-in TTS (no API
+    // key, works everywhere, but the exact Vietnamese voice/accent is
+    // whatever the device provides — can't force a specific regional voice
+    // this way, only a paid TTS service like FPT.AI can guarantee that.
+    function homeworkStripForSpeech(text) {
+      return text
+        .replace(/\*\*(.+?)\*\*/g, '$1')
+        .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}✅✨]/gu, '')
+        .replace(/[#*_`]/g, '')
+        .trim();
+    }
+    let homeworkSpeechVoice = null;
+    function homeworkPickVoice() {
+      if (!('speechSynthesis' in window)) return null;
+      const voices = window.speechSynthesis.getVoices();
+      const viVoices = voices.filter((v) => /^vi(-|_)?VN$/i.test(v.lang) || /vietnam/i.test(v.name));
+      if (!viVoices.length) return null;
+      const female = viVoices.find((v) => /nữ|female|linh|mai|huong|hương|thu|hoa/i.test(v.name));
+      return female || viVoices[0];
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => { homeworkSpeechVoice = homeworkPickVoice(); };
+      homeworkSpeechVoice = homeworkPickVoice();
+    }
+    function homeworkSpeak(text) {
+      if (!('speechSynthesis' in window) || muted) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(homeworkStripForSpeech(text));
+      utter.lang = 'vi-VN';
+      if (homeworkSpeechVoice) utter.voice = homeworkSpeechVoice;
+      utter.rate = 0.95;
+      utter.pitch = 1.05;
+      utter.onstart = () => btnHomeworkSpeak.classList.add('is-speaking');
+      utter.onend = () => btnHomeworkSpeak.classList.remove('is-speaking');
+      utter.onerror = () => btnHomeworkSpeak.classList.remove('is-speaking');
+      window.speechSynthesis.speak(utter);
+    }
+    function homeworkStopSpeak() {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      btnHomeworkSpeak.classList.remove('is-speaking');
+    }
+
     // fromOffsetPx: where the new content visually starts before easing to
     // rest — 0 for the very first slide, a signed offset (matching swipe/
     // button direction) for every step after, so the motion reads as one
@@ -1205,6 +1249,7 @@
       const total = homeworkSlides.length;
       homeworkAnswerBox.innerHTML = homeworkFormatAnswer(homeworkSlides[homeworkSlideIndex]);
       homeworkAnswerBox.scrollTop = 0;
+      homeworkSpeak(homeworkSlides[homeworkSlideIndex]);
 
       if (fromOffsetPx) {
         homeworkAnswerBox.style.transition = 'none';
@@ -1246,7 +1291,7 @@
       setMascot($('mascotHomework'), 'idle');
       showScreen('homework');
     });
-    $('btnHomeworkBack').addEventListener('click', () => { sfx.click(); showScreen('home'); });
+    $('btnHomeworkBack').addEventListener('click', () => { sfx.click(); homeworkStopSpeak(); showScreen('home'); });
 
     $('btnHomeworkPickPhoto').addEventListener('click', () => { sfx.click(); homeworkFileInput.click(); });
     homeworkFileInput.addEventListener('change', async () => {
@@ -1273,6 +1318,7 @@
 
     btnHomeworkPrev.addEventListener('click', () => homeworkGoToSlide(homeworkSlideIndex - 1, -36));
     btnHomeworkNext.addEventListener('click', () => homeworkGoToSlide(homeworkSlideIndex + 1, 36));
+    btnHomeworkSpeak.addEventListener('click', () => { sfx.click(); homeworkSpeak(homeworkSlides[homeworkSlideIndex]); });
 
     // Swipe left/right on the answer box to move between steps. The box
     // tracks the finger 1:1 while dragging (soft, not a hard jump-cut),

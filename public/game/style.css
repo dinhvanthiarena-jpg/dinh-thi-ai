@@ -1358,11 +1358,42 @@ button:focus-visible,
   font-weight: 700;
   color: var(--color-on-bg-muted);
 }
+.homework-progress-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 0 6px;
+}
 .homework-slide-progress {
   font-family: var(--font-heading);
   font-weight: 800;
   color: var(--color-primary);
-  margin: 0 0 6px;
+  margin: 0;
+}
+.btn-speak {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid #B9C6E0;
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #FFFFFF 0%, #E4EBFA 55%, #C6D4F0 100%);
+  color: var(--color-primary);
+  box-shadow: var(--gloss-shadow-sm);
+  transition: transform 150ms ease-out;
+}
+.btn-speak:active { transform: scale(0.92); }
+.btn-speak.is-speaking {
+  color: #fff;
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #8CF0AE 0%, #22C55E 55%, #0F6B31 100%);
+  border-color: #0B4A22;
+  animation: speak-pulse 1s ease-in-out infinite;
+}
+@keyframes speak-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
 }
 .homework-answer-box {
   background: var(--gloss-shine), linear-gradient(180deg, #FFFFFF 0%, #F1F5FD 100%);
