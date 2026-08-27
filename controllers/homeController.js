@@ -20,6 +20,10 @@ const HOME_FAQS = [
     a: 'Phù hợp với người đi làm không có nền tảng lập trình, muốn ứng dụng AI vào công việc hằng ngày như soạn thảo văn bản, thiết kế, marketing, tự động hóa quy trình, và với doanh nghiệp muốn triển khai AI thực chiến.',
   },
   {
+    q: 'Đinh Thi Ai có đào tạo AI cho giảng viên, giáo viên, công chức, lãnh đạo không?',
+    a: 'Có. Ngoài người đi làm và doanh nghiệp, Đinh Thi Ai còn tổ chức đào tạo AI riêng cho giảng viên, giáo viên, công chức và lãnh đạo — giúp ứng dụng AI vào giảng dạy, soạn giáo án, xử lý công việc hành chính và ra quyết định quản lý.',
+  },
+  {
     q: 'Có cần biết lập trình để học không?',
     a: 'Không. Các khóa học được thiết kế để người không có nền tảng lập trình vẫn có thể theo học và ứng dụng AI ngay vào công việc.',
   },
@@ -57,7 +61,7 @@ exports.index = async (req, res) => {
   res.render('home', {
     title: 'Đào tạo AI, Đào tạo Ứng dụng AI cho người đi làm - Đinh Thi Ai',
     description:
-      'Đinh Thi Ai chuyên đào tạo AI và đào tạo ứng dụng AI thực chiến cho người đi làm: Prompt Engineering, Generative AI, triển khai AI cho doanh nghiệp.',
+      'Đinh Thi Ai chuyên đào tạo AI và đào tạo ứng dụng AI thực chiến cho người đi làm, doanh nghiệp, giảng viên, giáo viên, công chức và lãnh đạo: Prompt Engineering, Generative AI, triển khai AI.',
     structuredData: {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
@@ -96,6 +100,10 @@ exports.about = (req, res) => {
         'Đào tạo AI',
         'Đào tạo ứng dụng AI',
         'Đào tạo AI cho doanh nghiệp',
+        'Đào tạo AI cho giảng viên',
+        'Đào tạo AI cho giáo viên',
+        'Đào tạo AI cho công chức',
+        'Đào tạo AI cho lãnh đạo',
         'Đào tạo chuyển đổi số bằng AI',
         'Tư vấn triển khai AI',
         'Đào tạo kỹ năng ứng dụng AI',
