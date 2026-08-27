@@ -97,7 +97,20 @@ app.use(
 );
 app.use(cookieParser());
 app.use(methodOverride('_method'));
-app.use(express.static(path.join(__dirname, 'public')));
+// The game's PWA app-shell files (index.html/app.js/style.css/sw.js/manifest)
+// get redeployed often via `git pull` on the server — without an explicit
+// no-store here, the hosting's LiteSpeed edge cache (see the no-store
+// middleware below for the same issue on dynamic routes) and browsers can
+// keep serving an old cached copy to phones that already installed the PWA,
+// so a fix never reaches them until they uninstall/reinstall.
+const GAME_SHELL_FILES = /\/game\/(index\.html|app\.js|style\.css|sw\.js|manifest\.json)$/;
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, filePath) => {
+    if (GAME_SHELL_FILES.test(filePath.replace(/\\/g, '/'))) {
+      res.set('Cache-Control', 'no-store');
+    }
+  },
+}));
 
 const sessionStore = new MySQLStore({
   host: process.env.DB_HOST || 'localhost',
