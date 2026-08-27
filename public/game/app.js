@@ -740,17 +740,172 @@
     { q: 'Vì sao các bạn số 2, 4, 6, 8 luôn chơi cùng nhau?', a: 'Vì chúng đều là số chẵn, hợp thành một hội rất thân thiết!' },
     { q: 'Vì sao quyển sổ tay của Rô-bốt Số không bao giờ hết trang?', a: 'Vì mỗi ngày Rô-bốt lại nghĩ ra một câu đố vui mới toanh!' },
   ];
+
+  // Trắc nghiệm đố vui — mỗi câu: choices[0] LUÔN là đáp án đúng (được xáo
+  // trộn vị trí lúc hiển thị). Gộp nhiều chủ đề (con vật, trái cây, nghề
+  // nghiệp, xe cộ, thiên nhiên, đố mẹo gây cười) để kho câu hỏi lớn, ít lặp.
+  const QUIZ_RIDDLES = [
+    { q: 'Con gì kêu "meo meo", thích bắt chuột?', choices: ['Con mèo', 'Con chó', 'Con hổ', 'Con thỏ'] },
+    { q: 'Con gì kêu "gâu gâu", giữ nhà rất giỏi?', choices: ['Con chó', 'Con mèo', 'Con gà', 'Con vịt'] },
+    { q: 'Con gì có vòi dài, tai to, sống ở rừng?', choices: ['Con voi', 'Con hươu cao cổ', 'Con tê giác', 'Con gấu'] },
+    { q: 'Con gì có sừng, giúp bác nông dân kéo cày?', choices: ['Con trâu', 'Con dê', 'Con cừu', 'Con ngựa'] },
+    { q: 'Con gì đẻ trứng, sáng sớm gáy "ò ó o" gọi cả nhà dậy?', choices: ['Con gà trống', 'Con vịt', 'Con ngỗng', 'Con chim sẻ'] },
+    { q: 'Con gì có mào đỏ, hay bới đất tìm thóc?', choices: ['Con gà mái', 'Con gà trống', 'Con vịt', 'Con ngan'] },
+    { q: 'Con gì kêu "ụm bò", cho ta sữa uống mỗi ngày?', choices: ['Con bò sữa', 'Con trâu', 'Con dê', 'Con ngựa'] },
+    { q: 'Con gì kêu "cạp cạp", thích bơi lội dưới ao?', choices: ['Con vịt', 'Con ngan', 'Con ngỗng', 'Con gà'] },
+    { q: 'Con gì bé xíu mà rất chăm chỉ, cả đàn cùng tha mồi về tổ?', choices: ['Con kiến', 'Con ong', 'Con nhện', 'Con sâu'] },
+    { q: 'Con gì nhả tơ làm kén, sau này hóa thành bướm?', choices: ['Con tằm', 'Con nhện', 'Con sâu', 'Con kiến'] },
+    { q: 'Con gì có cánh, bay vo ve khắp vườn hoa, làm ra mật ngọt?', choices: ['Con ong', 'Con bướm', 'Con ruồi', 'Con muỗi'] },
+    { q: 'Con gì có mai cứng trên lưng, bò rất chậm chạp?', choices: ['Con rùa', 'Con ốc', 'Con cua', 'Con cá sấu'] },
+    { q: 'Con gì tai dài, mắt đỏ, thích gặm cà rốt?', choices: ['Con thỏ', 'Con chuột', 'Con sóc', 'Con nai'] },
+    { q: 'Con gì kêu "ộp ộp", sống được cả trên cạn lẫn dưới nước?', choices: ['Con ếch', 'Con cóc', 'Con cá', 'Con rắn'] },
+    { q: 'Con gì leo cây cực giỏi, rất thích ăn chuối?', choices: ['Con khỉ', 'Con sóc', 'Con gấu', 'Con mèo'] },
+    { q: 'Con gì lông xù trắng như bông, kêu "be be"?', choices: ['Con cừu', 'Con dê', 'Con thỏ', 'Con chó'] },
+    { q: 'Con gì được gọi là "chúa sơn lâm"?', choices: ['Con hổ', 'Con sư tử', 'Con gấu', 'Con báo'] },
+    { q: 'Con gì có bờm oai vệ, được mệnh danh là "vua muông thú"?', choices: ['Con sư tử', 'Con hổ', 'Con báo', 'Con voi'] },
+    { q: 'Con gì thức đêm, mắt tròn to, kêu "u u"?', choices: ['Con cú mèo', 'Con dơi', 'Con chim sẻ', 'Con quạ'] },
+    { q: 'Con gì cổ dài, chân cao, là loài vật cao nhất trên cạn?', choices: ['Con hươu cao cổ', 'Con voi', 'Con ngựa', 'Con lạc đà'] },
+    { q: 'Quả gì vỏ cam, chia nhiều múi, nhiều vitamin C?', choices: ['Quả cam', 'Quả quýt', 'Quả bưởi', 'Quả chanh'] },
+    { q: 'Quả gì vỏ vàng, dài cong, khỉ rất thích ăn?', choices: ['Quả chuối', 'Quả xoài', 'Quả đu đủ', 'Quả dứa'] },
+    { q: 'Quả gì vỏ xanh, ruột đỏ mọng nước, có nhiều hạt đen?', choices: ['Quả dưa hấu', 'Quả đu đủ', 'Quả táo', 'Quả lê'] },
+    { q: 'Quả gì vỏ sần vàng, có mắt, ăn thơm và chua ngọt?', choices: ['Quả dứa', 'Quả mít', 'Quả sầu riêng', 'Quả na'] },
+    { q: 'Quả gì gai đầy mình, mùi rất nồng, ai cũng biết tiếng?', choices: ['Quả sầu riêng', 'Quả mít', 'Quả chôm chôm', 'Quả dứa'] },
+    { q: 'Quả gì tròn nhỏ mọc thành chùm, vỏ có gai mềm màu đỏ?', choices: ['Quả chôm chôm', 'Quả vải', 'Quả nhãn', 'Quả dâu'] },
+    { q: 'Quả gì vỏ dày múi to, hay ăn kèm muối ớt cho đỡ chua?', choices: ['Quả bưởi', 'Quả cam', 'Quả quýt', 'Quả chanh'] },
+    { q: 'Quả gì vỏ đỏ hình trái tim, hạt lấm tấm bên ngoài?', choices: ['Quả dâu tây', 'Quả táo', 'Quả nho', 'Quả cà chua'] },
+    { q: 'Quả gì mọc thành chùm, khi chín có màu tím hoặc xanh?', choices: ['Quả nho', 'Quả dâu', 'Quả nhãn', 'Quả vải'] },
+    { q: 'Quả gì vỏ xanh gai, bổ ra có múi vàng thơm lừng?', choices: ['Quả mít', 'Quả sầu riêng', 'Quả dứa', 'Quả na'] },
+    { q: 'Quả gì tròn giòn, có nhiều màu đỏ, xanh, vàng?', choices: ['Quả táo', 'Quả lê', 'Quả ổi', 'Quả cam'] },
+    { q: 'Quả gì vỏ xanh vàng, ruột cam, mùi rất thơm khi chín?', choices: ['Quả đu đủ', 'Quả xoài', 'Quả hồng', 'Quả cam'] },
+    { q: 'Quả gì vỏ mỏng trơn, ruột vàng, có hạt dẹt to ở giữa?', choices: ['Quả xoài', 'Quả đu đủ', 'Quả mận', 'Quả hồng'] },
+    { q: 'Quả gì vỏ đỏ sần sùi, bóc ra cùi trắng ngọt lịm?', choices: ['Quả vải', 'Quả nhãn', 'Quả chôm chôm', 'Quả dâu'] },
+    { q: 'Quả gì tròn nhỏ vỏ nâu, cùi trắng trong, có hạt đen?', choices: ['Quả nhãn', 'Quả vải', 'Quả chôm chôm', 'Quả táo'] },
+    { q: 'Ai mặc áo blouse trắng, khám chữa bệnh cho mọi người?', choices: ['Bác sĩ', 'Y tá', 'Dược sĩ', 'Giáo viên'] },
+    { q: 'Ai đứng trên bục giảng, dạy các con học chữ mỗi ngày?', choices: ['Giáo viên', 'Bác sĩ', 'Kỹ sư', 'Nhà báo'] },
+    { q: 'Ai xây nên những ngôi nhà, tòa cao tầng?', choices: ['Kỹ sư xây dựng', 'Bác sĩ', 'Nông dân', 'Đầu bếp'] },
+    { q: 'Ai lái máy bay, đưa hành khách bay khắp nơi trên trời?', choices: ['Phi công', 'Tài xế', 'Thuyền trưởng', 'Lái tàu'] },
+    { q: 'Ai giúp chúng ta chữa răng đau?', choices: ['Nha sĩ', 'Bác sĩ mắt', 'Y tá', 'Dược sĩ'] },
+    { q: 'Ai nướng những ổ bánh mì thơm phức mỗi sáng?', choices: ['Thợ làm bánh', 'Đầu bếp', 'Nông dân', 'Thợ may'] },
+    { q: 'Ai giữ trật tự đường phố, giúp đỡ người dân?', choices: ['Công an', 'Bộ đội', 'Lính cứu hỏa', 'Bảo vệ'] },
+    { q: 'Ai xông vào đám cháy để cứu người và dập lửa?', choices: ['Lính cứu hỏa', 'Công an', 'Bác sĩ', 'Bộ đội'] },
+    { q: 'Ai cấy lúa, trồng rau ngoài đồng cho ta có gạo ăn?', choices: ['Nông dân', 'Ngư dân', 'Công nhân', 'Thợ mộc'] },
+    { q: 'Ai chăm sóc bệnh nhân, tiêm thuốc theo lệnh bác sĩ?', choices: ['Y tá', 'Bác sĩ', 'Dược sĩ', 'Hộ lý'] },
+    { q: 'Ai ra khơi đánh bắt cá mỗi ngày?', choices: ['Ngư dân', 'Nông dân', 'Thủy thủ', 'Thợ lặn'] },
+    { q: 'Ai vẽ ra bản thiết kế cho ngôi nhà trước khi xây?', choices: ['Kiến trúc sư', 'Kỹ sư điện', 'Họa sĩ', 'Thợ xây'] },
+    { q: 'Ai may nên những bộ quần áo đẹp cho chúng ta mặc?', choices: ['Thợ may', 'Thợ giày', 'Thợ tóc', 'Họa sĩ'] },
+    { q: 'Ai cắt tóc, tạo kiểu tóc đẹp cho mọi người?', choices: ['Thợ cắt tóc', 'Thợ may', 'Bác sĩ da liễu', 'Nha sĩ'] },
+    { q: 'Ai lái tàu hỏa, chở hành khách đi xa?', choices: ['Lái tàu', 'Phi công', 'Tài xế', 'Thuyền trưởng'] },
+    { q: 'Xe gì hai bánh, phải đạp bằng chân mới chạy được?', choices: ['Xe đạp', 'Xe máy', 'Xe ba bánh', 'Xe điện'] },
+    { q: 'Xe gì hai bánh, có động cơ, không cần đạp vẫn chạy?', choices: ['Xe máy', 'Xe đạp', 'Xe buýt', 'Xe tải'] },
+    { q: 'Xe gì to lớn, chở được rất nhiều hành khách cùng lúc?', choices: ['Xe buýt', 'Xe taxi', 'Xe máy', 'Xe tải'] },
+    { q: 'Xe gì kêu "e e", sơn trắng đỏ, chở người đi cấp cứu?', choices: ['Xe cứu thương', 'Xe cứu hỏa', 'Xe công an', 'Xe taxi'] },
+    { q: 'Xe gì màu đỏ, có thang dài, chuyên đi dập tắt đám cháy?', choices: ['Xe cứu hỏa', 'Xe cứu thương', 'Xe công an', 'Xe rác'] },
+    { q: 'Xe gì chạy trên đường ray, kéo theo nhiều toa?', choices: ['Xe lửa', 'Xe buýt', 'Xe điện', 'Xe khách'] },
+    { q: 'Xe gì bay trên trời, có cánh và động cơ phản lực?', choices: ['Máy bay', 'Trực thăng', 'Khinh khí cầu', 'Tên lửa'] },
+    { q: 'Xe gì có cánh quạt trên nóc, có thể đứng yên giữa trời?', choices: ['Máy bay trực thăng', 'Máy bay', 'Diều', 'Khinh khí cầu'] },
+    { q: 'Xe gì chạy trên mặt nước, chở người qua sông?', choices: ['Thuyền', 'Tàu hỏa', 'Ô tô', 'Xe máy'] },
+    { q: 'Xe gì có thùng to phía sau, chuyên chở hàng hóa nặng?', choices: ['Xe tải', 'Xe con', 'Xe máy', 'Xe đạp'] },
+    { q: 'Xe gì các bạn nhỏ hay ngồi đi học mỗi sáng, sơn màu vàng?', choices: ['Xe buýt trường học', 'Xe cứu thương', 'Xe tải', 'Xe rác'] },
+    { q: 'Xe gì có đèn xanh đỏ nhấp nháy, chuyên đi bắt kẻ xấu?', choices: ['Xe công an', 'Xe cứu hỏa', 'Xe cứu thương', 'Xe khách'] },
+    { q: 'Xe gì chạy bằng bốn bánh, có động cơ, chở được vài người?', choices: ['Ô tô', 'Xe máy', 'Xe đạp', 'Xe ba gác'] },
+    { q: 'Xe gì to khổng lồ, có thể bay lên tận vũ trụ?', choices: ['Tàu vũ trụ', 'Máy bay', 'Khinh khí cầu', 'Tên lửa đồ chơi'] },
+    { q: 'Cái gì sáng chói ban ngày, sưởi ấm cho muôn loài?', choices: ['Mặt trời', 'Mặt trăng', 'Ngôi sao', 'Đèn'] },
+    { q: 'Cái gì tỏa sáng dịu dàng vào ban đêm?', choices: ['Mặt trăng', 'Mặt trời', 'Ngôi sao', 'Đèn pin'] },
+    { q: 'Cái gì lất phất rơi xuống làm ướt áo, mà không phải đi tắm?', choices: ['Mưa', 'Sương', 'Tuyết', 'Sóng biển'] },
+    { q: 'Cái gì thổi mát, làm cành cây đung đưa mà không nhìn thấy được?', choices: ['Gió', 'Mưa', 'Nắng', 'Mây'] },
+    { q: 'Cái gì trắng bồng bềnh trên bầu trời, hay đổi hình dạng?', choices: ['Mây', 'Sương mù', 'Khói', 'Bụi'] },
+    { q: 'Cái gì ầm ầm vang trời sau khi có tia chớp lóe sáng?', choices: ['Sấm', 'Sét', 'Mưa', 'Gió bão'] },
+    { q: 'Cái gì có bảy sắc màu, thường xuất hiện sau cơn mưa?', choices: ['Cầu vồng', 'Mây', 'Sấm sét', 'Ánh trăng'] },
+    { q: 'Mùa nào trời nóng bức nhất, các bạn được nghỉ hè?', choices: ['Mùa hè', 'Mùa xuân', 'Mùa thu', 'Mùa đông'] },
+    { q: 'Mùa nào lạnh nhất trong năm, đôi khi có tuyết rơi?', choices: ['Mùa đông', 'Mùa hè', 'Mùa xuân', 'Mùa thu'] },
+    { q: 'Mùa nào cây cối đâm chồi nảy lộc, trăm hoa đua nở?', choices: ['Mùa xuân', 'Mùa hè', 'Mùa thu', 'Mùa đông'] },
+    { q: 'Mùa nào lá vàng rụng đầy sân, trời se se lạnh?', choices: ['Mùa thu', 'Mùa xuân', 'Mùa hè', 'Mùa đông'] },
+    { q: 'Cái gì li ti đọng trên lá cỏ vào mỗi sáng sớm?', choices: ['Sương', 'Mưa', 'Tuyết', 'Nước mưa'] },
+    { q: 'Cái gì gào thét dữ dội, cuốn theo mưa to gió lớn?', choices: ['Bão', 'Gió nhẹ', 'Sương mù', 'Mây đen'] },
+    { q: 'Cái gì càng lấy ra càng to?', choices: ['Cái hố', 'Cái hộp', 'Quả bóng', 'Cục tẩy'] },
+    { q: 'Cái gì mất đi rồi 5 giây sau lại có ngay, cứ thế suốt đời?', choices: ['Hơi thở', 'Giấc ngủ', 'Nụ cười', 'Cơn đói'] },
+    { q: 'Con gì không có chân mà đi khắp muôn nơi?', choices: ['Con đường', 'Con sông', 'Con thuyền', 'Đám mây'] },
+    { q: 'Cái gì đập liên tục suốt đời mà không bao giờ vỡ?', choices: ['Trái tim', 'Quả trứng', 'Cái trống', 'Ly thủy tinh'] },
+    { q: 'Cái gì càng rửa lại càng bẩn?', choices: ['Nước rửa bát', 'Cái khăn lau', 'Đôi tay', 'Cái chén'] },
+    { q: 'Cái gì cho đi rồi mà mình vẫn còn giữ nguyên?', choices: ['Lời hứa', 'Cái kẹo', 'Đồ chơi', 'Cây bút'] },
+    { q: 'Con gì ngủ mà không bao giờ nhắm mắt?', choices: ['Con cá', 'Con mèo', 'Con chó', 'Con gà'] },
+    { q: 'Cái gì luôn đi lên chứ không bao giờ đi xuống?', choices: ['Tuổi của con người', 'Thang máy', 'Diều', 'Bong bóng'] },
+    { q: 'Bóng đèn nào sáng nhất trong nhà?', choices: ['Bóng đèn mới thay', 'Bóng đèn to nhất', 'Bóng đèn ngủ', 'Đèn pin'] },
+    { q: 'Cái gì càng cao càng ngắn lại?', choices: ['Ngọn nến đang cháy', 'Cái thang', 'Cây viết chì', 'Sợi dây'] },
+    { q: 'Con gì càng đánh càng kêu to, càng vui tai?', choices: ['Cái trống', 'Con chó', 'Cái chiêng', 'Quả bóng'] },
+    { q: 'Cái gì một khi đã nói ra thì không thể "đóng" lại được nữa?', choices: ['Lời nói', 'Cửa sổ', 'Hộp quà', 'Quyển sách'] },
+    { q: 'Tủ lạnh mở ra thì đèn sáng, đóng lại thì đèn tắt — ai đã tắt đèn?', choices: ['Cái công tắc cửa tủ', 'Ông trời', 'Con ma', 'Không ai cả'] },
+    { q: 'Cái gì càng chia sẻ cho nhiều người thì lại càng nhiều thêm?', choices: ['Niềm vui', 'Cái bánh', 'Tiền bạc', 'Đồ chơi'] },
+    { q: 'Cái gì có đầu có đuôi mà không hề có thân mình?', choices: ['Đồng xu', 'Con rắn', 'Con giun', 'Sợi dây'] },
+    { q: 'Cái gì càng bị đập thì càng mỏng ra?', choices: ['Tờ giấy', 'Cái trống', 'Quả bóng', 'Cục đất sét'] },
+    { q: 'Cái gì luôn chạy phía trước ta khi trời nắng mà không bao giờ đuổi kịp?', choices: ['Cái bóng của mình', 'Con chó', 'Chiếc xe', 'Đám mây'] },
+    { q: 'Bàn nào không thể kê đồ vật lên trên được?', choices: ['Bàn chân', 'Bàn học', 'Bàn ăn', 'Bàn ghế'] },
+    { q: 'Cái gì bạn phải cho đi thì mới giữ được nó mãi mãi trong lòng?', choices: ['Lòng tốt', 'Đồ chơi', 'Cái kẹo', 'Cây bút'] },
+    { q: 'Cái gì rỗng ruột mà vẫn đựng đầy nước được?', choices: ['Cái ly', 'Hòn đá', 'Quả bóng đặc', 'Khối gỗ'] },
+    { q: 'Cái gì không có mà ai cũng lo sợ bị mất đi?', choices: ['Thời gian', 'Đồ chơi', 'Tiền bạc', 'Chìa khóa'] },
+  ];
+
+  // Trộn 2 kiểu "giải lao": kiểu joke-kể-cười (bật mí đáp án) và kiểu
+  // trắc nghiệm (chọn 1 trong 4) — kho lớn, xáo bài không lặp cho tới khi
+  // hết vòng mới xáo lại, nên phần đố vui luôn cảm giác mới mẻ.
+  const BREAK_ITEMS = [
+    ...JOKES.map((j) => ({ type: 'joke', q: j.q, a: j.a })),
+    ...QUIZ_RIDDLES.map((r) => ({ type: 'quiz', q: r.q, choices: r.choices })),
+  ];
+
   const breakOverlay = $('breakOverlay');
+  const breakQuizGrid = $('breakQuizGrid');
+
+  function renderBreakQuiz(item) {
+    breakQuizGrid.innerHTML = '';
+    breakQuizGrid.hidden = false;
+    const correctText = item.choices[0];
+    const shuffled = [...item.choices].sort(() => Math.random() - 0.5);
+    shuffled.forEach((choice, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'break-quiz-btn reveal';
+      btn.style.animationDelay = (i * 70) + 'ms';
+      btn.textContent = choice;
+      btn.addEventListener('click', () => {
+        const allBtns = [...breakQuizGrid.children];
+        allBtns.forEach((b) => { b.disabled = true; });
+        const isCorrect = choice === correctText;
+        if (isCorrect) {
+          btn.classList.add('correct');
+          sfx.correct();
+          setMascot($('mascotBreak'), 'happy');
+        } else {
+          btn.classList.add('wrong');
+          allBtns.forEach((b) => {
+            if (b === btn) return;
+            if (b.textContent === correctText) b.classList.add('correct'); else b.classList.add('dim');
+          });
+          sfx.wrong();
+          setMascot($('mascotBreak'), 'sad');
+        }
+        $('btnContinueGame').hidden = false;
+      });
+      breakQuizGrid.appendChild(btn);
+    });
+  }
 
   function showBreak() {
     clearInterval(state.timerId);
-    const idx = nextFromShuffledBag('mathgame_joke_bag', JOKES.length);
-    const joke = JOKES[idx];
-    $('breakJokeQ').textContent = joke.q;
-    $('breakJokeA').textContent = joke.a;
-    $('breakJokeA').hidden = true;
-    $('btnRevealJoke').hidden = false;
+    const idx = nextFromShuffledBag('mathgame_joke_bag', BREAK_ITEMS.length);
+    const item = BREAK_ITEMS[idx];
+    $('breakJokeQ').textContent = item.q;
+    breakQuizGrid.hidden = true;
+    breakQuizGrid.innerHTML = '';
     $('btnContinueGame').hidden = true;
+    if (item.type === 'quiz') {
+      $('breakJokeA').hidden = true;
+      $('btnRevealJoke').hidden = true;
+      renderBreakQuiz(item);
+    } else {
+      $('breakJokeA').textContent = item.a;
+      $('breakJokeA').hidden = true;
+      $('btnRevealJoke').hidden = false;
+    }
     setMascot($('mascotBreak'), 'happy');
     breakOverlay.hidden = false;
     sfx.win();

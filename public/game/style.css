@@ -1258,6 +1258,45 @@ button:focus-visible,
 }
 #btnRevealJoke, #btnContinueGame { width: 100%; }
 
+.break-quiz-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin: 0 0 16px;
+}
+.break-quiz-btn {
+  background: var(--gloss-shine), linear-gradient(180deg, #FFFFFF 0%, #EDF2FC 55%, #D7E1F5 100%);
+  border: 3px solid #B9C6E0;
+  border-radius: var(--radius-md);
+  padding: 13px 16px;
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  box-shadow: var(--gloss-shadow-sm);
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out, background 150ms, border-color 150ms;
+  text-align: center;
+}
+.break-quiz-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.break-quiz-btn:active:not(:disabled) { transform: translateY(3px) scale(0.98); }
+.break-quiz-btn:disabled { cursor: default; }
+.break-quiz-btn.correct {
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #8CF0AE 0%, #22C55E 55%, #0F6B31 100%);
+  border-color: #0B4A22;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  animation: pop-in 220ms ease-out;
+}
+.break-quiz-btn.wrong {
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #FCA5A5 0%, #EF4444 55%, #8A1414 100%);
+  border-color: #7F1D1D;
+  color: #fff;
+  animation: shake 420ms ease-in-out;
+}
+.break-quiz-btn.dim { opacity: 0.5; }
+.break-quiz-btn.reveal { animation: btn-pop-in 320ms ease-out backwards; }
+
 /* ==== Confetti ==== */
 #confettiLayer {
   position: fixed;
