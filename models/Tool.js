@@ -20,6 +20,10 @@ const Tool = sequelize.define(
     // Drive's "view" page first.
     driveUrl: { type: DataTypes.STRING, allowNull: false },
     driveFileId: { type: DataTypes.STRING, allowNull: true },
+    // Optional link to a mobile/browser-playable version (e.g. a PWA) of the
+    // same tool, shown as a second, parallel download option for phone users
+    // who don't need/can't run the desktop installer.
+    webAppUrl: { type: DataTypes.STRING, allowNull: true },
     downloadCount: { type: DataTypes.INTEGER, defaultValue: 0 },
     isPublished: { type: DataTypes.BOOLEAN, defaultValue: true },
   },

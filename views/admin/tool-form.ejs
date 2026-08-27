@@ -26,9 +26,15 @@
     </div>
 
     <div>
-      <label class="label">Link Google Drive *</label>
+      <label class="label">Link tải cho máy tính (Google Drive hoặc link .exe) *</label>
       <input class="input" type="text" name="driveUrl" value="<%= tool.driveUrl || '' %>" placeholder="https://drive.google.com/file/d/..." required />
-      <p class="text-xs text-muted mt-1">Dán nguyên link chia sẻ từ Google Drive (nhớ để chế độ chia sẻ là "Bất kỳ ai có đường liên kết"). Web sẽ tự tạo link tải cho khách.</p>
+      <p class="text-xs text-muted mt-1">Dán nguyên link chia sẻ từ Google Drive (nhớ để chế độ chia sẻ là "Bất kỳ ai có đường liên kết") hoặc link tải file .exe trực tiếp. Web sẽ tự tạo link tải cho khách.</p>
+    </div>
+
+    <div>
+      <label class="label">Link chơi/tải trên điện thoại (không bắt buộc)</label>
+      <input class="input" type="text" name="webAppUrl" value="<%= tool.webAppUrl || '' %>" placeholder="https://3dvietpro.com/game/" />
+      <p class="text-xs text-muted mt-1">Nếu tool có bản web/PWA chơi được ngay trên điện thoại, dán link ở đây — trang sẽ hiện thêm 1 nút "Chơi trên điện thoại" song song với nút tải máy tính.</p>
     </div>
 
     <div>

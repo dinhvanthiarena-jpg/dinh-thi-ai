@@ -392,6 +392,7 @@ exports.toolCreate = async (req, res) => {
     description: body.description,
     driveUrl: body.driveUrl,
     driveFileId: parseDriveFileId(body.driveUrl),
+    webAppUrl: body.webAppUrl || null,
     isPublished: body.isPublished === 'on',
     coverImageUrl: cover ? `/uploads/${cover.filename}` : undefined,
     galleryImages: gallery.map((f) => `/uploads/${f.filename}`),
@@ -423,6 +424,7 @@ exports.toolUpdate = async (req, res, next) => {
     description: body.description,
     driveUrl: body.driveUrl,
     driveFileId: parseDriveFileId(body.driveUrl),
+    webAppUrl: body.webAppUrl || null,
     isPublished: body.isPublished === 'on',
     ...(cover ? { coverImageUrl: `/uploads/${cover.filename}` } : {}),
     ...(gallery.length
