@@ -1111,17 +1111,15 @@
       );
       return;
     }
-    // Web: no native screenshot capture available without extra permissions,
-    // so share a text summary instead via the platform share sheet.
+    // Web: open Facebook's own share dialog so the result posts straight to
+    // the PLAYER'S OWN personal timeline — not the generic OS share sheet
+    // (navigator.share), which just lets them pick one specific person/app
+    // to send it to instead of actually posting it on Facebook.
     const total = state.mode === 'practice' ? state.totalQuestions : state.answered;
     const shareText = `Con vừa đạt ${state.score} điểm (${state.correct}/${total} câu đúng) trong game Toán Vui Cấp 1! Cùng chơi thử nhé!`;
     const shareUrl = window.location.origin + window.location.pathname;
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Toán Vui Cấp 1', text: shareText, url: shareUrl }); } catch (e) { /* user cancelled */ }
-      return;
-    }
-    try { await navigator.clipboard.writeText(`${shareText} ${shareUrl}`); } catch (e) {}
-    window.open('https://www.facebook.com/', '_blank');
+    const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+    window.open(fbShareUrl, '_blank', 'noopener,width=600,height=600');
   });
 
   $('btnResultHome').addEventListener('click', () => { sfx.click(); showScreen('home'); });
