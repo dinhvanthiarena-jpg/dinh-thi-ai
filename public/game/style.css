@@ -57,6 +57,41 @@ html, body {
   overflow: hidden;
 }
 
+.inapp-escape-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  padding-top: calc(10px + env(safe-area-inset-top, 0px));
+  background: linear-gradient(180deg, #FFF3DC 0%, #FCE3B0 100%);
+  border-bottom: 3px solid #6B3A02;
+  color: #5A3200;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.inapp-escape-banner span { flex: 1 1 220px; }
+.inapp-escape-banner button {
+  flex-shrink: 0;
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #FFD98F 0%, #F59E0B 100%);
+  border: 2px solid #B45309;
+  border-radius: var(--radius-md);
+  color: #5A3200;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.8rem;
+  padding: 8px 14px;
+  white-space: nowrap;
+}
+
 body {
   font-family: var(--font-body);
   background:

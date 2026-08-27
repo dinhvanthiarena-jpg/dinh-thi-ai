@@ -1,6 +1,42 @@
 (() => {
   'use strict';
 
+  /* ================= ESCAPE IN-APP BROWSERS (Zalo/Facebook/Instagram...) =====
+   * Chat-app in-app webviews can't show the "Add to Home Screen" install
+   * prompt at all — thầy shares this link straight into Zalo/FB/Messenger
+   * groups, so most students/parents arrive from inside one of these. Jump
+   * straight out to the real browser on Android (the trick works reliably);
+   * on iOS a script can't force it, so guide the user to the browser's own
+   * "Open in Safari" option instead. */
+  (function escapeInAppBrowser() {
+    if (window.electronAPI) return; // desktop app, not a mobile in-app webview
+    const ua = navigator.userAgent || '';
+    const isInApp = /FBAN|FBAV|FB_IAB|Instagram|Line\/|Zalo|MicroMessenger|TikTok/i.test(ua);
+    if (!isInApp) return;
+    if (/android/i.test(ua)) {
+      const { protocol, host, pathname, search } = window.location;
+      const intentUrl = `intent://${host}${pathname}${search}#Intent;scheme=${protocol.slice(0, -1)};action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end`;
+      window.location.href = intentUrl;
+      return;
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const banner = document.createElement('div');
+      banner.className = 'inapp-escape-banner';
+      banner.innerHTML = `
+        <span>Đang mở trong ứng dụng chat nên chưa cài vào màn hình chính được — bấm <strong>⋯</strong> ở góc màn hình rồi chọn <strong>"Mở bằng trình duyệt"</strong> (Safari) nhé!</span>
+        <button type="button" id="btnCopyGameLink">Sao chép link</button>
+      `;
+      document.body.prepend(banner);
+      const btn = document.getElementById('btnCopyGameLink');
+      btn.addEventListener('click', () => {
+        (navigator.clipboard && navigator.clipboard.writeText(window.location.href).then(() => {
+          btn.textContent = 'Đã sao chép!';
+          setTimeout(() => { btn.textContent = 'Sao chép link'; }, 2000);
+        })) || Promise.resolve();
+      });
+    });
+  })();
+
   /* ================= MASCOT & TEACHER SETTINGS ================= */
   let teacherName = 'Thầy Đinh Thi Ai';
   let avatarDataUrl = null;
