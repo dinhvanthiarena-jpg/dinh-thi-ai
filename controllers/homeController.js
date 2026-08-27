@@ -4,9 +4,10 @@ const BlogPost = require('../models/BlogPost');
 const Review = require('../models/Review');
 const User = require('../models/User');
 const GalleryPhoto = require('../models/GalleryPhoto');
+const Tool = require('../models/Tool');
 
 exports.index = async (req, res) => {
-  const [featuredCourses, latestPosts, topReviews, latestPhotos] = await Promise.all([
+  const [featuredCourses, latestPosts, topReviews, latestPhotos, featuredTools] = await Promise.all([
     Course.findAll({ where: { isPublished: true, isFeatured: true }, limit: 6 }),
     BlogPost.findAll({ where: { isPublished: true }, order: [['publishedAt', 'DESC']], limit: 3 }),
     Review.findAll({
@@ -19,6 +20,7 @@ exports.index = async (req, res) => {
       limit: 6,
     }),
     GalleryPhoto.findAll({ where: { isPublished: true }, order: [['eventDate', 'DESC']], limit: 6 }),
+    Tool.findAll({ where: { isPublished: true }, order: [['createdAt', 'DESC']], limit: 3 }),
   ]);
 
   res.render('home', {
@@ -29,6 +31,7 @@ exports.index = async (req, res) => {
     latestPosts,
     topReviews,
     latestPhotos,
+    featuredTools,
   });
 };
 
