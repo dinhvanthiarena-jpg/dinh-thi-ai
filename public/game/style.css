@@ -303,29 +303,34 @@ button:focus-visible,
 .btn-gem-img:active { transform: translateY(3px) scale(0.98); }
 .btn-gem-img img { display: block; height: 88px; width: auto; }
 
-/* CSS-drawn gem button (no matching cropped artwork exists yet) — same cut
-   corner + gloss language as the real gem-button images so it doesn't look
-   out of place sitting next to them. */
-.btn-gem {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 88px;
-  padding: 0 26px;
+/* "Ôn học sinh giỏi" button: real gem-artwork background (thầy's PNG, gold
+   frame + purple glass), with the icon/label drawn as a real CSS overlay
+   on top since the image's own baked-in text came out unreadable. */
+.btn-gifted-img { position: relative; }
+.btn-gifted-icon {
+  position: absolute;
+  left: 17%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 26px;
+  line-height: 1;
+  pointer-events: none;
+}
+.btn-gifted-label {
+  position: absolute;
+  left: 34%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 58%;
   font-family: var(--font-heading);
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 14px;
+  line-height: 1.15;
   color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
-  border: 3px solid rgba(255,255,255,0.35);
-  clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
-  box-shadow: 0 6px 0 rgba(0,0,0,0.25), 0 10px 18px rgba(0,0,0,0.3);
-  transition: transform 150ms ease-out, box-shadow 150ms ease-out, filter 150ms ease-out;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.55);
+  text-align: left;
+  pointer-events: none;
 }
-.btn-gem:hover { transform: translateY(-3px); filter: brightness(1.08); }
-.btn-gem:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
-.btn-gem-violet { background: var(--gloss-shine-strong), linear-gradient(160deg, #C9A8F7 0%, #7C3AED 45%, #4C1D95 100%); border-color: #3B1470; }
-.btn-gem .gem-icon { font-size: 1.3rem; }
 
 /* Icon-only homework button (real photo/AI-teach icon comes later from
    thầy — placeholder SVG for now). */
