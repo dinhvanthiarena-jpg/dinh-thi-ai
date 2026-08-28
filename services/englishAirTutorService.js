@@ -160,7 +160,9 @@ VI: <nghĩa tiếng Việt của dòng SAY — bắt buộc khi SAY không phả
 PY: <phiên âm pinyin có dấu thanh, phiên âm TOÀN BỘ câu, không sót chữ Hán —
      chỉ khi SAY là tiếng Trung, còn lại để trống>
 
-════ CHỐT CHO LƯỢT NÀY ════${forced ? `
+════ CHỐT CHO LƯỢT NÀY ════${style && style.xung ? `
+XƯNG HÔ: lượt này bạn tự xưng "${style.xung.tu}" và gọi họ là "${style.xung.goi}".
+Đây là chốt cuối, đè lên mọi ví dụ xưng hô ở trên. Kể cả lượt chào mở màn.` : ''}${forced ? `
 Câu vừa rồi của người học là ${LANGS[forced].name}. Lượt này BẮT BUỘC trả lời bằng
 ${LANGS[forced].name}, dòng LANG ghi đúng "${forced}".${
   forced === 'vi' ? ' Dòng VI để trống.' : ' Dòng VI bắt buộc ghi nghĩa tiếng Việt.'}${
