@@ -267,7 +267,11 @@ exports.proOrderConfirm = async (req, res) => {
 
 exports.studentList = async (req, res) => {
   const students = await User.findAll({ where: { role: 'student' }, order: [['createdAt', 'DESC']] });
-  res.render('admin/students', { title: 'Học viên', students });
+  // Ai chỉ có số điện thoại là đăng ký từ trong app Mon.L, còn web thì bắt buộc email.
+  const tuApp = students.filter((s) => s.phone && !s.email).length;
+  const homNay = new Date().toDateString();
+  const moiHomNay = students.filter((s) => new Date(s.createdAt).toDateString() === homNay).length;
+  res.render('admin/students', { title: 'Học viên', students, tuApp, moiHomNay });
 };
 
 // --- Messages ---
