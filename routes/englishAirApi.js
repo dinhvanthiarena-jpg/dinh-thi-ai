@@ -1,6 +1,7 @@
 const express = require('express');
 const tutor = require('../services/englishAirTutorService');
 const pro = require('../services/proService');
+const tk = require('../services/taiKhoanAppService');
 
 const router = express.Router();
 
@@ -53,5 +54,83 @@ router.post('/chat', async (req, res) => {
     });
   }
 });
+
+/* ═══════════════ TÀI KHOẢN TRONG APP ═══════════════
+   App và web cùng tên miền nên dùng chung cookie đăng nhập — gọi kèm
+   credentials:"same-origin" là cookie tự đi theo, không cần token riêng. */
+
+// Đăng nhập sai thì chậm dần lại, để không ai ngồi dò mật khẩu của người khác.
+const DO_MS = 15 * 60 * 1000;
+const DO_TOI_DA = 8;
+const doSai = new Map();
+function dangBiChan(khoa) {
+  const r = doSai.get(khoa);
+  if (!r || Date.now() - r.tu > DO_MS) return false;
+  return r.n >= DO_TOI_DA;
+}
+function ghiSai(khoa) {
+  const r = doSai.get(khoa);
+  if (!r || Date.now() - r.tu > DO_MS) doSai.set(khoa, { tu: Date.now(), n: 1 });
+  else r.n += 1;
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, r] of doSai) if (now - r.tu > DO_MS) doSai.delete(k);
+}, DO_MS).unref?.();
+
+const ipCua = req => req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip || 'unknown';
+
+/** Bọc handler bất đồng bộ: lỗi nào cũng phải ra một câu trả lời, đừng treo. */
+function an(fn) {
+  return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(err => {
+    console.error('[english-air/tai-khoan]', req.originalUrl, err);
+    if (!res.headersSent) res.status(500).json({ error: 'Có lỗi ở máy chủ, bạn thử lại nhé.' });
+  });
+}
+
+router.get('/toi', an(async (req, res) => {
+  if (!req.user) return res.json({ dangNhap: false });
+  res.json({ dangNhap: true, ...tk.goiVe(req.user) });
+}));
+
+router.post('/dang-ky', express.json(), an(async (req, res) => {
+  if (req.user) return res.json({ dangNhap: true, ...tk.goiVe(req.user) });
+  const { ten, sdt, matKhau } = req.body || {};
+  const kq = await tk.dangKySdt({ ten, sdt, matKhau });
+  if (kq.loi) return res.status(400).json({ error: kq.loi });
+  tk.datCookie(res, kq.user);
+  res.json({ dangNhap: true, ...tk.goiVe(kq.user) });
+}));
+
+router.post('/dang-nhap', express.json(), an(async (req, res) => {
+  const khoa = ipCua(req);
+  if (dangBiChan(khoa)) {
+    return res.status(429).json({ error: 'Sai nhiều lần quá. Bạn chờ ít phút rồi thử lại nhé.' });
+  }
+  const kq = await tk.dangNhapSdt(req.body || {});
+  if (kq.loi) { ghiSai(khoa); return res.status(400).json({ error: kq.loi }); }
+  doSai.delete(khoa);
+  tk.datCookie(res, kq.user);
+  res.json({ dangNhap: true, ...tk.goiVe(kq.user) });
+}));
+
+router.post('/thoat', an(async (req, res) => {
+  res.clearCookie('token');
+  res.json({ dangNhap: false });
+}));
+
+router.post('/doi-mat-khau', express.json(), an(async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Bạn cần đăng nhập.' });
+  const kq = await tk.doiMatKhau(req.user, req.body || {});
+  if (kq.loi) return res.status(400).json({ error: kq.loi });
+  res.json({ ok: true });
+}));
+
+router.post('/them-email', express.json(), an(async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Bạn cần đăng nhập.' });
+  const kq = await tk.themEmail(req.user, (req.body || {}).email);
+  if (kq.loi) return res.status(400).json({ error: kq.loi });
+  res.json({ ok: true, email: req.user.email });
+}));
 
 module.exports = router;

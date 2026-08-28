@@ -8,11 +8,14 @@ const User = sequelize.define(
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     _id: { type: DataTypes.VIRTUAL, get() { return this.id; } },
     name: { type: DataTypes.STRING, allowNull: false },
-    email: { type: DataTypes.STRING, allowNull: false, unique: true, validate: { isEmail: true } },
+    // Ai đăng ký bằng số điện thoại thì không có email, và ngược lại — nên cả hai
+    // đều để trống được. UNIQUE của MySQL cho nhiều NULL nhưng không cho nhiều
+    // chuỗi rỗng, vì vậy chỗ nào bỏ trống phải ghi NULL chứ đừng ghi ''.
+    email: { type: DataTypes.STRING, allowNull: true, unique: true, validate: { isEmail: true } },
     password: { type: DataTypes.STRING, allowNull: false },
     role: { type: DataTypes.ENUM('student', 'admin'), defaultValue: 'student' },
     avatarUrl: { type: DataTypes.STRING, defaultValue: '' },
-    phone: { type: DataTypes.STRING, defaultValue: '' },
+    phone: { type: DataTypes.STRING(20), allowNull: true, unique: true },
     isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
     // Hạn dùng gói Pro của app Mon.L. Rỗng hoặc đã qua nghĩa là bản miễn phí.
     proUntil: { type: DataTypes.DATE, allowNull: true },
