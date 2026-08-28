@@ -476,6 +476,15 @@ function buildPractice(words, sentences, max) {
     }
   });
 
+  // Xen một lượt tô chữ cho đỡ ngán: chọn chữ cái đầu của một từ vừa học, ưu
+  // tiên từ một tiếng cho khớp giữa chữ được tô và từ đọc lên sau đó.
+  const netCo = window.NET_CHU || {};
+  const tuNgan = pool.filter(w => !w.en.includes(" ") && netCo[w.en[0].toUpperCase()]);
+  if (tuNgan.length) {
+    const w = sample(tuNgan, 1)[0];
+    q.push({ type: "viet", chu: w.en[0].toUpperCase(), tu: w.en, word: w });
+  }
+
   const head = q[0] && q[0].type === "match" ? [q.shift()] : [];
   return head.concat(shuffle(q)).slice(0, max);
 }
@@ -536,7 +545,8 @@ function renderSlide() {
   $(".p-body").scrollTo?.({ top: 0 });
 
   const s = P.slides[P.i]; P.cur = s;
-  $("#btnHint").hidden = s.phase !== "drill";
+  // Bài tô chữ không có gì để gợi ý — nét đã hiện sẵn rồi.
+  $("#btnHint").hidden = s.phase !== "drill" || s.d.type === "viet";
   if (s.phase === "learn") { TEACH[s.d.t](s.d, stage); setBtn("Tiếp theo", "btn-primary", true); }
   else { DRILL[s.d.type](s.d, stage); setBtn("Kiểm tra", "btn-primary", false); }
 }
@@ -1001,6 +1011,143 @@ const DRILL = {
     }
     st.append(line, el("div", "bank-line"), bank);
     P.picked = null;
+  },
+
+  /* Tô chữ bằng ngón tay: người học kéo theo nét, máy chấm bằng cách rải sẵn
+     các mốc dọc nét rồi xem ngón tay có đi qua LẦN LƯỢT không. Chỉ đo khoảng
+     cách tới nét thì tô ngược hay tô loạn vẫn qua, nên phải xét thứ tự. */
+  viet(d, st) {
+    showMascot(false); setKicker("Tô chữ theo nét");
+    const chu = d.chu;
+    const nets = (window.NET_CHU || {})[chu] || [];
+    st.append(el("p", "ask", `Chữ ${chu} — dùng ngón tay tô theo nét`));
+
+    const khung = el("div", "to-khung");
+    const NS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 100 120");
+    svg.setAttribute("class", "to-svg");
+
+    // Chữ mờ nằm dưới cùng, để người ta thấy hình dạng cần tô.
+    nets.forEach(dd => {
+      const p = document.createElementNS(NS, "path");
+      p.setAttribute("d", dd); p.setAttribute("class", "to-nen");
+      svg.append(p);
+    });
+
+    const netEls = [];
+    nets.forEach(dd => {
+      const p = document.createElementNS(NS, "path");
+      p.setAttribute("d", dd); p.setAttribute("class", "to-net");
+      svg.append(p);
+      netEls.push(p);
+    });
+    khung.append(svg);
+    st.append(khung);
+
+    let iNet = 0, iMoc = 0, moc = [], xong = false;
+
+    /** Rải mốc dọc một nét, cứ 5 đơn vị một cái. */
+    function raiMoc(p) {
+      const dai = p.getTotalLength();
+      const n = Math.max(6, Math.round(dai / 5));
+      const ds = [];
+      for (let i = 0; i <= n; i += 1) ds.push(p.getPointAtLength((dai * i) / n));
+      return ds;
+    }
+
+    function vaoNet(k) {
+      iNet = k; iMoc = 0;
+      netEls.forEach((p, i) => p.classList.toggle("dang-to", i === k));
+      if (k >= netEls.length) { hoanTat(); return; }
+      const p = netEls[k];
+      moc = raiMoc(p);
+      const dai = p.getTotalLength();
+      p.style.strokeDasharray = dai;
+      p.style.strokeDashoffset = dai;
+      datChamBatDau(moc[0]);
+    }
+
+    let cham = null;
+    function datChamBatDau(pt) {
+      if (!cham) {
+        cham = document.createElementNS(NS, "circle");
+        cham.setAttribute("r", "5.5");
+        cham.setAttribute("class", "to-cham");
+        svg.append(cham);
+      }
+      cham.setAttribute("cx", pt.x); cham.setAttribute("cy", pt.y);
+      cham.style.display = "";
+    }
+
+    function toiDiem(x, y) {
+      if (xong || iNet >= netEls.length) return;
+      // Cho phép lệch 11 đơn vị — ngón tay to hơn nét nhiều, khắt khe quá thì bực.
+      let tien = false;
+      while (iMoc < moc.length) {
+        const m = moc[iMoc];
+        if (Math.hypot(x - m.x, y - m.y) > 11) break;
+        iMoc += 1; tien = true;
+      }
+      if (!tien) return;
+      const p = netEls[iNet];
+      const dai = p.getTotalLength();
+      p.style.strokeDashoffset = dai * (1 - iMoc / (moc.length - 1));
+      if (cham && iMoc > 0) cham.style.display = "none";
+      if (iMoc >= moc.length) {
+        p.classList.add("da-to"); p.classList.remove("dang-to");
+        p.style.strokeDashoffset = 0;
+        rung(12);
+        vaoNet(iNet + 1);
+      }
+    }
+
+    function hoanTat() {
+      xong = true;
+      if (cham) cham.style.display = "none";
+      svg.classList.add("to-xong");
+      rung([14, 60, 14]);
+      P.picked = { ok: true };
+      P.answered = false;
+      setBtn("Kiểm tra", "btn-primary", true);
+      docLanLuot([{ text: chu, lang: "en-US" },
+                  d.tu ? { text: d.tu, lang: "en-US" } : null].filter(Boolean));
+    }
+
+    /** Đổi toạ độ màn hình sang toạ độ trong khung vẽ. */
+    function doiToa(ev) {
+      const r = svg.getBoundingClientRect();
+      return { x: ((ev.clientX - r.left) / r.width) * 100,
+               y: ((ev.clientY - r.top) / r.height) * 120 };
+    }
+
+    let dangVe = false;
+    svg.addEventListener("pointerdown", ev => {
+      if (xong) return;
+      ev.preventDefault();
+      dangVe = true;
+      try { svg.setPointerCapture(ev.pointerId); } catch { /* trình duyệt cũ */ }
+      const t = doiToa(ev); toiDiem(t.x, t.y);
+    });
+    svg.addEventListener("pointermove", ev => {
+      if (!dangVe || xong) return;
+      const t = doiToa(ev); toiDiem(t.x, t.y);
+    });
+    const thoi = () => {
+      dangVe = false;
+      // Bỏ dở giữa nét thì trả nét đó về đầu, để tô lại cho liền mạch.
+      if (!xong && iMoc > 0 && iMoc < moc.length) vaoNet(iNet);
+    };
+    svg.addEventListener("pointerup", thoi);
+    svg.addEventListener("pointercancel", thoi);
+    svg.addEventListener("pointerleave", thoi);
+
+    const goi = el("p", "to-goi", "Đặt ngón tay lên chấm sáng rồi kéo theo nét.");
+    st.append(goi);
+
+    vaoNet(0);
+    P.picked = null;
+    setBtn("Kiểm tra", "btn-primary", false);
   },
 
   match(d, st) {

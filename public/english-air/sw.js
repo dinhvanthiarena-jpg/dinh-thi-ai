@@ -3,13 +3,14 @@
    Toàn bộ app chạy offline sau lần mở đầu tiên.
    Đổi CACHE khi sửa file để buộc tải lại bản mới.
    ============================================================ */
-const CACHE = "english-air-v57";
+const CACHE = "english-air-v58";
 
 const SHELL = [
   "./",
   "./index.html",
   "./style.css",
   "./app.js",
+  "./letters.js",
   "./course-a1.js",
   "./course-a2.js",
   "./course-b1.js",

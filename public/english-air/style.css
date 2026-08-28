@@ -1201,6 +1201,38 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .vcard-say-vi:active { transform: scale(.9); color: var(--brand); }
 .vcard-say-vi .ic { width: 15px; height: 15px; }
 
+/* ---------- 15i. TÔ CHỮ BẰNG NGÓN TAY ---------- */
+.to-khung { width: 100%; max-width: 300px; margin: var(--s4) auto 0;
+  aspect-ratio: 100 / 120; max-height: 46vh;
+  border-radius: var(--r3); background: var(--card); box-shadow: var(--sh-1);
+  display: grid; place-items: center; overflow: hidden; }
+.to-svg { width: 100%; height: 100%; display: block;
+  /* Bắt buộc: không có dòng này thì ngón tay vừa nhích là trình duyệt cuộn trang. */
+  touch-action: none; -webkit-user-select: none; user-select: none; cursor: crosshair; }
+
+/* Nét mờ nằm dưới cho thấy hình dạng chữ cần tô */
+.to-nen { fill: none; stroke: var(--muted); stroke-width: 15;
+  stroke-linecap: round; stroke-linejoin: round; }
+/* Nét đang tô: vẽ dần theo ngón tay */
+.to-net { fill: none; stroke: var(--brand-fill); stroke-width: 13;
+  stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.to-net.dang-to, .to-net.da-to { opacity: 1; }
+.to-net.da-to { stroke: var(--ok); }
+/* Chấm sáng chỉ chỗ đặt ngón tay */
+.to-cham { fill: var(--brand); animation: chamNhay 1.1s ease-in-out infinite; }
+@keyframes chamNhay { 0%, 100% { opacity: 1; r: 5.5; } 50% { opacity: .45; r: 7; } }
+.to-svg.to-xong .to-net { stroke: var(--ok); }
+.to-svg.to-xong { animation: toXong .45s var(--e); }
+@keyframes toXong { 0% { transform: scale(1); } 45% { transform: scale(1.06); } 100% { transform: scale(1); } }
+
+.to-goi { margin-top: var(--s3); text-align: center; font-size: .85rem;
+  font-weight: 700; color: var(--muted-fg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .to-cham { animation: none; }
+  .to-svg.to-xong { animation: none; }
+}
+
 /* ---------- 15f. BÁO BÀI CHƯA MỞ KHOÁ ---------- */
 .sheet-mon { width: 96px; height: 96px; margin: 0 auto var(--s4);
   border-radius: var(--rf); background: var(--brand-soft);
