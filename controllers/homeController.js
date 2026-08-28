@@ -116,3 +116,11 @@ exports.about = (req, res) => {
     },
   });
 };
+
+exports.deals = (req, res) => {
+  res.render('deals', {
+    title: 'Ưu đãi mua sắm hôm nay',
+    description: 'Gợi ý sản phẩm hay trên Shopee, tuyển chọn bởi Đinh Thi Ai — cập nhật thường xuyên.',
+    shopeePicks: require('../data/shopeePicks'),
+  });
+};

@@ -1,0 +1,27 @@
+<section class="bg-gradient-to-br from-orange-50 to-white border-b border-orange-100">
+  <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-14 text-center">
+    <span class="badge bg-orange-500 text-white mb-4">Shopee</span>
+    <h1 class="text-3xl sm:text-5xl font-extrabold text-ink">Ưu đãi mua sắm hôm nay</h1>
+    <p class="mt-4 text-muted max-w-2xl mx-auto text-base sm:text-lg">Sản phẩm được Đinh Thi Ai tuyển chọn — bấm vào để xem giá và mua trên Shopee.</p>
+  </div>
+</section>
+
+<section class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-14">
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-6">
+    <% shopeePicks.forEach(function(p) { %>
+      <a href="<%= p.url %>" target="_blank" rel="noopener sponsored" class="group card overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+        <div class="aspect-square bg-orange-50 overflow-hidden">
+          <img src="<%= p.image %>" alt="<%= p.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" referrerpolicy="no-referrer" />
+        </div>
+        <div class="p-4 flex flex-col flex-1">
+          <h3 class="text-sm font-semibold text-ink leading-snug line-clamp-2 flex-1"><%= p.name %></h3>
+          <p class="mt-2 text-lg font-bold text-orange-600"><%= p.price %></p>
+          <span class="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-orange-500 text-white text-sm font-semibold px-4 py-2 group-hover:bg-orange-600 transition-colors">
+            Mua trên Shopee
+          </span>
+        </div>
+      </a>
+    <% }); %>
+  </div>
+  <p class="mt-8 text-xs text-muted text-center">Đây là liên kết tiếp thị liên kết (affiliate) — Đinh Thi Ai có thể nhận hoa hồng nhỏ từ đơn hàng hợp lệ, không phát sinh thêm chi phí cho bạn.</p>
+</section>
