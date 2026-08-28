@@ -1912,7 +1912,24 @@ function veManXong() {
 }
 
 $("#btnProClose").addEventListener("click", dongPro);
-$("#btnOpenPro").addEventListener("click", moPro);
+$$("#btnOpenPro, #btnOpenPro2").forEach(b => b.addEventListener("click", moPro));
+
+/** Cập nhật chữ trên thẻ Pro: chưa mua thì khoe giá, mua rồi thì khoe hạn. */
+async function veThePro() {
+  try {
+    const r = await fetch(PRO_URL + "/goi", { credentials: "same-origin" });
+    const d = await r.json();
+    P2.data = d;
+    const re = d.goi.find(x => x.ma === "year");
+    const phu = d.pro
+      ? "Đang dùng Pro · hạn " + ngayVN(d.proUntil)
+      : (d.thuPhi ? "Gọi thoải mái, không giới hạn" : "Đang mở miễn phí cho tất cả");
+    const nut = d.pro ? "Gói của tôi" : (re ? "Từ " + tien(re.moiThang) + "/thg" : "Xem gói");
+    $$("#pbSub, #pbSub2").forEach(x => { x.textContent = phu; });
+    $$("#pbGia, #pbGia2").forEach(x => { x.textContent = nut; });
+  } catch { /* mất mạng thì cứ để chữ mặc định */ }
+}
+veThePro();
 
 /* ---------- 19. Giải đấu ---------- */
 const AVCOL = ["#0369A1", "#B45309", "#047857", "#BE185D", "#6D28D9", "#B91C1C", "#0F766E", "#4F46E5"];

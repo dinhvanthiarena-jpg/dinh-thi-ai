@@ -944,6 +944,33 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .call-foot .btn-text { color: #E9D5FF; }
 
 
+
+/* Lối vào gói Pro — phải nhìn thấy ngay, không nấp dưới một dòng chữ mờ. */
+.pro-banner {
+  display: flex; align-items: center; gap: var(--s3); width: 100%;
+  margin-top: var(--s4); padding: var(--s3) var(--s4);
+  border-radius: var(--r3); text-align: left; color: #fff;
+  background: linear-gradient(100deg, #6D28D9, #A21CAF 55%, #DB2777);
+  box-shadow: var(--sh-2);
+  transition: transform var(--t1) var(--e);
+}
+.pro-banner:active { transform: scale(.99); }
+.pb-mon { flex: none; width: 46px; height: 46px; border-radius: var(--rf);
+  background: rgba(255,255,255,.16); overflow: hidden; position: relative; }
+.pb-mon img { position: absolute; left: 50%; top: 4px; transform: translateX(-50%);
+  height: 62px; width: auto; }
+.pb-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pb-txt b { font-size: 1rem; font-weight: 900; letter-spacing: -.01em; }
+.pb-txt small { font-size: .8rem; font-weight: 600; color: rgba(255,255,255,.86); margin-top: 1px; }
+.pb-go { flex: none; display: inline-flex; align-items: center; gap: 4px;
+  font-size: .82rem; font-weight: 900;
+  background: rgba(255,255,255,.18); border-radius: var(--rf); padding: 6px 10px; }
+.pb-go .ic { width: 16px; height: 16px; }
+@media (max-width: 379px) {
+  .pb-go span { display: none; }
+  .pb-go { padding: 8px; }
+}
+
 /* ---------- 15d. MÀN BÁN GÓI PRO (nằm trong app) ---------- */
 .pro { position: fixed; inset: 0; z-index: 66; overflow-y: auto;
   background: var(--bg); -webkit-overflow-scrolling: touch; }
