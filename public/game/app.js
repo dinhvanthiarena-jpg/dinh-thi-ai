@@ -1099,6 +1099,71 @@
   $('btnCloseBrowserPicker').addEventListener('click', () => { sfx.click(); browserPickerModal.hidden = true; });
   browserPickerModal.addEventListener('click', (e) => { if (e.target.id === 'browserPickerModal') browserPickerModal.hidden = true; });
 
+  // Draws an actual "achievement card" (score, stars, stats) instead of
+  // sharing a bare text+link — this is the thing worth "khoe" (showing off)
+  // on Facebook, and it's what makes the shared post visually represent the
+  // real result instead of a generic message.
+  const RESULT_TITLES = ['Luyện thêm nhé!', 'Cố lên nào!', 'Giỏi quá!', 'Xuất sắc!'];
+  function buildResultShareImage(stars, total) {
+    const width = 720, height = 720;
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+    bgGrad.addColorStop(0, '#0B1230');
+    bgGrad.addColorStop(0.5, '#131B45');
+    bgGrad.addColorStop(1, '#1B2A5E');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, width, height);
+
+    for (let i = 0; i < 50; i++) {
+      ctx.fillStyle = `rgba(255,255,255,${0.15 + Math.random() * 0.5})`;
+      ctx.beginPath();
+      ctx.arc(Math.random() * width, Math.random() * height, Math.random() * 1.4 + 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.textAlign = 'center';
+    ctx.font = '900 34px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#FFD98F';
+    ctx.fillText('TOÁN VUI CẤP 1', width / 2, 90);
+
+    ctx.font = '900 46px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.fillText(RESULT_TITLES[stars], width / 2, 165);
+
+    ctx.font = '64px "Segoe UI", system-ui, sans-serif';
+    const starGap = 74;
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = i < stars ? '#FFD200' : 'rgba(255,255,255,0.22)';
+      ctx.fillText('★', width / 2 + (i - 1) * starGap, 260);
+    }
+
+    ctx.font = '900 130px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#4FC3F7';
+    ctx.fillText(String(state.score), width / 2, 430);
+    ctx.font = '700 24px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.fillText('ĐIỂM', width / 2, 462);
+
+    ctx.font = '800 32px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.fillText(`${state.correct}/${total} câu đúng`, width / 2, 530);
+
+    if (state.bestStreak >= 3) {
+      ctx.font = '700 26px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = '#F59E0B';
+      ctx.fillText(`\u{1F525} Chuỗi ${state.bestStreak} câu liên tiếp!`, width / 2, 580);
+    }
+
+    ctx.font = '700 20px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fillText('Chơi tại 3dvietpro.com/game', width / 2, height - 40);
+
+    return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+  }
+
   $('btnShareFacebook').addEventListener('click', async () => {
     sfx.click();
     if (window.electronAPI) {
@@ -1111,20 +1176,38 @@
       );
       return;
     }
+    const stars = computeStars();
     const total = state.mode === 'practice' ? state.totalQuestions : state.answered;
     const shareText = `Con vừa đạt ${state.score} điểm (${state.correct}/${total} câu đúng) trong game Toán Vui Cấp 1! Cùng chơi thử nhé!`;
     const shareUrl = window.location.origin + window.location.pathname;
 
     // Facebook's own sharer.php link is unreliable on phones: when the
     // Facebook app is installed it often intercepts the link and just opens
-    // to the home feed instead of the share composer, ignoring the text/url
-    // entirely — a widely-reported Facebook-side quirk, not fixable from
-    // the web page. navigator.share() hands off to the OS share sheet
-    // instead, where Facebook registers as a real share target (an Android
-    // intent / iOS share extension) rather than a plain link — tapping the
-    // Facebook ICON there (not a friend's name) opens Facebook's actual
-    // native composer and posts to the player's own timeline. This is the
-    // reliable path on mobile, so prefer it whenever it's available.
+    // to the home feed instead of the share composer, ignoring whatever was
+    // passed in — a Facebook-side quirk, not fixable from the web page.
+    // navigator.share() hands off to the OS share sheet instead, where
+    // Facebook registers as a real share target (an Android intent / iOS
+    // share extension), and — critically — supports attaching the actual
+    // achievement-card image built above, not just a link. No web page on
+    // any platform can skip straight past this one tap to "already posted"
+    // without it — that confirmation step is an OS-level permission
+    // boundary (Apple/Google both require it so a site can't silently post
+    // to someone's account), the same kind of hard platform wall as not
+    // being able to force-launch Safari from inside Facebook's own in-app
+    // browser earlier. This is the closest possible thing to it: one tap
+    // opens the share sheet with the score card ready to post.
+    let imageFile = null;
+    try {
+      const blob = await buildResultShareImage(stars, total);
+      if (blob) imageFile = new File([blob], 'ket-qua-toan-vui.png', { type: 'image/png' });
+    } catch (e) { /* canvas unavailable — fall back to text-only share */ }
+
+    if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+      try {
+        await navigator.share({ files: [imageFile], title: 'Toán Vui Cấp 1', text: shareText });
+      } catch (e) { /* user cancelled */ }
+      return;
+    }
     if (navigator.share) {
       try { await navigator.share({ title: 'Toán Vui Cấp 1', text: shareText, url: shareUrl }); } catch (e) { /* user cancelled */ }
       return;
