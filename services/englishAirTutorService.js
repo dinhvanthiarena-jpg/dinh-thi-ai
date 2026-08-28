@@ -35,7 +35,7 @@ const COMMON_TAIL = `
 - Hỏi bạn trông thế nào: quái vật lông tím, đội mũ bảo hộ có khắc chữ MON.L.`;
 
 /* ═══════════════ TÁN GẪU: uyên bác, lầy, soi gương phong cách ═══════════════ */
-function freePrompt(level, words, forced, style) {
+function freePrompt(level, words, forced, style, moMan) {
   const lv = LEVEL_GUIDE[level] || LEVEL_GUIDE.A1;
   const vocab = Array.isArray(words) && words.length ? words.slice(0, 60).join(', ') : '(chưa có)';
 
@@ -203,7 +203,11 @@ VI: <nghĩa tiếng Việt của dòng SAY — bắt buộc khi SAY không phả
 PY: <phiên âm pinyin có dấu thanh, phiên âm TOÀN BỘ câu, không sót chữ Hán —
      chỉ khi SAY là tiếng Trung, còn lại để trống>
 
-════ CHỐT CHO LƯỢT NÀY ════${style && style.xung ? `
+════ CHỐT CHO LƯỢT NÀY ════${moMan ? `
+Lượt này LÀ lượt mở màn: chào bằng một câu hỏi đời thường, nói tên mình và
+"thầy Đinh Thi sáng tạo ra tớ".` : `
+Lượt này KHÔNG phải mở màn. TUYỆT ĐỐI đừng chào lại, đừng giới thiệu tên mình,
+đừng nhắc lại chuyện ai sáng tạo ra bạn. Cứ nói tiếp câu chuyện đang dở.`}${style && style.xung ? `
 XƯNG HÔ — chốt cuối, đè lên mọi ví dụ và mọi câu mẫu ở trên, kể cả lượt chào mở màn:
    • Bạn gọi CHÍNH MÌNH là "${style.xung.tu}".
    • Bạn gọi NGƯỜI ĐỐI DIỆN là "${style.xung.goi}".
@@ -374,7 +378,8 @@ async function reply({ history, level, words, mode, style }) {
   // Nhắc suông không ăn: mô hình vẫn đáp tiếng Việt khi người học nói tiếng Trung.
   // Chữ Hán và dấu tiếng Việt thì nhìn là biết chắc, nên chốt thẳng bằng mã.
   const lastSaid = messages[messages.length - 1].content;
-  const forced = lastSaid === '__START__' ? null : sniffLang(lastSaid);
+  const moMan = lastSaid === '__START__';
+  const forced = moMan ? null : sniffLang(lastSaid);
   // Giờ học: app gắn kết quả chấm vào cuối câu người học, dạng
   // [Câu mẫu: "..." — máy nghe khớp 45%]. Đọc ra rồi ra chỉ thị cho đúng lượt,
   // nhắc suông thì mô hình quên sửa lỗi và quên bắt đọc lại.
@@ -394,7 +399,7 @@ async function reply({ history, level, words, mode, style }) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      system: teach ? teachPrompt(level, words, heard) : freePrompt(level, words, forced, soTay),
+      system: teach ? teachPrompt(level, words, heard) : freePrompt(level, words, forced, soTay, moMan),
       messages,
     }),
   });
