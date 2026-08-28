@@ -1,4 +1,4 @@
-// Bộ não hội thoại cho linh vật MON.L của app English Air (/english-air).
+// Bộ não hội thoại cho linh vật MON.L của app Mon.L (/english-air).
 // Khoá API nằm ở server, app phía trình duyệt chỉ gọi /api/english-air/chat.
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
@@ -24,7 +24,7 @@ const LANGS = {
   zh: { name: 'tiếng Trung' },
 };
 
-function buildSystemPrompt(level, words) {
+function buildSystemPrompt(level, words, forced) {
   const lv = LEVEL_GUIDE[level] || LEVEL_GUIDE.A1;
   const vocab = Array.isArray(words) && words.length
     ? words.slice(0, 60).join(', ')
@@ -85,7 +85,14 @@ LANG: <vi hoặc en hoặc zh — thứ tiếng bạn vừa dùng ở dòng SAY>
 SAY: <câu trả lời của bạn>
 VI: <nghĩa tiếng Việt của dòng SAY — BẮT BUỘC có khi SAY là tiếng Anh hoặc tiếng Trung,
      chỉ để trống khi SAY đã là tiếng Việt>
-PY: <phiên âm pinyin có dấu thanh — CHỈ khi SAY là tiếng Trung, còn lại để trống>`;
+PY: <phiên âm pinyin có dấu thanh — CHỈ khi SAY là tiếng Trung, còn lại để trống>${
+  forced ? `
+
+════ CHỐT CHO LƯỢT NÀY ════
+Câu vừa rồi của người học là ${LANGS[forced].name}. Lượt này BẮT BUỘC trả lời bằng
+${LANGS[forced].name}, dòng LANG phải ghi đúng "${forced}". Không được đổi sang thứ tiếng khác.${
+    forced === 'vi' ? ' Dòng VI để trống.' : ' Dòng VI bắt buộc ghi nghĩa tiếng Việt.'}${
+    forced === 'zh' ? ' Dòng PY bắt buộc ghi pinyin có dấu thanh.' : ''}` : ''}`;
 }
 
 /** Cắt gọn lịch sử hội thoại trước khi gửi lên API. */
@@ -136,6 +143,10 @@ async function reply({ history, level, words }) {
   if (!messages.length || messages[messages.length - 1].role !== 'user') {
     messages.push({ role: 'user', content: 'Hi!' });
   }
+  // Nhắc suông không ăn: mô hình vẫn đáp tiếng Việt khi người học nói tiếng Trung.
+  // Chữ Hán và dấu tiếng Việt thì nhìn là biết chắc, nên chốt thẳng bằng mã.
+  const lastSaid = messages[messages.length - 1].content;
+  const forced = lastSaid === '__START__' ? null : sniffLang(lastSaid);
 
   const res = await fetch(ANTHROPIC_API_URL, {
     method: 'POST',
@@ -147,7 +158,7 @@ async function reply({ history, level, words }) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      system: buildSystemPrompt(level, words),
+      system: buildSystemPrompt(level, words, forced),
       messages,
     }),
   });
@@ -164,7 +175,8 @@ async function reply({ history, level, words }) {
   // Mô hình hay quên dòng LANG hoặc ghi sai — soi lại chính câu nó vừa nói.
   const sniffed = sniffLang(out.reply);
   if (sniffed) out.lang = sniffed;
-  else if (!LANGS[out.lang]) out.lang = 'en';
+  else if (LANGS[out.lang]) { /* giữ nguyên dòng LANG của mô hình */ }
+  else out.lang = forced || 'en';
   // Đã nói tiếng Việt rồi thì dòng nghĩa là thừa; pinyin chỉ có nghĩa với tiếng Trung.
   if (out.lang === 'vi') out.vi = '';
   if (out.lang !== 'zh') out.py = '';
