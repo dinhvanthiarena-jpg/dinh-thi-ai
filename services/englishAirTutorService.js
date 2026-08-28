@@ -85,14 +85,18 @@ LANG: <vi hoặc en hoặc zh — thứ tiếng bạn vừa dùng ở dòng SAY>
 SAY: <câu trả lời của bạn>
 VI: <nghĩa tiếng Việt của dòng SAY — BẮT BUỘC có khi SAY là tiếng Anh hoặc tiếng Trung,
      chỉ để trống khi SAY đã là tiếng Việt>
-PY: <phiên âm pinyin có dấu thanh — CHỈ khi SAY là tiếng Trung, còn lại để trống>${
-  forced ? `
+PY: <phiên âm pinyin có dấu thanh — CHỈ khi SAY là tiếng Trung, còn lại để trống>
 
-════ CHỐT CHO LƯỢT NÀY ════
+════ CHỐT CHO LƯỢT NÀY ════${
+  forced ? `
 Câu vừa rồi của người học là ${LANGS[forced].name}. Lượt này BẮT BUỘC trả lời bằng
 ${LANGS[forced].name}, dòng LANG phải ghi đúng "${forced}". Không được đổi sang thứ tiếng khác.${
     forced === 'vi' ? ' Dòng VI để trống.' : ' Dòng VI bắt buộc ghi nghĩa tiếng Việt.'}${
-    forced === 'zh' ? ' Dòng PY bắt buộc ghi pinyin có dấu thanh.' : ''}` : ''}`;
+    forced === 'zh' ? ' Dòng PY bắt buộc ghi pinyin có dấu thanh.' : ''}` : `
+Câu vừa rồi không có chữ Hán cũng không có dấu tiếng Việt, nên nhiều khả năng là
+tiếng Anh — nhưng cũng có thể là tiếng Việt gõ không dấu. Tự đọc mà quyết.
+Nếu bạn trả lời bằng tiếng Anh hoặc tiếng Trung thì DÒNG VI BẮT BUỘC PHẢI CÓ
+nghĩa tiếng Việt, đừng bỏ trống — người học cần nó để đối chiếu.`}`;
 }
 
 /** Cắt gọn lịch sử hội thoại trước khi gửi lên API. */
