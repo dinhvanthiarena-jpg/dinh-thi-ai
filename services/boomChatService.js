@@ -161,11 +161,6 @@ async function reply({ history, grade }) {
   // Đã nói tiếng Việt rồi thì dòng nghĩa là thừa; pinyin chỉ có nghĩa với tiếng Trung.
   if (out.lang === 'vi') out.vi = '';
   if (out.lang !== 'zh') out.py = '';
-  // TEMP DIAGNOSTIC — remove before shipping.
-  out._debugForced = forced;
-  out._debugLastSaid = lastSaid;
-  out._debugLastSaidLen = lastSaid.length;
-  out._debugRawText = text;
   return out;
 }
 
