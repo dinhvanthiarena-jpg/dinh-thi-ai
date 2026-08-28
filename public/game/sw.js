@@ -1,7 +1,7 @@
 // Minimal app-shell cache so the PWA install prompt qualifies and the game
 // still opens (from cache) with a flaky connection. Bump CACHE_NAME whenever
 // the shipped files change so old caches don't linger.
-const CACHE_NAME = 'tvc1-shell-v17';
+const CACHE_NAME = 'tvc1-shell-v18';
 const SHELL_FILES = [
   './',
   './index.html',

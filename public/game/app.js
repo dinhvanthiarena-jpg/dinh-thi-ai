@@ -2464,19 +2464,26 @@
       if (callVoice) utter.voice = callVoice;
       utter.rate = 1.0;
       utter.pitch = 1.05;
-      utter.onstart = () => callAvatar.classList.add('talking');
-      utter.onend = () => {
+      // Some browsers (no matching vi-VN voice, some automated/embedded
+      // WebViews) silently accept an utterance but never fire onstart/onend
+      // — without a watchdog the mic/state machine would lock up forever
+      // waiting for a callback that's never coming. ~120ms/char at rate 1.0
+      // is a generous upper bound for vi-VN speech length.
+      let callSpeakDone = false;
+      const finishSpeak = () => {
+        if (callSpeakDone) return;
+        callSpeakDone = true;
         callAvatar.classList.remove('talking');
         callBusy = false;
         if (callEnded) return;
         callSetState('Đến lượt cậu rồi đó!');
         callAutoListenIfPossible();
       };
-      utter.onerror = () => {
-        callAvatar.classList.remove('talking');
-        callBusy = false;
-      };
+      utter.onstart = () => callAvatar.classList.add('talking');
+      utter.onend = finishSpeak;
+      utter.onerror = finishSpeak;
       window.speechSynthesis.speak(utter);
+      setTimeout(finishSpeak, Math.min(12000, 1500 + text.length * 120));
     }
     function callReplayLast() {
       if (!('speechSynthesis' in window) || !callSaid.textContent || callSaid.textContent === '…') return;
@@ -2484,9 +2491,13 @@
       const utter = new SpeechSynthesisUtterance(callSaid.textContent);
       utter.lang = 'vi-VN';
       if (callVoice) utter.voice = callVoice;
+      let replayDone = false;
+      const finishReplay = () => { if (!replayDone) { replayDone = true; callAvatar.classList.remove('talking'); } };
       utter.onstart = () => callAvatar.classList.add('talking');
-      utter.onend = () => callAvatar.classList.remove('talking');
+      utter.onend = finishReplay;
+      utter.onerror = finishReplay;
       window.speechSynthesis.speak(utter);
+      setTimeout(finishReplay, Math.min(12000, 1500 + callSaid.textContent.length * 120));
     }
 
     async function callAsk(userText) {
