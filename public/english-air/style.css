@@ -1086,6 +1086,25 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   background: var(--bad-soft); border-radius: var(--r2); padding: var(--s2) var(--s3); }
 
 
+/* ---------- 15g. KHUNG ẢNH MINH HOẠ TRONG BÀI ---------- */
+/* Đặt giữa câu hỏi và phần trả lời, đúng chỗ mắt nhìn tới trước khi đọc chữ.
+   Tỉ lệ cố định để bố cục không giật khi ảnh tải xong. */
+.pic-hero { width: 100%; margin: var(--s4) 0 var(--s2); aspect-ratio: 16 / 10;
+  border-radius: var(--r3); overflow: hidden; background: var(--muted);
+  display: grid; place-items: center; box-shadow: var(--sh-1);
+  animation: up var(--t3) var(--e) both; }
+.pic-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Bản hình vẽ: nền dịu, nét to ở giữa — hình sprite vốn là nét đơn sắc nên phải
+   tự dựng khung cảnh quanh nó, không thì nhìn trống trải. */
+.pic-hero.ve { background:
+    radial-gradient(120% 100% at 50% 0%, var(--brand-soft) 0%, var(--muted) 70%); }
+.pic-hero.ve svg { width: 44%; max-width: 150px; height: auto; color: var(--brand-ink);
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,.18)); }
+
+@media (max-width: 379px) { .pic-hero { aspect-ratio: 16 / 9; } }
+/* Màn cao thoải mái thì cho ảnh to hơn một chút, vẫn chừa chỗ cho ngân hàng từ. */
+@media (min-height: 780px) { .pic-hero { aspect-ratio: 3 / 2; } }
+
 /* ---------- 15f. BÁO BÀI CHƯA MỞ KHOÁ ---------- */
 .sheet-mon { width: 96px; height: 96px; margin: 0 auto var(--s4);
   border-radius: var(--rf); background: var(--brand-soft);

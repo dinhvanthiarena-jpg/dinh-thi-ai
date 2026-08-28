@@ -484,6 +484,36 @@ function renderSlide() {
   else { DRILL[s.d.type](s.d, stage); setBtn("Kiểm tra", "btn-primary", false); }
 }
 
+/** Khung ảnh minh hoạ lớn cho câu hỏi — người học nhìn thấy nghĩa trước khi đọc chữ.
+    Từ nào có ảnh thật (assets/pics/…) thì dùng ảnh, không thì lấy hình vẽ trong
+    sprite phóng to. Từ chưa có gì thì trả null và slide bỏ qua, không để khung rỗng. */
+function khungAnh(w) {
+  if (!w) return null;
+  if (!w.img && !w.pic) return null;
+  const box = el("figure", "pic-hero");
+  if (w.img) {
+    const im = el("img");
+    im.src = "assets/pics/" + w.img;
+    im.alt = "";
+    im.loading = "lazy";
+    im.decoding = "async";
+    // Ảnh thiếu file thì gỡ cả khung đi, thà không có còn hơn ô vỡ.
+    im.addEventListener("error", () => box.remove());
+    box.append(im);
+  } else {
+    box.classList.add("ve");
+    box.append(pic(w.pic));
+  }
+  return box;
+}
+
+/** Câu điền từ: lấy ảnh của từ đang phải điền, đó mới là thứ cần minh hoạ. */
+function anhChoCau(d) {
+  const canDien = (d.answers || []).map(a => String(a).toLowerCase().replace(/[.,!?]/g, ""));
+  const w = ALL_WORDS.find(x => canDien.includes(x.en.toLowerCase()) && (x.img || x.pic));
+  return khungAnh(w);
+}
+
 /* ---------- 9. Slide dạy ---------- */
 const TEACH = {
   intro(d, st) {
@@ -599,13 +629,19 @@ const DRILL = {
     say.append(icon("i-sound"));
     say.addEventListener("click", () => speak(d.word.en));
     row.append(say);
-    st.append(el("p", "ask", d.word.en), row, optList(d.opts, w => w.vi, d.word.en));
+    st.append(el("p", "ask", d.word.en), row);
+    const anh = khungAnh(d.word);
+    if (anh) st.append(anh);
+    st.append(optList(d.opts, w => w.vi, d.word.en));
     speak(d.word.en);
   },
 
   reverse(d, st) {
     showMascot(true); setKicker("Dịch sang tiếng Anh");
-    st.append(el("p", "ask", "“" + d.word.vi + "”"), optList(d.opts, w => w.en, d.word.en));
+    st.append(el("p", "ask", "“" + d.word.vi + "”"));
+    const anh = khungAnh(d.word);
+    if (anh) st.append(anh);
+    st.append(optList(d.opts, w => w.en, d.word.en));
   },
 
   listen(d, st) {
@@ -669,6 +705,8 @@ const DRILL = {
   blanks(d, st) {
     showMascot(true); setKicker("Dịch câu này");
     st.append(el("p", "ask", d.sent.vi));
+    const anh = anhChoCau(d);
+    if (anh) st.append(anh);
     const parts = d.sent.en.split(" ");
     const line = el("div", "blanks");
     const slots = [];
