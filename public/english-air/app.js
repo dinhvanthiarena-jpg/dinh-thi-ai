@@ -1091,7 +1091,8 @@ $("#btnWeak").addEventListener("click", () => startLesson(null, { words: weakWor
    Hai chế độ:
    • "free"   — nói chuyện tự do. Máy chủ /api/english-air/chat gọi Claude,
                 MON.L trả lời theo trình độ và vốn từ của người học.
-   • "script" — luyện đúng lời thoại trong bài đã học, chạy được cả khi
+   • "teach" — luyện nói với MON.L trong vai giáo viên: nó nói tiếng Anh chuẩn,
+     ra câu cho mình nói theo, chấm phát âm rồi sửa. Cũng cần mạng. Cũ là
                 không có mạng.
    Cả hai đều dùng micro (Web Speech API); gõ chữ là đường lui khi không nói được. */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1130,19 +1131,9 @@ addEventListener("orientationchange", () => setTimeout(fitScene, 120));
 const CHAT_URL = "../api/english-air/chat";
 
 const C = { mode: "free", lang: "en", speaking: false, sayDone: null,
-            msgs: [], lines: [], i: 0, target: null,
+            msgs: [], target: null,
             right: 0, asked: 0, t0: 0, timer: null, rec: null, listening: false, busy: false };
 
-function callDialogues() {
-  const out = [];
-  COURSE.levels.forEach(lv => lv.units.forEach(u => u.lessons.forEach(l => {
-    if (!S.done[l.id] || !l.teach) return;
-    l.teach.filter(t => t.t === "dialogue").forEach(d => {
-      if (d.lines.some(x => x.who === "B")) out.push({ title: d.title, lines: d.lines });
-    });
-  })));
-  return out;
-}
 function similar(heardText, target) {
   const a = norm(heardText).split(" ").filter(Boolean);
   const b = norm(target).split(" ").filter(Boolean);
@@ -1152,23 +1143,7 @@ function similar(heardText, target) {
   return hit / b.length;
 }
 
-/* Chưa học bài nào vẫn phải gọi được — không thì mở app ra chỉ thấy một tấm ảnh đứng im. */
-const STARTER_DIALOGUE = {
-  title: "Chào hỏi",
-  lines: [
-    { who: "A", en: "Hi! I am MON.L. What is your name?", vi: "Chào! Tớ là MON.L. Bạn tên gì?" },
-    { who: "B", en: "My name is Nam.", vi: "Tớ tên Nam." },
-    { who: "A", en: "Nice to meet you! How are you today?", vi: "Rất vui được gặp bạn! Hôm nay bạn khoẻ không?" },
-    { who: "B", en: "I am fine, thank you.", vi: "Tớ khoẻ, cảm ơn bạn." },
-    { who: "A", en: "Where are you from?", vi: "Bạn đến từ đâu?" },
-    { who: "B", en: "I am from Viet Nam.", vi: "Tớ đến từ Việt Nam." },
-    { who: "A", en: "Very good! See you tomorrow.", vi: "Giỏi lắm! Hẹn gặp lại ngày mai." },
-  ],
-};
-
 function renderCall() {
-  const n = callDialogues().length;
-  $("#callLocked").hidden = n > 0;
   $("#callMicNote").textContent = SR
     ? "Lần đầu bấm micro, trình duyệt sẽ hỏi quyền dùng micro — chọn Cho phép."
     : "Trình duyệt này chưa nghe được bằng micro, bạn gõ chữ để nói chuyện nhé.";
@@ -1234,12 +1209,12 @@ function monSays(en, vi, after, py) {
 function startCall(mode) {
   C.mode = mode;
   // Luyện hội thoại trong bài luôn là tiếng Anh vì đó là lời thoại đã học.
-  // Luyện hội thoại trong bài luôn là tiếng Anh; nói chuyện tự do thì bắt đầu
-  // bằng tiếng của máy rồi bám theo người học từ lượt sau.
+  // Giờ học luôn là tiếng Anh; tán gẫu thì bắt đầu bằng tiếng của máy rồi
+  // bám theo người học từ lượt sau.
   C.lang = mode === "free" ? deviceLang() : "en";
   $("#callSaidPy").hidden = true;
   $("#callSaidLang").hidden = true;
-  C.msgs = []; C.lines = []; C.i = 0; C.target = null;
+  C.msgs = []; C.target = null;
   C.right = 0; C.asked = 0; C.busy = false;
   $("#callLog").textContent = "";
   $("#callHeard").hidden = true;
@@ -1264,16 +1239,8 @@ function startCall(mode) {
   }, 1000);
   $("#callTimer").textContent = "00:00";
 
-  if (mode === "script") {
-    const pool = callDialogues();
-    const d = pool.length ? pool[Math.floor(Math.random() * pool.length)] : STARTER_DIALOGUE;
-    C.lines = d.lines.slice();
-    C.asked = d.lines.filter(x => x.who === "B").length;
-    nextScriptLine();
-  } else {
-    setState("Đang kết nối…");
-    askTutor(true);
-  }
+  setState("Đang kết nối…");
+  askTutor(true);
 }
 function endCall(finished) {
   stopListening();
@@ -1284,12 +1251,12 @@ function endCall(finished) {
   stopSpeak();
   const mins = (Date.now() - C.t0) / 60000;
   if (finished !== false && (C.right > 0 || C.msgs.length > 2)) {
-    const xp = C.mode === "script"
+    const xp = C.mode === "teach"
       ? 5 + (C.asked && C.right === C.asked ? 5 : 0)
       : clamp(Math.round(mins * 4), 3, 15);
     markStudied(); addXp(xp); save();
-    toast(C.mode === "script"
-      ? `Xong cuộc gọi: ${C.right}/${C.asked} câu · +${xp} XP`
+    toast(C.mode === "teach"
+      ? `Xong buổi học: ${C.right}/${C.asked} câu đọc đạt · +${xp} XP`
       : `Nói chuyện ${Math.max(1, Math.round(mins))} phút · +${xp} XP`);
   }
   paintStats();
@@ -1310,6 +1277,7 @@ async function askTutor(first) {
         // __START__ là dấu hiệu mở màn: MON.L chào bằng tiếng Việt và mời
         // người học cứ nói tiếng gì cũng được.
         history: first ? [{ role: "user", content: "__START__" }] : C.msgs,
+        mode: C.mode,
         level: level().code,
         words: seenWords().slice(-60).map(w => w.en),
       }),
@@ -1323,6 +1291,14 @@ async function askTutor(first) {
     if (CALL_LANGS[data.lang]) C.lang = data.lang;
     C.msgs.push({ role: "assistant", content: data.reply });
     if (!first) pushLog("mon", data.reply);
+    // Giờ học: mỗi lượt giáo viên ra một câu cho mình đọc theo.
+    if (C.mode === "teach" && data.task) {
+      C.target = { en: data.task, vi: data.taskVi || "" };
+      C.asked++;
+      $("#callTarget").textContent = data.task;
+      $("#callTargetVi").textContent = S.showVi ? (data.taskVi || "") : "";
+      $("#callTask").hidden = false;
+    }
     // Mở micro ngay khi MON.L bắt đầu nói, đừng đợi nó nói xong. Người học
     // phải cắt lời được, không thì ngồi chờ cả chục giây mới tới lượt mình.
     C.busy = false;
@@ -1340,59 +1316,20 @@ async function askTutor(first) {
       title: "Chưa gọi tự do được",
       body: "Chế độ nói chuyện tự do cần mạng. Bạn chuyển sang luyện hội thoại trong bài nhé — cái này chạy được cả khi không có mạng.",
       yes: "Luyện hội thoại trong bài", no: "Đóng",
-      onYes() { startCall("script"); }
+      onYes() { startCall("teach"); }
     });
   }
 }
 
 /* ----- chế độ luyện lời thoại trong bài ----- */
-function nextScriptLine() {
-  stopListening();
-  $("#callHeard").hidden = true;
-  $("#callChoices").hidden = true;
-  $("#callChoices").textContent = "";
-
-  if (C.i >= C.lines.length) return endCall(true);
-  const line = C.lines[C.i];
-  const doneB = C.lines.slice(0, C.i).filter(x => x.who === "B").length;
-  setState(`Câu ${Math.min(doneB + 1, C.asked)}/${C.asked}`);
-
-  if (line.who !== "B") {
-    C.target = null;
-    $("#callTask").hidden = true;
-    $("#btnMic").disabled = true;
-    monSays(line.en, line.vi, () => { pushLog("mon", line.en); C.i++; nextScriptLine(); });
-    return;
-  }
-  C.target = line;
-  $("#callTask").hidden = false;
-  $("#callTarget").textContent = line.en;
-  $("#callTargetVi").textContent = S.showVi ? line.vi : "";
-  setState("Tới lượt bạn");
-  $("#btnMic").disabled = !SR;
-  if (!SR) showChoices();
-}
+/* Không nói được thì gõ chữ. Trước đây còn dựng sẵn ba câu để chọn, nhưng giờ
+   câu mẫu do giáo viên tự nghĩ ra từng lượt nên không bịa được câu sai nữa. */
 function showChoices() {
-  if (C.mode !== "script" || !C.target) {
-    $("#callType").hidden = false;
-    $("#callInput").focus();
-    return;
-  }
-  const box = $("#callChoices");
-  box.textContent = "";
-  const others = sample(COURSE.levels.flatMap(lv => lv.units.flatMap(u => u.lessons.flatMap(l =>
-    (l.teach || []).filter(t => t.t === "dialogue").flatMap(d => d.lines))))
-    .filter(x => x.en !== C.target.en), 2);
-  shuffle([C.target, ...others]).forEach(x => {
-    const b = el("button", "opt"); b.type = "button";
-    b.append(el("span", null, x.en));
-    b.addEventListener("click", () => heardReply(x.en, x.en === C.target.en ? 1 : 0));
-    box.append(b);
-  });
-  box.hidden = false;
+  $("#callChoices").hidden = true;
+  $("#callType").hidden = false;
+  $("#callInput").focus();
 }
 
-/* ----- người học vừa nói / gõ xong ----- */
 function heardReply(text, score) {
   if (C.mode === "free") {
     const g = guessLang(text);
@@ -1403,20 +1340,26 @@ function heardReply(text, score) {
     askTutor(false);
     return;
   }
-  const ok = (score != null ? score : similar(text, C.target.en)) >= 0.7;
+  // Giờ học: chấm câu vừa đọc so với câu mẫu, rồi kể lại cho giáo viên nghe
+  // để thầy biết đường mà sửa phát âm.
+  const pct = C.target
+    ? Math.round((score != null ? score : similar(text, C.target.en)) * 100)
+    : null;
+  const ok = pct != null && pct >= 70;
   const h = $("#callHeard");
   h.hidden = false;
   h.className = "call-heard " + (ok ? "ok" : "bad");
   $("#callHeardText").textContent = ok
     ? `Chuẩn rồi: “${text}”`
-    : `Nghe được: “${text}” — thử lại cho sát câu mẫu nhé.`;
-  if (ok) {
-    C.right++;
-    pushLog("you", C.target.en);
-    setTimeout(() => { C.i++; nextScriptLine(); }, 900);
-  } else {
-    $("#btnMic").disabled = !SR;
-  }
+    : `Nghe được: “${text}”` + (pct != null ? ` — mới khớp ${pct}% câu mẫu` : "");
+  if (ok) C.right++;
+  pushLog("you", text);
+  C.msgs.push({
+    role: "user",
+    content: text + (C.target ? ` [Câu mẫu: "${C.target.en}" — máy nghe khớp ${pct}%]` : ""),
+  });
+  $("#callTask").hidden = true;
+  askTutor(false);
 }
 
 /* ----- micro ----- */
@@ -1479,7 +1422,7 @@ function sendTyped() {
   heardReply(v);
 }
 $("#btnStartFree").addEventListener("click", () => { primeSpeech(); startCall("free"); });
-$("#btnStartCall").addEventListener("click", () => { primeSpeech(); startCall("script"); });
+$("#btnStartCall").addEventListener("click", () => { primeSpeech(); startCall("teach"); });
 $("#btnMic").addEventListener("click", () => {
   primeSpeech();
   // Đang nói dở mà người học bấm micro thì cắt lời ngay — như nói chuyện thật.

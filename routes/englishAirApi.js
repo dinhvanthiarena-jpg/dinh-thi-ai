@@ -31,8 +31,8 @@ router.post('/chat', async (req, res) => {
     return res.status(429).json({ error: 'Bạn nói hơi nhanh rồi, nghỉ một lát rồi gọi lại nhé.' });
   }
   try {
-    const { history, level, words } = req.body || {};
-    const out = await tutor.reply({ history, level, words });
+    const { history, level, words, mode } = req.body || {};
+    const out = await tutor.reply({ history, level, words, mode });
     res.json(out);
   } catch (err) {
     const noKey = err.code === 'NO_KEY';
