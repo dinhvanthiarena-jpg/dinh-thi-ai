@@ -42,7 +42,7 @@
     <% shopeePicks.forEach(function(p) { %>
       <a href="<%= p.url %>" target="_blank" rel="noopener sponsored" class="group block">
         <div class="aspect-square rounded-xl overflow-hidden bg-white border border-orange-100 shadow-sm">
-          <img src="<%= p.image %>" alt="<%= p.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+          <img src="<%= p.image %>" alt="<%= p.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" referrerpolicy="no-referrer" />
         </div>
         <p class="mt-2 text-xs text-ink line-clamp-2 leading-snug"><%= p.name %></p>
         <p class="mt-1 text-sm font-bold text-orange-600"><%= p.price %></p>
