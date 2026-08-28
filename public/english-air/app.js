@@ -672,9 +672,22 @@ const TEACH = {
     st.append(markup(el("p", "sign-body"), d.body));
     if (d.bullets) {
       const ul = el("ul", "bullets");
-      d.bullets.forEach(t => { const li = el("li"); li.append(icon("i-check", "ic ic-sm"), el("span", null, t)); ul.append(li); });
+      d.bullets.forEach(t => {
+        // Mỗi gạch đầu dòng chạm vào là nghe được — có dòng lẫn tiếng Anh nên
+        // để máy tự nhận thứ tiếng thay vì ép một giọng.
+        const li = el("li");
+        const b = el("button", "bullet-btn"); b.type = "button";
+        b.setAttribute("aria-label", "Nghe: " + boDanhDau(t));
+        b.append(icon("i-check", "ic ic-sm"), el("span", null, t));
+        b.addEventListener("click", () => speak(boDanhDau(t)));
+        li.append(b); ul.append(li);
+      });
       st.append(ul);
     }
+    docLanLuot([
+      { text: d.title, lang: tiengCua(d.title) },
+      { text: boDanhDau(d.body), lang: "vi-VN" },
+    ]);
   },
   vocab(d, st) { vocabSlide(d, st, "Từ mới"); },
   phrase(d, st) { vocabSlide(d, st, "Mẫu câu"); },
@@ -684,20 +697,44 @@ const TEACH = {
     st.append(signpost(d.title, d.body, "i-book"));
     const t = el("div", "gtable");
     d.rows.forEach(r => {
-      const row = el("div", "grow"), ex = el("div", "gex");
       const g = grammarRow(r);
+      // Cả hàng là một nút: chạm vào là nghe câu mẫu rồi nghe nghĩa. Đây là chỗ
+      // người ta cần nghe nhất — mẫu câu mà chỉ đọc bằng mắt thì không vào đầu.
+      const row = el("button", "grow"); row.type = "button";
+      row.setAttribute("aria-label", "Nghe: " + g.en);
+      const ex = el("div", "gex");
       ex.append(el("b", null, g.en));
       if (g.vi) ex.append(el("small", null, g.vi));
-      row.append(el("div", "gform", g.label), ex);
+      const loa = el("span", "grow-loa"); loa.append(icon("i-sound", "ic ic-sm"));
+      row.append(el("div", "gform", g.label), ex, loa);
+      row.addEventListener("click", () => docLanLuot([
+        { text: g.en, lang: "en-US" },
+        g.vi ? { text: g.vi, lang: "vi-VN" } : null,
+      ].filter(Boolean)));
       t.append(row);
     });
     st.append(t);
-    if (d.tip) { const tip = el("div", "tip"); tip.append(icon("i-bulb", "ic ic-sm"), el("span", null, d.tip)); st.append(tip); }
+    if (d.tip) {
+      const tip = el("button", "tip"); tip.type = "button";
+      tip.setAttribute("aria-label", "Nghe mẹo: " + boDanhDau(d.tip));
+      tip.append(icon("i-bulb", "ic ic-sm"), el("span", null, d.tip));
+      tip.addEventListener("click", () => speak(boDanhDau(d.tip), false, "vi-VN"));
+      st.append(tip);
+    }
+    // Vào slide là giảng luôn bằng tiếng, khỏi phải bấm.
+    docLanLuot([
+      { text: d.title, lang: tiengCua(d.title) },
+      { text: boDanhDau(d.body), lang: "vi-VN" },
+    ]);
   },
 
   culture(d, st) {
     showMascot(false); setKicker("Góc văn hoá");
     st.append(signpost(d.title, d.body, "i-globe"));
+    docLanLuot([
+      { text: d.title, lang: tiengCua(d.title) },
+      { text: boDanhDau(d.body), lang: "vi-VN" },
+    ]);
   },
 
   dialogue(d, st) {
@@ -720,12 +757,25 @@ const TEACH = {
 };
 
 /** Biển báo: thẻ viền đậm đứng trên hai chân cột, có đồi tuyết phía dưới. */
+/** Bỏ dấu ** đánh dấu từ khoá — đọc lên mà kèm dấu sao thì nghe kỳ. */
+const boDanhDau = t => String(t || "").replace(/\*\*/g, "");
+
 function signpost(title, body, ic) {
   const wrap = el("div", "sign");
   const card = el("div", "sign-card");
   const badge = el("div", "sign-badge"); badge.append(icon(ic, "ic"));
   card.append(badge, el("div", "sign-word", title));
   card.append(markup(el("div", "sign-body"), body));
+  // Phần giải thích phải nghe được, không bắt người ta chỉ đọc chữ. Đọc bằng
+  // giọng Việt vì đây là lời giảng, không phải mẫu câu tiếng Anh.
+  const ngheLai = el("button", "sign-nghe");
+  ngheLai.type = "button";
+  ngheLai.append(icon("i-sound", "ic ic-sm"), el("span", null, "Nghe lại"));
+  ngheLai.addEventListener("click", () => docLanLuot([
+    { text: title, lang: tiengCua(title) },
+    { text: boDanhDau(body), lang: "vi-VN" },
+  ]));
+  card.append(ngheLai);
   const legs = el("div", "sign-legs"); legs.append(el("i"), el("i"));
   wrap.append(card, legs);
   const hill = document.createElementNS("http://www.w3.org/2000/svg", "svg");

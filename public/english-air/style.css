@@ -718,14 +718,26 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 /* bảng ngữ pháp */
 .gtable { border-radius: var(--r3); overflow: hidden; box-shadow: inset 0 0 0 2px var(--line); }
-.grow { display: grid; grid-template-columns: minmax(96px,.8fr) 1.4fr; border-bottom: 1px solid var(--line); }
+/* Cả hàng ngữ pháp là một nút bấm để nghe, nên phải tự dựng lại nét của nút. */
+.grow { display: grid; grid-template-columns: minmax(96px,.8fr) 1.4fr auto;
+  align-items: center; width: 100%; border: 0; border-bottom: 1px solid var(--line);
+  background: none; color: inherit; font: inherit; text-align: left; cursor: pointer;
+  transition: background var(--t1) var(--e); }
 .grow:last-child { border-bottom: 0; }
+.grow:active { background: var(--muted); }
+.grow-loa { display: grid; place-items: center; width: 34px; height: 34px; flex: none;
+  margin-right: var(--s2); border-radius: var(--rf);
+  background: var(--brand-soft); color: var(--brand); }
+.grow-loa .ic { width: 15px; height: 15px; }
 .gform { padding: var(--s3); background: var(--muted); font-weight: 900; font-size: .86rem; }
 .gex { padding: var(--s3); min-width: 0; text-align: left; }
 .gex b { display: block; font-weight: 800; font-size: .94rem; }
 .gex small { color: var(--muted-fg); font-size: .84rem; font-weight: 600; }
 .tip { display: flex; gap: var(--s3); padding: var(--s3) var(--s4); border-radius: var(--r2); background: var(--amber-soft); color: var(--amber); font-size: .89rem; font-weight: 800; line-height: 1.5; text-align: left; }
 .tip .ic-sm { flex: none; margin-top: 2px; }
+/* Mẹo cũng bấm nghe được */
+.tip { width: 100%; border: 0; font-family: inherit; cursor: pointer; }
+.tip:active { filter: brightness(1.12); }
 
 /* hội thoại */
 .dialog { display: flex; flex-direction: column; gap: var(--s3); }
@@ -739,7 +751,12 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .dbubble small { display: block; margin-top: 2px; font-size: .84rem; font-weight: 600; opacity: .78; }
 
 .bullets { display: flex; flex-direction: column; gap: var(--s2); text-align: left; }
-.bullets li { display: flex; gap: var(--s3); align-items: flex-start; font-size: .98rem; font-weight: 700; }
+.bullets li { display: flex; }
+.bullet-btn { display: flex; gap: var(--s3); align-items: flex-start; width: 100%;
+  padding: var(--s2) 0; border: 0; background: none; color: inherit;
+  font-family: inherit; font-size: .98rem; font-weight: 700; text-align: left;
+  cursor: pointer; transition: opacity var(--t1) var(--e); }
+.bullet-btn:active { opacity: .6; }
 .bullets .ic-sm { color: var(--ok); flex: none; margin-top: 3px; }
 
 /* ---------- 15. THẺ GHI NHỚ ---------- */
@@ -1200,6 +1217,15 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   transition: transform var(--t1) var(--e), color var(--t1) var(--e); }
 .vcard-say-vi:active { transform: scale(.9); color: var(--brand); }
 .vcard-say-vi .ic { width: 15px; height: 15px; }
+
+/* Nút nghe lại lời giảng trên biển giải thích */
+.sign-nghe { display: inline-flex; align-items: center; gap: 6px;
+  margin-top: var(--s3); padding: 8px var(--s3); border-radius: var(--rf);
+  background: var(--brand-soft); color: var(--brand-ink);
+  font-size: .82rem; font-weight: 800; cursor: pointer;
+  transition: transform var(--t1) var(--e); }
+.sign-nghe:active { transform: scale(.95); }
+.sign-nghe .ic { width: 15px; height: 15px; }
 
 /* ---------- 15i. TÔ CHỮ BẰNG NGÓN TAY ---------- */
 .to-khung { width: 100%; max-width: 300px; margin: var(--s4) auto 0;
