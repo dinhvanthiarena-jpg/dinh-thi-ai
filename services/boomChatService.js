@@ -13,11 +13,12 @@ const ANTHROPIC_VERSION = '2023-06-01';
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
 
 // Một lượt gọi bất thường không được đốt token: lịch sử tối đa 12 lượt,
-// mỗi lượt cắt còn 400 ký tự, câu trả lời tối đa ~260 token (Mon.L chỉ nói
-// tối đa 2 câu ngắn + dòng dịch nghĩa/pinyin khi cần, xem system prompt).
+// mỗi lượt cắt còn 400 ký tự, câu trả lời tối đa ~320 token (Mon.L giờ dạy
+// thật nên câu trả lời có thể dài hơn một câu chào xã giao một chút, xem
+// system prompt — vẫn phải ngắn gọn vì sẽ được đọc thành giọng nói).
 const MAX_TURNS = 12;
 const MAX_CHARS = 400;
-const MAX_TOKENS = 260;
+const MAX_TOKENS = 320;
 
 // Ba thứ tiếng Mon.L nói được. Bạn học KHÔNG phải chọn trước — cứ nói,
 // Mon.L tự nhận ra rồi đáp lại đúng thứ tiếng đó.

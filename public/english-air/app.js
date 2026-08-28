@@ -1378,12 +1378,19 @@ async function askTutor(first) {
     C.msgs.push({ role: "assistant", content: data.reply });
     if (!first) pushLog("mon", data.reply);
     // Giờ học: mỗi lượt giáo viên ra một câu cho mình đọc theo.
-    if (C.mode === "teach" && data.task) {
-      C.target = { en: data.task, vi: data.taskVi || "" };
-      C.asked++;
-      $("#callTarget").textContent = data.task;
-      $("#callTargetVi").textContent = S.showVi ? (data.taskVi || "") : "";
-      $("#callTask").hidden = false;
+    if (C.mode === "teach") {
+      if (data.task) {
+        C.target = { en: data.task, vi: data.taskVi || "" };
+        C.asked++;
+        $("#callTarget").textContent = data.task;
+        $("#callTargetVi").textContent = S.showVi ? (data.taskVi || "") : "";
+        $("#callTask").hidden = false;
+      } else {
+        // Giáo viên thấy họ nói trơn nên không gợi ý gì — bỏ hẳn câu cũ đi,
+        // không thì lượt sau lại đem câu cũ ra chấm.
+        C.target = null;
+        $("#callTask").hidden = true;
+      }
     }
     // Mở micro ngay khi MON.L bắt đầu nói, đừng đợi nó nói xong. Người học
     // phải cắt lời được, không thì ngồi chờ cả chục giây mới tới lượt mình.
@@ -1427,23 +1434,30 @@ function heardReply(text, score) {
     askTutor(false);
     return;
   }
-  // Giờ học: chấm câu vừa đọc so với câu mẫu, rồi kể lại cho giáo viên nghe
-  // để thầy biết đường mà sửa phát âm.
+  // Giờ học. Chỗ này từng làm hỏng cả cuộc nói chuyện: câu nào cũng bị chấm so
+  // với câu gợi ý rồi báo lên cho giáo viên, nên thầy tưởng lượt nào học trò cũng
+  // đọc sai, cứ thế bắt đọc lại mà chẳng nghe họ NÓI GÌ.
+  // Nay: nói khác hẳn câu gợi ý nghĩa là họ đang TRẢ LỜI, không phải đọc hỏng.
   const pct = C.target
     ? Math.round((score != null ? score : similar(text, C.target.en)) * 100)
     : null;
+  const coDoc = pct != null && pct >= 30;   // có cố đọc theo câu gợi ý
   const ok = pct != null && pct >= 70;
   const h = $("#callHeard");
-  h.hidden = false;
-  h.className = "call-heard " + (ok ? "ok" : "bad");
-  $("#callHeardText").textContent = ok
-    ? `Chuẩn rồi: “${text}”`
-    : `Nghe được: “${text}”` + (pct != null ? ` — mới khớp ${pct}% câu mẫu` : "");
+  if (coDoc) {
+    h.hidden = false;
+    h.className = "call-heard " + (ok ? "ok" : "bad");
+    $("#callHeardText").textContent = ok
+      ? `Đọc tốt: “${text}”`
+      : `Nghe được: “${text}” — mới khớp ${pct}% câu gợi ý`;
+  } else {
+    h.hidden = true;   // họ nói ý của họ, không có gì để chấm
+  }
   if (ok) C.right++;
   pushLog("you", text);
   C.msgs.push({
     role: "user",
-    content: text + (C.target ? ` [Câu mẫu: "${C.target.en}" — máy nghe khớp ${pct}%]` : ""),
+    content: text + (coDoc ? ` [Họ đang đọc câu gợi ý "${C.target.en}" — máy nghe khớp ${pct}%]` : ""),
   });
   $("#callTask").hidden = true;
   askTutor(false);
