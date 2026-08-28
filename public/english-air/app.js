@@ -1130,7 +1130,7 @@ addEventListener("orientationchange", () => setTimeout(fitScene, 120));
 
 const CHAT_URL = "../api/english-air/chat";
 
-const C = { mode: "free", lang: "en", speaking: false, sayDone: null,
+const C = { mode: "free", lang: "en", speaking: false, sayDone: null, watch: null,
             msgs: [], target: null,
             right: 0, asked: 0, t0: 0, timer: null, rec: null, listening: false, busy: false };
 
@@ -1144,9 +1144,11 @@ function similar(heardText, target) {
 }
 
 function renderCall() {
-  $("#callMicNote").textContent = SR
-    ? "Lần đầu bấm micro, trình duyệt sẽ hỏi quyền dùng micro — chọn Cho phép."
-    : "Trình duyệt này chưa nghe được bằng micro, bạn gõ chữ để nói chuyện nhé.";
+  $("#callMicNote").textContent = !SR
+    ? "Trình duyệt này chưa nghe được bằng micro, bạn gõ chữ để nói chuyện nhé."
+    : (isIosStandalone()
+      ? "Bạn đang mở app từ màn hình chính. Trên iPhone kiểu này micro hay không chạy — không nghe được thì mở bằng Safari, hoặc cứ gõ chữ."
+      : "Lần đầu bấm micro, trình duyệt sẽ hỏi quyền dùng micro — chọn Cho phép.");
 }
 
 /* ----- hiển thị ----- */
@@ -1365,45 +1367,110 @@ function heardReply(text, score) {
 /* ----- micro ----- */
 /* Thứ tiếng nào máy này không nghe được thì nhớ lại, lần sau khỏi thử. */
 const NO_LISTEN = {};
+
+/** iPhone chạy app từ màn hình chính (chế độ standalone) thì bộ nghe giọng nói
+    thường không hoạt động, dù trình duyệt vẫn khai là có. Phải nói trước cho người
+    dùng biết, không thì họ tưởng app hỏng. */
+function isIosStandalone() {
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const standalone = navigator.standalone === true
+    || matchMedia("(display-mode: standalone)").matches;
+  return ios && standalone;
+}
+
+/** Báo cho người học biết máy không nghe được, và mở sẵn ô gõ chữ.
+    Trước đây bộ nghe tắt lặng lẽ, không một dòng chữ — người dùng tưởng hỏng micro. */
+function micFailed(msg) {
+  setState("Không nghe được");
+  toast(isIosStandalone()
+    ? "Micro không chạy khi mở từ màn hình chính. Bạn gõ chữ, hoặc mở bằng Safari."
+    : msg);
+  $("#callType").hidden = false;
+  $("#callInput").focus();
+}
+
 function startListening() {
   if (!SR || C.listening || C.busy) return;
   const r = new SR();
   C.rec = r; C.listening = true;
   const lg = NO_LISTEN[C.lang] ? "en" : C.lang;
   r.lang = (CALL_LANGS[lg] || CALL_LANGS.en).sr;
-  r.interimResults = false; r.maxAlternatives = 3;
+  // Lấy cả kết quả tạm: iPhone rất hay tắt bộ nghe mà không bắn kết quả cuối,
+  // có bản tạm thì còn vớt được câu người ta vừa nói.
+  r.interimResults = true;
+  r.maxAlternatives = 3;
   $("#btnMic").classList.add("listening");
   $("#callMascot").classList.add("listening");
   $("#callYou").hidden = false;
   setState("Đang nghe bạn…", "listen");
-  r.onresult = e => {
-    const alts = [...e.results[0]].map(a => a.transcript);
-    if (C.mode === "free") heardReply(alts[0]);
-    else heardReply(alts[0], alts.reduce((b, t) => Math.max(b, similar(t, C.target.en)), 0));
-  };
-  r.onerror = ev => {
+
+  let xong = false;
+  let tam = "";
+  const nop = alts => {
+    if (xong) return;
+    xong = true;
+    clearTimeout(C.watch);
     stopListening();
-    if (ev.error === "no-speech") { setState("Không nghe thấy gì, thử lại"); return; }
-    // Máy không nghe được thứ tiếng này thì lùi về tiếng Anh rồi nghe lại,
-    // đừng bắt người học tự xoay xở.
+    const t = (alts[0] || "").trim();
+    if (!t) { micFailed("Không nghe rõ, bạn nói lại hoặc gõ chữ nhé."); return; }
+    if (C.mode === "free" || !C.target) heardReply(t);
+    else heardReply(t, alts.reduce((best, x) => Math.max(best, similar(x, C.target.en)), 0));
+  };
+
+  r.onresult = e => {
+    const cuoi = e.results[e.results.length - 1];
+    if (!cuoi.isFinal) {
+      tam = [...e.results].map(x => x[0].transcript).join(" ").trim();
+      if (tam) setState("Nghe: " + tam.slice(-38), "listen");
+      return;
+    }
+    nop([...cuoi].map(x => x.transcript));
+  };
+
+  r.onerror = ev => {
+    if (xong) return;
+    if (ev.error === "no-speech") {
+      xong = true; clearTimeout(C.watch); stopListening();
+      setState("Không nghe thấy gì, bấm micro nói lại");
+      return;
+    }
+    // Máy không nghe được thứ tiếng này thì lùi về tiếng Anh, đừng bắt người học xoay xở.
     if (ev.error === "language-not-supported" && C.lang !== "en") {
+      xong = true; clearTimeout(C.watch); stopListening();
       NO_LISTEN[C.lang] = true;
       C.lang = "en";
       toast("Máy chưa nghe được tiếng đó, chuyển sang nghe tiếng Anh.");
       setTimeout(startListening, 250);
       return;
     }
-    toast(ev.error === "not-allowed"
-      ? "Chưa được cấp quyền micro. Bạn gõ chữ nhé."
-      : "Không nghe được, bạn gõ chữ nhé.");
-    // Nói chuyện tự do thì không có câu mẫu để chọn — mở ô gõ chữ ra.
-    if (C.mode === "free") $("#callType").hidden = false; else showChoices();
+    xong = true; clearTimeout(C.watch); stopListening();
+    micFailed(ev.error === "not-allowed"
+      ? "Chưa được cấp quyền micro. Vào Cài đặt cho phép rồi thử lại, hoặc gõ chữ nhé."
+      : "Máy không nghe được (" + ev.error + "). Bạn gõ chữ bên dưới nhé.");
   };
-  r.onend = () => stopListening();
-  try { r.start(); } catch { stopListening(); }
+
+  r.onend = () => {
+    if (xong) return;
+    // Tắt mà không ra kết quả nào. Có bản tạm thì dùng tạm, không thì phải BÁO,
+    // đừng im lặng — im lặng là lúc người ta tưởng app hỏng.
+    if (tam) { nop([tam]); return; }
+    xong = true; clearTimeout(C.watch); stopListening();
+    micFailed("Máy chưa nghe được gì. Bạn bấm micro nói lại, hoặc gõ chữ bên dưới.");
+  };
+
+  clearTimeout(C.watch);
+  C.watch = setTimeout(() => { try { r.stop(); } catch {} }, 12000);
+  try {
+    r.start();
+  } catch (err) {
+    xong = true; clearTimeout(C.watch); stopListening();
+    micFailed("Không mở được micro. Bạn gõ chữ bên dưới nhé.");
+  }
 }
 function stopListening() {
   C.listening = false;
+  clearTimeout(C.watch);
   $("#btnMic").classList.remove("listening");
   $("#callMascot").classList.remove("listening");
   $("#callYou").hidden = true;
@@ -1426,8 +1493,14 @@ $("#btnStartCall").addEventListener("click", () => { primeSpeech(); startCall("t
 $("#btnMic").addEventListener("click", () => {
   primeSpeech();
   // Đang nói dở mà người học bấm micro thì cắt lời ngay — như nói chuyện thật.
-  if (C.speaking) { stopSpeak(); if (C.sayDone) C.sayDone(); }
-  C.listening ? stopListening() : startListening();
+  if (C.listening) { stopListening(); return; }
+  if (C.speaking) {
+    stopSpeak();
+    if (C.sayDone) C.sayDone();
+    setTimeout(startListening, 200);   // iPhone cần một nhịp để đổi đường tiếng
+    return;
+  }
+  startListening();
 });
 $("#btnHangup").addEventListener("click", () => endCall(true));
 $("#btnCallLog").addEventListener("click", () => {
