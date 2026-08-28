@@ -115,12 +115,6 @@ body {
   cursor: default;
 }
 
-/* Real background photo from thầy, home screen only — other screens keep
-   the CSS starfield since he scoped this image to "trang chủ". */
-#screen-home {
-  background: url('assets/ui/bg-home.jpg') center center / cover no-repeat;
-}
-
 button {
   font-family: inherit;
   cursor: pointer;
@@ -238,6 +232,11 @@ button:focus-visible,
   align-items: center;
   justify-content: center;
   min-height: 100%;
+  /* .screen is itself a flex column, so without this, .home-wrap (its only
+     child) gets shrunk by the flex algorithm whenever content is taller
+     than the viewport — squishing the avatar ring down instead of letting
+     the screen's own overflow-y:auto scroll like it's meant to. */
+  flex-shrink: 0;
   /* Extra bottom padding so centered content never lands underneath the
      fixed-height footer bar on shorter screens (it's opaque and would
      just hide whatever sits behind it, like the homework button). */
@@ -558,41 +557,44 @@ button:focus-visible,
 .mascot-game { width: 80px; height: 80px; margin: 0 auto 6px; transition: transform 200ms ease-out; }
 .mascot-result { width: 100px; height: 100px; margin: 0 auto; }
 
-/* Home/license/homework mascot: real cropped gear-frame artwork (with a
-   transparent hole) layered over the live photo, instead of a CSS ring.
-   Grid stacking (both layers in the same 1x1 cell) instead of
-   absolute+percentage+transform centering — that combination rendered
-   correctly in Chromium but put the photo well below/right of the hole
-   on iOS Safari; grid layering doesn't have that cross-browser edge case. */
+/* Home/license/homework mascot: same CSS ring recipe as .mascot-game/
+   .mascot-result (conic-gradient gold ring + 4 dot accents via ::before),
+   instead of the old cropped gear-frame image — one consistent circular
+   avatar style everywhere in the app now. box-sizing: border-box makes the
+   padding a predictable, non-percentage inset, so .mascot-hero's 100%
+   height resolves against a definite pixel height (no iOS Safari
+   percentage-height-on-the-wrong-containing-block ambiguity). */
 .mascot-hero-wrap {
-  display: grid;
-  width: 164px;
-  height: 110px;
+  position: relative;
+  box-sizing: border-box;
+  width: 150px;
+  height: 150px;
+  padding: 10px;
   margin: 0 auto;
   animation: floaty 3.2s ease-in-out infinite;
 }
-.mascot-hero-wrap > * { grid-area: 1 / 1; }
-.mascot-hero {
-  width: 74px;
-  height: 74px;
-  align-self: center;
-  justify-self: center;
-  /* Nudge from dead-center to the hole's actual center (very slightly
-     below and right of the frame's midpoint). */
-  transform: translate(1px, 3px);
+.mascot-hero-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle 8px at 50% 2%, #34D399, transparent 62%),
+    radial-gradient(circle 8px at 98% 50%, #38BDF8, transparent 62%),
+    radial-gradient(circle 8px at 50% 98%, #34D399, transparent 62%),
+    radial-gradient(circle 8px at 2% 50%, #38BDF8, transparent 62%),
+    conic-gradient(from -20deg, #C9963A, #F3D48A, #C9963A, #8B5E1F, #C9963A, #F3D48A, #C9963A, #8B5E1F, #C9963A);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 0 0 3px #6B4413;
+  z-index: -1;
 }
-.mascot-frame-overlay {
+.mascot-hero {
   width: 100%;
   height: 100%;
-  align-self: center;
-  justify-self: center;
-  z-index: 2;
-  pointer-events: none;
 }
 .mascot-hero .mascot-photo {
   width: 100%;
   height: 100%;
-  border: none;
+  border: 4px solid #fff;
   box-shadow: none;
 }
 

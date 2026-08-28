@@ -205,26 +205,28 @@
     let a, b, ans, decimal = false;
     switch (grade) {
       case 1:
-        if (op === 'add') { a = randInt(0, 20); b = randInt(0, 20 - a); ans = a + b; }
-        else if (op === 'sub') { a = randInt(0, 20); b = randInt(0, a); ans = a - b; }
+        // Neither operand is ever 0 for +/− (randInt starts at 1, not 0) —
+        // "5 + 0" or "5 − 0" is trivial and not worth a practice slot.
+        if (op === 'add') { a = randInt(1, 19); b = randInt(1, 20 - a); ans = a + b; }
+        else if (op === 'sub') { a = randInt(1, 20); b = randInt(1, a); ans = a - b; }
         else if (op === 'mul') { a = randInt(1, 5); b = randInt(1, 5); ans = a * b; }
         else { const d = randInt(1, 5), q = randInt(1, 5); a = d * q; b = d; ans = q; }
         break;
       case 2:
-        if (op === 'add') { a = randInt(0, 100); b = randInt(0, 100 - a); ans = a + b; }
-        else if (op === 'sub') { a = randInt(0, 100); b = randInt(0, a); ans = a - b; }
+        if (op === 'add') { a = randInt(1, 99); b = randInt(1, 100 - a); ans = a + b; }
+        else if (op === 'sub') { a = randInt(1, 100); b = randInt(1, a); ans = a - b; }
         else if (op === 'mul') { a = randInt(2, 5); b = randInt(1, 10); ans = a * b; }
         else { const d = randInt(2, 5), q = randInt(1, 10); a = d * q; b = d; ans = q; }
         break;
       case 3:
-        if (op === 'add') { a = randInt(0, 1000); b = randInt(0, 1000 - a); ans = a + b; }
-        else if (op === 'sub') { a = randInt(0, 1000); b = randInt(0, a); ans = a - b; }
+        if (op === 'add') { a = randInt(1, 999); b = randInt(1, 1000 - a); ans = a + b; }
+        else if (op === 'sub') { a = randInt(1, 1000); b = randInt(1, a); ans = a - b; }
         else if (op === 'mul') { a = randInt(2, 9); b = randInt(2, 9); ans = a * b; }
         else { const d = randInt(2, 9), q = randInt(2, 9); a = d * q; b = d; ans = q; }
         break;
       case 4:
-        if (op === 'add') { a = randInt(0, 10000); b = randInt(0, 10000 - a); ans = a + b; }
-        else if (op === 'sub') { a = randInt(0, 10000); b = randInt(0, a); ans = a - b; }
+        if (op === 'add') { a = randInt(1, 9999); b = randInt(1, 10000 - a); ans = a + b; }
+        else if (op === 'sub') { a = randInt(1, 10000); b = randInt(1, a); ans = a - b; }
         else if (op === 'mul') { a = randInt(11, 99); b = randInt(2, 12); ans = a * b; }
         else { const d = randInt(2, 12), q = randInt(5, 50); a = d * q; b = d; ans = q; }
         break;
@@ -234,14 +236,14 @@
             a = randInt(1, 999) / 10; b = randInt(1, 999) / 10;
             a = Math.round(a * 10) / 10; b = Math.round(b * 10) / 10;
             ans = Math.round((a + b) * 10) / 10; decimal = true;
-          } else { a = randInt(1000, 90000); b = randInt(0, 100000 - a); ans = a + b; }
+          } else { a = randInt(1000, 90000); b = randInt(1, 100000 - a); ans = a + b; }
         } else if (op === 'sub') {
           if (Math.random() < 0.5) {
             a = randInt(10, 999) / 10; b = randInt(1, a * 10) / 10;
             a = Math.round(a * 10) / 10; b = Math.round(b * 10) / 10;
             if (b > a) [a, b] = [b, a];
             ans = Math.round((a - b) * 10) / 10; decimal = true;
-          } else { a = randInt(1000, 100000); b = randInt(0, a); ans = a - b; }
+          } else { a = randInt(1000, 100000); b = randInt(1, a); ans = a - b; }
         } else if (op === 'mul') { a = randInt(12, 99); b = randInt(2, 12); ans = a * b; }
         else { const d = randInt(2, 12), q = randInt(10, 99); a = d * q; b = d; ans = q; }
         break;
