@@ -357,12 +357,13 @@ function parseReply(text) {
 /** Soi mặt chữ để biết chắc thứ tiếng. Trả về null khi không có dấu hiệu rõ ràng
     — câu tiếng Anh và câu tiếng Việt không dấu trông giống hệt nhau. */
 function sniffLang(text) {
-  // Tiếng Nhật cũng dùng chữ Hán nên phải soi kana TRƯỚC, không thì câu tiếng Nhật
-  // bị đọc nhầm thành tiếng Trung rồi đọc bằng giọng Trung.
+  // Dấu tiếng Việt soi TRƯỚC hết. Một câu tiếng Việt có chèn 猫 hay ありがとう vẫn là
+  // câu tiếng Việt — xét chữ Hán trước thì nó bị đọc bằng giọng Trung, sai hẳn.
+  if (/[ăâđêôơưĂÂĐÊÔƠƯàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/.test(text)) return 'vi';
+  // Tiếng Nhật cũng dùng chữ Hán nên phải soi kana TRƯỚC chữ Hán.
   if (/[\u3040-\u30ff]/.test(text)) return 'ja';
   if (/[\uac00-\ud7af]/.test(text)) return 'ko';
   if (/[\u4e00-\u9fff]/.test(text)) return 'zh';
-  if (/[ăâđêôơưĂÂĐÊÔƠƯàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/.test(text)) return 'vi';
   return null;
 }
 
