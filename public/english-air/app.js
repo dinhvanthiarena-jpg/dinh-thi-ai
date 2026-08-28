@@ -198,6 +198,14 @@ function findLesson(id) {
   return null;
 }
 
+/** Số slide dạy và số câu hỏi dự kiến của một bài, để hiện trên thẻ Tiếp tục. */
+function lessonMeta(l) {
+  if (!l) return { teach: 0, drill: 0 };
+  if (l.checkpoint) return { teach: 0, drill: 14 };
+  return { teach: (l.teach || []).length,
+           drill: Math.min(12, lessonWords(l).length + (l.sentences || []).length) };
+}
+
 /* ---------- 5. Điều hướng ---------- */
 const VIEWS = ["learn", "words", "review", "call", "league", "profile"];
 let view = "learn";
@@ -225,9 +233,30 @@ function renderLearn() {
   const lv = level();
   const list = lessonsOf(lv);
   const doneN = list.filter(l => S.done[l.id]).length;
-  $("#helloSub").textContent = doneN
-    ? `Bạn đã xong ${doneN}/${list.length} bài của trình độ ${lv.code}.`
-    : "Hãy bắt đầu tiếng Anh của bạn.";
+  const cur = list.find(l => l.id === currentLessonId());
+
+  // MON.L nói một câu hợp với tình hình học của người dùng
+  const left = clamp(S.goal - S.todayXp, 0, S.goal);
+  $("#heroLine").textContent =
+    !doneN                       ? "Chào bạn! Mình là MON.L. Bắt đầu bài đầu tiên nhé?" :
+    doneN === list.length        ? `Bạn xong hết trình độ ${lv.code} rồi! Đổi trình độ ở góc trên nhé.` :
+    !S.streak                    ? "Lâu rồi chưa gặp! Học một bài cho ấm tay nào." :
+    left === 0                   ? `Xong mục tiêu hôm nay rồi. Chuỗi ${S.streak} ngày, giỏi lắm!` :
+                                   `Chuỗi ${S.streak} ngày rồi. Còn ${left} XP nữa là đạt mục tiêu hôm nay!`;
+
+  $("#hsStreak").textContent = S.streak;
+  $("#hsXp").textContent = S.xp;
+  $("#hsWords").textContent = seenWords().length;
+
+  // thẻ tiếp tục học
+  const m = lessonMeta(cur);
+  $("#contKick").textContent = S.done[cur.id] ? "Học lại" : doneN ? "Tiếp tục học" : "Bắt đầu";
+  $("#contTitle").textContent = cur.title;
+  $("#contGoal").textContent = cur.goal || cur.unit.goal || "";
+  $("#contBar").style.width = Math.round((doneN / list.length) * 100) + "%";
+  $("#contMeta").textContent = cur.checkpoint
+    ? `Ôn tập chương · ${m.drill} câu hỏi`
+    : `${m.teach} slide dạy · ${m.drill} câu hỏi`;
 
   const root = $("#unitList");
   root.textContent = "";
@@ -268,6 +297,8 @@ function ring(frac) {
   }
   return s;
 }
+
+$("#continueCard").addEventListener("click", () => startLesson(currentLessonId()));
 
 /* ---------- 7. Sinh bài luyện tập ---------- */
 function buildPractice(words, sentences, max) {
@@ -886,7 +917,7 @@ $("#btnFlash").addEventListener("click", startFlash);
 $("#btnFlash2").addEventListener("click", startFlash);
 
 /* ---------- 17. Màn Từ vựng ---------- */
-const POS_ORDER = ["Danh từ", "Động từ", "Tính từ", "Trạng từ", "Cụm từ", "Chào hỏi", "Giới từ"];
+const POS_ORDER = ["Danh từ", "Động từ", "Tính từ", "Trạng từ", "Đại từ", "Cụm từ", "Chào hỏi", "Giới từ"];
 const LOCK_LESSONS = 5;                 // đủ 5 bài mới mở kho từ
 let wordFilter = "all", wordSortAZ = false, wordGrid = false, wordQuery = "";
 

@@ -214,15 +214,78 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 
 /* ---------- 6. MÀN HỌC ---------- */
-.hello { display: flex; align-items: center; gap: var(--s3); padding: var(--s4) 0 var(--s3); }
-.hello-h { font-size: 1.4rem; }
-.hello-p { color: var(--muted-fg); font-size: .94rem; font-weight: 600; margin-top: 2px; }
-.hello-mascot { width: 56px; height: 56px; margin-left: auto; flex: none; }
-.hello-mascot svg { width: 100%; height: 100%; }
+/* Hero: MON.L đứng giữa vầng sáng tím, có bong bóng lời chào. */
+.hero {
+  position: relative; display: flex; flex-direction: column; align-items: center;
+  padding: var(--s5) 0 var(--s4); margin: 0 calc(var(--gut) * -1);
+  overflow: hidden;
+}
+.hero-glow {
+  position: absolute; top: -18%; left: 50%; transform: translateX(-50%);
+  width: 128%; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--brand) 42%, transparent) 0%,
+    color-mix(in srgb, var(--brand) 14%, transparent) 42%,
+    transparent 66%);
+  pointer-events: none;
+}
+.hero-mascot {
+  position: relative; width: 190px; height: 190px;
+  animation: bob 4.5s ease-in-out infinite;
+}
+.hero-mascot svg, .hero-mascot img { width: 100%; height: 100%; }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
 
-.banner { position: relative; margin: 0 calc(var(--gut) * -1); }
-.banner-art { display: block; width: 100%; height: 150px; }
-.banner-wave { display: block; width: 100%; height: 20px; margin-top: -19px; fill: var(--bg); }
+.spark {
+  position: absolute; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--brand); box-shadow: 0 0 12px 3px var(--brand);
+  opacity: .75; animation: twinkle 3.2s ease-in-out infinite;
+}
+.spark.s1 { top: 18%; left: 14%; }
+.spark.s2 { top: 30%; right: 12%; width: 6px; height: 6px; animation-delay: .7s; }
+.spark.s3 { bottom: 34%; left: 8%; width: 6px; height: 6px; animation-delay: 1.4s; }
+.spark.s4 { bottom: 26%; right: 16%; animation-delay: 2.1s; }
+@keyframes twinkle { 0%,100% { opacity: .25; transform: scale(.7); } 50% { opacity: .9; transform: scale(1); } }
+
+.hero-bubble {
+  position: relative; max-width: 340px; margin: var(--s3) var(--gut) 0;
+  padding: var(--s3) var(--s4); border-radius: var(--r3);
+  background: var(--card); box-shadow: var(--sh-2); text-align: center;
+}
+.hero-bubble::before {
+  content: ""; position: absolute; top: -9px; left: 50%; margin-left: -9px;
+  border: 9px solid transparent; border-bottom-color: var(--card); border-top: 0;
+}
+.hero-name { display: block; font-size: .72rem; font-weight: 900; letter-spacing: .1em; color: var(--brand-ink); }
+.hero-bubble p { margin-top: 3px; font-size: 1rem; font-weight: 700; line-height: 1.45; }
+
+.home-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); margin-top: var(--s4); }
+.hs {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: var(--s3) var(--s2); border-radius: var(--r3);
+  background: var(--card); box-shadow: var(--sh-1);
+}
+.hs b { font-size: 1.25rem; font-weight: 900; }
+.hs small { font-size: .7rem; color: var(--muted-fg); font-weight: 700; text-align: center; }
+
+.cont {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--s2);
+  width: 100%; text-align: left; margin-top: var(--s4);
+  padding: var(--s5); border-radius: var(--r4);
+  background-color: var(--brand-fill);
+  background-image: linear-gradient(150deg, var(--brand-fill), #C026D3);
+  color: #fff; box-shadow: var(--sh-2);
+  transition: transform var(--t1) var(--e), box-shadow var(--t2) var(--e);
+}
+.cont:hover { box-shadow: var(--sh-3); }
+.cont:active { transform: scale(.99); }
+.cont-kick { font-size: .7rem; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
+.cont-title { font-size: 1.4rem; font-weight: 900; letter-spacing: -.02em; line-height: 1.2; }
+.cont-goal { font-size: .9rem; opacity: .9; font-weight: 600; }
+.cont-bar { display: block; width: 100%; height: 7px; margin-top: var(--s1); border-radius: var(--rf); background: rgba(255,255,255,.3); overflow: hidden; }
+.cont-bar > i { display: block; height: 100%; background: #fff; border-radius: var(--rf); transition: width var(--t3) var(--e); }
+.cont-row { display: flex; align-items: center; width: 100%; font-size: .86rem; font-weight: 800; }
+.cont-go { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; }
 
 .unit { margin-top: var(--s5); text-align: center; }
 .unit h2 { font-size: 1.3rem; }
