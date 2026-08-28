@@ -1129,7 +1129,8 @@ addEventListener("orientationchange", () => setTimeout(fitScene, 120));
 
 const CHAT_URL = "../api/english-air/chat";
 
-const C = { mode: "free", lang: "en", msgs: [], lines: [], i: 0, target: null,
+const C = { mode: "free", lang: "en", speaking: false, sayDone: null,
+            msgs: [], lines: [], i: 0, target: null,
             right: 0, asked: 0, t0: 0, timer: null, rec: null, listening: false, busy: false };
 
 function callDialogues() {
@@ -1202,9 +1203,11 @@ function monSays(en, vi, after, py) {
   const done = () => {
     if (ended) return;
     ended = true;
+    C.speaking = false; C.sayDone = null;
     m.classList.remove("talking", "pulse");
     if (after) after();
   };
+  C.speaking = true; C.sayDone = done;
   if (!S.sound || !window.speechSynthesis) {
     setTimeout(done, 700 + en.length * 45);
     return;
@@ -1219,8 +1222,11 @@ function monSays(en, vi, after, py) {
     u.onend = done;
     u.onerror = done;
     speechSynthesis.speak(u);
-    // Dự phòng: vài trình duyệt không bắn onend, đừng để kẹt vĩnh viễn.
-    setTimeout(done, 2200 + en.length * 90);
+    // Máy không có giọng cho thứ tiếng này thì speak() im lặng không làm gì.
+    // Đợi mãi thì người học ngồi nhìn nút micro khoá — kiểm tra rồi thoát sớm.
+    setTimeout(() => { if (!speechSynthesis.speaking && !speechSynthesis.pending) done(); }, 700);
+    // Dự phòng cuối: vài trình duyệt không bắn onend. Chặn trên 12 giây.
+    setTimeout(done, Math.min(2200 + en.length * 90, 12000));
   } catch { done(); }
 }
 
@@ -1239,7 +1245,9 @@ function startCall(mode) {
   $("#callHeard").hidden = true;
   $("#callChoices").hidden = true;
   $("#callTask").hidden = true;
-  $("#callType").hidden = !!SR;
+  // Nói chuyện tự do thì LUÔN để sẵn ô gõ chữ: micro trên iPhone hay hỏng,
+  // không có đường nào khác thì người học ngồi im không đáp lại được.
+  $("#callType").hidden = mode === "free" ? false : !!SR;
   $("#btnMic").disabled = !SR;
   $("#callYou").hidden = true;
   $("#call").classList.remove("show-log");
@@ -1315,10 +1323,12 @@ async function askTutor(first) {
     if (CALL_LANGS[data.lang]) C.lang = data.lang;
     C.msgs.push({ role: "assistant", content: data.reply });
     if (!first) pushLog("mon", data.reply);
+    // Mở micro ngay khi MON.L bắt đầu nói, đừng đợi nó nói xong. Người học
+    // phải cắt lời được, không thì ngồi chờ cả chục giây mới tới lượt mình.
+    C.busy = false;
+    $("#btnMic").disabled = !SR;
     monSays(data.reply, data.vi, () => {
-      setState("Tới lượt bạn");
-      $("#btnMic").disabled = !SR;
-      C.busy = false;
+      if (!C.listening) setState("Tới lượt bạn");
     }, data.py);
   } catch (err) {
     C.busy = false;
@@ -1410,11 +1420,14 @@ function heardReply(text, score) {
 }
 
 /* ----- micro ----- */
+/* Thứ tiếng nào máy này không nghe được thì nhớ lại, lần sau khỏi thử. */
+const NO_LISTEN = {};
 function startListening() {
   if (!SR || C.listening || C.busy) return;
   const r = new SR();
   C.rec = r; C.listening = true;
-  r.lang = (CALL_LANGS[C.lang] || CALL_LANGS.en).sr;
+  const lg = NO_LISTEN[C.lang] ? "en" : C.lang;
+  r.lang = (CALL_LANGS[lg] || CALL_LANGS.en).sr;
   r.interimResults = false; r.maxAlternatives = 3;
   $("#btnMic").classList.add("listening");
   $("#callMascot").classList.add("listening");
@@ -1428,10 +1441,20 @@ function startListening() {
   r.onerror = ev => {
     stopListening();
     if (ev.error === "no-speech") { setState("Không nghe thấy gì, thử lại"); return; }
+    // Máy không nghe được thứ tiếng này thì lùi về tiếng Anh rồi nghe lại,
+    // đừng bắt người học tự xoay xở.
+    if (ev.error === "language-not-supported" && C.lang !== "en") {
+      NO_LISTEN[C.lang] = true;
+      C.lang = "en";
+      toast("Máy chưa nghe được tiếng đó, chuyển sang nghe tiếng Anh.");
+      setTimeout(startListening, 250);
+      return;
+    }
     toast(ev.error === "not-allowed"
       ? "Chưa được cấp quyền micro. Bạn gõ chữ nhé."
       : "Không nghe được, bạn gõ chữ nhé.");
-    showChoices();
+    // Nói chuyện tự do thì không có câu mẫu để chọn — mở ô gõ chữ ra.
+    if (C.mode === "free") $("#callType").hidden = false; else showChoices();
   };
   r.onend = () => stopListening();
   try { r.start(); } catch { stopListening(); }
@@ -1457,7 +1480,12 @@ function sendTyped() {
 }
 $("#btnStartFree").addEventListener("click", () => { primeSpeech(); startCall("free"); });
 $("#btnStartCall").addEventListener("click", () => { primeSpeech(); startCall("script"); });
-$("#btnMic").addEventListener("click", () => { primeSpeech(); C.listening ? stopListening() : startListening(); });
+$("#btnMic").addEventListener("click", () => {
+  primeSpeech();
+  // Đang nói dở mà người học bấm micro thì cắt lời ngay — như nói chuyện thật.
+  if (C.speaking) { stopSpeak(); if (C.sayDone) C.sayDone(); }
+  C.listening ? stopListening() : startListening();
+});
 $("#btnHangup").addEventListener("click", () => endCall(true));
 $("#btnCallLog").addEventListener("click", () => {
   const on = $("#call").classList.toggle("show-log");

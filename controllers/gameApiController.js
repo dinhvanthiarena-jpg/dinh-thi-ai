@@ -1,6 +1,7 @@
 const GameInstall = require('../models/GameInstall');
 const PushSubscription = require('../models/PushSubscription');
 const homeworkHelperService = require('../services/homeworkHelperService');
+const boomChatService = require('../services/boomChatService');
 
 // Called by the desktop game on every launch. Upserts by installId so the
 // same machine always updates one row instead of creating duplicates.
@@ -108,4 +109,21 @@ exports.pushUnsubscribe = async (req, res) => {
   }
   await PushSubscription.destroy({ where: { endpoint: endpoint.trim() } });
   res.json({ ok: true });
+};
+
+// One turn of the "Gọi BOOM" free-conversation call screen.
+exports.boomChat = async (req, res) => {
+  try {
+    const { history, grade } = req.body || {};
+    const safeGrade = Number.isInteger(grade) && grade >= 1 && grade <= 5 ? grade : null;
+    const out = await boomChatService.reply({ history, grade: safeGrade });
+    res.json({ ok: true, ...out });
+  } catch (err) {
+    const noKey = err.code === 'NO_KEY';
+    console.error('[boom-chat]', err.message);
+    res.status(noKey ? 503 : 502).json({
+      ok: false,
+      message: noKey ? 'Gọi BOOM chưa bật trên máy chủ.' : 'BOOM đang bận, thử gọi lại sau một chút nhé.',
+    });
+  }
 };
