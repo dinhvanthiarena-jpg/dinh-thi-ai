@@ -485,8 +485,15 @@ function buildPractice(words, sentences, max) {
     q.push({ type: "viet", chu: w.en[0].toUpperCase(), tu: w.en, word: w });
   }
 
+  // Cắt bớt cho vừa số câu thì phải chừa chỗ cho bài tô chữ, không thì trộn xong
+  // slice là nó rụng mất và người học chẳng bao giờ gặp.
   const head = q[0] && q[0].type === "match" ? [q.shift()] : [];
-  return head.concat(shuffle(q)).slice(0, max);
+  const bTo = q.find(x => x.type === "viet");
+  const conLai = shuffle(q.filter(x => x.type !== "viet"));
+  const ds = head.concat(conLai).slice(0, Math.max(1, max - (bTo ? 1 : 0)));
+  // Chèn vào giữa chứ không để đầu — mở bài nào cũng tô chữ thì lại thành nhàm.
+  if (bTo) ds.splice(Math.min(2, ds.length), 0, bTo);
+  return ds;
 }
 
 /* ---------- 8. Trình chiếu ---------- */
