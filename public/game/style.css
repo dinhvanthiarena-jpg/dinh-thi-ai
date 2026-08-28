@@ -1675,6 +1675,17 @@ button:focus-visible,
 
 /* ---- Trước khi gọi: thẻ xem trước phòng + Mon.L ---- */
 .call-preview-wrap {
+  /* #screen-call::before (the blurred call-card.jpg backdrop for the LIVE
+     call scene) is position:absolute with z-index:0, which — since this
+     wrap has no stacking context of its own — paints ABOVE any of its own
+     non-positioned children (h1/description/info-card/button), covering
+     them almost entirely. .call-preview escaped this by accident (it has
+     its own position:relative, later in tree order than ::before), which
+     is why only the room-photo card was visible and everything below it
+     wasn't. Giving the whole wrap its own stacking context fixes all of
+     it at once. */
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 460px;
   padding: calc(70px + env(safe-area-inset-top, 0px)) 20px 50px;
