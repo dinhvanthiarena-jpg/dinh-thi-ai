@@ -1,5 +1,5 @@
 /* ============================================================
-   English Air — logic ứng dụng
+   Mon.L — logic ứng dụng
    Bố cục và luồng dựng theo bản ghi màn hình AirLearn:
    dạy trước (biển báo / thẻ từ / hội thoại) rồi mới luyện tập.
    ============================================================ */
@@ -86,7 +86,7 @@ const DEFAULTS = {
   goal: 30, goalDay: "", todayXp: 0,
   weekXp: 0, weekStart: "", tier: 0,
   joined: today(), sound: true, motion: false, showVi: true, theme: "",
-  callLang: "en", kidVoice: true
+  kidVoice: true
 };
 let S = load();
 function load() { try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { return Object.assign({}, DEFAULTS); } }
@@ -153,12 +153,27 @@ function paintStats() {
 }
 
 /* ---------- 3. Phát âm ---------- */
-/* MON.L nói được ba thứ tiếng. Mỗi thứ tiếng cần một mã giọng riêng. */
+/* MON.L nói được ba thứ tiếng. Người học KHÔNG chọn trước — cứ nói, MON.L
+   nghe ra rồi đáp lại đúng thứ tiếng đó, và bộ nghe cũng đổi theo. */
 const CALL_LANGS = {
-  en: { name: "Tiếng Anh", tts: "en-US", sr: "en-US", hint: "Nói tiếng Anh với MON.L." },
-  vi: { name: "Tiếng Việt", tts: "vi-VN", sr: "vi-VN", hint: "Nói tiếng Việt — hợp với bé mới bắt đầu." },
-  zh: { name: "Tiếng Trung", tts: "zh-CN", sr: "zh-CN", hint: "Nói tiếng Trung, có kèm phiên âm pinyin." },
+  en: { name: "English", tts: "en-US", sr: "en-US" },
+  vi: { name: "Tiếng Việt", tts: "vi-VN", sr: "vi-VN" },
+  zh: { name: "中文", tts: "zh-CN", sr: "zh-CN" },
 };
+/** Đoán thứ tiếng từ mặt chữ. Chỉ chắc được với chữ Hán và dấu tiếng Việt —
+    câu tiếng Anh và câu tiếng Việt không dấu trông giống hệt nhau. */
+function guessLang(text) {
+  if (/[\u4e00-\u9fff]/.test(text)) return "zh";
+  if (/[ăâđêôơưĂÂĐÊÔƠƯàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/.test(text)) return "vi";
+  return null;
+}
+/** Thứ tiếng mở màn: lấy theo ngôn ngữ của máy, người Việt thì là tiếng Việt. */
+function deviceLang() {
+  const tag = String(navigator.language || "vi").toLowerCase();
+  if (tag.startsWith("zh")) return "zh";
+  if (tag.startsWith("en")) return "en";
+  return "vi";
+}
 /* Nâng cao độ giọng lên cho ra chất con trai nhỏ, hợp với MON.L. */
 const KID_PITCH = 1.65;
 
@@ -1153,8 +1168,6 @@ const STARTER_DIALOGUE = {
 function renderCall() {
   const n = callDialogues().length;
   $("#callLocked").hidden = n > 0;
-  $$(".lang-chip").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === S.callLang)));
-  $("#callLangNote").textContent = (CALL_LANGS[S.callLang] || CALL_LANGS.en).hint;
   $("#callMicNote").textContent = SR
     ? "Lần đầu bấm micro, trình duyệt sẽ hỏi quyền dùng micro — chọn Cho phép."
     : "Trình duyệt này chưa nghe được bằng micro, bạn gõ chữ để nói chuyện nhé.";
@@ -1175,6 +1188,8 @@ function pushLog(who, text) {
 /** MON.L nói: hiện câu, chạy hoạt ảnh, nhảy một nhịp mỗi từ cho khớp miệng. */
 function monSays(en, vi, after, py) {
   const L = CALL_LANGS[C.lang] || CALL_LANGS.en;
+  $("#callSaidLang").textContent = L.name;
+  $("#callSaidLang").hidden = C.mode !== "free";
   $("#callSaid").textContent = en;
   $("#callSaidPy").textContent = py || "";
   $("#callSaidPy").hidden = !py;
@@ -1213,8 +1228,11 @@ function monSays(en, vi, after, py) {
 function startCall(mode) {
   C.mode = mode;
   // Luyện hội thoại trong bài luôn là tiếng Anh vì đó là lời thoại đã học.
-  C.lang = mode === "free" ? (CALL_LANGS[S.callLang] ? S.callLang : "en") : "en";
+  // Luyện hội thoại trong bài luôn là tiếng Anh; nói chuyện tự do thì bắt đầu
+  // bằng tiếng của máy rồi bám theo người học từ lượt sau.
+  C.lang = mode === "free" ? deviceLang() : "en";
   $("#callSaidPy").hidden = true;
+  $("#callSaidLang").hidden = true;
   C.msgs = []; C.lines = []; C.i = 0; C.target = null;
   C.right = 0; C.asked = 0; C.busy = false;
   $("#callLog").textContent = "";
@@ -1283,7 +1301,6 @@ async function askTutor(first) {
       body: JSON.stringify({
         history: first ? [{ role: "user", content: "Hi MON.L!" }] : C.msgs,
         level: level().code,
-        lang: C.lang,
         words: seenWords().slice(-60).map(w => w.en),
       }),
     });
@@ -1292,6 +1309,8 @@ async function askTutor(first) {
       throw new Error(j.error || "Không gọi được máy chủ");
     }
     const data = await res.json();
+    // MON.L đáp bằng thứ tiếng nào thì từ đây nói và nghe bằng thứ tiếng đó.
+    if (CALL_LANGS[data.lang]) C.lang = data.lang;
     C.msgs.push({ role: "assistant", content: data.reply });
     if (!first) pushLog("mon", data.reply);
     monSays(data.reply, data.vi, () => {
@@ -1364,6 +1383,8 @@ function showChoices() {
 /* ----- người học vừa nói / gõ xong ----- */
 function heardReply(text, score) {
   if (C.mode === "free") {
+    const g = guessLang(text);
+    if (g) C.lang = g;
     pushLog("you", text);
     C.msgs.push({ role: "user", content: text });
     $("#callHeard").hidden = true;
@@ -1427,11 +1448,11 @@ function sendTyped() {
   const v = $("#callInput").value.trim();
   if (!v || C.busy) return;
   $("#callInput").value = "";
+  // Chữ gõ tay thì đọc được chắc chắn — bắt thứ tiếng ngay, khỏi đợi máy chủ.
+  const g = guessLang(v);
+  if (C.mode === "free" && g) C.lang = g;
   heardReply(v);
 }
-$$(".lang-chip").forEach(b => b.addEventListener("click", () => {
-  S.callLang = b.dataset.lang; save(); renderCall();
-}));
 $("#btnStartFree").addEventListener("click", () => { primeSpeech(); startCall("free"); });
 $("#btnStartCall").addEventListener("click", () => { primeSpeech(); startCall("script"); });
 $("#btnMic").addEventListener("click", () => { primeSpeech(); C.listening ? stopListening() : startListening(); });

@@ -707,11 +707,11 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 /* ---------- 15b. GỌI VIDEO LUYỆN NÓI ---------- */
 .call-hero { text-align: center; padding: var(--s5) 0 var(--s4); }
-.lang-pick { display: flex; gap: var(--s2); margin-top: var(--s4); }
-.lang-chip { flex: 1; min-width: 0; min-height: 48px; padding: 0 var(--s2); border-radius: var(--rf);
-  background: var(--muted); color: var(--muted-fg); font-size: .9rem; font-weight: 800;
-  transition: background var(--t1) var(--e), color var(--t1) var(--e); }
-.lang-chip[aria-pressed="true"] { background: var(--brand-fill); color: #fff; }
+/* Nhãn nhỏ cho biết MON.L vừa nghe ra thứ tiếng nào — người học không phải chọn. */
+.say-lang { display: inline-block; margin-bottom: 6px; padding: 3px 10px; border-radius: var(--rf);
+  background: #EDE4FB; color: #5B21B6; font-size: .66rem; font-weight: 900;
+  letter-spacing: .08em; text-transform: uppercase; }
+.say-lang[hidden] { display: none; }
 .say-py { display: block; margin-top: 3px; color: #6D28D9; font-size: .92rem; font-weight: 700; font-style: italic; }
 .say-py[hidden] { display: none; }
 

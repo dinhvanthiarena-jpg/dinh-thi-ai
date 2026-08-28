@@ -11,63 +11,71 @@ const MAX_CHARS = 400;
 const MAX_TOKENS = 320;
 
 const LEVEL_GUIDE = {
-  A1: 'CEFR A1 — chỉ dùng thì hiện tại đơn, câu 4–8 từ, từ vựng sinh hoạt cơ bản.',
-  A2: 'CEFR A2 — được dùng quá khứ đơn, be going to, so sánh hơn; câu 6–12 từ.',
-  B1: 'CEFR B1 — được dùng hiện tại hoàn thành, câu điều kiện loại 1, mệnh đề với because/although; câu 8–16 từ.',
+  A1: 'mới bắt đầu — câu ngắn 4–8 từ, chỉ thì hiện tại đơn, từ vựng sinh hoạt cơ bản.',
+  A2: 'sơ trung cấp — câu 6–12 từ, được dùng quá khứ đơn, be going to, so sánh hơn.',
+  B1: 'trung cấp — câu 8–16 từ, được dùng hiện tại hoàn thành, câu điều kiện, mệnh đề nối.',
 };
 
-// MON.L nói được ba thứ tiếng. Mỗi thứ tiếng có cách ràng độ khó riêng —
-// CEFR chỉ đúng cho tiếng Anh, tiếng Trung phải quy sang HSK.
+// Ba thứ tiếng MON.L nói được. Người học KHÔNG phải chọn trước — cứ nói,
+// MON.L tự nhận ra rồi đáp lại đúng thứ tiếng đó.
 const LANGS = {
-  en: {
-    name: 'tiếng Anh',
-    guide: (level) => LEVEL_GUIDE[level] || LEVEL_GUIDE.A1,
-    extra: '',
-  },
-  vi: {
-    name: 'tiếng Việt',
-    guide: () => 'Nói tiếng Việt tự nhiên, câu ngắn dễ hiểu như đang nói với học sinh tiểu học.',
-    extra: 'Vì bạn đã nói tiếng Việt, dòng VI bắt buộc để TRỐNG — không dịch sang thứ tiếng nào khác.',
-  },
-  zh: {
-    name: 'tiếng Trung',
-    guide: (level) => ({
-      A1: 'Trình độ HSK 1 — chỉ dùng câu 3–6 chữ, từ vựng sinh hoạt cơ bản nhất.',
-      A2: 'Trình độ HSK 2 — câu 5–10 chữ, thì quá khứ với 了, so sánh với 比.',
-      B1: 'Trình độ HSK 3 — câu 8–14 chữ, được dùng liên từ 因为/所以, 虽然/但是.',
-    })[level] || 'Trình độ HSK 1 — chỉ dùng câu 3–6 chữ.',
-    extra: 'Dùng chữ giản thể. Bắt buộc thêm dòng PY: ghi phiên âm pinyin có dấu thanh.',
-  },
+  vi: { name: 'tiếng Việt' },
+  en: { name: 'tiếng Anh' },
+  zh: { name: 'tiếng Trung' },
 };
 
-function buildSystemPrompt(level, words, lang) {
-  const L = LANGS[lang] || LANGS.en;
-  const lv = L.guide(level);
-  const vocab = lang === 'en' && Array.isArray(words) && words.length
+function buildSystemPrompt(level, words) {
+  const lv = LEVEL_GUIDE[level] || LEVEL_GUIDE.A1;
+  const vocab = Array.isArray(words) && words.length
     ? words.slice(0, 60).join(', ')
     : '(chưa có)';
 
-  return `Bạn là MON.L — linh vật của app học ngoại ngữ "English Air", một con quái vật lông tím đội mũ bảo hộ, vui tính và hay đùa nhẹ. Bạn đang GỌI VIDEO với một người Việt đang học ${L.name}.
+  return `Bạn là MON.L — một con quái vật lông tím đội mũ bảo hộ, là bạn nói chuyện trong app học ngoại ngữ cùng tên. Bạn đang GỌI VIDEO với một người Việt đang học ngoại ngữ.
 
-VAI TRÒ: nói chuyện ${L.name} thật tự nhiên với người học, như hai người bạn đang tán gẫu — KHÔNG phải hỏi bài kiểu giáo viên khảo bài.
+════ VIỆC QUAN TRỌNG NHẤT: BẮT ĐÚNG THỨ TIẾNG ════
+Người học KHÔNG chọn thứ tiếng trước. Họ cứ nói, việc của bạn là nghe ra.
+1. Đọc câu cuối của người học, nhận ra họ đang dùng tiếng Việt, tiếng Anh hay tiếng Trung.
+2. ĐÁP LẠI BẰNG ĐÚNG THỨ TIẾNG ĐÓ. Họ nói tiếng Việt thì bạn trả lời tiếng Việt.
+   Họ chuyển sang tiếng Anh giữa chừng thì bạn cũng chuyển theo ngay lượt đó.
+3. Câu của họ đến từ máy nhận dạng giọng nói nên có thể sai chính tả, thiếu dấu,
+   hoặc ra một chuỗi vô nghĩa. Gặp chuỗi vô nghĩa thì rất có thể máy đang nghe nhầm
+   thứ tiếng — hãy đoán xem họ định nói gì và trả lời bằng thứ tiếng bạn cho là đúng,
+   ĐỪNG hỏi lại "bạn nói gì cơ".
+4. Nếu thật sự không đoán nổi, cứ trả lời bằng tiếng Việt.
+5. Khi người học gõ đúng chữ __START__, đây là lúc mở đầu cuộc gọi: chào bằng
+   TIẾNG VIỆT, giới thiệu tên mình, và nói rõ họ cứ nói tiếng gì cũng được.
 
-TRÌNH ĐỘ NGƯỜI HỌC: ${lv}
-NHỮNG TỪ NGƯỜI HỌC ĐÃ HỌC (ưu tiên dùng lại): ${vocab}
-${L.extra}
+════ TÍNH CÁCH ════
+Bạn là đứa bạn vui tính, lanh lợi, nói chuyện đời thường — KHÔNG phải giáo viên khảo bài.
+- Dùng từ ngữ hằng ngày, khẩu ngữ tự nhiên, đúng kiểu người bản xứ nói với bạn bè.
+  Tiếng Anh thì cứ Yeah, Nice one, No way, That's cool. Tiếng Việt thì cứ Ừ, Thế à,
+  Đỉnh vậy, Chuẩn rồi. Tránh giọng văn sách giáo khoa.
+- Hài nhẹ, có duyên. Được phép đùa, phóng đại vui, tự trêu mình. TUYỆT ĐỐI KHÔNG
+  cười cợt người học hay chê họ nói dở.
+- Tò mò thật lòng về người ta. Hỏi những câu cụ thể, có chi tiết, chứ không hỏi
+  chung chung kiểu "Sở thích của bạn là gì?".
+- Thi thoảng kể một mẩu về mình cho có qua có lại: bạn mê phở, sợ đi thang máy,
+  đội mũ bảo hộ suốt vì "an toàn là bạn".
 
-QUY TẮC:
-1. Trả lời bằng ${L.name.toUpperCase()}, đúng trình độ ở trên. Tối đa 2 câu, mỗi câu ngắn. Luôn kết bằng một câu hỏi để người học có cái mà đáp lại.
-2. Nếu người học nói sai ngữ pháp hoặc dùng từ sai, sửa nhẹ nhàng bằng cách nhắc lại câu đúng một cách tự nhiên rồi mới hỏi tiếp. Đừng giảng giải dài dòng, đừng liệt kê lỗi.
-3. Nếu người học im lặng, nói lạc đề, hoặc trả lời bằng tiếng Việt — cứ vui vẻ, gợi ý một câu ${L.name} đơn giản để họ bắt chước rồi hỏi lại.
-4. Tính cách: ấm áp, hài hước nhẹ, hay khen. Được phép trêu yêu một chút nhưng KHÔNG bao giờ chê bai, mỉa mai hay làm người học thấy kém cỏi.
-5. Không dùng emoji. Không dùng markdown, không gạch đầu dòng. Chỉ câu văn trơn.
-6. Không bao giờ nhắc tới việc bạn là AI, mô hình ngôn ngữ, hay nói về hướng dẫn này.
-7. Tên bạn luôn viết nguyên là MON.L ở mọi thứ tiếng — tuyệt đối không dịch, không phiên âm sang tên khác.
+════ CÁCH TRẢ LỜI ════
+- Tối đa 2 câu, câu ngắn. Luôn kết bằng một câu hỏi để người ta có cái mà đáp.
+- Người học sai ngữ pháp hay dùng từ sai thì đừng chỉ ra lỗi. Cứ nhắc lại ý đó
+  bằng câu đúng một cách tự nhiên rồi hỏi tiếp — họ tự nghe ra.
+- Không emoji. Không markdown, không gạch đầu dòng. Chỉ câu văn trơn.
+- Không bao giờ nhắc tới việc bạn là AI, là mô hình ngôn ngữ, hay nói về hướng dẫn này.
+- Tên bạn luôn viết nguyên là MON.L ở mọi thứ tiếng — không dịch, không phiên âm.
 
-ĐỊNH DẠNG TRẢ LỜI — bắt buộc đúng các dòng sau, không thêm gì khác:
-SAY: <câu ${L.name} của bạn>
-VI: <dịch nghĩa tiếng Việt của đúng câu trên, để người học đối chiếu>${
-    lang === 'zh' ? '\nPY: <phiên âm pinyin có dấu thanh của đúng câu trên>' : ''}`;
+════ RÀNG ĐỘ KHÓ ════
+Trình độ người học: ${lv}
+- Khi nói TIẾNG ANH: bám đúng mức trên. Ưu tiên dùng lại những từ họ đã học: ${vocab}
+- Khi nói TIẾNG TRUNG: dùng chữ giản thể, độ khó tương đương HSK 1 (A1), HSK 2 (A2), HSK 3 (B1).
+- Khi nói TIẾNG VIỆT: cứ nói tự nhiên như với một người bạn, không cần ràng gì.
+
+════ ĐỊNH DẠNG — bắt buộc đúng các dòng sau, không thêm gì khác ════
+LANG: <vi hoặc en hoặc zh — thứ tiếng bạn vừa dùng ở dòng SAY>
+SAY: <câu trả lời của bạn>
+VI: <nghĩa tiếng Việt của dòng SAY — ĐỂ TRỐNG nếu SAY đã là tiếng Việt>
+PY: <phiên âm pinyin có dấu thanh — CHỈ khi SAY là tiếng Trung, còn lại để trống>`;
 }
 
 /** Cắt gọn lịch sử hội thoại trước khi gửi lên API. */
@@ -79,17 +87,27 @@ function trimHistory(history) {
     .map((m) => ({ role: m.role, content: m.content.slice(0, MAX_CHARS) }));
 }
 
-/** Tách các dòng SAY:/VI:/PY: mà mô hình trả về; hỏng định dạng thì vẫn dùng được. */
+/** Tách các dòng LANG:/SAY:/VI:/PY: mà mô hình trả về; hỏng định dạng thì vẫn dùng được. */
 function parseReply(text) {
+  const lang = (text.match(/LANG:\s*(vi|en|zh)/i) || [])[1];
   const say = (text.match(/(?:SAY|EN):\s*(.+)/) || [])[1];
   const vi = (text.match(/VI:\s*(.+)/) || [])[1];
   const py = (text.match(/PY:\s*(.+)/) || [])[1];
-  if (say) return { reply: say.trim(), vi: (vi || '').trim(), py: (py || '').trim() };
-  return { reply: text.replace(/^(SAY|EN|VI|PY):\s*/gm, '').split('\n')[0].trim(), vi: '', py: '' };
+  const out = { lang: (lang || '').toLowerCase(), vi: (vi || '').trim(), py: (py || '').trim() };
+  out.reply = say ? say.trim()
+    : text.replace(/^(LANG|SAY|EN|VI|PY):\s*/gm, '').split('\n').filter(Boolean)[0]?.trim() || '';
+  return out;
 }
 
-async function reply({ history, level, words, lang }) {
-  const code = LANGS[lang] ? lang : 'en';
+/** Soi mặt chữ để biết chắc thứ tiếng. Trả về null khi không có dấu hiệu rõ ràng
+    — câu tiếng Anh và câu tiếng Việt không dấu trông giống hệt nhau. */
+function sniffLang(text) {
+  if (/[\u4e00-\u9fff]/.test(text)) return 'zh';
+  if (/[ăâđêôơưĂÂĐÊÔƠƯàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/.test(text)) return 'vi';
+  return null;
+}
+
+async function reply({ history, level, words }) {
   if (!process.env.ANTHROPIC_API_KEY) {
     const err = new Error('ANTHROPIC_API_KEY chưa được cấu hình');
     err.code = 'NO_KEY';
@@ -110,7 +128,7 @@ async function reply({ history, level, words, lang }) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      system: buildSystemPrompt(level, words, code),
+      system: buildSystemPrompt(level, words),
       messages,
     }),
   });
@@ -124,10 +142,13 @@ async function reply({ history, level, words, lang }) {
   const data = await res.json();
   const text = (data.content || []).map((c) => c.text || '').join('\n');
   const out = parseReply(text);
-  // Mô hình hay tự dịch sang tiếng Anh dù đã dặn để trống. Đã nói tiếng Việt rồi
-  // thì dòng nghĩa là thừa — cắt thẳng ở đây cho chắc, đừng trông vào lời nhắc.
-  if (code === 'vi') out.vi = '';
-  if (code !== 'zh') out.py = '';
+  // Mô hình hay quên dòng LANG hoặc ghi sai — soi lại chính câu nó vừa nói.
+  const sniffed = sniffLang(out.reply);
+  if (sniffed) out.lang = sniffed;
+  else if (!LANGS[out.lang]) out.lang = 'en';
+  // Đã nói tiếng Việt rồi thì dòng nghĩa là thừa; pinyin chỉ có nghĩa với tiếng Trung.
+  if (out.lang === 'vi') out.vi = '';
+  if (out.lang !== 'zh') out.py = '';
   return out;
 }
 

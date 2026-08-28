@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>English Air — Học tiếng Anh mỗi ngày</title>
+<title>Mon.L — Học ngoại ngữ mỗi ngày</title>
 <meta name="description" content="Học tiếng Anh theo khung CEFR A1–A2. Dạy trước, luyện sau. Bài ngắn 5 phút mỗi ngày." />
 
 <link rel="manifest" href="manifest.webmanifest" />
@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="English Air" />
+<meta name="apple-mobile-web-app-title" content="Mon.L" />
 <meta name="format-detection" content="telephone=no" />
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
@@ -144,13 +144,13 @@
   <nav class="sidenav" aria-label="Điều hướng chính">
     <div class="brand">
       <span class="brand-mark" data-mascot="head" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></span>
-      <span class="brand-name">English Air</span>
+      <span class="brand-name">Mon.L</span>
     </div>
     <ul class="sidenav-list">
       <li><button class="navlink is-active" data-nav="learn" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-learn"/></svg><span>Học</span></button></li>
       <li><button class="navlink" data-nav="words" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-words"/></svg><span>Từ vựng</span></button></li>
       <li><button class="navlink" data-nav="review" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-review"/></svg><span>Ôn tập</span></button></li>
-      <li><button class="navlink" data-nav="call" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-video"/></svg><span>Gọi Air</span></button></li>
+      <li><button class="navlink" data-nav="call" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-video"/></svg><span>Gọi Mon.L</span></button></li>
       <li><button class="navlink" data-nav="league" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-league"/></svg><span>Giải đấu</span></button></li>
       <li><button class="navlink" data-nav="profile" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-profile"/></svg><span>Hồ sơ</span></button></li>
     </ul>
@@ -305,7 +305,7 @@
             <span class="cp-tap"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sound"/></svg>Bấm để nghe</span>
           </button>
           <h1 id="callTitle">Gọi video với MON.L</h1>
-          <p class="sub">Luyện nói bằng chính những đoạn hội thoại bạn đã học. MON.L nói trước, bạn trả lời — app nghe và chấm ngay.</p>
+          <p class="sub">MON.L nghe bạn nói tiếng gì thì đáp lại đúng tiếng đó — Việt, Anh hay Trung. Không cần chọn trước.</p>
         </div>
         <div class="card call-info">
           <div class="ci-row"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mic"/></svg>
@@ -313,14 +313,8 @@
           <div class="ci-row"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg>
             <span><b>Chấm ngay từng câu</b><small>Sai chỗ nào app chỉ ra chỗ đó.</small></span></div>
           <div class="ci-row"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chat"/></svg>
-            <span><b>Không nói được vẫn học</b><small>Chọn câu đúng bằng tay cũng được tính.</small></span></div>
+            <span><b>Nói tiếng gì cũng được</b><small>MON.L tự nhận ra rồi đáp lại đúng tiếng đó.</small></span></div>
         </div>
-        <div class="lang-pick" role="group" aria-label="Chọn thứ tiếng để nói chuyện">
-          <button class="lang-chip" type="button" data-lang="en" aria-pressed="true">Tiếng Anh</button>
-          <button class="lang-chip" type="button" data-lang="vi" aria-pressed="false">Tiếng Việt</button>
-          <button class="lang-chip" type="button" data-lang="zh" aria-pressed="false">Tiếng Trung</button>
-        </div>
-        <p class="fine" id="callLangNote"></p>
         <p class="fine" id="callMicNote"></p>
         <button class="btn btn-primary btn-block mt" id="btnStartFree" type="button">Gọi nói chuyện tự do</button>
         <button class="btn btn-soft btn-block mt" id="btnStartCall" type="button">Luyện hội thoại trong bài</button>
@@ -397,7 +391,7 @@
       <button class="tab is-active" data-nav="learn" aria-current="page" aria-label="Lộ trình học" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-learn"/></svg><span>Học</span></button>
       <button class="tab" data-nav="words" aria-label="Từ vựng đã học" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-words"/></svg><span>Từ vựng</span></button>
       <button class="tab" data-nav="review" aria-label="Ôn tập" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-review"/></svg><span>Ôn tập</span></button>
-      <button class="tab" data-nav="call" aria-label="Gọi video luyện nói" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-video"/></svg><span>Gọi Air</span></button>
+      <button class="tab" data-nav="call" aria-label="Gọi video luyện nói" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-video"/></svg><span>Gọi Mon.L</span></button>
       <button class="tab" data-nav="league" aria-label="Giải đấu tuần" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-league"/></svg><span>Giải đấu</span></button>
       <button class="tab" data-nav="profile" aria-label="Hồ sơ của bạn" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-profile"/></svg><span>Hồ sơ</span></button>
     </nav>
@@ -533,6 +527,7 @@
   <div class="call-stage">
     <ul class="call-log" id="callLog"></ul>
     <div class="call-bubble" id="callBubble" aria-live="polite">
+      <span class="say-lang" id="callSaidLang" hidden></span>
       <b id="callSaid">…</b>
       <small class="say-py" id="callSaidPy" hidden></small>
       <small id="callSaidVi"></small>
