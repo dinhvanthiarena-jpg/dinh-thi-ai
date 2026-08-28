@@ -305,7 +305,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .node:nth-child(3n + 1)::before { display: none; }
 .node.done::before, .node.current::before { background: var(--brand-soft); }
 .node-btn {
-  position: relative; z-index: 1; width: 84px; height: 84px; border-radius: var(--rf);
+  position: relative; z-index: 1; width: 84px; height: 84px; padding: 0; border-radius: var(--rf);
   display: grid; place-items: center;
   background: var(--muted); color: var(--muted-fg);
   transition: transform var(--t1) var(--e);
@@ -317,10 +317,14 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .node.done .node-btn { background: var(--ok-soft); color: var(--ok); }
 .node.current .node-btn { background: var(--brand-fill); color: #fff; box-shadow: 0 0 0 5px var(--brand-soft); }
 .node.check .node-btn { background: var(--amber-soft); color: var(--amber); }
-.node-ring { position: absolute; inset: -7px; }
+.node-ring {
+  position: absolute; top: -7px; left: -7px;
+  width: calc(100% + 14px); height: calc(100% + 14px);
+}
 .node-ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
 .node-ring .bgc { stroke: var(--brand-soft); }
-.node-ring .fgc { stroke: var(--brand); transform: rotate(-90deg); transform-origin: 50% 50%; }
+.node-ring .fgc { stroke: var(--brand); transform: rotate(-90deg);
+  transform-origin: 50% 50%; transform-box: fill-box; }
 .node-label { font-size: .8rem; font-weight: 800; color: var(--muted-fg); line-height: 1.25; }
 .node.current .node-label { color: var(--brand-ink); }
 .node.done .node-label { color: var(--fg); }
