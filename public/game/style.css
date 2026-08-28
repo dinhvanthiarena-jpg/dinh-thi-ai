@@ -1825,6 +1825,29 @@ button:focus-visible,
   max-width: 92%;
   box-shadow: 0 6px 16px rgba(0,0,0,0.3);
 }
+.call-said-lang {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(52,211,153,0.22);
+  color: #34D399;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.call-said-py,
+.call-said-vi {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--font-body, inherit);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.4;
+}
+.call-said-py { font-style: italic; color: rgba(255,255,255,0.5); }
 .call-log {
   list-style: none;
   margin: 0;

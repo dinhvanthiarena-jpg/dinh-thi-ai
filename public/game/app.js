@@ -2367,6 +2367,9 @@
     const callLog = $('callLog');
     const callBubble = $('callBubble');
     const callSaid = $('callSaid');
+    const callSaidLang = $('callSaidLang');
+    const callSaidPy = $('callSaidPy');
+    const callSaidVi = $('callSaidVi');
     const callYou = $('callYou');
     const callHeard = $('callHeard');
     const callHeardText = $('callHeardText');
@@ -2386,14 +2389,33 @@
     let callBusy = false;
     let callEnded = true;
     let callTypedOnly = !SpeechRecognitionCtor;
-    let callVoice = null;
 
-    function callPickVoice() {
+    // BOOM nói được ba thứ tiếng — bạn học không chọn trước, cứ nói, server
+    // (boomChatService.js) tự nghe ra rồi trả lời đúng thứ tiếng đó, client
+    // chỉ cần đổi giọng đọc/giọng nghe theo callLang mỗi lượt.
+    const CALL_LANGS = {
+      vi: { name: 'Tiếng Việt', tts: 'vi-VN', sr: 'vi-VN' },
+      en: { name: 'English', tts: 'en-US', sr: 'en-US' },
+      zh: { name: '中文', tts: 'zh-CN', sr: 'zh-CN' },
+    };
+    let callLang = 'vi';
+    // Máy nào không nghe được thứ tiếng đang nói thì nhớ lại, lần sau nghe
+    // thẳng bằng tiếng Việt luôn thay vì thử lại rồi lại báo lỗi.
+    const CALL_NO_LISTEN = {};
+    function callGuessLang(text) {
+      if (/[一-鿿]/.test(text)) return 'zh';
+      if (/[ăâđêôơưĂÂĐÊÔƠƯàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/.test(text)) return 'vi';
+      return null;
+    }
+
+    const callVoiceCache = {};
+    function callPickVoice(tag) {
       if (!('speechSynthesis' in window)) return null;
       const voices = window.speechSynthesis.getVoices();
-      const viVoices = voices.filter((v) => /^vi(-|_)?VN$/i.test(v.lang) || /vietnam/i.test(v.name));
-      if (!viVoices.length) return null;
-      const scored = viVoices.map((v) => {
+      const base = tag.split('-')[0].toLowerCase();
+      const pool = voices.filter((v) => String(v.lang).toLowerCase().replace('_', '-').startsWith(base));
+      if (!pool.length) return null;
+      const scored = pool.map((v) => {
         let score = 0;
         if (/natural|online|neural/i.test(v.name)) score += 3;
         if (/google/i.test(v.name)) score += 2;
@@ -2402,9 +2424,12 @@
       scored.sort((a, b) => b.score - a.score);
       return scored[0].v;
     }
+    function callRefreshVoices() {
+      Object.keys(CALL_LANGS).forEach((lg) => { callVoiceCache[lg] = callPickVoice(CALL_LANGS[lg].tts); });
+    }
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = () => { callVoice = callPickVoice(); };
-      callVoice = callPickVoice();
+      window.speechSynthesis.onvoiceschanged = callRefreshVoices;
+      callRefreshVoices();
     }
 
     function callFormatTime(sec) {
@@ -2448,9 +2473,19 @@
 
     // BOOM's reply always lands in the big bubble, and also gets appended to
     // the scrollback log — the bubble is "what's being said right now", the
-    // log is the running transcript underneath it.
-    function callSpeak(text) {
+    // log is the running transcript underneath it. lang/viGloss/py come from
+    // the server (boomChatService.js), which detects which of BOOM's three
+    // languages the reply is actually in.
+    function callSpeak(text, lang, viGloss, py) {
+      if (CALL_LANGS[lang]) callLang = lang;
+      const L = CALL_LANGS[callLang] || CALL_LANGS.vi;
+      callSaidLang.textContent = L.name;
+      callSaidLang.hidden = callLang === 'vi';
       callSaid.textContent = text;
+      callSaidPy.textContent = py || '';
+      callSaidPy.hidden = !py;
+      callSaidVi.textContent = viGloss || '';
+      callSaidVi.hidden = !viGloss;
       callAppendLog('assistant', text);
       if (!('speechSynthesis' in window) || muted) {
         callBusy = false;
@@ -2460,15 +2495,16 @@
       }
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = 'vi-VN';
-      if (callVoice) utter.voice = callVoice;
+      utter.lang = L.tts;
+      const voice = callVoiceCache[callLang];
+      if (voice) utter.voice = voice;
       utter.rate = 1.0;
       utter.pitch = 1.05;
-      // Some browsers (no matching vi-VN voice, some automated/embedded
-      // WebViews) silently accept an utterance but never fire onstart/onend
-      // — without a watchdog the mic/state machine would lock up forever
-      // waiting for a callback that's never coming. ~120ms/char at rate 1.0
-      // is a generous upper bound for vi-VN speech length.
+      // Some browsers (no matching voice for the current language, some
+      // automated/embedded WebViews) silently accept an utterance but never
+      // fire onstart/onend — without a watchdog the mic/state machine would
+      // lock up forever waiting for a callback that's never coming.
+      // ~120ms/char at rate 1.0 is a generous upper bound for speech length.
       let callSpeakDone = false;
       const finishSpeak = () => {
         if (callSpeakDone) return;
@@ -2488,9 +2524,11 @@
     function callReplayLast() {
       if (!('speechSynthesis' in window) || !callSaid.textContent || callSaid.textContent === '…') return;
       window.speechSynthesis.cancel();
+      const L = CALL_LANGS[callLang] || CALL_LANGS.vi;
       const utter = new SpeechSynthesisUtterance(callSaid.textContent);
-      utter.lang = 'vi-VN';
-      if (callVoice) utter.voice = callVoice;
+      utter.lang = L.tts;
+      const voice = callVoiceCache[callLang];
+      if (voice) utter.voice = voice;
       let replayDone = false;
       const finishReplay = () => { if (!replayDone) { replayDone = true; callAvatar.classList.remove('talking'); } };
       utter.onstart = () => callAvatar.classList.add('talking');
@@ -2521,7 +2559,7 @@
           return;
         }
         callHistory.push({ role: 'assistant', content: data.reply });
-        callSpeak(data.reply);
+        callSpeak(data.reply, data.lang, data.vi, data.py);
       } catch (e) {
         if (callEnded) return;
         callBusy = false;
@@ -2533,7 +2571,8 @@
       if (!SpeechRecognitionCtor || callBusy || callEnded || callTypedOnly) return;
       try {
         callRecognition = new SpeechRecognitionCtor();
-        callRecognition.lang = 'vi-VN';
+        const lg = CALL_NO_LISTEN[callLang] ? 'vi' : callLang;
+        callRecognition.lang = (CALL_LANGS[lg] || CALL_LANGS.vi).sr;
         callRecognition.interimResults = false;
         callRecognition.maxAlternatives = 1;
         callRecognition.onstart = () => {
@@ -2549,9 +2588,17 @@
             callAsk(text);
           }
         };
-        callRecognition.onerror = () => {
+        callRecognition.onerror = (ev) => {
           callYou.hidden = true;
           btnMic.classList.remove('on');
+          // Máy không nghe được thứ tiếng đang chọn thì lùi về tiếng Việt rồi
+          // nghe lại ngay, đừng bắt bạn học tự xoay xở với lỗi khó hiểu.
+          if (ev.error === 'language-not-supported' && callLang !== 'vi') {
+            CALL_NO_LISTEN[callLang] = true;
+            callLang = 'vi';
+            setTimeout(callStartListening, 250);
+            return;
+          }
           if (!callBusy) callSetState('Không nghe rõ, bấm mic để nói lại nhé.');
         };
         callRecognition.onend = () => {
@@ -2578,6 +2625,9 @@
       const text = callInput.value.trim();
       if (!text || callBusy) return;
       callInput.value = '';
+      // Chữ gõ tay thì đọc được chắc chắn — bắt thứ tiếng ngay, khỏi đợi máy chủ.
+      const g = callGuessLang(text);
+      if (g) callLang = g;
       callHeardText.textContent = `Cậu: "${text}"`;
       callHeard.hidden = false;
       callAsk(text);
@@ -2587,10 +2637,14 @@
       callEnded = false;
       callBusy = false;
       callHistory = [];
+      callLang = 'vi'; // BOOM luôn mở màn bằng tiếng Việt, đây là app tiếng Việt
       callLog.innerHTML = '';
       callLog.hidden = true;
       callHeard.hidden = true;
       callSaid.textContent = 'BOOM đang kết nối…';
+      callSaidLang.hidden = true;
+      callSaidPy.hidden = true;
+      callSaidVi.hidden = true;
       callSetState('Đang kết nối…');
       callStartTimer();
       callTypedOnly = !SpeechRecognitionCtor;
