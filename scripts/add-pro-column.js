@@ -8,7 +8,8 @@
  * Chạy lại lần nữa cũng không sao, nó tự nhận ra cột đã có rồi.
  */
 require('dotenv').config();
-const { sequelize, connectDB } = require('../config/db');
+const connectDB = require('../config/db');
+const { sequelize } = require('../config/db');
 
 async function run() {
   await connectDB();
