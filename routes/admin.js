@@ -30,6 +30,8 @@ router.post('/blog/:id', upload.single('cover'), upload.processImage({ maxWidth:
 router.post('/blog/:id/delete', adminController.blogDelete);
 
 router.get('/orders', adminController.orderList);
+router.get('/pro-orders', adminController.proOrderList);
+router.post('/pro-orders/:id/confirm', adminController.proOrderConfirm);
 router.get('/students', adminController.studentList);
 
 router.get('/messages', adminController.messageList);

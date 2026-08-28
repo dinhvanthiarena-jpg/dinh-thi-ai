@@ -1,5 +1,6 @@
 const express = require('express');
 const tutor = require('../services/englishAirTutorService');
+const pro = require('../services/proService');
 
 const router = express.Router();
 
@@ -29,6 +30,14 @@ router.post('/chat', async (req, res) => {
   const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip || 'unknown';
   if (rateLimited(ip)) {
     return res.status(429).json({ error: 'Bạn nói hơi nhanh rồi, nghỉ một lát rồi gọi lại nhé.' });
+  }
+  // Cửa gói Pro. Khi PRO_MODE còn tắt thì duocDung() luôn trả về true —
+  // mọi người vẫn gọi thoải mái, đúng như đang để miễn phí.
+  if (!pro.duocDung(res.locals.currentUser)) {
+    return res.status(402).json({
+      error: 'Phần gọi tự do nằm trong gói Pro. Nâng cấp để nói chuyện thoải mái với MON.L nhé.',
+      nangCap: '/pro',
+    });
   }
   try {
     const { history, level, words, mode, style } = req.body || {};

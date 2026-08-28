@@ -1,0 +1,70 @@
+<section class="mx-auto max-w-xl px-4 sm:px-6 lg:px-8 py-16" data-code="<%= order.code %>">
+
+  <h1 class="text-2xl sm:text-3xl font-extrabold text-ink">Quét mã để thanh toán</h1>
+  <p class="text-muted mt-2"><%= ten %> · <span class="font-bold text-ink"><%= order.amount.toLocaleString('vi-VN') %>đ</span></p>
+
+  <div id="choTien" class="<%= order.status === 'paid' ? 'hidden' : '' %>">
+    <div class="card p-6 mt-6 text-center">
+      <% if (qr) { %>
+        <img src="<%= qr %>" alt="Mã QR chuyển khoản" class="w-64 h-64 mx-auto rounded-xl" />
+      <% } %>
+      <p class="text-sm text-muted mt-4">
+        Mở app ngân hàng bất kỳ rồi quét mã này. Số tiền và nội dung đã điền sẵn.
+      </p>
+      <p class="mt-4 inline-flex items-center gap-2 text-sm">
+        <span class="inline-block h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+        <span class="text-muted">Đang chờ tiền về…</span>
+      </p>
+    </div>
+
+    <div class="card p-6 mt-5">
+      <h2 class="font-bold text-ink text-sm">Không quét được thì chuyển tay</h2>
+      <dl class="mt-3 text-sm divide-y divide-slate-100">
+        <div class="flex justify-between py-2"><dt class="text-muted">Ngân hàng</dt><dd class="font-semibold text-ink"><%= ck.nganHang %></dd></div>
+        <div class="flex justify-between py-2"><dt class="text-muted">Số tài khoản</dt><dd class="font-semibold text-ink"><%= ck.soTaiKhoan %></dd></div>
+        <div class="flex justify-between py-2"><dt class="text-muted">Chủ tài khoản</dt><dd class="font-semibold text-ink"><%= ck.chuTaiKhoan %></dd></div>
+        <div class="flex justify-between py-2"><dt class="text-muted">Số tiền</dt><dd class="font-semibold text-ink"><%= ck.soTien.toLocaleString('vi-VN') %>đ</dd></div>
+        <div class="flex justify-between py-2">
+          <dt class="text-muted">Nội dung</dt>
+          <dd class="font-mono font-bold text-purple-700"><%= ck.noiDung %></dd>
+        </div>
+      </dl>
+      <p class="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 mt-4">
+        Nội dung chuyển khoản phải giữ đúng mã <strong><%= ck.noiDung %></strong>, sai mã thì
+        hệ thống không biết đơn của ai để mở gói.
+      </p>
+    </div>
+  </div>
+
+  <div id="xong" class="<%= order.status === 'paid' ? '' : 'hidden' %>">
+    <div class="card p-8 mt-6 text-center">
+      <div class="mx-auto w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 grid place-items-center text-3xl">✓</div>
+      <h2 class="font-extrabold text-ink text-xl mt-4">Đã nhận được tiền</h2>
+      <p class="text-muted mt-2">Gói Pro đã mở. Cảm ơn bạn nhiều!</p>
+      <a href="/english-air/" class="btn btn-primary mt-6 inline-block">Mở app Mon.L</a>
+    </div>
+  </div>
+
+</section>
+
+<script>
+  // Hỏi máy chủ vài giây một lần xem tiền về chưa. Ngân hàng báo sang thường
+  // trong dưới 10 giây, nhưng cứ hỏi tới 10 phút rồi thôi cho đỡ tốn.
+  (function () {
+    var code = document.currentScript.parentElement.querySelector('[data-code]').dataset.code;
+    if (document.getElementById('xong').className.indexOf('hidden') === -1) return;
+    var het = Date.now() + 10 * 60 * 1000;
+    var t = setInterval(function () {
+      if (Date.now() > het) { clearInterval(t); return; }
+      fetch('/pro/don/' + code + '/trang-thai')
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.status !== 'paid') return;
+          clearInterval(t);
+          document.getElementById('choTien').classList.add('hidden');
+          document.getElementById('xong').classList.remove('hidden');
+        })
+        .catch(function () {});
+    }, 3000);
+  })();
+</script>

@@ -1,0 +1,82 @@
+<div class="flex items-center justify-between gap-4 flex-wrap">
+  <h1 class="text-2xl font-extrabold text-ink">Gói Pro</h1>
+  <div class="flex items-center gap-2 text-sm">
+    <% if (dangThuPhi) { %>
+      <span class="rounded-full bg-emerald-100 text-emerald-800 font-bold px-3 py-1">Đang thu phí</span>
+    <% } else { %>
+      <span class="rounded-full bg-slate-200 text-slate-700 font-bold px-3 py-1">Đang miễn phí cho tất cả</span>
+    <% } %>
+    <% if (!sanSang) { %>
+      <span class="rounded-full bg-amber-100 text-amber-800 font-bold px-3 py-1">Chưa cấu hình tài khoản nhận tiền</span>
+    <% } %>
+  </div>
+</div>
+
+<% if (!dangThuPhi) { %>
+  <p class="mt-3 text-sm text-muted">
+    Đang để <code class="font-mono">PRO_MODE = off</code>, nên không ai bị chặn tính năng nào.
+    Muốn bắt đầu thu phí thì đổi thành <code class="font-mono">on</code> trong bảng biến môi trường
+    của cPanel rồi khởi động lại app.
+  </p>
+<% } %>
+
+<div class="card mt-6 overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="text-left text-muted border-b border-slate-100">
+      <tr>
+        <th class="px-4 py-3 font-semibold">Mã đơn</th>
+        <th class="px-4 py-3 font-semibold">Người mua</th>
+        <th class="px-4 py-3 font-semibold">Gói</th>
+        <th class="px-4 py-3 font-semibold text-right">Số tiền</th>
+        <th class="px-4 py-3 font-semibold">Trạng thái</th>
+        <th class="px-4 py-3 font-semibold">Hạn Pro</th>
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% if (!orders.length) { %>
+        <tr><td colspan="7" class="px-4 py-10 text-center text-muted">Chưa có đơn nào.</td></tr>
+      <% } %>
+      <% orders.forEach(function (o) { %>
+        <tr>
+          <td class="px-4 py-3 font-mono font-bold text-ink"><%= o.code %></td>
+          <td class="px-4 py-3">
+            <div class="font-semibold text-ink"><%= o.user ? o.user.name : '—' %></div>
+            <div class="text-muted text-xs"><%= o.user ? o.user.email : '' %></div>
+          </td>
+          <td class="px-4 py-3"><%= o.plan === 'year' ? '1 năm' : '1 tháng' %></td>
+          <td class="px-4 py-3 text-right font-semibold text-ink"><%= o.amount.toLocaleString('vi-VN') %>đ</td>
+          <td class="px-4 py-3">
+            <% if (o.status === 'paid') { %>
+              <span class="rounded-full bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 text-xs">Đã trả</span>
+              <% if (o.confirmedBy && o.confirmedBy.indexOf('tay:') === 0) { %>
+                <div class="text-xs text-muted mt-1">duyệt tay</div>
+              <% } %>
+            <% } else if (o.bankAmount && o.bankAmount < o.amount) { %>
+              <span class="rounded-full bg-amber-100 text-amber-800 font-bold px-2.5 py-1 text-xs">Chuyển thiếu</span>
+              <div class="text-xs text-muted mt-1">nhận <%= o.bankAmount.toLocaleString('vi-VN') %>đ</div>
+            <% } else { %>
+              <span class="rounded-full bg-slate-100 text-slate-600 font-bold px-2.5 py-1 text-xs">Chờ tiền</span>
+            <% } %>
+          </td>
+          <td class="px-4 py-3 text-muted">
+            <%= o.user && o.user.proUntil ? new Date(o.user.proUntil).toLocaleDateString('vi-VN') : '—' %>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <% if (o.status !== 'paid') { %>
+              <form method="POST" action="/admin/pro-orders/<%= o.id %>/confirm"
+                    onsubmit="return confirm('Xác nhận đã nhận đủ <%= o.amount.toLocaleString('vi-VN') %>đ cho đơn <%= o.code %>?')">
+                <button class="btn btn-outline text-xs px-3 py-1.5">Đã nhận tiền</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<p class="text-xs text-muted mt-4">
+  Bình thường ngân hàng báo sang là hệ thống tự mở gói trong vài giây. Nút “Đã nhận tiền”
+  chỉ dùng khi người mua ghi sai nội dung chuyển khoản, hoặc thầy nhận tiền theo cách khác.
+</p>

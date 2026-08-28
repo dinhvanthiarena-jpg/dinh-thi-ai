@@ -14,6 +14,8 @@ const User = sequelize.define(
     avatarUrl: { type: DataTypes.STRING, defaultValue: '' },
     phone: { type: DataTypes.STRING, defaultValue: '' },
     isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
+    // Hạn dùng gói Pro của app Mon.L. Rỗng hoặc đã qua nghĩa là bản miễn phí.
+    proUntil: { type: DataTypes.DATE, allowNull: true },
   },
   {
     tableName: 'users',

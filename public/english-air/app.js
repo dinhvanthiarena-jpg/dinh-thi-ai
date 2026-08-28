@@ -1341,6 +1341,7 @@ async function askTutor(first) {
   try {
     const res = await fetch(CHAT_URL, {
       method: "POST",
+      credentials: "same-origin",   // để máy chủ biết ai đang gọi, phục vụ gói Pro
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         // __START__ là dấu hiệu mở màn: MON.L chào bằng tiếng Việt và mời
@@ -1352,6 +1353,21 @@ async function askTutor(first) {
         words: seenWords().slice(-60).map(w => w.en),
       }),
     });
+    if (res.status === 402) {
+      // Chưa có gói Pro. Mời nâng cấp chứ đừng báo lỗi chung chung.
+      const j = await res.json().catch(() => ({}));
+      C.busy = false;
+      setState("Cần gói Pro");
+      $("#callSaid").textContent = j.error || "Phần này nằm trong gói Pro.";
+      $("#callSaidVi").textContent = "";
+      openSheet({
+        title: "Nâng cấp Mon.L Pro",
+        body: "Học 60 bài thì miễn phí mãi. Riêng phần gọi nói chuyện tự do với MON.L cần gói Pro.",
+        yes: "Xem gói Pro", no: "Để sau",
+        onYes() { location.href = j.nangCap || "/pro"; }
+      });
+      return;
+    }
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
       throw new Error(j.error || "Không gọi được máy chủ");

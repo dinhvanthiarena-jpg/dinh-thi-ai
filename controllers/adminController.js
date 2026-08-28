@@ -235,6 +235,36 @@ exports.orderList = async (req, res) => {
   res.render('admin/orders', { title: 'Đơn hàng', orders });
 };
 
+exports.proOrderList = async (req, res) => {
+  const { ProOrder } = require('../models');
+  const pro = require('../services/proService');
+  const orders = await ProOrder.findAll({
+    include: [{ model: User, as: 'user', attributes: ['name', 'email', 'proUntil'] }],
+    order: [['createdAt', 'DESC']],
+    limit: 200,
+  });
+  res.render('admin/pro-orders', {
+    title: 'Gói Pro',
+    orders,
+    dangThuPhi: pro.dangThuPhi(),
+    sanSang: pro.sanSangNhanTien(),
+  });
+};
+
+/**
+ * Duyệt tay một đơn. Dùng khi ngân hàng báo chậm, người mua ghi sai nội dung,
+ * hoặc thầy nhận tiền theo cách khác. Ghi lại là ai duyệt để sau còn lần ra.
+ */
+exports.proOrderConfirm = async (req, res) => {
+  const { ProOrder } = require('../models');
+  const pro = require('../services/proService');
+  const order = await ProOrder.findByPk(req.params.id);
+  if (order && order.status !== 'paid') {
+    await pro.ghiNhanDaTra(order, { boi: 'tay:' + (res.locals.currentUser?.email || 'admin') });
+  }
+  res.redirect('/admin/pro-orders');
+};
+
 exports.studentList = async (req, res) => {
   const students = await User.findAll({ where: { role: 'student' }, order: [['createdAt', 'DESC']] });
   res.render('admin/students', { title: 'Học viên', students });
