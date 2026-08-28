@@ -87,7 +87,8 @@ LANG: <vi hoặc en hoặc zh — thứ tiếng bạn vừa dùng ở dòng SAY>
 SAY: <câu trả lời của bạn>
 VI: <nghĩa tiếng Việt của dòng SAY — BẮT BUỘC có khi SAY là tiếng Anh hoặc tiếng Trung,
      chỉ để trống khi SAY đã là tiếng Việt>
-PY: <phiên âm pinyin có dấu thanh — CHỈ khi SAY là tiếng Trung, còn lại để trống>
+PY: <phiên âm pinyin có dấu thanh — CHỈ khi SAY là tiếng Trung, còn lại để trống.
+     Phải phiên âm TOÀN BỘ câu, tuyệt đối không được để sót chữ Hán nào>
 
 ════ CHỐT CHO LƯỢT NÀY ════${
   forced ? `
