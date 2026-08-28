@@ -507,11 +507,77 @@ function khungAnh(w) {
   return box;
 }
 
-/** Câu điền từ: lấy ảnh của từ đang phải điền, đó mới là thứ cần minh hoạ. */
+/* Phần lớn nội dung là CÂU chứ không phải từ đơn, nên gán ảnh theo từ khoá xuất
+   hiện trong câu: một cảnh phủ được hàng chục câu. Xếp từ cụ thể lên trước từ
+   chung, vì "coffee shop" phải ra quán cà phê chứ không ra cái cửa hàng. */
+const CANH = [
+  ["hello|hi|goodbye|bye|welcome|greet|nice to meet|name|introduce|excuse me", "hello"],
+  ["thank|thanks|please|help|helping|kind|sure|of course", "friend"],
+  ["vietnam|vietnamese|country|nation|flag|culture|tradition", "village"],
+  ["teacher|student|school|class|classroom|study|studies|homework|lesson|learn|english|language|book|read|reading|library|pen|pencil", "school"],
+  ["family|mother|father|mum|mom|dad|parents|sister|brother|son|daughter|baby|child|children|wife|husband", "family"],
+  ["friend|friends|classmate|neighbour|neighbor|together|everyone|people", "friend"],
+  ["coffee|tea|cafe|café|milk|juice|cup", "coffee"],
+  ["bread|rice|noodle|pho|food|eat|eating|ate|hungry|breakfast|lunch|dinner|meal|restaurant|cook|cooking", "bread"],
+  ["water|drink|drinking|thirsty|bottle", "water"],
+  ["apple|banana|orange|mango|fruit|vegetable", "apple"],
+  ["fish|sea|beach|river|lake|swim|swimming|boat", "fish"],
+  ["dog|puppy|pet", "dog"],
+  ["cat|kitten", "cat"],
+  ["happy|glad|great|fun|funny|love|like|good|beautiful|smile|laugh|enjoy", "happy"],
+  ["tired|sad|sick|ill|sorry|bad|angry|worried|difficult|hard", "tired"],
+  ["doctor|hospital|nurse|medicine|health|headache|fever|hand|leg|arm|head|eye|tooth|hair|face|body|hurt|wash", "doctor"],
+  ["left|right|turn|corner|way|direction|map|near|far|straight|address|here|there", "car"],
+  ["number|count|one|two|three|four|five|six|seven|eight|nine|ten|twenty|hundred|age|old", "clock"],
+  ["money|price|cost|buy|bought|pay|cheap|expensive|dong|dollar", "money"],
+  ["market|shop|store|supermarket|sell|shopping|menu|order|waiter|bill|table", "market"],
+  ["tomato|salt|sugar|onion|meat|chicken|egg|soup|salad|dish|taste|sweet|spicy", "bread"],
+  ["police|officer|factory|farmer|driver|cook|seller|staff|uniform", "work"],
+  ["work|working|job|office|company|business|meeting|boss|engineer|worker", "work"],
+  ["city|hanoi|saigon|town|street|building|traffic|downtown", "city"],
+  ["village|countryside|farm|field|quiet|small town", "village"],
+  ["house|home|room|live|living|lived|apartment|kitchen|door|window", "house"],
+  ["car|drive|driving|bus|taxi|motorbike|bike|road|ride", "car"],
+  ["plane|airport|fly|flight|travel|trip|holiday|vacation|visit|tourist|country", "plane"],
+  ["sun|sunny|hot|summer|warm|weather|sky|morning|afternoon", "sun"],
+  ["rain|rainy|wet|cold|winter|storm|cloud", "rain"],
+  ["tree|park|garden|flower|green|nature|mountain", "tree"],
+  ["bed|sleep|sleeping|slept|night|evening|tired at night|bedroom|dream", "bed"],
+  ["shirt|clothes|dress|wear|wearing|shoes|hat|jacket", "shirt"],
+  ["ball|football|soccer|sport|play|playing|game|team|run|running", "ball"],
+  ["music|song|sing|singing|listen to music|guitar|dance|dancing", "music"],
+  ["birthday|cake|party|celebrate|gift|present", "cake"],
+  ["phone|call|calling|text|message|internet|computer|email", "phone"],
+  ["clock|time|hour|minute|late|early|tomorrow|yesterday|today|week|month|year", "clock"],
+  ["what|where|when|who|why|how|question|ask|asking|please help", "question"],
+  ["man|boy|he|his|sir|mr", "man"],
+  ["woman|girl|she|her|lady|ms|mrs", "woman"],
+];
+// Ranh gioi tu phai la HAI dau gach cheo trong nguon: mot cai thi JS doc thanh
+// ky tu backspace va regex khong bao gio khop.
+const CANH_RX = CANH.map(([tu, hinh]) => [new RegExp("\\b(" + tu + ")(s|es|ing|ed)?\\b", "i"), hinh]);
+
+/** Tìm hình hợp với một câu tiếng Anh. Không có gì hợp thì trả null. */
+function hinhChoChu(cau) {
+  if (!cau) return null;
+  for (const [rx, hinh] of CANH_RX) if (rx.test(cau)) return hinh;
+  return null;
+}
+
+/** Câu điền từ: ưu tiên ảnh riêng của từ phải điền, không có thì lấy cảnh theo cả câu. */
 function anhChoCau(d) {
   const canDien = (d.answers || []).map(a => String(a).toLowerCase().replace(/[.,!?]/g, ""));
   const w = ALL_WORDS.find(x => canDien.includes(x.en.toLowerCase()) && (x.img || x.pic));
-  return khungAnh(w);
+  if (w) return khungAnh(w);
+  const hinh = hinhChoChu(d.sent && d.sent.en);
+  return hinh ? khungAnh({ pic: hinh }) : null;
+}
+
+/** Một mục từ vựng: ảnh riêng nếu có, không thì dò cảnh theo chính chữ tiếng Anh. */
+function anhChoTu(w) {
+  if (w && (w.img || w.pic)) return khungAnh(w);
+  const hinh = hinhChoChu(w && w.en);
+  return hinh ? khungAnh({ pic: hinh }) : null;
 }
 
 /* ---------- 9. Slide dạy ---------- */
@@ -630,7 +696,7 @@ const DRILL = {
     say.addEventListener("click", () => speak(d.word.en));
     row.append(say);
     st.append(el("p", "ask", d.word.en), row);
-    const anh = khungAnh(d.word);
+    const anh = anhChoTu(d.word);
     if (anh) st.append(anh);
     st.append(optList(d.opts, w => w.vi, d.word.en));
     speak(d.word.en);
@@ -639,7 +705,7 @@ const DRILL = {
   reverse(d, st) {
     showMascot(true); setKicker("Dịch sang tiếng Anh");
     st.append(el("p", "ask", "“" + d.word.vi + "”"));
-    const anh = khungAnh(d.word);
+    const anh = anhChoTu(d.word);
     if (anh) st.append(anh);
     st.append(optList(d.opts, w => w.en, d.word.en));
   },
@@ -981,9 +1047,12 @@ function renderCal() {
 }
 $("#calPrev").addEventListener("click", () => { calMonth.setMonth(calMonth.getMonth() - 1); renderCal(); });
 $("#calNext").addEventListener("click", () => { calMonth.setMonth(calMonth.getMonth() + 1); renderCal(); });
-$("#btnStreakClose").addEventListener("click", () => {
+function dongStreak() {
   $("#streakView").hidden = true; document.body.style.overflow = ""; go(view);
-});
+}
+// Dấu X nằm tít trên đỉnh, cuộn hết lịch xuống rồi thì không thấy đâu nữa —
+// nên có thêm một nút quay lại ngay dưới bảng.
+$$("#btnStreakClose, #btnStreakHome").forEach(b => b.addEventListener("click", dongStreak));
 $("#btnStreak").addEventListener("click", openStreak);
 
 /* ---------- 16. Thẻ ghi nhớ ---------- */

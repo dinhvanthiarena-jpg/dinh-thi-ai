@@ -1171,8 +1171,12 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 :root[data-theme="dark"] .streak { background: linear-gradient(180deg, #2A1C10, var(--card) 45%); }
 .streak[hidden] { display: none; }
 .streak-body { width: 100%; max-width: 460px; margin: 0 auto; padding: 0 var(--s4) calc(var(--s6) + env(safe-area-inset-bottom)); text-align: center; }
-.flame { width: 120px; height: 145px; margin: var(--s3) auto var(--s4); }
-.flame svg { width: 100%; height: 100%; }
+/* Ô này trước là ngọn lửa cao, nay là mặt MON.L nên phải vuông và bo tròn. */
+.flame { width: 128px; height: 128px; margin: var(--s3) auto var(--s4);
+  border-radius: var(--rf); overflow: hidden; display: grid; place-items: center;
+  background: var(--brand-soft); }
+.flame svg { width: 88px; height: 88px; }
+.flame img { width: 100%; height: 100%; object-fit: cover; }
 .streak h2 { font-size: 1.9rem; }
 .streak .sub { margin-top: var(--s2); }
 .cal { margin-top: var(--s5); text-align: left; }
@@ -1277,7 +1281,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   .fcard { min-height: 180px; padding: var(--s4); }
   .btn { min-height: 46px; }
   .sky { height: 130px; }
-  .flame { width: 76px; height: 92px; margin-block: var(--s2); }
+  .flame { width: 84px; height: 84px; margin-block: var(--s2); }
 }
 
 /* ---------- 21. GIẢM CHUYỂN ĐỘNG ---------- */
