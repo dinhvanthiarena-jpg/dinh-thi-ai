@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data: blob:; connect-src 'self';" />
-<meta name="theme-color" content="#2563EB" />
+<meta name="theme-color" content="#F7F3FD" />
 <meta name="description" content="Game Toán Vui Cấp 1 - luyện toán vui nhộn cho học sinh lớp 1 đến lớp 5, chơi ngay trên trình duyệt." />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -82,26 +82,26 @@
         <div class="mascot-hero" id="mascotHome" aria-hidden="true"></div>
       </div>
       <p class="mascot-name js-teacher-name">Thầy Đinh Thi Ai</p>
-      <img class="title-hero-img" src="assets/ui/title-hero.png" alt="Toán Vui Cấp 1" />
-      <img class="subtitle-img" src="assets/ui/subtitle-ribbon.png" alt="Chơi mà học – Học mà chơi!" />
+      <h1 class="home-title">Toán Vui Cấp 1</h1>
+      <p class="home-subtitle">Chơi mà học – Học mà chơi!</p>
       <p class="update-badge" id="updateBadge" hidden></p>
       <button class="btn btn-install" id="btnInstallApp" hidden>
         <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M12 3v10.59l3.3-3.3 1.4 1.42L12 17.4l-4.7-4.7 1.4-1.42 3.3 3.3V3h2zM5 19h14v2H5v-2z"/></svg>
         Cài đặt ngay vào điện thoại
       </button>
       <div class="home-actions">
-        <button class="btn-gem-img" id="btnPlay" aria-label="Bắt đầu chơi">
-          <img src="assets/ui/btn-play.png" alt="Bắt đầu chơi" />
+        <button class="btn btn-primary btn-xl btn-play" id="btnPlay" aria-label="Bắt đầu chơi">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+          Bắt đầu chơi
         </button>
-        <button class="btn-gem-img btn-gifted-img" id="btnGifted" aria-label="Ôn học sinh giỏi">
-          <img src="assets/ui/btn-gifted.png" alt="" />
-          <span class="btn-gifted-icon">🎓</span>
-          <span class="btn-gifted-label">Ôn học sinh giỏi</span>
+        <button class="btn btn-gifted btn-xl" id="btnGifted" aria-label="Ôn học sinh giỏi">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3zm0 12.5L4.24 9 12 4.5 19.76 9 12 15.5zM5 13.18v4.5L12 21l7-3.32v-4.5L12 17l-7-3.82z"/></svg>
+          Ôn học sinh giỏi
         </button>
       </div>
       <div class="home-secondary-actions">
         <button class="btn-homework-icon" id="btnOpenHomework" aria-label="Chụp bài tập, AI giảng bài">
-          <img src="assets/ui/icon-camera.png" alt="" aria-hidden="true" />
+          <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M9 2 7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
         </button>
         <button class="btn-homework-icon btn-call-icon" id="btnOpenCall" aria-label="Gọi BOOM nói chuyện">
           <span class="call-icon-emoji" aria-hidden="true">👹</span>
@@ -113,9 +113,18 @@
     <div class="contact-footer">
       <p class="contact-line">Một sản phẩm của <strong>Thầy Đinh Thi Ai</strong> kính tặng</p>
       <div class="contact-actions">
-        <span class="contact-phone-img"><img src="assets/ui/contact-phone.png" alt="0977 317 988" /></span>
-        <button class="contact-img-btn" id="btnContactFB"><img src="assets/ui/contact-facebook.png" alt="dinhthi.daotao" /></button>
-        <button class="contact-img-btn" id="btnContactWeb"><img src="assets/ui/contact-web.png" alt="3dvietpro.com" /></button>
+        <span class="contact-phone">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+          0977 317 988
+        </span>
+        <button class="contact-fb-btn" id="btnContactFB">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>
+          dinhthi.daotao
+        </button>
+        <button class="contact-web-btn" id="btnContactWeb">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm6.93 6h-2.95a15.7 15.7 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.93 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14a7.99 7.99 0 0 1 0-4h3.38a17.2 17.2 0 0 0 0 4H4.26zm.81 2h2.95a15.7 15.7 0 0 0 1.38 3.56A7.99 7.99 0 0 1 5.07 16zm2.95-8H5.07a7.99 7.99 0 0 1 4.33-3.56A15.7 15.7 0 0 0 8.02 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66a15.36 15.36 0 0 1 0-4h4.68a15.36 15.36 0 0 1 0 4zm.25 5.56A15.7 15.7 0 0 0 15.97 16h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14a17.2 17.2 0 0 0 0-4h3.38a7.99 7.99 0 0 1 0 4h-3.38z"/></svg>
+          3dvietpro.com
+        </button>
       </div>
     </div>
   </section>

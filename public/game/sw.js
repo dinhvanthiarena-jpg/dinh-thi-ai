@@ -1,7 +1,7 @@
 // Minimal app-shell cache so the PWA install prompt qualifies and the game
 // still opens (from cache) with a flaky connection. Bump CACHE_NAME whenever
 // the shipped files change so old caches don't linger.
-const CACHE_NAME = 'tvc1-shell-v19';
+const CACHE_NAME = 'tvc1-shell-v20';
 const SHELL_FILES = [
   './',
   './index.html',
@@ -9,6 +9,11 @@ const SHELL_FILES = [
   './app.js',
   './manifest.json',
   './assets/thay-avatar.png',
+  './assets/fonts/nunito-400.woff2',
+  './assets/fonts/nunito-600.woff2',
+  './assets/fonts/nunito-700.woff2',
+  './assets/fonts/nunito-800.woff2',
+  './assets/fonts/nunito-900.woff2',
 ];
 
 self.addEventListener('install', (event) => {
