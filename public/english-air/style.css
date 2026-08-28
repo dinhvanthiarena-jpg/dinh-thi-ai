@@ -311,6 +311,8 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   transition: transform var(--t1) var(--e);
 }
 .node-btn .ic { width: 34px; height: 34px; }
+/* Mốc chưa mở khoá: ổ khoá nhỏ và mờ, đừng để nó hút mắt hơn bài đang học. */
+.node.locked .node-btn .ic { width: 21px; height: 21px; opacity: .42; }
 .node-btn:active:not([disabled]) { transform: scale(.94); }
 .node.done .node-btn { background: var(--ok-soft); color: var(--ok); }
 .node.current .node-btn { background: var(--brand-fill); color: #fff; box-shadow: 0 0 0 5px var(--brand-soft); }
@@ -999,6 +1001,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   .node-btn { width: 68px; height: 68px; }
   .node-label { font-size: .72rem; }
   .node::before { top: 34px; }
+  .node.locked .node-btn .ic { width: 18px; height: 18px; }
   .unit { padding: var(--s3) var(--s2); }
   .vcard-en { font-size: 1.7rem; }
   .big-count { font-size: 1.5rem; }
@@ -1030,6 +1033,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   .nodes { gap: var(--s4) var(--s2); }
   .node-btn { width: 96px; height: 96px; }
   .node::before { top: 48px; }
+  .node.locked .node-btn .ic { width: 24px; height: 24px; }
   .pics { gap: var(--s4); }
   .mascot-top { width: 130px; height: 130px; }
 }
