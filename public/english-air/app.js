@@ -2721,7 +2721,41 @@ function setupInstallHint() {
   }
 }
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  /* Máy đã cài app lên màn hình chính thì trước đây phải mở HAI lần mới thấy bản
+     mới: lần đầu chỉ tải về bản mới, lần sau mới dùng. Tệ hơn, giữa chừng có thể
+     dính HTML mới ghép với mã cũ. Nay bản mới vừa nắm quyền là tự nạp lại một
+     lần, để mọi tệp luôn cùng một đời. */
+  let daNapLai = false;
+  let choNapLai = false;
+  const daCoNguoiDieuKhien = !!navigator.serviceWorker.controller;
+
+  function thuNapLai() {
+    if (daNapLai) return;
+    // Đang học dở thì khoan — nạp lại lúc đó là mất bài người ta đang làm.
+    const dangBan = ["#player", "#flash", "#call", "#result", "#cong", "#pro"]
+      .some(sel => { const o = $(sel); return o && !o.hidden; });
+    if (dangBan) { choNapLai = true; return; }
+    daNapLai = true;
+    location.reload();
+  }
+
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    // Lần cài đầu tiên cũng bắn sự kiện này, nhưng lúc đó nạp lại là thừa.
+    if (!daCoNguoiDieuKhien) return;
+    thuNapLai();
+  });
+  setInterval(() => { if (choNapLai) thuNapLai(); }, 3000);
+
+  window.addEventListener("load", async () => {
+    try {
+      const reg = await navigator.serviceWorker.register("sw.js");
+      // App đã cài thì người ta mở đi mở lại chứ ít khi đóng hẳn, nên mỗi lần
+      // quay lại là hỏi luôn có bản mới không, đừng chờ trình duyệt tự kiểm.
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) reg.update().catch(() => {});
+      });
+    } catch { /* không có service worker thì app vẫn chạy bình thường */ }
+  });
 }
 
 /* ---------- 24. Khởi động ---------- */
