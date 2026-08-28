@@ -1,42 +1,43 @@
 /* ============================================================
    English Air — giao diện dựng theo bản ghi màn hình AirLearn
-   Xanh trời + navy đậm, bo tròn nhiều, nền sáng thoáng.
+   Tím thương hiệu MON.L, nền đậm mặc định, bo tròn nhiều.
    ============================================================ */
 
 /* ---------- 1. TOKEN ---------- */
 :root {
-  --blue:        #0EA5FF;   /* nút chính, nhãn, viền chọn */
-  --blue-ink:    #036397;   /* chu xanh tren nen sang, >=4.5:1 */
-  --blue-fill:   #0B75BD;   /* nen dac mang chu trang, 4.9:1 */
-  --blue-soft:   #E1F3FE;
-  --navy:        #0B3F63;   /* viền biển báo, chân cột, chữ đậm */
-  --on-blue:     #FFFFFF;
+  /* --brand dung cho CHU va vien; --brand-fill dung cho NEN dac mang chu trang. */
+  --brand:       #7E22CE;
+  --brand-ink:   #6B21A8;
+  --brand-fill:  #7C3AED;
+  --brand-soft:  #F3E8FF;
+  --ink-deep:    #3B0764;
+  --on-brand:    #FFFFFF;
 
   --ok:          #15803D;
-  --ok-soft:     #E5F8EC;
+  --ok-soft:     #E6F8EC;
   --ok-ink:      #14532D;
   --bad:         #B91C1C;
   --bad-soft:    #FDECEC;
   --bad-ink:     #8B1A1E;
-  --amber:       #B45309;
-  --amber-soft:  #FEF4DC;
+  --amber:       #A65209;
+  --amber-soft:  #FDF1DC;
   --flame:       #C2410C;
-  --heart:       #E11D48;
+  --heart:       #DB2777;
   --xp:          #15803D;
 
-  --bg:          #F2F7FA;
-  --fg:          #10222E;
+  --bg:          #F7F3FD;
+  --fg:          #1E1030;
   --card:        #FFFFFF;
-  --muted:       #EDF2F6;
-  --muted-fg:    #5A6B78;
-  --line:        #E2E9EF;
-  --line-hi:     #C8D5DF;
-  --sky-1:       #BEE7FB;
-  --sky-2:       #EAF7FE;
+  --muted:       #F1EAFA;
+  --muted-fg:    #5C4B72;
+  --line:        #E7DDF5;
+  --line-hi:     #C9B6E4;
+  --sky-1:       #DFCCFA;
+  --sky-2:       #F6EFFE;
 
-  --sh-1: 0 1px 2px rgba(16,34,46,.06);
-  --sh-2: 0 4px 14px rgba(16,34,46,.09);
-  --sh-3: 0 12px 30px rgba(16,34,46,.14);
+  --sh-1: 0 1px 2px rgba(30,16,48,.06);
+  --sh-2: 0 4px 14px rgba(30,16,48,.10);
+  --sh-3: 0 12px 30px rgba(30,16,48,.16);
 
   --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px;
   --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
@@ -45,43 +46,44 @@
   --e: cubic-bezier(.22,.8,.32,1);
   --t1: 140ms; --t2: 220ms; --t3: 340ms;
 
-  --gut: 16px;          /* le ngang cua noi dung, banner bam theo */
+  --gut: 16px;
   --shell: 620px;
   --ic: 24px;
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
-  --blue:        #4DBBFF;
-  --blue-ink:    #7CCCFF;
-  --blue-fill:   #0B75BD;   /* nen dac mang chu trang, 4.9:1 */
-  --blue-soft:   #14304A;
-  --navy:        #9FD8F5;
-  --ok:          #16A34A;
+  --brand:       #C084FC;
+  --brand-ink:   #D8B4FE;
+  --brand-fill:  #7C3AED;
+  --brand-soft:  #2E1A4E;
+  --ink-deep:    #E9D5FF;
+
+  --ok:          #22C55E;
   --ok-soft:     #10321F;
   --ok-ink:      #86EFAC;
-  --bad:         #E5484D;
-  --bad-soft:    #3A1518;
+  --bad:         #F0555A;
+  --bad-soft:    #3D161C;
   --bad-ink:     #FCA5A5;
   --amber:       #FBBF24;
-  --amber-soft:  #34290D;
+  --amber-soft:  #3A2A10;
   --flame:       #FF9A4D;
   --heart:       #FB7185;
   --xp:          #4ADE80;
 
-  --bg:          #0B1220;
-  --fg:          #E9F1F7;
-  --card:        #141E2E;
-  --muted:       #1D2939;
-  --muted-fg:    #A9BAC7;
-  --line:        #26344A;
-  --line-hi:     #3A4B63;
-  --sky-1:       #16304A;
-  --sky-2:       #101C2C;
+  --bg:          #150A26;
+  --fg:          #F3EAFE;
+  --card:        #20123A;
+  --muted:       #2B1A4A;
+  --muted-fg:    #BCA8DC;
+  --line:        #35204F;
+  --line-hi:     #4C2E6E;
+  --sky-1:       #341561;
+  --sky-2:       #20123A;
 
-  --sh-1: 0 1px 2px rgba(0,0,0,.4);
-  --sh-2: 0 4px 14px rgba(0,0,0,.45);
-  --sh-3: 0 12px 30px rgba(0,0,0,.55);
+  --sh-1: 0 1px 2px rgba(0,0,0,.5);
+  --sh-2: 0 4px 14px rgba(0,0,0,.55);
+  --sh-3: 0 12px 30px rgba(0,0,0,.65);
   color-scheme: dark;
 }
 
@@ -104,7 +106,7 @@ button { background: none; border: 0; cursor: pointer; touch-action: manipulatio
 button[disabled] { cursor: not-allowed; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; border-radius: var(--r1); }
+:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; border-radius: var(--r1); }
 svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .ic { width: var(--ic); height: var(--ic); display: block; flex: none; }
 .ic-sm { width: 20px; height: 20px; }
@@ -133,7 +135,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .flagchip { position: relative; width: 52px; height: 44px; flex: none; }
 .flagchip-face {
   display: grid; place-items: center; width: 52px; height: 44px;
-  border-radius: var(--r1); background: linear-gradient(150deg, #2F6FD0, #1B4FA8);
+  border-radius: var(--r1); background: linear-gradient(150deg, #9333EA, #5B21B6);
   color: #fff; font-size: .72rem; font-weight: 900; letter-spacing: .5px;
   box-shadow: var(--sh-1);
 }
@@ -141,7 +143,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   position: absolute; right: -4px; bottom: -5px;
   min-width: 24px; padding: 0 5px; height: 20px;
   display: grid; place-items: center; border-radius: var(--rf);
-  background: var(--blue-fill); color: #fff; font-size: .64rem; font-weight: 900;
+  background: var(--brand-fill); color: #fff; font-size: .64rem; font-weight: 900;
   border: 2px solid var(--sky-2);
 }
 .pills { margin-left: auto; display: flex; align-items: center; gap: 6px; }
@@ -173,10 +175,10 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .btn:active:not([disabled]) { transform: scale(.975); filter: brightness(.96); }
 .btn-block { display: flex; width: 100%; }
 .btn-sm { min-height: 44px; font-size: .9rem; padding: 0 var(--s4); }
-.btn-primary { background: var(--blue-fill); color: var(--on-blue); }
+.btn-primary { background: var(--brand-fill); color: var(--on-brand); }
 .btn-ok      { background: var(--ok); color: #fff; }
 .btn-danger  { background: var(--bad); color: #fff; }
-.btn-soft    { background: var(--card); color: var(--blue-ink); box-shadow: inset 0 0 0 2px var(--line); }
+.btn-soft    { background: var(--card); color: var(--brand-ink); box-shadow: inset 0 0 0 2px var(--line); }
 .btn-text    { background: none; color: var(--muted-fg); font-weight: 700; }
 .btn[disabled] { background: var(--muted); color: var(--muted-fg); }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
@@ -186,7 +188,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .icon-btn:active { opacity: .55; }
 .round-btn { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--rf); background: var(--muted); color: var(--muted-fg); flex: none; }
 .round-btn.sm { width: 36px; height: 36px; }
-.ghost-btn { display: grid; place-items: center; width: 52px; height: 52px; border-radius: var(--r2); background: var(--card); color: var(--blue-ink); box-shadow: inset 0 0 0 2px var(--blue); flex: none; }
+.ghost-btn { display: grid; place-items: center; width: 52px; height: 52px; border-radius: var(--r2); background: var(--card); color: var(--brand-ink); box-shadow: inset 0 0 0 2px var(--brand); flex: none; }
 .ghost-btn:active { opacity: .6; }
 
 .bar { height: 10px; border-radius: var(--rf); background: var(--muted); overflow: hidden; }
@@ -198,22 +200,17 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   background: var(--card); color: var(--muted-fg); box-shadow: inset 0 0 0 2px var(--line);
   font-size: .86rem; font-weight: 800; transition: all var(--t1) var(--e);
 }
-.chip.on { background: var(--card); color: var(--blue-ink); box-shadow: inset 0 0 0 2px var(--blue); }
+.chip.on { background: var(--card); color: var(--brand-ink); box-shadow: inset 0 0 0 2px var(--brand); }
 
 /* ---------- 5b. LINH VẬT ----------
-   Một file ảnh dùng cho hai kiểu: nguyên người (mascot-full) và cắt tròn
-   lấy phần đầu (mascot-head) cho các ô avatar nhỏ. */
+   Ảnh huy hiệu tròn của thương hiệu, để nguyên cho cả ô lớn lẫn ô nhỏ. */
 .mascot-img { display: block; width: 100%; height: 100%; }
 .mascot-full { object-fit: contain; }
-.mascot-head {
-  object-fit: cover;
-  object-position: 50% 12%;      /* khung vào phần đầu, bỏ phần thân */
-  border-radius: var(--rf);
-  transform: scale(1.55);        /* phóng để đầu lấp đầy vòng tròn */
-}
-.brand-mark, .hello-mascot, .avatar, .empty-mascot { overflow: hidden; border-radius: var(--rf); }
+/* Ảnh thương hiệu vốn đã là huy hiệu tròn nên để nguyên, không cắt. */
+.mascot-head { object-fit: contain; }
+.brand-mark, .hello-mascot, .avatar, .empty-mascot { border-radius: var(--rf); }
 .has-mascot-img .avatar { background: none; }
-.has-mascot-img .empty-mascot { box-shadow: 0 0 0 2px var(--line); }
+
 
 /* ---------- 6. MÀN HỌC ---------- */
 .hello { display: flex; align-items: center; gap: var(--s3); padding: var(--s4) 0 var(--s3); }
@@ -240,14 +237,14 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .node-btn .ic { width: 34px; height: 34px; }
 .node-btn:active:not([disabled]) { transform: scale(.94); }
 .node.done .node-btn { background: var(--ok-soft); color: var(--ok); }
-.node.current .node-btn { background: var(--blue-fill); color: #fff; box-shadow: 0 0 0 5px var(--blue-soft); }
+.node.current .node-btn { background: var(--brand-fill); color: #fff; box-shadow: 0 0 0 5px var(--brand-soft); }
 .node.check .node-btn { background: var(--amber-soft); color: var(--amber); }
 .node-ring { position: absolute; inset: -7px; }
 .node-ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
-.node-ring .bgc { stroke: var(--blue-soft); }
-.node-ring .fgc { stroke: var(--blue); transform: rotate(-90deg); transform-origin: 50% 50%; }
+.node-ring .bgc { stroke: var(--brand-soft); }
+.node-ring .fgc { stroke: var(--brand); transform: rotate(-90deg); transform-origin: 50% 50%; }
 .node-label { font-size: .82rem; font-weight: 800; color: var(--muted-fg); line-height: 1.3; }
-.node.current .node-label { color: var(--blue-ink); }
+.node.current .node-label { color: var(--brand-ink); }
 .node.done .node-label { color: var(--fg); }
 
 /* ---------- 7. TỪ VỰNG ---------- */
@@ -267,7 +264,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .promo .btn { margin-left: auto; flex: none; }
 .wlist li { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--s2); border-bottom: 1px solid var(--line); }
 .wlist li:last-child { border-bottom: 0; }
-.w-say { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--rf); background: var(--blue-soft); color: var(--blue-ink); flex: none; }
+.w-say { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--rf); background: var(--brand-soft); color: var(--brand-ink); flex: none; }
 .w-say .ic-sm { width: 18px; height: 18px; }
 .w-en { font-weight: 900; }
 .w-vi { font-size: .86rem; color: var(--muted-fg); font-weight: 600; }
@@ -290,7 +287,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .rcard[disabled] { opacity: .5; }
 .rc-ic { display: grid; place-items: center; width: 48px; height: 48px; border-radius: var(--r2); flex: none; }
 .rc-ic svg { width: 22px; height: 22px; }
-.ic-brand { background: var(--blue-soft); color: var(--blue-ink); }
+.ic-brand { background: var(--brand-soft); color: var(--brand-ink); }
 .ic-warn { background: var(--amber-soft); color: var(--amber); }
 .ic-bad  { background: var(--bad-soft); color: var(--bad-ink); }
 .rc-b { display: flex; flex-direction: column; min-width: 0; }
@@ -305,9 +302,9 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .lg-head h2 { font-size: 1.5rem; }
 .lg-timer { margin-top: var(--s3); font-size: .86rem; font-weight: 800; color: var(--flame); }
 .rank li { display: flex; align-items: center; gap: var(--s3); padding: var(--s3); border-radius: var(--r2); }
-.rank li.me { background: var(--blue-soft); }
+.rank li.me { background: var(--brand-soft); }
 .r-pos { width: 26px; text-align: center; font-weight: 900; color: var(--muted-fg); }
-.rank li.me .r-pos { color: var(--blue-ink); }
+.rank li.me .r-pos { color: var(--brand-ink); }
 .r-av { width: 38px; height: 38px; border-radius: var(--rf); flex: none; display: grid; place-items: center; color: #fff; font-weight: 900; font-size: .9rem; }
 .r-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
 .rank li.me .r-name { font-weight: 900; }
@@ -319,7 +316,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 /* ---------- 10. HỒ SƠ ---------- */
 .prof-head { display: flex; align-items: center; gap: var(--s4); padding: var(--s5) 0 var(--s6); }
-.avatar { width: 72px; height: 72px; border-radius: var(--rf); background: var(--blue-soft); display: grid; place-items: center; flex: none; }
+.avatar { width: 72px; height: 72px; border-radius: var(--rf); background: var(--brand-soft); display: grid; place-items: center; flex: none; }
 .avatar svg { width: 52px; height: 52px; }
 .prof-name { font-size: 1.3rem; }
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
@@ -327,7 +324,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .tile b { font-size: 1.5rem; font-weight: 900; }
 .tile small { font-size: .78rem; color: var(--muted-fg); font-weight: 700; }
 .tile .ic-sm { margin-bottom: var(--s2); }
-.t-flame { color: var(--flame); } .t-xp { color: var(--xp); } .t-blue { color: var(--blue-ink); }
+.t-flame { color: var(--flame); } .t-xp { color: var(--xp); } .t-blue { color: var(--brand-ink); }
 .t-ok { color: var(--ok); } .t-gold { color: var(--amber); }
 .set { margin-bottom: var(--s2); padding: var(--s1) var(--s4); }
 .switch { display: flex; align-items: center; gap: var(--s3); min-height: 52px; cursor: pointer; font-size: .95rem; font-weight: 700; }
@@ -336,7 +333,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform var(--t2) var(--e); }
 .switch input:checked + .track { background: var(--ok); }
 .switch input:checked + .track::after { transform: translateX(20px); }
-.switch input:focus-visible + .track { outline: 3px solid var(--blue); outline-offset: 2px; }
+.switch input:focus-visible + .track { outline: 3px solid var(--brand); outline-offset: 2px; }
 .install { margin: var(--s4) 0; }
 .install h3 { font-size: 1.02rem; margin-bottom: var(--s2); }
 
@@ -354,7 +351,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   transition: color var(--t1) var(--e);
 }
 .tab .ic { width: 22px; height: 22px; }
-.tab.is-active { color: var(--blue-ink); }
+.tab.is-active { color: var(--brand-ink); }
 .tab:active { opacity: .55; }
 .sidenav, .rail { display: none; }
 
@@ -382,10 +379,10 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .mascot-top { width: 116px; height: 116px; margin: 0 auto; }
 .mascot-top svg { width: 100%; height: 100%; }
 .mascot-top.hide { display: none; }
-.kicker { text-align: center; color: var(--blue-ink); font-size: .96rem; font-weight: 900; margin-bottom: var(--s3); }
+.kicker { text-align: center; color: var(--brand-ink); font-size: .96rem; font-weight: 900; margin-bottom: var(--s3); }
 .stage { width: 100%; max-width: var(--shell); margin: 0 auto; display: flex; flex-direction: column; gap: var(--s4); }
 .ask { text-align: center; font-size: 1.24rem; font-weight: 900; line-height: 1.35; }
-.ask em { font-style: normal; color: var(--blue-ink); }
+.ask em { font-style: normal; color: var(--brand-ink); }
 
 .p-foot {
   position: relative; z-index: 2;
@@ -394,7 +391,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 }
 .p-foot > * { width: 100%; max-width: var(--shell); margin-inline: auto; }
 .p-progress { height: 8px; border-radius: var(--rf); background: var(--muted); overflow: hidden; margin-bottom: var(--s3); }
-.p-progress > i { display: block; height: 100%; border-radius: var(--rf); background: var(--blue-fill); transition: width var(--t3) var(--e); }
+.p-progress > i { display: block; height: 100%; border-radius: var(--rf); background: var(--brand-fill); transition: width var(--t3) var(--e); }
 .p-actions { display: flex; align-items: center; gap: var(--s3); }
 .p-next { flex: 1; }
 .p-foot.ok  { background: var(--ok-soft); }
@@ -413,18 +410,18 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .sign { position: relative; padding-bottom: 86px; }
 .sign-card {
   position: relative; z-index: 2;
-  background: var(--card); border: 4px solid var(--navy); border-radius: var(--r4);
+  background: var(--card); border: 4px solid var(--ink-deep); border-radius: var(--r4);
   padding: var(--s5) var(--s4); text-align: center;
 }
-.sign-badge { width: 52px; height: 52px; margin: 0 auto var(--s3); border-radius: var(--rf); background: var(--blue-fill); color: #fff; display: grid; place-items: center; }
+.sign-badge { width: 52px; height: 52px; margin: 0 auto var(--s3); border-radius: var(--rf); background: var(--brand-fill); color: #fff; display: grid; place-items: center; }
 .sign-badge svg { width: 26px; height: 26px; }
-.sign-word { color: var(--blue-ink); font-size: 1.5rem; font-weight: 900; margin-bottom: var(--s3); }
+.sign-word { color: var(--brand-ink); font-size: 1.5rem; font-weight: 900; margin-bottom: var(--s3); }
 .sign-body { font-size: 1.02rem; font-weight: 700; line-height: 1.62; }
-.sign-body em { font-style: normal; color: var(--blue-ink); font-weight: 900; }
+.sign-body em { font-style: normal; color: var(--brand-ink); font-weight: 900; }
 .sign-legs { position: absolute; left: 0; right: 0; top: calc(100% - 86px); height: 86px; z-index: 1; }
-.sign-legs i { position: absolute; top: -6px; width: 12px; height: 74px; background: var(--navy); border-radius: 3px; }
+.sign-legs i { position: absolute; top: -6px; width: 12px; height: 74px; background: var(--ink-deep); border-radius: 3px; }
 .sign-legs i:first-child { left: 26%; } .sign-legs i:last-child { right: 26%; }
-.hill { display: block; width: calc(100% + var(--s5)); margin: -34px calc(var(--s3) * -1) 0; fill: var(--blue-soft); }
+.hill { display: block; width: calc(100% + var(--s5)); margin: -34px calc(var(--s3) * -1) 0; fill: var(--brand-soft); }
 
 /* ---------- 14. DẠNG BÀI ---------- */
 .opts { display: flex; flex-direction: column; gap: var(--s3); }
@@ -437,7 +434,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 }
 .opt:active:not([disabled]) { transform: scale(.99); }
 .opt-key { display: grid; place-items: center; flex: none; width: 26px; height: 26px; border-radius: 8px; box-shadow: inset 0 0 0 2px var(--line); font-size: .74rem; font-weight: 900; color: var(--muted-fg); }
-.opt.sel { box-shadow: inset 0 0 0 3px var(--blue); background: var(--blue-soft); }
+.opt.sel { box-shadow: inset 0 0 0 3px var(--brand); background: var(--brand-soft); }
 .opt.ok  { box-shadow: inset 0 0 0 3px var(--ok); background: var(--ok-soft); color: var(--ok-ink); }
 .opt.bad { box-shadow: inset 0 0 0 3px var(--bad); background: var(--bad-soft); color: var(--bad-ink); }
 .opt.done { opacity: .28; pointer-events: none; }
@@ -465,7 +462,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   border: 2px dashed var(--line-hi); border-radius: var(--r2);
   color: var(--fg); background: none;
 }
-.slot.filled { border-style: solid; border-color: var(--blue); background: var(--blue-soft); }
+.slot.filled { border-style: solid; border-color: var(--brand); background: var(--brand-soft); }
 .slot.ok  { border-style: solid; border-color: var(--ok); background: var(--ok-soft); color: var(--ok-ink); }
 .slot.bad { border-style: solid; border-color: var(--bad); background: var(--bad-soft); color: var(--bad-ink); }
 .bank-line { height: 1px; background: var(--line); margin: var(--s4) 0; }
@@ -487,18 +484,18 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   display: flex; flex-direction: column; align-items: center; gap: var(--s2);
   font-weight: 800; font-size: .95rem; transition: all var(--t1) var(--e);
 }
-.pic svg { width: 72px; height: 72px; color: var(--blue-ink); }
+.pic svg { width: 72px; height: 72px; color: var(--brand-ink); }
 .pic:active:not([disabled]) { transform: scale(.98); }
-.pic.sel { box-shadow: inset 0 0 0 3px var(--blue), var(--sh-1); background: var(--blue-soft); }
+.pic.sel { box-shadow: inset 0 0 0 3px var(--brand), var(--sh-1); background: var(--brand-soft); }
 .pic.ok  { box-shadow: inset 0 0 0 3px var(--ok), var(--sh-1); background: var(--ok-soft); }
 .pic.bad { box-shadow: inset 0 0 0 3px var(--bad), var(--sh-1); background: var(--bad-soft); }
 
 /* nghe */
 .say-row { display: flex; align-items: center; justify-content: center; gap: var(--s3); }
-.say-btn { display: grid; place-items: center; width: 84px; height: 84px; border-radius: var(--r3); background: var(--blue-fill); color: #fff; flex: none; }
+.say-btn { display: grid; place-items: center; width: 84px; height: 84px; border-radius: var(--r3); background: var(--brand-fill); color: #fff; flex: none; }
 .say-btn svg { width: 34px; height: 34px; }
 .say-btn:active { transform: scale(.95); }
-.say-btn.sm { width: 56px; height: 56px; background: var(--blue-soft); color: var(--blue-ink); }
+.say-btn.sm { width: 56px; height: 56px; background: var(--brand-soft); color: var(--brand-ink); }
 .say-btn.sm svg { width: 24px; height: 24px; }
 
 /* nối cặp */
@@ -507,21 +504,21 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 /* gõ đáp án */
 .type-in { width: 100%; min-height: 96px; padding: var(--s4); background: var(--card); border: 0; box-shadow: inset 0 0 0 2px var(--line); border-radius: var(--r2); font-size: 1.06rem; font-weight: 700; resize: none; }
-.type-in:focus { outline: none; box-shadow: inset 0 0 0 3px var(--blue); }
+.type-in:focus { outline: none; box-shadow: inset 0 0 0 3px var(--brand); }
 
 /* thẻ từ mới */
 .vcard { text-align: center; }
-.vcard-pic { width: 92px; height: 92px; margin: 0 auto var(--s3); color: var(--blue-ink); }
+.vcard-pic { width: 92px; height: 92px; margin: 0 auto var(--s3); color: var(--brand-ink); }
 .vcard-pic svg { width: 100%; height: 100%; }
 .vcard-en { font-size: 2rem; font-weight: 900; letter-spacing: -.03em; }
 .vcard-ipa { color: var(--muted-fg); font-size: .98rem; font-weight: 600; }
-.vcard-say { margin: var(--s3) auto 0; display: grid; place-items: center; width: 58px; height: 58px; border-radius: var(--rf); background: var(--blue-fill); color: #fff; }
+.vcard-say { margin: var(--s3) auto 0; display: grid; place-items: center; width: 58px; height: 58px; border-radius: var(--rf); background: var(--brand-fill); color: #fff; }
 .vcard-say svg { width: 26px; height: 26px; }
 .vcard-vi { margin-top: var(--s4); font-size: 1.3rem; font-weight: 900; }
-.note { display: flex; gap: var(--s3); padding: var(--s3) var(--s4); border-radius: var(--r2); background: var(--blue-soft); font-size: .92rem; font-weight: 700; line-height: 1.55; text-align: left; }
-.note .ic-sm { color: var(--blue-ink); flex: none; margin-top: 2px; }
+.note { display: flex; gap: var(--s3); padding: var(--s3) var(--s4); border-radius: var(--r2); background: var(--brand-soft); font-size: .92rem; font-weight: 700; line-height: 1.55; text-align: left; }
+.note .ic-sm { color: var(--brand-ink); flex: none; margin-top: 2px; }
 .example { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--s4); border-radius: var(--r2); box-shadow: inset 0 0 0 2px var(--line); text-align: left; }
-.example .say { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--rf); background: var(--blue-soft); color: var(--blue-ink); }
+.example .say { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--rf); background: var(--brand-soft); color: var(--brand-ink); }
 .example .say svg { width: 20px; height: 20px; }
 .example b { display: block; font-size: .98rem; font-weight: 800; }
 .example small { color: var(--muted-fg); font-size: .86rem; font-weight: 600; }
@@ -542,9 +539,9 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .dline { display: flex; gap: var(--s2); max-width: 90%; }
 .dline.b { align-self: flex-end; flex-direction: row-reverse; }
 .dwho { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--rf); flex: none; font-size: .76rem; font-weight: 900; background: var(--muted); color: var(--muted-fg); }
-.dline.b .dwho { background: var(--blue-soft); color: var(--blue-ink); }
+.dline.b .dwho { background: var(--brand-soft); color: var(--brand-ink); }
 .dbubble { padding: var(--s3) var(--s4); border-radius: var(--r3); background: var(--muted); text-align: left; }
-.dline.b .dbubble { background: var(--blue-fill); color: #fff; }
+.dline.b .dbubble { background: var(--brand-fill); color: #fff; }
 .dbubble b { display: block; font-weight: 800; font-size: .97rem; }
 .dbubble small { display: block; margin-top: 2px; font-size: .84rem; font-weight: 600; opacity: .78; }
 
@@ -563,7 +560,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .fc-hint { font-size: .74rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-fg); }
 .fc-front { font-size: 2.1rem; font-weight: 900; letter-spacing: -.03em; }
 .fc-ipa { color: var(--muted-fg); font-size: .95rem; font-weight: 600; }
-.fc-back { margin-top: var(--s4); font-size: 1.35rem; font-weight: 900; color: var(--blue-ink); }
+.fc-back { margin-top: var(--s4); font-size: 1.35rem; font-weight: 900; color: var(--brand-ink); }
 .fc-ex { font-size: .9rem; color: var(--muted-fg); font-weight: 600; }
 
 /* ---------- 16. KẾT THÚC ---------- */
@@ -576,7 +573,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .result h2 { font-size: 1.55rem; margin-bottom: var(--s5); }
 .res-lab { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: .7rem; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
 .res-lab .ic-sm { width: 15px; height: 15px; }
-.res-wide { background: var(--blue-soft); border-radius: var(--r3); padding: var(--s3); color: var(--blue-ink); margin-bottom: var(--s3); }
+.res-wide { background: var(--brand-soft); border-radius: var(--r3); padding: var(--s3); color: var(--brand-ink); margin-bottom: var(--s3); }
 .res-wide b { display: block; font-size: 1.5rem; font-weight: 900; margin-top: 2px; }
 .res-two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); margin-bottom: var(--s5); }
 .res-acc { background: var(--amber-soft); color: var(--amber); border-radius: var(--r3); padding: var(--s3); }
@@ -615,8 +612,8 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 @keyframes up { from { transform: translateY(100%); } }
 .sheet h2 { font-size: 1.25rem; margin-bottom: var(--s2); }
 .lv-opt { display: flex; align-items: center; gap: var(--s3); width: 100%; padding: var(--s3) var(--s4); margin-bottom: var(--s2); border-radius: var(--r2); box-shadow: inset 0 0 0 2px var(--line); text-align: left; }
-.lv-opt.on { box-shadow: inset 0 0 0 3px var(--blue); background: var(--blue-soft); }
-.lv-opt b { display: grid; place-items: center; width: 36px; height: 30px; border-radius: 8px; background: var(--blue-fill); color: #fff; font-size: .76rem; font-weight: 900; flex: none; }
+.lv-opt.on { box-shadow: inset 0 0 0 3px var(--brand); background: var(--brand-soft); }
+.lv-opt b { display: grid; place-items: center; width: 36px; height: 30px; border-radius: 8px; background: var(--brand-fill); color: #fff; font-size: .76rem; font-weight: 900; flex: none; }
 .lv-opt span { min-width: 0; display: flex; flex-direction: column; }
 .lv-opt strong { font-size: .96rem; font-weight: 900; }
 .lv-opt small { font-size: .82rem; color: var(--muted-fg); font-weight: 600; }
@@ -658,7 +655,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   .sidenav-list { display: flex; flex-direction: column; gap: var(--s2); }
   .navlink { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 100%; min-height: 60px; padding: var(--s2); border-radius: var(--r2); color: var(--muted-fg); font-size: .68rem; font-weight: 800; }
   .navlink .ic { width: 22px; height: 22px; }
-  .navlink.is-active { background: var(--blue-soft); color: var(--blue-ink); }
+  .navlink.is-active { background: var(--brand-soft); color: var(--brand-ink); }
   .banner { margin-inline: 0; border-radius: var(--r3); overflow: hidden; }
   .banner-wave { display: none; }
   .nodes { gap: var(--s6) var(--s3); }

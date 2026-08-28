@@ -130,8 +130,8 @@ function addXp(n) { S.xp += n; S.todayXp += n; S.weekXp += n; save(); }
 
 /* ---------- 2. Giao diện chung ---------- */
 function applyTheme() {
-  const sys = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  document.documentElement.dataset.theme = S.theme || sys;
+  // Nền đậm là mặc định của thương hiệu; người học tự bật nền sáng thì mới đổi.
+  document.documentElement.dataset.theme = S.theme || "dark";
   document.documentElement.dataset.motion = S.motion ? "reduce" : "";
 }
 function paintStats() {
