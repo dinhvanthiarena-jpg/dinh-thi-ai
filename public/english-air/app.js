@@ -1034,101 +1034,220 @@ function renderReview() {
 $("#btnDue").addEventListener("click", () => startLesson(null, { words: sample(dueWords(), 8), mode: "review", max: 10 }));
 $("#btnWeak").addEventListener("click", () => startLesson(null, { words: weakWords().slice(0, 8), mode: "review", max: 10 }));
 
-/* ---------- 18b. Gọi video luyện nói ----------
-   Không phải AI thật: MON.L đọc lời thoại A trong các đoạn hội thoại người học
-   đã học, người học nói lời thoại B. Máy nghe bằng Web Speech API và chấm theo
-   tỉ lệ từ trùng khớp; máy nào không hỗ trợ micro thì chọn đáp án bằng tay.   */
+/* ---------- 18b. Gọi video với MON.L ----------
+   Hai chế độ:
+   • "free"   — nói chuyện tự do. Máy chủ /api/english-air/chat gọi Claude,
+                MON.L trả lời theo trình độ và vốn từ của người học.
+   • "script" — luyện đúng lời thoại trong bài đã học, chạy được cả khi
+                không có mạng.
+   Cả hai đều dùng micro (Web Speech API); gõ chữ là đường lui khi không nói được. */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-const C = { lines: [], i: 0, right: 0, asked: 0, target: null, t0: 0, timer: null, rec: null, listening: false };
+const CHAT_URL = "../api/english-air/chat";
 
-/** Các đoạn hội thoại lấy từ những bài đã hoàn thành. */
+const C = { mode: "free", msgs: [], lines: [], i: 0, target: null,
+            right: 0, asked: 0, t0: 0, timer: null, rec: null, listening: false, busy: false };
+
 function callDialogues() {
   const out = [];
   COURSE.levels.forEach(lv => lv.units.forEach(u => u.lessons.forEach(l => {
     if (!S.done[l.id] || !l.teach) return;
     l.teach.filter(t => t.t === "dialogue").forEach(d => {
-      if (d.lines.some(x => x.who === "B")) out.push({ title: d.title, lines: d.lines, lesson: l.title });
+      if (d.lines.some(x => x.who === "B")) out.push({ title: d.title, lines: d.lines });
     });
   })));
   return out;
 }
-/** Tỉ lệ từ của câu mẫu xuất hiện trong câu người học nói. */
-function similar(heard, target) {
-  const a = norm(heard).split(" ").filter(Boolean);
+function similar(heardText, target) {
+  const a = norm(heardText).split(" ").filter(Boolean);
   const b = norm(target).split(" ").filter(Boolean);
   if (!b.length) return 0;
-  const pool = a.slice();
-  let hit = 0;
+  const pool = a.slice(); let hit = 0;
   b.forEach(w => { const k = pool.indexOf(w); if (k >= 0) { pool.splice(k, 1); hit++; } });
   return hit / b.length;
 }
 
 function renderCall() {
   const n = callDialogues().length;
-  $("#callLocked").hidden = n > 0;
   $("#btnStartCall").disabled = n === 0;
+  $("#callLocked").hidden = n > 0;
   $("#callMicNote").textContent = SR
     ? "Lần đầu bấm micro, trình duyệt sẽ hỏi quyền dùng micro — chọn Cho phép."
-    : "Trình duyệt này chưa hỗ trợ nghe bằng micro, bạn vẫn luyện được bằng cách chọn câu đúng.";
+    : "Trình duyệt này chưa nghe được bằng micro, bạn gõ chữ để nói chuyện nhé.";
 }
 
-function startCall() {
-  const pool = callDialogues();
-  if (!pool.length) return toast("Học xong một bài có hội thoại đã nhé.");
-  const d = pool[Math.floor(Math.random() * pool.length)];
-  C.lines = d.lines.slice();
-  C.i = 0; C.right = 0; C.asked = d.lines.filter(x => x.who === "B").length;
-  C.t0 = Date.now();
-  $("#callName").textContent = "MON.L";
+/* ----- hiển thị ----- */
+function setState(text, cls) {
+  const e = $("#callState");
+  e.textContent = text;
+  e.className = "call-state" + (cls ? " " + cls : "");
+}
+function pushLog(who, text) {
+  $("#callLog").append(el("li", who, text));
+  const st = $(".call-stage");
+  st.scrollTop = st.scrollHeight;
+}
+
+/** MON.L nói: hiện câu, chạy hoạt ảnh, nhảy một nhịp mỗi từ cho khớp miệng. */
+function monSays(en, vi, after) {
+  $("#callSaid").textContent = en;
+  $("#callSaidVi").textContent = S.showVi ? (vi || "") : "";
+  const m = $("#callMascot");
+  m.classList.add("talking");
+  setState("Đang nói…");
+
+  let ended = false;
+  const done = () => {
+    if (ended) return;
+    ended = true;
+    m.classList.remove("talking", "pulse");
+    if (after) after();
+  };
+  if (!S.sound || !window.speechSynthesis) {
+    setTimeout(done, 700 + en.length * 45);
+    return;
+  }
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(en);
+    u.lang = "en-US"; if (voice) u.voice = voice; u.rate = 0.94;
+    u.onboundary = () => { m.classList.remove("pulse"); void m.offsetWidth; m.classList.add("pulse"); };
+    u.onend = done;
+    u.onerror = done;
+    speechSynthesis.speak(u);
+    // Dự phòng: vài trình duyệt không bắn onend, đừng để kẹt vĩnh viễn.
+    setTimeout(done, 2200 + en.length * 90);
+  } catch { done(); }
+}
+
+/* ----- bắt đầu / kết thúc ----- */
+function startCall(mode) {
+  C.mode = mode;
+  C.msgs = []; C.lines = []; C.i = 0; C.target = null;
+  C.right = 0; C.asked = 0; C.busy = false;
+  $("#callLog").textContent = "";
+  $("#callHeard").hidden = true;
+  $("#callChoices").hidden = true;
+  $("#callTask").hidden = true;
+  $("#callType").hidden = !!SR;
+  $("#btnMic").disabled = !SR;
   $("#call").hidden = false;
   document.body.style.overflow = "hidden";
+
+  C.t0 = Date.now();
   clearInterval(C.timer);
   C.timer = setInterval(() => {
     const s = Math.floor((Date.now() - C.t0) / 1000);
     $("#callTimer").textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
   }, 1000);
   $("#callTimer").textContent = "00:00";
-  nextCallLine();
+
+  if (mode === "script") {
+    const pool = callDialogues();
+    const d = pool[Math.floor(Math.random() * pool.length)];
+    C.lines = d.lines.slice();
+    C.asked = d.lines.filter(x => x.who === "B").length;
+    nextScriptLine();
+  } else {
+    setState("Đang kết nối…");
+    askTutor(true);
+  }
+}
+function endCall(finished) {
+  stopListening();
+  clearInterval(C.timer);
+  $("#call").hidden = true;
+  document.body.style.overflow = "";
+  stopSpeak();
+  const mins = (Date.now() - C.t0) / 60000;
+  if (finished !== false && (C.right > 0 || C.msgs.length > 2)) {
+    const xp = C.mode === "script"
+      ? 5 + (C.asked && C.right === C.asked ? 5 : 0)
+      : clamp(Math.round(mins * 4), 3, 15);
+    markStudied(); addXp(xp); save();
+    toast(C.mode === "script"
+      ? `Xong cuộc gọi: ${C.right}/${C.asked} câu · +${xp} XP`
+      : `Nói chuyện ${Math.max(1, Math.round(mins))} phút · +${xp} XP`);
+  }
+  paintStats();
+  go("call");
 }
 
-function nextCallLine() {
+/* ----- chế độ nói chuyện tự do ----- */
+async function askTutor(first) {
+  if (C.busy) return;
+  C.busy = true;
+  setState("Đang nghĩ…", "think");
+  $("#btnMic").disabled = true;
+  try {
+    const res = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        history: first ? [{ role: "user", content: "Hi MON.L!" }] : C.msgs,
+        level: level().code,
+        words: seenWords().slice(-60).map(w => w.en),
+      }),
+    });
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      throw new Error(j.error || "Không gọi được máy chủ");
+    }
+    const data = await res.json();
+    C.msgs.push({ role: "assistant", content: data.reply });
+    if (!first) pushLog("mon", data.reply);
+    monSays(data.reply, data.vi, () => {
+      setState("Tới lượt bạn");
+      $("#btnMic").disabled = !SR;
+      C.busy = false;
+    });
+  } catch (err) {
+    C.busy = false;
+    setState("Mất kết nối");
+    $("#callSaid").textContent = "MON.L chưa nói chuyện tự do được lúc này.";
+    $("#callSaidVi").textContent = String(err.message || "").slice(0, 120);
+    $("#btnMic").disabled = true;
+    openSheet({
+      title: "Chưa gọi tự do được",
+      body: "Chế độ nói chuyện tự do cần mạng. Bạn chuyển sang luyện hội thoại trong bài nhé — cái này chạy được cả khi không có mạng.",
+      yes: "Luyện hội thoại trong bài", no: "Đóng",
+      onYes() { callDialogues().length ? startCall("script") : endCall(false); }
+    });
+  }
+}
+
+/* ----- chế độ luyện lời thoại trong bài ----- */
+function nextScriptLine() {
   stopListening();
   $("#callHeard").hidden = true;
   $("#callChoices").hidden = true;
   $("#callChoices").textContent = "";
-  $("#btnCallSkip").hidden = false;
 
   if (C.i >= C.lines.length) return endCall(true);
   const line = C.lines[C.i];
   const doneB = C.lines.slice(0, C.i).filter(x => x.who === "B").length;
-  $("#callStep").textContent = Math.min(doneB + 1, C.asked) + "/" + C.asked;
+  setState(`Câu ${Math.min(doneB + 1, C.asked)}/${C.asked}`);
 
   if (line.who !== "B") {
-    // MON.L nói, người học chỉ nghe
     C.target = null;
-    $("#callLab").textContent = "MON.L nói";
-    $("#callSaid").textContent = line.en;
-    $("#callSaidVi").textContent = S.showVi ? line.vi : "";
     $("#callTask").hidden = true;
     $("#btnMic").disabled = true;
-    $("#btnCallSkip").hidden = true;
-    const m = $("#callMascot");
-    m.classList.add("talking");
-    speak(line.en);
-    setTimeout(() => { m.classList.remove("talking"); C.i++; nextCallLine(); }, 900 + line.en.length * 55);
+    monSays(line.en, line.vi, () => { pushLog("mon", line.en); C.i++; nextScriptLine(); });
     return;
   }
-
   C.target = line;
   $("#callTask").hidden = false;
   $("#callTarget").textContent = line.en;
   $("#callTargetVi").textContent = S.showVi ? line.vi : "";
+  setState("Tới lượt bạn");
   $("#btnMic").disabled = !SR;
-  if (!SR) showCallChoices();
+  if (!SR) showChoices();
 }
-
-/** Ba lựa chọn bấm tay, dùng khi không có micro hoặc người học bấm bỏ qua. */
-function showCallChoices() {
+function showChoices() {
+  if (C.mode !== "script" || !C.target) {
+    $("#callType").hidden = false;
+    $("#callInput").focus();
+    return;
+  }
   const box = $("#callChoices");
   box.textContent = "";
   const others = sample(COURSE.levels.flatMap(lv => lv.units.flatMap(u => u.lessons.flatMap(l =>
@@ -1137,51 +1256,58 @@ function showCallChoices() {
   shuffle([C.target, ...others]).forEach(x => {
     const b = el("button", "opt"); b.type = "button";
     b.append(el("span", null, x.en));
-    b.addEventListener("click", () => {
-      if (x.en === C.target.en) { b.classList.add("ok"); judgeCall(x.en, 1); }
-      else { b.classList.add("bad"); judgeCall(x.en, 0); }
-    });
+    b.addEventListener("click", () => heardReply(x.en, x.en === C.target.en ? 1 : 0));
     box.append(b);
   });
   box.hidden = false;
-  $("#btnCallSkip").hidden = true;
 }
 
-function judgeCall(heard, score) {
-  const ok = score >= 0.7;
+/* ----- người học vừa nói / gõ xong ----- */
+function heardReply(text, score) {
+  if (C.mode === "free") {
+    pushLog("you", text);
+    C.msgs.push({ role: "user", content: text });
+    $("#callHeard").hidden = true;
+    askTutor(false);
+    return;
+  }
+  const ok = (score != null ? score : similar(text, C.target.en)) >= 0.7;
   const h = $("#callHeard");
   h.hidden = false;
   h.className = "call-heard " + (ok ? "ok" : "bad");
   $("#callHeardText").textContent = ok
-    ? `Nghe rõ rồi: “${heard}”`
-    : `Nghe được: “${heard}” — thử lại cho sát câu mẫu nhé.`;
+    ? `Chuẩn rồi: “${text}”`
+    : `Nghe được: “${text}” — thử lại cho sát câu mẫu nhé.`;
   if (ok) {
     C.right++;
-    speak(C.target.en);
-    setTimeout(() => { C.i++; nextCallLine(); }, 1100);
+    pushLog("you", C.target.en);
+    setTimeout(() => { C.i++; nextScriptLine(); }, 900);
   } else {
-    $("#btnMic").disabled = false;
-    if (!$("#callChoices").children.length) $("#btnCallSkip").hidden = false;
+    $("#btnMic").disabled = !SR;
   }
 }
 
+/* ----- micro ----- */
 function startListening() {
-  if (!SR || C.listening || !C.target) return;
+  if (!SR || C.listening || C.busy) return;
   const r = new SR();
   C.rec = r; C.listening = true;
   r.lang = "en-US"; r.interimResults = false; r.maxAlternatives = 3;
   $("#btnMic").classList.add("listening");
+  $("#callMascot").classList.add("listening");
+  setState("Đang nghe bạn…", "listen");
   r.onresult = e => {
     const alts = [...e.results[0]].map(a => a.transcript);
-    const best = alts.reduce((b, t) => Math.max(b, similar(t, C.target.en)), 0);
-    judgeCall(alts[0], best);
+    if (C.mode === "free") heardReply(alts[0]);
+    else heardReply(alts[0], alts.reduce((b, t) => Math.max(b, similar(t, C.target.en)), 0));
   };
   r.onerror = ev => {
     stopListening();
+    if (ev.error === "no-speech") { setState("Không nghe thấy gì, thử lại"); return; }
     toast(ev.error === "not-allowed"
-      ? "Chưa được cấp quyền micro. Bạn chọn câu đúng bằng tay nhé."
-      : "Không nghe được, thử lại hoặc chọn bằng tay.");
-    showCallChoices();
+      ? "Chưa được cấp quyền micro. Bạn gõ chữ nhé."
+      : "Không nghe được, bạn gõ chữ nhé.");
+    showChoices();
   };
   r.onend = () => stopListening();
   try { r.start(); } catch { stopListening(); }
@@ -1189,32 +1315,26 @@ function startListening() {
 function stopListening() {
   C.listening = false;
   $("#btnMic").classList.remove("listening");
+  $("#callMascot").classList.remove("listening");
+  if (!C.busy) setState("Tới lượt bạn");
   if (C.rec) { try { C.rec.stop(); } catch {} C.rec = null; }
 }
 
-function endCall(finished) {
-  stopListening();
-  clearInterval(C.timer);
-  $("#call").hidden = true;
-  document.body.style.overflow = "";
-  stopSpeak();
-  if (finished && C.asked) {
-    const xp = 5 + (C.right === C.asked ? 5 : 0);
-    markStudied(); addXp(xp); save();
-    toast(`Xong cuộc gọi: ${C.right}/${C.asked} câu · +${xp} XP`);
-  }
-  paintStats();
-  go("call");
+/* ----- nút ----- */
+function sendTyped() {
+  const v = $("#callInput").value.trim();
+  if (!v || C.busy) return;
+  $("#callInput").value = "";
+  heardReply(v);
 }
-
-$("#btnStartCall").addEventListener("click", startCall);
+$("#btnStartFree").addEventListener("click", () => startCall("free"));
+$("#btnStartCall").addEventListener("click", () => startCall("script"));
 $("#btnMic").addEventListener("click", () => C.listening ? stopListening() : startListening());
-$("#btnCallHear").addEventListener("click", () => {
-  const prev = C.lines.slice(0, C.i).reverse().find(x => x.who !== "B");
-  speak(prev ? prev.en : (C.target ? C.target.en : ""));
-});
-$("#btnCallSkip").addEventListener("click", showCallChoices);
-$("#btnHangup").addEventListener("click", () => endCall(false));
+$("#btnHangup").addEventListener("click", () => endCall(true));
+$("#btnCallHear").addEventListener("click", () => speak($("#callSaid").textContent));
+$("#btnCallSkip").addEventListener("click", showChoices);
+$("#btnCallSend").addEventListener("click", sendTyped);
+$("#callInput").addEventListener("keydown", e => { if (e.key === "Enter") sendTyped(); });
 
 /* ---------- 19. Giải đấu ---------- */
 const AVCOL = ["#0369A1", "#B45309", "#047857", "#BE185D", "#6D28D9", "#B91C1C", "#0F766E", "#4F46E5"];

@@ -311,7 +311,8 @@
             <span><b>Không nói được vẫn học</b><small>Chọn câu đúng bằng tay cũng được tính.</small></span></div>
         </div>
         <p class="fine" id="callMicNote"></p>
-        <button class="btn btn-primary btn-block mt" id="btnStartCall" type="button">Bắt đầu cuộc gọi</button>
+        <button class="btn btn-primary btn-block mt" id="btnStartFree" type="button">Gọi nói chuyện tự do</button>
+        <button class="btn btn-soft btn-block mt" id="btnStartCall" type="button">Luyện hội thoại trong bài</button>
         <p class="fine" id="callLocked" hidden>Học xong ít nhất một bài có hội thoại thì mới gọi được.</p>
       </section>
 
@@ -496,34 +497,43 @@
   </div>
 </div>
 
-<!-- ================= CUỘC GỌI LUYỆN NÓI ================= -->
+<!-- ================= CUỘC GỌI VỚI MON.L ================= -->
 <div class="call" id="call" hidden role="dialog" aria-modal="true" aria-labelledby="callName">
   <div class="call-top">
     <div class="call-who">
       <span class="call-av" data-mascot="head" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></span>
       <span><b id="callName">MON.L</b><small id="callTimer">00:00</small></span>
     </div>
-    <span class="call-step" id="callStep">1/4</span>
+    <span class="call-state" id="callState">Đang kết nối…</span>
   </div>
 
   <div class="call-stage">
     <div class="call-mascot" id="callMascot" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
     <div class="call-bubble" id="callBubble" aria-live="polite">
-      <span class="call-lab" id="callLab">MON.L nói</span>
-      <b id="callSaid">—</b>
+      <b id="callSaid">…</b>
       <small id="callSaidVi"></small>
     </div>
-  </div>
-
-  <div class="call-foot">
-    <div class="call-task" id="callTask">
-      <span class="call-lab">Bạn trả lời</span>
+    <div class="call-task" id="callTask" hidden>
+      <span class="call-lab">Bạn nói câu này</span>
       <b id="callTarget">—</b>
       <small id="callTargetVi"></small>
     </div>
+    <ul class="call-log" id="callLog"></ul>
+  </div>
+
+  <div class="call-foot">
     <div class="call-heard" id="callHeard" hidden><span id="callHeardText"></span></div>
+    <div class="call-choices" id="callChoices" hidden></div>
+
+    <div class="call-type" id="callType" hidden>
+      <input type="text" id="callInput" placeholder="Gõ câu tiếng Anh của bạn…" aria-label="Gõ câu trả lời" />
+      <button class="round-btn lg" id="btnCallSend" type="button" aria-label="Gửi">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
+      </button>
+    </div>
+
     <div class="call-actions">
-      <button class="round-btn lg" id="btnCallHear" type="button" aria-label="Nghe lại câu của MON.L">
+      <button class="round-btn lg" id="btnCallHear" type="button" aria-label="Nghe lại">
         <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sound"/></svg>
       </button>
       <button class="mic-btn" id="btnMic" type="button" aria-label="Bấm để nói">
@@ -533,8 +543,7 @@
         <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-hangup"/></svg>
       </button>
     </div>
-    <button class="btn btn-text btn-block" id="btnCallSkip" type="button">Không nói được, chọn bằng tay</button>
-    <div class="call-choices" id="callChoices" hidden></div>
+    <button class="btn btn-text btn-block" id="btnCallSkip" type="button">Không nói được, gõ chữ</button>
   </div>
 </div>
 

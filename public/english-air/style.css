@@ -715,40 +715,69 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .call-who small { color: var(--ok); font-size: .8rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 .call-step { margin-left: auto; font-size: .84rem; font-weight: 800; color: var(--muted-fg); flex: none; }
 
+.call-state { margin-left: auto; font-size: .82rem; font-weight: 800; color: var(--brand-ink); flex: none; }
+.call-state.listen { color: var(--bad); }
+.call-state.think  { color: var(--amber); }
+
 .call-stage {
   flex: 1; min-height: 0; overflow-y: auto;
   width: 100%; max-width: var(--shell); margin-inline: auto;
-  padding: 0 var(--gut); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--s4);
+  padding: 0 var(--gut); display: flex; flex-direction: column; align-items: center; gap: var(--s3);
 }
-.call-mascot { width: 172px; height: 172px; flex: none; transition: transform var(--t3) var(--e); }
+.call-mascot { width: 168px; height: 168px; flex: none; animation: breathe 3.6s ease-in-out infinite; }
 .call-mascot svg, .call-mascot img { width: 100%; height: 100%; }
-.call-mascot.talking { animation: talk 700ms var(--e) infinite alternate; }
-@keyframes talk { from { transform: scale(1); } to { transform: scale(1.045); } }
+@keyframes breathe { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-6px) scale(1.015); } }
+/* Đang nói: lắc nhẹ liên tục cho có sức sống… */
+.call-mascot.talking { animation: talkSway 900ms ease-in-out infinite; }
+@keyframes talkSway {
+  0%   { transform: translateY(0)    rotate(-1.6deg) scale(1); }
+  50%  { transform: translateY(-5px) rotate(1.6deg)  scale(1.03); }
+  100% { transform: translateY(0)    rotate(-1.6deg) scale(1); }
+}
+/* …và nảy một nhịp mỗi khi phát xong một từ, cho khớp miệng. */
+.call-mascot.pulse { animation: talkSway 900ms ease-in-out infinite, mouth 170ms var(--e); }
+@keyframes mouth { 0% { scale: 1 1; } 45% { scale: 1.04 .94; } 100% { scale: 1 1; } }
+.call-mascot.listening { animation: breathe 2s ease-in-out infinite; filter: saturate(1.15); }
+
 .call-bubble {
   width: 100%; padding: var(--s4); border-radius: var(--r3);
   background: var(--card); box-shadow: var(--sh-2); text-align: center;
 }
-.call-lab { display: block; font-size: .7rem; font-weight: 900; letter-spacing: .08em;
-  text-transform: uppercase; color: var(--brand-ink); margin-bottom: var(--s2); }
-.call-bubble b { display: block; font-size: 1.2rem; font-weight: 800; line-height: 1.4; }
+.call-bubble b { display: block; font-size: 1.18rem; font-weight: 800; line-height: 1.42; }
 .call-bubble small { display: block; margin-top: var(--s1); color: var(--muted-fg); font-size: .88rem; font-weight: 600; }
+.call-lab { display: block; font-size: .7rem; font-weight: 900; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--brand-ink); margin-bottom: var(--s1); }
+.call-task { width: 100%; padding: var(--s3) var(--s4); border-radius: var(--r3); background: var(--brand-soft); text-align: center; }
+.call-task[hidden] { display: none; }
+.call-task b { display: block; font-size: 1.06rem; font-weight: 900; line-height: 1.4; }
+.call-task small { display: block; margin-top: 2px; color: var(--muted-fg); font-size: .86rem; font-weight: 600; }
+
+/* Nhật ký hội thoại — những lượt đã qua */
+.call-log { width: 100%; display: flex; flex-direction: column; gap: var(--s2); padding-bottom: var(--s3); }
+.call-log li { max-width: 86%; padding: var(--s2) var(--s3); border-radius: var(--r2); font-size: .9rem; font-weight: 700; }
+.call-log li.mon { align-self: flex-start; background: var(--muted); }
+.call-log li.you { align-self: flex-end; background: var(--brand-fill); color: #fff; }
 
 .call-foot {
   width: 100%; max-width: var(--shell); margin-inline: auto;
   padding: var(--s3) var(--gut) calc(var(--s3) + env(safe-area-inset-bottom));
 }
-.call-task { padding: var(--s3) var(--s4); border-radius: var(--r3); background: var(--brand-soft); text-align: center; }
-.call-task b { display: block; font-size: 1.1rem; font-weight: 900; line-height: 1.4; }
-.call-task small { display: block; margin-top: 2px; color: var(--muted-fg); font-size: .86rem; font-weight: 600; }
-.call-heard {
-  margin-top: var(--s2); padding: var(--s2) var(--s4); border-radius: var(--r2);
-  font-size: .9rem; font-weight: 700; text-align: center;
-}
+.call-heard { margin-bottom: var(--s2); padding: var(--s2) var(--s4); border-radius: var(--r2);
+  font-size: .9rem; font-weight: 700; text-align: center; }
 .call-heard[hidden] { display: none; }
 .call-heard.ok  { background: var(--ok-soft); color: var(--ok-ink); }
 .call-heard.bad { background: var(--bad-soft); color: var(--bad-ink); }
 
-.call-actions { display: flex; align-items: center; justify-content: center; gap: var(--s5); margin: var(--s4) 0 var(--s2); }
+.call-type { display: flex; align-items: center; gap: var(--s2); margin-bottom: var(--s2); }
+.call-type[hidden] { display: none; }
+.call-type input {
+  flex: 1; min-width: 0; min-height: 52px; padding: 0 var(--s4);
+  border: 0; border-radius: var(--rf); background: var(--card);
+  box-shadow: inset 0 0 0 2px var(--line); font-size: 1rem; font-weight: 700; outline: none;
+}
+.call-type input:focus { box-shadow: inset 0 0 0 3px var(--brand); }
+
+.call-actions { display: flex; align-items: center; justify-content: center; gap: var(--s5); margin: var(--s3) 0 var(--s2); }
 .round-btn.lg { width: 56px; height: 56px; }
 .round-btn.danger { background: var(--bad); color: #fff; }
 .mic-btn {
@@ -763,7 +792,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 @keyframes pulseMic { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--bad) 45%, transparent); }
   70% { box-shadow: 0 0 0 20px transparent; } }
 .mic-btn[disabled] { background: var(--muted); color: var(--muted-fg); }
-.call-choices { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s2); }
+.call-choices { display: flex; flex-direction: column; gap: var(--s2); margin-bottom: var(--s2); }
 .call-choices[hidden] { display: none; }
 
 /* ---------- 16. KẾT THÚC ---------- */
