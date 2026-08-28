@@ -376,7 +376,47 @@
 
   <!-- SCREEN: GỌI MON.L -->
   <section id="screen-call" class="screen">
-    <div class="call-wrap">
+    <!-- Trước khi gọi: thẻ xem trước phòng + Mon.L, giống hệt english-air -->
+    <div class="call-preview-wrap" id="callPreviewWrap">
+      <button class="icon-btn top-fixed" id="btnCallPreviewBack" aria-label="Về trang chủ" style="right:auto; left:calc(18px + env(safe-area-inset-left, 0px));">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/></svg>
+      </button>
+      <div class="call-hero">
+        <button class="call-preview" id="btnCallPreview" type="button" aria-label="Bấm để nghe Mon.L chào">
+          <img class="cp-room" src="assets/monl/call-card.jpg" alt="" decoding="async" />
+          <span class="cp-mon" id="previewMon"><span class="mon-beat"><img class="mon-base" src="assets/monl/mon-closed.png" alt="" decoding="async" /><img class="mon-mouth" src="assets/monl/mon-mouth.png" alt="" decoding="async" /></span></span>
+          <span class="cp-tap"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3z"/></svg>Bấm để nghe</span>
+        </button>
+        <h1>Gọi video với Mon.L</h1>
+      </div>
+      <p class="call-preview-desc">Mon.L nghe cậu nói tiếng gì thì đáp lại đúng tiếng đó — Việt, Anh hay Trung. Không cần chọn trước, cứ gọi rồi nói chuyện thoải mái nhé!</p>
+      <div class="call-info-card">
+        <div class="ci-row">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
+          <span><b>Nói vào micro</b><small>Bấm nút micro rồi nói chuyện với Mon.L.</small></span>
+        </div>
+        <div class="ci-row">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          <span><b>Vừa nói chuyện vừa học toán</b><small>Mon.L thỉnh thoảng đố vài câu toán vui, không dồn dập.</small></span>
+        </div>
+        <div class="ci-row">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+          <span><b>Nói tiếng gì cũng được</b><small>Việt, Anh, hay Trung — Mon.L tự nhận ra rồi đáp lại đúng tiếng đó.</small></span>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-xl btn-block" id="btnStartCallReal">Gọi nói chuyện tự do</button>
+    </div>
+
+    <!-- Đang gọi: cảnh phòng thật của Mon.L -->
+    <div class="call-wrap" id="callLiveWrap" hidden>
+      <div class="call-scene" id="callScene" aria-hidden="true">
+        <div class="scene-fit" id="sceneFit">
+          <img class="scene-room" src="assets/monl/mon-room.jpg" alt="" decoding="async" />
+          <div class="call-mon" id="callMascot"><span class="mon-beat"><img class="mon-base" src="assets/monl/mon-closed.png" alt="" decoding="async" /><img class="mon-mouth" src="assets/monl/mon-mouth.png" alt="" decoding="async" /></span></div>
+        </div>
+        <div class="scene-veil"></div>
+      </div>
+
       <div class="call-top">
         <div class="call-who">
           <div class="call-avatar" id="callAvatar" aria-hidden="true"><img class="call-avatar-img" id="callAvatarImg" src="assets/thay-avatar.png" alt="" /></div>

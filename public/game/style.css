@@ -1666,21 +1666,170 @@ button:focus-visible,
   color: var(--bad);
 }
 
-/* ==== Gọi BOOM (free AI conversation call screen) ====
-   Kept as a deliberately dark, cinematic screen even though the rest of
-   the app is light — same pattern as English Air's own call screen, which
-   stays dark regardless of the app's light/dark theme setting. */
-#screen-call { background: #150925; }
+/* ==== Gọi Mon.L (free AI conversation call screen) ====
+   Same room photo + character art + two-step flow (preview card first,
+   then the actual cinematic call) as english-air's own "Gọi Mon.L" —
+   reusing its exact assets/monl images and scene-fit math since it's the
+   same shared mascot. Deliberately stays dark even though the rest of the
+   app is dark-violet too — the room photo itself supplies the mood. */
+
+/* ---- Trước khi gọi: thẻ xem trước phòng + Mon.L ---- */
+.call-preview-wrap {
+  width: 100%;
+  max-width: 460px;
+  padding: calc(70px + env(safe-area-inset-top, 0px)) 20px 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+}
+.call-hero { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.call-preview {
+  position: relative;
+  display: block;
+  width: 186px;
+  aspect-ratio: 3 / 4;
+  margin: 0 auto 4px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r3);
+  overflow: hidden;
+  background: var(--muted);
+  box-shadow: var(--sh-2);
+  cursor: pointer;
+  transition: transform 140ms ease-out;
+}
+.call-preview:active { transform: scale(0.98); }
+.cp-room { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cp-mon {
+  position: absolute; left: 23.481%; top: 8.564%; width: 56.906%; height: 84.185%;
+  transform-origin: 50% 100%; animation: monBreathe 4.2s ease-in-out infinite;
+}
+.cp-mon .mon-beat { display: block; position: relative; width: 100%; height: 100%; transform-origin: 50% 100%; }
+.cp-mon.talking { animation: monTalk 1.25s ease-in-out infinite; }
+.cp-mon.talking .mon-mouth { animation: monMouth 240ms ease-in-out infinite; }
+.cp-mon.pulse .mon-beat { animation: monBeat 200ms ease-out; }
+.cp-tap {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: var(--rf);
+  background: rgba(20,8,38,.72); color: #fff; font-size: 0.74rem; font-weight: 800; white-space: nowrap;
+}
+.call-hero h1 { font-family: var(--font-heading); font-weight: 900; font-size: 1.5rem; color: var(--fg); margin: 4px 0 0; }
+.call-preview-desc { color: var(--muted-fg); font-size: 0.95rem; font-weight: 600; line-height: 1.5; max-width: 380px; }
+
+.call-info-card {
+  width: 100%;
+  background: var(--card);
+  border-radius: var(--r3);
+  padding: 16px;
+  box-shadow: var(--sh-1);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+}
+.ci-row { display: flex; gap: 12px; align-items: flex-start; }
+.ci-row svg { color: var(--brand-ink); flex-shrink: 0; margin-top: 2px; }
+.ci-row b { display: block; font-size: 0.96rem; color: var(--fg); }
+.ci-row small { display: block; color: var(--muted-fg); font-size: 0.84rem; font-weight: 600; margin-top: 2px; }
+
+/* ---- Hoạt hình nhân vật Mon.L (dùng chung cho thẻ xem trước và cảnh gọi thật) ---- */
+@keyframes monIn {
+  0% { opacity: 0; transform: translateY(5%) scale(0.92); }
+  60% { opacity: 1; transform: translateY(-1.2%) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes monBreathe {
+  0%, 100% { transform: translateY(0) rotate(-0.8deg) scale(1, 1); }
+  25% { transform: translateY(-2.2%) rotate(0deg) scale(0.992, 1.016); }
+  50% { transform: translateY(-0.4%) rotate(0.9deg) scale(1.006, 0.996); }
+  75% { transform: translateY(-1.8%) rotate(0deg) scale(0.994, 1.012); }
+}
+@keyframes monTalk {
+  0% { transform: translate(-1.4%, 0) rotate(-2.4deg) scale(1, 1); }
+  25% { transform: translate(-0.4%, -3.2%) rotate(-0.4deg) scale(0.978, 1.03); }
+  50% { transform: translate(1.4%, -0.6%) rotate(2.4deg) scale(1.02, 0.976); }
+  75% { transform: translate(0.4%, -3%) rotate(0.4deg) scale(0.982, 1.026); }
+  100% { transform: translate(-1.4%, 0) rotate(-2.4deg) scale(1, 1); }
+}
+@keyframes monMouth {
+  0% { transform: scaleY(0.16); }
+  45% { transform: scaleY(1); }
+  100% { transform: scaleY(0.16); }
+}
+@keyframes monBeat {
+  0% { transform: scale(1, 1); }
+  40% { transform: scale(1.04, 0.955); }
+  100% { transform: scale(1, 1); }
+}
+@keyframes monLean {
+  0%, 100% { transform: translateY(0) rotate(-1deg) scale(1.02); }
+  50% { transform: translateY(-1.6%) rotate(1deg) scale(1.035); }
+}
+
+/* ---- Đang gọi: cảnh phòng thật của Mon.L, chữ nổi trên cảnh ---- */
+/* .screen already sets position:fixed — do NOT add position:relative
+   here, it would override that (higher specificity, #id beats .class)
+   and silently break inset:0's full-viewport sizing, collapsing the
+   whole screen down to its content's auto height. .screen being
+   position:fixed already gives ::before a positioned ancestor. */
+#screen-call { background: #150925; overflow: hidden; }
+/* Màn rộng hơn khung ảnh phòng thì hai bên lấp bằng chính căn phòng đó,
+   làm mờ và tối lại — không để lộ khoảng trống màu phẳng hai bên. */
+#screen-call::before {
+  content: '';
+  position: absolute;
+  inset: -6%;
+  background: url('assets/monl/call-card.jpg') center / cover no-repeat;
+  filter: blur(34px) saturate(0.7) brightness(0.42);
+  z-index: 0;
+}
 .call-wrap {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 480px;
   height: 100%;
+  /* .screen is itself flex; without this, .call-wrap's intrinsic content
+     height (the .call-scene layer is position:fixed and contributes
+     nothing to it) collapses far below its intended height:100% — same
+     flex-shrink footgun as .home-wrap earlier in this file. */
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   padding: calc(20px + env(safe-area-inset-top, 0px)) 20px calc(20px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
+  overflow: hidden;
 }
+.call-scene { position: fixed; inset: 0; z-index: 0; overflow: hidden; --scene-h: 100dvh; --scene-t: 0px; }
+.scene-fit {
+  position: absolute; left: 50%; top: var(--scene-t); transform: translateX(-50%);
+  height: var(--scene-h); width: calc(var(--scene-h) * 0.47551);
+}
+.scene-room { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.scene-veil {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(18,7,34,.70) 0, rgba(18,7,34,0) 17%,
+    rgba(18,7,34,0) 40%, rgba(18,7,34,.62) 82%, rgba(18,7,34,.90) 100%);
+}
+.call-mon {
+  position: absolute; left: 23.481%; top: 12.561%; width: 56.906%; height: 53.361%;
+  transform-origin: 50% 100%; will-change: transform;
+  animation: monIn 700ms ease-out both, monBreathe 4.6s ease-in-out 700ms infinite;
+}
+.call-mon .mon-beat { display: block; position: relative; width: 100%; height: 100%; transform-origin: 50% 100%; }
+.mon-base, .mon-mouth { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.mon-mouth { transform-origin: 50% 24.89%; transform: scaleY(0.16); will-change: transform; }
+.call-mon.talking { animation: monTalk 1.25s ease-in-out infinite; }
+.call-mon.talking .mon-mouth { animation: monMouth 240ms ease-in-out infinite; }
+.call-mon.pulse .mon-beat { animation: monBeat 200ms ease-out; }
+.call-mon.listening { animation: monLean 1.9s ease-in-out infinite; }
+
 .call-top {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1723,6 +1872,8 @@ button:focus-visible,
 .call-state.err { color: #FCA5A5; }
 
 .call-stage {
+  position: relative;
+  z-index: 2;
   flex: 1;
   min-height: 0;
   display: flex;
@@ -1807,7 +1958,7 @@ button:focus-visible,
 .cy-bars i:nth-child(5) { height: 8px; animation-delay: 0.4s; }
 @keyframes cy-bar { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
 
-.call-foot { display: flex; flex-direction: column; gap: 14px; align-items: center; flex-shrink: 0; }
+.call-foot { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 14px; align-items: center; flex-shrink: 0; }
 .call-heard {
   background: rgba(255,255,255,0.1);
   border-radius: var(--rf);

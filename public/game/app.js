@@ -2361,10 +2361,22 @@
 
   /* ================= GỌI MON.L (video call quái vật, nói chuyện tự do) ================= */
   if (IS_WEB) {
+    const callPreviewWrap = $('callPreviewWrap');
+    const callLiveWrap = $('callLiveWrap');
+    const btnCallPreview = $('btnCallPreview');
+    const previewMon = $('previewMon');
+    const btnStartCallReal = $('btnStartCallReal');
+    const btnCallPreviewBack = $('btnCallPreviewBack');
+    const callSceneEl = $('callScene');
+    const sceneFitEl = $('sceneFit');
+    const callMascotEl = $('callMascot');
     const callAvatar = $('callAvatar');
     const callAvatarImg = $('callAvatarImg');
     const callTimer = $('callTimer');
     const callStateEl = $('callState');
+    const callTopEl = document.querySelector('#screen-call .call-top');
+    const callStageEl = document.querySelector('#screen-call .call-stage');
+    const callFootEl = document.querySelector('#screen-call .call-foot');
     const callLog = $('callLog');
     const callBubble = $('callBubble');
     const callSaid = $('callSaid');
@@ -2381,6 +2393,36 @@
     const btnMic = $('btnMic');
     const btnHangup = $('btnHangup');
     const btnCallSkip = $('btnCallSkip');
+
+    // Toạ độ % của Mon.L trong assets/monl/mon-room.jpg — cùng con số với
+    // english-air, vì dùng chung đúng file ảnh đó. scene-fit tính lại
+    // height/top mỗi khi đổi cỡ màn hình để nhân vật luôn đứng đúng chỗ
+    // giữa thanh trên và bong bóng thoại, không bị méo/lệch.
+    const SCENE = { top: 0.12561, bot: 0.65922, ratio: 0.47551 };
+    function fitCallScene() {
+      const screenCall = $('screen-call');
+      if (!screenCall.classList.contains('active') || callLiveWrap.hidden) return;
+      const vh = screenCall.clientHeight;
+      const head = callTopEl.offsetHeight + 8;
+      const first = [...callStageEl.children].find((n) => !n.hidden && n.offsetHeight > 0);
+      const limitEl = first || callFootEl;
+      const limit = limitEl.getBoundingClientRect().top;
+      let h = Math.max(240, limit - 10 - head) / (SCENE.bot - SCENE.top);
+      let t = head - SCENE.top * h;
+      if (t + h < vh) { h = (vh - head) / (1 - SCENE.top); t = head - SCENE.top * h; }
+      if (h > 1500) {
+        h = 1500;
+        t = head + Math.max(0, (limit - head - (SCENE.bot - SCENE.top) * h) / 2) - SCENE.top * h;
+      }
+      callSceneEl.style.setProperty('--scene-h', `${h}px`);
+      callSceneEl.style.setProperty('--scene-t', `${t}px`);
+    }
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(fitCallScene);
+      [callStageEl, callBubble, callFootEl].forEach((el) => { if (el) ro.observe(el); });
+    }
+    window.addEventListener('resize', fitCallScene);
+    window.addEventListener('orientationchange', () => setTimeout(fitCallScene, 120));
 
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
     let callRecognition = null;
@@ -2511,12 +2553,20 @@
         if (callSpeakDone) return;
         callSpeakDone = true;
         callAvatar.classList.remove('talking');
+        callMascotEl.classList.remove('talking');
         callBusy = false;
         if (callEnded) return;
         callSetState('Đến lượt cậu rồi đó!');
         callAutoListenIfPossible();
       };
-      utter.onstart = () => callAvatar.classList.add('talking');
+      utter.onstart = () => { callAvatar.classList.add('talking'); callMascotEl.classList.add('talking'); };
+      // Mỗi từ nói ra thì "nhấn" thêm một nhịp cho khớp trọng âm — buộc
+      // reflow (offsetWidth) để retrigger được animation dù class không đổi.
+      utter.onboundary = () => {
+        callMascotEl.classList.remove('pulse');
+        void callMascotEl.offsetWidth;
+        callMascotEl.classList.add('pulse');
+      };
       utter.onend = finishSpeak;
       utter.onerror = finishSpeak;
       window.speechSynthesis.speak(utter);
@@ -2531,8 +2581,8 @@
       const voice = callVoiceCache[callLang];
       if (voice) utter.voice = voice;
       let replayDone = false;
-      const finishReplay = () => { if (!replayDone) { replayDone = true; callAvatar.classList.remove('talking'); } };
-      utter.onstart = () => callAvatar.classList.add('talking');
+      const finishReplay = () => { if (!replayDone) { replayDone = true; callAvatar.classList.remove('talking'); callMascotEl.classList.remove('talking'); } };
+      utter.onstart = () => { callAvatar.classList.add('talking'); callMascotEl.classList.add('talking'); };
       utter.onend = finishReplay;
       utter.onerror = finishReplay;
       window.speechSynthesis.speak(utter);
@@ -2579,6 +2629,7 @@
         callRecognition.onstart = () => {
           callYou.hidden = false;
           btnMic.classList.add('on');
+          callMascotEl.classList.add('listening');
           callSetState('Đang nghe cậu nói…');
         };
         callRecognition.onresult = (ev) => {
@@ -2592,6 +2643,7 @@
         callRecognition.onerror = (ev) => {
           callYou.hidden = true;
           btnMic.classList.remove('on');
+          callMascotEl.classList.remove('listening');
           // Máy không nghe được thứ tiếng đang chọn thì lùi về tiếng Việt rồi
           // nghe lại ngay, đừng bắt bạn học tự xoay xở với lỗi khó hiểu.
           if (ev.error === 'language-not-supported' && callLang !== 'vi') {
@@ -2605,6 +2657,7 @@
         callRecognition.onend = () => {
           callYou.hidden = true;
           btnMic.classList.remove('on');
+          callMascotEl.classList.remove('listening');
         };
         callRecognition.start();
       } catch (e) {}
@@ -2613,6 +2666,7 @@
       if (callRecognition) { try { callRecognition.stop(); } catch (e) {} }
       callYou.hidden = true;
       btnMic.classList.remove('on');
+      callMascotEl.classList.remove('listening');
     }
     function callSwitchToTyped() {
       callTypedOnly = true;
@@ -2647,12 +2701,16 @@
       callSaidLang.hidden = true;
       callSaidPy.hidden = true;
       callSaidVi.hidden = true;
+      callMascotEl.classList.remove('talking', 'listening', 'pulse');
       callSetState('Đang kết nối…');
       callStartTimer();
       callTypedOnly = !SpeechRecognitionCtor;
       btnMic.hidden = callTypedOnly;
       btnCallSkip.hidden = callTypedOnly;
       callType.hidden = !callTypedOnly;
+      // Cảnh phòng cần layout đã ổn định (chiều cao thật của .call-top/
+      // .call-foot) mới tính đúng được — đợi một khung hình rồi mới fit.
+      requestAnimationFrame(fitCallScene);
       callAsk(null); // history rỗng -> server tự chào mở màn (xem __START__ trong boomChatService)
     }
     function callEnd() {
@@ -2661,15 +2719,57 @@
       callStopListening();
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       callAvatar.classList.remove('talking');
+      callMascotEl.classList.remove('talking', 'listening', 'pulse');
       callStopTimer();
+    }
+    function callShowPreview() {
+      callEnd();
+      callPreviewWrap.hidden = false;
+      callLiveWrap.hidden = true;
+      previewMon.classList.remove('talking', 'pulse');
+    }
+
+    // Bấm thẻ xem trước phòng của Mon.L: chỉ là một câu chào demo phát cục
+    // bộ (không gọi server) để nghe thử giọng trước khi bấm gọi thật —
+    // giống hệt cách english-air làm ở đúng chỗ này.
+    const CALL_PREVIEW_LINES = [
+      'Chào cậu! Tớ là Mon.L, con quái vật siêu mê toán nè!',
+      'Bấm nút "Gọi nói chuyện tự do" là tớ nghe cậu liền!',
+      'Đừng lo, cứ nói chuyện thoải mái với tớ thôi, tớ hiền lắm!',
+    ];
+    let callPreviewTurn = 0;
+    if (btnCallPreview) {
+      btnCallPreview.addEventListener('click', () => {
+        sfx.click();
+        const line = CALL_PREVIEW_LINES[callPreviewTurn++ % CALL_PREVIEW_LINES.length];
+        previewMon.classList.add('talking');
+        let previewDone = false;
+        const finishPreview = () => { if (!previewDone) { previewDone = true; previewMon.classList.remove('talking'); } };
+        if (!('speechSynthesis' in window) || muted) { setTimeout(finishPreview, 600 + line.length * 45); return; }
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(line);
+        utter.lang = 'vi-VN';
+        if (callVoiceCache.vi) utter.voice = callVoiceCache.vi;
+        utter.onend = finishPreview;
+        utter.onerror = finishPreview;
+        window.speechSynthesis.speak(utter);
+        setTimeout(finishPreview, Math.min(12000, 1500 + line.length * 120));
+      });
     }
 
     $('btnOpenCall').addEventListener('click', () => {
       sfx.click();
       showScreen('call');
+      callShowPreview();
+    });
+    btnCallPreviewBack.addEventListener('click', () => { sfx.click(); showScreen('home'); });
+    btnStartCallReal.addEventListener('click', () => {
+      sfx.click();
+      callPreviewWrap.hidden = true;
+      callLiveWrap.hidden = false;
       callStart();
     });
-    btnHangup.addEventListener('click', () => { sfx.click(); callEnd(); showScreen('home'); });
+    btnHangup.addEventListener('click', () => { sfx.click(); callShowPreview(); showScreen('home'); });
     btnMic.addEventListener('click', () => {
       sfx.click();
       if (btnMic.classList.contains('on')) callStopListening();
