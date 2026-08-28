@@ -201,6 +201,50 @@
     return n.toFixed(1).replace('.', ',');
   }
 
+  /* ================= VISUAL QUESTION FORMATS =================
+   * Diversifies plain "3 + 4 = ?" drilling with two more visual formats
+   * (icon-counting operands, and a two-icon "picture algebra" puzzle),
+   * plus an optional drag-the-number-into-the-blank answer mode — layered
+   * on top of the existing grade/op difficulty tables, not replacing them.
+   */
+  const ICON_POOLS = {
+    animals: ['🐱', '🐶', '🐰', '🐻', '🐼', '🦊', '🐸', '🐵', '🐷', '🐔'],
+    fruits: ['🍎', '🍌', '🍇', '🍊', '🍓', '🍉', '🍑', '🍍'],
+  };
+  function pickIconPool() { return pick([ICON_POOLS.animals, ICON_POOLS.fruits]); }
+  function iconGroupHtml(icon, n) {
+    const items = Array.from({ length: n }, () => `<span class="ic">${icon}</span>`).join('');
+    return `<span class="icon-grp">${items}</span>`;
+  }
+  function dropSlotHtml() { return '<span class="drop-slot" id="dropSlot"></span>'; }
+
+  function generateIconAlgebraQuestion(grade) {
+    const pool = pickIconPool();
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    const iconA = shuffled[0], iconB = shuffled[1];
+    const maxUnit = grade === 2 ? 8 : 15;
+    let x = randInt(1, maxUnit);
+    let y = randInt(1, maxUnit);
+    while (y === x) y = randInt(1, maxUnit);
+    const t1 = 2 * x + y; // iconA + iconA + iconB
+    const t2 = x + y;     // iconA + iconB
+
+    const askA = Math.random() < 0.5;
+    const answer = askA ? x : y;
+    const askIcon = askA ? iconA : iconB;
+
+    const distractors = makeDistractors(answer, false);
+    const choices = [answer, ...distractors].sort(() => Math.random() - 0.5);
+    const dragMode = Math.random() < 0.35;
+
+    const line1 = `${iconA} + ${iconA} + ${iconB} = ${t1}`;
+    const line2 = `${iconA} + ${iconB} = ${t2}`;
+    const askLine = `${askIcon} = ${dragMode ? dropSlotHtml() : '?'}`;
+    const displayHtml = `<div class="icon-algebra"><div class="ia-line">${line1}</div><div class="ia-line">${line2}</div><div class="ia-ask">${askLine}</div></div>`;
+
+    return { kind: 'icon-algebra', answer, choices, displayHtml, dragMode, isWord: false };
+  }
+
   function genByGradeOp(grade, op) {
     let a, b, ans, decimal = false;
     switch (grade) {
@@ -275,14 +319,45 @@
   }
 
   function generateQuestion(grade, opChoice) {
+    // Grades 2-3 occasionally get a "picture algebra" puzzle (two icons
+    // standing for unknown numbers, solved from two small equations)
+    // instead of a plain arithmetic drill — same difficulty family, more
+    // visual variety, per thầy's request to diversify beyond bare digits.
+    if (grade >= 2 && grade <= 3 && (opChoice === 'add' || opChoice === 'sub' || opChoice === 'mix') && Math.random() < 0.22) {
+      return generateIconAlgebraQuestion(grade);
+    }
+
     const op = opChoice === 'mix' ? pick(['add', 'sub', 'mul', 'div']) : opChoice;
     const { a, b, ans, decimal } = genByGradeOp(grade, op);
     const distractors = makeDistractors(ans, decimal);
     const choices = [ans, ...distractors].sort(() => Math.random() - 0.5);
+    const dragMode = Math.random() < 0.35;
+
+    // Icon-counting presentation: operands shown as repeated icon groups
+    // instead of digits, only when both are small enough to count at a
+    // glance (mirrors how grade-1 textbooks teach counting → arithmetic).
+    const iconEligible = (op === 'add' || op === 'sub') && !decimal && a >= 1 && a <= 9 && b >= 1 && b <= 9;
+    const useIcons = iconEligible && Math.random() < 0.4;
+
+    let exprHtml, eqSym;
+    if (useIcons) {
+      const icon = pick(pickIconPool());
+      exprHtml = `<span class="icon-eq">${iconGroupHtml(icon, a)}<span class="op-sym">${OP_SYMBOL[op]}</span>${iconGroupHtml(icon, b)}<span class="op-sym">=</span></span>`;
+      eqSym = '';
+    } else {
+      exprHtml = `${fmtNum(a)} ${OP_SYMBOL[op]} ${fmtNum(b)}`;
+      eqSym = ' = ';
+    }
+    const displayHtml = `${exprHtml}${eqSym}${dragMode ? dropSlotHtml() : '?'}`;
+
     return {
+      kind: useIcons ? 'icon-count' : 'arithmetic',
       text: `${fmtNum(a)} ${OP_SYMBOL[op]} ${fmtNum(b)}`,
+      displayHtml,
       answer: ans,
       choices,
+      dragMode,
+      isWord: false,
     };
   }
 
@@ -1089,6 +1164,11 @@
     state.locked = true;
     questionCard.classList.remove('shake', 'correct-flash', ...QUESTION_ANIMS);
     answersGrid.innerHTML = '';
+    answersGrid.classList.remove('drag-mode');
+    // Dragged chips are reparented to <body> while dragging (position:fixed,
+    // to escape overflow clipping) — clearing answersGrid alone won't
+    // remove a chip that never made it back before the question changed.
+    document.querySelectorAll('body > .drag-chip').forEach((el) => el.remove());
     solutionBox.hidden = true;
     questionText.hidden = true;
     thinkingDots.hidden = false;
@@ -1112,11 +1192,25 @@
     }
     const q = state.op === 'word' ? generateWordProblem(state.grade) : generateQuestion(state.grade, state.op);
     state.current = q;
-    questionText.textContent = q.isWord ? q.text : `${q.text} = ?`;
     questionText.classList.toggle('word-text', !!q.isWord);
+    if (q.isWord) {
+      questionText.textContent = q.text;
+    } else {
+      questionText.innerHTML = q.displayHtml;
+    }
     questionCard.classList.add(pick(QUESTION_ANIMS));
 
+    renderAnswers(q);
+    activityStrip.hidden = false;
+  }
+
+  function renderAnswers(q) {
     answersGrid.innerHTML = '';
+    answersGrid.classList.toggle('drag-mode', !!q.dragMode);
+    if (q.dragMode) {
+      renderDragChips(q);
+      return;
+    }
     q.choices.forEach((choice, i) => {
       const btn = document.createElement('button');
       btn.className = 'answer-btn reveal';
@@ -1125,7 +1219,106 @@
       btn.addEventListener('click', () => selectAnswer(choice, btn));
       answersGrid.appendChild(btn);
     });
-    activityStrip.hidden = false;
+  }
+
+  /* ---- Drag-the-number-into-the-blank answer mode ---- */
+  function renderDragChips(q) {
+    const tray = document.createElement('div');
+    tray.className = 'chip-tray';
+    q.choices.forEach((choice, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'drag-chip reveal';
+      chip.style.animationDelay = (i * 70) + 'ms';
+      chip.textContent = fmtNum(choice);
+      chip.dataset.value = String(choice);
+      tray.appendChild(chip);
+      wireChipDrag(chip, choice);
+    });
+    answersGrid.appendChild(tray);
+    const hint = document.createElement('p');
+    hint.className = 'drag-hint';
+    hint.textContent = 'Kéo con số đúng thả vào ô trống nhé!';
+    answersGrid.appendChild(hint);
+  }
+
+  function wireChipDrag(chip, choice) {
+    // Listeners live on `window`, not the chip itself: once the chip is
+    // mid-drag it's visually under the finger/cursor with pointer-events
+    // disabled (so it doesn't block hit-testing the drop slot underneath),
+    // and relying on setPointerCapture to keep routing events TO an
+    // unhittable element proved unreliable — the drag would start but the
+    // chip never received another pointermove/pointerup and stayed stuck
+    // mid-air. Tracking the active pointerId on window sidesteps that.
+    let offsetX = 0, offsetY = 0, origParent = null, origNext = null, activeId = null;
+
+    function moveTo(x, y) {
+      chip.style.left = (x - offsetX) + 'px';
+      chip.style.top = (y - offsetY) + 'px';
+    }
+
+    function onMove(e) {
+      if (e.pointerId !== activeId) return;
+      moveTo(e.clientX, e.clientY);
+      const slot = document.getElementById('dropSlot');
+      if (slot) {
+        const sr = slot.getBoundingClientRect();
+        const over = e.clientX >= sr.left - 12 && e.clientX <= sr.right + 12 && e.clientY >= sr.top - 12 && e.clientY <= sr.bottom + 12;
+        slot.classList.toggle('drop-hover', over);
+      }
+    }
+
+    function onUp(e) {
+      if (e.pointerId !== activeId) return;
+      activeId = null;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      chip.classList.remove('dragging');
+      const slot = document.getElementById('dropSlot');
+      let dropped = false;
+      if (slot) {
+        const sr = slot.getBoundingClientRect();
+        dropped = e.clientX >= sr.left - 16 && e.clientX <= sr.right + 16 && e.clientY >= sr.top - 16 && e.clientY <= sr.bottom + 16;
+        slot.classList.remove('drop-hover');
+      }
+      if (dropped && !state.locked) {
+        const sr2 = slot.getBoundingClientRect();
+        chip.style.left = (sr2.left + sr2.width / 2 - chip.offsetWidth / 2) + 'px';
+        chip.style.top = (sr2.top + sr2.height / 2 - chip.offsetHeight / 2) + 'px';
+        chip.classList.add('dropped');
+        selectAnswer(choice, chip);
+      } else {
+        chip.style.position = '';
+        chip.style.left = '';
+        chip.style.top = '';
+        chip.style.width = '';
+        chip.style.height = '';
+        if (origParent) {
+          if (origNext) origParent.insertBefore(chip, origNext);
+          else origParent.appendChild(chip);
+        }
+      }
+    }
+
+    chip.addEventListener('pointerdown', (e) => {
+      if (state.locked || activeId !== null) return;
+      activeId = e.pointerId;
+      const rect = chip.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      origParent = chip.parentElement;
+      origNext = chip.nextSibling;
+      chip.style.width = rect.width + 'px';
+      chip.style.height = rect.height + 'px';
+      document.body.appendChild(chip);
+      chip.classList.add('dragging');
+      chip.style.position = 'fixed';
+      moveTo(e.clientX, e.clientY);
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+      e.preventDefault();
+    });
   }
 
   function selectAnswer(choice, btn) {
@@ -1134,8 +1327,12 @@
     activityStrip.hidden = true;
     state.answered++;
     const isCorrect = choice === state.current.answer;
-    const allBtns = [...answersGrid.children];
-    allBtns.forEach(b => { b.disabled = true; if (b !== btn) b.classList.add('dim'); });
+    const isDrag = !!state.current.dragMode;
+    const allBtns = isDrag ? [...document.querySelectorAll('.drag-chip')] : [...answersGrid.children];
+    allBtns.forEach((b) => {
+      if (isDrag) b.style.pointerEvents = 'none'; else b.disabled = true;
+      if (b !== btn) b.classList.add('dim');
+    });
 
     if (isCorrect) {
       btn.classList.remove('dim');
@@ -1158,8 +1355,9 @@
     } else {
       btn.classList.remove('dim');
       btn.classList.add('wrong');
-      allBtns.forEach(b => {
-        if (Number(b.textContent.replace(',', '.')) === state.current.answer) b.classList.add('correct');
+      allBtns.forEach((b) => {
+        const val = isDrag ? Number(b.dataset.value) : Number(b.textContent.replace(',', '.'));
+        if (val === state.current.answer) b.classList.add('correct');
       });
       questionCard.classList.add('shake');
       state.streak = 0;
