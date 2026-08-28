@@ -157,6 +157,8 @@ app.use((req, res, next) => {
   next();
 });
 
+const shopeePicks = require('./data/shopeePicks');
+
 app.use((req, res, next) => {
   res.locals.appName = process.env.APP_NAME || 'Dinh Thi Ai';
   res.locals.appUrl = (process.env.APP_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
@@ -164,6 +166,10 @@ app.use((req, res, next) => {
   res.locals.currentPath = req.path;
   res.locals.flashSuccess = req.flash('success');
   res.locals.flashError = req.flash('error');
+  // Shared across every page that includes partials/shopee-picks.ejs
+  // (blog posts, courses, tools, homepage) so each controller doesn't
+  // need to load and pass it individually.
+  res.locals.shopeePicks = shopeePicks;
   next();
 });
 
