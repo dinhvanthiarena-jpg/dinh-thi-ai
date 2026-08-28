@@ -615,7 +615,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .blanks { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--s2) 6px; font-size: 1.16rem; font-weight: 800; }
 .blanks .fixed { padding: 0 2px; }
 .slot {
-  min-width: 88px; min-height: 46px; padding: 0 var(--s3);
+  min-width: 104px; min-height: 52px; padding: 0 var(--s3);
   display: inline-flex; align-items: center; justify-content: center;
   border: 2px dashed var(--line-hi); border-radius: var(--r2);
   color: var(--fg); background: none;
@@ -635,6 +635,11 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .tile-w.used { opacity: 0; visibility: hidden; }
 /* Thẻ gốc mờ đi trong lúc bản kéo đang bay, để thấy rõ mình đang cầm cái nào. */
 .tile-w.dang-keo { opacity: .28; }
+/* BẮT BUỘC cho cảm ứng: không có dòng này thì ngón tay vừa nhích là trình duyệt
+   hiểu thành cuộn trang, nó nuốt luôn cử chỉ và thẻ không nhúc nhích.
+   preventDefault trong pointerdown KHÔNG chặn được việc đó trên iOS. */
+.tile-w, .slot { touch-action: none; -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none; }
 /* Bản đang bay theo tay: nằm trên mọi thứ, không ăn sự kiện chuột. */
 .tile-fly { position: fixed; z-index: 90; margin: 0; pointer-events: none;
   justify-content: center; box-shadow: inset 0 0 0 2px var(--brand), 0 10px 24px rgba(0,0,0,.32);
@@ -1173,9 +1178,10 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .pic-hero.ve svg { width: 44%; max-width: 150px; height: auto; color: var(--brand-ink);
   filter: drop-shadow(0 6px 14px rgba(0,0,0,.18)); }
 
-@media (max-width: 379px) { .pic-hero { aspect-ratio: 16 / 9; } }
-/* Màn cao thoải mái thì cho ảnh to hơn một chút, vẫn chừa chỗ cho ngân hàng từ. */
-@media (min-height: 780px) { .pic-hero { aspect-ratio: 3 / 2; } }
+/* Chặn theo chiều cao màn: ảnh 16/10 trên máy hẹp mà cao thì vẫn ngốn nửa màn,
+   đẩy ô trống và ngân hàng từ xuống tận đáy. */
+.pic-hero { max-height: 30vh; }
+@media (max-width: 379px) { .pic-hero { aspect-ratio: 16 / 9; max-height: 26vh; } }
 
 /* ---------- 15f. BÁO BÀI CHƯA MỞ KHOÁ ---------- */
 .sheet-mon { width: 96px; height: 96px; margin: 0 auto var(--s4);

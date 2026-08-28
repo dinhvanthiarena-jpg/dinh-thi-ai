@@ -573,6 +573,11 @@ function anhChoCau(d) {
   return hinh ? khungAnh({ pic: hinh }) : null;
 }
 
+/** Rung nhẹ để tay biết máy đã nhận cử chỉ. Máy nào không có thì bỏ qua. */
+function rung(kieu) {
+  try { navigator.vibrate?.(kieu); } catch { /* trình duyệt chặn thì thôi */ }
+}
+
 /** Một mục từ vựng: ảnh riêng nếu có, không thì dò cảnh theo chính chữ tiếng Anh. */
 function anhChoTu(w) {
   if (w && (w.img || w.pic)) return khungAnh(w);
@@ -828,6 +833,8 @@ const DRILL = {
       t.addEventListener("pointerdown", ev => {
         if (P.answered || t.classList.contains("used")) return;
         ev.preventDefault();
+        // Giữ mọi sự kiện về đúng thẻ này, kể cả khi ngón tay trượt ra ngoài nó.
+        try { t.setPointerCapture(ev.pointerId); } catch { /* trình duyệt cũ */ }
         const r = t.getBoundingClientRect();
         const bay = t.cloneNode(true);
         bay.className = "tile-w tile-fly";
@@ -848,16 +855,25 @@ const DRILL = {
           bay.style.transform = `rotate(${ng}deg) scale(${1.06 * gian}, ${1.06 / gian})`;
         };
         ve();
+        rung(8);
 
         const oGan = () => {
-          let tot = null, gan = Infinity;
-          slots.forEach(o => {
-            if (o.dataset.word) return;
+          const trong = slots.filter(o => !o.dataset.word);
+          if (!trong.length) return null;
+          // Chỉ còn đúng một ô thì thả đâu cũng nhận — bắt người ta ngắm trúng
+          // một ô duy nhất là hành họ chứ chẳng để làm gì.
+          if (trong.length === 1) return trong[0];
+
+          let dangDe = null, tot = null, gan = Infinity;
+          trong.forEach(o => {
             const b = o.getBoundingClientRect();
+            // Ngón tay đang đè hẳn lên ô thì lấy ngay, không so đo khoảng cách.
+            if (x >= b.left && x <= b.right && y >= b.top && y <= b.bottom) dangDe = o;
             const dd = Math.hypot(x - (b.left + b.width / 2), y - (b.top + b.height / 2));
             if (dd < gan) { gan = dd; tot = o; }
           });
-          return gan < 110 ? tot : null;
+          if (dangDe) return dangDe;
+          return gan < 150 ? tot : null;
         };
 
         const dichuyen = e2 => {
@@ -869,6 +885,7 @@ const DRILL = {
         };
 
         const buong = () => {
+          try { t.releasePointerCapture(ev.pointerId); } catch { /* đã nhả rồi */ }
           window.removeEventListener("pointermove", dichuyen);
           window.removeEventListener("pointerup", buong);
           window.removeEventListener("pointercancel", buong);
@@ -880,6 +897,7 @@ const DRILL = {
             ? o.getBoundingClientRect()
             : t.getBoundingClientRect();
           const nhan = !!(o && thuDat(t, w, o));
+          rung(nhan ? 14 : [10, 50, 10]);
 
           // Cho thẻ bay về đích rồi mới biến mất, không nhảy cóc.
           bay.classList.add("ve");
