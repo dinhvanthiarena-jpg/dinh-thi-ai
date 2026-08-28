@@ -87,6 +87,103 @@ const A2 = {
         ]
       },
 
+      {
+        id: "a2u1l3", title: "Động từ bất quy tắc",
+        goal: "Sáu động từ quá khứ không theo quy tắc, gặp trong mọi câu chuyện.",
+        teach: [
+          { t: "intro", title: "Nhóm bướng bỉnh nhất tiếng Anh", body: "Bài trước bạn thêm -ed vào là xong. Nhưng những động từ hay dùng nhất lại không chịu quy tắc — chúng đổi hẳn hình dạng. Không có cách nào khác ngoài học thuộc.", bullets: ["6 động từ bất quy tắc thông dụng", "Bảng V1 – V2", "Câu phủ định thì lại về V1"] },
+          { t: "vocab", en: "begin", vi: "bắt đầu", pos: "Động từ", ipa: "/bɪˈɡɪn/", note: "Quá khứ là began. Đồng nghĩa với start nhưng trang trọng hơn.", ex: { en: "The film began at eight.", vi: "Bộ phim bắt đầu lúc tám giờ." } },
+          { t: "vocab", en: "bring", vi: "mang đến", pos: "Động từ", ipa: "/brɪŋ/", note: "Quá khứ là brought. Bring là mang TỚI chỗ người nói, take là mang ĐI.", ex: { en: "She brought a gift for me.", vi: "Cô ấy mang quà đến cho tôi." } },
+          { t: "vocab", en: "find", vi: "tìm thấy", pos: "Động từ", ipa: "/faɪnd/", note: "Quá khứ là found. Find là tìm THẤY, còn look for mới là đang tìm.", ex: { en: "I found my phone under the bed.", vi: "Tôi tìm thấy điện thoại dưới gầm giường." } },
+          { t: "vocab", en: "lose", vi: "mất, thua", pos: "Động từ", ipa: "/luːz/", note: "Quá khứ là lost. Vừa nghĩa mất đồ vừa nghĩa thua cuộc.", ex: { en: "He lost his ticket yesterday.", vi: "Hôm qua anh ấy làm mất vé." } },
+          { t: "vocab", en: "break", vi: "làm vỡ, làm hỏng", pos: "Động từ", ipa: "/breɪk/", note: "Quá khứ là broke. Break cũng là giờ giải lao: a coffee break.", ex: { en: "I broke a glass this morning.", vi: "Sáng nay tôi làm vỡ một cái cốc." } },
+          { t: "vocab", en: "catch", vi: "bắt, bắt kịp", pos: "Động từ", ipa: "/kætʃ/", note: "Quá khứ là caught. Catch a bus là bắt kịp chuyến xe buýt.", ex: { en: "We caught the last train.", vi: "Chúng tôi bắt kịp chuyến tàu cuối." } },
+          { t: "grammar", title: "Bảng V1 – V2 phải thuộc", body: "Cột trái là dạng gốc, cột giữa là quá khứ. Đọc to vài lần rồi che cột giữa tự nhớ lại — cách học hiệu quả nhất.", rows: [
+            ["begin", "began", "The class began late."],
+            ["bring", "brought", "He brought his book."],
+            ["find / lose", "found / lost", "I lost my bag but found it."],
+            ["break / catch", "broke / caught", "She broke her phone."]
+          ], tip: "Cạm bẫy lớn nhất: câu phủ định và câu hỏi thì động từ QUAY VỀ dạng gốc — I didn't find it, chứ không phải didn't found." },
+          { t: "dialogue", title: "Buổi sáng xui xẻo", lines: [
+            { who: "A", en: "You look tired. What happened?", vi: "Trông bạn mệt thế. Có chuyện gì vậy?" },
+            { who: "B", en: "I lost my keys and broke a glass this morning.", vi: "Sáng nay tôi làm mất chìa khoá và làm vỡ một cái cốc." },
+            { who: "A", en: "Did you find the keys?", vi: "Bạn tìm thấy chìa khoá chưa?" },
+            { who: "B", en: "Yes, but I didn't catch my bus.", vi: "Rồi, nhưng tôi lỡ mất chuyến xe buýt." }
+          ] }
+        ],
+        sentences: [
+          { en: "I found my phone under the bed", vi: "Tôi tìm thấy điện thoại dưới gầm giường" },
+          { en: "She brought a gift for me", vi: "Cô ấy mang quà đến cho tôi" },
+          { en: "We caught the last train", vi: "Chúng tôi bắt kịp chuyến tàu cuối" },
+          { en: "He lost his ticket yesterday", vi: "Hôm qua anh ấy làm mất vé" },
+          { en: "The film began at eight", vi: "Bộ phim bắt đầu lúc tám giờ" }
+        ]
+      },
+      {
+        id: "a2u1l4", title: "Kỳ nghỉ vừa rồi",
+        goal: "Kể lại một chuyến đi: đi đâu, ở đâu, làm gì.",
+        teach: [
+          { t: "intro", title: "Câu chuyện ai cũng muốn nghe", body: "Kể về chuyến đi là chủ đề dễ nói nhất khi làm quen. Bạn đã có thì quá khứ, giờ chỉ cần thêm từ vựng cho đúng chỗ.", bullets: ["Từ vựng du lịch", "Trật tự kể chuyện", "Trạng từ chỉ thời gian trong quá khứ"] },
+          { t: "vocab", en: "beach", vi: "bãi biển", pos: "Danh từ", ipa: "/biːtʃ/", note: "Đi biển nói go to the beach. Biển nói chung là the sea.", ex: { en: "We went to the beach last summer.", vi: "Hè năm ngoái chúng tôi đi biển." } },
+          { t: "vocab", en: "mountain", vi: "núi", pos: "Danh từ", ipa: "/ˈmaʊntn/", note: "Đọc MAUN-tần, chữ ai trong -tain đọc rất nhẹ.", ex: { en: "Sapa has beautiful mountains.", vi: "Sa Pa có những ngọn núi đẹp." } },
+          { t: "vocab", en: "hotel", vi: "khách sạn", pos: "Danh từ", ipa: "/hoʊˈtel/", note: "Trọng âm ở âm sau: hô-TEL. Nhà nghỉ nhỏ gọi là guesthouse.", ex: { en: "We stayed at a small hotel.", vi: "Chúng tôi ở một khách sạn nhỏ." } },
+          { t: "vocab", en: "photo", vi: "bức ảnh", pos: "Danh từ", ipa: "/ˈfoʊtoʊ/", note: "Chụp ảnh là take a photo, KHÔNG phải shoot hay make.", ex: { en: "I took many photos there.", vi: "Tôi chụp rất nhiều ảnh ở đó." } },
+          { t: "vocab", en: "souvenir", vi: "quà lưu niệm", pos: "Danh từ", ipa: "/ˌsuːvəˈnɪr/", note: "Từ mượn tiếng Pháp, trọng âm ở âm cuối: su-vơ-NIA.", ex: { en: "She bought a souvenir for her mother.", vi: "Cô ấy mua quà lưu niệm cho mẹ." } },
+          { t: "vocab", en: "trip", vi: "chuyến đi", pos: "Danh từ", ipa: "/trɪp/", note: "Chuyến đi ngắn. Trip cũng là động từ nghĩa vấp ngã.", ex: { en: "It was a wonderful trip.", vi: "Đó là một chuyến đi tuyệt vời." } },
+          { t: "grammar", title: "Kể chuyện theo thứ tự", body: "Một câu chuyện hay không chỉ đúng ngữ pháp, mà còn đúng thứ tự. Bốn từ nối này giúp người nghe theo được mạch chuyện.", rows: [
+            ["First,", "Đầu tiên", "First, we went to the beach."],
+            ["Then,", "Sau đó", "Then, we visited the mountains."],
+            ["After that,", "Tiếp theo đó", "After that, we ate seafood."],
+            ["Finally,", "Cuối cùng", "Finally, we came home."]
+          ], tip: "Bắt đầu câu chuyện bằng Last summer / Two years ago, rồi mới dùng bốn từ nối này." },
+          { t: "dialogue", title: "Kể về chuyến đi Đà Nẵng", lines: [
+            { who: "A", en: "Where did you go last summer?", vi: "Hè năm ngoái bạn đi đâu?" },
+            { who: "B", en: "I went to Da Nang. We stayed at a small hotel near the beach.", vi: "Tôi đi Đà Nẵng. Chúng tôi ở một khách sạn nhỏ gần biển." },
+            { who: "A", en: "Did you take many photos?", vi: "Bạn có chụp nhiều ảnh không?" },
+            { who: "B", en: "Yes! And I bought souvenirs for my family. It was a wonderful trip.", vi: "Có! Tôi còn mua quà lưu niệm cho gia đình. Đó là một chuyến đi tuyệt vời." }
+          ] }
+        ],
+        sentences: [
+          { en: "We went to the beach last summer", vi: "Hè năm ngoái chúng tôi đi biển" },
+          { en: "I took many photos there", vi: "Tôi chụp rất nhiều ảnh ở đó" },
+          { en: "We stayed at a small hotel", vi: "Chúng tôi ở một khách sạn nhỏ" },
+          { en: "It was a wonderful trip", vi: "Đó là một chuyến đi tuyệt vời" },
+          { en: "She bought a souvenir for her mother", vi: "Cô ấy mua quà lưu niệm cho mẹ" }
+        ]
+      },
+      {
+        id: "a2u1l5", title: "Chuyện hồi bé",
+        goal: "Kể về tuổi thơ bằng used to và các từ chỉ thời thơ ấu.",
+        teach: [
+          { t: "intro", title: "Ngày xưa tôi từng…", body: "Có một cấu trúc dành riêng cho những việc bạn LÀM ĐỀU ĐẶN hồi xưa nhưng giờ không làm nữa. Người Việt ít biết cấu trúc này nên câu chuyện tuổi thơ hay bị kể sai.", bullets: ["used to + động từ", "Từ vựng tuổi thơ", "Phân biệt used to và quá khứ đơn"] },
+          { t: "vocab", en: "childhood", vi: "tuổi thơ", pos: "Danh từ", ipa: "/ˈtʃaɪldhʊd/", note: "Ghép child (đứa trẻ) + hood (thời kỳ). Tương tự có neighbourhood.", ex: { en: "I had a happy childhood.", vi: "Tôi có một tuổi thơ hạnh phúc." } },
+          { t: "vocab", en: "grandmother", vi: "bà", pos: "Danh từ", ipa: "/ˈɡrænmʌðər/", note: "Gọi thân mật là grandma. Tiếng Anh không phân biệt bà nội bà ngoại.", ex: { en: "My grandmother told me stories.", vi: "Bà tôi kể chuyện cho tôi nghe." } },
+          { t: "vocab", en: "grandfather", vi: "ông", pos: "Danh từ", ipa: "/ˈɡrænfɑːðər/", note: "Gọi thân mật là grandpa. Cả ông và bà gọi chung là grandparents.", ex: { en: "My grandfather grew rice.", vi: "Ông tôi trồng lúa." } },
+          { t: "vocab", en: "toy", vi: "đồ chơi", pos: "Danh từ", ipa: "/tɔɪ/", note: "Đếm được: a toy, many toys.", ex: { en: "I used to play with old toys.", vi: "Hồi bé tôi hay chơi với đồ chơi cũ." } },
+          { t: "vocab", en: "story", vi: "câu chuyện", pos: "Danh từ", ipa: "/ˈstɔːri/", note: "Số nhiều là stories. Kể chuyện là tell a story, không phải say.", ex: { en: "She tells wonderful stories.", vi: "Bà ấy kể những câu chuyện rất hay." } },
+          { t: "vocab", en: "afraid", vi: "sợ", pos: "Tính từ", ipa: "/əˈfreɪd/", note: "Luôn đi với of: afraid of dogs. I'm afraid… còn nghĩa là e rằng.", ex: { en: "I was afraid of the dark.", vi: "Hồi bé tôi sợ bóng tối." } },
+          { t: "grammar", title: "Used to — chuyện xưa giờ không còn", body: "Dùng khi việc đó lặp đi lặp lại trong quá khứ và BÂY GIỜ ĐÃ THÔI. Quá khứ đơn chỉ kể một lần xảy ra.", rows: [
+            ["used to + V", "hồi xưa hay…", "I used to live in a village."],
+            ["didn't use to + V", "hồi xưa không…", "She didn't use to like coffee."],
+            ["Did you use to…?", "hồi xưa bạn có…?", "Did you use to play football?"],
+            ["so sánh", "quá khứ đơn = một lần", "I went there in 2019. (một lần)"]
+          ], tip: "Ở dạng phủ định và câu hỏi thì bỏ chữ d: didn't USE to, chứ không phải didn't used to." },
+          { t: "culture", title: "Tuổi thơ là chủ đề an toàn", body: "Muốn nói chuyện lâu với người nước ngoài mà không sợ chạm vào chuyện riêng tư, hãy hỏi về tuổi thơ của họ. Ai cũng có chuyện để kể, và ai cũng thích kể." },
+          { t: "dialogue", title: "Nhớ ngày xưa", lines: [
+            { who: "A", en: "Where did you live when you were a child?", vi: "Hồi bé bạn sống ở đâu?" },
+            { who: "B", en: "I used to live in a small village with my grandmother.", vi: "Hồi đó tôi sống ở một ngôi làng nhỏ với bà." },
+            { who: "A", en: "Did you use to play outside?", vi: "Bạn có hay chơi ngoài trời không?" },
+            { who: "B", en: "Every day! But I was afraid of the dark.", vi: "Ngày nào cũng chơi! Nhưng tôi sợ bóng tối." }
+          ] }
+        ],
+        sentences: [
+          { en: "I used to live in a village", vi: "Hồi xưa tôi sống ở một ngôi làng" },
+          { en: "My grandmother told me stories", vi: "Bà tôi kể chuyện cho tôi nghe" },
+          { en: "I was afraid of the dark", vi: "Tôi sợ bóng tối" },
+          { en: "Did you use to play football", vi: "Hồi bé bạn có hay chơi bóng đá không" },
+          { en: "I had a happy childhood", vi: "Tôi có một tuổi thơ hạnh phúc" }
+        ]
+      },
       { id: "a2u1c", title: "Ôn tập chương 1", checkpoint: true,
         goal: "Kiểm tra lại toàn bộ từ và mẫu câu của chương." }
     ]
@@ -162,6 +259,103 @@ const A2 = {
         ]
       },
 
+      {
+        id: "a2u2l3", title: "Sẽ và có lẽ",
+        goal: "Phân biệt will, might và be going to khi nói về tương lai.",
+        teach: [
+          { t: "intro", title: "Ba cách nói về ngày mai", body: "Bạn đã có be going to cho kế hoạch. Nhưng còn chuyện bạn quyết ngay lúc nói, và chuyện bạn chưa chắc? Mỗi loại có một từ riêng.", bullets: ["will cho quyết định tức thì", "might cho chuyện chưa chắc", "Khi nào dùng be going to"] },
+          { t: "vocab", en: "future", vi: "tương lai", pos: "Danh từ", ipa: "/ˈfjuːtʃər/", note: "In the future là trong tương lai. Đọc FYUU-chờ.", ex: { en: "What do you want to do in the future?", vi: "Trong tương lai bạn muốn làm gì?" } },
+          { t: "vocab", en: "dream", vi: "ước mơ; giấc mơ", pos: "Danh từ", ipa: "/driːm/", note: "Vừa là ước mơ vừa là giấc mơ khi ngủ. Dream of + V-ing.", ex: { en: "My dream is to be a doctor.", vi: "Ước mơ của tôi là làm bác sĩ." } },
+          { t: "vocab", en: "hope", vi: "hy vọng", pos: "Động từ", ipa: "/hoʊp/", note: "I hope so là câu đáp rất hay dùng: Mong là vậy.", ex: { en: "I hope it will be sunny.", vi: "Tôi mong trời sẽ nắng." } },
+          { t: "vocab", en: "sure", vi: "chắc chắn", pos: "Tính từ", ipa: "/ʃʊr/", note: "I'm not sure là câu nói giảm rất lịch sự khi bạn chưa biết.", ex: { en: "I am not sure about tomorrow.", vi: "Tôi chưa chắc về ngày mai." } },
+          { t: "vocab", en: "probably", vi: "có lẽ, chắc là", pos: "Trạng từ", ipa: "/ˈprɑːbəbli/", note: "Chắc chắn hơn maybe. Đứng trước động từ thường, sau will.", ex: { en: "I will probably stay home.", vi: "Chắc tôi sẽ ở nhà." } },
+          { t: "vocab", en: "university", vi: "trường đại học", pos: "Danh từ", ipa: "/ˌjuːnɪˈvɜːrsəti/", note: "Dùng a chứ không phải an, vì đọc là YU chứ không phải U: a university.", ex: { en: "She wants to go to university.", vi: "Cô ấy muốn vào đại học." } },
+          { t: "grammar", title: "Will, might hay be going to?", body: "Ba cách, ba tình huống khác hẳn nhau. Chọn sai thì câu vẫn hiểu được nhưng nghe không tự nhiên.", rows: [
+            ["be going to", "kế hoạch đã định", "I'm going to visit Hue next week."],
+            ["will", "quyết định ngay lúc nói", "It's cold — I'll close the window."],
+            ["might", "có thể, chưa chắc", "I might go to the party."],
+            ["will probably", "khá chắc nhưng chưa hẳn", "She will probably come."]
+          ], tip: "Mẹo: đã có kế hoạch từ trước thì GOING TO. Nghĩ ra ngay lúc nói thì WILL. Chưa chắc thì MIGHT." },
+          { t: "dialogue", title: "Nói chuyện tương lai", lines: [
+            { who: "A", en: "What do you want to do in the future?", vi: "Trong tương lai bạn muốn làm gì?" },
+            { who: "B", en: "My dream is to be an engineer. I'm going to study hard this year.", vi: "Ước mơ của tôi là làm kỹ sư. Năm nay tôi sẽ học chăm." },
+            { who: "A", en: "Will you go to university in Hanoi?", vi: "Bạn sẽ học đại học ở Hà Nội chứ?" },
+            { who: "B", en: "I'm not sure. I might go to Da Nang.", vi: "Tôi chưa chắc. Có thể tôi vào Đà Nẵng." }
+          ] }
+        ],
+        sentences: [
+          { en: "My dream is to be a doctor", vi: "Ước mơ của tôi là làm bác sĩ" },
+          { en: "I might go to the party", vi: "Có thể tôi sẽ đi bữa tiệc" },
+          { en: "I am not sure about tomorrow", vi: "Tôi chưa chắc về ngày mai" },
+          { en: "She wants to go to university", vi: "Cô ấy muốn vào đại học" },
+          { en: "I will probably stay home", vi: "Chắc tôi sẽ ở nhà" }
+        ]
+      },
+      {
+        id: "a2u2l4", title: "Mời và từ chối",
+        goal: "Mời ai đó đi chơi, nhận lời hoặc từ chối mà không mất lòng.",
+        teach: [
+          { t: "intro", title: "Từ chối cũng phải học", body: "Nói Yes thì dễ. Nói No mà người ta vẫn vui mới khó. Bài này cho bạn công thức từ chối lịch sự mà người bản xứ dùng hằng ngày.", bullets: ["Mẫu câu mời", "Nhận lời", "Từ chối ba bước"] },
+          { t: "vocab", en: "party", vi: "bữa tiệc", pos: "Danh từ", ipa: "/ˈpɑːrti/", note: "Đi dự tiệc là go to a party. Tổ chức tiệc là have a party.", ex: { en: "We are having a party on Saturday.", vi: "Thứ Bảy chúng tôi tổ chức tiệc." } },
+          { t: "vocab", en: "guest", vi: "khách mời", pos: "Danh từ", ipa: "/ɡest/", note: "Khách đến chơi nhà. Khách hàng mua bán thì gọi là customer.", ex: { en: "There were twenty guests.", vi: "Có hai mươi khách mời." } },
+          { t: "vocab", en: "gift", vi: "món quà", pos: "Danh từ", ipa: "/ɡɪft/", note: "Trang trọng hơn present một chút. Cả hai đều dùng được.", ex: { en: "I brought a small gift.", vi: "Tôi mang theo một món quà nhỏ." } },
+          { t: "vocab", en: "join", vi: "tham gia", pos: "Động từ", ipa: "/dʒɔɪn/", note: "Join us là câu rủ rất tự nhiên. Không cần giới từ phía sau.", ex: { en: "Would you like to join us?", vi: "Bạn có muốn tham gia cùng không?" } },
+          { t: "vocab", en: "accept", vi: "nhận lời, chấp nhận", pos: "Động từ", ipa: "/əkˈsept/", note: "Trang trọng. Nói chuyện thường ngày người ta hay dùng say yes.", ex: { en: "She accepted the invitation.", vi: "Cô ấy đã nhận lời mời." } },
+          { t: "vocab", en: "refuse", vi: "từ chối", pos: "Động từ", ipa: "/rɪˈfjuːz/", note: "Khá mạnh. Trong câu nói hằng ngày nên dùng I'm afraid I can't cho nhẹ.", ex: { en: "He refused politely.", vi: "Anh ấy từ chối một cách lịch sự." } },
+          { t: "grammar", title: "Từ chối ba bước", body: "Người bản xứ hiếm khi nói No trống không. Họ dùng đúng ba bước, và bạn nên bắt chước y hệt.", rows: [
+            ["Bước 1", "Cảm ơn lời mời", "Thanks for asking!"],
+            ["Bước 2", "Nói không, có đệm", "I'm afraid I can't."],
+            ["Bước 3", "Nêu lý do ngắn", "I have to study that day."],
+            ["Thêm", "Gợi ý dịp khác", "Maybe next time?"]
+          ], tip: "Câu mời lịch sự nhất là Would you like to…? Trả lời nhận lời: I'd love to!" },
+          { t: "culture", title: "Trả lời dứt khoát mới là lịch sự", body: "Người Việt hay nói để xem đã cho đỡ mất lòng. Người Anh–Mỹ coi câu trả lời lấp lửng là thiếu tôn trọng vì họ phải xếp chỗ, mua đồ ăn. Nhận thì nói rõ nhận, không thì từ chối sớm." },
+          { t: "dialogue", title: "Lời mời sinh nhật", lines: [
+            { who: "A", en: "We are having a party on Saturday. Would you like to join us?", vi: "Thứ Bảy chúng tôi tổ chức tiệc. Bạn có muốn tham gia không?" },
+            { who: "B", en: "Thanks for asking! I'm afraid I can't — I have to work.", vi: "Cảm ơn bạn đã mời! Nhưng tôi e là không được, tôi phải đi làm." },
+            { who: "A", en: "That's a pity. Maybe next time?", vi: "Tiếc quá. Lần sau nhé?" },
+            { who: "B", en: "I'd love to. I will bring a gift!", vi: "Tôi rất muốn. Tôi sẽ mang quà!" }
+          ] }
+        ],
+        sentences: [
+          { en: "Would you like to join us", vi: "Bạn có muốn tham gia cùng không" },
+          { en: "I am afraid I cannot come", vi: "Tôi e là tôi không đến được" },
+          { en: "We are having a party on Saturday", vi: "Thứ Bảy chúng tôi tổ chức tiệc" },
+          { en: "She accepted the invitation", vi: "Cô ấy đã nhận lời mời" },
+          { en: "I brought a small gift", vi: "Tôi mang theo một món quà nhỏ" }
+        ]
+      },
+      {
+        id: "a2u2l5", title: "Đặt chỗ & Giờ giấc",
+        goal: "Đặt bàn, đặt phòng và nói về giờ khởi hành, giờ đến.",
+        teach: [
+          { t: "intro", title: "Những câu cần khi đi xa", body: "Đặt phòng khách sạn, hỏi giờ tàu chạy, xin lỗi vì đến muộn — ba tình huống ai đi du lịch cũng gặp.", bullets: ["Từ vựng lịch trình", "Đặt chỗ cho lịch sự", "Sớm, muộn và đúng giờ"] },
+          { t: "vocab", en: "reserve", vi: "đặt chỗ trước", pos: "Động từ", ipa: "/rɪˈzɜːrv/", note: "Trang trọng hơn book. Nhà hàng, khách sạn đều hiểu cả hai từ.", ex: { en: "I would like to reserve a table.", vi: "Tôi muốn đặt một bàn." } },
+          { t: "vocab", en: "arrive", vi: "đến nơi", pos: "Động từ", ipa: "/əˈraɪv/", note: "Arrive IN thành phố, arrive AT nhà ga. Không bao giờ arrive to.", ex: { en: "The train arrives at seven.", vi: "Tàu đến lúc bảy giờ." } },
+          { t: "vocab", en: "leave", vi: "rời đi, khởi hành", pos: "Động từ", ipa: "/liːv/", note: "Quá khứ là left. Đừng nhầm với live (sống) — leave đọc dài hơn.", ex: { en: "We leave at six in the morning.", vi: "Chúng tôi khởi hành lúc sáu giờ sáng." } },
+          { t: "vocab", en: "early", vi: "sớm", pos: "Trạng từ", ipa: "/ˈɜːrli/", note: "Vừa là tính từ vừa là trạng từ, không thêm -ly nữa.", ex: { en: "I always arrive early.", vi: "Tôi luôn đến sớm." } },
+          { t: "vocab", en: "late", vi: "muộn", pos: "Trạng từ", ipa: "/leɪt/", note: "Late là muộn, nhưng lately lại nghĩa là dạo gần đây — hai từ khác hẳn.", ex: { en: "Sorry, I am late.", vi: "Xin lỗi, tôi đến muộn." } },
+          { t: "vocab", en: "delay", vi: "trễ, hoãn", pos: "Danh từ", ipa: "/dɪˈleɪ/", note: "Ở sân bay hay thấy chữ DELAYED trên bảng điện tử.", ex: { en: "There was a two-hour delay.", vi: "Có một sự chậm trễ hai tiếng." } },
+          { t: "grammar", title: "Đặt chỗ cho lịch sự", body: "Câu đặt chỗ dùng would like thay cho want. Cùng nghĩa nhưng lịch sự hơn hẳn, và đây là chuẩn mực khi nói với người lạ.", rows: [
+            ["I would like to…", "Tôi muốn…", "I'd like to reserve a room."],
+            ["Could I…?", "Tôi có thể… được không?", "Could I have a table for two?"],
+            ["What time does… ?", "Mấy giờ thì…?", "What time does the train leave?"],
+            ["It leaves at…", "Nó khởi hành lúc…", "It leaves at 6:30."]
+          ], tip: "Đừng nói I want a room — đúng ngữ pháp nhưng nghe cộc. Luôn dùng I'd like." },
+          { t: "dialogue", title: "Gọi điện đặt phòng", lines: [
+            { who: "A", en: "Good afternoon. I'd like to reserve a room for two nights.", vi: "Chào buổi chiều. Tôi muốn đặt phòng hai đêm." },
+            { who: "B", en: "Of course. What time will you arrive?", vi: "Vâng ạ. Anh chị đến lúc mấy giờ?" },
+            { who: "A", en: "Our train leaves at six, so we arrive quite late.", vi: "Tàu chúng tôi chạy lúc sáu giờ, nên chúng tôi đến khá muộn." },
+            { who: "B", en: "No problem. We are open all night.", vi: "Không sao ạ. Chúng tôi mở cửa cả đêm." }
+          ] }
+        ],
+        sentences: [
+          { en: "I would like to reserve a table", vi: "Tôi muốn đặt một bàn" },
+          { en: "What time does the train leave", vi: "Mấy giờ tàu khởi hành" },
+          { en: "The train arrives at seven", vi: "Tàu đến lúc bảy giờ" },
+          { en: "Sorry I am late", vi: "Xin lỗi tôi đến muộn" },
+          { en: "I always arrive early", vi: "Tôi luôn đến sớm" }
+        ]
+      },
       { id: "a2u2c", title: "Ôn tập chương 2", checkpoint: true,
         goal: "Kiểm tra lại toàn bộ từ và mẫu câu của chương." }
     ]
@@ -258,6 +452,70 @@ const A2 = {
           { en: "We are in the same class", vi: "Chúng tôi học cùng lớp" },
           { en: "I prefer tea to coffee", vi: "Tôi thích trà hơn cà phê" },
           { en: "Both of them are my friends", vi: "Cả hai người họ đều là bạn tôi" }
+        ]
+      },
+      {
+        id: "a2u3l4", title: "Miêu tả nơi chốn",
+        goal: "Tả một thành phố, một ngôi làng, một quán ăn cho người khác hình dung được.",
+        teach: [
+          { t: "intro", title: "Nói cho người ta thấy được", body: "Tả nơi chốn không chỉ là đẹp hay xấu. Sáu tính từ trong bài này cho phép bạn vẽ ra một bức tranh bằng lời.", bullets: ["6 tính từ tả nơi chốn", "There is / There are", "Trật tự nhiều tính từ"] },
+          { t: "vocab", en: "crowded", vi: "đông đúc", pos: "Tính từ", ipa: "/ˈkraʊdɪd/", note: "Từ crowd (đám đông). Chỉ dùng cho nơi chốn, không dùng cho người.", ex: { en: "The market is very crowded.", vi: "Chợ rất đông đúc." } },
+          { t: "vocab", en: "modern", vi: "hiện đại", pos: "Tính từ", ipa: "/ˈmɑːdərn/", note: "Trọng âm ở đầu: MO-dơn. Ngược lại là old-fashioned.", ex: { en: "Da Nang is a modern city.", vi: "Đà Nẵng là một thành phố hiện đại." } },
+          { t: "vocab", en: "ancient", vi: "cổ kính", pos: "Tính từ", ipa: "/ˈeɪnʃənt/", note: "Rất cổ, hàng trăm năm. Đồ cũ bình thường thì dùng old.", ex: { en: "Hoi An is an ancient town.", vi: "Hội An là một phố cổ." } },
+          { t: "vocab", en: "noisy", vi: "ồn ào", pos: "Tính từ", ipa: "/ˈnɔɪzi/", note: "Từ noise (tiếng ồn). Ngược lại là quiet.", ex: { en: "My street is noisy at night.", vi: "Phố nhà tôi ồn ào về đêm." } },
+          { t: "vocab", en: "wide", vi: "rộng", pos: "Tính từ", ipa: "/waɪd/", note: "Rộng theo bề ngang: a wide road. Rộng về diện tích thì dùng large.", ex: { en: "The roads here are wide.", vi: "Đường ở đây rộng." } },
+          { t: "vocab", en: "narrow", vi: "hẹp", pos: "Tính từ", ipa: "/ˈnæroʊ/", note: "Ngược với wide. Ngõ nhỏ là a narrow lane.", ex: { en: "The old streets are narrow.", vi: "Những con phố cổ thì hẹp." } },
+          { t: "grammar", title: "There is và There are", body: "Đây là cấu trúc để nói ở đâu đó CÓ gì. Người Việt hay dịch thẳng thành It has — sai hoàn toàn.", rows: [
+            ["There is + số ít", "có một…", "There is a market near my house."],
+            ["There are + số nhiều", "có nhiều…", "There are many old houses."],
+            ["There isn't / aren't", "không có", "There aren't any tall buildings."],
+            ["Is there…? / Are there…?", "có… không?", "Is there a hotel near here?"]
+          ], tip: "Nhớ: nói nơi chốn CÓ gì thì luôn là There is/are, tuyệt đối không nói It has." },
+          { t: "dialogue", title: "Kể về quê mình", lines: [
+            { who: "A", en: "What is your hometown like?", vi: "Quê bạn thế nào?" },
+            { who: "B", en: "It is a small town. The streets are narrow and quiet.", vi: "Đó là một thị trấn nhỏ. Đường phố hẹp và yên tĩnh." },
+            { who: "A", en: "Are there many shops?", vi: "Ở đó có nhiều cửa hàng không?" },
+            { who: "B", en: "Not many. But there is an ancient temple. It's beautiful.", vi: "Không nhiều. Nhưng có một ngôi đền cổ. Rất đẹp." }
+          ] }
+        ],
+        sentences: [
+          { en: "The market is very crowded", vi: "Chợ rất đông đúc" },
+          { en: "There are many old houses", vi: "Có nhiều ngôi nhà cổ" },
+          { en: "Hoi An is an ancient town", vi: "Hội An là một phố cổ" },
+          { en: "My street is noisy at night", vi: "Phố nhà tôi ồn ào về đêm" },
+          { en: "Is there a hotel near here", vi: "Gần đây có khách sạn nào không" }
+        ]
+      },
+      {
+        id: "a2u3l5", title: "Quá và đủ",
+        goal: "Dùng too và enough để nói cái gì quá mức hoặc vừa đủ.",
+        teach: [
+          { t: "intro", title: "Hai chữ nhỏ, hai vị trí ngược nhau", body: "Too đứng TRƯỚC tính từ, enough đứng SAU. Nhớ nhầm là câu sai ngay. Đây là điểm ngữ pháp A2 mà người Việt sai nhiều nhất.", bullets: ["too + tính từ", "tính từ + enough", "Nói giảm bằng a bit too"] },
+          { t: "vocab", en: "enough", vi: "đủ", pos: "Trạng từ", ipa: "/ɪˈnʌf/", note: "Viết gh nhưng đọc là f: i-NÁP. Đứng SAU tính từ, TRƯỚC danh từ.", ex: { en: "This room is big enough.", vi: "Phòng này đủ rộng." } },
+          { t: "vocab", en: "quite", vi: "khá", pos: "Trạng từ", ipa: "/kwaɪt/", note: "Đừng nhầm với quiet (yên tĩnh) — viết gần giống nhưng khác hẳn.", ex: { en: "The food is quite good.", vi: "Đồ ăn khá ngon." } },
+          { t: "vocab", en: "almost", vi: "gần như, suýt", pos: "Trạng từ", ipa: "/ˈɔːlmoʊst/", note: "Đứng trước động từ hoặc tính từ: I almost forgot.", ex: { en: "I am almost ready.", vi: "Tôi gần xong rồi." } },
+          { t: "vocab", en: "heavy", vi: "nặng", pos: "Tính từ", ipa: "/ˈhevi/", note: "Ngược lại là light (nhẹ). Heavy rain là mưa to.", ex: { en: "This bag is too heavy.", vi: "Cái túi này nặng quá." } },
+          { t: "vocab", en: "comfortable", vi: "thoải mái, dễ chịu", pos: "Tính từ", ipa: "/ˈkʌmftəbl/", note: "Nói gọn ba âm: CÂMF-tơ-bồ. Người Việt hay đọc đủ bốn âm nên nghe rất lạ.", ex: { en: "This chair is comfortable enough.", vi: "Cái ghế này đủ thoải mái." } },
+          { t: "vocab", en: "space", vi: "chỗ trống, không gian", pos: "Danh từ", ipa: "/speɪs/", note: "Không đếm được khi nói về chỗ trống: enough space.", ex: { en: "There is not enough space.", vi: "Không đủ chỗ." } },
+          { t: "grammar", title: "Too trước, enough sau", body: "Đây là bảng bạn nên chép ra giấy dán lên tường. Vị trí sai thì câu sai.", rows: [
+            ["too + tính từ", "quá … (theo hướng xấu)", "It is too expensive."],
+            ["tính từ + enough", "đủ …", "It is comfortable enough."],
+            ["enough + danh từ", "đủ (số lượng)", "We have enough money."],
+            ["not … enough", "chưa đủ …", "The room isn't big enough."]
+          ], tip: "Too luôn mang nghĩa TIÊU CỰC: quá đắt, quá nặng. Muốn khen thì dùng very, đừng dùng too." },
+          { t: "dialogue", title: "Chọn phòng trọ", lines: [
+            { who: "A", en: "What do you think about this room?", vi: "Bạn thấy phòng này thế nào?" },
+            { who: "B", en: "It is quite nice, but it is too small.", vi: "Cũng khá đẹp, nhưng nhỏ quá." },
+            { who: "A", en: "Is the bed comfortable enough?", vi: "Giường có đủ thoải mái không?" },
+            { who: "B", en: "Yes, but there is not enough space for my books.", vi: "Thoải mái, nhưng không đủ chỗ để sách của tôi." }
+          ] }
+        ],
+        sentences: [
+          { en: "This bag is too heavy", vi: "Cái túi này nặng quá" },
+          { en: "This room is big enough", vi: "Phòng này đủ rộng" },
+          { en: "There is not enough space", vi: "Không đủ chỗ" },
+          { en: "The food is quite good", vi: "Đồ ăn khá ngon" },
+          { en: "I am almost ready", vi: "Tôi gần xong rồi" }
         ]
       },
       { id: "a2u3c", title: "Ôn tập chương 3", checkpoint: true,
@@ -357,6 +615,71 @@ const A2 = {
           { en: "Have you ever been abroad", vi: "Bạn đã ra nước ngoài bao giờ chưa" },
           { en: "I have never seen snow", vi: "Tôi chưa bao giờ thấy tuyết" },
           { en: "She has already finished", vi: "Cô ấy làm xong rồi" }
+        ]
+      },
+      {
+        id: "a2u4l4", title: "Phỏng vấn xin việc",
+        goal: "Nói về kinh nghiệm, kỹ năng và trả lời câu hỏi phỏng vấn cơ bản.",
+        teach: [
+          { t: "intro", title: "Mười lăm phút quyết định", body: "Buổi phỏng vấn tiếng Anh xoay quanh đúng ba câu hỏi. Chuẩn bị trước ba câu trả lời là bạn đã hơn phần lớn ứng viên.", bullets: ["Từ vựng tuyển dụng", "Tell me about yourself", "Nói kỹ năng bằng can"] },
+          { t: "vocab", en: "interview", vi: "buổi phỏng vấn", pos: "Danh từ", ipa: "/ˈɪntərvjuː/", note: "Trọng âm ở đầu: IN-tơ-viu. Đi phỏng vấn là have an interview.", ex: { en: "I have an interview tomorrow.", vi: "Mai tôi có buổi phỏng vấn." } },
+          { t: "vocab", en: "experience", vi: "kinh nghiệm", pos: "Danh từ", ipa: "/ɪkˈspɪriəns/", note: "Không đếm được khi nói kinh nghiệm làm việc: much experience, không phải many experiences.", ex: { en: "I have two years of experience.", vi: "Tôi có hai năm kinh nghiệm." } },
+          { t: "vocab", en: "skill", vi: "kỹ năng", pos: "Danh từ", ipa: "/skɪl/", note: "Đếm được: computer skills, language skills.", ex: { en: "Communication is an important skill.", vi: "Giao tiếp là một kỹ năng quan trọng." } },
+          { t: "vocab", en: "apply", vi: "nộp đơn, ứng tuyển", pos: "Động từ", ipa: "/əˈplaɪ/", note: "Luôn đi với for: apply for a job. Đơn xin việc là an application.", ex: { en: "I applied for the job last week.", vi: "Tuần trước tôi nộp đơn xin việc." } },
+          { t: "vocab", en: "hire", vi: "tuyển dụng, thuê", pos: "Động từ", ipa: "/ˈhaɪər/", note: "Công ty hire người. Bị cho nghỉ là be fired.", ex: { en: "The company hired ten people.", vi: "Công ty đã tuyển mười người." } },
+          { t: "vocab", en: "team", vi: "nhóm, đội", pos: "Danh từ", ipa: "/tiːm/", note: "Work in a team là làm việc nhóm — cụm rất hay dùng khi phỏng vấn.", ex: { en: "I like working in a team.", vi: "Tôi thích làm việc nhóm." } },
+          { t: "grammar", title: "Ba câu hỏi phỏng vấn nào cũng có", body: "Mỗi câu hỏi có một cấu trúc trả lời gọn gàng. Học thuộc khung, chỉ cần thay nội dung của bạn vào.", rows: [
+            ["Tell me about yourself.", "I am… / I have…", "I'm a student. I have some experience in sales."],
+            ["Why do you want this job?", "Because…", "Because I want to improve my skills."],
+            ["What can you do?", "I can…", "I can use a computer and speak English."],
+            ["Do you have experience?", "I have… years of…", "I have two years of experience."]
+          ], tip: "Đừng trả lời một chữ Yes hay No. Luôn thêm một câu giải thích — đó là điều người phỏng vấn chờ nghe." },
+          { t: "culture", title: "Nói về mình không phải khoe khoang", body: "Người Việt được dạy khiêm tốn nên hay hạ thấp bản thân khi phỏng vấn. Ở môi trường quốc tế, nói rõ mình làm được gì là chuyện bình thường và cần thiết. Không nói ra thì không ai biết." },
+          { t: "dialogue", title: "Trong phòng phỏng vấn", lines: [
+            { who: "A", en: "Tell me about yourself.", vi: "Hãy kể về bản thân bạn." },
+            { who: "B", en: "I am a student and I have one year of experience in a shop.", vi: "Tôi là sinh viên và có một năm kinh nghiệm ở cửa hàng." },
+            { who: "A", en: "Why did you apply for this job?", vi: "Tại sao bạn nộp đơn vào vị trí này?" },
+            { who: "B", en: "Because I like working in a team and I want to learn new skills.", vi: "Vì tôi thích làm việc nhóm và muốn học thêm kỹ năng mới." }
+          ] }
+        ],
+        sentences: [
+          { en: "I have two years of experience", vi: "Tôi có hai năm kinh nghiệm" },
+          { en: "I applied for the job last week", vi: "Tuần trước tôi nộp đơn xin việc" },
+          { en: "I like working in a team", vi: "Tôi thích làm việc nhóm" },
+          { en: "I have an interview tomorrow", vi: "Mai tôi có buổi phỏng vấn" },
+          { en: "Communication is an important skill", vi: "Giao tiếp là một kỹ năng quan trọng" }
+        ]
+      },
+      {
+        id: "a2u4l5", title: "Thể thao & Trận đấu",
+        goal: "Nói về môn thể thao bạn theo dõi và kể lại một trận đấu.",
+        teach: [
+          { t: "intro", title: "Chủ đề bắt chuyện dễ nhất thế giới", body: "Không biết nói gì với người nước ngoài thì hỏi về bóng đá. Sáu từ trong bài này đủ để bạn theo được một cuộc tán gẫu thể thao.", bullets: ["Từ vựng trận đấu", "play, go hay do", "Kể lại kết quả"] },
+          { t: "vocab", en: "match", vi: "trận đấu", pos: "Danh từ", ipa: "/mætʃ/", note: "Người Anh dùng match, người Mỹ dùng game. Match cũng nghĩa là que diêm.", ex: { en: "The match starts at eight.", vi: "Trận đấu bắt đầu lúc tám giờ." } },
+          { t: "vocab", en: "win", vi: "thắng", pos: "Động từ", ipa: "/wɪn/", note: "Quá khứ là won, đọc là WẦN. Win a match, nhưng beat a team.", ex: { en: "Our team won the match.", vi: "Đội chúng tôi thắng trận." } },
+          { t: "vocab", en: "score", vi: "tỉ số; ghi bàn", pos: "Danh từ", ipa: "/skɔːr/", note: "Hỏi tỉ số: What's the score? Ghi bàn: score a goal.", ex: { en: "What is the score?", vi: "Tỉ số bao nhiêu rồi?" } },
+          { t: "vocab", en: "player", vi: "cầu thủ, người chơi", pos: "Danh từ", ipa: "/ˈpleɪər/", note: "Từ play thêm -er. Cầu thủ bóng đá là a football player.", ex: { en: "He is my favourite player.", vi: "Anh ấy là cầu thủ tôi thích nhất." } },
+          { t: "vocab", en: "coach", vi: "huấn luyện viên", pos: "Danh từ", ipa: "/koʊtʃ/", note: "Coach còn nghĩa là xe khách đường dài.", ex: { en: "The coach is very strict.", vi: "Huấn luyện viên rất nghiêm." } },
+          { t: "vocab", en: "practice", vi: "luyện tập", pos: "Danh từ", ipa: "/ˈpræktɪs/", note: "Practice makes perfect — có công mài sắt có ngày nên kim.", ex: { en: "We have practice every Tuesday.", vi: "Chúng tôi tập vào thứ Ba hằng tuần." } },
+          { t: "grammar", title: "Play, go hay do?", body: "Ba động từ cho ba nhóm môn thể thao khác nhau. Chọn sai là lỗi rất dễ nhận ra.", rows: [
+            ["play + môn có bóng", "play football, play tennis", "I play football on Sunday."],
+            ["go + môn đuôi -ing", "go swimming, go running", "She goes swimming every day."],
+            ["do + môn võ, thể dục", "do yoga, do karate", "He does karate."],
+            ["watch + trận đấu", "xem", "We watched the match on TV."]
+          ], tip: "Mẹo: có quả bóng thì PLAY, có đuôi -ing thì GO, còn lại phần lớn là DO." },
+          { t: "dialogue", title: "Bàn về trận tối qua", lines: [
+            { who: "A", en: "Did you watch the match last night?", vi: "Tối qua bạn có xem trận đấu không?" },
+            { who: "B", en: "Yes! Our team won two to one.", vi: "Có! Đội mình thắng hai một." },
+            { who: "A", en: "Who scored the goals?", vi: "Ai ghi bàn vậy?" },
+            { who: "B", en: "My favourite player. The coach was very happy.", vi: "Cầu thủ tôi thích nhất. Huấn luyện viên vui lắm." }
+          ] }
+        ],
+        sentences: [
+          { en: "Our team won the match", vi: "Đội chúng tôi thắng trận" },
+          { en: "Did you watch the match last night", vi: "Tối qua bạn có xem trận đấu không" },
+          { en: "He is my favourite player", vi: "Anh ấy là cầu thủ tôi thích nhất" },
+          { en: "We have practice every Tuesday", vi: "Chúng tôi tập vào thứ Ba hằng tuần" },
+          { en: "What is the score", vi: "Tỉ số bao nhiêu rồi" }
         ]
       },
       { id: "a2u4c", title: "Ôn tập chương 4", checkpoint: true,

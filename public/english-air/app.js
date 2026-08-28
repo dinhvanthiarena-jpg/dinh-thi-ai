@@ -301,7 +301,8 @@ function renderLearn() {
     const box = el("section", "unit");
     box.append(el("h2", null, u.title));
     const words = unitWords(u).length;
-    box.append(el("p", "unit-meta", `${u.lessons.length} chủ đề • ${words} từ vựng`));
+    const nBai = u.lessons.filter(x => !x.checkpoint).length;
+    box.append(el("p", "unit-meta", `${nBai} bài + ôn tập • ${words} từ vựng`));
 
     const grid = el("div", "nodes");
     u.lessons.forEach(l => {

@@ -104,6 +104,71 @@ const A1 = {
         ]
       },
 
+      {
+        id: "a1u1l4", title: "Bạn từ đâu đến?",
+        goal: "Hỏi và trả lời về quê quán, quốc tịch, thứ tiếng mình nói.",
+        teach: [
+          { t: "intro", title: "Câu hỏi thứ hai sau khi biết tên", body: "Gặp người nước ngoài, sau câu hỏi tên là câu hỏi quê quán. Chỉ cần thuộc một mẫu câu là bạn trả lời được cả đời.", bullets: ["Where are you from?", "Tên nước và tên thứ tiếng", "Nói mình sống ở đâu"] },
+          { t: "vocab", en: "city", vi: "thành phố", pos: "Danh từ", ipa: "/ˈsɪti/", note: "Thành phố lớn. Làng quê là village, thị trấn nhỏ là town.", ex: { en: "Hanoi is a big city.", vi: "Hà Nội là một thành phố lớn." } },
+          { t: "vocab", en: "live", vi: "sống, ở", pos: "Động từ", ipa: "/lɪv/", note: "Live in + thành phố, live at + số nhà. Đừng nhầm với leave (rời đi).", ex: { en: "I live in Da Nang.", vi: "Tôi sống ở Đà Nẵng." } },
+          { t: "vocab", en: "speak", vi: "nói (một thứ tiếng)", pos: "Động từ", ipa: "/spiːk/", note: "Speak dùng cho thứ tiếng: speak English. Còn talk là trò chuyện với ai đó.", ex: { en: "I speak Vietnamese.", vi: "Tôi nói tiếng Việt." } },
+          { t: "vocab", en: "language", vi: "ngôn ngữ", pos: "Danh từ", ipa: "/ˈlæŋɡwɪdʒ/", note: "Tên thứ tiếng luôn viết hoa: English, Vietnamese, Chinese.", ex: { en: "English is a useful language.", vi: "Tiếng Anh là một ngôn ngữ hữu ích." } },
+          { t: "vocab", en: "village", vi: "làng", pos: "Danh từ", ipa: "/ˈvɪlɪdʒ/", note: "Nơi ở nhỏ ở nông thôn. Người Anh–Mỹ rất hay hỏi bạn lớn lên ở đâu.", ex: { en: "My village is very quiet.", vi: "Làng tôi rất yên tĩnh." } },
+          { t: "phrase", en: "Where are you from?", vi: "Bạn đến từ đâu?", pos: "Cụm từ", ipa: "/wer ɑːr juː frʌm/", note: "Trả lời: I'm from Vietnam. Không nói I from Vietnam — thiếu động từ là sai." },
+          { t: "grammar", title: "Tên nước và tên người của nước đó", body: "Tiếng Anh có hai từ khác nhau: một cho tên nước, một cho người và thứ tiếng của nước đó. Học theo cặp cho nhanh.", rows: [
+            ["Vietnam", "Vietnamese", "I am Vietnamese. — Tôi là người Việt."],
+            ["England", "English", "She speaks English. — Cô ấy nói tiếng Anh."],
+            ["China", "Chinese", "He is Chinese. — Anh ấy là người Trung Quốc."],
+            ["Japan", "Japanese", "They are Japanese. — Họ là người Nhật."]
+          ], tip: "Trước tên nước KHÔNG có a/an: I am from Vietnam, chứ không phải from a Vietnam." },
+          { t: "culture", title: "Hỏi quê quán là chuyện bình thường", body: "Người Anh–Mỹ coi Where are you from? là câu làm quen lịch sự, không phải tò mò. Nhưng hỏi tuổi, hỏi lương, hỏi sao chưa lấy vợ chồng thì lại là bất lịch sự — ngược hẳn với thói quen ở Việt Nam." },
+          { t: "dialogue", title: "Làm quen ở sân bay", lines: [
+            { who: "A", en: "Hello! Where are you from?", vi: "Xin chào! Bạn đến từ đâu?" },
+            { who: "B", en: "I am from Vietnam. I live in Hue.", vi: "Tôi đến từ Việt Nam. Tôi sống ở Huế." },
+            { who: "A", en: "Nice! Do you speak English?", vi: "Hay quá! Bạn có nói tiếng Anh không?" },
+            { who: "B", en: "Yes, a little. I am a student.", vi: "Có, một chút. Tôi là học sinh." }
+          ] }
+        ],
+        sentences: [
+          { en: "Where are you from", vi: "Bạn đến từ đâu" },
+          { en: "I live in a small village", vi: "Tôi sống ở một ngôi làng nhỏ" },
+          { en: "She speaks three languages", vi: "Cô ấy nói được ba thứ tiếng" },
+          { en: "Hanoi is a big city", vi: "Hà Nội là một thành phố lớn" },
+          { en: "I am Vietnamese", vi: "Tôi là người Việt Nam" }
+        ]
+      },
+      {
+        id: "a1u1l5", title: "Cảm ơn & Xin lỗi",
+        goal: "Nói lời cảm ơn, xin lỗi, xin phép cho đúng lúc đúng chỗ.",
+        teach: [
+          { t: "intro", title: "Bốn chữ đổi được cả thiện cảm", body: "Please, thank you, sorry, excuse me — người Anh–Mỹ dùng bốn cụm này nhiều gấp mấy lần người Việt. Thiếu chúng, câu đúng ngữ pháp vẫn nghe cộc lốc.", bullets: ["Xin phép trước khi làm phiền", "Đáp lại lời cảm ơn", "Phân biệt sorry và excuse me"] },
+          { t: "vocab", en: "please", vi: "làm ơn, xin vui lòng", pos: "Trạng từ", ipa: "/pliːz/", note: "Thêm vào cuối câu đề nghị là câu lịch sự ngay: Water, please.", ex: { en: "One coffee, please.", vi: "Cho tôi một cà phê." } },
+          { t: "vocab", en: "welcome", vi: "hoan nghênh, không có gì", pos: "Tính từ", ipa: "/ˈwelkəm/", note: "You're welcome là câu đáp lại thank you thông dụng nhất.", ex: { en: "You are welcome.", vi: "Không có gì." } },
+          { t: "vocab", en: "help", vi: "giúp đỡ", pos: "Động từ", ipa: "/help/", note: "Can you help me? là câu nhờ vả an toàn nhất, dùng được với người lạ.", ex: { en: "Can you help me, please?", vi: "Bạn giúp tôi được không?" } },
+          { t: "phrase", en: "Of course", vi: "Tất nhiên rồi", pos: "Cụm từ", ipa: "/əv kɔːrs/", note: "Câu đồng ý nhiệt tình nhất. Nói khi ai đó nhờ mình việc gì." },
+          { t: "phrase", en: "Excuse me", vi: "Xin lỗi cho hỏi", pos: "Cụm từ", ipa: "/ɪkˈskjuːz miː/", note: "Dùng TRƯỚC khi làm phiền ai: hỏi đường, gọi phục vụ, xin đi qua." },
+          { t: "phrase", en: "Thank you very much", vi: "Cảm ơn bạn rất nhiều", pos: "Cụm từ", ipa: "/θæŋk juː ˈveri mʌtʃ/", note: "Thanks là bản ngắn thân mật. Thank you very much trang trọng hơn." },
+          { t: "grammar", title: "Sorry hay Excuse me?", body: "Hai từ này người Việt hay dùng lẫn. Quy tắc rất gọn: một cái dùng TRƯỚC, một cái dùng SAU.", rows: [
+            ["Excuse me", "trước khi làm phiền", "Excuse me, where is the bank?"],
+            ["Sorry", "sau khi đã làm sai", "Sorry, I am late."],
+            ["Excuse me", "xin đi qua chỗ đông", "Excuse me, can I pass?"],
+            ["Sorry", "khi từ chối, cho đỡ phũ", "Sorry, I can't come."]
+          ], tip: "Đụng phải ai đó thì nói Sorry. Muốn hỏi ai đó thì nói Excuse me." },
+          { t: "dialogue", title: "Nhờ giúp một tay", lines: [
+            { who: "A", en: "Excuse me, can you help me?", vi: "Xin lỗi, bạn giúp tôi được không?" },
+            { who: "B", en: "Of course. What is it?", vi: "Tất nhiên rồi. Chuyện gì vậy?" },
+            { who: "A", en: "This bag is very big. Thank you very much!", vi: "Cái túi này to quá. Cảm ơn bạn rất nhiều!" },
+            { who: "B", en: "You are welcome!", vi: "Không có gì đâu!" }
+          ] }
+        ],
+        sentences: [
+          { en: "Excuse me can you help me", vi: "Xin lỗi bạn giúp tôi được không" },
+          { en: "Thank you very much", vi: "Cảm ơn bạn rất nhiều" },
+          { en: "You are welcome", vi: "Không có gì" },
+          { en: "One coffee please", vi: "Cho tôi một cà phê" },
+          { en: "Sorry I am late", vi: "Xin lỗi tôi đến muộn" }
+        ]
+      },
       { id: "a1u1c", title: "Ôn tập chương 1", checkpoint: true,
         goal: "Kiểm tra lại toàn bộ từ và mẫu câu của chương." }
     ]
@@ -210,6 +275,71 @@ const A1 = {
         ]
       },
 
+      {
+        id: "a1u2l4", title: "Nghề của người thân",
+        goal: "Nói bố mẹ, anh chị làm nghề gì và làm ở đâu.",
+        teach: [
+          { t: "intro", title: "Người ta làm gì để sống?", body: "Giới thiệu gia đình mà thiếu nghề nghiệp thì câu chuyện cụt lủn. Bài này cho bạn sáu nghề phổ biến nhất ở Việt Nam và một mẫu câu hỏi.", bullets: ["6 nghề thường gặp", "What does he do?", "Mạo từ a / an trước nghề"] },
+          { t: "vocab", en: "farmer", vi: "nông dân", pos: "Danh từ", ipa: "/ˈfɑːrmər/", note: "Nghề phổ biến nhất ở nông thôn Việt Nam. Farm là nông trại.", ex: { en: "My father is a farmer.", vi: "Bố tôi là nông dân." } },
+          { t: "vocab", en: "driver", vi: "tài xế", pos: "Danh từ", ipa: "/ˈdraɪvər/", note: "Từ drive (lái xe) thêm -er thành người lái. Nhiều nghề tạo ra kiểu này.", ex: { en: "He is a bus driver.", vi: "Anh ấy là tài xế xe buýt." } },
+          { t: "vocab", en: "nurse", vi: "y tá, điều dưỡng", pos: "Danh từ", ipa: "/nɜːrs/", note: "Làm cùng bác sĩ trong bệnh viện. Nurse dùng cho cả nam lẫn nữ.", ex: { en: "My sister is a nurse.", vi: "Chị tôi là y tá." } },
+          { t: "vocab", en: "worker", vi: "công nhân", pos: "Danh từ", ipa: "/ˈwɜːrkər/", note: "Người làm việc chân tay, thường ở nhà máy (factory).", ex: { en: "They are factory workers.", vi: "Họ là công nhân nhà máy." } },
+          { t: "vocab", en: "engineer", vi: "kỹ sư", pos: "Danh từ", ipa: "/ˌendʒɪˈnɪr/", note: "Trọng âm rơi vào âm cuối: en-gi-NEER. Người Việt hay đọc sai chỗ này.", ex: { en: "She wants to be an engineer.", vi: "Cô ấy muốn làm kỹ sư." } },
+          { t: "vocab", en: "police", vi: "công an, cảnh sát", pos: "Danh từ", ipa: "/pəˈliːs/", note: "Police luôn là số nhiều. Một người thì nói a police officer.", ex: { en: "The police are here.", vi: "Công an đang ở đây." } },
+          { t: "grammar", title: "A hay An trước tên nghề?", body: "Nói nghề của ai đó thì bắt buộc có a hoặc an đứng trước. Chọn cái nào là tuỳ ÂM đầu tiên, không phải chữ cái.", rows: [
+            ["Âm phụ âm", "a", "a teacher, a farmer, a nurse"],
+            ["Âm nguyên âm", "an", "an engineer, an artist, an office worker"],
+            ["Số nhiều", "không có a/an", "They are farmers."],
+            ["Hỏi nghề", "What do / does … do?", "What does your mother do?"]
+          ], tip: "Câu hỏi nghề nghiệp có tới hai chữ do, nghe lạ tai nhưng đúng: What does he do?" },
+          { t: "dialogue", title: "Hỏi thăm gia đình", lines: [
+            { who: "A", en: "What does your father do?", vi: "Bố bạn làm nghề gì?" },
+            { who: "B", en: "He is a farmer. My mother is a nurse.", vi: "Bố tôi là nông dân. Mẹ tôi là y tá." },
+            { who: "A", en: "And your brother?", vi: "Còn anh trai bạn?" },
+            { who: "B", en: "He is an engineer. He works in a big city.", vi: "Anh ấy là kỹ sư. Anh ấy làm việc ở một thành phố lớn." }
+          ] }
+        ],
+        sentences: [
+          { en: "My father is a farmer", vi: "Bố tôi là nông dân" },
+          { en: "What does your mother do", vi: "Mẹ bạn làm nghề gì" },
+          { en: "She wants to be an engineer", vi: "Cô ấy muốn làm kỹ sư" },
+          { en: "He is a bus driver", vi: "Anh ấy là tài xế xe buýt" },
+          { en: "My sister is a nurse", vi: "Chị tôi là y tá" }
+        ]
+      },
+      {
+        id: "a1u2l5", title: "Tính cách bạn bè",
+        goal: "Khen và miêu tả tính nết của người khác.",
+        teach: [
+          { t: "intro", title: "Người ta thế nào, chứ không chỉ trông ra sao", body: "Bài trước bạn tả hình dáng. Bài này tả tính cách — thứ khiến câu chuyện của bạn có tình cảm chứ không chỉ là mô tả khô khan.", bullets: ["6 tính từ chỉ tính cách", "Rất và hơi", "Khen người khác cho tự nhiên"] },
+          { t: "vocab", en: "kind", vi: "tốt bụng", pos: "Tính từ", ipa: "/kaɪnd/", note: "Lời khen an toàn nhất trong tiếng Anh. Kind cũng có nghĩa là loại, kiểu.", ex: { en: "My grandmother is very kind.", vi: "Bà tôi rất tốt bụng." } },
+          { t: "vocab", en: "funny", vi: "hài hước", pos: "Tính từ", ipa: "/ˈfʌni/", note: "Khen ai làm mình cười. Đừng nhầm với fun (vui, thú vị).", ex: { en: "My friend is very funny.", vi: "Bạn tôi rất hài hước." } },
+          { t: "vocab", en: "clever", vi: "thông minh, khéo", pos: "Tính từ", ipa: "/ˈklevər/", note: "Người Anh hay dùng clever, người Mỹ hay dùng smart. Cùng nghĩa.", ex: { en: "She is a clever student.", vi: "Cô ấy là một học sinh thông minh." } },
+          { t: "vocab", en: "shy", vi: "nhút nhát", pos: "Tính từ", ipa: "/ʃaɪ/", note: "Không phải điều xấu. Nói I am a bit shy là cách rất tự nhiên để mở đầu.", ex: { en: "He is shy with new people.", vi: "Cậu ấy nhút nhát với người lạ." } },
+          { t: "vocab", en: "friendly", vi: "thân thiện", pos: "Tính từ", ipa: "/ˈfrendli/", note: "Từ friend thêm -ly. Khen cả người lẫn nơi chốn: a friendly city.", ex: { en: "The people here are friendly.", vi: "Người ở đây rất thân thiện." } },
+          { t: "vocab", en: "quiet", vi: "ít nói, yên tĩnh", pos: "Tính từ", ipa: "/ˈkwaɪət/", note: "Tả người là ít nói, tả nơi chốn là yên tĩnh. Đọc là KWAI-ợt, hai âm tiết.", ex: { en: "My brother is very quiet.", vi: "Em trai tôi rất ít nói." } },
+          { t: "grammar", title: "Very, so, a bit — chỉnh mức độ", body: "Ba từ nhỏ đặt trước tính từ, đổi hẳn sắc thái câu nói. Đây là cách nhanh nhất để câu của bạn nghe như người bản xứ.", rows: [
+            ["very", "rất", "She is very kind."],
+            ["so", "rất (cảm thán)", "You are so funny!"],
+            ["a bit", "hơi, một chút", "He is a bit shy."],
+            ["not very", "không được … lắm", "I am not very tall."]
+          ], tip: "Muốn chê nhẹ thì đừng nói xấu, hãy nói not very + tính từ tốt. Lịch sự hơn nhiều." },
+          { t: "culture", title: "Khen thì nhận, đừng chối", body: "Người Việt được khen hay chối cho khiêm tốn. Trong tiếng Anh, chối lời khen làm người ta lúng túng. Cứ nói Thank you! là đủ và đúng." },
+          { t: "dialogue", title: "Kể về bạn thân", lines: [
+            { who: "A", en: "Tell me about your best friend.", vi: "Kể tôi nghe về bạn thân của bạn đi." },
+            { who: "B", en: "Her name is Mai. She is very kind and funny.", vi: "Bạn ấy tên Mai. Bạn ấy rất tốt bụng và hài hước." },
+            { who: "A", en: "Is she friendly?", vi: "Bạn ấy có thân thiện không?" },
+            { who: "B", en: "Yes, but she is a bit shy with new people.", vi: "Có, nhưng bạn ấy hơi nhút nhát với người lạ." }
+          ] }
+        ],
+        sentences: [
+          { en: "My grandmother is very kind", vi: "Bà tôi rất tốt bụng" },
+          { en: "He is a bit shy", vi: "Cậu ấy hơi nhút nhát" },
+          { en: "The people here are friendly", vi: "Người ở đây rất thân thiện" },
+          { en: "She is a clever student", vi: "Cô ấy là một học sinh thông minh" },
+          { en: "My brother is very quiet", vi: "Em trai tôi rất ít nói" }
+        ]
+      },
       { id: "a1u2c", title: "Ôn tập chương 2", checkpoint: true,
         goal: "Kiểm tra lại toàn bộ từ và mẫu câu của chương." }
     ]
@@ -308,6 +438,71 @@ const A1 = {
         ]
       },
 
+      {
+        id: "a1u3l4", title: "Hoa quả & Rau",
+        goal: "Gọi tên hoa quả, rau củ và nói mình thích hay không thích.",
+        teach: [
+          { t: "intro", title: "Đi chợ bằng tiếng Anh", body: "Sáu từ trong bài này là những thứ bạn nhìn thấy mỗi ngày. Học xong, bạn nói được món mình thích và món mình chịu không nổi.", bullets: ["Hoa quả và rau thường gặp", "I like / I don't like", "Danh từ đếm được và không đếm được"] },
+          { t: "vocab", en: "banana", vi: "quả chuối", pos: "Danh từ", ipa: "/bəˈnænə/", note: "Trọng âm ở giữa: ba-NA-na.", ex: { en: "I eat a banana every day.", vi: "Tôi ăn một quả chuối mỗi ngày." } },
+          { t: "vocab", en: "orange", vi: "quả cam; màu cam", pos: "Danh từ", ipa: "/ˈɔːrɪndʒ/", note: "Vừa là quả cam vừa là màu cam — tiếng Anh dùng chung một từ.", ex: { en: "This orange is sweet.", vi: "Quả cam này ngọt." } },
+          { t: "vocab", en: "mango", vi: "quả xoài", pos: "Danh từ", ipa: "/ˈmæŋɡoʊ/", note: "Số nhiều là mangoes, thêm -es chứ không phải -s.", ex: { en: "Vietnamese mangoes are delicious.", vi: "Xoài Việt Nam rất ngon." } },
+          { t: "vocab", en: "tomato", vi: "quả cà chua", pos: "Danh từ", ipa: "/təˈmeɪtoʊ/", note: "Người Anh đọc tơ-MA-tâu, người Mỹ đọc tơ-MÂY-tâu. Cả hai đều đúng.", ex: { en: "I want two tomatoes.", vi: "Tôi muốn hai quả cà chua." } },
+          { t: "vocab", en: "carrot", vi: "củ cà rốt", pos: "Danh từ", ipa: "/ˈkærət/", note: "Trọng âm ở đầu: CA-rợt.", ex: { en: "Rabbits like carrots.", vi: "Thỏ thích cà rốt." } },
+          { t: "vocab", en: "vegetable", vi: "rau củ", pos: "Danh từ", ipa: "/ˈvedʒtəbl/", note: "Nói gọn ba âm: VEJ-tơ-bồ, đừng đọc đủ bốn âm như chữ viết.", ex: { en: "Eat more vegetables!", vi: "Ăn nhiều rau vào!" } },
+          { t: "grammar", title: "Nói thích và không thích", body: "Ba mức độ, một mẫu câu. Sau like luôn là danh từ SỐ NHIỀU khi nói về sở thích chung.", rows: [
+            ["I like…", "thích", "I like mangoes."],
+            ["I love…", "rất thích", "I love bananas."],
+            ["I don't like…", "không thích", "I don't like tomatoes."],
+            ["Do you like…?", "hỏi sở thích", "Do you like carrots?"]
+          ], tip: "Nói I like mango (số ít) là đang nói về vị xoài. Nói I like mangoes mới là thích ăn xoài." },
+          { t: "dialogue", title: "Ở quầy hoa quả", lines: [
+            { who: "A", en: "Do you like mangoes?", vi: "Bạn có thích xoài không?" },
+            { who: "B", en: "Yes, I love them! But I don't like tomatoes.", vi: "Có, tôi rất thích! Nhưng tôi không thích cà chua." },
+            { who: "A", en: "Really? Tomatoes are good for you.", vi: "Thật à? Cà chua tốt cho bạn đấy." },
+            { who: "B", en: "I know. I eat carrots instead.", vi: "Tôi biết. Tôi ăn cà rốt thay vào đó." }
+          ] }
+        ],
+        sentences: [
+          { en: "I like mangoes very much", vi: "Tôi rất thích xoài" },
+          { en: "Do you like carrots", vi: "Bạn có thích cà rốt không" },
+          { en: "Eat more vegetables", vi: "Ăn nhiều rau vào" },
+          { en: "This orange is sweet", vi: "Quả cam này ngọt" },
+          { en: "I do not like tomatoes", vi: "Tôi không thích cà chua" }
+        ]
+      },
+      {
+        id: "a1u3l5", title: "Bữa ăn trong ngày",
+        goal: "Gọi tên ba bữa ăn và kể mình ăn gì vào lúc nào.",
+        teach: [
+          { t: "intro", title: "Ba bữa, ba từ riêng", body: "Tiếng Việt chỉ cần chữ bữa rồi thêm sáng, trưa, tối. Tiếng Anh có ba từ hoàn toàn khác nhau, phải học thuộc.", bullets: ["breakfast, lunch, dinner", "Động từ have thay cho eat", "Nói giờ ăn"] },
+          { t: "vocab", en: "breakfast", vi: "bữa sáng", pos: "Danh từ", ipa: "/ˈbrekfəst/", note: "Ghép từ break (phá) + fast (nhịn ăn) — bữa phá vỡ đêm nhịn đói.", ex: { en: "I have breakfast at six.", vi: "Tôi ăn sáng lúc sáu giờ." } },
+          { t: "vocab", en: "lunch", vi: "bữa trưa", pos: "Danh từ", ipa: "/lʌntʃ/", note: "Không có a/the khi nói chung: have lunch, chứ không phải have a lunch.", ex: { en: "We have lunch at school.", vi: "Chúng tôi ăn trưa ở trường." } },
+          { t: "vocab", en: "dinner", vi: "bữa tối", pos: "Danh từ", ipa: "/ˈdɪnər/", note: "Bữa chính trong ngày ở phương Tây, thường ăn cả nhà cùng nhau.", ex: { en: "Dinner is ready!", vi: "Cơm tối xong rồi!" } },
+          { t: "vocab", en: "soup", vi: "món canh, súp", pos: "Danh từ", ipa: "/suːp/", note: "Canh trong mâm cơm Việt cũng gọi là soup. Uống canh nói là eat soup, không phải drink.", ex: { en: "My mother makes good soup.", vi: "Mẹ tôi nấu canh ngon." } },
+          { t: "vocab", en: "noodle", vi: "mì, bún, phở", pos: "Danh từ", ipa: "/ˈnuːdl/", note: "Hầu như luôn dùng số nhiều: noodles. Phở là rice noodles.", ex: { en: "I eat noodles for breakfast.", vi: "Tôi ăn phở vào bữa sáng." } },
+          { t: "vocab", en: "salt", vi: "muối", pos: "Danh từ", ipa: "/sɔːlt/", note: "Không đếm được, không bao giờ nói a salt hay salts.", ex: { en: "This soup needs salt.", vi: "Canh này thiếu muối." } },
+          { t: "grammar", title: "Have — ăn, chứ không phải có", body: "Với bữa ăn và đồ uống, người bản xứ dùng have nhiều hơn eat hay drink. Nghe tự nhiên hơn hẳn.", rows: [
+            ["have breakfast", "ăn sáng", "I have breakfast at 6:30."],
+            ["have lunch", "ăn trưa", "She has lunch at school."],
+            ["have dinner", "ăn tối", "We have dinner together."],
+            ["have a coffee", "uống một cốc cà phê", "Let's have a coffee."]
+          ], tip: "He, she, it thì have đổi thành has: He has dinner late." },
+          { t: "culture", title: "Bữa sáng của họ khác ta", body: "Người Việt ăn sáng bằng phở, bún, xôi — món nóng và mặn. Người Anh–Mỹ thường ăn bánh mì, ngũ cốc, trứng. Kể chuyện bạn ăn phở buổi sáng là câu chuyện họ rất thích nghe." },
+          { t: "dialogue", title: "Hỏi chuyện ăn uống", lines: [
+            { who: "A", en: "What do you have for breakfast?", vi: "Bạn ăn gì vào bữa sáng?" },
+            { who: "B", en: "I usually have noodles and tea.", vi: "Tôi thường ăn phở và uống trà." },
+            { who: "A", en: "And what about dinner?", vi: "Còn bữa tối thì sao?" },
+            { who: "B", en: "Rice, fish and soup. My mother cooks it.", vi: "Cơm, cá và canh. Mẹ tôi nấu." }
+          ] }
+        ],
+        sentences: [
+          { en: "I have breakfast at six", vi: "Tôi ăn sáng lúc sáu giờ" },
+          { en: "We have lunch at school", vi: "Chúng tôi ăn trưa ở trường" },
+          { en: "What do you have for dinner", vi: "Bạn ăn gì vào bữa tối" },
+          { en: "This soup needs salt", vi: "Canh này thiếu muối" },
+          { en: "I eat noodles for breakfast", vi: "Tôi ăn phở vào bữa sáng" }
+        ]
+      },
       { id: "a1u3c", title: "Ôn tập chương 3", checkpoint: true,
         goal: "Kiểm tra lại toàn bộ từ và mẫu câu của chương." }
     ]
@@ -411,6 +606,70 @@ const A1 = {
         ]
       },
 
+      {
+        id: "a1u4l4", title: "Việc nhà",
+        goal: "Kể những việc bạn làm giúp gia đình và gọi tên các phòng trong nhà.",
+        teach: [
+          { t: "intro", title: "Chuyện trong nhà", body: "Người nước ngoài rất hay hỏi bạn giúp gì cho gia đình. Sáu từ trong bài này đủ để bạn kể một ngày ở nhà.", bullets: ["Các phòng trong nhà", "Việc nhà thường làm", "Nói tần suất: always, often, never"] },
+          { t: "vocab", en: "kitchen", vi: "nhà bếp", pos: "Danh từ", ipa: "/ˈkɪtʃɪn/", note: "Nơi nấu ăn. Đọc KIT-chin, đừng đọc thành ki-CHEN.", ex: { en: "My mother is in the kitchen.", vi: "Mẹ tôi đang ở trong bếp." } },
+          { t: "vocab", en: "bedroom", vi: "phòng ngủ", pos: "Danh từ", ipa: "/ˈbedruːm/", note: "Ghép bed (giường) + room (phòng). Kiểu ghép này rất hay gặp.", ex: { en: "I share a bedroom with my brother.", vi: "Tôi ở chung phòng ngủ với em trai." } },
+          { t: "vocab", en: "clean", vi: "dọn dẹp; sạch", pos: "Động từ", ipa: "/kliːn/", note: "Vừa là động từ dọn dẹp, vừa là tính từ sạch sẽ.", ex: { en: "I clean my room every Sunday.", vi: "Tôi dọn phòng mỗi chủ nhật." } },
+          { t: "vocab", en: "wash", vi: "rửa, giặt", pos: "Động từ", ipa: "/wɑːʃ/", note: "Wash the dishes là rửa bát, wash clothes là giặt quần áo.", ex: { en: "I wash the dishes after dinner.", vi: "Tôi rửa bát sau bữa tối." } },
+          { t: "vocab", en: "tidy", vi: "gọn gàng; sắp xếp", pos: "Tính từ", ipa: "/ˈtaɪdi/", note: "Tidy up là dọn cho gọn. Ngược lại là messy (bừa bộn).", ex: { en: "Her room is always tidy.", vi: "Phòng cô ấy lúc nào cũng gọn gàng." } },
+          { t: "vocab", en: "often", vi: "thường xuyên", pos: "Trạng từ", ipa: "/ˈɔːfn/", note: "Đứng TRƯỚC động từ thường: I often help. Không nói I help often.", ex: { en: "I often help my mother.", vi: "Tôi thường giúp mẹ." } },
+          { t: "grammar", title: "Bao lâu một lần?", body: "Bốn trạng từ tần suất hay dùng nhất, xếp từ nhiều tới ít. Nhớ vị trí: TRƯỚC động từ thường, SAU động từ to be.", rows: [
+            ["always", "luôn luôn", "I always wash the dishes."],
+            ["often", "thường xuyên", "She often cleans the kitchen."],
+            ["sometimes", "thỉnh thoảng", "We sometimes cook together."],
+            ["never", "không bao giờ", "He never tidies his bedroom."]
+          ], tip: "Với to be thì đảo lại: She is always tidy — trạng từ đứng SAU is." },
+          { t: "dialogue", title: "Ai làm việc gì", lines: [
+            { who: "A", en: "Do you help your family at home?", vi: "Bạn có giúp gia đình việc nhà không?" },
+            { who: "B", en: "Yes. I often clean my bedroom and wash the dishes.", vi: "Có. Tôi thường dọn phòng ngủ và rửa bát." },
+            { who: "A", en: "What about your brother?", vi: "Còn em trai bạn?" },
+            { who: "B", en: "He never tidies his room!", vi: "Nó không bao giờ dọn phòng!" }
+          ] }
+        ],
+        sentences: [
+          { en: "I often help my mother", vi: "Tôi thường giúp mẹ" },
+          { en: "I wash the dishes after dinner", vi: "Tôi rửa bát sau bữa tối" },
+          { en: "My mother is in the kitchen", vi: "Mẹ tôi đang ở trong bếp" },
+          { en: "Her room is always tidy", vi: "Phòng cô ấy lúc nào cũng gọn gàng" },
+          { en: "I clean my room every Sunday", vi: "Tôi dọn phòng mỗi chủ nhật" }
+        ]
+      },
+      {
+        id: "a1u4l5", title: "Ngày nghỉ của tôi",
+        goal: "Kể bạn làm gì lúc rảnh và rủ người khác cùng làm.",
+        teach: [
+          { t: "intro", title: "Rảnh thì làm gì?", body: "Câu hỏi này xuất hiện trong mọi cuộc làm quen. Có sẵn vài động từ và một mẫu rủ rê là bạn nói chuyện được cả buổi.", bullets: ["6 hoạt động lúc rảnh", "Động từ + ing sau like", "Rủ ai đó: Let's…"] },
+          { t: "vocab", en: "play", vi: "chơi", pos: "Động từ", ipa: "/pleɪ/", note: "Play + môn thể thao (play football), play + nhạc cụ có the (play the guitar).", ex: { en: "I play football with my friends.", vi: "Tôi chơi bóng đá với bạn bè." } },
+          { t: "vocab", en: "run", vi: "chạy", pos: "Động từ", ipa: "/rʌn/", note: "Go running là đi chạy bộ tập thể dục.", ex: { en: "I run in the park every morning.", vi: "Tôi chạy trong công viên mỗi sáng." } },
+          { t: "vocab", en: "read", vi: "đọc", pos: "Động từ", ipa: "/riːd/", note: "Đọc là RIID ở hiện tại, nhưng quá khứ read đọc là RED — viết giống hệt.", ex: { en: "I like reading books.", vi: "Tôi thích đọc sách." } },
+          { t: "vocab", en: "listen", vi: "nghe", pos: "Động từ", ipa: "/ˈlɪsn/", note: "Chữ t câm. Luôn đi với to: listen to music.", ex: { en: "I listen to music every day.", vi: "Tôi nghe nhạc mỗi ngày." } },
+          { t: "vocab", en: "park", vi: "công viên", pos: "Danh từ", ipa: "/pɑːrk/", note: "In the park, không phải at the park khi nói đang ở bên trong.", ex: { en: "The park is near my house.", vi: "Công viên ở gần nhà tôi." } },
+          { t: "vocab", en: "garden", vi: "vườn", pos: "Danh từ", ipa: "/ˈɡɑːrdn/", note: "Vườn sau nhà. Người Mỹ hay gọi là yard.", ex: { en: "My grandmother works in the garden.", vi: "Bà tôi làm vườn." } },
+          { t: "grammar", title: "Sau like là động từ đuôi -ing", body: "Nói mình thích LÀM gì thì động từ theo sau phải thêm -ing. Đây là lỗi người Việt sai nhiều nhất ở A1.", rows: [
+            ["like + V-ing", "thích làm gì", "I like reading."],
+            ["love + V-ing", "rất thích làm gì", "She loves running."],
+            ["don't like + V-ing", "không thích làm gì", "He doesn't like washing."],
+            ["Let's + V", "rủ cùng làm", "Let's play football!"]
+          ], tip: "Nhớ mẹo: sau like thì -ing, sau Let's thì để trần." },
+          { t: "dialogue", title: "Rủ nhau đi chơi", lines: [
+            { who: "A", en: "What do you do at the weekend?", vi: "Cuối tuần bạn làm gì?" },
+            { who: "B", en: "I like reading and listening to music.", vi: "Tôi thích đọc sách và nghe nhạc." },
+            { who: "A", en: "Let's run in the park tomorrow!", vi: "Mai mình chạy bộ ở công viên đi!" },
+            { who: "B", en: "Good idea. See you at six!", vi: "Ý hay đấy. Hẹn gặp lúc sáu giờ nhé!" }
+          ] }
+        ],
+        sentences: [
+          { en: "I like reading books", vi: "Tôi thích đọc sách" },
+          { en: "Let us play football", vi: "Mình chơi bóng đá đi" },
+          { en: "I listen to music every day", vi: "Tôi nghe nhạc mỗi ngày" },
+          { en: "The park is near my house", vi: "Công viên ở gần nhà tôi" },
+          { en: "I run in the park every morning", vi: "Tôi chạy trong công viên mỗi sáng" }
+        ]
+      },
       { id: "a1u4c", title: "Ôn tập chương 4", checkpoint: true,
         goal: "Kiểm tra lại toàn bộ từ và mẫu câu của chương." }
     ]
@@ -506,6 +765,71 @@ const A1 = {
           { en: "I wear a white shirt to school", vi: "Tôi mặc áo trắng đi học" },
           { en: "She has a big red bag", vi: "Cô ấy có một cái túi đỏ to" },
           { en: "What colour do you want", vi: "Bạn muốn màu gì" }
+        ]
+      },
+      {
+        id: "a1u5l4", title: "Thứ, tháng & Ngày sinh",
+        goal: "Nói thứ mấy, tháng nào, và hỏi ngày sinh của người khác.",
+        teach: [
+          { t: "intro", title: "Xếp lịch bằng tiếng Anh", body: "Hẹn nhau mà không nói được thứ và tháng thì chịu. Bài này cho bạn từ vựng và hai giới từ quan trọng nhất: on và in.", bullets: ["Thứ trong tuần", "Tháng trong năm", "on Monday nhưng in May"] },
+          { t: "vocab", en: "Monday", vi: "thứ Hai", pos: "Danh từ", ipa: "/ˈmʌndeɪ/", note: "Thứ và tháng trong tiếng Anh LUÔN viết hoa, kể cả giữa câu.", ex: { en: "I have class on Monday.", vi: "Tôi có lớp vào thứ Hai." } },
+          { t: "vocab", en: "Sunday", vi: "chủ nhật", pos: "Danh từ", ipa: "/ˈsʌndeɪ/", note: "Với người Anh–Mỹ, chủ nhật là ngày ĐẦU tuần trên lịch.", ex: { en: "I stay home on Sunday.", vi: "Chủ nhật tôi ở nhà." } },
+          { t: "vocab", en: "month", vi: "tháng", pos: "Danh từ", ipa: "/mʌnθ/", note: "Âm cuối th khó đọc, cắn nhẹ đầu lưỡi. Số nhiều months.", ex: { en: "There are twelve months in a year.", vi: "Một năm có mười hai tháng." } },
+          { t: "vocab", en: "year", vi: "năm", pos: "Danh từ", ipa: "/jɪr/", note: "Hỏi tuổi cũng dùng từ này: I am twelve years old.", ex: { en: "See you next year!", vi: "Hẹn gặp lại năm sau!" } },
+          { t: "vocab", en: "birthday", vi: "sinh nhật", pos: "Danh từ", ipa: "/ˈbɜːrθdeɪ/", note: "Chúc mừng sinh nhật là Happy birthday! — không có chữ to.", ex: { en: "My birthday is in May.", vi: "Sinh nhật tôi vào tháng Năm." } },
+          { t: "vocab", en: "date", vi: "ngày (trong tháng)", pos: "Danh từ", ipa: "/deɪt/", note: "What's the date today? là hỏi hôm nay ngày mấy.", ex: { en: "What is the date today?", vi: "Hôm nay là ngày mấy?" } },
+          { t: "grammar", title: "On, in, at — chọn đúng giới từ thời gian", body: "Ba giới từ này người Việt hay dùng nhầm. Quy tắc rất dễ nhớ: càng dài càng dùng in, càng ngắn càng dùng at.", rows: [
+            ["at", "giờ cụ thể", "at six o'clock, at night"],
+            ["on", "thứ và ngày", "on Monday, on my birthday"],
+            ["in", "tháng, năm, mùa", "in May, in 2026, in the morning"],
+            ["không dùng gì", "today, tomorrow", "I go today. (không nói on today)"]
+          ], tip: "Mẹo nhớ: at GIỜ — on NGÀY — in THÁNG. Đơn vị càng to thì giới từ càng ngắn dần rồi thành in." },
+          { t: "dialogue", title: "Hỏi ngày sinh nhật", lines: [
+            { who: "A", en: "When is your birthday?", vi: "Sinh nhật bạn khi nào?" },
+            { who: "B", en: "It is in May. What about you?", vi: "Vào tháng Năm. Còn bạn?" },
+            { who: "A", en: "Mine is on Sunday! Come to my house.", vi: "Của tôi vào chủ nhật này! Đến nhà tôi nhé." },
+            { who: "B", en: "Of course. Happy birthday!", vi: "Tất nhiên rồi. Chúc mừng sinh nhật!" }
+          ] }
+        ],
+        sentences: [
+          { en: "My birthday is in May", vi: "Sinh nhật tôi vào tháng Năm" },
+          { en: "I have class on Monday", vi: "Tôi có lớp vào thứ Hai" },
+          { en: "What is the date today", vi: "Hôm nay là ngày mấy" },
+          { en: "There are twelve months in a year", vi: "Một năm có mười hai tháng" },
+          { en: "I stay home on Sunday", vi: "Chủ nhật tôi ở nhà" }
+        ]
+      },
+      {
+        id: "a1u5l5", title: "Đi chợ",
+        goal: "Hỏi số lượng, cân đo và mặc cả ở chợ.",
+        teach: [
+          { t: "intro", title: "Mua theo cân, theo túi", body: "Ở cửa hàng bạn hỏi giá. Ở chợ bạn phải hỏi thêm số lượng. Bài này dạy hai câu hỏi khác nhau mà người Việt hay lẫn: How many và How much.", bullets: ["Từ vựng ở chợ", "How many hay How much", "Some và any"] },
+          { t: "vocab", en: "market", vi: "chợ", pos: "Danh từ", ipa: "/ˈmɑːrkɪt/", note: "Chợ truyền thống. Siêu thị là supermarket.", ex: { en: "I go to the market every morning.", vi: "Tôi đi chợ mỗi sáng." } },
+          { t: "vocab", en: "kilo", vi: "cân, ki-lô", pos: "Danh từ", ipa: "/ˈkiːloʊ/", note: "Nói tắt của kilogram. A kilo of rice — một cân gạo.", ex: { en: "I want two kilos of rice.", vi: "Tôi muốn hai cân gạo." } },
+          { t: "vocab", en: "bag", vi: "túi, cặp", pos: "Danh từ", ipa: "/bæɡ/", note: "A bag of + thứ bên trong: a bag of apples.", ex: { en: "Can I have a bag, please?", vi: "Cho tôi xin một cái túi được không?" } },
+          { t: "vocab", en: "box", vi: "hộp", pos: "Danh từ", ipa: "/bɑːks/", note: "Số nhiều là boxes, thêm -es vì tận cùng bằng x.", ex: { en: "She buys a box of milk.", vi: "Cô ấy mua một hộp sữa." } },
+          { t: "vocab", en: "some", vi: "một ít, một vài", pos: "Đại từ", ipa: "/sʌm/", note: "Dùng trong câu khẳng định và khi mời mọc: Would you like some tea?", ex: { en: "I want some water.", vi: "Tôi muốn một chút nước." } },
+          { t: "vocab", en: "many", vi: "nhiều", pos: "Tính từ", ipa: "/ˈmeni/", note: "Chỉ dùng với danh từ đếm được: many apples. Nước, gạo thì dùng much.", ex: { en: "There are many people here.", vi: "Ở đây có nhiều người." } },
+          { t: "grammar", title: "How many hay How much?", body: "Đếm được thì many, không đếm được thì much. Đây là câu hỏi bạn dùng mỗi lần đi chợ.", rows: [
+            ["How many", "đếm được, số nhiều", "How many apples do you want?"],
+            ["How much", "không đếm được", "How much rice do you need?"],
+            ["How much", "hỏi giá tiền", "How much is this bag?"],
+            ["some / any", "khẳng định / hỏi–phủ định", "I want some. / Do you have any?"]
+          ], tip: "Thứ nào bốc lên đếm được từng cái thì many. Thứ nào phải cân, đong, rót thì much." },
+          { t: "culture", title: "Mặc cả — nét riêng của chợ Việt", body: "Ở chợ Việt Nam trả giá là chuyện thường. Ở siêu thị hay cửa hàng phương Tây thì tuyệt đối không. Nếu muốn hỏi giảm giá cho lịch sự, nói: Can you give me a better price?" },
+          { t: "dialogue", title: "Mua rau ngoài chợ", lines: [
+            { who: "A", en: "How much are these tomatoes?", vi: "Cà chua này bao nhiêu tiền?" },
+            { who: "B", en: "Twenty thousand a kilo.", vi: "Hai mươi nghìn một cân." },
+            { who: "A", en: "I want one kilo, please. And some carrots.", vi: "Cho tôi một cân. Với một ít cà rốt nữa." },
+            { who: "B", en: "Here you are. Do you need a bag?", vi: "Của bạn đây. Bạn có cần túi không?" }
+          ] }
+        ],
+        sentences: [
+          { en: "How many apples do you want", vi: "Bạn muốn mấy quả táo" },
+          { en: "I want two kilos of rice", vi: "Tôi muốn hai cân gạo" },
+          { en: "I go to the market every morning", vi: "Tôi đi chợ mỗi sáng" },
+          { en: "There are many people here", vi: "Ở đây có nhiều người" },
+          { en: "Can I have a bag please", vi: "Cho tôi xin một cái túi được không" }
         ]
       },
       { id: "a1u5c", title: "Ôn tập chương 5", checkpoint: true,
@@ -605,6 +929,71 @@ const A1 = {
           { en: "The weather is nice today", vi: "Hôm nay thời tiết đẹp" },
           { en: "It is sunny and warm", vi: "Trời nắng và ấm" },
           { en: "It is very cold in December", vi: "Tháng Mười Hai rất lạnh" }
+        ]
+      },
+      {
+        id: "a1u6l4", title: "Đi lại bằng gì",
+        goal: "Nói bạn đi học, đi làm bằng phương tiện gì và mất bao lâu.",
+        teach: [
+          { t: "intro", title: "Bạn đến đây bằng gì?", body: "Một câu hỏi nhỏ nhưng gặp mỗi ngày. Chỉ cần thuộc mẫu go by + phương tiện là xong, trừ đúng một ngoại lệ.", bullets: ["6 phương tiện thường dùng", "go by bus nhưng on foot", "Hỏi mất bao lâu"] },
+          { t: "vocab", en: "bus", vi: "xe buýt", pos: "Danh từ", ipa: "/bʌs/", note: "Số nhiều là buses. Bến xe buýt là bus stop.", ex: { en: "I go to school by bus.", vi: "Tôi đi học bằng xe buýt." } },
+          { t: "vocab", en: "train", vi: "tàu hoả", pos: "Danh từ", ipa: "/treɪn/", note: "Train station là ga tàu. Train cũng là động từ nghĩa luyện tập.", ex: { en: "The train is very fast.", vi: "Tàu hoả rất nhanh." } },
+          { t: "vocab", en: "bike", vi: "xe đạp", pos: "Danh từ", ipa: "/baɪk/", note: "Nói tắt của bicycle. Xe máy là motorbike.", ex: { en: "My bike is old but good.", vi: "Xe đạp của tôi cũ nhưng tốt." } },
+          { t: "vocab", en: "walk", vi: "đi bộ", pos: "Động từ", ipa: "/wɔːk/", note: "Chữ l câm, đọc là WOOK. Đừng nhầm với work (làm việc).", ex: { en: "I walk to school every day.", vi: "Tôi đi bộ đến trường mỗi ngày." } },
+          { t: "vocab", en: "drive", vi: "lái xe", pos: "Động từ", ipa: "/draɪv/", note: "Chỉ dùng cho xe bốn bánh. Đi xe máy, xe đạp thì dùng ride.", ex: { en: "My father drives a car.", vi: "Bố tôi lái ô tô." } },
+          { t: "vocab", en: "minute", vi: "phút", pos: "Danh từ", ipa: "/ˈmɪnɪt/", note: "Đọc MI-nịt. Just a minute nghĩa là đợi một chút.", ex: { en: "It takes twenty minutes.", vi: "Mất hai mươi phút." } },
+          { t: "grammar", title: "By + phương tiện, trừ đi bộ", body: "Mọi phương tiện đều dùng by và KHÔNG có a/the. Riêng đi bộ là ngoại lệ duy nhất.", rows: [
+            ["by bus", "bằng xe buýt", "I go by bus."],
+            ["by train", "bằng tàu hoả", "We travel by train."],
+            ["by bike", "bằng xe đạp", "She goes by bike."],
+            ["on foot", "đi bộ", "He goes to school on foot."]
+          ], tip: "Hỏi mất bao lâu: How long does it take? Trả lời: It takes twenty minutes." },
+          { t: "dialogue", title: "Hỏi đường đi học", lines: [
+            { who: "A", en: "How do you go to school?", vi: "Bạn đi học bằng gì?" },
+            { who: "B", en: "I go by bike. It takes fifteen minutes.", vi: "Tôi đi xe đạp. Mất mười lăm phút." },
+            { who: "A", en: "That is fast! I walk, so it takes thirty minutes.", vi: "Nhanh đấy! Tôi đi bộ nên mất ba mươi phút." },
+            { who: "B", en: "Then take the bus tomorrow!", vi: "Vậy mai đi xe buýt đi!" }
+          ] }
+        ],
+        sentences: [
+          { en: "I go to school by bus", vi: "Tôi đi học bằng xe buýt" },
+          { en: "How do you go to school", vi: "Bạn đi học bằng gì" },
+          { en: "It takes twenty minutes", vi: "Mất hai mươi phút" },
+          { en: "I walk to school every day", vi: "Tôi đi bộ đến trường mỗi ngày" },
+          { en: "My father drives a car", vi: "Bố tôi lái ô tô" }
+        ]
+      },
+      {
+        id: "a1u6l5", title: "Ở bệnh viện",
+        goal: "Nói bạn bị làm sao và hiểu lời dặn của bác sĩ.",
+        teach: [
+          { t: "intro", title: "Khi phải đi khám", body: "Bài trước bạn học tên các bộ phận cơ thể. Bài này là những gì bạn nói ra khi ngồi trước mặt bác sĩ — thứ có thể rất cần khi đi nước ngoài.", bullets: ["Từ vựng ở bệnh viện", "Mẫu câu I have a…", "Hiểu lời dặn của bác sĩ"] },
+          { t: "vocab", en: "hospital", vi: "bệnh viện", pos: "Danh từ", ipa: "/ˈhɑːspɪtl/", note: "Đi nằm viện nói go to hospital, không có the. Đi thăm ai thì có: go to the hospital.", ex: { en: "The hospital is near the station.", vi: "Bệnh viện ở gần nhà ga." } },
+          { t: "vocab", en: "medicine", vi: "thuốc", pos: "Danh từ", ipa: "/ˈmedsn/", note: "Uống thuốc nói là take medicine, KHÔNG phải drink medicine.", ex: { en: "Take this medicine twice a day.", vi: "Uống thuốc này hai lần mỗi ngày." } },
+          { t: "vocab", en: "hurt", vi: "đau", pos: "Động từ", ipa: "/hɜːrt/", note: "Chỗ nào đau thì làm chủ ngữ: My head hurts. — Tôi đau đầu.", ex: { en: "My leg hurts.", vi: "Chân tôi đau." } },
+          { t: "vocab", en: "fever", vi: "sốt", pos: "Danh từ", ipa: "/ˈfiːvər/", note: "Luôn đi với have: I have a fever. Không nói I am fever.", ex: { en: "She has a high fever.", vi: "Cô ấy sốt cao." } },
+          { t: "vocab", en: "rest", vi: "nghỉ ngơi", pos: "Động từ", ipa: "/rest/", note: "Get some rest là lời dặn quen thuộc của bác sĩ.", ex: { en: "You need to rest at home.", vi: "Bạn cần nghỉ ở nhà." } },
+          { t: "vocab", en: "better", vi: "khá hơn, đỡ hơn", pos: "Tính từ", ipa: "/ˈbetər/", note: "Get better là khỏi bệnh. Chúc mau khỏi: Get well soon!", ex: { en: "I feel better today.", vi: "Hôm nay tôi thấy đỡ hơn." } },
+          { t: "grammar", title: "Nói mình bị làm sao", body: "Tiếng Anh có ba mẫu câu cho chuyện ốm đau. Chọn mẫu nào là tuỳ bạn nói về triệu chứng, bộ phận, hay cảm giác.", rows: [
+            ["I have a…", "triệu chứng", "I have a fever. / I have a cold."],
+            ["My … hurts", "bộ phận đau", "My head hurts."],
+            ["I feel…", "cảm giác chung", "I feel sick. / I feel better."],
+            ["I can't…", "không làm được gì", "I can't sleep."]
+          ], tip: "Nhớ: có triệu chứng thì HAVE, bộ phận đau thì HURTS, cảm giác thì FEEL." },
+          { t: "culture", title: "Get well soon", body: "Câu chúc người ốm chuẩn nhất trong tiếng Anh là Get well soon! Người Anh–Mỹ ít khi hỏi kỹ về bệnh tật của nhau như người Việt — họ coi đó là chuyện riêng tư." },
+          { t: "dialogue", title: "Khám bệnh", lines: [
+            { who: "A", en: "Good morning. What is the problem?", vi: "Chào buổi sáng. Bạn bị làm sao?" },
+            { who: "B", en: "I have a fever and my head hurts.", vi: "Tôi bị sốt và đau đầu." },
+            { who: "A", en: "Take this medicine and rest at home.", vi: "Uống thuốc này và nghỉ ở nhà nhé." },
+            { who: "B", en: "Thank you, doctor. I hope I feel better tomorrow.", vi: "Cảm ơn bác sĩ. Mong là mai tôi đỡ hơn." }
+          ] }
+        ],
+        sentences: [
+          { en: "I have a fever", vi: "Tôi bị sốt" },
+          { en: "My leg hurts", vi: "Chân tôi đau" },
+          { en: "You need to rest at home", vi: "Bạn cần nghỉ ở nhà" },
+          { en: "I feel better today", vi: "Hôm nay tôi thấy đỡ hơn" },
+          { en: "Take this medicine twice a day", vi: "Uống thuốc này hai lần mỗi ngày" }
         ]
       },
       { id: "a1u6c", title: "Ôn tập chương 6", checkpoint: true,

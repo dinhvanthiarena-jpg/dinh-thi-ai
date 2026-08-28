@@ -103,6 +103,71 @@ const B1 = {
           { en: "What is the reason for this", vi: "Lý do của việc này là gì" }
         ]
       },
+      {
+        id: "b1u1l4", title: "Đề nghị & Cân nhắc",
+        goal: "Gợi ý một hướng đi và nói rõ bạn chắc chắn hay còn phân vân.",
+        teach: [
+          { t: "intro", title: "Nói ý mình mà không áp đặt", body: "Bài trước bạn học đưa lời khuyên. Bài này đi xa hơn: gợi ý một cách mềm, và nói rõ mức độ chắc chắn của mình. Đây là thứ phân biệt người nói tiếng Anh khá với người nói tiếng Anh giỏi.", bullets: ["suggest và consider", "Mức độ chắc chắn", "Thừa nhận mình có thể sai"] },
+          { t: "vocab", en: "suggest", vi: "gợi ý, đề xuất", pos: "Động từ", ipa: "/səˈdʒest/", note: "Theo sau là V-ing hoặc that: I suggest going early. KHÔNG nói suggest to go.", ex: { en: "I suggest leaving before six.", vi: "Tôi gợi ý là nên đi trước sáu giờ." } },
+          { t: "vocab", en: "consider", vi: "cân nhắc, xem xét", pos: "Động từ", ipa: "/kənˈsɪdər/", note: "Cũng đi với V-ing: consider moving. Trang trọng hơn think about.", ex: { en: "We should consider other options.", vi: "Chúng ta nên cân nhắc các lựa chọn khác." } },
+          { t: "vocab", en: "doubt", vi: "nghi ngờ, không chắc", pos: "Động từ", ipa: "/daʊt/", note: "Chữ b câm, đọc là DAUT. I doubt it nghĩa là tôi e là không đâu.", ex: { en: "I doubt he will come.", vi: "Tôi không chắc anh ấy sẽ đến." } },
+          { t: "vocab", en: "certain", vi: "chắc chắn", pos: "Tính từ", ipa: "/ˈsɜːrtn/", note: "Mạnh hơn sure. I'm certain that… dùng khi bạn thật sự chắc.", ex: { en: "I am certain this is the right way.", vi: "Tôi chắc chắn đây là đường đúng." } },
+          { t: "vocab", en: "obvious", vi: "rõ ràng, hiển nhiên", pos: "Tính từ", ipa: "/ˈɑːbviəs/", note: "It's obvious that… — dùng khi điều đó ai cũng thấy.", ex: { en: "It is obvious that she is tired.", vi: "Rõ ràng là cô ấy đang mệt." } },
+          { t: "vocab", en: "admit", vi: "thừa nhận", pos: "Động từ", ipa: "/ədˈmɪt/", note: "Cũng đi với V-ing: admit making a mistake. Nhân đôi chữ t khi thêm -ed: admitted.", ex: { en: "He admitted making a mistake.", vi: "Anh ấy thừa nhận đã phạm sai lầm." } },
+          { t: "grammar", title: "Thang đo mức độ chắc chắn", body: "Người bản xứ hiếm khi nói chắc như đinh đóng cột. Họ chọn từ theo đúng mức tin của mình — và người nghe đánh giá bạn qua chính chỗ đó.", rows: [
+            ["I'm certain / definitely", "chắc chắn 100%", "I'm certain she said that."],
+            ["It's obvious that…", "rõ ràng, ai cũng thấy", "It's obvious that he is angry."],
+            ["I think / probably", "khá chắc", "I think he will agree."],
+            ["I doubt / I'm not sure", "không chắc", "I doubt it will rain."]
+          ], tip: "Sau suggest, consider, admit thì động từ luôn thêm -ing. Đây là ba động từ hay bị dùng sai nhất ở B1." },
+          { t: "culture", title: "Nói chắc quá lại mất tin cậy", body: "Trong môi trường công việc quốc tế, người nói câu nào cũng chắc nịch thường bị coi là thiếu cẩn trọng. Ngược lại, người biết nói I'm not sure, let me check lại được tin. Khiêm tốn có tính toán là một kỹ năng." },
+          { t: "dialogue", title: "Bàn kế hoạch nhóm", lines: [
+            { who: "A", en: "I suggest starting the project this week.", vi: "Tôi gợi ý là bắt đầu dự án ngay tuần này." },
+            { who: "B", en: "I'm not sure. Should we consider waiting for the report?", vi: "Tôi không chắc. Hay là mình cân nhắc chờ báo cáo?" },
+            { who: "A", en: "It's obvious that we don't have much time.", vi: "Rõ ràng là chúng ta không còn nhiều thời gian." },
+            { who: "B", en: "You're right. I admit I was being too careful.", vi: "Bạn nói đúng. Tôi thừa nhận là mình đã quá thận trọng." }
+          ] }
+        ],
+        sentences: [
+          { en: "I suggest leaving before six", vi: "Tôi gợi ý là nên đi trước sáu giờ" },
+          { en: "We should consider other options", vi: "Chúng ta nên cân nhắc các lựa chọn khác" },
+          { en: "It is obvious that she is tired", vi: "Rõ ràng là cô ấy đang mệt" },
+          { en: "I doubt he will come", vi: "Tôi không chắc anh ấy sẽ đến" },
+          { en: "He admitted making a mistake", vi: "Anh ấy thừa nhận đã phạm sai lầm" }
+        ]
+      },
+      {
+        id: "b1u1l5", title: "Yêu cầu lịch sự",
+        goal: "Nhờ vả, xin phép và xin lỗi theo đúng mức trang trọng của tình huống.",
+        teach: [
+          { t: "intro", title: "Cùng một việc, ba cách nói", body: "Nhờ bạn thân đóng cửa sổ khác hẳn nhờ sếp. Tiếng Anh phân tầng lịch sự rất rõ, và dùng sai tầng thì người ta thấy ngay.", bullets: ["Ba mức nhờ vả", "Would you mind + V-ing", "Xin lỗi cho đúng mức"] },
+          { t: "vocab", en: "polite", vi: "lịch sự", pos: "Tính từ", ipa: "/pəˈlaɪt/", note: "Trọng âm ở âm sau: pơ-LAIT. Ngược lại là rude (thô lỗ).", ex: { en: "She is always polite to customers.", vi: "Cô ấy luôn lịch sự với khách hàng." } },
+          { t: "vocab", en: "request", vi: "lời đề nghị, yêu cầu", pos: "Danh từ", ipa: "/rɪˈkwest/", note: "Trang trọng. Make a request là đưa ra một đề nghị.", ex: { en: "I have a small request.", vi: "Tôi có một đề nghị nhỏ." } },
+          { t: "vocab", en: "mind", vi: "phiền, ngại", pos: "Động từ", ipa: "/maɪnd/", note: "Would you mind…? nghĩa là bạn có phiền không. Trả lời No, not at all mới là đồng ý!", ex: { en: "Would you mind closing the door?", vi: "Bạn đóng cửa giúp được không?" } },
+          { t: "vocab", en: "favour", vi: "sự giúp đỡ", pos: "Danh từ", ipa: "/ˈfeɪvər/", note: "Người Mỹ viết favor. Can I ask you a favour? là câu mở đầu khi nhờ việc lớn.", ex: { en: "Can I ask you a favour?", vi: "Tôi nhờ bạn một việc được không?" } },
+          { t: "vocab", en: "offer", vi: "đề nghị giúp, mời", pos: "Động từ", ipa: "/ˈɔːfər/", note: "Offer to + V: He offered to help me. Khác với suggest — offer là tự mình làm.", ex: { en: "He offered to carry my bag.", vi: "Anh ấy đề nghị xách túi giúp tôi." } },
+          { t: "vocab", en: "apologise", vi: "xin lỗi (trang trọng)", pos: "Động từ", ipa: "/əˈpɑːlədʒaɪz/", note: "Người Mỹ viết apologize. Trang trọng hơn sorry nhiều, dùng trong email công việc.", ex: { en: "I apologise for the delay.", vi: "Tôi xin lỗi vì sự chậm trễ." } },
+          { t: "grammar", title: "Thang lịch sự khi nhờ vả", body: "Bốn bậc, từ thân mật tới rất trang trọng. Chọn đúng bậc là chuyện quan trọng hơn cả chọn đúng từ vựng.", rows: [
+            ["Can you…?", "thân mật, bạn bè", "Can you pass the salt?"],
+            ["Could you…?", "lịch sự, dùng được mọi lúc", "Could you help me, please?"],
+            ["Would you mind + V-ing?", "rất lịch sự", "Would you mind waiting a moment?"],
+            ["I was wondering if…", "trang trọng nhất", "I was wondering if you could help."]
+          ], tip: "Cạm bẫy lớn: Would you mind…? hỏi bạn CÓ PHIỀN KHÔNG. Muốn đồng ý phải trả lời No — nói Yes là bạn đang từ chối!" },
+          { t: "dialogue", title: "Nhờ đồng nghiệp", lines: [
+            { who: "A", en: "Can I ask you a favour?", vi: "Tôi nhờ bạn một việc được không?" },
+            { who: "B", en: "Of course. What is it?", vi: "Tất nhiên rồi. Việc gì vậy?" },
+            { who: "A", en: "Would you mind checking this report? I apologise for asking so late.", vi: "Bạn xem giúp báo cáo này được không? Tôi xin lỗi vì nhờ muộn quá." },
+            { who: "B", en: "Not at all. I offered to help last week anyway.", vi: "Không phiền gì đâu. Tuần trước tôi đã bảo sẽ giúp mà." }
+          ] }
+        ],
+        sentences: [
+          { en: "Would you mind closing the door", vi: "Bạn đóng cửa giúp được không" },
+          { en: "Can I ask you a favour", vi: "Tôi nhờ bạn một việc được không" },
+          { en: "I apologise for the delay", vi: "Tôi xin lỗi vì sự chậm trễ" },
+          { en: "He offered to carry my bag", vi: "Anh ấy đề nghị xách túi giúp tôi" },
+          { en: "She is always polite to customers", vi: "Cô ấy luôn lịch sự với khách hàng" }
+        ]
+      },
       { id: "b1u1c", title: "Ôn tập chương 1", checkpoint: true,
         goal: "Kiểm tra lại toàn bộ từ và mẫu câu của chương." }
     ]
@@ -169,6 +234,103 @@ const B1 = {
           { en: "If it rains I will stay home", vi: "Nếu trời mưa tôi sẽ ở nhà" },
           { en: "I promise I will call you", vi: "Tôi hứa sẽ gọi cho bạn" },
           { en: "Remember to bring your book", vi: "Nhớ mang sách theo nhé" }
+        ]
+      },
+      {
+        id: "b1u2l3", title: "Giá như — điều kiện loại 2",
+        goal: "Nói về những chuyện không có thật, giả sử, ước ao.",
+        teach: [
+          { t: "intro", title: "Chuyện không có thật thì nói thế nào?", body: "Bài trước là điều kiện loại 1: chuyện có thể xảy ra. Bài này là loại 2: chuyện không có thật ở hiện tại. Điểm lạ là động từ lùi về quá khứ dù đang nói chuyện bây giờ.", bullets: ["If + quá khứ, would + V", "were cho mọi chủ ngữ", "Ước ao với I wish"] },
+          { t: "vocab", en: "imagine", vi: "tưởng tượng", pos: "Động từ", ipa: "/ɪˈmædʒɪn/", note: "Theo sau là V-ing: Imagine living there.", ex: { en: "Imagine living by the sea.", vi: "Tưởng tượng sống bên bờ biển xem." } },
+          { t: "vocab", en: "choice", vi: "sự lựa chọn", pos: "Danh từ", ipa: "/tʃɔɪs/", note: "Danh từ của choose. Have no choice là không còn cách nào khác.", ex: { en: "I had no choice.", vi: "Tôi không còn lựa chọn nào khác." } },
+          { t: "vocab", en: "situation", vi: "tình huống, hoàn cảnh", pos: "Danh từ", ipa: "/ˌsɪtʃuˈeɪʃn/", note: "In this situation là trong tình huống này.", ex: { en: "In your situation, I would wait.", vi: "Ở hoàn cảnh của bạn, tôi sẽ đợi." } },
+          { t: "vocab", en: "instead", vi: "thay vào đó", pos: "Trạng từ", ipa: "/ɪnˈsted/", note: "Đứng cuối câu. Instead OF + danh từ hoặc V-ing.", ex: { en: "Let's take the bus instead.", vi: "Hay là mình đi xe buýt thay vào đó." } },
+          { t: "vocab", en: "unless", vi: "trừ khi", pos: "Giới từ", ipa: "/ənˈles/", note: "Bằng if… not. Sau unless KHÔNG dùng phủ định nữa.", ex: { en: "I won't go unless you come.", vi: "Tôi sẽ không đi trừ khi bạn đi cùng." } },
+          { t: "vocab", en: "wish", vi: "ước", pos: "Động từ", ipa: "/wɪʃ/", note: "Sau I wish, động từ cũng lùi về quá khứ giống điều kiện loại 2.", ex: { en: "I wish I had more time.", vi: "Ước gì tôi có nhiều thời gian hơn." } },
+          { t: "grammar", title: "If + quá khứ, would + động từ", body: "Cấu trúc trông như quá khứ nhưng nói về HIỆN TẠI không có thật. Đây là chỗ khiến người học Việt Nam bối rối nhất.", rows: [
+            ["If + V2, would + V", "nếu… thì sẽ…", "If I had money, I would travel."],
+            ["If I were you…", "nếu tôi là bạn", "If I were you, I would apologise."],
+            ["I wish + V2", "ước gì", "I wish I spoke Chinese."],
+            ["so sánh loại 1", "chuyện có thể xảy ra", "If it rains, I will stay home."]
+          ], tip: "Ở loại 2, was đổi thành WERE cho MỌI chủ ngữ: If I were you, if he were here. Đây là dấu hiệu của người viết tiếng Anh chuẩn." },
+          { t: "dialogue", title: "Nếu trúng số", lines: [
+            { who: "A", en: "What would you do if you won the lottery?", vi: "Nếu trúng số bạn sẽ làm gì?" },
+            { who: "B", en: "I would buy a house for my parents. What about you?", vi: "Tôi sẽ mua nhà cho bố mẹ. Còn bạn?" },
+            { who: "A", en: "If I were you, I would travel instead.", vi: "Nếu là bạn, tôi sẽ đi du lịch thay vào đó." },
+            { who: "B", en: "I wish I had that much free time!", vi: "Ước gì tôi có nhiều thời gian rảnh đến thế!" }
+          ] }
+        ],
+        sentences: [
+          { en: "If I had money I would travel", vi: "Nếu có tiền tôi sẽ đi du lịch" },
+          { en: "If I were you I would wait", vi: "Nếu là bạn tôi sẽ đợi" },
+          { en: "I wish I had more time", vi: "Ước gì tôi có nhiều thời gian hơn" },
+          { en: "Let us take the bus instead", vi: "Hay là mình đi xe buýt thay vào đó" },
+          { en: "I will not go unless you come", vi: "Tôi sẽ không đi trừ khi bạn đi cùng" }
+        ]
+      },
+      {
+        id: "b1u2l4", title: "Thuật lại lời người khác",
+        goal: "Kể lại ai đó đã nói gì mà không trích nguyên văn.",
+        teach: [
+          { t: "intro", title: "Anh ấy bảo là…", body: "Khi kể lại lời người khác, tiếng Anh bắt động từ lùi một thì về quá khứ. Nghe rắc rối, nhưng chỉ cần nắm một quy tắc là xong.", bullets: ["Lùi thì khi thuật lại", "say hay tell", "Động từ thay cho said"] },
+          { t: "vocab", en: "mention", vi: "nhắc đến, đề cập", pos: "Động từ", ipa: "/ˈmenʃn/", note: "Don't mention it là câu đáp lại lời cảm ơn: có gì đâu.", ex: { en: "She mentioned your name.", vi: "Cô ấy có nhắc đến tên bạn." } },
+          { t: "vocab", en: "reply", vi: "trả lời, đáp lại", pos: "Động từ", ipa: "/rɪˈplaɪ/", note: "Reply TO someone. Vừa là động từ vừa là danh từ.", ex: { en: "He replied to my email.", vi: "Anh ấy đã trả lời email của tôi." } },
+          { t: "vocab", en: "complain", vi: "phàn nàn", pos: "Động từ", ipa: "/kəmˈpleɪn/", note: "Complain ABOUT something, complain TO someone.", ex: { en: "They complained about the noise.", vi: "Họ phàn nàn về tiếng ồn." } },
+          { t: "vocab", en: "shout", vi: "hét, quát", pos: "Động từ", ipa: "/ʃaʊt/", note: "Shout AT someone là quát ai đó — nghe rất nặng.", ex: { en: "He shouted at the driver.", vi: "Anh ta quát tài xế." } },
+          { t: "vocab", en: "whisper", vi: "thì thầm", pos: "Động từ", ipa: "/ˈwɪspər/", note: "Ngược với shout. Chữ h gần như không nghe thấy.", ex: { en: "She whispered the answer.", vi: "Cô ấy thì thầm câu trả lời." } },
+          { t: "vocab", en: "warn", vi: "cảnh báo", pos: "Động từ", ipa: "/wɔːrn/", note: "Warn someone about something. Chữ r rất nhẹ trong giọng Anh.", ex: { en: "He warned me about the rain.", vi: "Anh ấy đã báo trước cho tôi về cơn mưa." } },
+          { t: "grammar", title: "Lùi một thì khi thuật lại", body: "Nguyên tắc duy nhất: mọi thì đều lùi về sau một bậc, và đại từ đổi theo người kể.", rows: [
+            ["\"I am tired.\"", "→ said (that) he WAS tired", "hiện tại → quá khứ"],
+            ["\"I went home.\"", "→ said he HAD GONE home", "quá khứ → quá khứ hoàn thành"],
+            ["\"I will call.\"", "→ said he WOULD call", "will → would"],
+            ["\"Can you help?\"", "→ asked if I COULD help", "can → could"]
+          ], tip: "Say KHÔNG có người nghe đi liền sau: he said that… Tell thì BẮT BUỘC có: he told ME that… Đây là lỗi kinh điển." },
+          { t: "dialogue", title: "Kể lại cuộc họp", lines: [
+            { who: "A", en: "What did the manager say?", vi: "Quản lý nói gì vậy?" },
+            { who: "B", en: "He said the report was late, and he warned us about the deadline.", vi: "Anh ấy bảo báo cáo trễ, và nhắc chúng ta về hạn chót." },
+            { who: "A", en: "Did anyone complain?", vi: "Có ai phàn nàn không?" },
+            { who: "B", en: "Nam mentioned the problem, but nobody replied.", vi: "Nam có nhắc đến vấn đề đó, nhưng không ai trả lời." }
+          ] }
+        ],
+        sentences: [
+          { en: "She mentioned your name", vi: "Cô ấy có nhắc đến tên bạn" },
+          { en: "He said he was tired", vi: "Anh ấy bảo là anh ấy mệt" },
+          { en: "They complained about the noise", vi: "Họ phàn nàn về tiếng ồn" },
+          { en: "He warned me about the rain", vi: "Anh ấy đã báo trước cho tôi về cơn mưa" },
+          { en: "He replied to my email", vi: "Anh ấy đã trả lời email của tôi" }
+        ]
+      },
+      {
+        id: "b1u2l5", title: "Nguyên nhân & Hậu quả",
+        goal: "Nối chuyện này với chuyện kia: vì sao xảy ra và dẫn tới điều gì.",
+        teach: [
+          { t: "intro", title: "Không chỉ kể, mà giải thích", body: "Đến B1, người ta chờ bạn không chỉ kể chuyện gì đã xảy ra mà còn nói được TẠI SAO và RỒI SAO. Sáu từ trong bài này là bộ khung để làm điều đó.", bullets: ["cause và effect", "Ngăn chặn và tránh né", "Từ nối chỉ hậu quả"] },
+          { t: "vocab", en: "cause", vi: "gây ra; nguyên nhân", pos: "Động từ", ipa: "/kɔːz/", note: "Vừa là động từ vừa là danh từ. The cause of the accident.", ex: { en: "Heavy rain caused the accident.", vi: "Mưa lớn đã gây ra vụ tai nạn." } },
+          { t: "vocab", en: "effect", vi: "tác động, ảnh hưởng", pos: "Danh từ", ipa: "/ɪˈfekt/", note: "Effect là DANH từ, affect là ĐỘNG từ. Đây là cặp gây nhầm nhiều nhất tiếng Anh.", ex: { en: "It had a big effect on me.", vi: "Nó có tác động lớn tới tôi." } },
+          { t: "vocab", en: "affect", vi: "ảnh hưởng đến", pos: "Động từ", ipa: "/əˈfekt/", note: "Đi thẳng với tân ngữ, không cần giới từ: affect the result.", ex: { en: "The weather affects my mood.", vi: "Thời tiết ảnh hưởng đến tâm trạng tôi." } },
+          { t: "vocab", en: "avoid", vi: "tránh", pos: "Động từ", ipa: "/əˈvɔɪd/", note: "Theo sau là V-ing: avoid making noise. Không nói avoid to make.", ex: { en: "Try to avoid making the same mistake.", vi: "Cố tránh phạm cùng một lỗi." } },
+          { t: "vocab", en: "prevent", vi: "ngăn chặn", pos: "Động từ", ipa: "/prɪˈvent/", note: "Prevent somebody FROM doing something.", ex: { en: "Exercise prevents many illnesses.", vi: "Tập thể dục ngăn được nhiều bệnh." } },
+          { t: "vocab", en: "solve", vi: "giải quyết", pos: "Động từ", ipa: "/sɑːlv/", note: "Solve a problem. Danh từ là solution (giải pháp).", ex: { en: "We solved the problem together.", vi: "Chúng tôi đã cùng nhau giải quyết vấn đề." } },
+          { t: "grammar", title: "Nối nguyên nhân với hậu quả", body: "Bốn cách nối, khác nhau ở chỗ đặt câu và dấu phẩy. Dùng đúng thì bài viết của bạn lên hẳn một bậc.", rows: [
+            ["because + mệnh đề", "vì (có chủ ngữ + động từ)", "We stayed home because it rained."],
+            ["because of + danh từ", "vì (chỉ danh từ)", "We stayed home because of the rain."],
+            ["so", "nên", "It rained, so we stayed home."],
+            ["as a result,", "kết quả là", "It rained. As a result, we stayed home."]
+          ], tip: "Nhớ: because đi với CẢ MỘT CÂU, because of chỉ đi với DANH TỪ. Sai chỗ này là lỗi phổ biến nhất khi viết." },
+          { t: "culture", title: "Người ta chờ bạn nói vì sao", body: "Trong bài thi nói và trong họp hành quốc tế, một câu trả lời không kèm lý do bị coi là chưa hoàn chỉnh. Tập thói quen: nói ý kiến, rồi thêm ngay một chữ because." },
+          { t: "dialogue", title: "Bàn cách xử lý", lines: [
+            { who: "A", en: "Why was the delivery late?", vi: "Sao hàng lại giao muộn vậy?" },
+            { who: "B", en: "Because of the storm. It affected all the roads.", vi: "Vì cơn bão. Nó ảnh hưởng đến toàn bộ các tuyến đường." },
+            { who: "A", en: "How can we prevent this next time?", vi: "Lần sau làm sao ngăn được chuyện này?" },
+            { who: "B", en: "We can order earlier. That would solve most of it.", vi: "Mình có thể đặt hàng sớm hơn. Vậy là giải quyết được phần lớn." }
+          ] }
+        ],
+        sentences: [
+          { en: "Heavy rain caused the accident", vi: "Mưa lớn đã gây ra vụ tai nạn" },
+          { en: "The weather affects my mood", vi: "Thời tiết ảnh hưởng đến tâm trạng tôi" },
+          { en: "We solved the problem together", vi: "Chúng tôi đã cùng nhau giải quyết vấn đề" },
+          { en: "Try to avoid making the same mistake", vi: "Cố tránh phạm cùng một lỗi" },
+          { en: "It had a big effect on me", vi: "Nó có tác động lớn tới tôi" }
         ]
       },
       { id: "b1u2c", title: "Ôn tập chương 2", checkpoint: true,
