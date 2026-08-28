@@ -88,7 +88,9 @@ const DEFAULTS = {
   joined: today(), sound: true, motion: false, showVi: true, theme: "",
   kidVoice: true,
   ten: "",
-  moHet: false,
+  // Đang mở sẵn hết bài để thầy kiểm tra nội dung. Khi nào cần học lần lượt
+  // trở lại thì đổi về false — ai đã tự gạt công tắc thì giữ lựa chọn của họ.
+  moHet: true,
   // Ảnh đại diện: {k:"m"} linh vật, {k:"e",i:<số>} mặt vui, {k:"a",d:"data:…"} ảnh tự tải
   avatar: { k: "m" }
 };
