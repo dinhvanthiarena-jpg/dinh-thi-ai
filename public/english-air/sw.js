@@ -3,7 +3,7 @@
    Toàn bộ app chạy offline sau lần mở đầu tiên.
    Đổi CACHE khi sửa file để buộc tải lại bản mới.
    ============================================================ */
-const CACHE = "english-air-v37";
+const CACHE = "english-air-v38";
 
 const SHELL = [
   "./",
@@ -51,6 +51,14 @@ self.addEventListener("fetch", e => {
   const sameOrigin = url.origin === self.location.origin;
   const isFont = /fonts\.(googleapis|gstatic)\.com$/.test(url.hostname);
   if (!sameOrigin && !isFont) return;
+
+  // CHỈ ĐỤNG VÀO FILE CỦA CHÍNH APP. Trước đây bắt mọi lời gọi cùng tên miền rồi
+  // trả bản đã lưu — nên các lời gọi API bị đóng băng: app hỏi "ai đang đăng nhập"
+  // thì nhận lại bản cũ từ lúc chưa đăng nhập, và màn chờ tiền hỏi mãi vẫn nhận
+  // "chưa trả" cũ nên quay không dứt. Cái gì không nằm trong thư mục app thì để
+  // mạng lo, tuyệt đối không lưu lại.
+  const trongApp = url.pathname.startsWith(new URL("./", self.location).pathname);
+  if (sameOrigin && !trongApp) return;
 
   // Điều hướng: ưu tiên mạng để lấy bản mới, mất mạng thì trả bản đã lưu
   if (req.mode === "navigate") {
