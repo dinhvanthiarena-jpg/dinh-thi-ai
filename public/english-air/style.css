@@ -1113,6 +1113,51 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   background: var(--bad-soft); border-radius: var(--r2); padding: var(--s2) var(--s3); }
 
 
+/* Thẻ tài khoản trong phần Cài đặt */
+.tk-the { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+.tk-the b { display: block; font-size: .98rem; font-weight: 800; }
+.tk-the small { display: block; font-size: .82rem; color: var(--muted-fg); font-weight: 600; margin-top: 2px; }
+.tk-the .btn { flex: none; }
+
+/* ---------- 15h. CỬA VÀO: ĐĂNG KÝ / ĐĂNG NHẬP ---------- */
+/* Phủ kín màn hình và nằm trên mọi thứ — người chưa có tài khoản không được
+   lọt vào bên trong app. */
+.cong { position: fixed; inset: 0; z-index: 95; overflow-y: auto;
+  background: var(--bg); -webkit-overflow-scrolling: touch; }
+.cong[hidden] { display: none; }
+.cong-in { width: 100%; max-width: 420px; margin-inline: auto;
+  padding: calc(var(--s6) + env(safe-area-inset-top)) var(--gut)
+           calc(var(--s6) + env(safe-area-inset-bottom)); }
+
+.cong-mon { width: 108px; height: 108px; margin: 0 auto var(--s4);
+  border-radius: var(--rf); overflow: hidden; display: grid; place-items: center;
+  background: var(--brand-soft); }
+.cong-mon svg { width: 76px; height: 76px; }
+.cong-mon img { width: 100%; height: 100%; object-fit: cover; }
+
+.cong h1 { font-size: 1.55rem; font-weight: 900; text-align: center; line-height: 1.25; }
+.cong-sub { text-align: center; color: var(--muted-fg); font-weight: 600;
+  margin-top: var(--s2); font-size: .92rem; }
+
+#congForm { margin-top: var(--s5); display: flex; flex-direction: column; gap: var(--s3); }
+.cong-o { display: flex; flex-direction: column; gap: 6px; }
+.cong-o span { font-size: .82rem; font-weight: 800; color: var(--muted-fg); padding-left: 2px; }
+.cong-o input { width: 100%; min-height: 54px; padding: 0 var(--s4);
+  border: 0; border-radius: var(--r3); background: var(--muted); color: var(--fg);
+  font-family: inherit; font-size: 1rem; font-weight: 700; outline: none;
+  transition: box-shadow var(--t1) var(--e); }
+.cong-o input::placeholder { color: var(--muted-fg); font-weight: 600; opacity: .7; }
+.cong-o input:focus { box-shadow: inset 0 0 0 2px var(--brand); }
+.cong-o.sai input { box-shadow: inset 0 0 0 2px var(--bad); }
+
+.cong-loi { margin-top: var(--s1); padding: var(--s3);
+  border-radius: var(--r2); background: var(--bad-soft); color: var(--bad-ink);
+  font-size: .88rem; font-weight: 700; text-align: center; }
+.cong-loi[hidden] { display: none; }
+.cong-fine { margin-top: var(--s4); font-size: .78rem; line-height: 1.5;
+  color: var(--muted-fg); text-align: center; }
+#congGui[disabled] { opacity: .6; }
+
 /* ---------- 15g. KHUNG ẢNH MINH HOẠ TRONG BÀI ---------- */
 /* Đặt giữa câu hỏi và phần trả lời, đúng chỗ mắt nhìn tới trước khi đọc chữ.
    Tỉ lệ cố định để bố cục không giật khi ảnh tải xong. */

@@ -2370,6 +2370,166 @@ $("#avFile").addEventListener("change", ev => {
 });
 veAvatar();
 
+/* ---------- 18e. Cửa vào: đăng ký / đăng nhập ----------
+   App và web cùng tên miền nên dùng chung một phiên: gọi kèm credentials là
+   cookie đăng nhập tự đi theo, app không phải giữ mật khẩu hay token nào. */
+const TK_URL = "../api/english-air";
+const TK = { toi: null, kieu: "dangKy" };
+
+async function hoiTaiKhoan() {
+  try {
+    const r = await fetch(TK_URL + "/toi", { credentials: "same-origin" });
+    TK.toi = await r.json();
+  } catch {
+    // Mất mạng thì đừng chặn người ta học — tiến độ vẫn nằm trên máy.
+    TK.toi = { dangNhap: false, ngoaiTuyen: true };
+  }
+  return TK.toi;
+}
+
+function veCong() {
+  const dangKy = TK.kieu === "dangKy";
+  $("#congTitle").textContent = dangKy ? "Chào bạn, tớ là MON.L" : "Chào bạn quay lại";
+  $("#congSub").textContent = dangKy
+    ? "Đăng ký để giữ tiến độ học của bạn trên mọi máy."
+    : "Nhập số điện thoại và mật khẩu để học tiếp.";
+  $("#oTen").hidden = !dangKy;
+  $("#fTen").required = dangKy;
+  $("#fMk").autocomplete = dangKy ? "new-password" : "current-password";
+  $("#fMk").placeholder = dangKy ? "Ít nhất 6 ký tự" : "Mật khẩu của bạn";
+  $("#congGui").textContent = dangKy ? "Đăng ký" : "Đăng nhập";
+  $("#congDoi").textContent = dangKy ? "Đã có tài khoản? Đăng nhập" : "Chưa có tài khoản? Đăng ký";
+  loiCong("");
+}
+
+function loiCong(msg) {
+  const o = $("#congLoi");
+  o.textContent = msg || "";
+  o.hidden = !msg;
+}
+
+function moCong() {
+  $("#cong").hidden = false;
+  document.body.style.overflow = "hidden";
+  veCong();
+  setTimeout(() => $(dangKyDangMo() ? "#fTen" : "#fSdt").focus(), 80);
+}
+const dangKyDangMo = () => TK.kieu === "dangKy";
+
+function dongCong() {
+  $("#cong").hidden = true;
+  document.body.style.overflow = "";
+}
+
+$("#congDoi").addEventListener("click", () => {
+  TK.kieu = TK.kieu === "dangKy" ? "dangNhap" : "dangKy";
+  veCong();
+  $(dangKyDangMo() ? "#fTen" : "#fSdt").focus();
+});
+
+$("#congForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const nut = $("#congGui");
+  if (nut.disabled) return;
+
+  const dangKy = dangKyDangMo();
+  const ten = $("#fTen").value.trim();
+  const sdt = $("#fSdt").value.trim();
+  const mk = $("#fMk").value;
+
+  // Bắt lỗi ngay tại chỗ trước khi phiền tới máy chủ.
+  if (dangKy && !ten) return neuThieu("#fTen", "Bạn tên là gì nhỉ?");
+  if (!sdt) return neuThieu("#fSdt", "Bạn nhập số điện thoại nhé.");
+  if (!mk) return neuThieu("#fMk", "Bạn nhập mật khẩu nhé.");
+  if (dangKy && mk.length < 6) return neuThieu("#fMk", "Mật khẩu cần ít nhất 6 ký tự.");
+
+  $$(".cong-o").forEach(o => o.classList.remove("sai"));
+  nut.disabled = true;
+  nut.textContent = dangKy ? "Đang tạo tài khoản…" : "Đang vào…";
+  loiCong("");
+
+  try {
+    const r = await fetch(TK_URL + (dangKy ? "/dang-ky" : "/dang-nhap"), {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ten, sdt, matKhau: mk }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { loiCong(j.error || "Chưa xong được, bạn thử lại nhé."); return; }
+
+    TK.toi = j;
+    $("#fMk").value = "";
+    // Lần đầu đăng ký thì lấy luôn tên đó làm tên hiển thị trong app.
+    if (j.ten && !S.ten) { S.ten = j.ten; save(); veTen(); }
+    dongCong();
+    toast(dangKy ? `Chào ${j.ten}, bắt đầu thôi!` : `Chào bạn quay lại, ${j.ten}!`);
+    veTheTaiKhoan();
+    veThePro();
+  } catch {
+    loiCong("Không nối được máy chủ. Bạn kiểm tra mạng rồi thử lại nhé.");
+  } finally {
+    nut.disabled = false;
+    veCongNut();
+  }
+});
+
+function veCongNut() {
+  $("#congGui").textContent = dangKyDangMo() ? "Đăng ký" : "Đăng nhập";
+}
+
+function neuThieu(sel, msg) {
+  const o = $(sel);
+  o.closest(".cong-o").classList.add("sai");
+  o.focus();
+  loiCong(msg);
+}
+
+// Số điện thoại chỉ gồm chữ số và dấu cộng — chặn ngay lúc gõ cho đỡ sai.
+$("#fSdt").addEventListener("input", ev => {
+  const v = ev.target.value.replace(/[^0-9+ ]/g, "");
+  if (v !== ev.target.value) ev.target.value = v;
+});
+
+/** Thẻ tài khoản dưới phần Cài đặt. */
+function veTheTaiKhoan() {
+  const the = $("#tkThe");
+  if (!the) return;
+  const t = TK.toi;
+  if (!t || !t.dangNhap) { the.hidden = true; return; }
+  the.hidden = false;
+  $("#tkTen").textContent = t.ten || "Tài khoản của bạn";
+  $("#tkSdt").textContent = t.sdt || t.email || "";
+}
+
+$("#btnThoat").addEventListener("click", () => openSheet({
+  title: "Đăng xuất?",
+  body: "Tiến độ học vẫn nằm trên máy này. Đăng nhập lại lúc nào cũng được.",
+  yes: "Đăng xuất",
+  yesClass: "btn-danger",
+  no: "Ở lại",
+  onYes: async () => {
+    try { await fetch(TK_URL + "/thoat", { method: "POST", credentials: "same-origin" }); }
+    catch { /* mất mạng thì thôi, cookie hết hạn sau */ }
+    TK.toi = { dangNhap: false };
+    TK.kieu = "dangNhap";
+    veTheTaiKhoan();
+    moCong();
+  },
+}));
+
+/** Chưa đăng nhập thì chặn ở cửa; mất mạng thì cho vào để không kẹt người học. */
+async function gacCua() {
+  const t = await hoiTaiKhoan();
+  veTheTaiKhoan();
+  if (t.dangNhap || t.ngoaiTuyen) {
+    if (t.dangNhap && t.ten && !S.ten) { S.ten = t.ten; save(); veTen(); }
+    return;
+  }
+  moCong();
+}
+gacCua();
+
 /* ---------- 19. Giải đấu ---------- */
 const AVCOL = ["#0369A1", "#B45309", "#047857", "#BE185D", "#6D28D9", "#B91C1C", "#0F766E", "#4F46E5"];
 const leagueName = () => "Giải " + LEAGUES[clamp(S.tier, 0, LEAGUES.length - 1)].name;

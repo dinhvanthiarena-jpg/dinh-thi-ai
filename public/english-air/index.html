@@ -433,8 +433,16 @@
           <button class="btn btn-primary mt" id="btnInstall" type="button" hidden>Cài đặt</button>
         </div>
 
+        <div class="card set tk-the" id="tkThe" hidden>
+          <div>
+            <b id="tkTen">—</b>
+            <small id="tkSdt"></small>
+          </div>
+          <button class="btn btn-soft" id="btnThoat" type="button">Đăng xuất</button>
+        </div>
+
         <button class="btn btn-text btn-block" id="btnReset" type="button">Xoá toàn bộ tiến độ</button>
-        <p class="fine">Mọi dữ liệu chỉ lưu trên máy bạn.</p>
+        <p class="fine">Tiến độ học lưu trên máy bạn; tên và số điện thoại lưu ở tài khoản.</p>
       </section>
     </main>
 
@@ -566,6 +574,35 @@
 </div>
 
 <!-- ================= CUỘC GỌI VỚI MON.L ================= -->
+
+<!-- ================= CỬA VÀO: ĐĂNG KÝ / ĐĂNG NHẬP ================= -->
+<div class="cong" id="cong" hidden role="dialog" aria-modal="true" aria-labelledby="congTitle">
+  <div class="cong-in">
+    <div class="cong-mon" data-mascot="head" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></div>
+    <h1 id="congTitle">Chào bạn, tớ là MON.L</h1>
+    <p class="cong-sub" id="congSub">Đăng ký để giữ tiến độ học của bạn trên mọi máy.</p>
+
+    <form id="congForm" novalidate>
+      <label class="cong-o" id="oTen">
+        <span>Tên của bạn</span>
+        <input type="text" id="fTen" autocomplete="name" maxlength="60" placeholder="Ví dụ: Đinh Thi Ai" />
+      </label>
+      <label class="cong-o">
+        <span>Số điện thoại</span>
+        <input type="tel" id="fSdt" autocomplete="tel" inputmode="numeric" maxlength="15" placeholder="0912345678" />
+      </label>
+      <label class="cong-o">
+        <span>Mật khẩu</span>
+        <input type="password" id="fMk" autocomplete="new-password" maxlength="72" placeholder="Ít nhất 6 ký tự" />
+      </label>
+      <p class="cong-loi" id="congLoi" hidden role="alert"></p>
+      <button class="pro-cta" id="congGui" type="submit">Đăng ký</button>
+    </form>
+
+    <button class="btn btn-text btn-block mt" id="congDoi" type="button">Đã có tài khoản? Đăng nhập</button>
+    <p class="cong-fine">Tớ chỉ giữ tên và số điện thoại để nhận ra bạn, không dùng vào việc gì khác.</p>
+  </div>
+</div>
 
 <!-- ================= MON.L PRO ================= -->
 <div class="pro" id="pro" hidden role="dialog" aria-modal="true" aria-labelledby="proTitle">
