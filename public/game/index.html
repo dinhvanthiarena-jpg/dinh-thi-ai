@@ -95,8 +95,8 @@
         <button class="btn-gem-img" id="btnPlay" aria-label="Bắt đầu chơi">
           <img src="assets/ui/btn-play.png" alt="Bắt đầu chơi" />
         </button>
-        <button class="btn-gem-img" id="btnHowTo" aria-label="Cách chơi">
-          <img src="assets/ui/btn-howto.png" alt="Cách chơi" />
+        <button class="btn-gem btn-gem-violet" id="btnGifted" aria-label="Ôn học sinh giỏi">
+          <span class="gem-icon">🎓</span> Ôn học sinh giỏi
         </button>
       </div>
       <button class="btn-homework-icon" id="btnOpenHomework" aria-label="Chụp bài tập, AI giảng bài">
@@ -336,25 +336,30 @@
     </div>
   </section>
 
-  <!-- MODAL: HOW TO PLAY -->
-  <div class="modal-overlay" id="howToModal" hidden>
-    <div class="modal-box">
-      <button class="icon-btn modal-close" id="btnCloseHowTo" aria-label="Đóng">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+  <!-- SCREEN: ÔN HỌC SINH GIỎI -->
+  <section id="screen-gifted" class="screen">
+    <div class="topbar">
+      <button class="icon-btn" id="btnGiftedBack" aria-label="Quay lại">
+        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/></svg>
       </button>
-      <h2>Cách chơi</h2>
-      <ol class="howto-list">
-        <li>Chọn <strong>lớp</strong> của con và <strong>dạng toán</strong> muốn luyện — chọn <strong>Toán đố</strong> để làm bài toán có lời văn, có lời giải chi tiết!</li>
-        <li>Chọn chế độ <strong>Luyện tập</strong> (20 câu, thong thả) hoặc <strong>Thử thách</strong> (đua với đồng hồ 60 giây).</li>
-        <li>Đọc phép tính rồi bấm vào ô có <strong>đáp án đúng</strong>.</li>
-        <li>Trả lời đúng liên tiếp để được <strong>combo điểm thưởng</strong>!</li>
-        <li>Trả lời sai sẽ mất 1 trái tim — hết 3 trái tim là kết thúc ván chơi.</li>
-        <li>Cứ mỗi <strong>5 câu</strong>, con sẽ được <strong>giải lao vui</strong> với câu đố hài hước cùng Thầy Đinh Thi Ai!</li>
-        <li>Cuối ván, con sẽ nhận được <strong>sao thưởng</strong> tùy theo kết quả. Cố gắng đạt 3 sao nhé!</li>
-      </ol>
-      <button class="btn btn-primary btn-lg" id="btnHowToGotIt">Đã hiểu!</button>
+      <h2 class="topbar-title">Ôn học sinh giỏi</h2>
+      <div style="width:44px"></div>
     </div>
-  </div>
+
+    <div class="gifted-wrap">
+      <div class="gifted-grade-picker" id="giftedGradePicker">
+        <p class="setup-label">Chọn lớp muốn ôn</p>
+        <div class="grade-row" id="giftedGradeRow">
+          <button class="grade-card" data-grade="1"><span class="grade-num">1</span><span>Lớp 1</span></button>
+          <button class="grade-card" data-grade="2"><span class="grade-num">2</span><span>Lớp 2</span></button>
+          <button class="grade-card" data-grade="3"><span class="grade-num">3</span><span>Lớp 3</span></button>
+          <button class="grade-card" data-grade="4"><span class="grade-num">4</span><span>Lớp 4</span></button>
+          <button class="grade-card" data-grade="5"><span class="grade-num">5</span><span>Lớp 5</span></button>
+        </div>
+      </div>
+      <div class="gifted-problem-list" id="giftedProblemList" hidden></div>
+    </div>
+  </section>
 
   <!-- OVERLAY: FUN BREAK -->
   <div class="modal-overlay break-overlay" id="breakOverlay" hidden>

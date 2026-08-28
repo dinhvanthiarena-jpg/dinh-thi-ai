@@ -421,7 +421,7 @@
   /* ================= DOM refs ================= */
   const $ = (id) => document.getElementById(id);
   const screens = {
-    license: $('screen-license'), home: $('screen-home'), setup: $('screen-setup'), game: $('screen-game'), result: $('screen-result'), homework: $('screen-homework'),
+    license: $('screen-license'), home: $('screen-home'), setup: $('screen-setup'), game: $('screen-game'), result: $('screen-result'), homework: $('screen-homework'), gifted: $('screen-gifted'),
   };
   function showScreen(name) {
     Object.values(screens).forEach(s => s.classList.remove('active'));
@@ -465,10 +465,7 @@
 
   /* ================= HOME ================= */
   $('btnPlay').addEventListener('click', () => { sfx.click(); showScreen('setup'); });
-  $('btnHowTo').addEventListener('click', () => { sfx.click(); $('howToModal').hidden = false; });
-  $('btnCloseHowTo').addEventListener('click', () => { $('howToModal').hidden = true; });
-  $('btnHowToGotIt').addEventListener('click', () => { sfx.click(); $('howToModal').hidden = true; });
-  $('howToModal').addEventListener('click', (e) => { if (e.target.id === 'howToModal') $('howToModal').hidden = true; });
+  $('btnGifted').addEventListener('click', () => { sfx.click(); showScreen('gifted'); giftedShowGradePicker(); });
   setMascot($('mascotHome'), 'happy');
 
   $('btnContactFB').addEventListener('click', () => {
@@ -478,6 +475,108 @@
   $('btnContactWeb').addEventListener('click', () => {
     sfx.click();
     if (window.electronAPI) window.electronAPI.openExternalLink('website');
+  });
+
+  /* ================= ÔN HỌC SINH GIỎI ================= */
+  // Curated advanced/enrichment problems per grade, ordered easy → hard —
+  // this is a review/reading list (tap to reveal each solution), not a
+  // timed quiz, so it reuses the setup screen's grade-card styling but
+  // renders a plain scrollable list instead of the game flow.
+  const GIFTED_PROBLEMS = {
+    1: [
+      { level: 'Cơ bản', text: 'Tìm số thích hợp điền vào dãy số sau: 5, 7, 9, 11, ...', solution: 'Mỗi số sau hơn số liền trước 2 đơn vị (5→7, 7→9, 9→11 đều cách nhau 2). Vậy số tiếp theo là 11 + 2 = <strong>13</strong>.' },
+      { level: 'Cơ bản', text: 'Hộp thứ nhất có nhiều hơn hộp thứ hai 3 cái bút. Hộp thứ hai có 6 cái bút. Hỏi hộp thứ nhất có bao nhiêu cái bút?', solution: 'Hộp thứ nhất nhiều hơn 3 cái nên có: 6 + 3 = <strong>9 cái bút</strong>.' },
+      { level: 'Nâng cao', text: 'An cho em 2 quả táo thì An còn lại nhiều hơn em 1 quả. Biết sau khi được cho, em có 4 quả táo. Hỏi lúc đầu An có bao nhiêu quả táo?', solution: 'Sau khi cho, An còn nhiều hơn em 1 quả nên An còn: 4 + 1 = 5 (quả). Vì An đã cho đi 2 quả nên lúc đầu An có: 5 + 2 = <strong>7 quả táo</strong>.' },
+      { level: 'Nâng cao', text: 'Điền số thích hợp vào ô trống để phép tính đúng: 8 + ☐ = 15 − 3', solution: '15 − 3 = 12. Vậy 8 + ☐ = 12, nên ☐ = 12 − 8 = <strong>4</strong>.' },
+      { level: 'Nâng cao', text: 'Ba bạn xếp hàng: Lan đứng trước Hoa, Hoa đứng trước Mai. Hỏi ai đứng cuối hàng?', solution: 'Thứ tự xếp hàng là Lan → Hoa → Mai, nên bạn đứng cuối hàng là <strong>Mai</strong>.' },
+      { level: 'Nâng cao', text: 'Tìm một số biết số đó cộng với 5 thì bằng số lớn nhất có 1 chữ số.', solution: 'Số lớn nhất có 1 chữ số là 9. Số cần tìm là: 9 − 5 = <strong>4</strong>.' },
+    ],
+    2: [
+      { level: 'Cơ bản', text: 'Tìm x, biết: x + 24 = 57', solution: 'x = 57 − 24 = <strong>33</strong>.' },
+      { level: 'Cơ bản', text: 'Một lớp có 35 học sinh, trong đó có 19 bạn nam. Hỏi lớp đó có bao nhiêu bạn nữ?', solution: 'Số bạn nữ là: 35 − 19 = <strong>16 bạn</strong>.' },
+      { level: 'Nâng cao', text: 'Tìm 3 số tự nhiên liên tiếp có tổng bằng 24.', solution: 'Số ở giữa bằng tổng chia cho 3: 24 : 3 = 8. Vậy 3 số liên tiếp cần tìm là <strong>7, 8, 9</strong>.' },
+      { level: 'Nâng cao', text: 'Có một số sách xếp đều vào 6 ngăn, mỗi ngăn 8 quyển thì vừa hết. Nếu xếp mỗi ngăn 6 quyển thì cần bao nhiêu ngăn?', solution: 'Tổng số sách là: 8 × 6 = 48 (quyển). Nếu mỗi ngăn 6 quyển thì cần: 48 : 6 = <strong>8 ngăn</strong>.' },
+      { level: 'Nâng cao', text: 'Tìm một số, biết nếu thêm 15 vào số đó rồi bớt đi 7 thì được kết quả là 42.', solution: 'Gọi số cần tìm là x, ta có x + 15 − 7 = 42, nghĩa là x + 8 = 42. Vậy x = 42 − 8 = <strong>34</strong>.' },
+      { level: 'Nâng cao', text: 'Mẹ có 50 000 đồng, mua bút hết 23 000 đồng, mua vở hết 15 000 đồng. Hỏi mẹ còn lại bao nhiêu tiền?', solution: 'Số tiền còn lại là: 50 000 − 23 000 − 15 000 = <strong>12 000 đồng</strong>.' },
+    ],
+    3: [
+      { level: 'Cơ bản', text: 'Tìm x, biết: x × 6 = 42', solution: 'x = 42 : 6 = <strong>7</strong>.' },
+      { level: 'Cơ bản', text: 'Một cửa hàng có 84 quả cam, đã bán 1/4 số cam đó. Hỏi cửa hàng còn lại bao nhiêu quả cam?', solution: 'Số cam đã bán là: 84 : 4 = 21 (quả). Số cam còn lại là: 84 − 21 = <strong>63 quả</strong>.' },
+      { level: 'Nâng cao', text: 'Tìm số tự nhiên bé nhất có 2 chữ số, biết số đó chia cho 4 thì dư 3.', solution: 'Thử các số có 2 chữ số từ nhỏ: 10 chia 4 dư 2; 11 chia 4 dư 3 (vì 4 × 2 = 8, 11 − 8 = 3). Vậy số cần tìm là <strong>11</strong>.' },
+      { level: 'Nâng cao', text: 'Một phép chia có số bị chia là 47, số chia là 6. Tìm thương và số dư.', solution: '6 × 7 = 42, mà 47 − 42 = 5 (< 6) nên: 47 : 6 = <strong>7, dư 5</strong>.' },
+      { level: 'Nâng cao', text: 'Tổng của hai số là 96. Số thứ nhất hơn số thứ hai 12 đơn vị. Tìm hai số đó.', solution: 'Số lớn là: (96 + 12) : 2 = 54. Số bé là: 54 − 12 = <strong>42</strong>. Vậy hai số cần tìm là <strong>54 và 42</strong>.' },
+      { level: 'Nâng cao', text: 'Có 27 cái kẹo chia đều cho 4 bạn. Hỏi mỗi bạn được nhiều nhất bao nhiêu cái kẹo và còn dư mấy cái?', solution: '27 : 4 = 6, dư 3 (vì 4 × 6 = 24, 27 − 24 = 3). Vậy mỗi bạn được nhiều nhất <strong>6 cái kẹo</strong>, còn dư <strong>3 cái</strong>.' },
+    ],
+    4: [
+      { level: 'Cơ bản', text: 'Một hình chữ nhật có chiều dài 15cm, chiều rộng 9cm. Tính chu vi hình đó.', solution: 'Chu vi hình chữ nhật là: (15 + 9) × 2 = <strong>48cm</strong>.' },
+      { level: 'Cơ bản', text: 'Tìm x, biết: x : 7 = 128', solution: 'x = 128 × 7 = <strong>896</strong>.' },
+      { level: 'Nâng cao', text: 'Tổng hai số là 158, hiệu hai số là 24. Tìm hai số đó.', solution: 'Số lớn là: (158 + 24) : 2 = 91. Số bé là: 91 − 24 = <strong>67</strong>. Vậy hai số cần tìm là <strong>91 và 67</strong>.' },
+      { level: 'Nâng cao', text: 'Một mảnh vườn hình chữ nhật có chu vi 60m, chiều dài hơn chiều rộng 6m. Tính diện tích mảnh vườn.', solution: 'Nửa chu vi là: 60 : 2 = 30 (m). Chiều dài là: (30 + 6) : 2 = 18 (m); chiều rộng là: 30 − 18 = 12 (m). Diện tích là: 18 × 12 = <strong>216m²</strong>.' },
+      { level: 'Nâng cao', text: 'Tìm một số, biết nếu lấy số đó nhân với 3 rồi cộng thêm 25 thì được 100.', solution: 'Gọi số cần tìm là x: 3 × x + 25 = 100, nên 3 × x = 75. Vậy x = 75 : 3 = <strong>25</strong>.' },
+      { level: 'Nâng cao', text: 'Một đội công nhân sửa xong một quãng đường trong 6 ngày, mỗi ngày sửa 250m. Nếu muốn xong trong 5 ngày thì mỗi ngày phải sửa bao nhiêu mét?', solution: 'Tổng quãng đường là: 250 × 6 = 1500 (m). Muốn xong trong 5 ngày thì mỗi ngày phải sửa: 1500 : 5 = <strong>300m</strong>.' },
+    ],
+    5: [
+      { level: 'Cơ bản', text: 'Tính: 24,5 + 13,75', solution: '24,5 + 13,75 = <strong>38,25</strong>.' },
+      { level: 'Cơ bản', text: 'Một lớp có 40 học sinh, số học sinh nam chiếm 60% số học sinh cả lớp. Hỏi lớp đó có bao nhiêu học sinh nam?', solution: 'Số học sinh nam là: 40 × 60 : 100 = <strong>24 học sinh</strong>.' },
+      { level: 'Nâng cao', text: 'Tổng hai số là 84. Tỉ số của số bé và số lớn là 3/4. Tìm hai số đó.', solution: 'Tổng số phần bằng nhau là 3 + 4 = 7 phần. Số bé là: 84 : 7 × 3 = 36. Số lớn là: 84 − 36 = <strong>48</strong>. Vậy hai số cần tìm là <strong>36 và 48</strong>.' },
+      { level: 'Nâng cao', text: 'Một hình thang có đáy lớn 18cm, đáy bé 12cm, chiều cao 8cm. Tính diện tích hình thang đó.', solution: 'Diện tích hình thang là: (18 + 12) × 8 : 2 = <strong>120cm²</strong>.' },
+      { level: 'Nâng cao', text: 'Một chiếc áo giá 250 000 đồng được giảm giá 20%. Hỏi giá chiếc áo sau khi giảm là bao nhiêu?', solution: 'Số tiền được giảm là: 250 000 × 20 : 100 = 50 000 (đồng). Giá sau khi giảm là: 250 000 − 50 000 = <strong>200 000 đồng</strong>.' },
+      { level: 'Nâng cao', text: 'Một vòi nước chảy một mình thì đầy bể trong 6 giờ, vòi khác chảy một mình thì đầy bể đó trong 4 giờ. Nếu cả hai vòi cùng chảy thì sau bao lâu đầy bể?', solution: 'Mỗi giờ vòi 1 chảy được 1/6 bể, vòi 2 chảy được 1/4 bể. Cả hai vòi mỗi giờ chảy được: 1/6 + 1/4 = 5/12 (bể). Thời gian chảy đầy bể là: 1 : 5/12 = 12/5 = 2,4 giờ = <strong>2 giờ 24 phút</strong>.' },
+    ],
+  };
+
+  const giftedGradePicker = $('giftedGradePicker');
+  const giftedGradeRow = $('giftedGradeRow');
+  const giftedProblemList = $('giftedProblemList');
+  let giftedCurrentGrade = null;
+
+  function giftedShowGradePicker() {
+    giftedCurrentGrade = null;
+    giftedGradePicker.hidden = false;
+    giftedProblemList.hidden = true;
+  }
+
+  function giftedRenderProblems(grade) {
+    giftedCurrentGrade = grade;
+    giftedGradePicker.hidden = true;
+    giftedProblemList.hidden = false;
+    giftedProblemList.innerHTML = '';
+    (GIFTED_PROBLEMS[grade] || []).forEach((p, i) => {
+      const card = document.createElement('div');
+      card.className = 'gifted-card';
+      const levelClass = p.level === 'Nâng cao' ? 'gifted-level-advanced' : 'gifted-level-basic';
+      card.innerHTML = `
+        <div class="gifted-card-head">
+          <span class="gifted-level ${levelClass}">${p.level}</span>
+          <span class="gifted-num">Bài ${i + 1}</span>
+        </div>
+        <p class="gifted-question">${p.text}</p>
+        <button type="button" class="gifted-reveal-btn">Xem lời giải</button>
+        <p class="gifted-solution" hidden>${p.solution}</p>
+      `;
+      const revealBtn = card.querySelector('.gifted-reveal-btn');
+      const solutionEl = card.querySelector('.gifted-solution');
+      revealBtn.addEventListener('click', () => {
+        sfx.click();
+        const willShow = solutionEl.hidden;
+        solutionEl.hidden = !willShow;
+        revealBtn.textContent = willShow ? 'Ẩn lời giải' : 'Xem lời giải';
+      });
+      giftedProblemList.appendChild(card);
+    });
+  }
+
+  giftedGradeRow.addEventListener('click', (e) => {
+    const btn = e.target.closest('.grade-card');
+    if (!btn) return;
+    sfx.click();
+    giftedRenderProblems(parseInt(btn.dataset.grade, 10));
+  });
+
+  $('btnGiftedBack').addEventListener('click', () => {
+    sfx.click();
+    if (giftedCurrentGrade !== null) giftedShowGradePicker();
+    else showScreen('home');
   });
 
   /* ================= SETUP ================= */

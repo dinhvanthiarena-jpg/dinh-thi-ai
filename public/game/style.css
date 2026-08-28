@@ -303,6 +303,30 @@ button:focus-visible,
 .btn-gem-img:active { transform: translateY(3px) scale(0.98); }
 .btn-gem-img img { display: block; height: 88px; width: auto; }
 
+/* CSS-drawn gem button (no matching cropped artwork exists yet) — same cut
+   corner + gloss language as the real gem-button images so it doesn't look
+   out of place sitting next to them. */
+.btn-gem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 88px;
+  padding: 0 26px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1rem;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  border: 3px solid rgba(255,255,255,0.35);
+  clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+  box-shadow: 0 6px 0 rgba(0,0,0,0.25), 0 10px 18px rgba(0,0,0,0.3);
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out, filter 150ms ease-out;
+}
+.btn-gem:hover { transform: translateY(-3px); filter: brightness(1.08); }
+.btn-gem:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+.btn-gem-violet { background: var(--gloss-shine-strong), linear-gradient(160deg, #C9A8F7 0%, #7C3AED 45%, #4C1D95 100%); border-color: #3B1470; }
+.btn-gem .gem-icon { font-size: 1.3rem; }
+
 /* Icon-only homework button (real photo/AI-teach icon comes later from
    thầy — placeholder SVG for now). */
 .btn-homework-icon {
@@ -842,6 +866,68 @@ button:focus-visible,
   border-color: #8A5A0A;
 }
 .btn-start { align-self: center; min-width: 260px; }
+
+/* ==== Ôn học sinh giỏi ==== */
+.gifted-wrap {
+  width: 100%;
+  max-width: 700px;
+  padding: 10px 20px 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.gifted-grade-picker { display: flex; flex-direction: column; gap: 10px; }
+.gifted-problem-list { display: flex; flex-direction: column; gap: 16px; }
+.gifted-card {
+  background: linear-gradient(180deg, rgba(30,41,82,0.9), rgba(15,21,50,0.9));
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.gifted-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.gifted-level {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.7rem;
+  padding: 3px 12px;
+  border-radius: 999px;
+}
+.gifted-level-basic { background: linear-gradient(180deg, #6EE7A8, #16A34A); color: #06280F; }
+.gifted-level-advanced { background: linear-gradient(180deg, #FFB199, #F97316); color: #3A1300; }
+.gifted-num { font-family: var(--font-heading); font-weight: 700; font-size: 0.78rem; color: rgba(255,255,255,0.5); }
+.gifted-question { font-weight: 700; line-height: 1.55; margin: 0 0 12px; }
+.gifted-reveal-btn {
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #FFD98F 0%, #F59E0B 55%, #B45F06 100%);
+  border: 2px solid #6B3A02;
+  border-radius: 999px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 8px 18px;
+  box-shadow: var(--gloss-shadow-sm);
+  transition: transform 150ms ease-out;
+}
+.gifted-reveal-btn:hover { transform: translateY(-2px); }
+.gifted-reveal-btn:active { transform: translateY(2px) scale(0.97); }
+.gifted-solution {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.08);
+  border-left: 3px solid #34D399;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.9);
+}
 
 /* ==== Game HUD ==== */
 .game-hud {
