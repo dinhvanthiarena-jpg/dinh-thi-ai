@@ -1299,7 +1299,9 @@ async function askTutor(first) {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        history: first ? [{ role: "user", content: "Hi MON.L!" }] : C.msgs,
+        // __START__ là dấu hiệu mở màn: MON.L chào bằng tiếng Việt và mời
+        // người học cứ nói tiếng gì cũng được.
+        history: first ? [{ role: "user", content: "__START__" }] : C.msgs,
         level: level().code,
         words: seenWords().slice(-60).map(w => w.en),
       }),
