@@ -25,9 +25,19 @@
 const { ProOrder, User } = require('../models');
 
 const PLANS = {
-  month: { months: 1, amount: 29000, ten: 'Pro 1 tháng' },
-  year: { months: 12, amount: 249000, ten: 'Pro 1 năm' },
+  month: { months: 1, amount: 29000, ten: 'Gói tháng', nguoi: 1 },
+  year: { months: 12, amount: 249000, ten: 'Gói năm', nguoi: 1 },
+  family: { months: 12, amount: 349000, ten: 'Gói gia đình', nguoi: 5 },
 };
+
+const NGAY_DUNG_THU = 7;
+const TOI_DA_GIA_DINH = 5;
+
+/** Giá quy về mỗi tháng, để người ta so được gói năm rẻ hơn bao nhiêu. */
+function giaMoiThang(plan) {
+  const g = PLANS[plan];
+  return Math.round(g.amount / g.months);
+}
 
 const proMode = () => (process.env.PRO_MODE || 'off').toLowerCase();
 const dangThuPhi = () => proMode() === 'on';
@@ -37,13 +47,15 @@ function sanSangNhanTien() {
   return Boolean(process.env.BANK_ID && process.env.BANK_ACCOUNT && process.env.BANK_ACCOUNT_NAME);
 }
 
-/** Mã đơn ngắn, dễ đọc, không có ký tự dễ nhìn nhầm (0/O, 1/I). */
-function taoMa() {
+/** Mã ngắn, dễ đọc, không có ký tự dễ nhìn nhầm (0/O, 1/I). */
+function chuoiNgau(n) {
   const CHU = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let s = '';
-  for (let i = 0; i < 6; i += 1) s += CHU[Math.floor(Math.random() * CHU.length)];
-  return `MONL${s}`;
+  for (let i = 0; i < n; i += 1) s += CHU[Math.floor(Math.random() * CHU.length)];
+  return s;
 }
+const taoMa = () => `MONL${chuoiNgau(6)}`;
+const taoMaGiaDinh = () => `GD${chuoiNgau(6)}`;
 
 /** Ảnh QR do vietqr.io sinh, đã nhúng sẵn số tiền và nội dung chuyển khoản. */
 function anhQR(order) {
@@ -100,8 +112,25 @@ async function ghiNhanDaTra(order, { bankRef = '', bankAmount = null, raw = '', 
   const hetHan = new Date(mocBatDau);
   hetHan.setMonth(hetHan.getMonth() + order.months);
 
-  await user.update({ proUntil: hetHan });
+  const thayDoi = { proUntil: hetHan };
+  let maNha = order.familyCode || user.familyCode;
+  if (order.plan === 'family') {
+    // Chưa có nhóm thì lập nhóm mới, người mua làm chủ nhóm.
+    if (!maNha || !user.familyOwner) {
+      maNha = taoMaGiaDinh();
+      thayDoi.familyCode = maNha;
+      thayDoi.familyOwner = true;
+    }
+  }
+  await user.update(thayDoi);
+
+  // Chủ nhóm gia hạn thì cả nhà được kéo hạn theo, khỏi ai phải làm gì.
+  if (user.familyOwner && maNha) {
+    await User.update({ proUntil: hetHan }, { where: { familyCode: maNha, familyOwner: false } });
+  }
+
   await order.update({
+    familyCode: order.plan === 'family' ? maNha : '',
     status: 'paid',
     paidAt: new Date(),
     bankRef,
@@ -110,6 +139,53 @@ async function ghiNhanDaTra(order, { bankRef = '', bankAmount = null, raw = '', 
     confirmedBy: boi,
   });
   return order;
+}
+
+/**
+ * Nhận lời mời vào nhóm gia đình. Hạn dùng lấy theo chủ nhóm, nên chủ nhóm gia
+ * hạn là cả nhà được theo, không ai phải trả thêm gì.
+ */
+async function vaoNhom(user, ma) {
+  const code = String(ma || '').trim().toUpperCase();
+  if (!code) return { loi: 'Bạn chưa nhập mã nhóm.' };
+  if (user.familyOwner) return { loi: 'Bạn đang là chủ một nhóm rồi.' };
+
+  const chu = await User.findOne({ where: { familyCode: code, familyOwner: true } });
+  if (!chu) return { loi: 'Không tìm thấy nhóm nào mang mã này.' };
+  if (!chu.proUntil || new Date(chu.proUntil) <= new Date()) {
+    return { loi: 'Nhóm này đã hết hạn Pro rồi.' };
+  }
+  if (user.familyCode === code) return { loi: 'Bạn đã ở trong nhóm này rồi.' };
+
+  const dangCo = await User.count({ where: { familyCode: code } });
+  if (dangCo >= TOI_DA_GIA_DINH) {
+    return { loi: `Nhóm đã đủ ${TOI_DA_GIA_DINH} người.` };
+  }
+  await user.update({ familyCode: code, familyOwner: false, proUntil: chu.proUntil });
+  return { ok: true, hetHan: chu.proUntil };
+}
+
+/** Danh sách người trong nhóm, để chủ nhóm nhìn thấy ai đang dùng chung. */
+async function nguoiTrongNhom(ma) {
+  if (!ma) return [];
+  return User.findAll({
+    where: { familyCode: ma },
+    attributes: ['id', 'name', 'email', 'familyOwner'],
+    order: [['familyOwner', 'DESC'], ['createdAt', 'ASC']],
+  });
+}
+
+/**
+ * Bật 7 ngày dùng thử. KHÔNG giữ thẻ, KHÔNG tự trừ tiền — hết 7 ngày là tự về
+ * bản miễn phí. Mỗi tài khoản chỉ dùng thử một lần.
+ */
+async function batDungThu(user) {
+  if (user.trialUsed) return { loi: 'Bạn đã dùng thử một lần rồi.' };
+  if (conHanPro(user)) return { loi: 'Bạn đang có gói Pro rồi.' };
+  const hetHan = new Date();
+  hetHan.setDate(hetHan.getDate() + NGAY_DUNG_THU);
+  await user.update({ proUntil: hetHan, trialUsed: true });
+  return { ok: true, hetHan };
 }
 
 /** Người này còn hạn Pro không. */
@@ -127,6 +203,12 @@ function duocDung(user) {
 
 module.exports = {
   PLANS,
+  NGAY_DUNG_THU,
+  TOI_DA_GIA_DINH,
+  giaMoiThang,
+  vaoNhom,
+  nguoiTrongNhom,
+  batDungThu,
   proMode,
   dangThuPhi,
   sanSangNhanTien,

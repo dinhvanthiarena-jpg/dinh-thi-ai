@@ -1,79 +1,187 @@
-<section class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
+<%
+  const dinhDang = (n) => n.toLocaleString('vi-VN');
+  const ngay = (d) => new Date(d).toLocaleDateString('vi-VN');
+  const goiNam = plans.year;
+  const goiNha = plans.family;
+  const goiThang = plans.month;
+%>
 
-  <div class="text-center">
-    <span class="inline-block rounded-full bg-purple-100 text-purple-700 text-xs font-black tracking-widest uppercase px-3 py-1">Mon.L Pro</span>
-    <h1 class="text-3xl sm:text-4xl font-extrabold text-ink mt-4">Nói chuyện với MON.L thoải mái</h1>
-    <p class="text-muted mt-3 max-w-xl mx-auto">
-      Mỗi lượt gọi là một lượt máy phải nghĩ và nói. Gói Pro mở khoá phần gọi không giới hạn,
-      còn toàn bộ 60 bài học thì miễn phí mãi mãi.
-    </p>
+<!-- Hero: MON.L đứng trong phòng, chữ đè lên như màn gọi trong app -->
+<section class="relative">
+  <div class="relative h-[46vh] min-h-[280px] max-h-[420px] overflow-hidden">
+    <img src="/english-air/assets/call-card.jpg" alt=""
+         class="absolute inset-0 w-full h-full object-cover" />
+    <img src="/english-air/assets/mon-closed.png" alt="MON.L"
+         class="absolute left-1/2 -translate-x-1/2 bottom-0 h-[92%] w-auto drop-shadow-2xl" />
+    <div class="absolute inset-0 bg-gradient-to-b from-slate-900/45 via-transparent to-slate-900/85"></div>
+    <div class="absolute inset-x-0 bottom-0 px-6 pb-7 text-center">
+      <h2 class="text-white text-2xl sm:text-3xl font-extrabold drop-shadow">Gọi video với MON.L</h2>
+      <p class="text-white/90 text-sm sm:text-base font-semibold mt-1 drop-shadow">
+        Nói chuyện thoải mái, tiếng gì cũng được — MON.L bắt đúng giọng bạn.
+      </p>
+    </div>
   </div>
+</section>
+
+<section class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+
+  <h1 class="text-3xl sm:text-4xl font-extrabold text-ink text-center leading-tight">
+    Gọi video với MON.L,
+    <span class="bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
+      miễn phí <%= trialDays %> ngày
+    </span>
+  </h1>
+  <p class="text-center text-muted font-semibold mt-3">Kèm toàn bộ tính năng Pro.</p>
 
   <% if (!dangThuPhi) { %>
-    <div class="mt-8 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-900">
-      <p class="font-bold">Đang mở miễn phí cho tất cả mọi người.</p>
-      <p class="text-sm mt-1">
-        Phần gọi Mon.L hiện chưa giới hạn gì cả — cứ dùng thoải mái. Trang này đang chờ sẵn,
-        khi nào bắt đầu thu phí sẽ báo trước.
-      </p>
+    <div class="mt-7 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-900 text-center">
+      <p class="font-bold">Hiện tại mọi thứ đang miễn phí cho tất cả mọi người.</p>
+      <p class="text-sm mt-1">Trang này đang chờ sẵn. Khi nào bắt đầu thu phí sẽ báo trước.</p>
     </div>
   <% } %>
 
   <% if (conHan) { %>
-    <div class="mt-8 rounded-xl border border-purple-200 bg-purple-50 px-5 py-4 text-purple-900">
-      <p class="font-bold">Bạn đang dùng gói Pro.</p>
-      <p class="text-sm mt-1">
-        Hạn tới <%= new Date(currentUser.proUntil).toLocaleDateString('vi-VN') %>.
-        Mua thêm thì ngày mới nối vào cuối, không mất ngày nào.
-      </p>
+    <div class="mt-7 rounded-2xl border border-violet-200 bg-violet-50 px-5 py-4 text-violet-900 text-center">
+      <p class="font-bold">Bạn đang dùng gói Pro, hạn tới <%= ngay(currentUser.proUntil) %>.</p>
+      <% if (maNhom) { %>
+        <p class="text-sm mt-2">
+          Mã nhóm gia đình của bạn:
+          <span class="font-mono font-black tracking-wider bg-white rounded-lg px-2 py-1"><%= maNhom %></span>
+          <span class="block mt-1 text-violet-700">Đang có <%= soThanhVien %>/<%= toiDaNhom %> người dùng chung.</span>
+        </p>
+      <% } %>
     </div>
   <% } %>
 
-  <div class="grid sm:grid-cols-2 gap-5 mt-10">
-    <% const goi = [
-         { ma: 'month', ten: 'Theo tháng', gia: plans.month.amount, phu: 'Trả từng tháng, dừng lúc nào cũng được.', noiBat: false },
-         { ma: 'year',  ten: 'Theo năm',   gia: plans.year.amount,  phu: 'Rẻ hơn 28% so với trả tháng.', noiBat: true }
-       ]; %>
-    <% goi.forEach(function (g) { %>
-      <div class="card p-6 <%= g.noiBat ? 'ring-2 ring-purple-500' : '' %>">
-        <% if (g.noiBat) { %>
-          <span class="inline-block rounded-full bg-purple-600 text-white text-[11px] font-black uppercase tracking-wider px-2.5 py-1 mb-3">Đáng tiền nhất</span>
-        <% } %>
-        <h2 class="font-bold text-ink text-lg"><%= g.ten %></h2>
-        <p class="mt-2">
-          <span class="text-3xl font-extrabold text-ink"><%= g.gia.toLocaleString('vi-VN') %>đ</span>
-          <span class="text-muted text-sm">/ <%= g.ma === 'year' ? 'năm' : 'tháng' %></span>
-        </p>
-        <p class="text-sm text-muted mt-2"><%= g.phu %></p>
+  <!-- Các gói -->
+  <div class="mt-8 space-y-4">
 
-        <% if (!sanSang) { %>
-          <p class="mt-5 text-sm text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
-            Chưa cấu hình tài khoản nhận tiền.
-          </p>
-        <% } else if (!currentUser) { %>
-          <a href="/auth/login?next=/pro" class="btn btn-primary w-full mt-5">Đăng nhập để mua</a>
-        <% } else { %>
-          <form method="POST" action="/pro/mua" class="mt-5">
-            <input type="hidden" name="plan" value="<%= g.ma %>" />
-            <button type="submit" class="btn <%= g.noiBat ? 'btn-primary' : 'btn-outline' %> w-full">
-              Mua <%= g.ten.toLowerCase() %>
-            </button>
-          </form>
-        <% } %>
+    <!-- Gói năm — nổi bật -->
+    <div class="relative rounded-2xl border-2 border-violet-500 bg-white p-5 sm:p-6 shadow-sm">
+      <span class="absolute -top-3 right-5 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white text-[11px] font-black uppercase tracking-wider px-3 py-1">
+        Đề xuất
+      </span>
+      <div class="flex items-baseline justify-between gap-3">
+        <h3 class="text-xl font-extrabold text-violet-700">Gói hàng năm</h3>
+        <p class="text-right shrink-0">
+          <span class="text-lg font-extrabold text-ink"><%= dinhDang(giaThang.year) %> đ</span>
+          <span class="text-muted text-sm">/thg</span>
+        </p>
       </div>
-    <% }); %>
+      <div class="border-t border-dashed border-slate-200 my-4"></div>
+      <div class="flex items-center justify-between gap-3">
+        <span class="text-muted">Trả một lần cả năm</span>
+        <span class="font-extrabold text-violet-700"><%= dinhDang(goiNam.amount) %> đ/năm</span>
+      </div>
+      <p class="mt-4 rounded-xl bg-violet-50 text-violet-800 text-sm font-semibold text-center py-2">
+        Rẻ hơn 28% so với trả từng tháng
+      </p>
+      <% if (sanSang && currentUser) { %>
+        <form method="POST" action="/pro/mua" class="mt-4">
+          <input type="hidden" name="plan" value="year" />
+          <button class="btn btn-primary w-full">Mua gói năm</button>
+        </form>
+      <% } %>
+    </div>
+
+    <!-- Gói gia đình -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+      <div class="flex items-baseline justify-between gap-3">
+        <h3 class="text-xl font-extrabold text-ink">Gói gia đình</h3>
+        <p class="text-right shrink-0">
+          <span class="text-lg font-extrabold text-ink"><%= dinhDang(giaThang.family) %> đ</span>
+          <span class="text-muted text-sm">/thg</span>
+        </p>
+      </div>
+      <p class="text-muted text-sm mt-1">Dành cho tối đa <%= toiDaNhom %> thành viên.</p>
+      <div class="border-t border-dashed border-slate-200 my-4"></div>
+      <div class="flex items-center justify-between gap-3">
+        <span class="text-muted">Trả một lần cả năm</span>
+        <span class="font-extrabold text-ink"><%= dinhDang(goiNha.amount) %> đ/năm</span>
+      </div>
+      <p class="mt-3 text-sm text-muted">
+        Chỉ <%= dinhDang(Math.round(goiNha.amount / toiDaNhom / 12)) %> đ mỗi người mỗi tháng nếu đủ <%= toiDaNhom %> người.
+      </p>
+      <% if (sanSang && currentUser) { %>
+        <form method="POST" action="/pro/mua" class="mt-4">
+          <input type="hidden" name="plan" value="family" />
+          <button class="btn btn-outline w-full">Mua gói gia đình</button>
+        </form>
+      <% } %>
+    </div>
+
+    <!-- Gói tháng -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+      <div class="flex items-baseline justify-between gap-3">
+        <h3 class="text-xl font-extrabold text-ink">Gói tháng</h3>
+        <p class="text-right shrink-0">
+          <span class="text-lg font-extrabold text-ink"><%= dinhDang(goiThang.amount) %> đ</span>
+          <span class="text-muted text-sm">/thg</span>
+        </p>
+      </div>
+      <p class="text-muted text-sm mt-1">Trả từng tháng, dừng lúc nào cũng được.</p>
+      <% if (sanSang && currentUser) { %>
+        <form method="POST" action="/pro/mua" class="mt-4">
+          <input type="hidden" name="plan" value="month" />
+          <button class="btn btn-outline w-full">Mua gói tháng</button>
+        </form>
+      <% } %>
+    </div>
   </div>
 
-  <div class="card p-6 mt-8">
+  <!-- Nút chính -->
+  <div class="mt-8">
+    <% if (!currentUser) { %>
+      <a href="/auth/login?next=/pro"
+         class="block w-full text-center rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-extrabold text-lg py-4 shadow-lg">
+        Đăng nhập để bắt đầu
+      </a>
+    <% } else if (duocDungThu) { %>
+      <form method="POST" action="/pro/dung-thu">
+        <button class="block w-full text-center rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-extrabold text-lg py-4 shadow-lg">
+          Bắt đầu dùng thử miễn phí
+        </button>
+      </form>
+    <% } else if (!sanSang) { %>
+      <p class="rounded-2xl bg-amber-50 text-amber-800 text-center font-semibold py-4">
+        Chưa cấu hình tài khoản nhận tiền.
+      </p>
+    <% } %>
+
+    <p class="text-center text-xs text-muted mt-3 leading-relaxed">
+      Dùng thử <%= trialDays %> ngày, hoàn toàn không cần thẻ. Hết <%= trialDays %> ngày tài khoản
+      <strong>tự quay về bản miễn phí</strong> — không tự động trừ tiền của bạn, vì chúng tôi
+      không giữ thông tin thanh toán nào cả.
+    </p>
+  </div>
+
+  <!-- Vào nhóm gia đình -->
+  <% if (currentUser && !maNhom) { %>
+    <div class="card p-5 mt-8">
+      <h3 class="font-bold text-ink">Người nhà đã mua gói gia đình?</h3>
+      <p class="text-sm text-muted mt-1">Nhập mã nhóm họ gửi cho bạn để dùng chung.</p>
+      <% if (typeof loiNhom !== 'undefined' && loiNhom) { %>
+        <p class="text-sm text-rose-700 bg-rose-50 rounded-lg px-3 py-2 mt-3"><%= loiNhom %></p>
+      <% } %>
+      <form method="POST" action="/pro/vao-nhom" class="mt-3 flex gap-2">
+        <input name="ma" placeholder="VD: GD7F3KQP" required
+               class="flex-1 min-w-0 rounded-xl border border-slate-200 px-4 py-2.5 font-mono uppercase tracking-wider" />
+        <button class="btn btn-outline shrink-0">Vào nhóm</button>
+      </form>
+    </div>
+  <% } %>
+
+  <!-- Cách trả tiền -->
+  <div class="card p-5 sm:p-6 mt-6">
     <h3 class="font-bold text-ink">Trả tiền thế nào?</h3>
     <ol class="mt-3 space-y-2 text-sm text-muted list-decimal list-inside">
       <li>Chọn gói, màn hình hiện một mã QR.</li>
-      <li>Mở app ngân hàng bất kỳ, quét mã. Số tiền và nội dung đã điền sẵn, không phải gõ gì.</li>
+      <li>Mở app ngân hàng bất kỳ, quét mã. Số tiền và nội dung đã điền sẵn.</li>
       <li>Bấm chuyển. Vài giây sau trang tự báo xong và mở gói ngay.</li>
     </ol>
     <p class="text-sm text-muted mt-4">
-      Không cần nhập số thẻ ở bất cứ đâu. Tiền chuyển thẳng vào tài khoản ngân hàng của
-      thầy Đinh Thi, hệ thống chỉ đọc thông báo tiền vào để mở gói.
+      Không phải nhập số thẻ ở bất cứ đâu. Tiền chuyển thẳng vào tài khoản ngân hàng của
+      thầy Đinh Thi; hệ thống chỉ đọc thông báo tiền vào để mở gói cho bạn.
     </p>
   </div>
 

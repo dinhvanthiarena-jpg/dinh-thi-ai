@@ -6,14 +6,42 @@ const pro = require('../services/proService');
 const router = express.Router();
 
 /* ---------- Trang bán gói ---------- */
-router.get('/', async (req, res) => {
+async function veTrangPro(req, res, loiNhom) {
+  const u = res.locals.currentUser;
+  const maNhom = u && u.familyCode ? u.familyCode : '';
   res.render('pro/index', {
     title: 'Mon.L Pro',
     plans: pro.PLANS,
+    giaThang: {
+      month: pro.giaMoiThang('month'),
+      year: pro.giaMoiThang('year'),
+      family: pro.giaMoiThang('family'),
+    },
+    trialDays: pro.NGAY_DUNG_THU,
+    toiDaNhom: pro.TOI_DA_GIA_DINH,
     dangThuPhi: pro.dangThuPhi(),
     sanSang: pro.sanSangNhanTien(),
-    conHan: pro.conHanPro(res.locals.currentUser),
+    conHan: pro.conHanPro(u),
+    duocDungThu: Boolean(u) && !u.trialUsed && !pro.conHanPro(u),
+    maNhom,
+    soThanhVien: maNhom ? (await pro.nguoiTrongNhom(maNhom)).length : 0,
+    loiNhom: loiNhom || '',
   });
+}
+
+router.get('/', (req, res) => veTrangPro(req, res));
+
+/* ---------- Dùng thử 7 ngày, không giữ thẻ, không tự trừ tiền ---------- */
+router.post('/dung-thu', requireAuth, async (req, res) => {
+  await pro.batDungThu(res.locals.currentUser);
+  res.redirect('/pro');
+});
+
+/* ---------- Vào nhóm gia đình bằng mã người nhà gửi ---------- */
+router.post('/vao-nhom', requireAuth, async (req, res) => {
+  const kq = await pro.vaoNhom(res.locals.currentUser, req.body.ma);
+  if (kq.loi) return veTrangPro(req, res, kq.loi);
+  res.redirect('/pro');
 });
 
 /* ---------- Tạo đơn rồi hiện mã QR ---------- */

@@ -14,7 +14,9 @@ const ProOrder = sequelize.define(
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     _id: { type: DataTypes.VIRTUAL, get() { return this.id; } },
     code: { type: DataTypes.STRING, allowNull: false, unique: true },
-    plan: { type: DataTypes.ENUM('month', 'year'), allowNull: false },
+    plan: { type: DataTypes.ENUM('month', 'year', 'family'), allowNull: false },
+    // Mã nhóm sinh ra khi mua gói gia đình, để người thân nhập vào mà vào chung.
+    familyCode: { type: DataTypes.STRING, defaultValue: '' },
     amount: { type: DataTypes.INTEGER, allowNull: false },
     months: { type: DataTypes.INTEGER, allowNull: false },
     status: { type: DataTypes.ENUM('pending', 'paid', 'cancelled'), defaultValue: 'pending' },

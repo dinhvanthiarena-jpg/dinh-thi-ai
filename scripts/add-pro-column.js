@@ -14,15 +14,23 @@ const { sequelize } = require('../config/db');
 async function run() {
   await connectDB();
   const bang = 'users';
-  const [cot] = await sequelize.query(
-    `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '${bang}' AND COLUMN_NAME = 'proUntil'`
-  );
-  if (cot.length) {
-    console.log('cột proUntil đã có sẵn, không cần làm gì');
-  } else {
-    await sequelize.query(`ALTER TABLE \`${bang}\` ADD COLUMN \`proUntil\` DATETIME NULL`);
-    console.log('đã thêm cột proUntil vào bảng', bang);
+  const canCo = [
+    ['proUntil', 'DATETIME NULL'],
+    ['familyCode', "VARCHAR(255) NOT NULL DEFAULT ''"],
+    ['familyOwner', 'TINYINT(1) NOT NULL DEFAULT 0'],
+    ['trialUsed', 'TINYINT(1) NOT NULL DEFAULT 0'],
+  ];
+  for (const [ten, kieu] of canCo) {
+    const [co] = await sequelize.query(
+      `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '${bang}' AND COLUMN_NAME = '${ten}'`
+    );
+    if (co.length) {
+      console.log('cột', ten, 'đã có sẵn');
+    } else {
+      await sequelize.query(`ALTER TABLE \`${bang}\` ADD COLUMN \`${ten}\` ${kieu}`);
+      console.log('đã thêm cột', ten);
+    }
   }
 
   const [bangPro] = await sequelize.query(

@@ -16,6 +16,11 @@ const User = sequelize.define(
     isActive: { type: DataTypes.BOOLEAN, defaultValue: true },
     // Hạn dùng gói Pro của app Mon.L. Rỗng hoặc đã qua nghĩa là bản miễn phí.
     proUntil: { type: DataTypes.DATE, allowNull: true },
+    // Gói gia đình: mọi thành viên mang cùng một mã, người mua là chủ nhóm.
+    familyCode: { type: DataTypes.STRING, defaultValue: '' },
+    familyOwner: { type: DataTypes.BOOLEAN, defaultValue: false },
+    // Dùng thử 7 ngày, mỗi tài khoản chỉ một lần.
+    trialUsed: { type: DataTypes.BOOLEAN, defaultValue: false },
   },
   {
     tableName: 'users',
