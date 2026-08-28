@@ -1057,6 +1057,11 @@ function fitScene() {
   let h = Math.max(240, limit - 10 - head) / (SCENE.bot - SCENE.top);
   let t = head - SCENE.top * h;
   if (t + h < vh) { h = (vh - head) / (1 - SCENE.top); t = head - SCENE.top * h; }
+  // Cửa sổ cao bất thường (màn desktop dựng đứng) thì thôi, đừng để MON.L phình ra.
+  if (h > 1500) {
+    h = 1500;
+    t = head + Math.max(0, (limit - head - (SCENE.bot - SCENE.top) * h) / 2) - SCENE.top * h;
+  }
   call.style.setProperty("--scene-h", h + "px");
   call.style.setProperty("--scene-t", t + "px");
 }
