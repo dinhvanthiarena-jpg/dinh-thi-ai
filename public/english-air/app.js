@@ -1364,7 +1364,7 @@ async function askTutor(first) {
         title: "Nâng cấp Mon.L Pro",
         body: "Học 60 bài thì miễn phí mãi. Riêng phần gọi nói chuyện tự do với MON.L cần gói Pro.",
         yes: "Xem gói Pro", no: "Để sau",
-        onYes() { location.href = j.nangCap || "/pro"; }
+        onYes() { endCall(false); moPro(); }   // mở ngay trong app
       });
       return;
     }
@@ -1658,6 +1658,261 @@ $("#callPreview").addEventListener("click", () => {
 $("#btnCallSkip").addEventListener("click", showChoices);
 $("#btnCallSend").addEventListener("click", sendTyped);
 $("#callInput").addEventListener("keydown", e => { if (e.key === "Enter") sendTyped(); });
+
+/* ---------- 18c. Gói Mon.L Pro ----------
+   Màn bán gói nằm hẳn trong app. Máy chủ chỉ lo hai việc app không làm được:
+   sinh mã QR có sẵn số tiền, và nghe ngân hàng báo tiền về. App và web cùng
+   một tên miền nên dùng chung phiên đăng nhập, chỉ cần gọi kèm credentials. */
+const PRO_URL = "../pro/api";
+const P2 = { data: null, don: null, dongHo: null };
+
+const tien = n => Number(n || 0).toLocaleString("vi-VN") + " đ";
+const ngayVN = d => new Date(d).toLocaleDateString("vi-VN");
+
+async function moPro() {
+  $("#pro").hidden = false;
+  document.body.style.overflow = "hidden";
+  $("#proBody").textContent = "";
+  $("#proBody").append(el("h1", null, "Đang tải…"));
+  try {
+    const r = await fetch(PRO_URL + "/goi", { credentials: "same-origin" });
+    P2.data = await r.json();
+    veManPro();
+  } catch {
+    $("#proBody").textContent = "";
+    $("#proBody").append(el("h1", null, "Chưa xem được gói"));
+    $("#proBody").append(el("p", "pro-sub", "Kiểm tra lại mạng rồi mở lại nhé."));
+  }
+}
+
+function dongPro() {
+  clearInterval(P2.dongHo);
+  P2.dongHo = null; P2.don = null;
+  $("#pro").hidden = true;
+  document.body.style.overflow = "";
+}
+
+/** Màn chính: tiêu đề, các gói, nút dùng thử. */
+function veManPro() {
+  const d = P2.data;
+  const b = $("#proBody");
+  b.textContent = "";
+
+  const h = el("h1");
+  h.append(document.createTextNode("Gọi video với MON.L, "));
+  h.append(el("em", null, `miễn phí ${d.ngayDungThu} ngày`));
+  b.append(h);
+  b.append(el("p", "pro-sub", "Kèm toàn bộ tính năng Pro."));
+
+  if (!d.thuPhi) {
+    const n = el("div", "pro-note free");
+    n.append(document.createTextNode("Mọi thứ đang miễn phí cho tất cả mọi người."));
+    n.append(el("small", null, "Màn này đang chờ sẵn. Khi nào bắt đầu thu phí sẽ báo trước."));
+    b.append(n);
+  }
+  if (d.pro) {
+    const n = el("div", "pro-note have");
+    n.append(document.createTextNode(`Bạn đang có gói Pro, hạn tới ${ngayVN(d.proUntil)}.`));
+    if (d.maNhom) {
+      n.append(el("small", null,
+        `Mã nhóm gia đình: ${d.maNhom} — đang có ${d.soThanhVien}/${d.toiDaNhom} người dùng chung.`));
+    }
+    b.append(n);
+  }
+  if (!d.sanSang) {
+    b.append(el("div", "pro-note warn", "Thầy chưa bật tài khoản nhận tiền, chưa mua được."));
+  }
+
+  // Xếp gói năm lên trước cho nổi bật, đúng kiểu các app hay làm.
+  const thuTu = ["year", "family", "month"];
+  thuTu.forEach(ma => {
+    const g = d.goi.find(x => x.ma === ma);
+    if (!g) return;
+    b.append(theGoi(g, ma === "year", d));
+  });
+
+  if (!d.dangNhap) {
+    const nut = el("button", "pro-cta", "Đăng nhập để bắt đầu");
+    nut.type = "button";
+    nut.addEventListener("click", () => { location.href = "../auth/login?next=/english-air/"; });
+    b.append(nut);
+  } else if (d.duocDungThu) {
+    const nut = el("button", "pro-cta", "Bắt đầu dùng thử miễn phí");
+    nut.type = "button";
+    nut.addEventListener("click", dungThu);
+    b.append(nut);
+  }
+
+  b.append(el("p", "pro-fine",
+    `Dùng thử ${d.ngayDungThu} ngày, không cần thẻ. Hết ${d.ngayDungThu} ngày tài khoản tự quay ` +
+    "về bản miễn phí — không tự trừ tiền của bạn, vì app không giữ thông tin thanh toán nào cả."));
+
+  if (d.dangNhap && !d.maNhom) b.append(oVaoNhom());
+}
+
+function theGoi(g, noiBat, d) {
+  const the = el("div", "pro-plan" + (noiBat ? " best" : ""));
+  if (noiBat) the.append(el("span", "pro-tag", "Đề xuất"));
+
+  const hang = el("div", "pro-row");
+  hang.append(el("b", null, g.ten));
+  const gia = el("span", "pro-price");
+  gia.append(document.createTextNode(tien(g.moiThang)));
+  gia.append(el("span", null, "/thg"));
+  hang.append(gia);
+  the.append(hang);
+
+  if (g.nguoi > 1) the.append(el("p", "sub", `Dành cho tối đa ${g.nguoi} thành viên.`));
+  else if (g.thang === 1) the.append(el("p", "sub", "Trả từng tháng, dừng lúc nào cũng được."));
+
+  if (g.thang > 1) {
+    the.append(el("div", "pro-dash"));
+    const full = el("div", "pro-full");
+    full.append(el("span", null, "Trả một lần cả năm"));
+    full.append(document.createTextNode(tien(g.tien) + "/năm"));
+    the.append(full);
+    if (g.nguoi > 1) {
+      the.append(el("div", "pro-save",
+        `Chỉ ${tien(Math.round(g.tien / g.nguoi / 12))} mỗi người mỗi tháng nếu đủ ${g.nguoi} người`));
+    } else {
+      const thang = d.goi.find(x => x.ma === "month");
+      if (thang) {
+        const re = Math.round((1 - g.moiThang / thang.moiThang) * 100);
+        the.append(el("div", "pro-save", `Rẻ hơn ${re}% so với trả từng tháng`));
+      }
+    }
+  }
+
+  if (d.dangNhap && d.sanSang) {
+    const nut = el("button", "btn " + (noiBat ? "btn-primary" : "btn-soft") + " btn-block mt");
+    nut.type = "button";
+    nut.textContent = "Mua " + g.ten.toLowerCase();
+    nut.addEventListener("click", () => muaGoi(g.ma));
+    the.append(nut);
+  }
+  return the;
+}
+
+function oVaoNhom() {
+  const box = el("div", "pro-join");
+  box.append(el("b", null, "Người nhà đã mua gói gia đình?"));
+  box.append(el("p", "sub", "Nhập mã nhóm họ gửi cho bạn để dùng chung."));
+  const f = el("form");
+  const inp = el("input"); inp.placeholder = "VD: GD7F3KQP"; inp.required = true;
+  const nut = el("button", "btn btn-soft"); nut.type = "submit"; nut.textContent = "Vào nhóm";
+  f.append(inp, nut);
+  f.addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const r = await fetch(PRO_URL + "/vao-nhom", {
+      method: "POST", credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ma: inp.value }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      box.querySelectorAll(".pro-err").forEach(x => x.remove());
+      box.append(el("p", "pro-err", j.error || "Không vào được nhóm."));
+      return;
+    }
+    toast("Đã vào nhóm gia đình!");
+    moPro();
+  });
+  box.append(f);
+  return box;
+}
+
+async function dungThu() {
+  const r = await fetch(PRO_URL + "/dung-thu", { method: "POST", credentials: "same-origin" });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { toast(j.error || "Chưa bật dùng thử được."); return; }
+  toast(`Đã mở ${P2.data.ngayDungThu} ngày dùng thử!`);
+  moPro();
+}
+
+/** Chọn gói xong thì hiện mã QR ngay trong app, và chờ tiền về. */
+async function muaGoi(plan) {
+  const r = await fetch(PRO_URL + "/mua", {
+    method: "POST", credentials: "same-origin",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ plan }),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401) { location.href = j.dangNhap || "../auth/login"; return; }
+  if (!r.ok) { toast(j.error || "Chưa tạo được đơn."); return; }
+  P2.don = j;
+  veManQR(j);
+}
+
+function veManQR(don) {
+  const b = $("#proBody");
+  b.textContent = "";
+  b.append(el("h1", null, "Quét mã để trả tiền"));
+  b.append(el("p", "pro-sub", `${don.ten} · ${tien(don.tien)}`));
+
+  const box = el("div", "pro-qr mt");
+  if (don.qr) {
+    const img = el("img"); img.src = don.qr; img.alt = "Mã QR chuyển khoản"; img.decoding = "async";
+    box.append(img);
+  }
+  box.append(el("p", "pro-fine", "Mở app ngân hàng bất kỳ rồi quét. Số tiền và nội dung đã điền sẵn."));
+  const cho = el("span", "pro-wait");
+  cho.append(el("i"));
+  cho.append(document.createTextNode("Đang chờ tiền về…"));
+  box.append(cho);
+  b.append(box);
+
+  const ck = el("div", "pro-ck");
+  ck.append(el("b", null, "Không quét được thì chuyển tay"));
+  const dl = el("dl");
+  [["Ngân hàng", don.ck.nganHang], ["Số tài khoản", don.ck.soTaiKhoan],
+   ["Chủ tài khoản", don.ck.chuTaiKhoan], ["Số tiền", tien(don.ck.soTien)]].forEach(([k, v]) => {
+    const r = el("div", "r"); r.append(el("dt", null, k)); r.append(el("dd", null, String(v))); dl.append(r);
+  });
+  const rMa = el("div", "r");
+  rMa.append(el("dt", null, "Nội dung"));
+  rMa.append(el("dd", "ma", don.ck.noiDung));
+  dl.append(rMa);
+  ck.append(dl);
+  ck.append(el("p", "pro-fine",
+    `Nội dung chuyển khoản phải giữ đúng mã ${don.ck.noiDung}, sai mã thì máy không biết đơn của ai.`));
+  b.append(ck);
+
+  const quay = el("button", "btn btn-text btn-block mt", "Quay lại chọn gói");
+  quay.type = "button";
+  quay.addEventListener("click", () => { clearInterval(P2.dongHo); moPro(); });
+  b.append(quay);
+
+  // Hỏi máy chủ 3 giây một lần, tối đa 10 phút.
+  clearInterval(P2.dongHo);
+  const het = Date.now() + 10 * 60 * 1000;
+  P2.dongHo = setInterval(async () => {
+    if (Date.now() > het) { clearInterval(P2.dongHo); return; }
+    try {
+      const r = await fetch(PRO_URL + "/don/" + don.code, { credentials: "same-origin" });
+      const j = await r.json();
+      if (j.status !== "paid") return;
+      clearInterval(P2.dongHo);
+      veManXong();
+    } catch { /* mất mạng một nhịp thì thôi, lát hỏi lại */ }
+  }, 3000);
+}
+
+function veManXong() {
+  const b = $("#proBody");
+  b.textContent = "";
+  const box = el("div", "pro-done");
+  box.append(el("div", "tick", "✓"));
+  box.append(el("h1", null, "Đã nhận được tiền"));
+  box.append(el("p", "pro-sub", "Gói Pro đã mở. Cảm ơn bạn nhiều!"));
+  const nut = el("button", "pro-cta", "Bắt đầu nói chuyện với MON.L");
+  nut.type = "button";
+  nut.addEventListener("click", () => { dongPro(); primeSpeech(); startCall("free"); });
+  box.append(nut);
+  b.append(box);
+}
+
+$("#btnProClose").addEventListener("click", dongPro);
+$("#btnOpenPro").addEventListener("click", moPro);
 
 /* ---------- 19. Giải đấu ---------- */
 const AVCOL = ["#0369A1", "#B45309", "#047857", "#BE185D", "#6D28D9", "#B91C1C", "#0F766E", "#4F46E5"];

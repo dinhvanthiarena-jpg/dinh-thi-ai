@@ -86,6 +86,87 @@ router.get('/api/quyen', (req, res) => {
   });
 });
 
+/* ══════════════════════════════════════════════════════════════
+   API cho app Mon.L — bán gói ngay trong app, không phải nhảy ra web.
+   App và web cùng một tên miền nên dùng chung phiên đăng nhập, chỉ cần
+   gọi kèm credentials: "same-origin".
+   ══════════════════════════════════════════════════════════════ */
+
+/** Một lần gọi là app đủ dữ liệu vẽ cả màn hình bán gói. */
+router.get('/api/goi', async (req, res) => {
+  const u = res.locals.currentUser;
+  const maNhom = u && u.familyCode ? u.familyCode : '';
+  const ds = Object.entries(pro.PLANS).map(([ma, g]) => ({
+    ma,
+    ten: g.ten,
+    tien: g.amount,
+    thang: g.months,
+    nguoi: g.nguoi,
+    moiThang: pro.giaMoiThang(ma),
+  }));
+  res.json({
+    dangNhap: Boolean(u),
+    ten: u ? u.name : '',
+    thuPhi: pro.dangThuPhi(),
+    sanSang: pro.sanSangNhanTien(),
+    pro: pro.conHanPro(u),
+    proUntil: u ? u.proUntil : null,
+    duocDungThu: Boolean(u) && !u.trialUsed && !pro.conHanPro(u),
+    ngayDungThu: pro.NGAY_DUNG_THU,
+    toiDaNhom: pro.TOI_DA_GIA_DINH,
+    maNhom,
+    soThanhVien: maNhom ? (await pro.nguoiTrongNhom(maNhom)).length : 0,
+    goi: ds,
+  });
+});
+
+/** Chưa đăng nhập thì trả 401 kèm đường dẫn, app tự mở trang đăng nhập. */
+function canDangNhap(req, res) {
+  if (res.locals.currentUser) return false;
+  res.status(401).json({ error: 'Cần đăng nhập', dangNhap: '/auth/login?next=/english-air/' });
+  return true;
+}
+
+router.post('/api/mua', express.json(), async (req, res) => {
+  if (canDangNhap(req, res)) return;
+  const plan = String((req.body || {}).plan || '');
+  if (!pro.PLANS[plan]) return res.status(400).json({ error: 'Gói không hợp lệ' });
+  if (!pro.sanSangNhanTien()) {
+    return res.status(503).json({ error: 'Chưa cấu hình tài khoản nhận tiền.' });
+  }
+  const order = await pro.taoDon(res.locals.currentUser.id, plan);
+  res.json({
+    code: order.code,
+    tien: order.amount,
+    ten: pro.PLANS[plan].ten,
+    qr: pro.anhQR(order),
+    ck: pro.thongTinChuyenKhoan(order),
+  });
+});
+
+router.get('/api/don/:code', async (req, res) => {
+  if (canDangNhap(req, res)) return;
+  const order = await ProOrder.findOne({ where: { code: req.params.code } });
+  if (!order || order.UserId !== res.locals.currentUser.id) {
+    return res.status(404).json({ error: 'Không tìm thấy đơn' });
+  }
+  res.json({ status: order.status, proUntil: res.locals.currentUser.proUntil });
+});
+
+router.post('/api/dung-thu', express.json(), async (req, res) => {
+  if (canDangNhap(req, res)) return;
+  const kq = await pro.batDungThu(res.locals.currentUser);
+  if (kq.loi) return res.status(400).json({ error: kq.loi });
+  res.json({ ok: true, hetHan: kq.hetHan });
+});
+
+router.post('/api/vao-nhom', express.json(), async (req, res) => {
+  if (canDangNhap(req, res)) return;
+  const kq = await pro.vaoNhom(res.locals.currentUser, (req.body || {}).ma);
+  if (kq.loi) return res.status(400).json({ error: kq.loi });
+  res.json({ ok: true, hetHan: kq.hetHan });
+});
+
 /* ---------- Ngân hàng báo tiền về ---------- */
 /**
  * SePay gọi vào đây mỗi khi tài khoản có tiền vào. Nó gửi kèm

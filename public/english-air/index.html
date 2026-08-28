@@ -318,6 +318,7 @@
         <p class="fine" id="callMicNote"></p>
         <button class="btn btn-primary btn-block mt" id="btnStartFree" type="button">Gọi nói chuyện tự do</button>
         <button class="btn btn-soft btn-block mt" id="btnStartCall" type="button">Luyện nói với giáo viên</button>
+        <button class="btn btn-text btn-block mt" id="btnOpenPro" type="button">Xem gói Mon.L Pro</button>
         <p class="fine">Tán gẫu thì MON.L nói theo đúng phong cách của bạn. Luyện nói thì nó thành giáo viên: nói tiếng Anh chuẩn và sửa lỗi cho bạn.</p>
       </section>
 
@@ -504,6 +505,27 @@
 </div>
 
 <!-- ================= CUỘC GỌI VỚI MON.L ================= -->
+
+<!-- ================= MON.L PRO ================= -->
+<div class="pro" id="pro" hidden role="dialog" aria-modal="true" aria-labelledby="proTitle">
+  <div class="pro-hero">
+    <img class="pro-room" src="assets/call-card.jpg" alt="" decoding="async" />
+    <img class="pro-mon" src="assets/mon-closed.png" alt="" decoding="async" />
+    <div class="pro-veil"></div>
+    <button class="pro-close" id="btnProClose" type="button" aria-label="Đóng">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+    <div class="pro-hero-txt">
+      <b>Gọi video với MON.L</b>
+      <small>Nói thoải mái, tiếng gì cũng được — nó bắt đúng giọng bạn.</small>
+    </div>
+  </div>
+
+  <div class="pro-body" id="proBody">
+    <h1 id="proTitle">Đang tải…</h1>
+  </div>
+</div>
+
 <div class="call" id="call" hidden role="dialog" aria-modal="true" aria-labelledby="callName">
   <div class="call-scene" aria-hidden="true">
     <div class="scene-fit">
