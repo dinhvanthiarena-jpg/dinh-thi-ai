@@ -58,6 +58,9 @@
     <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.6 3.5 5.6 3.5 8.5s-1.1 5.9-3.5 8.5c-2.4-2.6-3.5-5.6-3.5-8.5S9.6 6.1 12 3.5Z"/></symbol>
     <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4.5h6a3 3 0 0 1 3 3V20a2.5 2.5 0 0 0-2.5-2.5H4v-13Z"/><path d="M20 4.5h-6a3 3 0 0 0-3 3V20a2.5 2.5 0 0 1 2.5-2.5H20v-13Z"/></symbol>
     <symbol id="i-flip" viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="12" rx="2.5"/><path d="M7 3h11a3 3 0 0 1 3 3v11"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="12" height="12" rx="3"/><path d="m15 11 5-3.2v8.4L15 13"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></symbol>
+    <symbol id="i-hangup" viewBox="0 0 24 24"><path d="M4.5 13.5c4-3.5 11-3.5 15 0l1.5-1.7c-5-5-13.5-5-18.5 0l2 1.7Z"/><path d="M8 12.6v3M16 12.6v3"/></symbol>
     <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></symbol>
 
     <!-- ===== linh vật: quái vật tím MON.S — hình vẽ dự phòng.
@@ -147,6 +150,7 @@
       <li><button class="navlink is-active" data-nav="learn" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-learn"/></svg><span>Học</span></button></li>
       <li><button class="navlink" data-nav="words" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-words"/></svg><span>Từ vựng</span></button></li>
       <li><button class="navlink" data-nav="review" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-review"/></svg><span>Ôn tập</span></button></li>
+      <li><button class="navlink" data-nav="call" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-video"/></svg><span>Gọi Air</span></button></li>
       <li><button class="navlink" data-nav="league" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-league"/></svg><span>Giải đấu</span></button></li>
       <li><button class="navlink" data-nav="profile" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-profile"/></svg><span>Hồ sơ</span></button></li>
     </ul>
@@ -228,16 +232,44 @@
             <h1 class="big-count" id="wordCount">0 từ</h1>
             <p class="sub" id="wordWeek">0 trong tuần này.</p>
           </div>
-          <button class="round-btn" id="btnWordSort" type="button" aria-label="Đổi cách sắp xếp">
+          <button class="round-btn" id="btnWordSearch" type="button" aria-label="Tìm từ" aria-expanded="false">
+            <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-search"/></svg>
+          </button>
+          <button class="sort-pill" id="btnWordSort" type="button" aria-label="Đổi cách sắp xếp">Mới học</button>
+          <button class="round-btn" id="btnWordView" type="button" aria-label="Đổi kiểu hiển thị" aria-pressed="false">
             <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-grid"/></svg>
           </button>
         </div>
-        <div class="filters" id="wordFilters" role="group" aria-label="Lọc từ vựng"></div>
-        <div class="promo">
+
+        <div class="search-wrap" id="wordSearchWrap" hidden>
+          <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-search"/></svg>
+          <input type="search" id="wordSearch" placeholder="Tìm từ tiếng Anh hoặc nghĩa…" aria-label="Tìm trong kho từ" />
+          <button class="round-btn sm" id="btnSearchClear" type="button" aria-label="Xoá ô tìm">
+            <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg>
+          </button>
+        </div>
+
+        <div class="filters" id="wordFilters" role="group" aria-label="Lọc theo từ loại"></div>
+        <div class="promo" id="wordPromo">
           <div><b>Ôn bằng thẻ ghi nhớ</b><small>Lật thẻ, tự chấm — nhớ nhanh gấp đôi.</small></div>
           <button class="btn btn-sm btn-primary" id="btnFlash" type="button">Ôn ngay</button>
         </div>
         <ul class="wlist" id="wordList"></ul>
+
+        <!-- Chưa đủ số bài thì khoá kho từ, giống cách AirLearn mở dần tính năng -->
+        <div class="locked" id="wordsLocked" hidden>
+          <div class="locked-art" aria-hidden="true">
+            <span class="chip-float f1">Create</span><span class="chip-float f2">Learn</span>
+            <span class="chip-float f3">Smile</span><span class="chip-float f4">Roar</span>
+            <div class="locked-mascot" data-mascot="full"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+          </div>
+          <span class="locked-tag">GIỚI THIỆU ✦</span>
+          <h2 class="locked-h">Hoàn thành 5 bài học để mở khoá phần ôn tập từ vựng</h2>
+          <p class="sub">Ôn lại từng từ bạn đã học và xây dựng một vốn từ vững chắc.</p>
+          <p class="locked-left" id="lockedLeft">Hoàn thành thêm 5 bài học nữa để mở khoá</p>
+          <div class="bar"><i id="lockedBar" style="width:0%"></i></div>
+          <button class="btn btn-primary btn-block mt" id="btnLockedStart" type="button">Bắt đầu bài học</button>
+        </div>
       </section>
 
       <!-- ================= ÔN TẬP ================= -->
@@ -259,6 +291,26 @@
           <span class="rc-b"><strong>Thẻ ghi nhớ</strong><small id="flashCount">—</small></span>
           <svg class="ic ic-sm rc-a" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
         </button>
+      </section>
+
+      <!-- ================= GỌI VIDEO ================= -->
+      <section class="view" id="view-call" hidden aria-labelledby="callTitle">
+        <div class="call-hero">
+          <div class="call-hero-art" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+          <h1 id="callTitle">Gọi video với MON.L</h1>
+          <p class="sub">Luyện nói bằng chính những đoạn hội thoại bạn đã học. MON.L nói trước, bạn trả lời — app nghe và chấm ngay.</p>
+        </div>
+        <div class="card call-info">
+          <div class="ci-row"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mic"/></svg>
+            <span><b>Nói vào micro</b><small>Bấm nút micro rồi đọc câu tiếng Anh.</small></span></div>
+          <div class="ci-row"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg>
+            <span><b>Chấm ngay từng câu</b><small>Sai chỗ nào app chỉ ra chỗ đó.</small></span></div>
+          <div class="ci-row"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chat"/></svg>
+            <span><b>Không nói được vẫn học</b><small>Chọn câu đúng bằng tay cũng được tính.</small></span></div>
+        </div>
+        <p class="fine" id="callMicNote"></p>
+        <button class="btn btn-primary btn-block mt" id="btnStartCall" type="button">Bắt đầu cuộc gọi</button>
+        <p class="fine" id="callLocked" hidden>Học xong ít nhất một bài có hội thoại thì mới gọi được.</p>
       </section>
 
       <!-- ================= GIẢI ĐẤU ================= -->
@@ -330,6 +382,7 @@
       <button class="tab is-active" data-nav="learn" aria-current="page" aria-label="Lộ trình học" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-learn"/></svg><span>Học</span></button>
       <button class="tab" data-nav="words" aria-label="Từ vựng đã học" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-words"/></svg><span>Từ vựng</span></button>
       <button class="tab" data-nav="review" aria-label="Ôn tập" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-review"/></svg><span>Ôn tập</span></button>
+      <button class="tab" data-nav="call" aria-label="Gọi video luyện nói" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-video"/></svg><span>Gọi Air</span></button>
       <button class="tab" data-nav="league" aria-label="Giải đấu tuần" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-league"/></svg><span>Giải đấu</span></button>
       <button class="tab" data-nav="profile" aria-label="Hồ sơ của bạn" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-profile"/></svg><span>Hồ sơ</span></button>
     </nav>
@@ -438,6 +491,48 @@
       </div>
       <div class="cal-grid" id="calGrid"></div>
     </div>
+  </div>
+</div>
+
+<!-- ================= CUỘC GỌI LUYỆN NÓI ================= -->
+<div class="call" id="call" hidden role="dialog" aria-modal="true" aria-labelledby="callName">
+  <div class="call-top">
+    <div class="call-who">
+      <span class="call-av" data-mascot="head" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></span>
+      <span><b id="callName">MON.L</b><small id="callTimer">00:00</small></span>
+    </div>
+    <span class="call-step" id="callStep">1/4</span>
+  </div>
+
+  <div class="call-stage">
+    <div class="call-mascot" id="callMascot" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+    <div class="call-bubble" id="callBubble" aria-live="polite">
+      <span class="call-lab" id="callLab">MON.L nói</span>
+      <b id="callSaid">—</b>
+      <small id="callSaidVi"></small>
+    </div>
+  </div>
+
+  <div class="call-foot">
+    <div class="call-task" id="callTask">
+      <span class="call-lab">Bạn trả lời</span>
+      <b id="callTarget">—</b>
+      <small id="callTargetVi"></small>
+    </div>
+    <div class="call-heard" id="callHeard" hidden><span id="callHeardText"></span></div>
+    <div class="call-actions">
+      <button class="round-btn lg" id="btnCallHear" type="button" aria-label="Nghe lại câu của MON.L">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sound"/></svg>
+      </button>
+      <button class="mic-btn" id="btnMic" type="button" aria-label="Bấm để nói">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mic"/></svg>
+      </button>
+      <button class="round-btn lg danger" id="btnHangup" type="button" aria-label="Kết thúc cuộc gọi">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-hangup"/></svg>
+      </button>
+    </div>
+    <button class="btn btn-text btn-block" id="btnCallSkip" type="button">Không nói được, chọn bằng tay</button>
+    <div class="call-choices" id="callChoices" hidden></div>
   </div>
 </div>
 

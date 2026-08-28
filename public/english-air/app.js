@@ -15,6 +15,7 @@ const DAY = 86400000;
 
 function shuffle(a) { const x = a.slice(); for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; } return x; }
 const sample = (a, n) => shuffle(a).slice(0, n);
+const deaccent = t => t.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").toLowerCase();
 const norm = s => s.toLowerCase().replace(/[.,!?;:'"’]/g, "").replace(/\s+/g, " ").trim();
 
 function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
@@ -138,7 +139,15 @@ function paintStats() {
   regenHearts();
   $("#statStreak").textContent = S.streak;
   $("#statXp").textContent = S.xp >= 1000 ? (S.xp / 1000).toFixed(2) + "K" : S.xp;
-  $("#statHeart").textContent = S.hearts;
+  // Hết tim thì ô tim đổi thành đồng hồ đếm tới lượt hồi tiếp theo.
+  if (S.hearts > 0) {
+    $("#statHeart").textContent = S.hearts;
+    $("#btnHeart").classList.remove("empty");
+  } else {
+    const m = Math.max(1, Math.ceil((S.heartAt + HEART_MS - Date.now()) / 60000));
+    $("#statHeart").textContent = m >= 60 ? Math.ceil(m / 60) + "h" : m + "p";
+    $("#btnHeart").classList.add("empty");
+  }
   $("#levelCode").textContent = level().code;
 }
 
@@ -168,7 +177,7 @@ const lessonsOf = lv => lv.units.flatMap(u => u.lessons.map(l => ({ ...l, unit: 
 function lessonWords(l) {
   if (!l.teach) return [];
   return l.teach.filter(s => s.t === "vocab" || s.t === "phrase")
-    .map(s => ({ en: s.en, vi: s.vi, ipa: s.ipa, pic: s.pic, note: s.note, ex: s.ex }));
+    .map(s => ({ en: s.en, vi: s.vi, pos: s.pos, ipa: s.ipa, pic: s.pic, note: s.note, ex: s.ex }));
 }
 const unitWords = u => u.lessons.flatMap(lessonWords);
 const unitSentences = u => u.lessons.flatMap(l => l.sentences || []);
@@ -190,7 +199,7 @@ function findLesson(id) {
 }
 
 /* ---------- 5. Điều hướng ---------- */
-const VIEWS = ["learn", "words", "review", "league", "profile"];
+const VIEWS = ["learn", "words", "review", "call", "league", "profile"];
 let view = "learn";
 function go(name) {
   if (!VIEWS.includes(name)) return;
@@ -205,7 +214,7 @@ function go(name) {
     b.classList.toggle("is-active", on);
     if (b.classList.contains("tab")) { on ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current"); }
   });
-  ({ learn: renderLearn, words: renderWords, review: renderReview, league: renderLeague, profile: renderProfile })[name]();
+  ({ learn: renderLearn, words: renderWords, review: renderReview, call: renderCall, league: renderLeague, profile: renderProfile })[name]();
   window.scrollTo({ top: 0 });
   if (location.hash.slice(1) !== name) history.replaceState(null, "", "#" + name);
 }
@@ -737,7 +746,8 @@ $("#btnNext").addEventListener("click", nextPressed);
 /* ---------- 13. Lặp lại ngắt quãng ---------- */
 const BOX_DAYS = [0, 1, 3, 7, 16, 35];
 function srsUpdate(en, ok) {
-  const r = S.srs[en] || { box: 0, due: 0, right: 0, wrong: 0 };
+  const r = S.srs[en] || { box: 0, due: 0, right: 0, wrong: 0, first: Date.now() };
+  if (!r.first) r.first = Date.now();
   if (ok) { r.right++; r.box = clamp(r.box + 1, 0, 5); } else { r.wrong++; r.box = clamp(r.box - 1, 0, 5); }
   r.due = Date.now() + BOX_DAYS[r.box] * DAY;
   S.srs[en] = r; save();
@@ -876,46 +886,69 @@ $("#btnFlash").addEventListener("click", startFlash);
 $("#btnFlash2").addEventListener("click", startFlash);
 
 /* ---------- 17. Màn Từ vựng ---------- */
-const FILTERS = [
-  { id: "all",   name: "Tất cả",   fn: () => true },
-  { id: "due",   name: "Cần ôn",   fn: w => S.srs[w.en].due <= Date.now() },
-  { id: "known", name: "Đã thuộc", fn: w => S.srs[w.en].box >= 4 },
-  { id: "weak",  name: "Hay sai",  fn: w => S.srs[w.en].wrong > 0 },
-  { id: "multi", name: "Cụm từ",   fn: w => w.en.includes(" ") },
-  { id: "pic",   name: "Có hình",  fn: w => !!w.pic }
-];
-let wordFilter = "all", wordSortAZ = false;
+const POS_ORDER = ["Danh từ", "Động từ", "Tính từ", "Trạng từ", "Cụm từ", "Chào hỏi", "Giới từ"];
+const LOCK_LESSONS = 5;                 // đủ 5 bài mới mở kho từ
+let wordFilter = "all", wordSortAZ = false, wordGrid = false, wordQuery = "";
 
 function renderWords() {
+  const doneN = Object.keys(S.done).length;
+  const locked = doneN < LOCK_LESSONS;
+  const head = $("#view-words .words-head");
+  [head, $("#wordSearchWrap"), $("#wordFilters"), $("#wordPromo"), $("#wordList")]
+    .forEach(el => { if (el) el.hidden = locked; });
+  $("#wordsLocked").hidden = !locked;
+  if (locked) {
+    const left = LOCK_LESSONS - doneN;
+    $("#lockedLeft").textContent = `Hoàn thành thêm ${left} bài học nữa để mở khoá`;
+    $("#lockedBar").style.width = Math.round((doneN / LOCK_LESSONS) * 100) + "%";
+    return;
+  }
+  if (!$("#wordSearchWrap").dataset.open) $("#wordSearchWrap").hidden = true;
+
   const seen = seenWords();
-  const wk = weekKey();
-  const thisWeek = seen.filter(w => S.srs[w.en].due - BOX_DAYS[S.srs[w.en].box] * DAY >= new Date(wk).getTime()).length;
+  const wkStart = new Date(weekKey()).getTime();
+  const thisWeek = seen.filter(w => S.srs[w.en].first >= wkStart).length;
   $("#wordCount").textContent = seen.length + " từ";
   $("#wordWeek").textContent = thisWeek + " trong tuần này.";
 
+  // chip lọc: chỉ hiện từ loại thực sự có trong kho từ của người học
+  const have = POS_ORDER.filter(p => seen.some(w => w.pos === p));
+  const chips = [{ id: "all", name: "Tất cả" }]
+    .concat(have.map(p => ({ id: p, name: p })))
+    .concat([{ id: "due", name: "Cần ôn" }]);
+  if (!chips.some(c => c.id === wordFilter)) wordFilter = "all";
+
   const fbox = $("#wordFilters"); fbox.textContent = "";
-  FILTERS.forEach(f => {
-    const b = el("button", "chip" + (f.id === wordFilter ? " on" : ""), f.name);
+  chips.forEach(c => {
+    const b = el("button", "chip" + (c.id === wordFilter ? " on" : ""), c.name);
     b.type = "button";
-    b.setAttribute("aria-pressed", String(f.id === wordFilter));
-    b.addEventListener("click", () => { wordFilter = f.id; renderWords(); });
+    b.setAttribute("aria-pressed", String(c.id === wordFilter));
+    b.addEventListener("click", () => { wordFilter = c.id; renderWords(); });
     fbox.append(b);
   });
 
-  const f = FILTERS.find(x => x.id === wordFilter);
-  let list = seen.filter(f.fn);
+  let list = seen.filter(w =>
+    wordFilter === "all" ? true :
+    wordFilter === "due" ? S.srs[w.en].due <= Date.now() : w.pos === wordFilter);
+  if (wordQuery) {
+    const q = deaccent(wordQuery);
+    list = list.filter(w => deaccent(w.en).includes(q) || deaccent(w.vi).includes(q));
+  }
   list = wordSortAZ ? list.slice().sort((a, b) => a.en.localeCompare(b.en)) : list.slice().reverse();
 
-  const ul = $("#wordList"); ul.textContent = "";
+  const ul = $("#wordList");
+  ul.className = "wlist" + (wordGrid ? " grid" : "");
+  ul.textContent = "";
   if (!list.length) {
     const box = el("div", "empty");
-    const m = mascotBox("head", "empty-mascot");
-    box.append(m, el("b", null, seen.length ? `Không có từ nào ở mục “${f.name}”` : "Chưa có từ nào"),
-      el("p", "sub", seen.length ? "Thử chọn mục khác xem sao." : "Hoàn thành một bài học để bắt đầu tích từ."));
+    box.append(mascotBox("head", "empty-mascot"),
+      el("b", null, wordQuery ? `Không tìm thấy “${wordQuery}”`
+        : wordFilter === "all" ? "Chưa có từ nào" : `Không tìm thấy ${chips.find(c => c.id === wordFilter).name} nào`),
+      el("p", "sub", wordQuery ? "Thử từ khoá khác xem sao." : "Hãy thử tìm các từ mà bạn đã học."));
     ul.append(box);
     return;
   }
-  list.slice(0, 80).forEach(w => {
+  list.slice(0, 120).forEach(w => {
     const li = el("li");
     const say = el("button", "w-say"); say.type = "button";
     say.setAttribute("aria-label", "Nghe: " + w.en);
@@ -923,17 +956,39 @@ function renderWords() {
     say.addEventListener("click", () => speak(w.en));
     const box = el("div");
     box.append(el("div", "w-en", w.en), el("div", "w-vi", w.vi));
+    if (w.pos) box.append(el("span", "w-pos", w.pos));
     const pips = el("div", "w-pips");
     pips.setAttribute("aria-label", `Độ nhớ ${S.srs[w.en].box} trên 5`);
     for (let i = 0; i < 5; i++) pips.append(el("i", "pip" + (i < S.srs[w.en].box ? " on" : "")));
     li.append(say, box, pips);
+    if (wordGrid) li.addEventListener("click", () => speak(w.en));
     ul.append(li);
   });
 }
 $("#btnWordSort").addEventListener("click", () => {
-  wordSortAZ = !wordSortAZ; renderWords();
-  toast(wordSortAZ ? "Sắp xếp A → Z" : "Sắp xếp theo từ mới học");
+  wordSortAZ = !wordSortAZ;
+  $("#btnWordSort").textContent = wordSortAZ ? "A–Z" : "Mới học";
+  renderWords();
 });
+$("#btnWordView").addEventListener("click", () => {
+  wordGrid = !wordGrid;
+  $("#btnWordView").setAttribute("aria-pressed", String(wordGrid));
+  renderWords();
+});
+$("#btnWordSearch").addEventListener("click", () => {
+  const wrap = $("#wordSearchWrap");
+  const open = wrap.hidden;
+  wrap.hidden = !open;
+  if (open) wrap.dataset.open = "1"; else delete wrap.dataset.open;
+  $("#btnWordSearch").setAttribute("aria-expanded", String(open));
+  if (open) $("#wordSearch").focus();
+  else { wordQuery = ""; $("#wordSearch").value = ""; renderWords(); }
+});
+$("#wordSearch").addEventListener("input", e => { wordQuery = e.target.value.trim(); renderWords(); });
+$("#btnSearchClear").addEventListener("click", () => {
+  wordQuery = ""; $("#wordSearch").value = ""; $("#wordSearch").focus(); renderWords();
+});
+$("#btnLockedStart").addEventListener("click", () => { go("learn"); startLesson(currentLessonId()); });
 
 /* ---------- 18. Màn Ôn tập ---------- */
 function renderReview() {
@@ -947,6 +1002,188 @@ function renderReview() {
 }
 $("#btnDue").addEventListener("click", () => startLesson(null, { words: sample(dueWords(), 8), mode: "review", max: 10 }));
 $("#btnWeak").addEventListener("click", () => startLesson(null, { words: weakWords().slice(0, 8), mode: "review", max: 10 }));
+
+/* ---------- 18b. Gọi video luyện nói ----------
+   Không phải AI thật: MON.L đọc lời thoại A trong các đoạn hội thoại người học
+   đã học, người học nói lời thoại B. Máy nghe bằng Web Speech API và chấm theo
+   tỉ lệ từ trùng khớp; máy nào không hỗ trợ micro thì chọn đáp án bằng tay.   */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const C = { lines: [], i: 0, right: 0, asked: 0, target: null, t0: 0, timer: null, rec: null, listening: false };
+
+/** Các đoạn hội thoại lấy từ những bài đã hoàn thành. */
+function callDialogues() {
+  const out = [];
+  COURSE.levels.forEach(lv => lv.units.forEach(u => u.lessons.forEach(l => {
+    if (!S.done[l.id] || !l.teach) return;
+    l.teach.filter(t => t.t === "dialogue").forEach(d => {
+      if (d.lines.some(x => x.who === "B")) out.push({ title: d.title, lines: d.lines, lesson: l.title });
+    });
+  })));
+  return out;
+}
+/** Tỉ lệ từ của câu mẫu xuất hiện trong câu người học nói. */
+function similar(heard, target) {
+  const a = norm(heard).split(" ").filter(Boolean);
+  const b = norm(target).split(" ").filter(Boolean);
+  if (!b.length) return 0;
+  const pool = a.slice();
+  let hit = 0;
+  b.forEach(w => { const k = pool.indexOf(w); if (k >= 0) { pool.splice(k, 1); hit++; } });
+  return hit / b.length;
+}
+
+function renderCall() {
+  const n = callDialogues().length;
+  $("#callLocked").hidden = n > 0;
+  $("#btnStartCall").disabled = n === 0;
+  $("#callMicNote").textContent = SR
+    ? "Lần đầu bấm micro, trình duyệt sẽ hỏi quyền dùng micro — chọn Cho phép."
+    : "Trình duyệt này chưa hỗ trợ nghe bằng micro, bạn vẫn luyện được bằng cách chọn câu đúng.";
+}
+
+function startCall() {
+  const pool = callDialogues();
+  if (!pool.length) return toast("Học xong một bài có hội thoại đã nhé.");
+  const d = pool[Math.floor(Math.random() * pool.length)];
+  C.lines = d.lines.slice();
+  C.i = 0; C.right = 0; C.asked = d.lines.filter(x => x.who === "B").length;
+  C.t0 = Date.now();
+  $("#callName").textContent = "MON.L";
+  $("#call").hidden = false;
+  document.body.style.overflow = "hidden";
+  clearInterval(C.timer);
+  C.timer = setInterval(() => {
+    const s = Math.floor((Date.now() - C.t0) / 1000);
+    $("#callTimer").textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+  }, 1000);
+  $("#callTimer").textContent = "00:00";
+  nextCallLine();
+}
+
+function nextCallLine() {
+  stopListening();
+  $("#callHeard").hidden = true;
+  $("#callChoices").hidden = true;
+  $("#callChoices").textContent = "";
+  $("#btnCallSkip").hidden = false;
+
+  if (C.i >= C.lines.length) return endCall(true);
+  const line = C.lines[C.i];
+  const doneB = C.lines.slice(0, C.i).filter(x => x.who === "B").length;
+  $("#callStep").textContent = Math.min(doneB + 1, C.asked) + "/" + C.asked;
+
+  if (line.who !== "B") {
+    // MON.L nói, người học chỉ nghe
+    C.target = null;
+    $("#callLab").textContent = "MON.L nói";
+    $("#callSaid").textContent = line.en;
+    $("#callSaidVi").textContent = S.showVi ? line.vi : "";
+    $("#callTask").hidden = true;
+    $("#btnMic").disabled = true;
+    $("#btnCallSkip").hidden = true;
+    const m = $("#callMascot");
+    m.classList.add("talking");
+    speak(line.en);
+    setTimeout(() => { m.classList.remove("talking"); C.i++; nextCallLine(); }, 900 + line.en.length * 55);
+    return;
+  }
+
+  C.target = line;
+  $("#callTask").hidden = false;
+  $("#callTarget").textContent = line.en;
+  $("#callTargetVi").textContent = S.showVi ? line.vi : "";
+  $("#btnMic").disabled = !SR;
+  if (!SR) showCallChoices();
+}
+
+/** Ba lựa chọn bấm tay, dùng khi không có micro hoặc người học bấm bỏ qua. */
+function showCallChoices() {
+  const box = $("#callChoices");
+  box.textContent = "";
+  const others = sample(COURSE.levels.flatMap(lv => lv.units.flatMap(u => u.lessons.flatMap(l =>
+    (l.teach || []).filter(t => t.t === "dialogue").flatMap(d => d.lines))))
+    .filter(x => x.en !== C.target.en), 2);
+  shuffle([C.target, ...others]).forEach(x => {
+    const b = el("button", "opt"); b.type = "button";
+    b.append(el("span", null, x.en));
+    b.addEventListener("click", () => {
+      if (x.en === C.target.en) { b.classList.add("ok"); judgeCall(x.en, 1); }
+      else { b.classList.add("bad"); judgeCall(x.en, 0); }
+    });
+    box.append(b);
+  });
+  box.hidden = false;
+  $("#btnCallSkip").hidden = true;
+}
+
+function judgeCall(heard, score) {
+  const ok = score >= 0.7;
+  const h = $("#callHeard");
+  h.hidden = false;
+  h.className = "call-heard " + (ok ? "ok" : "bad");
+  $("#callHeardText").textContent = ok
+    ? `Nghe rõ rồi: “${heard}”`
+    : `Nghe được: “${heard}” — thử lại cho sát câu mẫu nhé.`;
+  if (ok) {
+    C.right++;
+    speak(C.target.en);
+    setTimeout(() => { C.i++; nextCallLine(); }, 1100);
+  } else {
+    $("#btnMic").disabled = false;
+    if (!$("#callChoices").children.length) $("#btnCallSkip").hidden = false;
+  }
+}
+
+function startListening() {
+  if (!SR || C.listening || !C.target) return;
+  const r = new SR();
+  C.rec = r; C.listening = true;
+  r.lang = "en-US"; r.interimResults = false; r.maxAlternatives = 3;
+  $("#btnMic").classList.add("listening");
+  r.onresult = e => {
+    const alts = [...e.results[0]].map(a => a.transcript);
+    const best = alts.reduce((b, t) => Math.max(b, similar(t, C.target.en)), 0);
+    judgeCall(alts[0], best);
+  };
+  r.onerror = ev => {
+    stopListening();
+    toast(ev.error === "not-allowed"
+      ? "Chưa được cấp quyền micro. Bạn chọn câu đúng bằng tay nhé."
+      : "Không nghe được, thử lại hoặc chọn bằng tay.");
+    showCallChoices();
+  };
+  r.onend = () => stopListening();
+  try { r.start(); } catch { stopListening(); }
+}
+function stopListening() {
+  C.listening = false;
+  $("#btnMic").classList.remove("listening");
+  if (C.rec) { try { C.rec.stop(); } catch {} C.rec = null; }
+}
+
+function endCall(finished) {
+  stopListening();
+  clearInterval(C.timer);
+  $("#call").hidden = true;
+  document.body.style.overflow = "";
+  stopSpeak();
+  if (finished && C.asked) {
+    const xp = 5 + (C.right === C.asked ? 5 : 0);
+    markStudied(); addXp(xp); save();
+    toast(`Xong cuộc gọi: ${C.right}/${C.asked} câu · +${xp} XP`);
+  }
+  paintStats();
+  go("call");
+}
+
+$("#btnStartCall").addEventListener("click", startCall);
+$("#btnMic").addEventListener("click", () => C.listening ? stopListening() : startListening());
+$("#btnCallHear").addEventListener("click", () => {
+  const prev = C.lines.slice(0, C.i).reverse().find(x => x.who !== "B");
+  speak(prev ? prev.en : (C.target ? C.target.en : ""));
+});
+$("#btnCallSkip").addEventListener("click", showCallChoices);
+$("#btnHangup").addEventListener("click", () => endCall(false));
 
 /* ---------- 19. Giải đấu ---------- */
 const AVCOL = ["#0369A1", "#B45309", "#047857", "#BE185D", "#6D28D9", "#B91C1C", "#0F766E", "#4F46E5"];
