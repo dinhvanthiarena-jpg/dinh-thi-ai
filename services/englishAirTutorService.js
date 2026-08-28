@@ -131,8 +131,15 @@ function teachPrompt(level, words, heard) {
 ════ CÁCH DẠY ════
 - Dẫn dắt bằng một tình huống đời thường: gọi món, hỏi đường, kể về cuối tuần,
   đi khám bệnh, phỏng vấn xin việc… Không bó buộc trong bài đã học.
-- MỖI LƯỢT BẮT BUỘC cho một câu tiếng Anh để người học nói theo, ghi ở dòng TASK.
-  Câu đó phải ngắn (4–12 từ), đúng mức trình độ, và ăn khớp với điều bạn vừa nói.
+- MỖI LƯỢT BẮT BUỘC cho một câu tiếng Anh để người học ĐỌC TO LÊN, ghi ở dòng TASK.
+  Câu đó ngắn (4–12 từ), đúng mức trình độ, ăn khớp với điều bạn vừa nói.
+- DÒNG TASK LÀ CÂU CỦA NGƯỜI HỌC, không phải câu bạn hỏi họ. Phải là câu hoàn chỉnh,
+  thường ở ngôi thứ nhất, và KHÔNG được là câu hỏi bạn đặt cho họ, KHÔNG được có chỗ trống.
+    ĐÚNG:  TASK: I wake up at six o'clock.
+    ĐÚNG:  TASK: My name is Nam and I am a student.
+    SAI:   TASK: What is your name?   (câu này bạn hỏi, họ đâu có đọc lại)
+    SAI:   TASK: My name is ___.      (chừa chỗ trống thì máy chấm sao được)
+- Dòng SAY phải dẫn vào câu đó, kiểu "Let's try this one." hay "Now say this after me."
 - NGẮN. Lời của bạn tối đa 2 câu, dưới 25 từ.
 ${COMMON_TAIL}
 
@@ -160,7 +167,10 @@ Họ vừa ĐỌC câu mẫu và máy nghe khớp ${heard.pct}% — đạt rồi
 sửa ngữ pháp nếu có, rồi ra câu MỚI và khó hơn một chút ở dòng TASK.` : `
 Họ vừa đọc câu mẫu "${heard.target}" nhưng máy chỉ nghe khớp ${heard.pct}% — CHƯA ĐẠT.
 Hãy nói cho họ biết chỗ đọc chưa rõ (âm nào khó, đọc thế nào), rồi cho họ đọc LẠI
-ĐÚNG CÂU CŨ: dòng TASK lượt này phải ghi y nguyên "${heard.target}", không được đổi câu.`}
+ĐÚNG CÂU CŨ: dòng TASK lượt này phải ghi y nguyên "${heard.target}", không được đổi câu.
+NHƯNG nếu câu họ vừa nói là một câu tiếng Anh tử tế mà chỉ khác câu mẫu — tức là họ
+đang trả lời bạn chứ không phải cố đọc lại — thì ĐỪNG chê phát âm. Nhận xét câu đó,
+sửa lỗi nếu có, rồi ra câu mới.`}
 Dòng TASK tuyệt đối không được để trống.`;
 }
 
