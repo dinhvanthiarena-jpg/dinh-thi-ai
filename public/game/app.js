@@ -189,8 +189,13 @@
     wrong() { tone(220, 0, 0.12, 'sawtooth', 0.22); tone(140, 0.09, 0.24, 'sawtooth', 0.2); },
     win() { tone(523, 0, 0.15, 'sine', 0.24); tone(659, 0.14, 0.15, 'sine', 0.24); tone(784, 0.28, 0.15, 'sine', 0.24); tone(1046, 0.42, 0.3, 'sine', 0.26); },
     pop() {
-      noiseBurst(0, 0.06, 0.32, 1700 + Math.random() * 900);
-      tone(170 + Math.random() * 70, 0, 0.08, 'sine', 0.16);
+      // A real balloon-pop "đùng": a sharp broadband crack up front, a
+      // low-end thump right under it for weight, then a very short high
+      // sizzle tail as the burst fades — louder/punchier than a UI click.
+      noiseBurst(0, 0.09, 0.5, 1500 + Math.random() * 1200);
+      tone(90 + Math.random() * 30, 0, 0.14, 'sine', 0.3);
+      tone(60, 0.01, 0.1, 'triangle', 0.22);
+      noiseBurst(0.05, 0.05, 0.16, 3200);
     },
   };
 
@@ -225,25 +230,46 @@
   }
   function dropSlotHtml() { return '<span class="drop-slot" id="dropSlot"></span>'; }
 
-  // Small confetti-style burst at a viewport point (x,y) — used on correct/
-  // wrong reveals and balloon pops. Particles are throwaway fixed-position
-  // spans appended to <body> and removed once their own animation ends.
-  function burstParticles(x, y, color, count) {
+  // Confetti-style burst at a viewport point (x,y) — used on correct/wrong
+  // reveals and balloon pops. Particles are throwaway fixed-position spans
+  // appended to <body> and removed once their own animation ends. `big`
+  // (balloon pops) throws them farther/bigger and mixes in rubber-shard
+  // shapes for a proper "bắn tung tóe" splatter instead of gentle confetti.
+  function burstParticles(x, y, color, count, big) {
     const n = count || 12;
     for (let i = 0; i < n; i++) {
       const p = document.createElement('span');
       p.className = 'pop-particle';
-      const angle = (Math.PI * 2 * i) / n + Math.random() * 0.5;
-      const dist = 26 + Math.random() * 34;
+      const angle = (Math.PI * 2 * i) / n + Math.random() * 0.6;
+      const dist = big ? 55 + Math.random() * 75 : 26 + Math.random() * 34;
+      const size = big ? 7 + Math.random() * 8 : 8;
       p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
       p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+      p.style.setProperty('--spin', Math.round(Math.random() * 500 - 250) + 'deg');
+      p.style.width = size + 'px';
+      p.style.height = (big && Math.random() < 0.5 ? size * 1.8 : size) + 'px';
+      p.style.borderRadius = Math.random() < 0.5 ? '2px' : '50%';
       p.style.left = x + 'px';
       p.style.top = y + 'px';
       p.style.background = color;
+      if (big) p.style.animationDuration = (500 + Math.random() * 260) + 'ms';
       document.body.appendChild(p);
       p.addEventListener('animationend', () => p.remove());
-      setTimeout(() => p.remove(), 700);
+      setTimeout(() => p.remove(), 900);
     }
+  }
+
+  // Quick expanding ring "shockwave" — layered with burstParticles on a
+  // balloon pop for extra "đùng!" punch.
+  function popRing(x, y, color) {
+    const r = document.createElement('span');
+    r.className = 'pop-ring';
+    r.style.left = x + 'px';
+    r.style.top = y + 'px';
+    r.style.borderColor = color;
+    document.body.appendChild(r);
+    r.addEventListener('animationend', () => r.remove());
+    setTimeout(() => r.remove(), 500);
   }
 
   function generateIconAlgebraQuestion(grade) {
@@ -1285,8 +1311,14 @@
       balloon.className = 'balloon reveal';
       balloon.style.animationDelay = (i * 80) + 'ms';
       balloon.style.setProperty('--hue', pick(BALLOON_HUES));
+      balloon.style.setProperty('--bob-dur', (2 + Math.random() * 1.4).toFixed(2) + 's');
+      balloon.style.setProperty('--bob-x', (Math.random() * 10 - 5).toFixed(1) + 'px');
       balloon.dataset.value = String(choice);
-      balloon.innerHTML = `<div class="balloon-float"><div class="balloon-body"><span class="balloon-num">${fmtNum(choice)}</span></div><div class="balloon-knot"></div><div class="balloon-string"></div></div>`;
+      // .balloon-num sits OUTSIDE .balloon-shape (a sibling, not a child) so
+      // popping the shape (scaling it to nothing) doesn't shrink the number
+      // along with it — the number needs to stay full-size and readable so
+      // the correct/wrong reveal is still clear after the burst.
+      balloon.innerHTML = `<div class="balloon-float"><div class="balloon-shape"><div class="balloon-body"></div><div class="balloon-knot"></div><div class="balloon-string"></div></div><span class="balloon-num">${fmtNum(choice)}</span></div>`;
       tray.appendChild(balloon);
       wireBalloonDrag(balloon, choice);
     });
@@ -1301,7 +1333,9 @@
     balloon.classList.add('popping');
     sfx.pop();
     const hue = balloon.style.getPropertyValue('--hue') || '280';
-    burstParticles(cx, cy, `hsl(${hue}, 85%, 65%)`, 14);
+    const color = `hsl(${hue}, 85%, 65%)`;
+    burstParticles(cx, cy, color, 22, true);
+    popRing(cx, cy, color);
   }
 
   function wireBalloonDrag(balloon, choice) {

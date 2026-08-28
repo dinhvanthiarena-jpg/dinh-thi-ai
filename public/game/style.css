@@ -1266,27 +1266,41 @@ button:focus-visible,
 /* ==== Confetti burst (correct/wrong reveals, balloon pops) ==== */
 .pop-particle {
   position: fixed;
-  width: 8px;
-  height: 8px;
   border-radius: 3px;
   pointer-events: none;
   z-index: 1000;
-  animation: particle-burst 620ms cubic-bezier(.2,.7,.3,1) forwards;
+  animation: particle-burst 620ms cubic-bezier(.15,.7,.25,1) forwards;
 }
 @keyframes particle-burst {
   0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
-  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 24px)) scale(0.4) rotate(200deg); opacity: 0; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 30px)) scale(0.3) rotate(var(--spin, 200deg)); opacity: 0; }
+}
+.pop-ring {
+  position: fixed;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 4px solid;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 999;
+  animation: pop-ring-expand 420ms cubic-bezier(.1,.6,.3,1) forwards;
+}
+@keyframes pop-ring-expand {
+  0% { transform: scale(0.4); opacity: 0.9; }
+  100% { transform: scale(7); opacity: 0; }
 }
 
 /* ==== Balloon-pop answer mode ==== */
 .balloon-tray {
   display: flex;
   flex-wrap: wrap;
-  gap: 18px 22px;
+  gap: 18px 26px;
   justify-content: center;
   align-items: flex-start;
   width: 100%;
-  padding-top: 6px;
+  padding: 16px 0 6px;
 }
 .balloon {
   position: relative;
@@ -1298,13 +1312,15 @@ button:focus-visible,
 }
 .balloon.reveal { animation: btn-pop-in 320ms ease-out backwards; }
 .balloon-float {
-  animation: balloon-bob 2.4s ease-in-out infinite;
+  position: relative;
+  animation: balloon-bob var(--bob-dur, 2.4s) ease-in-out infinite;
   animation-delay: inherit;
 }
 @keyframes balloon-bob {
-  0%, 100% { transform: translateY(0) rotate(-3deg); }
-  50% { transform: translateY(-9px) rotate(3deg); }
+  0%, 100% { transform: translate(0, 0) rotate(-4deg); }
+  50% { transform: translate(var(--bob-x, 0px), -18px) rotate(4deg); }
 }
+.balloon-shape { transform-origin: 50% 40%; }
 .balloon-body {
   width: 74px;
   height: 86px;
@@ -1312,16 +1328,6 @@ button:focus-visible,
   border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
   background: linear-gradient(155deg, hsl(var(--hue), 90%, 70%), hsl(var(--hue), 85%, 52%));
   box-shadow: inset -8px -10px 14px rgba(0,0,0,0.18), inset 6px 8px 10px rgba(255,255,255,0.35), var(--sh-1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.balloon-num {
-  font-family: var(--font-heading);
-  font-weight: 900;
-  font-size: 1.35rem;
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.35);
 }
 .balloon-knot {
   width: 0;
@@ -1338,6 +1344,19 @@ button:focus-visible,
   background: var(--line);
   border-radius: 2px;
 }
+.balloon-num {
+  position: absolute;
+  inset: 0 0 26px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.35rem;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+  transition: transform 160ms ease-out, color 160ms;
+}
 .balloon.dragging {
   animation: none;
   cursor: grabbing;
@@ -1345,16 +1364,30 @@ button:focus-visible,
 }
 .balloon.dragging .balloon-float { animation: none; transform: scale(1.12); }
 .balloon.dim { opacity: 0.5; }
-.balloon.correct .balloon-body { background: linear-gradient(155deg, var(--ok), #16a34a); }
-.balloon.wrong .balloon-body { background: linear-gradient(155deg, var(--bad), #b83338); }
-.balloon.popping .balloon-body { animation: balloon-pop 360ms ease-out; }
-.balloon.popping .balloon-knot,
-.balloon.popping .balloon-string { opacity: 0; transition: opacity 180ms 100ms; }
+.balloon.correct .balloon-num { color: var(--ok-ink); transform: scale(1.35); }
+.balloon.wrong .balloon-num { color: var(--bad-ink); transform: scale(1.35); }
+/* Reveal-only case (this balloon wasn't the one tapped/dragged, just shown
+ * as the right answer) — tint the still-intact rubber too since it never
+ * pops. A popping balloon skips this so its body can explode cleanly
+ * instead of snapping to a flat color mid-burst. */
+.balloon.correct:not(.popping) .balloon-body { background: linear-gradient(155deg, var(--ok), #16a34a); }
+.balloon.wrong:not(.popping) .balloon-body { background: linear-gradient(155deg, var(--bad), #b83338); }
+/* Popping: the rubber shape explodes outward and vanishes while the number
+ * (a sibling, unaffected by the shape's own transform) stays put and pops
+ * a little bigger — a real "bùm" burst, not just a color-changing bounce. */
+.balloon.popping .balloon-shape { animation: balloon-pop 420ms cubic-bezier(.2,.8,.3,1) forwards; }
+.balloon.popping .balloon-num { animation: balloon-num-pop 420ms ease-out; }
 @keyframes balloon-pop {
+  0% { transform: scale(1); opacity: 1; }
+  25% { transform: scale(1.45) rotate(-6deg); opacity: 1; }
+  55% { transform: scale(1.7) rotate(4deg); opacity: 0; }
+  100% { transform: scale(1.7) rotate(4deg); opacity: 0; }
+}
+@keyframes balloon-num-pop {
   0% { transform: scale(1); }
-  35% { transform: scale(1.32) rotate(-4deg); }
-  60% { transform: scale(0.86) rotate(3deg); }
-  100% { transform: scale(1) rotate(0); }
+  30% { transform: scale(1.6); }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1.35); }
 }
 
 /* ==== Thinking dots ==== */
