@@ -5,6 +5,30 @@ const pro = require('../services/proService');
 
 const router = express.Router();
 
+/**
+ * Dự án này không có lớp bắt lỗi cho route bất đồng bộ: một lỗi ném ra trong
+ * handler async sẽ thành unhandledRejection, request KHÔNG BAO GIỜ được trả lời,
+ * và trình duyệt cứ quay mãi. Bọc mọi handler ở đây lại để lỗi nào cũng ra một
+ * câu trả lời — thà báo hỏng còn hơn treo.
+ */
+function an(fn) {
+  return function (req, res, next) {
+    Promise.resolve(fn(req, res, next)).catch((err) => {
+      console.error('[pro]', req.method, req.originalUrl, err);
+      if (res.headersSent) return;
+      const admin = res.locals.currentUser && res.locals.currentUser.role === 'admin';
+      const chiTiet = admin ? ' — ' + err.message : '';
+      if (req.path.startsWith('/api/') || req.xhr) {
+        return res.status(500).json({ error: 'Có lỗi ở máy chủ' + chiTiet });
+      }
+      res.status(500).send(
+        '<p style="font:16px system-ui;padding:2rem">Có lỗi ở máy chủ' + chiTiet +
+        '. <a href="/pro">Thử lại</a></p>'
+      );
+    });
+  };
+}
+
 /* ---------- Trang bán gói ---------- */
 async function veTrangPro(req, res, loiNhom) {
   const u = res.locals.currentUser;
@@ -29,23 +53,23 @@ async function veTrangPro(req, res, loiNhom) {
   });
 }
 
-router.get('/', (req, res) => veTrangPro(req, res));
+router.get('/', an((req, res) => veTrangPro(req, res)));
 
 /* ---------- Dùng thử 7 ngày, không giữ thẻ, không tự trừ tiền ---------- */
-router.post('/dung-thu', requireAuth, async (req, res) => {
+router.post('/dung-thu', requireAuth, an(async (req, res) => {
   await pro.batDungThu(res.locals.currentUser);
   res.redirect('/pro');
-});
+}));
 
 /* ---------- Vào nhóm gia đình bằng mã người nhà gửi ---------- */
-router.post('/vao-nhom', requireAuth, async (req, res) => {
+router.post('/vao-nhom', requireAuth, an(async (req, res) => {
   const kq = await pro.vaoNhom(res.locals.currentUser, req.body.ma);
   if (kq.loi) return veTrangPro(req, res, kq.loi);
   res.redirect('/pro');
-});
+}));
 
 /* ---------- Tạo đơn rồi hiện mã QR ---------- */
-router.post('/mua', requireAuth, async (req, res) => {
+router.post('/mua', requireAuth, an(async (req, res) => {
   const plan = String(req.body.plan || '');
   if (!pro.PLANS[plan]) return res.redirect('/pro');
   if (!pro.sanSangNhanTien()) {
@@ -54,9 +78,9 @@ router.post('/mua', requireAuth, async (req, res) => {
   }
   const order = await pro.taoDon(res.locals.currentUser.id, plan);
   res.redirect(`/pro/don/${order.code}`);
-});
+}));
 
-router.get('/don/:code', requireAuth, async (req, res) => {
+router.get('/don/:code', requireAuth, an(async (req, res) => {
   const order = await ProOrder.findOne({ where: { code: req.params.code } });
   if (!order || order.UserId !== res.locals.currentUser.id) return res.redirect('/pro');
   res.render('pro/don', {
@@ -66,17 +90,17 @@ router.get('/don/:code', requireAuth, async (req, res) => {
     ck: pro.thongTinChuyenKhoan(order),
     ten: pro.PLANS[order.plan].ten,
   });
-});
+}));
 
 /** Trang đơn hỏi lại mỗi vài giây xem tiền về chưa. */
-router.get('/don/:code/trang-thai', requireAuth, async (req, res) => {
+router.get('/don/:code/trang-thai', requireAuth, an(async (req, res) => {
   const order = await ProOrder.findOne({ where: { code: req.params.code } });
   if (!order || order.UserId !== res.locals.currentUser.id) return res.status(404).json({});
   res.json({ status: order.status, proUntil: res.locals.currentUser.proUntil });
-});
+}));
 
 /* ---------- App Mon.L hỏi xem người này được dùng gì ---------- */
-router.get('/api/quyen', (req, res) => {
+router.get('/api/quyen', an((req, res) => {
   const u = res.locals.currentUser;
   res.json({
     thuPhi: pro.dangThuPhi(),
@@ -84,7 +108,7 @@ router.get('/api/quyen', (req, res) => {
     duocGoi: pro.duocDung(u),
     proUntil: u ? u.proUntil : null,
   });
-});
+}));
 
 /* ══════════════════════════════════════════════════════════════
    API cho app Mon.L — bán gói ngay trong app, không phải nhảy ra web.
@@ -93,7 +117,7 @@ router.get('/api/quyen', (req, res) => {
    ══════════════════════════════════════════════════════════════ */
 
 /** Một lần gọi là app đủ dữ liệu vẽ cả màn hình bán gói. */
-router.get('/api/goi', async (req, res) => {
+router.get('/api/goi', an(async (req, res) => {
   const u = res.locals.currentUser;
   const maNhom = u && u.familyCode ? u.familyCode : '';
   const ds = Object.entries(pro.PLANS).map(([ma, g]) => ({
@@ -118,7 +142,7 @@ router.get('/api/goi', async (req, res) => {
     soThanhVien: maNhom ? (await pro.nguoiTrongNhom(maNhom)).length : 0,
     goi: ds,
   });
-});
+}));
 
 /** Chưa đăng nhập thì trả 401 kèm đường dẫn, app tự mở trang đăng nhập. */
 function canDangNhap(req, res) {
@@ -127,7 +151,7 @@ function canDangNhap(req, res) {
   return true;
 }
 
-router.post('/api/mua', express.json(), async (req, res) => {
+router.post('/api/mua', express.json(), an(async (req, res) => {
   if (canDangNhap(req, res)) return;
   const plan = String((req.body || {}).plan || '');
   if (!pro.PLANS[plan]) return res.status(400).json({ error: 'Gói không hợp lệ' });
@@ -143,30 +167,30 @@ router.post('/api/mua', express.json(), async (req, res) => {
     ck: pro.thongTinChuyenKhoan(order),
     tuDong: pro.tuDongDoiSoat(),
   });
-});
+}));
 
-router.get('/api/don/:code', async (req, res) => {
+router.get('/api/don/:code', an(async (req, res) => {
   if (canDangNhap(req, res)) return;
   const order = await ProOrder.findOne({ where: { code: req.params.code } });
   if (!order || order.UserId !== res.locals.currentUser.id) {
     return res.status(404).json({ error: 'Không tìm thấy đơn' });
   }
   res.json({ status: order.status, proUntil: res.locals.currentUser.proUntil });
-});
+}));
 
-router.post('/api/dung-thu', express.json(), async (req, res) => {
+router.post('/api/dung-thu', express.json(), an(async (req, res) => {
   if (canDangNhap(req, res)) return;
   const kq = await pro.batDungThu(res.locals.currentUser);
   if (kq.loi) return res.status(400).json({ error: kq.loi });
   res.json({ ok: true, hetHan: kq.hetHan });
-});
+}));
 
-router.post('/api/vao-nhom', express.json(), async (req, res) => {
+router.post('/api/vao-nhom', express.json(), an(async (req, res) => {
   if (canDangNhap(req, res)) return;
   const kq = await pro.vaoNhom(res.locals.currentUser, (req.body || {}).ma);
   if (kq.loi) return res.status(400).json({ error: kq.loi });
   res.json({ ok: true, hetHan: kq.hetHan });
-});
+}));
 
 /* ---------- Ngân hàng báo tiền về ---------- */
 /**
@@ -174,7 +198,7 @@ router.post('/api/vao-nhom', express.json(), async (req, res) => {
  * `Authorization: Apikey <khoá>` — không khớp khoá thì bỏ qua ngay.
  * Khớp đơn bằng mã nằm trong nội dung chuyển khoản.
  */
-router.post('/webhook/sepay', express.json(), async (req, res) => {
+router.post('/webhook/sepay', express.json(), an(async (req, res) => {
   const key = process.env.SEPAY_WEBHOOK_KEY;
   const gui = String(req.headers.authorization || '').replace(/^Apikey\s+/i, '').trim();
   if (!key || gui !== key) return res.status(401).json({ success: false });
@@ -214,6 +238,6 @@ router.post('/webhook/sepay', express.json(), async (req, res) => {
     console.error('[pro/webhook]', err.message);
     return res.status(500).json({ success: false });
   }
-});
+}));
 
 module.exports = router;

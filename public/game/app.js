@@ -2634,7 +2634,11 @@
         // Đáp án đúng (đã máy tính ra) của bài toán Mon.L VỪA ra ở lượt này —
         // nhớ lại để gửi kèm lượt sau, cho server chấm điểm chính xác thay vì
         // để mô hình tự đoán lại phép tính (không đáng tin với model nhỏ).
-        callPendingAnswer = typeof data.pendingAnswer === 'number' ? data.pendingAnswer : null;
+        // CHỈ ghi đè khi lượt này thật sự có một đáp án mới (Mon.L vừa ra
+        // bài mới) — một lượt chỉ nhắc lại gợi ý cho CÙNG bài cũ (không ra
+        // EXPR mới) không được xoá mất đáp án đang chờ, không thì lần trả
+        // lời đúng tiếp theo cho đúng bài đó sẽ mất "trí nhớ" và bị chấm sai.
+        if (typeof data.pendingAnswer === 'number') callPendingAnswer = data.pendingAnswer;
         callSpeak(data.reply, data.lang, data.vi, data.py);
       } catch (e) {
         if (callEnded) return;
