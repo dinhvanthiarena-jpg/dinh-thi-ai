@@ -35,7 +35,7 @@ const COMMON_TAIL = `
 - Hỏi bạn trông thế nào: quái vật lông tím, đội mũ bảo hộ có khắc chữ MON.L.`;
 
 /* ═══════════════ TÁN GẪU: uyên bác, lầy, soi gương phong cách ═══════════════ */
-function freePrompt(level, words, forced) {
+function freePrompt(level, words, forced, style) {
   const lv = LEVEL_GUIDE[level] || LEVEL_GUIDE.A1;
   const vocab = Array.isArray(words) && words.length ? words.slice(0, 60).join(', ') : '(chưa có)';
 
@@ -66,7 +66,20 @@ Chỉ khi câu của họ đúng bằng chữ __START__ mới là lúc mở màn
  – Xưng "tớ", nói bằng tiếng Việt, gói dưới 40 từ.
 Mọi lượt khác KHÔNG chào kiểu mở màn nữa.
 
-════ SOI GƯƠNG PHONG CÁCH — VIỆC QUAN TRỌNG NHẤT ════
+${style ? `════ SỔ TAY CÁCH NÓI CỦA CHÍNH NGƯỜI NÀY ════
+App đã ghi lại cách người này nói, gom từ những lần trò chuyện trước. Hãy nói theo
+đúng giọng đó NGAY TỪ CÂU ĐẦU, đừng đợi họ mở lời rồi mới bắt chước.${
+  style.xung ? `
+Xưng hô họ quen dùng: ${style.xung} — dùng đúng cặp này.` : ''}${
+  style.hay ? `
+Những chữ họ hay dùng: ${style.hay}` : ''}${
+  style.mau ? `
+Vài câu chính họ từng nói:
+${style.mau}` : ''}
+Bắt chước cách chọn chữ, nhịp câu và độ suồng sã của họ. NHƯNG đừng nhại lại nguyên
+câu của họ — nói bằng chữ của họ, ý của bạn.
+
+` : ''}════ SOI GƯƠNG PHONG CÁCH — VIỆC QUAN TRỌNG NHẤT ════
 Bạn thích nghi với MỌI kiểu người và MỌI câu chuyện. Người ta nói kiểu nào, bạn kiểu đó.
 
 1. XƯNG HÔ — bắt ngay câu đầu rồi giữ nguyên suốt cuộc:
@@ -275,8 +288,25 @@ function sniffLang(text) {
   return null;
 }
 
-async function reply({ history, level, words, mode }) {
+/** Sổ tay do máy người học gửi lên — phải cắt gọn trước khi nhét vào lời nhắc. */
+function trimStyle(style) {
+  if (!style || typeof style !== 'object') return null;
+  const chu = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
+  const xung = chu(style.xung, 40);
+  const hay = Array.isArray(style.hay)
+    ? style.hay.filter((w) => typeof w === 'string').slice(0, 25).map((w) => chu(w, 24)).join(', ')
+    : '';
+  const mau = Array.isArray(style.mau)
+    ? style.mau.filter((t) => typeof t === 'string').slice(0, 6)
+        .map((t) => '  "' + chu(t, 160) + '"').join('\n')
+    : '';
+  if (!xung && !hay && !mau) return null;
+  return { xung, hay, mau };
+}
+
+async function reply({ history, level, words, mode, style }) {
   const teach = mode === 'teach';
+  const soTay = teach ? null : trimStyle(style);
   if (!process.env.ANTHROPIC_API_KEY) {
     const err = new Error('ANTHROPIC_API_KEY chưa được cấu hình');
     err.code = 'NO_KEY';
@@ -309,7 +339,7 @@ async function reply({ history, level, words, mode }) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      system: teach ? teachPrompt(level, words, heard) : freePrompt(level, words, forced),
+      system: teach ? teachPrompt(level, words, heard) : freePrompt(level, words, forced, soTay),
       messages,
     }),
   });

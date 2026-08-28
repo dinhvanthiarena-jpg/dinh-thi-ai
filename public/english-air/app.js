@@ -1109,6 +1109,49 @@ $("#btnWeak").addEventListener("click", () => startLesson(null, { words: weakWor
      ra câu cho mình nói theo, chấm phát âm rồi sửa. Cũng cần mạng. Cũ là
                 không có mạng.
    Cả hai đều dùng micro (Web Speech API); gõ chữ là đường lui khi không nói được. */
+/* ---------- Sổ tay cách nói ----------
+   Mỗi câu người học nói trong lúc tán gẫu đều được ghi lại ngay trên máy họ.
+   Từ đó rút ra cách xưng hô và những chữ họ hay dùng, gửi kèm mỗi lượt để
+   MON.L bắt đúng giọng — kể cả ở những lần gọi sau, khỏi phải làm quen lại.
+   Sổ này chỉ nằm trong máy người học, và chỉ dùng cho chế độ nói tự do. */
+const STYLE_MAX = 40;
+const STYLE_STOP = new Set(("là và của có không được cho với thì mà ở này đó rồi nhé nha " +
+  "một hai các những cái người khi nào sao thế vậy đi ra vào lên xuống " +
+  "tôi bạn mình cậu anh chị em con chú cô ông bà nó họ chúng " +
+  "the and for you are was that this với").split(" "));
+
+/** Ghi một câu người học vừa nói vào sổ. */
+function noteStyle(text) {
+  const t = String(text || "").trim();
+  if (!t || t.length > 300) return;
+  if (!S.style) S.style = { says: [] };
+  S.style.says.push(t);
+  if (S.style.says.length > STYLE_MAX) S.style.says = S.style.says.slice(-STYLE_MAX);
+  save();
+}
+
+/** Rút gọn sổ thành vài dòng đủ để MON.L bắt giọng, không gửi cả cuốn lên. */
+function styleBrief() {
+  const says = (S.style && S.style.says) || [];
+  if (says.length < 2) return null;
+  const all = says.join(" ").toLowerCase();
+  const co = w => new RegExp("(^|\\P{L})" + w + "(\\P{L}|$)", "iu").test(all);
+  const PAIRS = [["tao", "mày"], ["tớ", "cậu"], ["mình", "bạn"],
+                 ["em", "anh"], ["em", "chị"], ["con", "chú"], ["con", "cô"]];
+  let xung = null;
+  for (const [a, b] of PAIRS) if (co(a) && co(b)) { xung = a + " – " + b; break; }
+
+  const dem = new Map();
+  for (const w of all.split(/[^\p{L}\p{N}]+/u)) {
+    if (w.length < 2 || STYLE_STOP.has(w)) continue;
+    dem.set(w, (dem.get(w) || 0) + 1);
+  }
+  const hay = [...dem.entries()].filter(([, n]) => n >= 2)
+    .sort((a, b) => b[1] - a[1]).slice(0, 25).map(([w]) => w);
+
+  return { xung, hay, mau: says.slice(-6).map(x => x.slice(0, 160)) };
+}
+
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 /* Khung cảnh: tính lại cỡ căn phòng để MON.L đứng lọt giữa thanh trên và bóng nói.
@@ -1294,6 +1337,7 @@ async function askTutor(first) {
         // người học cứ nói tiếng gì cũng được.
         history: first ? [{ role: "user", content: "__START__" }] : C.msgs,
         mode: C.mode,
+        style: C.mode === "free" ? styleBrief() : null,
         level: level().code,
         words: seenWords().slice(-60).map(w => w.en),
       }),
@@ -1350,6 +1394,7 @@ function heardReply(text, score) {
   if (C.mode === "free") {
     const g = guessLang(text);
     if (g) C.lang = g;
+    noteStyle(text);
     pushLog("you", text);
     C.msgs.push({ role: "user", content: text });
     $("#callHeard").hidden = true;
