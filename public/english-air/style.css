@@ -460,7 +460,23 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .prof-head { display: flex; align-items: center; gap: var(--s4); padding: var(--s5) 0 var(--s6); }
 .avatar { width: 72px; height: 72px; border-radius: var(--rf); background: var(--brand-soft); display: grid; place-items: center; flex: none; }
 .avatar svg { width: 52px; height: 52px; }
-.prof-name { font-size: 1.3rem; }
+.prof-id { min-width: 0; }
+/* Tên là nút bấm được. Giữ nguyên cỡ chữ tiêu đề, chỉ thêm cây bút mờ bên cạnh
+   để người ta biết bấm được — nút trơn không có dấu hiệu gì thì không ai bấm. */
+.prof-name { display: flex; align-items: center; gap: var(--s2);
+  font-size: 1.3rem; font-weight: 900; color: var(--fg); text-align: left;
+  padding: 0; border: 0; background: none; cursor: pointer; }
+.prof-name .ic { width: 15px; height: 15px; color: var(--muted-fg); flex: none;
+  transition: color var(--t1) var(--e); }
+.prof-name:active .ic, .prof-name:hover .ic { color: var(--brand); }
+.prof-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Ô nhập tên trong tấm trượt */
+.ten-o { width: 100%; min-height: 54px; margin-top: var(--s2); padding: 0 var(--s4);
+  border: 0; border-radius: var(--r3); background: var(--muted); color: var(--fg);
+  font-family: inherit; font-size: 1.05rem; font-weight: 800; text-align: center;
+  outline: none; }
+.ten-o:focus { box-shadow: inset 0 0 0 2px var(--brand); }
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
 .tile { background: var(--card); border-radius: var(--r3); box-shadow: var(--sh-1); padding: var(--s4); display: flex; flex-direction: column; }
 .tile b { font-size: 1.5rem; font-weight: 900; }

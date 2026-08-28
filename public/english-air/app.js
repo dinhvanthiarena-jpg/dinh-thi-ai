@@ -87,6 +87,7 @@ const DEFAULTS = {
   weekXp: 0, weekStart: "", tier: 0,
   joined: today(), sound: true, motion: false, showVi: true, theme: "",
   kidVoice: true,
+  ten: "",
   // Ảnh đại diện: {k:"m"} linh vật, {k:"e",i:<số>} mặt vui, {k:"a",d:"data:…"} ảnh tự tải
   avatar: { k: "m" }
 };
@@ -2106,6 +2107,49 @@ function nhanAnh(file) {
   };
   doc.readAsDataURL(file);
 }
+
+const TEN_TOI_DA = 24;
+
+function veTen() {
+  const o = $("#profName");
+  if (o) o.textContent = S.ten || "Người học";
+}
+
+function moDoiTen() {
+  const box = el("div");
+  const o = el("input", "ten-o");
+  o.type = "text";
+  o.value = S.ten || "";
+  o.placeholder = "Người học";
+  o.maxLength = TEN_TOI_DA;
+  o.autocomplete = "nickname";
+  o.setAttribute("aria-label", "Tên của bạn");
+  box.append(o);
+
+  const luu = () => {
+    // Gộp khoảng trắng thừa: dán từ chỗ khác hay lọt cả tab và xuống dòng.
+    S.ten = o.value.replace(/\s+/g, " ").trim().slice(0, TEN_TOI_DA);
+    save();
+    veTen();
+    closeSheet();
+    toast(S.ten ? "Đã đổi tên." : "Đã trả về tên mặc định.");
+  };
+  o.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); luu(); } });
+
+  openSheet({
+    title: "Tên của bạn",
+    body: "Tên này chỉ hiện trong app trên máy bạn.",
+    yes: "Lưu",
+    no: "Huỷ",
+    onYes: luu,
+    slot: box,
+  });
+  // Bàn phím phải bật lên ngay, nhưng chỉ sau khi tấm trượt đã dựng xong.
+  setTimeout(() => { o.focus(); o.select(); }, 60);
+}
+
+$("#btnName").addEventListener("click", moDoiTen);
+veTen();
 
 $("#btnAvatar").addEventListener("click", moChonAvatar);
 $("#avFile").addEventListener("change", ev => {

@@ -97,6 +97,7 @@
       <rect x="97" y="34" width="7" height="13" rx="3" fill="#5B2CA6"/>
     </g>
 
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20h4L20 8a2.8 2.8 0 0 0-4-4L4 16v4Z"/></symbol>
     <symbol id="i-camera" viewBox="0 0 24 24"><path d="M9 4h6l1.2 2H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.8L9 4Z"/><circle cx="12" cy="13" r="3.6" fill="none" stroke="#fff" stroke-width="1.8"/></symbol>
     <symbol id="m-air-head" viewBox="0 0 120 120"><use href="#m-air-face"/></symbol>
 
@@ -354,7 +355,13 @@
             <span class="av-face" id="avFace" data-mascot="head" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></span>
             <span class="av-pen" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><use href="#i-camera"/></svg></span>
           </button>
-          <div><h2 class="prof-name">Người học</h2><p class="sub">Tham gia <span id="joinDate">hôm nay</span></p></div>
+          <div class="prof-id">
+            <button class="prof-name" id="btnName" type="button">
+              <span id="profName">Người học</span>
+              <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pencil"/></svg>
+            </button>
+            <p class="sub">Tham gia <span id="joinDate">hôm nay</span></p>
+          </div>
           <input type="file" id="avFile" accept="image/*" hidden />
         </div>
         <div class="tiles">
