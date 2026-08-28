@@ -1069,6 +1069,42 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .pro-err { margin-top: var(--s2); font-size: .84rem; font-weight: 700; color: var(--bad-ink);
   background: var(--bad-soft); border-radius: var(--r2); padding: var(--s2) var(--s3); }
 
+
+/* ---------- 15e. ẢNH ĐẠI DIỆN ĐỔI ĐƯỢC ---------- */
+/* Ô avatar cũ là một thẻ div trơ. Nay là nút bấm, nên phải tự đặt lại các
+   thuộc tính nút mà .avatar không có, và cần position để gắn huy hiệu. */
+.av-btn { position: relative; padding: 0; border: 0; cursor: pointer;
+  transition: transform var(--t1) var(--e); }
+.av-btn:active { transform: scale(.96); }
+.av-face { display: grid; place-items: center; width: 100%; height: 100%;
+  border-radius: var(--rf); overflow: hidden; }
+.av-face svg { width: 52px; height: 52px; }
+.av-face img { width: 100%; height: 100%; object-fit: cover; }
+/* Ô emoji: nền màu riêng của từng lựa chọn, chữ căn giữa bằng line-height 1 để
+   emoji không bị đẩy lệch xuống như mặc định. */
+.av-face.emoji { font-size: 38px; line-height: 1; }
+.av-pen { position: absolute; right: -2px; bottom: -2px; width: 26px; height: 26px;
+  border-radius: var(--rf); display: grid; place-items: center;
+  background: var(--brand-fill); color: #fff; box-shadow: 0 0 0 3px var(--bg); }
+.av-pen .ic { width: 14px; height: 14px; }
+
+/* Lưới chọn trong tấm trượt */
+.av-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s3); margin-top: var(--s2); }
+.av-opt { aspect-ratio: 1; border-radius: var(--rf); display: grid; place-items: center;
+  font-size: 30px; line-height: 1; transition: transform var(--t1) var(--e); }
+.av-opt:active { transform: scale(.92); }
+.av-opt.on { box-shadow: 0 0 0 3px var(--brand), 0 0 0 6px var(--brand-soft); }
+/* Ô linh vật trong lưới chọn: svg trong sprite không có kích thước sẵn, phải
+   nêu rõ, nếu không Safari lấy kích thước gốc và tràn ra ngoài ô. */
+.av-mini { display: grid; place-items: center; width: 100%; height: 100%;
+  border-radius: var(--rf); overflow: hidden; }
+.av-mini svg { width: 34px; height: 34px; }
+.av-mini img { width: 100%; height: 100%; object-fit: cover; }
+.av-up { display: flex; align-items: center; justify-content: center; gap: var(--s2);
+  width: 100%; margin-top: var(--s4); min-height: 52px; border-radius: var(--r3);
+  background: var(--muted); color: var(--fg); font-weight: 800; font-size: .95rem; }
+.av-up .ic { width: 18px; height: 18px; }
+
 /* ---------- 16. KẾT THÚC ---------- */
 .result { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: var(--s5) var(--s4); background: var(--card); overflow-y: auto; }
 .result[hidden] { display: none; }

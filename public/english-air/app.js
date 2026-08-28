@@ -86,7 +86,9 @@ const DEFAULTS = {
   goal: 30, goalDay: "", todayXp: 0,
   weekXp: 0, weekStart: "", tier: 0,
   joined: today(), sound: true, motion: false, showVi: true, theme: "",
-  kidVoice: true
+  kidVoice: true,
+  // Ảnh đại diện: {k:"m"} linh vật, {k:"e",i:<số>} mặt vui, {k:"a",d:"data:…"} ảnh tự tải
+  avatar: { k: "m" }
 };
 let S = load();
 function load() { try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { return Object.assign({}, DEFAULTS); } }
@@ -1978,6 +1980,139 @@ async function veThePro() {
   } catch { /* mất mạng thì cứ để chữ mặc định */ }
 }
 veThePro();
+
+/* ---------- 18d. Ảnh đại diện ----------
+   Ba kiểu: giữ linh vật, chọn một mặt vui có sẵn, hoặc tải ảnh của mình.
+   Ảnh tải lên được thu nhỏ về 256px rồi mới lưu — localStorage chỉ chứa được
+   vài MB, nhét thẳng ảnh gốc từ máy ảnh điện thoại vào là tràn ngay. */
+const MAT_VUI = [
+  { e: "🦊", n: "linear-gradient(135deg,#F97316,#FDBA74)" },
+  { e: "🐼", n: "linear-gradient(135deg,#334155,#94A3B8)" },
+  { e: "🐱", n: "linear-gradient(135deg,#8B5CF6,#C4B5FD)" },
+  { e: "🐨", n: "linear-gradient(135deg,#0EA5E9,#7DD3FC)" },
+  { e: "🦁", n: "linear-gradient(135deg,#D97706,#FCD34D)" },
+  { e: "🐸", n: "linear-gradient(135deg,#16A34A,#86EFAC)" },
+  { e: "🐧", n: "linear-gradient(135deg,#1E293B,#64748B)" },
+  { e: "🦉", n: "linear-gradient(135deg,#92400E,#D6AE7B)" },
+  { e: "🐙", n: "linear-gradient(135deg,#DB2777,#F9A8D4)" },
+  { e: "🦄", n: "linear-gradient(135deg,#A21CAF,#F0ABFC)" },
+  { e: "🐯", n: "linear-gradient(135deg,#EA580C,#FDE047)" },
+  { e: "🐵", n: "linear-gradient(135deg,#78350F,#FCD9A8)" },
+];
+const ANH_TOI_DA = 256;
+
+/** Vẽ lại ô avatar trên màn Hồ sơ theo lựa chọn đang lưu. */
+function veAvatar() {
+  const o = $("#avFace");
+  if (!o) return;
+  const a = S.avatar || { k: "m" };
+  o.textContent = "";
+  o.className = "av-face";
+  o.style.background = "";
+  delete o.dataset.mascot;
+
+  if (a.k === "a" && a.d) {
+    const img = el("img");
+    img.src = a.d; img.alt = ""; img.decoding = "async";
+    o.append(img);
+    return;
+  }
+  if (a.k === "e") {
+    const m = MAT_VUI[a.i] || MAT_VUI[0];
+    o.className = "av-face emoji";
+    o.style.background = m.n;
+    o.append(document.createTextNode(m.e));
+    return;
+  }
+  // Mặc định: linh vật MON.L, dùng lại đúng cơ chế thay ảnh sẵn có
+  o.dataset.mascot = "head";
+  o.append(svgUse("m-air-head", "0 0 120 120"));
+  if (document.documentElement.classList.contains("has-mascot-img")) swapMascot(o);
+}
+
+function datAvatar(a) {
+  S.avatar = a;
+  save();
+  veAvatar();
+  closeSheet();
+  toast("Đã đổi ảnh đại diện.");
+}
+
+function moChonAvatar() {
+  const box = el("div");
+  const luoi = el("div", "av-grid");
+
+  // Ô đầu tiên trả về linh vật
+  const oMon = el("button", "av-opt" + (!S.avatar || S.avatar.k === "m" ? " on" : ""));
+  oMon.type = "button";
+  oMon.setAttribute("aria-label", "Dùng linh vật MON.L");
+  oMon.style.background = "var(--brand-soft)";
+  const mini = el("span", "av-mini");
+  mini.dataset.mascot = "head";
+  mini.append(svgUse("m-air-head", "0 0 120 120"));
+  if (document.documentElement.classList.contains("has-mascot-img")) swapMascot(mini);
+  oMon.append(mini);
+  oMon.addEventListener("click", () => datAvatar({ k: "m" }));
+  luoi.append(oMon);
+
+  MAT_VUI.forEach((m, i) => {
+    const b = el("button", "av-opt" + (S.avatar && S.avatar.k === "e" && S.avatar.i === i ? " on" : ""));
+    b.type = "button";
+    b.style.background = m.n;
+    b.append(document.createTextNode(m.e));
+    b.setAttribute("aria-label", "Chọn mặt " + m.e);
+    b.addEventListener("click", () => datAvatar({ k: "e", i }));
+    luoi.append(b);
+  });
+  box.append(luoi);
+
+  const up = el("button", "av-up");
+  up.type = "button";
+  up.append(svgUse("i-camera", "0 0 24 24"));
+  up.append(document.createTextNode("Tải ảnh từ máy"));
+  up.addEventListener("click", () => $("#avFile").click());
+  box.append(up);
+
+  openSheet({
+    title: "Ảnh đại diện",
+    body: "Chọn một mặt có sẵn, hoặc tải ảnh của bạn lên. Ảnh chỉ lưu trên máy này.",
+    no: "Đóng",
+    slot: box,
+  });
+}
+
+/** Thu nhỏ ảnh người dùng chọn về ô vuông 256px rồi lưu dạng chuỗi. */
+function nhanAnh(file) {
+  if (!file) return;
+  if (!/^image\//.test(file.type)) { toast("Chọn một tệp ảnh nhé."); return; }
+  const doc = new FileReader();
+  doc.onerror = () => toast("Không đọc được ảnh.");
+  doc.onload = () => {
+    const img = new Image();
+    img.onerror = () => toast("Ảnh này không mở được.");
+    img.onload = () => {
+      // Cắt vuông ở giữa rồi mới thu nhỏ, để mặt không bị bóp méo.
+      const c = Math.min(img.width, img.height);
+      const cv = el("canvas");
+      cv.width = cv.height = ANH_TOI_DA;
+      const g = cv.getContext("2d");
+      g.drawImage(img, (img.width - c) / 2, (img.height - c) / 2, c, c, 0, 0, ANH_TOI_DA, ANH_TOI_DA);
+      let data;
+      try { data = cv.toDataURL("image/jpeg", 0.82); }
+      catch { toast("Không xử lý được ảnh này."); return; }
+      datAvatar({ k: "a", d: data });
+    };
+    img.src = doc.result;
+  };
+  doc.readAsDataURL(file);
+}
+
+$("#btnAvatar").addEventListener("click", moChonAvatar);
+$("#avFile").addEventListener("change", ev => {
+  nhanAnh(ev.target.files && ev.target.files[0]);
+  ev.target.value = "";   // chọn lại đúng ảnh cũ vẫn phải kích hoạt được
+});
+veAvatar();
 
 /* ---------- 19. Giải đấu ---------- */
 const AVCOL = ["#0369A1", "#B45309", "#047857", "#BE185D", "#6D28D9", "#B91C1C", "#0F766E", "#4F46E5"];

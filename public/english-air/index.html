@@ -97,6 +97,7 @@
       <rect x="97" y="34" width="7" height="13" rx="3" fill="#5B2CA6"/>
     </g>
 
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M9 4h6l1.2 2H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.8L9 4Z"/><circle cx="12" cy="13" r="3.6" fill="none" stroke="#fff" stroke-width="1.8"/></symbol>
     <symbol id="m-air-head" viewBox="0 0 120 120"><use href="#m-air-face"/></symbol>
 
     <symbol id="m-air" viewBox="0 0 120 120">
@@ -349,8 +350,12 @@
       <section class="view" id="view-profile" hidden aria-labelledby="profileTitle">
         <h1 class="sr-only" id="profileTitle">Hồ sơ</h1>
         <div class="prof-head">
-          <div class="avatar" data-mascot="head" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></div>
+          <button class="avatar av-btn" id="btnAvatar" type="button" aria-label="Đổi ảnh đại diện">
+            <span class="av-face" id="avFace" data-mascot="head" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></span>
+            <span class="av-pen" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><use href="#i-camera"/></svg></span>
+          </button>
           <div><h2 class="prof-name">Người học</h2><p class="sub">Tham gia <span id="joinDate">hôm nay</span></p></div>
+          <input type="file" id="avFile" accept="image/*" hidden />
         </div>
         <div class="tiles">
           <div class="tile"><svg class="ic ic-sm t-flame" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-flame"/></svg><b id="tileStreak">0</b><small>Ngày liên tiếp</small></div>
