@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>English Air — Học tiếng Anh mỗi ngày</title>
+<meta name="description" content="Học tiếng Anh theo khung CEFR A1–A2. Dạy trước, luyện sau. Bài ngắn 5 phút mỗi ngày." />
+
+<link rel="manifest" href="manifest.webmanifest" />
+<meta name="theme-color" content="#0EA5FF" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0B1220" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="English Air" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    <!-- ===== icon giao diện 24x24 ===== -->
+    <symbol id="i-learn" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/></symbol>
+    <symbol id="i-words" viewBox="0 0 24 24"><path d="M5 4.5h11l3 3V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19V6a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M8.5 12h7M8.5 15.5h4.5"/></symbol>
+    <symbol id="i-review" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.6"/><path d="M20 4v7h-7"/></symbol>
+    <symbol id="i-league" viewBox="0 0 24 24"><path d="M7 4h10v6a5 5 0 0 1-10 0V4Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/><path d="M9.5 20h5M12 15v5"/></symbol>
+    <symbol id="i-profile" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4.5 12.5 9 17l10.5-10.5"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="10.5" rx="2.5"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5Z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-cap" viewBox="0 0 24 24"><path d="M12 4 2.5 8.5 12 13l9.5-4.5L12 4Z"/><path d="M6.5 10.8V15c0 1.9 2.5 3.4 5.5 3.4s5.5-1.5 5.5-3.4v-4.2"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2.5s5.5 4.3 5.5 9.2a5.5 5.5 0 0 1-11 0c0-2 .8-3.4 1.8-4.6.3 1.6 1.2 2.4 2 2.4 1.3 0 1.9-1.4 1.7-3.2-.1-1.3-.4-2.5 0-3.8Z"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.5 2.5 4.5 13.5H11l-.5 8 9-11H13l.5-8Z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.3S3.5 15.4 3.5 9.6A4.6 4.6 0 0 1 12 7.1a4.6 4.6 0 0 1 8.5 2.5c0 5.8-8.5 10.7-8.5 10.7Z"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4v-5Z"/><path d="M15.5 9a4 4 0 0 1 0 6M18.3 6.4a8 8 0 0 1 0 11.2"/></symbol>
+    <symbol id="i-slow" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4v-5Z"/><path d="M15.5 9.5a3.5 3.5 0 0 1 0 5"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9.5 17h5M10 20h4"/><path d="M12 3.5a5.5 5.5 0 0 1 3.4 9.8c-.6.5-.9 1.1-.9 1.8h-5c0-.7-.3-1.3-.9-1.8A5.5 5.5 0 0 1 12 3.5Z"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M6 21V4"/><path d="M6 4.5h11l-2.2 4L17 13H6"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V4M8.5 7.5 12 4l3.5 3.5"/><path d="M6 12H4.5v7.5h15V12H18"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".6"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.2A8.2 8.2 0 0 1 9.8 4 8.5 8.5 0 1 0 20 14.2Z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 24 24"><path d="M4 18h16M4 18 3 7l5 4 4-6 4 6 5-4-1 11"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20.5 12c0 4.1-3.8 7.5-8.5 7.5-1 0-2-.2-2.9-.5L4 20.5l1.4-4A7 7 0 0 1 3.5 12c0-4.1 3.8-7.5 8.5-7.5s8.5 3.4 8.5 7.5Z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.6 3.5 5.6 3.5 8.5s-1.1 5.9-3.5 8.5c-2.4-2.6-3.5-5.6-3.5-8.5S9.6 6.1 12 3.5Z"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4.5h6a3 3 0 0 1 3 3V20a2.5 2.5 0 0 0-2.5-2.5H4v-13Z"/><path d="M20 4.5h-6a3 3 0 0 0-3 3V20a2.5 2.5 0 0 1 2.5-2.5H20v-13Z"/></symbol>
+    <symbol id="i-flip" viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="12" rx="2.5"/><path d="M7 3h11a3 3 0 0 1 3 3v11"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></symbol>
+
+    <!-- ===== linh vật: chim Air (nhân vật riêng, không dùng của AirLearn) ===== -->
+    <symbol id="m-air" viewBox="0 0 120 120">
+      <ellipse cx="60" cy="106" rx="30" ry="5" fill="#0B3F63" opacity=".14"/>
+      <path d="M60 22c19 0 33 14 33 33v14c0 19-14 33-33 33S27 88 27 69V55c0-19 14-33 33-33Z" fill="#3EC0FF"/>
+      <path d="M60 55c14 0 25 9 25 21s-11 21-25 21-25-9-25-21 11-21 25-21Z" fill="#D8F2FF"/>
+      <circle cx="47" cy="48" r="12" fill="#fff"/><circle cx="73" cy="48" r="12" fill="#fff"/>
+      <circle cx="49" cy="49" r="5.4" fill="#0B3F63"/><circle cx="71" cy="49" r="5.4" fill="#0B3F63"/>
+      <circle cx="51" cy="47" r="1.9" fill="#fff"/><circle cx="73" cy="47" r="1.9" fill="#fff"/>
+      <path d="M60 58.5 53 65h14l-7-6.5Z" fill="#FFB020"/>
+      <path d="M27 60c-8 2-12 8-11 14 5-2 9-5 11-9V60Z" fill="#1FA8EE"/>
+      <path d="M93 60c8 2 12 8 11 14-5-2-9-5-11-9V60Z" fill="#1FA8EE"/>
+      <path d="M52 20c1-7 5-11 8-13 3 2 7 6 8 13-5-2-11-2-16 0Z" fill="#1FA8EE"/>
+    </symbol>
+    <!-- đầu linh vật, dùng cho avatar nhỏ -->
+    <symbol id="m-air-head" viewBox="0 0 120 120">
+      <path d="M60 18c22 0 38 16 38 38S82 96 60 96 22 78 22 56 38 18 60 18Z" fill="#3EC0FF"/>
+      <circle cx="45" cy="52" r="14" fill="#fff"/><circle cx="75" cy="52" r="14" fill="#fff"/>
+      <circle cx="47" cy="53" r="6.4" fill="#0B3F63"/><circle cx="73" cy="53" r="6.4" fill="#0B3F63"/>
+      <circle cx="49.5" cy="50.5" r="2.2" fill="#fff"/><circle cx="75.5" cy="50.5" r="2.2" fill="#fff"/>
+      <path d="M60 64 52 72h16l-8-8Z" fill="#FFB020"/>
+      <path d="M50 16c1-6 6-10 10-11 4 1 9 5 10 11-6-3-14-3-20 0Z" fill="#1FA8EE"/>
+    </symbol>
+
+    <!-- ===== minh hoạ 48x48 ===== -->
+    <symbol id="p-apple" viewBox="0 0 48 48"><path d="M24 14c-3-3-9-3-11.5.6-2.8 4-1 12.4 2.6 16.9 2 2.5 4.2 3.6 6.1 2.6 1.7-.9 3.9-.9 5.6 0 1.9 1 4.1-.1 6.1-2.6 3.6-4.5 5.4-12.9 2.6-16.9C32.9 11 27 11 24 14Z" fill="currentColor"/><path d="M24 14c.3-3 2.2-5.4 5.4-6.2" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="p-dog" viewBox="0 0 48 48"><path d="M12 13c0-3 2-4 4-2.6l4 2.8h8l4-2.8C33.9 9 36 10 36 13v10a12 12 0 0 1-24 0V13Z" fill="currentColor"/><circle cx="19" cy="21" r="2.2" fill="#fff"/><circle cx="29" cy="21" r="2.2" fill="#fff"/><path d="M24 26.5c2.6 0 4 1.4 4 3s-1.8 3-4 3-4-1.4-4-3 1.4-3 4-3Z" fill="#fff"/></symbol>
+    <symbol id="p-cat" viewBox="0 0 48 48"><path d="M13 12.5 12 24a12 12 0 0 0 24 0l-1-11.5-6 4.5H19l-6-4.5Z" fill="currentColor"/><circle cx="19" cy="24" r="2" fill="#fff"/><circle cx="29" cy="24" r="2" fill="#fff"/><path d="M8 25h7M8 29h7M33 25h7M33 29h7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></symbol>
+    <symbol id="p-book" viewBox="0 0 48 48"><path d="M8 11c5-2 10-2 16 1v25c-6-3-11-3-16-1V11Z" fill="currentColor"/><path d="M40 11c-5-2-10-2-16 1v25c6-3 11-3 16-1V11Z" fill="currentColor" opacity=".62"/></symbol>
+    <symbol id="p-house" viewBox="0 0 48 48"><path d="M24 8 5 23h6v16h26V23h6L24 8Z" fill="currentColor"/><rect x="20" y="27" width="8" height="12" rx="1.5" fill="#fff" opacity=".85"/></symbol>
+    <symbol id="p-car" viewBox="0 0 48 48"><path d="M8 30v-5.5l4-9A4 4 0 0 1 15.7 13h16.6a4 4 0 0 1 3.7 2.5l4 9V30a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2Z" fill="currentColor"/><path d="M11 24h26l-3-7.5a1.5 1.5 0 0 0-1.4-1H15.4a1.5 1.5 0 0 0-1.4 1L11 24Z" fill="#fff" opacity=".85"/><circle cx="15" cy="33" r="4" fill="currentColor"/><circle cx="33" cy="33" r="4" fill="currentColor"/></symbol>
+    <symbol id="p-water" viewBox="0 0 48 48"><path d="M24 6s13 13.4 13 21.5A13 13 0 0 1 11 27.5C11 19.4 24 6 24 6Z" fill="currentColor"/><path d="M18 28a6 6 0 0 0 6 6" stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none" opacity=".9"/></symbol>
+    <symbol id="p-bread" viewBox="0 0 48 48"><path d="M9 22c0-6.6 6.7-10 15-10s15 3.4 15 10c0 2.6-2 4-4 4v9a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3v-9c-2 0-4-1.4-4-4Z" fill="currentColor"/><path d="M17 22v-4M24 22v-5M31 22v-4" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".75" fill="none"/></symbol>
+    <symbol id="p-coffee" viewBox="0 0 48 48"><path d="M9 16h26v13a10 10 0 0 1-10 10h-6A10 10 0 0 1 9 29V16Z" fill="currentColor"/><path d="M35 20h3a5 5 0 0 1 0 10h-3" stroke="currentColor" stroke-width="3" fill="none"/></symbol>
+    <symbol id="p-fish" viewBox="0 0 48 48"><path d="M6 24c6-8 14-11 21-11 6 0 11 4 14 11-3 7-8 11-14 11-7 0-15-3-21-11Z" fill="currentColor"/><circle cx="17" cy="21" r="2.2" fill="#fff"/><path d="M41 24c2-3 4-5 4-5v10s-2-2-4-5Z" fill="currentColor" opacity=".65"/></symbol>
+    <symbol id="p-clock" viewBox="0 0 48 48"><circle cx="24" cy="25" r="17" fill="currentColor"/><path d="M24 14v11l7 5" stroke="#fff" stroke-width="3.2" stroke-linecap="round" fill="none"/></symbol>
+    <symbol id="p-school" viewBox="0 0 48 48"><path d="M24 5 6 13l18 8 18-8-18-8Z" fill="currentColor"/><path d="M12 18v10c0 3.9 5.4 7 12 7s12-3.1 12-7V18l-12 5.4L12 18Z" fill="currentColor" opacity=".62"/></symbol>
+    <symbol id="p-phone" viewBox="0 0 48 48"><rect x="13" y="4" width="22" height="40" rx="5" fill="currentColor"/><rect x="16.5" y="10" width="15" height="24" rx="2" fill="#fff" opacity=".9"/><circle cx="24" cy="39" r="2" fill="#fff" opacity=".9"/></symbol>
+
+    <!-- ===== ngọn lửa chuỗi ngày ===== -->
+    <symbol id="p-flame" viewBox="0 0 100 120">
+      <path d="M50 4c4 18 14 24 21 34 6 9 9 18 9 28 0 26-14 44-30 44S20 92 20 66c0-12 5-22 12-31 4 6 8 8 11 8 5 0 7-5 6-13-1-9-3-18 1-26Z" fill="#FF8A2B"/>
+      <path d="M50 44c3 10 10 14 13 23 2 6 3 11 3 16 0 15-8 25-16 25s-16-10-16-25c0-7 3-13 7-18 2 4 4 5 6 5 3 0 4-3 3-8-1-6-2-12 0-18Z" fill="#FFC24D"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="app">
+
+  <!-- điều hướng dọc cho màn rộng -->
+  <nav class="sidenav" aria-label="Điều hướng chính">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></span>
+      <span class="brand-name">English Air</span>
+    </div>
+    <ul class="sidenav-list">
+      <li><button class="navlink is-active" data-nav="learn" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-learn"/></svg><span>Học</span></button></li>
+      <li><button class="navlink" data-nav="words" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-words"/></svg><span>Từ vựng</span></button></li>
+      <li><button class="navlink" data-nav="review" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-review"/></svg><span>Ôn tập</span></button></li>
+      <li><button class="navlink" data-nav="league" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-league"/></svg><span>Giải đấu</span></button></li>
+      <li><button class="navlink" data-nav="profile" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-profile"/></svg><span>Hồ sơ</span></button></li>
+    </ul>
+  </nav>
+
+  <div class="main">
+    <!-- ===== thanh trạng thái trên ===== -->
+    <header class="topbar">
+      <button class="flagchip" id="btnLevel" type="button" aria-label="Đổi trình độ">
+        <span class="flagchip-face" aria-hidden="true">EN</span>
+        <span class="flagchip-lv" id="levelCode">A1</span>
+      </button>
+      <div class="pills">
+        <button class="pill p-flame" id="btnStreak" type="button" aria-label="Chuỗi ngày học">
+          <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-flame"/></svg><b id="statStreak">0</b>
+        </button>
+        <button class="pill p-xp" id="btnXp" type="button" aria-label="Điểm kinh nghiệm">
+          <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bolt"/></svg><b id="statXp">0</b>
+        </button>
+        <button class="pill p-heart" id="btnHeart" type="button" aria-label="Số tim còn lại">
+          <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg><b id="statHeart">5</b>
+        </button>
+        <button class="pill p-theme" id="btnTheme" type="button" aria-label="Chuyển chế độ sáng tối">
+          <svg class="ic ic-sm ic-moon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-moon"/></svg>
+          <svg class="ic ic-sm ic-sun" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sun"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="content" id="content" tabindex="-1">
+
+      <!-- ================= HỌC ================= -->
+      <section class="view" id="view-learn" aria-labelledby="learnTitle">
+        <h1 class="sr-only" id="learnTitle">Lộ trình học</h1>
+
+        <div class="hello">
+          <div>
+            <h2 class="hello-h">👋 Xin chào!</h2>
+            <p class="hello-p" id="helloSub">Hãy bắt đầu tiếng Anh của bạn.</p>
+          </div>
+          <span class="hello-mascot" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></span>
+        </div>
+
+        <div class="banner" id="banner" aria-hidden="true">
+          <svg class="banner-art" viewBox="0 0 400 150" preserveAspectRatio="xMidYMax slice">
+            <rect width="400" height="150" fill="url(#skyGrad)"/>
+            <defs>
+              <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#7FD4FF"/><stop offset="100%" stop-color="#CDEDFF"/>
+              </linearGradient>
+            </defs>
+            <circle cx="332" cy="34" r="17" fill="#FFD466"/>
+            <g fill="#FFFFFF" opacity=".85">
+              <ellipse cx="70" cy="34" rx="26" ry="12"/><ellipse cx="92" cy="30" rx="18" ry="10"/>
+              <ellipse cx="248" cy="24" rx="20" ry="9"/>
+            </g>
+            <g fill="#2E9BD6"><rect x="10" y="72" width="46" height="78" rx="4"/><rect x="330" y="60" width="52" height="90" rx="4"/></g>
+            <g fill="#4FB4E8"><rect x="62" y="52" width="40" height="98" rx="4"/><rect x="286" y="78" width="40" height="72" rx="4"/></g>
+            <g fill="#7ACBF2"><rect x="108" y="88" width="52" height="62" rx="4"/><rect x="232" y="64" width="48" height="86" rx="4"/></g>
+            <g fill="#A6DDF8"><rect x="166" y="70" width="60" height="80" rx="4"/></g>
+            <g fill="#FFFFFF" opacity=".55">
+              <rect x="20" y="84" width="8" height="10" rx="2"/><rect x="36" y="84" width="8" height="10" rx="2"/>
+              <rect x="72" y="66" width="8" height="10" rx="2"/><rect x="86" y="66" width="8" height="10" rx="2"/>
+              <rect x="180" y="86" width="10" height="12" rx="2"/><rect x="200" y="86" width="10" height="12" rx="2"/>
+              <rect x="244" y="80" width="9" height="11" rx="2"/><rect x="262" y="80" width="9" height="11" rx="2"/>
+              <rect x="342" y="76" width="9" height="11" rx="2"/><rect x="360" y="76" width="9" height="11" rx="2"/>
+            </g>
+          </svg>
+          <svg class="banner-wave" viewBox="0 0 400 20" preserveAspectRatio="none"><path d="M0 20V8c20 0 20-6 40-6s20 6 40 6 20-6 40-6 20 6 40 6 20-6 40-6 20 6 40 6 20-6 40-6 20 6 40 6 20-6 40-6 20 6 40 6v12Z"/></svg>
+        </div>
+
+        <div id="unitList"></div>
+      </section>
+
+      <!-- ================= TỪ VỰNG ================= -->
+      <section class="view" id="view-words" hidden aria-labelledby="wordsTitle">
+        <div class="words-head">
+          <div>
+            <h1 class="big-count" id="wordCount">0 từ</h1>
+            <p class="sub" id="wordWeek">0 trong tuần này.</p>
+          </div>
+          <button class="round-btn" id="btnWordSort" type="button" aria-label="Đổi cách sắp xếp">
+            <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-grid"/></svg>
+          </button>
+        </div>
+        <div class="filters" id="wordFilters" role="group" aria-label="Lọc từ vựng"></div>
+        <div class="promo">
+          <div><b>Ôn bằng thẻ ghi nhớ</b><small>Lật thẻ, tự chấm — nhớ nhanh gấp đôi.</small></div>
+          <button class="btn btn-sm btn-primary" id="btnFlash" type="button">Ôn ngay</button>
+        </div>
+        <ul class="wlist" id="wordList"></ul>
+      </section>
+
+      <!-- ================= ÔN TẬP ================= -->
+      <section class="view" id="view-review" hidden aria-labelledby="reviewTitle">
+        <h1 class="view-title" id="reviewTitle">Ôn tập</h1>
+        <p class="sub mb">Lặp lại ngắt quãng — ôn đúng lúc bạn sắp quên.</p>
+        <button class="rcard" id="btnDue" type="button">
+          <span class="rc-ic ic-warn"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-clock"/></svg></span>
+          <span class="rc-b"><strong>Từ đến hạn ôn</strong><small id="dueCount">—</small></span>
+          <svg class="ic ic-sm rc-a" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
+        </button>
+        <button class="rcard" id="btnWeak" type="button">
+          <span class="rc-ic ic-bad"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"/></svg></span>
+          <span class="rc-b"><strong>Từ hay sai</strong><small id="weakCount">—</small></span>
+          <svg class="ic ic-sm rc-a" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
+        </button>
+        <button class="rcard" id="btnFlash2" type="button">
+          <span class="rc-ic ic-brand"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-flip"/></svg></span>
+          <span class="rc-b"><strong>Thẻ ghi nhớ</strong><small id="flashCount">—</small></span>
+          <svg class="ic ic-sm rc-a" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
+        </button>
+      </section>
+
+      <!-- ================= GIẢI ĐẤU ================= -->
+      <section class="view" id="view-league" hidden aria-labelledby="leagueTitle">
+        <h1 class="sr-only" id="leagueTitle">Giải đấu tuần</h1>
+        <div class="lg-head">
+          <div class="lg-badge" id="leagueBadge" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#i-crown"/></svg></div>
+          <h2 id="leagueName">Giải Đồng</h2>
+          <p class="sub">Top 5 lên hạng · 3 cuối xuống hạng</p>
+          <p class="lg-timer" id="leagueTimer">—</p>
+        </div>
+        <ol class="rank" id="rankList"></ol>
+        <p class="fine">Đối thủ là dữ liệu mô phỏng lưu trên máy bạn, không phải người dùng thật.</p>
+      </section>
+
+      <!-- ================= HỒ SƠ ================= -->
+      <section class="view" id="view-profile" hidden aria-labelledby="profileTitle">
+        <h1 class="sr-only" id="profileTitle">Hồ sơ</h1>
+        <div class="prof-head">
+          <div class="avatar" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></div>
+          <div><h2 class="prof-name">Người học</h2><p class="sub">Tham gia <span id="joinDate">hôm nay</span></p></div>
+        </div>
+        <div class="tiles">
+          <div class="tile"><svg class="ic ic-sm t-flame" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-flame"/></svg><b id="tileStreak">0</b><small>Ngày liên tiếp</small></div>
+          <div class="tile"><svg class="ic ic-sm t-xp" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bolt"/></svg><b id="tileXp">0</b><small>Tổng XP</small></div>
+          <div class="tile"><svg class="ic ic-sm t-blue" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-book"/></svg><b id="tileLessons">0</b><small>Bài hoàn thành</small></div>
+          <div class="tile"><svg class="ic ic-sm t-ok" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"/></svg><b id="tileAcc">—</b><small>Độ chính xác</small></div>
+        </div>
+
+        <h2 class="sec">Mục tiêu hằng ngày</h2>
+        <div class="card">
+          <div class="row-between"><span>XP hôm nay</span><b><span id="goalNow">0</span> / <span id="goalTarget">30</span></b></div>
+          <div class="bar mt" role="progressbar" aria-label="Tiến độ mục tiêu XP hằng ngày" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="goalBar"><i style="width:0%"></i></div>
+          <div class="chips mt" role="group" aria-label="Chọn mục tiêu hằng ngày">
+            <button class="chip" data-goal="10" type="button">Nhẹ · 10</button>
+            <button class="chip" data-goal="30" type="button">Vừa · 30</button>
+            <button class="chip" data-goal="50" type="button">Chăm · 50</button>
+            <button class="chip" data-goal="100" type="button">Cường độ · 100</button>
+          </div>
+        </div>
+
+        <h2 class="sec">Cài đặt</h2>
+        <div class="card set"><label class="switch"><input type="checkbox" id="optSound" checked /><span class="track" aria-hidden="true"></span><span>Phát âm tự động</span></label></div>
+        <div class="card set"><label class="switch"><input type="checkbox" id="optMotion" /><span class="track" aria-hidden="true"></span><span>Giảm chuyển động</span></label></div>
+        <div class="card set"><label class="switch"><input type="checkbox" id="optVi" checked /><span class="track" aria-hidden="true"></span><span>Hiện nghĩa tiếng Việt trong hội thoại</span></label></div>
+
+        <div class="card install" id="installCard" hidden>
+          <h3>Cài lên màn hình chính</h3>
+          <p class="sub" id="installHow">Dùng như một app thật, mở được cả khi không có mạng.</p>
+          <button class="btn btn-primary mt" id="btnInstall" type="button" hidden>Cài đặt</button>
+        </div>
+
+        <button class="btn btn-text btn-block" id="btnReset" type="button">Xoá toàn bộ tiến độ</button>
+        <p class="fine">Mọi dữ liệu chỉ lưu trên máy bạn.</p>
+      </section>
+    </main>
+
+    <aside class="rail" aria-label="Tóm tắt">
+      <div class="card"><h3 class="rail-h"><svg class="ic ic-sm t-flame" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-flame"/></svg> Chuỗi ngày</h3>
+        <p class="rail-big" id="railStreak">0</p><div class="week" id="weekDots"></div></div>
+      <div class="card"><h3 class="rail-h"><svg class="ic ic-sm t-ok" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"/></svg> Mục tiêu hôm nay</h3>
+        <p class="sub"><b id="railGoal">0 / 30</b> XP</p><div class="bar mt"><i id="railBar" style="width:0%"></i></div></div>
+      <div class="card"><h3 class="rail-h"><svg class="ic ic-sm t-gold" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crown"/></svg> <span id="railLeagueName">Giải Đồng</span></h3>
+        <p class="sub">Bạn đang đứng thứ <b id="railRank">—</b>.</p>
+        <button class="btn btn-sm btn-soft mt" data-nav="league" type="button">Xem bảng xếp hạng</button></div>
+    </aside>
+
+    <nav class="tabbar" aria-label="Điều hướng chính">
+      <button class="tab is-active" data-nav="learn" aria-current="page" aria-label="Lộ trình học" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-learn"/></svg><span>Học</span></button>
+      <button class="tab" data-nav="words" aria-label="Từ vựng đã học" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-words"/></svg><span>Từ vựng</span></button>
+      <button class="tab" data-nav="review" aria-label="Ôn tập" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-review"/></svg><span>Ôn tập</span></button>
+      <button class="tab" data-nav="league" aria-label="Giải đấu tuần" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-league"/></svg><span>Giải đấu</span></button>
+      <button class="tab" data-nav="profile" aria-label="Hồ sơ của bạn" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-profile"/></svg><span>Hồ sơ</span></button>
+    </nav>
+  </div>
+</div>
+
+<!-- ================= TRÌNH CHIẾU BÀI HỌC ================= -->
+<div class="player" id="player" hidden role="dialog" aria-modal="true" aria-labelledby="slideAsk">
+  <div class="sky" id="playerSky" aria-hidden="true">
+    <svg class="sky-art" viewBox="0 0 400 200" preserveAspectRatio="xMidYMin slice">
+      <g fill="#FFFFFF" opacity=".8"><ellipse cx="60" cy="42" rx="34" ry="14"/><ellipse cx="88" cy="36" rx="22" ry="11"/><ellipse cx="320" cy="26" rx="26" ry="11"/></g>
+      <g fill="#BFE6FA" opacity=".9">
+        <rect x="300" y="86" width="14" height="80" rx="3"/><rect x="322" y="72" width="14" height="94" rx="3"/>
+        <rect x="344" y="94" width="14" height="72" rx="3"/><rect x="366" y="64" width="16" height="102" rx="3"/>
+        <path d="M330 52a20 20 0 0 1 40 0v22h-40Z"/>
+      </g>
+    </svg>
+  </div>
+
+  <header class="p-bar">
+    <button class="icon-btn" id="btnQuit" type="button" aria-label="Thoát bài học"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <div class="hearts" id="pHearts" aria-live="polite" aria-label="Tim còn lại" hidden>
+      <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg><b>5</b>
+    </div>
+  </header>
+
+  <div class="p-body">
+    <div class="mascot-top" id="mascotTop" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+    <p class="kicker" id="slideKicker"></p>
+    <div class="stage" id="stage"></div>
+  </div>
+
+  <footer class="p-foot">
+    <div class="fb" id="feedback" hidden aria-live="assertive">
+      <span class="fb-ic" id="fbIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#i-check"/></svg></span>
+      <span class="fb-t"><strong id="fbTitle"></strong><span id="fbDetail"></span></span>
+    </div>
+    <div class="p-progress" role="progressbar" aria-label="Tiến độ bài học" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="pProgress"><i style="width:0%"></i></div>
+    <div class="p-actions">
+      <button class="ghost-btn" id="btnHint" type="button" aria-label="Gợi ý"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bulb"/></svg></button>
+      <button class="btn btn-primary p-next" id="btnNext" type="button">Tiếp theo</button>
+    </div>
+  </footer>
+  <p class="sr-only" id="slideAsk">Bài học</p>
+</div>
+
+<!-- ================= THẺ GHI NHỚ ================= -->
+<div class="player flat" id="flash" hidden role="dialog" aria-modal="true" aria-labelledby="flashFront">
+  <header class="p-bar">
+    <button class="icon-btn" id="btnFlashQuit" type="button" aria-label="Thoát ôn thẻ"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <span class="flash-left" id="flashLeft">0</span>
+  </header>
+  <div class="p-body center">
+    <button class="fcard" id="fcard" type="button" aria-live="polite">
+      <span class="fc-hint" id="fcHint">Bấm để xem nghĩa</span>
+      <span class="fc-front" id="flashFront">—</span>
+      <span class="fc-ipa" id="flashIpa"></span>
+      <span class="fc-back" id="flashBack" hidden></span>
+      <span class="fc-ex" id="flashEx" hidden></span>
+    </button>
+  </div>
+  <footer class="p-foot">
+    <div class="p-progress"><i id="flashBar" style="width:0%"></i></div>
+    <div class="two" id="flashActions" hidden>
+      <button class="btn btn-soft" id="btnForgot" type="button">Chưa nhớ</button>
+      <button class="btn btn-ok" id="btnKnew" type="button">Nhớ rồi</button>
+    </div>
+    <button class="btn btn-primary btn-block" id="btnReveal" type="button">Xem nghĩa</button>
+  </footer>
+</div>
+
+<!-- ================= KẾT THÚC BÀI ================= -->
+<div class="result" id="result" hidden role="dialog" aria-modal="true" aria-labelledby="resTitle">
+  <div class="res-in">
+    <div class="res-mascot" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+    <h2 id="resTitle">Chậm mà chắc, rất tuyệt!</h2>
+    <div class="res-wide">
+      <span class="res-lab"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-clock"/></svg> HOÀN THÀNH BÀI HỌC TRONG</span>
+      <b id="resTime">0:00</b>
+    </div>
+    <div class="res-two">
+      <div class="res-acc"><span class="res-lab"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"/></svg> ĐỘ CHÍNH XÁC</span><b id="resAcc">0%</b></div>
+      <div class="res-xp"><span class="res-lab"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bolt"/></svg> XP</span><b id="resXp">0</b></div>
+    </div>
+    <p class="res-note" id="resNote"></p>
+    <button class="btn btn-primary btn-block" id="btnResDone" type="button">Tiếp tục</button>
+  </div>
+</div>
+
+<!-- ================= CHUỖI NGÀY ================= -->
+<div class="streak" id="streakView" hidden role="dialog" aria-modal="true" aria-labelledby="streakTitle">
+  <header class="p-bar">
+    <button class="icon-btn" id="btnStreakClose" type="button" aria-label="Đóng"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg></button>
+  </header>
+  <div class="streak-body">
+    <div class="flame" aria-hidden="true"><svg viewBox="0 0 100 120"><use href="#p-flame"/></svg></div>
+    <h2 id="streakTitle"><span id="streakNum">0</span> ngày liên tiếp</h2>
+    <p class="sub" id="streakSub">Đây là chuỗi dài nhất của bạn, đừng dừng lại.</p>
+    <div class="cal card">
+      <div class="cal-head">
+        <div><b id="calMonth">tháng 8 2026</b><small id="calCount">Đã học 0 trong 31 ngày</small></div>
+        <div class="cal-nav">
+          <button class="round-btn sm" id="calPrev" type="button" aria-label="Tháng trước"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-left"/></svg></button>
+          <button class="round-btn sm" id="calNext" type="button" aria-label="Tháng sau"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg></button>
+        </div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SHEET ================= -->
+<div class="sheet-wrap" id="sheetWrap" hidden>
+  <div class="scrim" id="sheetScrim"></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <h2 id="sheetTitle">—</h2>
+    <p class="sub" id="sheetBody"></p>
+    <div id="sheetSlot"></div>
+    <button class="btn btn-primary btn-block mt" id="sheetYes" type="button">OK</button>
+    <button class="btn btn-text btn-block" id="sheetNo" type="button">Đóng</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="course-a1.js"></script>
+<script src="course-a2.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

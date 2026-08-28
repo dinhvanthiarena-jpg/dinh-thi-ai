@@ -1,0 +1,24 @@
+{
+  "name": "English Air — Học tiếng Anh",
+  "short_name": "English Air",
+  "description": "Học tiếng Anh theo khung CEFR: dạy trước, luyện sau. Bài ngắn 5 phút mỗi ngày.",
+  "lang": "vi",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
+  "orientation": "any",
+  "background_color": "#EEF2FF",
+  "theme_color": "#4F46E5",
+  "categories": ["education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Học bài tiếp theo", "url": "./index.html#learn", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Ôn tập từ", "url": "./index.html#review", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
