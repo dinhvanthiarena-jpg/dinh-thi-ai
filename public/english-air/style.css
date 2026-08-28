@@ -1193,6 +1193,14 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .switch small { display: block; font-size: .78rem; font-weight: 600;
   color: var(--muted-fg); margin-top: 2px; line-height: 1.4; }
 
+/* Dòng nghĩa tiếng Việt trong thẻ từ, kèm nút nghe riêng */
+.vcard-vi-row { display: flex; align-items: center; justify-content: center; gap: var(--s2); }
+.vcard-say-vi { width: 32px; height: 32px; flex: none; border-radius: var(--rf);
+  display: grid; place-items: center; background: var(--muted); color: var(--muted-fg);
+  transition: transform var(--t1) var(--e), color var(--t1) var(--e); }
+.vcard-say-vi:active { transform: scale(.9); color: var(--brand); }
+.vcard-say-vi .ic { width: 15px; height: 15px; }
+
 /* ---------- 15f. BÁO BÀI CHƯA MỞ KHOÁ ---------- */
 .sheet-mon { width: 96px; height: 96px; margin: 0 auto var(--s4);
   border-radius: var(--rf); background: var(--brand-soft);

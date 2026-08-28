@@ -225,14 +225,50 @@ function voiceFor(tag) {
       || pool[0];
 }
 if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function speak(text, slow) {
+/* Chữ nước nào phải đọc bằng giọng nước đó. Trước đây mọi thứ đều đặt en-US,
+   nên "quả táo" bị đọc bằng giọng Anh nghe méo hết cả. */
+const DAU_VIET = /[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụỳýỷỹỵ]/i;
+function tiengCua(text) {
+  const s = String(text || "");
+  // Dấu tiếng Việt xét trước: câu tiếng Việt có lẫn chữ Hán vẫn là tiếng Việt.
+  if (DAU_VIET.test(s)) return "vi-VN";
+  if (/[\u3040-\u30ff]/.test(s)) return "ja-JP";
+  if (/[\uac00-\ud7af]/.test(s)) return "ko-KR";
+  if (/[\u4e00-\u9fff]/.test(s)) return "zh-CN";
+  return "en-US";
+}
+
+function dungGiong(u, tag) {
+  u.lang = tag;
+  const v = voiceFor(tag);
+  if (v) u.voice = v;
+}
+
+function speak(text, slow, lang) {
   if (!S.sound || !window.speechSynthesis || !text) return;
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "en-US"; if (voice) u.voice = voice;
+    dungGiong(u, lang || tiengCua(text));
     u.rate = slow ? 0.55 : 0.92;
     speechSynthesis.speak(u);
+  } catch { /* bỏ qua */ }
+}
+
+/** Đọc lần lượt nhiều đoạn, mỗi đoạn một thứ tiếng — dùng để đọc từ rồi đọc nghĩa.
+    Không gọi cancel giữa chừng, cứ xếp vào hàng đợi cho máy đọc nối nhau. */
+function docLanLuot(khuc) {
+  if (!S.sound || !window.speechSynthesis) return;
+  const ds = (khuc || []).filter(k => k && k.text);
+  if (!ds.length) return;
+  try {
+    speechSynthesis.cancel();
+    ds.forEach(k => {
+      const u = new SpeechSynthesisUtterance(k.text);
+      dungGiong(u, k.lang || tiengCua(k.text));
+      u.rate = k.slow ? 0.55 : 0.92;
+      speechSynthesis.speak(u);
+    });
   } catch { /* bỏ qua */ }
 }
 const stopSpeak = () => { if (window.speechSynthesis) speechSynthesis.cancel(); };
@@ -700,8 +736,18 @@ function vocabSlide(d, st, label) {
   const say = el("button", "vcard-say"); say.type = "button";
   say.setAttribute("aria-label", "Nghe phát âm: " + d.en);
   say.append(icon("i-sound"));
-  say.addEventListener("click", () => speak(d.en));
-  card.append(say, el("div", "vcard-vi", d.vi));
+  // Bấm loa lớn: đọc chậm để nghe rõ từng âm, đó mới là lúc người ta cần nghe kỹ.
+  say.addEventListener("click", () => speak(d.en, true));
+  card.append(say);
+
+  // Dòng nghĩa cũng bấm nghe được, và đọc bằng giọng Việt chứ không phải giọng Anh.
+  const hangVi = el("div", "vcard-vi-row");
+  const nutVi = el("button", "vcard-say-vi"); nutVi.type = "button";
+  nutVi.setAttribute("aria-label", "Nghe nghĩa tiếng Việt: " + d.vi);
+  nutVi.append(icon("i-sound", "ic ic-sm"));
+  nutVi.addEventListener("click", () => speak(d.vi, false, "vi-VN"));
+  hangVi.append(el("div", "vcard-vi", d.vi), nutVi);
+  card.append(hangVi);
   st.append(card);
   if (d.note) { const n = el("div", "note"); n.append(icon("i-bulb", "ic ic-sm"), markup(el("span"), d.note)); st.append(n); }
   if (d.ex) {
@@ -709,11 +755,19 @@ function vocabSlide(d, st, label) {
     const s = el("button", "say"); s.type = "button";
     s.setAttribute("aria-label", "Nghe ví dụ: " + d.ex.en);
     s.append(icon("i-sound", "ic ic-sm"));
-    s.addEventListener("click", () => speak(d.ex.en));
+    s.addEventListener("click", () => docLanLuot([
+      { text: d.ex.en, lang: "en-US" },
+      { text: d.ex.vi, lang: "vi-VN" },
+    ]));
     const txt = el("div"); txt.append(el("b", null, d.ex.en), el("small", null, d.ex.vi));
     ex.append(s, txt); st.append(ex);
   }
-  speak(d.en);
+  // Vừa mở thẻ là dạy luôn bằng tiếng, không bắt người ta tự bấm: đọc từ tiếng
+  // Anh trước, rồi nghĩa tiếng Việt, mỗi bên bằng giọng bản ngữ của nó.
+  docLanLuot([
+    { text: d.en, lang: "en-US" },
+    { text: d.vi, lang: "vi-VN" },
+  ]);
 }
 
 /* ---------- 10. Dạng bài luyện tập ---------- */
@@ -1921,7 +1975,7 @@ $("#callPreview").addEventListener("click", () => {
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(line.en);
-    u.lang = "en-US"; if (voice) u.voice = voice; u.rate = 0.94;
+    dungGiong(u, tiengCua(line.en)); u.rate = 0.94;
     u.pitch = S.kidVoice ? KID_PITCH : 1;
     u.onboundary = () => { box.classList.remove("pulse"); void box.offsetWidth; box.classList.add("pulse"); };
     u.onend = stop; u.onerror = stop;
