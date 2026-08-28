@@ -240,6 +240,17 @@ function primeSpeech() {
   } catch { /* bỏ qua */ }
 }
 
+/** MON.L giải thích vì sao bài này chưa bấm vào được. */
+function baoKhoa() {
+  openSheet({
+    top: mascotBox("head", "sheet-mon"),
+    title: "Bài này chưa mở",
+    body: "Bạn hãy hoàn thành các bài học trước mới tới bài này.",
+    yes: "Đã hiểu",
+    no: "",
+  });
+}
+
 /* ---------- 4. Truy vấn khoá học ---------- */
 const level = () => COURSE.levels.find(l => l.id === S.level) || COURSE.levels[0];
 const lessonsOf = lv => lv.units.flatMap(u => u.lessons.map(l => ({ ...l, unit: u })));
@@ -341,11 +352,13 @@ function renderLearn() {
       const st = lessonState(l.id);
       const cell = el("div", "node " + st + (l.checkpoint ? " check" : ""));
       const b = el("button", "node-btn"); b.type = "button";
-      b.disabled = st === "locked";
+      // Trước đây nút khoá bị disabled nên bấm vào không có gì xảy ra, người học
+      // tưởng app hỏng. Nay vẫn bấm được, bấm thì MON.L nói cho biết vì sao.
+      b.setAttribute("aria-disabled", st === "locked" ? "true" : "false");
       b.setAttribute("aria-label", `${l.title} — ${st === "done" ? "đã hoàn thành" : st === "current" ? "bài hiện tại" : "chưa mở khoá"}`);
       b.append(icon(st === "locked" ? "i-lock" : l.checkpoint ? "i-cap" : st === "done" ? "i-check" : "i-play"));
       if (st === "current") b.append(ring(doneN / list.length));
-      if (st !== "locked") b.addEventListener("click", () => startLesson(l.id));
+      b.addEventListener("click", () => (st === "locked" ? baoKhoa() : startLesson(l.id)));
       cell.append(b, el("span", "node-label", l.title));
       grid.append(cell);
     });
@@ -2237,17 +2250,21 @@ $("#btnReset").addEventListener("click", () => openSheet({
 
 /* ---------- 21. Sheet ---------- */
 let sheetYes = null;
-function openSheet({ title, body, yes, no, yesClass = "btn-primary", onYes, slot }) {
+function openSheet({ title, body, yes, no, yesClass = "btn-primary", onYes, slot, top }) {
+  // 'top' là chỗ đặt hình phía TRÊN tiêu đề — slot thường nằm dưới phần chữ.
+  const t = $("#sheetTop"); t.textContent = ""; t.hidden = !top; if (top) t.append(top);
   $("#sheetTitle").textContent = title;
   $("#sheetBody").textContent = body || "";
   $("#sheetBody").hidden = !body;
   const s = $("#sheetSlot"); s.textContent = ""; if (slot) s.append(slot);
   const y = $("#sheetYes");
   y.textContent = yes || ""; y.hidden = !yes; y.className = "btn btn-block mt " + yesClass;
+  // Truyền no rỗng khi chỉ muốn một nút duy nhất; bỏ trống thì vẫn có nút Đóng.
+  $("#sheetNo").hidden = no === "";
   $("#sheetNo").textContent = no || "Đóng";
   sheetYes = onYes || null;
   $("#sheetWrap").hidden = false;
-  $("#sheetNo").focus();
+  (no === "" ? $("#sheetYes") : $("#sheetNo")).focus();
 }
 const closeSheet = () => { $("#sheetWrap").hidden = true; sheetYes = null; };
 $("#sheetNo").addEventListener("click", closeSheet);

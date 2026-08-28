@@ -1086,6 +1086,14 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   background: var(--bad-soft); border-radius: var(--r2); padding: var(--s2) var(--s3); }
 
 
+/* ---------- 15f. BÁO BÀI CHƯA MỞ KHOÁ ---------- */
+.sheet-mon { width: 96px; height: 96px; margin: 0 auto var(--s4);
+  border-radius: var(--rf); background: var(--brand-soft);
+  display: grid; place-items: center; overflow: hidden; }
+.sheet-mon svg { width: 66px; height: 66px; }
+.sheet-mon img { width: 100%; height: 100%; object-fit: cover; }
+
+
 /* ---------- 15e. ẢNH ĐẠI DIỆN ĐỔI ĐƯỢC ---------- */
 /* Ô avatar cũ là một thẻ div trơ. Nay là nút bấm, nên phải tự đặt lại các
    thuộc tính nút mà .avatar không có, và cần position để gắn huy hiệu. */
