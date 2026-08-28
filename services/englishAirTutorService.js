@@ -42,8 +42,17 @@ Người học KHÔNG chọn thứ tiếng trước. Họ cứ nói, việc củ
    thứ tiếng — hãy đoán xem họ định nói gì và trả lời bằng thứ tiếng bạn cho là đúng,
    ĐỪNG hỏi lại "bạn nói gì cơ".
 4. Nếu thật sự không đoán nổi, cứ trả lời bằng tiếng Việt.
-5. Khi người học gõ đúng chữ __START__, đây là lúc mở đầu cuộc gọi: chào bằng
-   TIẾNG VIỆT, giới thiệu tên mình, và nói rõ họ cứ nói tiếng gì cũng được.
+
+Ví dụ bắt buộc làm đúng:
+   Họ nói "Hôm nay trời nóng quá"   -> bạn trả lời TIẾNG VIỆT.
+   Họ nói "I had noodles for lunch" -> bạn trả lời TIẾNG ANH.
+   Họ nói "你好，我今天很累"          -> bạn trả lời TIẾNG TRUNG bằng chữ Hán.
+   Thấy chữ Hán là chắc chắn tiếng Trung. Tuyệt đối không đáp lại bằng tiếng Việt.
+
+════ MỞ ĐẦU CUỘC GỌI ════
+Chỉ khi câu của người học đúng bằng chữ __START__ thì mới là lúc mở màn: chào bằng
+TIẾNG VIỆT, giới thiệu tên mình, nói rõ họ cứ nói tiếng gì cũng được. Mọi lượt khác
+KHÔNG được chào kiểu mở màn nữa.
 
 ════ TÍNH CÁCH ════
 Bạn là đứa bạn vui tính, lanh lợi, nói chuyện đời thường — KHÔNG phải giáo viên khảo bài.
@@ -74,7 +83,8 @@ Trình độ người học: ${lv}
 ════ ĐỊNH DẠNG — bắt buộc đúng các dòng sau, không thêm gì khác ════
 LANG: <vi hoặc en hoặc zh — thứ tiếng bạn vừa dùng ở dòng SAY>
 SAY: <câu trả lời của bạn>
-VI: <nghĩa tiếng Việt của dòng SAY — ĐỂ TRỐNG nếu SAY đã là tiếng Việt>
+VI: <nghĩa tiếng Việt của dòng SAY — BẮT BUỘC có khi SAY là tiếng Anh hoặc tiếng Trung,
+     chỉ để trống khi SAY đã là tiếng Việt>
 PY: <phiên âm pinyin có dấu thanh — CHỈ khi SAY là tiếng Trung, còn lại để trống>`;
 }
 
@@ -89,13 +99,22 @@ function trimHistory(history) {
 
 /** Tách các dòng LANG:/SAY:/VI:/PY: mà mô hình trả về; hỏng định dạng thì vẫn dùng được. */
 function parseReply(text) {
-  const lang = (text.match(/LANG:\s*(vi|en|zh)/i) || [])[1];
-  const say = (text.match(/(?:SAY|EN):\s*(.+)/) || [])[1];
-  const vi = (text.match(/VI:\s*(.+)/) || [])[1];
-  const py = (text.match(/PY:\s*(.+)/) || [])[1];
-  const out = { lang: (lang || '').toLowerCase(), vi: (vi || '').trim(), py: (py || '').trim() };
-  out.reply = say ? say.trim()
-    : text.replace(/^(LANG|SAY|EN|VI|PY):\s*/gm, '').split('\n').filter(Boolean)[0]?.trim() || '';
+  // Chỉ ăn khoảng trắng NGANG. Dùng \s* thì một dòng "VI:" bỏ trống sẽ nuốt luôn
+  // dòng "PY:" nằm ngay dưới — lỗi này từng lọt ra tới bản chạy thật.
+  // Viết thẳng biểu thức, đừng ghép từ chuỗi: dấu \ trong chuỗi bị hiểu một nghĩa khác.
+  const grab = (re) => {
+    const m = text.match(re);
+    const t = m ? m[1].trim() : '';
+    return /^(LANG|SAY|EN|VI|PY):/i.test(t) ? '' : t;
+  };
+  const lang = (text.match(/LANG:[^\S\r\n]*(vi|en|zh)/i) || [])[1];
+  const out = {
+    lang: (lang || '').toLowerCase(),
+    vi: grab(/VI:[^\S\r\n]*(.*)/),
+    py: grab(/PY:[^\S\r\n]*(.*)/),
+  };
+  out.reply = grab(/(?:SAY|EN):[^\S\r\n]*(.*)/)
+    || text.replace(/^(LANG|SAY|EN|VI|PY):[^\S\r\n]*/gm, '').split('\n').filter(Boolean)[0]?.trim() || '';
   return out;
 }
 
