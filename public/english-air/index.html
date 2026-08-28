@@ -298,9 +298,12 @@
       <!-- ================= GỌI VIDEO ================= -->
       <section class="view" id="view-call" hidden aria-labelledby="callTitle">
         <div class="call-hero">
-          <div class="call-preview" aria-hidden="true">
+          <button class="call-preview" id="callPreview" type="button"
+                  aria-label="Bấm để nghe MON.L chào">
             <img class="cp-room" src="assets/call-card.jpg" alt="" decoding="async" />
-          </div>
+            <span class="cp-mon" id="previewMon"><span class="mon-beat"><img class="mon-base" src="assets/mon-closed.png" alt="" decoding="async" /><img class="mon-mouth" src="assets/mon-mouth.png" alt="" decoding="async" /></span></span>
+            <span class="cp-tap"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sound"/></svg>Bấm để nghe</span>
+          </button>
           <h1 id="callTitle">Gọi video với MON.L</h1>
           <p class="sub">Luyện nói bằng chính những đoạn hội thoại bạn đã học. MON.L nói trước, bạn trả lời — app nghe và chấm ngay.</p>
         </div>
@@ -315,7 +318,7 @@
         <p class="fine" id="callMicNote"></p>
         <button class="btn btn-primary btn-block mt" id="btnStartFree" type="button">Gọi nói chuyện tự do</button>
         <button class="btn btn-soft btn-block mt" id="btnStartCall" type="button">Luyện hội thoại trong bài</button>
-        <p class="fine" id="callLocked" hidden>Học xong ít nhất một bài có hội thoại thì mới gọi được.</p>
+        <p class="fine" id="callLocked" hidden>Bạn chưa học bài nào có hội thoại — MON.L sẽ dùng đoạn chào hỏi cơ bản.</p>
       </section>
 
       <!-- ================= GIẢI ĐẤU ================= -->
@@ -504,7 +507,7 @@
   <div class="call-scene" aria-hidden="true">
     <div class="scene-fit">
       <img class="scene-room" src="assets/mon-room.jpg" alt="" decoding="async" />
-      <div class="call-mon" id="callMascot"><span class="mon-beat"><img src="assets/mon-stand.png" alt="" decoding="async" /></span></div>
+      <div class="call-mon" id="callMascot"><span class="mon-beat"><img class="mon-base" src="assets/mon-closed.png" alt="" decoding="async" /><img class="mon-mouth" src="assets/mon-mouth.png" alt="" decoding="async" /></span></div>
     </div>
     <div class="scene-veil"></div>
   </div>

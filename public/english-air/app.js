@@ -171,6 +171,22 @@ function speak(text, slow) {
 }
 const stopSpeak = () => { if (window.speechSynthesis) speechSynthesis.cancel(); };
 
+/* iPhone/iPad chỉ cho phát tiếng lần đầu ngay trong lúc ngón tay còn chạm màn hình.
+   Câu nói đầu của MON.L lại đến sau một lượt chờ mạng, nên phải "mồi" sẵn lúc bấm nút,
+   không thì cả cuộc gọi im lặng mà chẳng báo lỗi gì. */
+let speechPrimed = false;
+function primeSpeech() {
+  if (!window.speechSynthesis) return;
+  pickVoice();
+  if (speechPrimed) return;
+  speechPrimed = true;
+  try {
+    const u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0; u.lang = "en-US";
+    speechSynthesis.speak(u);
+  } catch { /* bỏ qua */ }
+}
+
 /* ---------- 4. Truy vấn khoá học ---------- */
 const level = () => COURSE.levels.find(l => l.id === S.level) || COURSE.levels[0];
 const lessonsOf = lv => lv.units.flatMap(u => u.lessons.map(l => ({ ...l, unit: u })));
@@ -1098,9 +1114,22 @@ function similar(heardText, target) {
   return hit / b.length;
 }
 
+/* Chưa học bài nào vẫn phải gọi được — không thì mở app ra chỉ thấy một tấm ảnh đứng im. */
+const STARTER_DIALOGUE = {
+  title: "Chào hỏi",
+  lines: [
+    { who: "A", en: "Hi! I am MON.L. What is your name?", vi: "Chào! Tớ là MON.L. Bạn tên gì?" },
+    { who: "B", en: "My name is Nam.", vi: "Tớ tên Nam." },
+    { who: "A", en: "Nice to meet you! How are you today?", vi: "Rất vui được gặp bạn! Hôm nay bạn khoẻ không?" },
+    { who: "B", en: "I am fine, thank you.", vi: "Tớ khoẻ, cảm ơn bạn." },
+    { who: "A", en: "Where are you from?", vi: "Bạn đến từ đâu?" },
+    { who: "B", en: "I am from Viet Nam.", vi: "Tớ đến từ Việt Nam." },
+    { who: "A", en: "Very good! See you tomorrow.", vi: "Giỏi lắm! Hẹn gặp lại ngày mai." },
+  ],
+};
+
 function renderCall() {
   const n = callDialogues().length;
-  $("#btnStartCall").disabled = n === 0;
   $("#callLocked").hidden = n > 0;
   $("#callMicNote").textContent = SR
     ? "Lần đầu bấm micro, trình duyệt sẽ hỏi quyền dùng micro — chọn Cho phép."
@@ -1179,7 +1208,7 @@ function startCall(mode) {
 
   if (mode === "script") {
     const pool = callDialogues();
-    const d = pool[Math.floor(Math.random() * pool.length)];
+    const d = pool.length ? pool[Math.floor(Math.random() * pool.length)] : STARTER_DIALOGUE;
     C.lines = d.lines.slice();
     C.asked = d.lines.filter(x => x.who === "B").length;
     nextScriptLine();
@@ -1247,7 +1276,7 @@ async function askTutor(first) {
       title: "Chưa gọi tự do được",
       body: "Chế độ nói chuyện tự do cần mạng. Bạn chuyển sang luyện hội thoại trong bài nhé — cái này chạy được cả khi không có mạng.",
       yes: "Luyện hội thoại trong bài", no: "Đóng",
-      onYes() { callDialogues().length ? startCall("script") : endCall(false); }
+      onYes() { startCall("script"); }
     });
   }
 }
@@ -1366,9 +1395,9 @@ function sendTyped() {
   $("#callInput").value = "";
   heardReply(v);
 }
-$("#btnStartFree").addEventListener("click", () => startCall("free"));
-$("#btnStartCall").addEventListener("click", () => startCall("script"));
-$("#btnMic").addEventListener("click", () => C.listening ? stopListening() : startListening());
+$("#btnStartFree").addEventListener("click", () => { primeSpeech(); startCall("free"); });
+$("#btnStartCall").addEventListener("click", () => { primeSpeech(); startCall("script"); });
+$("#btnMic").addEventListener("click", () => { primeSpeech(); C.listening ? stopListening() : startListening(); });
 $("#btnHangup").addEventListener("click", () => endCall(true));
 $("#btnCallLog").addEventListener("click", () => {
   const on = $("#call").classList.toggle("show-log");
@@ -1376,7 +1405,34 @@ $("#btnCallLog").addEventListener("click", () => {
   if (on) { const l = $("#callLog"); l.scrollTop = l.scrollHeight; }
   fitScene();
 });
-$("#btnCallHear").addEventListener("click", () => speak($("#callSaid").textContent));
+$("#btnCallHear").addEventListener("click", () => { primeSpeech(); speak($("#callSaid").textContent); });
+
+/* Thẻ Gọi Air: bấm vào là MON.L chào ngay — để thấy nó cử động và nói được thật. */
+const PREVIEW_LINES = [
+  { en: "Hi! I am MON.L. Let us speak English!", vi: "Chào! Tớ là MON.L. Mình nói tiếng Anh nhé!" },
+  { en: "Tap the green button and talk to me.", vi: "Bấm nút xanh rồi nói chuyện với tớ nhé." },
+  { en: "Do not worry. Just try your best!", vi: "Đừng lo. Cứ thử hết sức nhé!" },
+];
+let previewTurn = 0;
+$("#callPreview").addEventListener("click", () => {
+  primeSpeech();
+  const line = PREVIEW_LINES[previewTurn++ % PREVIEW_LINES.length];
+  const box = $("#previewMon");
+  toast(line.vi);
+  box.classList.add("talking");
+  let ended = false;
+  const stop = () => { if (ended) return; ended = true; box.classList.remove("talking", "pulse"); };
+  if (!S.sound || !window.speechSynthesis) { setTimeout(stop, 600 + line.en.length * 45); return; }
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(line.en);
+    u.lang = "en-US"; if (voice) u.voice = voice; u.rate = 0.94;
+    u.onboundary = () => { box.classList.remove("pulse"); void box.offsetWidth; box.classList.add("pulse"); };
+    u.onend = stop; u.onerror = stop;
+    speechSynthesis.speak(u);
+    setTimeout(stop, 1400 + line.en.length * 95);
+  } catch { stop(); }
+});
 $("#btnCallSkip").addEventListener("click", showChoices);
 $("#btnCallSend").addEventListener("click", sendTyped);
 $("#callInput").addEventListener("keydown", e => { if (e.key === "Enter") sendTyped(); });

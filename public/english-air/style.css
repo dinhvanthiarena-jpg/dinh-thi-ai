@@ -689,9 +689,21 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 /* ---------- 15b. GỌI VIDEO LUYỆN NÓI ---------- */
 .call-hero { text-align: center; padding: var(--s5) 0 var(--s4); }
-.call-preview { position: relative; width: 172px; aspect-ratio: 3 / 4; margin: 0 auto var(--s4);
-  border-radius: 20px; overflow: hidden; box-shadow: var(--sh-2); }
+.call-preview { position: relative; display: block; width: 186px; aspect-ratio: 3 / 4;
+  margin: 0 auto var(--s4); padding: 0; border: 0; border-radius: 20px; overflow: hidden;
+  background: var(--muted); box-shadow: var(--sh-2); cursor: pointer; }
 .cp-room { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* Đặt MON.L đúng chỗ cũ trong tấm ảnh 3:4, rồi cho cử động y như trong cuộc gọi. */
+.cp-mon { position: absolute; left: 23.481%; top: 8.564%; width: 56.906%; height: 84.185%;
+  transform-origin: 50% 100%; animation: monBreathe 4.2s ease-in-out infinite; }
+.cp-mon .mon-beat { display: block; position: relative; width: 100%; height: 100%; transform-origin: 50% 100%; }
+.cp-mon.talking { animation: monTalk 1.25s ease-in-out infinite; }
+.cp-mon.talking .mon-mouth { animation: monMouth 240ms ease-in-out infinite; }
+.cp-mon.pulse .mon-beat { animation: monBeat 200ms var(--e); }
+.cp-tap { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: var(--rf);
+  background: rgba(20,8,38,.72); color: #fff; font-size: .74rem; font-weight: 800; white-space: nowrap; }
+.call-preview:active { transform: scale(.98); }
 .call-hero h1 { font-size: 1.6rem; margin-bottom: var(--s2); }
 .call-info { display: flex; flex-direction: column; gap: var(--s4); }
 .ci-row { display: flex; gap: var(--s3); align-items: flex-start; }
@@ -731,39 +743,51 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   transform-origin: 50% 100%; will-change: transform;
   animation: monIn 700ms var(--e) both, monBreathe 4.6s ease-in-out 700ms infinite;
 }
-.call-mon .mon-beat { display: block; width: 100%; height: 100%; transform-origin: 50% 100%; }
-.call-mon img { width: 100%; height: 100%; display: block; }
+.call-mon .mon-beat { display: block; position: relative; width: 100%; height: 100%; transform-origin: 50% 100%; }
+.mon-base, .mon-mouth { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* Lớp miệng bóp lại quanh mép trên của cái miệng, nên trông đúng như đang ngậm. */
+.mon-mouth { transform-origin: 50% 23.14%; transform: scaleY(.16); will-change: transform; }
 
 @keyframes monIn {
-  0%   { opacity: 0; transform: translateY(2.4%) scale(.965); }
+  0%   { opacity: 0; transform: translateY(5%) scale(.92); }
+  60%  { opacity: 1; transform: translateY(-1.2%) scale(1.02); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
-/* Đứng yên: thở nhẹ. */
+/* Đứng yên: thở, và thỉnh thoảng đảo người — đứng im như tượng thì trông như ảnh chụp. */
 @keyframes monBreathe {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50%      { transform: translateY(-.7%) scale(1.006); }
+  0%, 100% { transform: translateY(0) rotate(-.8deg) scale(1, 1); }
+  25%      { transform: translateY(-2.2%) rotate(0deg) scale(.992, 1.016); }
+  50%      { transform: translateY(-.4%) rotate(.9deg) scale(1.006, .996); }
+  75%      { transform: translateY(-1.8%) rotate(0deg) scale(.994, 1.012); }
 }
-/* Đang nói: đung đưa như người thật đang kể chuyện. */
-.call-mon.talking { animation: monTalk 1.5s ease-in-out infinite; }
+/* Đang nói: đung đưa, dồn trọng tâm qua lại như người thật đang kể chuyện. */
+.call-mon.talking { animation: monTalk 1.25s ease-in-out infinite; }
 @keyframes monTalk {
-  0%   { transform: translateY(0)     rotate(-.9deg) scale(1); }
-  22%  { transform: translateY(-1.1%) rotate(.2deg)  scale(1.010, .994); }
-  46%  { transform: translateY(-.2%)  rotate(1deg)   scale(1.004); }
-  70%  { transform: translateY(-1%)   rotate(.1deg)  scale(1.012, .992); }
-  100% { transform: translateY(0)     rotate(-.9deg) scale(1); }
+  0%   { transform: translate(-1.4%, 0)     rotate(-2.4deg) scale(1, 1); }
+  25%  { transform: translate(-.4%, -3.2%)  rotate(-.4deg)  scale(.978, 1.03); }
+  50%  { transform: translate(1.4%, -.6%)   rotate(2.4deg)  scale(1.02, .976); }
+  75%  { transform: translate(.4%, -3%)     rotate(.4deg)   scale(.982, 1.026); }
+  100% { transform: translate(-1.4%, 0)     rotate(-2.4deg) scale(1, 1); }
 }
-/* Nảy một nhịp mỗi tiếng phát ra, cho khớp với lời. */
-.call-mon.pulse .mon-beat { animation: monBeat 190ms var(--e); }
+/* Miệng mấp máy liên tục suốt lúc nói — đây mới là cái làm nó ra chất hoạt hình. */
+.call-mon.talking .mon-mouth { animation: monMouth 240ms ease-in-out infinite; }
+@keyframes monMouth {
+  0%   { transform: scaleY(.16); }
+  45%  { transform: scaleY(1); }
+  100% { transform: scaleY(.16); }
+}
+/* Mỗi tiếng phát ra thì nhấn thêm một nhịp, cho khớp trọng âm. */
+.call-mon.pulse .mon-beat { animation: monBeat 200ms var(--e); }
 @keyframes monBeat {
   0%   { transform: scale(1, 1); }
-  42%  { transform: scale(1.018, .972); }
+  40%  { transform: scale(1.04, .955); }
   100% { transform: scale(1, 1); }
 }
-/* Đang nghe: nhoài người về phía người học một chút. */
-.call-mon.listening { animation: monLean 2.4s ease-in-out infinite; }
+/* Đang nghe: nhoài người tới, gật nhẹ như đang chăm chú nghe. */
+.call-mon.listening { animation: monLean 1.9s ease-in-out infinite; }
 @keyframes monLean {
-  0%, 100% { transform: translateY(0) scale(1.010); }
-  50%      { transform: translateY(-.4%) scale(1.016); }
+  0%, 100% { transform: translateY(0) rotate(-1deg) scale(1.02); }
+  50%      { transform: translateY(-1.6%) rotate(1deg) scale(1.035); }
 }
 
 /* ----- Thanh trên: chữ trắng nổi trên cảnh ----- */
