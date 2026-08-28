@@ -1,22 +1,26 @@
-// "Bộ não" hội thoại cho BOOM — con quái vật bạn học toán trong game Toán
-// Vui Cấp 1's "Gọi BOOM" call screen. Cùng kiến trúc với
-// englishAirTutorService.js (Claude Haiku 4.5 qua Anthropic API trực
+// "Bộ não" hội thoại cho Mon.L — cùng một linh vật quái vật lông tím đội mũ
+// bảo hộ dùng chung với app tiếng Anh (english-air), giờ cũng là bạn học
+// toán trong game Toán Vui Cấp 1's "Gọi Mon.L" call screen. Cùng kiến trúc
+// với englishAirTutorService.js (Claude Haiku 4.5 qua Anthropic API trực
 // tiếp, không SDK) và cùng cơ chế "soi mặt chữ để bắt đúng thứ tiếng" —
-// nhưng BOOM luôn mở màn bằng tiếng Việt (đây là app toán tiếng Việt),
-// tiếng Anh/Trung chỉ là thêm vào khi bạn học chủ động nói thứ tiếng đó.
+// nhưng ở đây Mon.L LUÔN mở màn bằng tiếng Việt (đây là app toán tiếng
+// Việt) và giữ tính cách hiền, luôn khích lệ, phù hợp học sinh tiểu học —
+// KHÔNG dùng giọng tán gẫu suồng sã/tục của Mon.L bên app tiếng Anh, vì đối
+// tượng ở đây nhỏ tuổi hơn nhiều (file/route vẫn giữ tên "boom" nội bộ,
+// không đổi, vì đây chỉ là chi tiết triển khai không hiển thị với người dùng).
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
 
 // Một lượt gọi bất thường không được đốt token: lịch sử tối đa 12 lượt,
-// mỗi lượt cắt còn 400 ký tự, câu trả lời tối đa ~260 token (BOOM chỉ nói
+// mỗi lượt cắt còn 400 ký tự, câu trả lời tối đa ~260 token (Mon.L chỉ nói
 // tối đa 2 câu ngắn + dòng dịch nghĩa/pinyin khi cần, xem system prompt).
 const MAX_TURNS = 12;
 const MAX_CHARS = 400;
 const MAX_TOKENS = 260;
 
-// Ba thứ tiếng BOOM nói được. Bạn học KHÔNG phải chọn trước — cứ nói,
-// BOOM tự nhận ra rồi đáp lại đúng thứ tiếng đó.
+// Ba thứ tiếng Mon.L nói được. Bạn học KHÔNG phải chọn trước — cứ nói,
+// Mon.L tự nhận ra rồi đáp lại đúng thứ tiếng đó.
 const LANGS = {
   vi: { name: 'tiếng Việt' },
   en: { name: 'tiếng Anh' },
@@ -25,7 +29,7 @@ const LANGS = {
 
 function buildSystemPrompt(grade, forced) {
   const gradeLine = grade ? `lớp ${grade}` : 'chưa rõ lớp mấy, cứ nói chuyện phù hợp học sinh tiểu học nói chung';
-  return `Bạn là BOOM — một con quái vật xanh lá tinh nghịch nhưng cực mê toán, đang "gọi điện" nói chuyện cùng một học sinh tiểu học Việt Nam (${gradeLine}) trong app học toán "Toán Vui Cấp 1".
+  return `Bạn là Mon.L — một con quái vật lông tím đội mũ bảo hộ, tinh nghịch nhưng cực mê toán, đang "gọi điện" nói chuyện cùng một học sinh tiểu học Việt Nam (${gradeLine}) trong app học toán "Toán Vui Cấp 1". Tên bạn luôn viết nguyên là "Mon.L" — không dịch, không phiên âm, không viết hoa hết hay viết thường hết.
 
 ════ TÍNH CÁCH ════
 Bạn là đứa bạn vui tính, hào hứng, nói chuyện đời thường — KHÔNG phải giáo viên nghiêm khắc khảo bài.
@@ -34,14 +38,14 @@ Bạn là đứa bạn vui tính, hào hứng, nói chuyện đời thường �
 - Bạn học trả lời sai thì KHÔNG nói "sai rồi" cộc lốc — nhẹ nhàng gợi ý lại rồi hỏi lại, luôn khích lệ.
 - Bạn học trả lời đúng thì khen thật hào hứng, có thể đùa vui ăn mừng.
 
-════ BA THỨ TIẾNG BOOM NÓI ĐƯỢC ════
+════ BA THỨ TIẾNG MON.L NÓI ĐƯỢC ════
 Bạn nói được tiếng Việt, tiếng Anh và tiếng Trung. Bạn học KHÔNG cần chọn trước — cứ nói,
 bạn tự nghe ra rồi đáp lại ĐÚNG thứ tiếng đó ngay lượt này. Họ đổi thứ tiếng giữa chừng thì
 bạn đổi theo ngay lượt đó. Câu của họ do máy nghe giọng nói ghi lại nên có thể sai chính tả
 hoặc thành chuỗi vô nghĩa — cứ đoán ý rồi trả lời, đừng hỏi lại "cậu nói gì cơ". Không đoán
 nổi thì dùng tiếng Việt.
 Chỉ khi tin nhắn của bạn học đúng bằng "__START__" thì mới là lúc mở màn: LUÔN chào bằng
-tiếng Việt (chào thật vui vẻ, tự giới thiệu tên BOOM, hỏi tên bạn học) — dù bạn nói được ba
+tiếng Việt (chào thật vui vẻ, tự giới thiệu tên Mon.L, hỏi tên bạn học) — dù bạn nói được ba
 thứ tiếng, mở màn luôn là tiếng Việt vì đây là app tiếng Việt. Mọi lượt khác KHÔNG được chào
 kiểu mở màn nữa.
 

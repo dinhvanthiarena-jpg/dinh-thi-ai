@@ -111,7 +111,7 @@ exports.pushUnsubscribe = async (req, res) => {
   res.json({ ok: true });
 };
 
-// One turn of the "Gọi BOOM" free-conversation call screen.
+// One turn of the "Gọi Mon.L" free-conversation call screen.
 exports.boomChat = async (req, res) => {
   try {
     const { history, grade } = req.body || {};
@@ -123,7 +123,7 @@ exports.boomChat = async (req, res) => {
     console.error('[boom-chat]', err.message);
     res.status(noKey ? 503 : 502).json({
       ok: false,
-      message: noKey ? 'Gọi BOOM chưa bật trên máy chủ.' : 'BOOM đang bận, thử gọi lại sau một chút nhé.',
+      message: noKey ? 'Gọi Mon.L chưa bật trên máy chủ.' : 'Mon.L đang bận, thử gọi lại sau một chút nhé.',
     });
   }
 };

@@ -103,8 +103,8 @@
         <button class="btn-homework-icon" id="btnOpenHomework" aria-label="Chụp bài tập, AI giảng bài">
           <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M9 2 7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
         </button>
-        <button class="btn-homework-icon btn-call-icon" id="btnOpenCall" aria-label="Gọi BOOM nói chuyện">
-          <span class="call-icon-emoji" aria-hidden="true">👹</span>
+        <button class="btn-homework-icon btn-call-icon" id="btnOpenCall" aria-label="Gọi Mon.L nói chuyện">
+          <img id="homeCallIcon" src="assets/thay-avatar.png" alt="" aria-hidden="true" />
         </button>
       </div>
       <p class="app-version" id="appVersion"></p>
@@ -374,14 +374,14 @@
     </div>
   </section>
 
-  <!-- SCREEN: GỌI BOOM -->
+  <!-- SCREEN: GỌI MON.L -->
   <section id="screen-call" class="screen">
     <div class="call-wrap">
       <div class="call-top">
         <div class="call-who">
-          <div class="call-avatar" id="callAvatar" aria-hidden="true"><span class="call-avatar-emoji">👹</span></div>
+          <div class="call-avatar" id="callAvatar" aria-hidden="true"><img class="call-avatar-img" id="callAvatarImg" src="assets/thay-avatar.png" alt="" /></div>
           <div class="call-who-text">
-            <b>BOOM</b>
+            <b>Mon.L</b>
             <small id="callTimer">00:00</small>
           </div>
         </div>
@@ -398,7 +398,7 @@
         </div>
         <div class="call-you" id="callYou" hidden>
           <span class="cy-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-          <span>BOOM đang nghe cậu nói…</span>
+          <span>Mon.L đang nghe cậu nói…</span>
         </div>
       </div>
 
@@ -406,7 +406,7 @@
         <div class="call-heard" id="callHeard" hidden><span id="callHeardText"></span></div>
 
         <div class="call-type" id="callType" hidden>
-          <input type="text" id="callInput" placeholder="Gõ điều muốn nói với BOOM…" aria-label="Gõ câu trả lời" />
+          <input type="text" id="callInput" placeholder="Gõ điều muốn nói với Mon.L…" aria-label="Gõ câu trả lời" />
           <button class="round-btn lg" id="btnCallSend" type="button" aria-label="Gửi">
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg>
           </button>

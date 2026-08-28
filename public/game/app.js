@@ -1708,6 +1708,8 @@
     applyTeacherName();
     setMascot($('mascotHome'), 'happy');
     setMascot($('mascotLicense'), 'sad');
+    const homeCallIcon = $('homeCallIcon');
+    if (homeCallIcon) homeCallIcon.src = avatarDataUrl || 'assets/thay-avatar.png';
   }
 
   function openSettingsModal() {
@@ -2359,9 +2361,10 @@
     $('btnHomeworkSubmit').addEventListener('click', () => { sfx.click(); homeworkSubmit(); });
   }
 
-  /* ================= GỌI BOOM (video call quái vật, nói chuyện tự do) ================= */
+  /* ================= GỌI MON.L (video call quái vật, nói chuyện tự do) ================= */
   if (IS_WEB) {
     const callAvatar = $('callAvatar');
+    const callAvatarImg = $('callAvatarImg');
     const callTimer = $('callTimer');
     const callStateEl = $('callState');
     const callLog = $('callLog');
@@ -2390,7 +2393,7 @@
     let callEnded = true;
     let callTypedOnly = !SpeechRecognitionCtor;
 
-    // BOOM nói được ba thứ tiếng — bạn học không chọn trước, cứ nói, server
+    // Mon.L nói được ba thứ tiếng — bạn học không chọn trước, cứ nói, server
     // (boomChatService.js) tự nghe ra rồi trả lời đúng thứ tiếng đó, client
     // chỉ cần đổi giọng đọc/giọng nghe theo callLang mỗi lượt.
     const CALL_LANGS = {
@@ -2471,10 +2474,10 @@
       setTimeout(() => { if (!callEnded && !callBusy) callStartListening(); }, 400);
     }
 
-    // BOOM's reply always lands in the big bubble, and also gets appended to
+    // Mon.L's reply always lands in the big bubble, and also gets appended to
     // the scrollback log — the bubble is "what's being said right now", the
     // log is the running transcript underneath it. lang/viGloss/py come from
-    // the server (boomChatService.js), which detects which of BOOM's three
+    // the server (boomChatService.js), which detects which of Mon.L's three
     // languages the reply is actually in.
     function callSpeak(text, lang, viGloss, py) {
       if (CALL_LANGS[lang]) callLang = lang;
@@ -2544,7 +2547,7 @@
         callAppendLog('user', userText);
       }
       callBusy = true;
-      callSetState('BOOM đang nghĩ…', 'think');
+      callSetState('Mon.L đang nghĩ…', 'think');
       try {
         const res = await fetch('/api/game/boom-chat', {
           method: 'POST',
@@ -2555,7 +2558,7 @@
         if (callEnded) return;
         if (!res.ok || !data.ok) {
           callBusy = false;
-          callSetState((data && data.message) || 'BOOM đang bận, thử lại nhé.', 'err');
+          callSetState((data && data.message) || 'Mon.L đang bận, thử lại nhé.', 'err');
           return;
         }
         callHistory.push({ role: 'assistant', content: data.reply });
@@ -2563,7 +2566,7 @@
       } catch (e) {
         if (callEnded) return;
         callBusy = false;
-        callSetState('Không kết nối được, kiểm tra mạng giúp BOOM nhé.', 'err');
+        callSetState('Không kết nối được, kiểm tra mạng giúp Mon.L nhé.', 'err');
       }
     }
 
@@ -2637,11 +2640,12 @@
       callEnded = false;
       callBusy = false;
       callHistory = [];
-      callLang = 'vi'; // BOOM luôn mở màn bằng tiếng Việt, đây là app tiếng Việt
+      callLang = 'vi'; // Mon.L luôn mở màn bằng tiếng Việt, đây là app tiếng Việt
       callLog.innerHTML = '';
       callLog.hidden = true;
       callHeard.hidden = true;
-      callSaid.textContent = 'BOOM đang kết nối…';
+      callAvatarImg.src = avatarDataUrl || 'assets/thay-avatar.png';
+      callSaid.textContent = 'Mon.L đang kết nối…';
       callSaidLang.hidden = true;
       callSaidPy.hidden = true;
       callSaidVi.hidden = true;
