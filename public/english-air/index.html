@@ -60,27 +60,56 @@
     <symbol id="i-flip" viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="12" rx="2.5"/><path d="M7 3h11a3 3 0 0 1 3 3v11"/></symbol>
     <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></symbol>
 
-    <!-- ===== linh vật: chim Air (nhân vật riêng, không dùng của AirLearn) ===== -->
+    <!-- ===== linh vật: quái vật tím MON.S — hình vẽ dự phòng.
+         Khi có file assets/mascot.png thì app tự thay bằng ảnh nhân vật thật. ===== -->
+    <g id="m-air-face">
+      <!-- đầu lông -->
+      <path d="M60 27c23 0 39 14 39 34 0 25-17 43-39 43S21 86 21 61c0-20 16-34 39-34Z" fill="#6B31C2"/>
+      <path d="M60 27c23 0 39 14 39 34 0 6-1 11-3 16-5-22-18-34-36-34s-31 12-36 34c-2-5-3-10-3-16 0-20 16-34 39-34Z" fill="#8446DE"/>
+      <!-- miệng há -->
+      <path d="M27 63c0-4 7-6 33-6s33 2 33 6c0 23-15 38-33 38S27 86 27 63Z" fill="#4C1526"/>
+      <ellipse cx="60" cy="90" rx="21" ry="10" fill="#A63B54"/>
+      <!-- răng trên -->
+      <g fill="#F4E7D3">
+        <path d="M30 59h8l-4 10z"/><path d="M38 59h8l-4 10z"/><path d="M46 59h8l-4 10z"/>
+        <path d="M54 59h8l-4 10z"/><path d="M62 59h8l-4 10z"/><path d="M70 59h8l-4 10z"/>
+        <path d="M78 59h8l-4 10z"/>
+      </g>
+      <!-- răng dưới -->
+      <g fill="#EBDCC6">
+        <rect x="45" y="88" width="9" height="9" rx="3"/><rect x="56" y="89" width="9" height="9" rx="3"/>
+        <rect x="67" y="88" width="8" height="8" rx="3"/>
+      </g>
+      <!-- mắt -->
+      <ellipse cx="50" cy="46" rx="8.5" ry="9.5" fill="#F1EBE1"/>
+      <ellipse cx="70" cy="46" rx="8.5" ry="9.5" fill="#F1EBE1"/>
+      <circle cx="51.5" cy="47" r="4.2" fill="#171021"/><circle cx="71.5" cy="47" r="4.2" fill="#171021"/>
+      <circle cx="53" cy="45" r="1.5" fill="#fff"/><circle cx="73" cy="45" r="1.5" fill="#fff"/>
+      <!-- mũ bảo hộ -->
+      <path d="M14 43c0-19 21-32 46-32s46 13 46 32c0 3-2 5-6 5H20c-4 0-6-2-6-5Z" fill="#6E3BC0"/>
+      <path d="M21 35c0-14 18-24 39-24s39 10 39 24c0 2-1 3-3 3H24c-2 0-3-1-3-3Z" fill="#9163E4"/>
+      <rect x="58" y="16" width="34" height="13" rx="3" fill="#BC96F2"/>
+      <text x="75" y="26" text-anchor="middle" font-family="Nunito, sans-serif" font-size="9" font-weight="900" fill="#4A2185">MON.S</text>
+      <rect x="16" y="34" width="7" height="13" rx="3" fill="#5B2CA6"/>
+      <rect x="97" y="34" width="7" height="13" rx="3" fill="#5B2CA6"/>
+    </g>
+
+    <symbol id="m-air-head" viewBox="0 0 120 120"><use href="#m-air-face"/></symbol>
+
     <symbol id="m-air" viewBox="0 0 120 120">
-      <ellipse cx="60" cy="106" rx="30" ry="5" fill="#0B3F63" opacity=".14"/>
-      <path d="M60 22c19 0 33 14 33 33v14c0 19-14 33-33 33S27 88 27 69V55c0-19 14-33 33-33Z" fill="#3EC0FF"/>
-      <path d="M60 55c14 0 25 9 25 21s-11 21-25 21-25-9-25-21 11-21 25-21Z" fill="#D8F2FF"/>
-      <circle cx="47" cy="48" r="12" fill="#fff"/><circle cx="73" cy="48" r="12" fill="#fff"/>
-      <circle cx="49" cy="49" r="5.4" fill="#0B3F63"/><circle cx="71" cy="49" r="5.4" fill="#0B3F63"/>
-      <circle cx="51" cy="47" r="1.9" fill="#fff"/><circle cx="73" cy="47" r="1.9" fill="#fff"/>
-      <path d="M60 58.5 53 65h14l-7-6.5Z" fill="#FFB020"/>
-      <path d="M27 60c-8 2-12 8-11 14 5-2 9-5 11-9V60Z" fill="#1FA8EE"/>
-      <path d="M93 60c8 2 12 8 11 14-5-2-9-5-11-9V60Z" fill="#1FA8EE"/>
-      <path d="M52 20c1-7 5-11 8-13 3 2 7 6 8 13-5-2-11-2-16 0Z" fill="#1FA8EE"/>
-    </symbol>
-    <!-- đầu linh vật, dùng cho avatar nhỏ -->
-    <symbol id="m-air-head" viewBox="0 0 120 120">
-      <path d="M60 18c22 0 38 16 38 38S82 96 60 96 22 78 22 56 38 18 60 18Z" fill="#3EC0FF"/>
-      <circle cx="45" cy="52" r="14" fill="#fff"/><circle cx="75" cy="52" r="14" fill="#fff"/>
-      <circle cx="47" cy="53" r="6.4" fill="#0B3F63"/><circle cx="73" cy="53" r="6.4" fill="#0B3F63"/>
-      <circle cx="49.5" cy="50.5" r="2.2" fill="#fff"/><circle cx="75.5" cy="50.5" r="2.2" fill="#fff"/>
-      <path d="M60 64 52 72h16l-8-8Z" fill="#FFB020"/>
-      <path d="M50 16c1-6 6-10 10-11 4 1 9 5 10 11-6-3-14-3-20 0Z" fill="#1FA8EE"/>
+      <ellipse cx="60" cy="115" rx="34" ry="4" fill="#3A1470" opacity=".18"/>
+      <!-- áo len -->
+      <path d="M42 70h36c9 0 15 6 15 15v26c0 4-3 7-7 7H34c-4 0-7-3-7-7V85c0-9 6-15 15-15Z" fill="#6A48A6"/>
+      <path d="M27 92c0-9 6-15 15-15h36c9 0 15 6 15 15Z" fill="#7B57BC"/>
+      <!-- túi áo có mặt cười -->
+      <rect x="46" y="94" width="28" height="20" rx="4" fill="#7B57BC"/>
+      <path d="M53 100l4 4-4 4M67 100l-4 4 4 4" stroke="#5B3B92" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <!-- tay -->
+      <rect x="12" y="80" width="16" height="30" rx="8" fill="#6A48A6"/>
+      <rect x="92" y="80" width="16" height="30" rx="8" fill="#6A48A6"/>
+      <circle cx="20" cy="110" r="9" fill="#6B31C2"/><circle cx="100" cy="110" r="9" fill="#6B31C2"/>
+      <!-- đầu -->
+      <g transform="translate(60 36) scale(.66) translate(-60 -42)"><use href="#m-air-face"/></g>
     </symbol>
 
     <!-- ===== minh hoạ 48x48 ===== -->
@@ -111,7 +140,7 @@
   <!-- điều hướng dọc cho màn rộng -->
   <nav class="sidenav" aria-label="Điều hướng chính">
     <div class="brand">
-      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></span>
+      <span class="brand-mark" data-mascot="head" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></span>
       <span class="brand-name">English Air</span>
     </div>
     <ul class="sidenav-list">
@@ -158,7 +187,7 @@
             <h2 class="hello-h">👋 Xin chào!</h2>
             <p class="hello-p" id="helloSub">Hãy bắt đầu tiếng Anh của bạn.</p>
           </div>
-          <span class="hello-mascot" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></span>
+          <span class="hello-mascot" data-mascot="head" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></span>
         </div>
 
         <div class="banner" id="banner" aria-hidden="true">
@@ -249,7 +278,7 @@
       <section class="view" id="view-profile" hidden aria-labelledby="profileTitle">
         <h1 class="sr-only" id="profileTitle">Hồ sơ</h1>
         <div class="prof-head">
-          <div class="avatar" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></div>
+          <div class="avatar" data-mascot="head" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></div>
           <div><h2 class="prof-name">Người học</h2><p class="sub">Tham gia <span id="joinDate">hôm nay</span></p></div>
         </div>
         <div class="tiles">
@@ -328,7 +357,7 @@
   </header>
 
   <div class="p-body">
-    <div class="mascot-top" id="mascotTop" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+    <div class="mascot-top" id="mascotTop" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
     <p class="kicker" id="slideKicker"></p>
     <div class="stage" id="stage"></div>
   </div>
@@ -375,7 +404,7 @@
 <!-- ================= KẾT THÚC BÀI ================= -->
 <div class="result" id="result" hidden role="dialog" aria-modal="true" aria-labelledby="resTitle">
   <div class="res-in">
-    <div class="res-mascot" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+    <div class="res-mascot" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
     <h2 id="resTitle">Chậm mà chắc, rất tuyệt!</h2>
     <div class="res-wide">
       <span class="res-lab"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-clock"/></svg> HOÀN THÀNH BÀI HỌC TRONG</span>

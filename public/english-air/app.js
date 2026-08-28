@@ -28,6 +28,39 @@ function svgUse(id, box, cls) {
 const icon = (id, cls = "ic") => svgUse(id, "0 0 24 24", cls);
 const pic  = id => svgUse("p-" + id, "0 0 48 48");
 
+/* ---------- 0b. Linh vật ----------
+   Mặc định dùng hình vẽ SVG trong sprite. Nếu có file ảnh nhân vật thật ở
+   assets/mascot.png thì tự thay toàn bộ sang ảnh đó — không có file cũng
+   không vỡ giao diện, nên thả ảnh vào lúc nào cũng được.                */
+const MASCOT_SRC = "assets/mascot.png";
+
+function useMascotImage() {
+  const probe = new Image();
+  probe.onload = () => {
+    document.documentElement.classList.add("has-mascot-img");
+    $$("[data-mascot]").forEach(swapMascot);
+  };
+  probe.src = MASCOT_SRC;
+}
+/** Đổi một ô linh vật SVG thành thẻ ảnh, giữ nguyên kích thước ô. */
+function swapMascot(box) {
+  if (box.querySelector("img")) return;
+  const img = el("img", "mascot-img mascot-" + (box.dataset.mascot || "head"));
+  img.src = MASCOT_SRC;
+  img.alt = "";
+  img.decoding = "async";
+  box.textContent = "";
+  box.append(img);
+}
+/** Ô linh vật dựng bằng JS (màn Từ vựng khi chưa có từ nào). */
+function mascotBox(kind, cls) {
+  const box = el("div", cls);
+  box.dataset.mascot = kind;
+  box.append(svgUse(kind === "full" ? "m-air" : "m-air-head", "0 0 120 120"));
+  if (document.documentElement.classList.contains("has-mascot-img")) swapMascot(box);
+  return box;
+}
+
 let toastT;
 function toast(msg) {
   const t = $("#toast"); t.textContent = msg; t.hidden = false;
@@ -876,7 +909,7 @@ function renderWords() {
   const ul = $("#wordList"); ul.textContent = "";
   if (!list.length) {
     const box = el("div", "empty");
-    const m = el("div", "empty-mascot"); m.append(svgUse("m-air-head", "0 0 120 120"));
+    const m = mascotBox("head", "empty-mascot");
     box.append(m, el("b", null, seen.length ? `Không có từ nào ở mục “${f.name}”` : "Chưa có từ nào"),
       el("p", "sub", seen.length ? "Thử chọn mục khác xem sao." : "Hoàn thành một bài học để bắt đầu tích từ."));
     ul.append(box);
@@ -1089,6 +1122,7 @@ if ("serviceWorker" in navigator) {
 rollPeriods();
 applyTheme();
 paintStats();
+useMascotImage();
 setupInstallHint();
 setInterval(() => { regenHearts(); paintStats(); }, 60000);
 setInterval(() => { if (!$("#view-league").hidden) $("#leagueTimer").textContent = weekLeft(); }, 60000);

@@ -200,6 +200,21 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 }
 .chip.on { background: var(--card); color: var(--blue-ink); box-shadow: inset 0 0 0 2px var(--blue); }
 
+/* ---------- 5b. LINH VẬT ----------
+   Một file ảnh dùng cho hai kiểu: nguyên người (mascot-full) và cắt tròn
+   lấy phần đầu (mascot-head) cho các ô avatar nhỏ. */
+.mascot-img { display: block; width: 100%; height: 100%; }
+.mascot-full { object-fit: contain; }
+.mascot-head {
+  object-fit: cover;
+  object-position: 50% 12%;      /* khung vào phần đầu, bỏ phần thân */
+  border-radius: var(--rf);
+  transform: scale(1.55);        /* phóng để đầu lấp đầy vòng tròn */
+}
+.brand-mark, .hello-mascot, .avatar, .empty-mascot { overflow: hidden; border-radius: var(--rf); }
+.has-mascot-img .avatar { background: none; }
+.has-mascot-img .empty-mascot { box-shadow: 0 0 0 2px var(--line); }
+
 /* ---------- 6. MÀN HỌC ---------- */
 .hello { display: flex; align-items: center; gap: var(--s3); padding: var(--s4) 0 var(--s3); }
 .hello-h { font-size: 1.4rem; }
