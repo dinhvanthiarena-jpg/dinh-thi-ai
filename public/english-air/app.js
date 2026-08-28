@@ -80,7 +80,7 @@ function markup(node, text) {
 const KEY = "englishair.v3";
 const DEFAULTS = {
   level: "a1",
-  xp: 0, hearts: 5, heartAt: Date.now(),
+  xp: 0, hearts: 15, heartAt: Date.now(),
   streak: 0, best: 0, lastDay: "", days: [],
   done: {}, srs: {},
   goal: 30, goalDay: "", todayXp: 0,
@@ -102,10 +102,17 @@ function save() {
 }
 
 const HEART_MS = 30 * 60 * 1000;
+// Số tim tối đa. Con số này trước nằm rải rác bảy chỗ trong file — sửa một chỗ
+// mà sót chỗ khác là tim hồi tới 5 rồi đứng, hoặc mất tim mà đồng hồ không chạy.
+const TIM_TOI_DA = 15;
 function regenHearts() {
-  if (S.hearts >= 5) { S.heartAt = Date.now(); return; }
+  if (S.hearts >= TIM_TOI_DA) { S.heartAt = Date.now(); return; }
   const got = Math.floor((Date.now() - S.heartAt) / HEART_MS);
-  if (got > 0) { S.hearts = clamp(S.hearts + got, 0, 5); S.heartAt = S.hearts >= 5 ? Date.now() : S.heartAt + got * HEART_MS; save(); }
+  if (got > 0) {
+    S.hearts = clamp(S.hearts + got, 0, TIM_TOI_DA);
+    S.heartAt = S.hearts >= TIM_TOI_DA ? Date.now() : S.heartAt + got * HEART_MS;
+    save();
+  }
 }
 function weekKey(d = new Date()) { const x = new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x.toISOString().slice(0, 10); }
 function weekLeft() {
@@ -1057,8 +1064,9 @@ function nextPressed() {
     feedback(true, praise(), d.word ? `${d.word.en} — ${d.word.vi}` : (d.sent ? d.sent.en : ""));
   } else {
     P.wrong++;
-    S.hearts = clamp(S.hearts - 1, 0, 5);
-    if (S.hearts === 4) S.heartAt = Date.now();
+    S.hearts = clamp(S.hearts - 1, 0, TIM_TOI_DA);
+    // Vừa sứt quả đầu từ lúc đầy thì mới bắt đầu tính giờ hồi.
+    if (S.hearts === TIM_TOI_DA - 1) S.heartAt = Date.now();
     save(); paintHearts();
     const h = $("#pHearts"); h.classList.add("hit"); setTimeout(() => h.classList.remove("hit"), 400);
     feedback(false, "Chưa đúng", "Đáp án: " + answerOf(d));
@@ -2779,8 +2787,8 @@ $("#btnLevel").addEventListener("click", () => {
 $("#btnXp").addEventListener("click", () => toast(`${S.xp} XP · tuần này ${S.weekXp} XP`));
 $("#btnHeart").addEventListener("click", () => {
   regenHearts();
-  if (S.hearts >= 5) return toast("Tim đầy — học thoải mái.");
-  toast(`${S.hearts}/5 tim. Quả tiếp theo sau khoảng ${clamp(Math.ceil((S.heartAt + HEART_MS - Date.now()) / 60000), 1, 30)} phút.`);
+  if (S.hearts >= TIM_TOI_DA) return toast("Tim đầy — học thoải mái.");
+  toast(`${S.hearts}/${TIM_TOI_DA} tim. Quả tiếp theo sau khoảng ${clamp(Math.ceil((S.heartAt + HEART_MS - Date.now()) / 60000), 1, 30)} phút.`);
 });
 
 /* ---------- 22. Phím tắt ---------- */
