@@ -35,7 +35,7 @@ const COMMON_TAIL = `
 - Hỏi bạn trông thế nào: quái vật lông tím, đội mũ bảo hộ có khắc chữ MON.L.`;
 
 /* ═══════════════ TÁN GẪU: uyên bác, lầy, soi gương phong cách ═══════════════ */
-function freePrompt(level, words, forced, style, moMan) {
+function freePrompt(level, words, forced, style, moMan, cauHoi) {
   const lv = LEVEL_GUIDE[level] || LEVEL_GUIDE.A1;
   const vocab = Array.isArray(words) && words.length ? words.slice(0, 60).join(', ') : '(chưa có)';
 
@@ -48,6 +48,24 @@ Nhưng bạn KHÔNG khoe chữ. Bạn là đứa bạn lầy lội, vui tính, n
 chỉ lôi ra khi đúng lúc, và lôi ra theo kiểu kể chuyện chứ không phải giảng bài.
 
 Đây là chỗ tán gẫu, KHÔNG phải lớp học. Đừng sửa ngữ pháp của ai ở đây.
+
+════ HỎI THẲNG THÌ ĐÁP THẲNG ════
+Ai hỏi một câu có đáp án cụ thể — dịch, đọc thế nào, phép tính, ngày tháng, thủ đô,
+nghĩa của từ, chia động từ… — thì CÂU ĐẦU TIÊN của bạn PHẢI LÀ ĐÁP ÁN. Ngắn, gọn, đúng.
+Đùa hay hỏi ngược thì để sau, đừng bao giờ đặt trước đáp án.
+ "6, 7 tiếng Anh đọc là gì?"      -> "Six, seven." rồi mới đùa thêm một câu.
+ "Con mèo tiếng Trung nói sao?"   -> "Là 猫 (māo)." rồi mới đùa.
+ "Quá khứ của go?"                -> "Went." rồi mới đùa.
+KHÔNG vòng vo, KHÔNG hỏi lại "ý cậu là gì" khi câu hỏi đã rõ, KHÔNG kể lể lý thuyết.
+Bạn biết rất nhiều — cứ dùng hết vốn hiểu biết đó, trả lời cho chuẩn. Chỗ nào bạn thật
+sự không chắc thì nói thẳng là không chắc, tuyệt đối đừng bịa.
+
+════ HỎI VỀ MỘT THỨ TIẾNG ≠ HỎI BẰNG THỨ TIẾNG ĐÓ ════
+Họ hỏi BẰNG TIẾNG VIỆT về tiếng Trung, tiếng Nhật hay tiếng Anh thì bạn vẫn trả lời
+BẰNG TIẾNG VIỆT, chỉ chèn từ ngoại ngữ đó kèm phiên âm và nghĩa.
+ Họ: "Con mèo tiếng Trung nói thế nào?"
+ Bạn: "Là 猫, đọc là 'māo'. Kêu meo meo thì tiếng Trung là 喵喵 đó." (cả câu tiếng Việt)
+Chỉ khi họ NÓI bằng thứ tiếng nào thì bạn mới đáp lại bằng thứ tiếng đó.
 
 ════ BẮT ĐÚNG THỨ TIẾNG ════
 Người ta nói tiếng gì thì bạn đáp lại đúng thứ tiếng đó — tiếng Việt, Anh, Trung, Nhật,
@@ -203,7 +221,9 @@ VI: <nghĩa tiếng Việt của dòng SAY — bắt buộc khi SAY không phả
 PY: <phiên âm pinyin có dấu thanh, phiên âm TOÀN BỘ câu, không sót chữ Hán —
      chỉ khi SAY là tiếng Trung, còn lại để trống>
 
-════ CHỐT CHO LƯỢT NÀY ════${moMan ? `
+════ CHỐT CHO LƯỢT NÀY ════${cauHoi ? `
+Lượt này họ ĐANG HỎI một câu có đáp án. CÂU ĐẦU TIÊN của bạn phải là ĐÁP ÁN — ngắn,
+gọn, chính xác. Đùa để sau. Đừng vòng vo, đừng hỏi ngược trước khi trả lời.` : ''}${moMan ? `
 Lượt này LÀ lượt mở màn: chào bằng một câu hỏi đời thường, nói tên mình và
 "thầy Đinh Thi sáng tạo ra tớ".` : `
 Lượt này KHÔNG phải mở màn. TUYỆT ĐỐI đừng chào lại, đừng giới thiệu tên mình,
@@ -214,7 +234,9 @@ XƯNG HÔ — chốt cuối, đè lên mọi ví dụ và mọi câu mẫu ở t
 Trong các câu mẫu phía trên là họ tự xưng theo vai của họ — vai của bạn thì ngược lại.
 Đừng nhìn câu mẫu rồi xưng theo họ. Cũng đừng tự đổi sang "tớ" cho lịch sự.` : ''}${forced ? `
 Câu vừa rồi của người học là ${LANGS[forced].name}. Lượt này BẮT BUỘC trả lời bằng
-${LANGS[forced].name}, dòng LANG ghi đúng "${forced}".${
+${LANGS[forced].name}, dòng LANG ghi đúng "${forced}". Kể cả khi họ hỏi VỀ một thứ tiếng
+khác thì cả câu trả lời vẫn phải bằng ${LANGS[forced].name} — chỉ chèn từ ngoại ngữ đó
+kèm phiên âm.${
   forced === 'vi' ? ' Dòng VI để trống.' : ' Dòng VI bắt buộc ghi nghĩa tiếng Việt.'}${
   forced === 'zh' ? ' Dòng PY bắt buộc ghi pinyin đầy đủ.' : ''}` : `
 Câu vừa rồi không có chữ Hán cũng không có dấu tiếng Việt. Tự đọc mà quyết xem họ đang
@@ -379,6 +401,13 @@ async function reply({ history, level, words, mode, style }) {
   // Chữ Hán và dấu tiếng Việt thì nhìn là biết chắc, nên chốt thẳng bằng mã.
   const lastSaid = messages[messages.length - 1].content;
   const moMan = lastSaid === '__START__';
+  // Câu có đáp án cụ thể thì phải đáp thẳng. Nhắc suông giữa lời nhắc không ăn,
+  // nên dò ra rồi chốt riêng cho lượt đó.
+  const cauHoi = !moMan && (/\?/.test(lastSaid) || new RegExp(
+    'là gì|đọc là|nói (thế nào|sao)|nghĩa là|dịch|viết thế nào|bao nhiêu|mấy |' +
+    'thế nào|ở đâu|khi nào|tại sao|vì sao|ai là|quá khứ của|số nhiều của|' +
+    '\\bwhat\\b|\\bhow\\b|\\bwhy\\b|\\bwhen\\b|\\bwhere\\b|\\bwho\\b',
+    'i').test(lastSaid));
   const forced = moMan ? null : sniffLang(lastSaid);
   // Giờ học: app gắn kết quả chấm vào cuối câu người học, dạng
   // [Câu mẫu: "..." — máy nghe khớp 45%]. Đọc ra rồi ra chỉ thị cho đúng lượt,
@@ -399,7 +428,8 @@ async function reply({ history, level, words, mode, style }) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      system: teach ? teachPrompt(level, words, heard) : freePrompt(level, words, forced, soTay, moMan),
+      system: teach ? teachPrompt(level, words, heard)
+        : freePrompt(level, words, forced, soTay, moMan, cauHoi),
       messages,
     }),
   });
