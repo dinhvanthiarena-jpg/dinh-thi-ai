@@ -123,7 +123,12 @@ async function reply({ history, level, words, lang }) {
   }
   const data = await res.json();
   const text = (data.content || []).map((c) => c.text || '').join('\n');
-  return parseReply(text);
+  const out = parseReply(text);
+  // Mô hình hay tự dịch sang tiếng Anh dù đã dặn để trống. Đã nói tiếng Việt rồi
+  // thì dòng nghĩa là thừa — cắt thẳng ở đây cho chắc, đừng trông vào lời nhắc.
+  if (code === 'vi') out.vi = '';
+  if (code !== 'zh') out.py = '';
+  return out;
 }
 
 module.exports = { reply };
