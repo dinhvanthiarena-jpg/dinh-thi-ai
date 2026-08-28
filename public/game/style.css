@@ -1170,7 +1170,17 @@ button:focus-visible,
   justify-content: center;
   gap: 3px;
 }
-.icon-grp .ic { font-size: 1.4rem; line-height: 1; }
+.icon-grp .ic {
+  font-size: 1.4rem;
+  line-height: 1;
+  display: inline-block;
+  animation: ic-pop 320ms ease-out backwards;
+}
+@keyframes ic-pop {
+  0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+  70% { transform: scale(1.15) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); }
+}
 .op-sym { font-family: var(--font-heading); font-weight: 900; font-size: 1.9rem; color: var(--fg); }
 
 /* ==== Icon-algebra "picture puzzle" questions (two icons = two unknowns) ==== */
@@ -1251,6 +1261,100 @@ button:focus-visible,
   font-size: 0.9rem;
   color: var(--muted-fg);
   margin: 10px 0 0;
+}
+
+/* ==== Confetti burst (correct/wrong reveals, balloon pops) ==== */
+.pop-particle {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 1000;
+  animation: particle-burst 620ms cubic-bezier(.2,.7,.3,1) forwards;
+}
+@keyframes particle-burst {
+  0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 24px)) scale(0.4) rotate(200deg); opacity: 0; }
+}
+
+/* ==== Balloon-pop answer mode ==== */
+.balloon-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 22px;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  padding-top: 6px;
+}
+.balloon {
+  position: relative;
+  width: 74px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.balloon.reveal { animation: btn-pop-in 320ms ease-out backwards; }
+.balloon-float {
+  animation: balloon-bob 2.4s ease-in-out infinite;
+  animation-delay: inherit;
+}
+@keyframes balloon-bob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-9px) rotate(3deg); }
+}
+.balloon-body {
+  width: 74px;
+  height: 86px;
+  margin: 0 auto;
+  border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
+  background: linear-gradient(155deg, hsl(var(--hue), 90%, 70%), hsl(var(--hue), 85%, 52%));
+  box-shadow: inset -8px -10px 14px rgba(0,0,0,0.18), inset 6px 8px 10px rgba(255,255,255,0.35), var(--sh-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.balloon-num {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.35rem;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+.balloon-knot {
+  width: 0;
+  height: 0;
+  margin: 0 auto;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid hsl(var(--hue), 85%, 52%);
+}
+.balloon-string {
+  width: 2px;
+  height: 26px;
+  margin: 0 auto;
+  background: var(--line);
+  border-radius: 2px;
+}
+.balloon.dragging {
+  animation: none;
+  cursor: grabbing;
+  z-index: 999;
+}
+.balloon.dragging .balloon-float { animation: none; transform: scale(1.12); }
+.balloon.dim { opacity: 0.5; }
+.balloon.correct .balloon-body { background: linear-gradient(155deg, var(--ok), #16a34a); }
+.balloon.wrong .balloon-body { background: linear-gradient(155deg, var(--bad), #b83338); }
+.balloon.popping .balloon-body { animation: balloon-pop 360ms ease-out; }
+.balloon.popping .balloon-knot,
+.balloon.popping .balloon-string { opacity: 0; transition: opacity 180ms 100ms; }
+@keyframes balloon-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.32) rotate(-4deg); }
+  60% { transform: scale(0.86) rotate(3deg); }
+  100% { transform: scale(1) rotate(0); }
 }
 
 /* ==== Thinking dots ==== */

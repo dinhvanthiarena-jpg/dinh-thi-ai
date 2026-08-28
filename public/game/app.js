@@ -188,6 +188,10 @@
     },
     wrong() { tone(220, 0, 0.12, 'sawtooth', 0.22); tone(140, 0.09, 0.24, 'sawtooth', 0.2); },
     win() { tone(523, 0, 0.15, 'sine', 0.24); tone(659, 0.14, 0.15, 'sine', 0.24); tone(784, 0.28, 0.15, 'sine', 0.24); tone(1046, 0.42, 0.3, 'sine', 0.26); },
+    pop() {
+      noiseBurst(0, 0.06, 0.32, 1700 + Math.random() * 900);
+      tone(170 + Math.random() * 70, 0, 0.08, 'sine', 0.16);
+    },
   };
 
   /* ================= QUESTION GENERATION ================= */
@@ -208,15 +212,39 @@
    * on top of the existing grade/op difficulty tables, not replacing them.
    */
   const ICON_POOLS = {
-    animals: ['🐱', '🐶', '🐰', '🐻', '🐼', '🦊', '🐸', '🐵', '🐷', '🐔'],
-    fruits: ['🍎', '🍌', '🍇', '🍊', '🍓', '🍉', '🍑', '🍍'],
+    animals: ['🐱', '🐶', '🐰', '🐻', '🐼', '🦊', '🐸', '🐵', '🐷', '🐔', '🐮', '🐨', '🦁', '🐯', '🐘', '🦒', '🐧', '🐢'],
+    fruits: ['🍎', '🍌', '🍇', '🍊', '🍓', '🍉', '🍑', '🍍', '🥝', '🍒', '🍐', '🥭'],
+    sea: ['🐟', '🐠', '🐙', '🦀', '🐬', '🐳', '🐡', '🦐'],
+    vehicles: ['🚗', '🚌', '🚲', '🚀', '🚁', '🚓', '🚂', '⛵'],
+    sweets: ['🍬', '🍭', '🍩', '🍪', '🧁', '🍫'],
   };
-  function pickIconPool() { return pick([ICON_POOLS.animals, ICON_POOLS.fruits]); }
+  function pickIconPool() { return pick(Object.values(ICON_POOLS)); }
   function iconGroupHtml(icon, n) {
-    const items = Array.from({ length: n }, () => `<span class="ic">${icon}</span>`).join('');
+    const items = Array.from({ length: n }, (_, i) => `<span class="ic" style="animation-delay:${i * 45}ms">${icon}</span>`).join('');
     return `<span class="icon-grp">${items}</span>`;
   }
   function dropSlotHtml() { return '<span class="drop-slot" id="dropSlot"></span>'; }
+
+  // Small confetti-style burst at a viewport point (x,y) — used on correct/
+  // wrong reveals and balloon pops. Particles are throwaway fixed-position
+  // spans appended to <body> and removed once their own animation ends.
+  function burstParticles(x, y, color, count) {
+    const n = count || 12;
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement('span');
+      p.className = 'pop-particle';
+      const angle = (Math.PI * 2 * i) / n + Math.random() * 0.5;
+      const dist = 26 + Math.random() * 34;
+      p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+      p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      p.style.background = color;
+      document.body.appendChild(p);
+      p.addEventListener('animationend', () => p.remove());
+      setTimeout(() => p.remove(), 700);
+    }
+  }
 
   function generateIconAlgebraQuestion(grade) {
     const pool = pickIconPool();
@@ -1165,10 +1193,11 @@
     questionCard.classList.remove('shake', 'correct-flash', ...QUESTION_ANIMS);
     answersGrid.innerHTML = '';
     answersGrid.classList.remove('drag-mode');
-    // Dragged chips are reparented to <body> while dragging (position:fixed,
-    // to escape overflow clipping) — clearing answersGrid alone won't
-    // remove a chip that never made it back before the question changed.
-    document.querySelectorAll('body > .drag-chip').forEach((el) => el.remove());
+    // Dragged chips/balloons are reparented to <body> while dragging
+    // (position:fixed, to escape overflow clipping) — clearing answersGrid
+    // alone won't remove one that never made it back before the question
+    // changed.
+    document.querySelectorAll('body > .drag-chip, body > .balloon').forEach((el) => el.remove());
     solutionBox.hidden = true;
     questionText.hidden = true;
     thinkingDots.hidden = false;
@@ -1208,9 +1237,12 @@
     answersGrid.innerHTML = '';
     answersGrid.classList.toggle('drag-mode', !!q.dragMode);
     if (q.dragMode) {
-      renderDragChips(q);
+      q.answerSkin = Math.random() < 0.5 ? 'balloons' : 'chips';
+      if (q.answerSkin === 'balloons') renderBalloons(q);
+      else renderDragChips(q);
       return;
     }
+    q.answerSkin = 'buttons';
     q.choices.forEach((choice, i) => {
       const btn = document.createElement('button');
       btn.className = 'answer-btn reveal';
@@ -1239,6 +1271,141 @@
     hint.className = 'drag-hint';
     hint.textContent = 'Kéo con số đúng thả vào ô trống nhé!';
     answersGrid.appendChild(hint);
+  }
+
+  /* ---- Balloon-pop answer mode: tap a balloon to pop+answer it right
+   * away, or drag one into the blank to pop it there — both commit the
+   * same way, just two different gestures for the same choice. ---- */
+  const BALLOON_HUES = [350, 25, 45, 130, 190, 260, 300];
+  function renderBalloons(q) {
+    const tray = document.createElement('div');
+    tray.className = 'balloon-tray';
+    q.choices.forEach((choice, i) => {
+      const balloon = document.createElement('div');
+      balloon.className = 'balloon reveal';
+      balloon.style.animationDelay = (i * 80) + 'ms';
+      balloon.style.setProperty('--hue', pick(BALLOON_HUES));
+      balloon.dataset.value = String(choice);
+      balloon.innerHTML = `<div class="balloon-float"><div class="balloon-body"><span class="balloon-num">${fmtNum(choice)}</span></div><div class="balloon-knot"></div><div class="balloon-string"></div></div>`;
+      tray.appendChild(balloon);
+      wireBalloonDrag(balloon, choice);
+    });
+    answersGrid.appendChild(tray);
+    const hint = document.createElement('p');
+    hint.className = 'drag-hint';
+    hint.textContent = 'Chạm để bóng nổ, hoặc kéo số đúng thả vào ô trống nhé!';
+    answersGrid.appendChild(hint);
+  }
+
+  function popBalloon(balloon, cx, cy) {
+    balloon.classList.add('popping');
+    sfx.pop();
+    const hue = balloon.style.getPropertyValue('--hue') || '280';
+    burstParticles(cx, cy, `hsl(${hue}, 85%, 65%)`, 14);
+  }
+
+  function wireBalloonDrag(balloon, choice) {
+    let offsetX = 0, offsetY = 0, origParent = null, origNext = null, activeId = null;
+    let startX = 0, startY = 0, moved = false;
+
+    function moveTo(x, y) {
+      balloon.style.left = (x - offsetX) + 'px';
+      balloon.style.top = (y - offsetY) + 'px';
+    }
+
+    function commitAt(cx, cy, viaTap) {
+      popBalloon(balloon, cx, cy);
+      if (viaTap) {
+        // Tapped instead of dragged — the balloon pops in place in the
+        // tray, so fill the blank's text directly or it'd stay empty even
+        // though the question was answered.
+        const slot = document.getElementById('dropSlot');
+        if (slot) slot.textContent = fmtNum(choice);
+      }
+      selectAnswer(choice, balloon);
+    }
+
+    function resetPosition() {
+      balloon.style.position = '';
+      balloon.style.left = '';
+      balloon.style.top = '';
+      balloon.style.width = '';
+      balloon.style.height = '';
+      balloon.classList.remove('dragging');
+      if (origParent) {
+        if (origNext) origParent.insertBefore(balloon, origNext);
+        else origParent.appendChild(balloon);
+      }
+    }
+
+    function onMove(e) {
+      if (e.pointerId !== activeId) return;
+      if (!moved && (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5)) {
+        moved = true;
+        const rect = balloon.getBoundingClientRect();
+        balloon.style.width = rect.width + 'px';
+        balloon.style.height = rect.height + 'px';
+        document.body.appendChild(balloon);
+        balloon.classList.add('dragging');
+        balloon.style.position = 'fixed';
+      }
+      if (!moved) return;
+      moveTo(e.clientX, e.clientY);
+      const slot = document.getElementById('dropSlot');
+      if (slot) {
+        const sr = slot.getBoundingClientRect();
+        const over = e.clientX >= sr.left - 12 && e.clientX <= sr.right + 12 && e.clientY >= sr.top - 12 && e.clientY <= sr.bottom + 12;
+        slot.classList.toggle('drop-hover', over);
+      }
+    }
+
+    function onUp(e) {
+      if (e.pointerId !== activeId) return;
+      activeId = null;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+
+      if (!moved) {
+        if (!state.locked) {
+          const rect = balloon.getBoundingClientRect();
+          commitAt(rect.left + rect.width / 2, rect.top + rect.height / 2, true);
+        }
+        return;
+      }
+
+      const slot = document.getElementById('dropSlot');
+      let dropped = false;
+      if (slot) {
+        const sr = slot.getBoundingClientRect();
+        dropped = e.clientX >= sr.left - 16 && e.clientX <= sr.right + 16 && e.clientY >= sr.top - 16 && e.clientY <= sr.bottom + 16;
+        slot.classList.remove('drop-hover');
+      }
+      if (dropped && !state.locked) {
+        const sr2 = slot.getBoundingClientRect();
+        const cx = sr2.left + sr2.width / 2, cy = sr2.top + sr2.height / 2;
+        balloon.style.left = (cx - balloon.offsetWidth / 2) + 'px';
+        balloon.style.top = (cy - balloon.offsetHeight / 2) + 'px';
+        commitAt(cx, cy);
+      } else {
+        resetPosition();
+      }
+    }
+
+    balloon.addEventListener('pointerdown', (e) => {
+      if (state.locked || activeId !== null) return;
+      activeId = e.pointerId;
+      startX = e.clientX; startY = e.clientY; moved = false;
+      const rect = balloon.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      origParent = balloon.parentElement;
+      origNext = balloon.nextSibling;
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+      e.preventDefault();
+    });
   }
 
   function wireChipDrag(chip, choice) {
@@ -1327,12 +1494,22 @@
     activityStrip.hidden = true;
     state.answered++;
     const isCorrect = choice === state.current.answer;
-    const isDrag = !!state.current.dragMode;
-    const allBtns = isDrag ? [...document.querySelectorAll('.drag-chip')] : [...answersGrid.children];
+    const skin = state.current.answerSkin || 'buttons';
+    const isCustom = skin !== 'buttons'; // chips + balloons share div-based markup
+    const selector = skin === 'balloons' ? '.balloon' : skin === 'chips' ? '.drag-chip' : null;
+    const allBtns = selector ? [...document.querySelectorAll(selector)] : [...answersGrid.children];
     allBtns.forEach((b) => {
-      if (isDrag) b.style.pointerEvents = 'none'; else b.disabled = true;
+      if (isCustom) b.style.pointerEvents = 'none'; else b.disabled = true;
       if (b !== btn) b.classList.add('dim');
     });
+
+    // A little confetti burst on the answered element itself — balloons
+    // already got their own pop burst at the moment they were tapped/
+    // dropped, so only add this generic one for the plainer skins.
+    if (skin !== 'balloons') {
+      const r = btn.getBoundingClientRect();
+      burstParticles(r.left + r.width / 2, r.top + r.height / 2, isCorrect ? 'var(--ok)' : 'var(--bad)', isCorrect ? 14 : 8);
+    }
 
     if (isCorrect) {
       btn.classList.remove('dim');
@@ -1356,7 +1533,7 @@
       btn.classList.remove('dim');
       btn.classList.add('wrong');
       allBtns.forEach((b) => {
-        const val = isDrag ? Number(b.dataset.value) : Number(b.textContent.replace(',', '.'));
+        const val = isCustom ? Number(b.dataset.value) : Number(b.textContent.replace(',', '.'));
         if (val === state.current.answer) b.classList.add('correct');
       });
       questionCard.classList.add('shake');
