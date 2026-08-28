@@ -88,6 +88,7 @@ const DEFAULTS = {
   joined: today(), sound: true, motion: false, showVi: true, theme: "",
   kidVoice: true,
   ten: "",
+  moHet: false,
   // Ảnh đại diện: {k:"m"} linh vật, {k:"e",i:<số>} mặt vui, {k:"a",d:"data:…"} ảnh tự tải
   avatar: { k: "m" }
 };
@@ -272,7 +273,14 @@ function currentLessonId() {
   const list = lessonsOf(level());
   return (list.find(l => !S.done[l.id]) || list[list.length - 1]).id;
 }
-const lessonState = id => S.done[id] ? "done" : (id === currentLessonId() ? "current" : "locked");
+/* Bốn trạng thái: đã xong, bài hiện tại, mở sẵn, còn khoá.
+   "open" là bài chưa tới lượt nhưng đang bật chế độ mở hết — vẫn vào học được,
+   chỉ nhìn nhạt hơn bài hiện tại để không phải nút nào cũng sáng rực. */
+const lessonState = id =>
+  S.done[id] ? "done"
+  : id === currentLessonId() ? "current"
+  : S.moHet ? "open"
+  : "locked";
 function findLesson(id) {
   for (const lv of COURSE.levels) for (const u of lv.units) {
     const l = u.lessons.find(x => x.id === id);
@@ -358,7 +366,8 @@ function renderLearn() {
       // Trước đây nút khoá bị disabled nên bấm vào không có gì xảy ra, người học
       // tưởng app hỏng. Nay vẫn bấm được, bấm thì MON.L nói cho biết vì sao.
       b.setAttribute("aria-disabled", st === "locked" ? "true" : "false");
-      b.setAttribute("aria-label", `${l.title} — ${st === "done" ? "đã hoàn thành" : st === "current" ? "bài hiện tại" : "chưa mở khoá"}`);
+      const noiTrangThai = { done: "đã hoàn thành", current: "bài hiện tại", open: "mở sẵn", locked: "chưa mở khoá" };
+      b.setAttribute("aria-label", `${l.title} — ${noiTrangThai[st]}`);
       b.append(icon(st === "locked" ? "i-lock" : l.checkpoint ? "i-cap" : st === "done" ? "i-check" : "i-play"));
       if (st === "current") b.append(ring(doneN / list.length));
       b.addEventListener("click", () => (st === "locked" ? baoKhoa() : startLesson(l.id)));
@@ -2687,6 +2696,7 @@ function renderProfile() {
   $("#optMotion").checked = S.motion;
   $("#optVi").checked = S.showVi;
   $("#optKid").checked = S.kidVoice !== false;
+  $("#optMoHet").checked = !!S.moHet;
   paintRail();
 }
 $$("[data-goal]").forEach(b => b.addEventListener("click", () => {
@@ -2696,6 +2706,12 @@ $("#optSound").addEventListener("change", e => { S.sound = e.target.checked; sav
 $("#optMotion").addEventListener("change", e => { S.motion = e.target.checked; save(); applyTheme(); });
 $("#optVi").addEventListener("change", e => { S.showVi = e.target.checked; save(); });
 $("#optKid").addEventListener("change", e => { S.kidVoice = e.target.checked; save(); });
+$("#optMoHet").addEventListener("change", e => {
+  S.moHet = e.target.checked;
+  save();
+  renderLearn();
+  toast(S.moHet ? "Đã mở hết bài học." : "Đã trả về học lần lượt.");
+});
 $("#btnTheme").addEventListener("click", () => {
   S.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; save(); applyTheme();
 });

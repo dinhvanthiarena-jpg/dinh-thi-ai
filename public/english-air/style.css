@@ -317,6 +317,9 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .node.done .node-btn { background: var(--ok-soft); color: var(--ok); }
 .node.current .node-btn { background: var(--brand-fill); color: #fff; box-shadow: 0 0 0 5px var(--brand-soft); }
 .node.check .node-btn { background: var(--amber-soft); color: var(--amber); }
+/* Bài mở sẵn khi bật 'Mở hết bài học': bấm được nhưng không hô hào như bài hiện tại. */
+.node.open .node-btn { background: var(--brand-soft); color: var(--brand); }
+.node.open .node-label { color: var(--fg); }
 .node-ring {
   position: absolute; top: -7px; left: -7px;
   width: calc(100% + 14px); height: calc(100% + 14px);
@@ -1185,6 +1188,10 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
    đẩy ô trống và ngân hàng từ xuống tận đáy. */
 .pic-hero { max-height: 30vh; }
 @media (max-width: 379px) { .pic-hero { aspect-ratio: 16 / 9; max-height: 26vh; } }
+
+/* Công tắc có thêm một dòng giải thích bên dưới */
+.switch small { display: block; font-size: .78rem; font-weight: 600;
+  color: var(--muted-fg); margin-top: 2px; line-height: 1.4; }
 
 /* ---------- 15f. BÁO BÀI CHƯA MỞ KHOÁ ---------- */
 .sheet-mon { width: 96px; height: 96px; margin: 0 auto var(--s4);
