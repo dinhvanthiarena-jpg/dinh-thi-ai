@@ -2427,6 +2427,9 @@
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
     let callRecognition = null;
     let callHistory = [];
+    // Đáp án đúng (số, đã máy chủ tính ra) của bài toán Mon.L vừa ra, hoặc
+    // null khi lượt trước không phải một bài toán có đáp án cụ thể.
+    let callPendingAnswer = null;
     let callTimerId = null;
     let callSeconds = 0;
     let callBusy = false;
@@ -2618,7 +2621,7 @@
         const res = await fetch('/api/game/boom-chat', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ history: callHistory, grade: state.grade || null }),
+          body: JSON.stringify({ history: callHistory, grade: state.grade || null, pendingAnswer: callPendingAnswer }),
         });
         const data = await res.json().catch(() => ({ ok: false }));
         if (callEnded) return;
@@ -2628,6 +2631,10 @@
           return;
         }
         callHistory.push({ role: 'assistant', content: data.reply });
+        // Đáp án đúng (đã máy tính ra) của bài toán Mon.L VỪA ra ở lượt này —
+        // nhớ lại để gửi kèm lượt sau, cho server chấm điểm chính xác thay vì
+        // để mô hình tự đoán lại phép tính (không đáng tin với model nhỏ).
+        callPendingAnswer = typeof data.pendingAnswer === 'number' ? data.pendingAnswer : null;
         callSpeak(data.reply, data.lang, data.vi, data.py);
       } catch (e) {
         if (callEnded) return;
@@ -2710,6 +2717,7 @@
       callEnded = false;
       callBusy = false;
       callHistory = [];
+      callPendingAnswer = null;
       callLang = 'vi'; // Mon.L luôn mở màn bằng tiếng Việt, đây là app tiếng Việt
       callLog.innerHTML = '';
       callLog.hidden = true;

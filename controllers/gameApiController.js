@@ -114,9 +114,10 @@ exports.pushUnsubscribe = async (req, res) => {
 // One turn of the "Gọi Mon.L" free-conversation call screen.
 exports.boomChat = async (req, res) => {
   try {
-    const { history, grade } = req.body || {};
+    const { history, grade, pendingAnswer } = req.body || {};
     const safeGrade = Number.isInteger(grade) && grade >= 1 && grade <= 5 ? grade : null;
-    const out = await boomChatService.reply({ history, grade: safeGrade });
+    const safePending = typeof pendingAnswer === 'number' && Number.isFinite(pendingAnswer) ? pendingAnswer : null;
+    const out = await boomChatService.reply({ history, grade: safeGrade, pendingAnswer: safePending });
     res.json({ ok: true, ...out });
   } catch (err) {
     const noKey = err.code === 'NO_KEY';
