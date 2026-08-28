@@ -14,6 +14,7 @@ const Tool = require('./Tool');
 const GameInstall = require('./GameInstall');
 const PushSubscription = require('./PushSubscription');
 const ProOrder = require('./ProOrder');
+const MonlTienDo = require('./MonlTienDo');
 
 Course.hasMany(Lesson, { foreignKey: 'CourseId', onDelete: 'CASCADE' });
 Lesson.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
@@ -27,6 +28,9 @@ Enrollment.belongsTo(Order, { foreignKey: 'OrderId', as: 'order' });
 
 User.hasMany(ProOrder, { foreignKey: 'UserId', onDelete: 'CASCADE' });
 ProOrder.belongsTo(User, { foreignKey: 'UserId', as: 'user' });
+
+User.hasOne(MonlTienDo, { foreignKey: 'UserId', onDelete: 'CASCADE' });
+MonlTienDo.belongsTo(User, { foreignKey: 'UserId', as: 'user' });
 
 User.hasMany(Order, { foreignKey: 'UserId', onDelete: 'CASCADE' });
 Order.belongsTo(User, { foreignKey: 'UserId', as: 'user' });
@@ -58,4 +62,5 @@ module.exports = {
   GameInstall,
   PushSubscription,
   ProOrder,
+  MonlTienDo,
 };

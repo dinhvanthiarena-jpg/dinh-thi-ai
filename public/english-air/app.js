@@ -93,7 +93,10 @@ const DEFAULTS = {
 };
 let S = load();
 function load() { try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { return Object.assign({}, DEFAULTS); } }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* chế độ riêng tư */ } }
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* chế độ riêng tư */ }
+  henDayLen();   // gửi lên máy chủ, gộp nhiều lần sửa thành một lượt
+}
 
 const HEART_MS = 30 * 60 * 1000;
 function regenHearts() {
@@ -2388,6 +2391,76 @@ $("#avFile").addEventListener("change", ev => {
 });
 veAvatar();
 
+/* ---------- 18d-b. Giữ tiến độ theo tài khoản ----------
+   localStorage chỉ nằm trên đúng một máy: xoá app, đổi điện thoại hay dọn dữ
+   liệu trình duyệt là mất sạch. Nay mỗi lần đổi gì thì đẩy lên máy chủ, và
+   máy chủ GỘP chứ không đè — học lúc mất mạng rồi mới đồng bộ vẫn còn nguyên. */
+const DB = { hen: null, dangGui: false, no: false, bat: false };
+const DOI_MS = 4000;
+
+/** Gộp nhiều lần lưu sát nhau thành một lượt gửi, đỡ phiền máy chủ. */
+function henDayLen() {
+  if (!DB.bat) return;
+  clearTimeout(DB.hen);
+  DB.hen = setTimeout(dayLen, DOI_MS);
+}
+
+async function dayLen() {
+  if (!DB.bat) return;
+  // Đang gửi dở thì ghi nợ, gửi xong sẽ gửi tiếp lần cuối.
+  if (DB.dangGui) { DB.no = true; return; }
+  DB.dangGui = true;
+  try {
+    const r = await fetch(TK_URL + "/tien-do", {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ tienDo: S }),
+    });
+    if (r.status === 401) { DB.bat = false; return; }   // đã đăng xuất
+  } catch {
+    // Mất mạng thì thôi, lần lưu sau sẽ gửi lại — tiến độ vẫn nằm trên máy.
+  } finally {
+    DB.dangGui = false;
+    if (DB.no) { DB.no = false; henDayLen(); }
+  }
+}
+
+/** Lúc đăng nhập: kéo bản trên máy chủ về, gộp với bản đang có rồi dùng bản gộp. */
+async function keoVe() {
+  try {
+    const r = await fetch(TK_URL + "/tien-do", { credentials: "same-origin" });
+    if (!r.ok) return false;
+    const j = await r.json();
+    DB.bat = true;
+    if (!j.co || !j.tienDo) { dayLen(); return true; }   // máy chủ chưa có gì, đẩy bản máy lên
+
+    // Gửi bản của máy lên để máy chủ gộp, rồi lấy về đúng bản đã gộp.
+    const r2 = await fetch(TK_URL + "/tien-do", {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ tienDo: S }),
+    });
+    if (!r2.ok) return true;
+    const j2 = await r2.json();
+    if (!j2.tienDo) return true;
+
+    S = Object.assign({}, DEFAULTS, j2.tienDo);
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* riêng tư */ }
+    applyTheme(); paintStats(); veTen(); veAvatar();
+    if (!$("#view-learn").hidden) renderLearn();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Đóng app hay chuyển sang app khác thì gửi nốt, đừng để mất buổi học vừa rồi.
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && DB.bat) { clearTimeout(DB.hen); dayLen(); }
+});
+
 /* ---------- 18e. Cửa vào: đăng ký / đăng nhập ----------
    App và web cùng tên miền nên dùng chung một phiên: gọi kèm credentials là
    cookie đăng nhập tự đi theo, app không phải giữ mật khẩu hay token nào. */
@@ -2484,6 +2557,7 @@ $("#congForm").addEventListener("submit", async ev => {
     toast(dangKy ? `Chào ${j.ten}, bắt đầu thôi!` : `Chào bạn quay lại, ${j.ten}!`);
     veTheTaiKhoan();
     veThePro();
+    keoVe();
   } catch {
     loiCong("Không nối được máy chủ. Bạn kiểm tra mạng rồi thử lại nhé.");
   } finally {
@@ -2531,6 +2605,7 @@ $("#btnThoat").addEventListener("click", () => openSheet({
     catch { /* mất mạng thì thôi, cookie hết hạn sau */ }
     TK.toi = { dangNhap: false };
     TK.kieu = "dangNhap";
+    DB.bat = false; clearTimeout(DB.hen);
     veTheTaiKhoan();
     moCong();
   },
@@ -2542,6 +2617,7 @@ async function gacCua() {
   veTheTaiKhoan();
   if (t.dangNhap || t.ngoaiTuyen) {
     if (t.dangNhap && t.ten && !S.ten) { S.ten = t.ten; save(); veTen(); }
+    if (t.dangNhap) keoVe();
     return;
   }
   moCong();

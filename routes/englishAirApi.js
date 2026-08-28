@@ -2,6 +2,7 @@ const express = require('express');
 const tutor = require('../services/englishAirTutorService');
 const pro = require('../services/proService');
 const tk = require('../services/taiKhoanAppService');
+const tienDo = require('../services/tienDoMonlService');
 
 const router = express.Router();
 
@@ -131,6 +132,27 @@ router.post('/them-email', express.json(), an(async (req, res) => {
   const kq = await tk.themEmail(req.user, (req.body || {}).email);
   if (kq.loi) return res.status(400).json({ error: kq.loi });
   res.json({ ok: true, email: req.user.email });
+}));
+
+/* ═══════════════ TIẾN ĐỘ HỌC ═══════════════
+   Giữ theo tài khoản để đổi máy hay cài lại app vẫn còn. Máy gửi bản của nó
+   lên, máy chủ GỘP với bản đang giữ rồi trả lại bản đã gộp — không bên nào đè
+   bên nào, vì người ta có thể học lúc mất mạng rồi mới đồng bộ. */
+
+router.get('/tien-do', an(async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Bạn cần đăng nhập.' });
+  const goi = await tienDo.doc(req.user.id);
+  res.json({ co: !!goi, tienDo: goi || null });
+}));
+
+router.put('/tien-do', express.json({ limit: '600kb' }), an(async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Bạn cần đăng nhập.' });
+  const cuaMay = (req.body || {}).tienDo;
+  if (!cuaMay || typeof cuaMay !== 'object') {
+    return res.status(400).json({ error: 'Thiếu gói tiến độ.' });
+  }
+  const daGop = await tienDo.dongBo(req.user.id, cuaMay);
+  res.json({ ok: true, tienDo: daGop });
 }));
 
 module.exports = router;
