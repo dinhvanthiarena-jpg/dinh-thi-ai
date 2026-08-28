@@ -159,7 +159,21 @@ const CALL_LANGS = {
   en: { name: "English", tts: "en-US", sr: "en-US" },
   vi: { name: "Tiếng Việt", tts: "vi-VN", sr: "vi-VN" },
   zh: { name: "中文", tts: "zh-CN", sr: "zh-CN" },
+  ja: { name: "日本語", tts: "ja-JP", sr: "ja-JP" },
+  ko: { name: "한국어", tts: "ko-KR", sr: "ko-KR" },
+  fr: { name: "Français", tts: "fr-FR", sr: "fr-FR" },
+  es: { name: "Español", tts: "es-ES", sr: "es-ES" },
+  de: { name: "Deutsch", tts: "de-DE", sr: "de-DE" },
+  ru: { name: "Русский", tts: "ru-RU", sr: "ru-RU" },
+  th: { name: "ไทย", tts: "th-TH", sr: "th-TH" },
 };
+/** MON.L nói được thứ tiếng nào cũng được, nên gặp mã lạ thì cứ dựng tạm một mục
+    rồi để trình duyệt tự tìm giọng — còn hơn là ép về tiếng Anh. */
+function langInfo(code) {
+  if (CALL_LANGS[code]) return CALL_LANGS[code];
+  if (/^[a-z]{2}$/.test(code || "")) return { name: code.toUpperCase(), tts: code, sr: code };
+  return CALL_LANGS.en;
+}
 /** Đoán thứ tiếng từ mặt chữ. Chỉ chắc được với chữ Hán và dấu tiếng Việt —
     câu tiếng Anh và câu tiếng Việt không dấu trông giống hệt nhau. */
 function guessLang(text) {
@@ -1165,7 +1179,7 @@ function pushLog(who, text) {
 
 /** MON.L nói: hiện câu, chạy hoạt ảnh, nhảy một nhịp mỗi từ cho khớp miệng. */
 function monSays(en, vi, after, py) {
-  const L = CALL_LANGS[C.lang] || CALL_LANGS.en;
+  const L = langInfo(C.lang);
   $("#callSaidLang").textContent = L.name;
   $("#callSaidLang").hidden = C.mode !== "free";
   $("#callSaid").textContent = en;
@@ -1290,7 +1304,7 @@ async function askTutor(first) {
     }
     const data = await res.json();
     // MON.L đáp bằng thứ tiếng nào thì từ đây nói và nghe bằng thứ tiếng đó.
-    if (CALL_LANGS[data.lang]) C.lang = data.lang;
+    if (/^[a-z]{2}$/.test(data.lang || "")) C.lang = data.lang;
     C.msgs.push({ role: "assistant", content: data.reply });
     if (!first) pushLog("mon", data.reply);
     // Giờ học: mỗi lượt giáo viên ra một câu cho mình đọc theo.
@@ -1395,7 +1409,7 @@ function startListening() {
   const r = new SR();
   C.rec = r; C.listening = true;
   const lg = NO_LISTEN[C.lang] ? "en" : C.lang;
-  r.lang = (CALL_LANGS[lg] || CALL_LANGS.en).sr;
+  r.lang = langInfo(lg).sr;
   // Lấy cả kết quả tạm: iPhone rất hay tắt bộ nghe mà không bắn kết quả cuối,
   // có bản tạm thì còn vớt được câu người ta vừa nói.
   r.interimResults = true;
