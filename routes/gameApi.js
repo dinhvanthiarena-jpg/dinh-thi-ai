@@ -18,7 +18,14 @@ const homeworkUpload = multer({
 // well below that so one class doesn't starve everyone else.
 const homeworkLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 30 });
 
+// A student's own device subscribing/unsubscribing — cheap, but still capped
+// well above any real usage pattern to block abuse.
+const pushLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 30 });
+
 router.post('/ping', pingLimiter, gameApiController.ping);
 router.post('/homework-help', homeworkLimiter, homeworkUpload.single('image'), gameApiController.homeworkHelp);
+router.get('/vapid-public-key', gameApiController.vapidPublicKey);
+router.post('/push-subscribe', pushLimiter, gameApiController.pushSubscribe);
+router.post('/push-unsubscribe', pushLimiter, gameApiController.pushUnsubscribe);
 
 module.exports = router;

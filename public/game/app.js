@@ -1781,6 +1781,85 @@
     setTimeout(() => { settingsModal.hidden = true; }, 900);
   });
 
+  /* ================= UPDATE NOTIFICATIONS (Web Push) ================= */
+  // Lets a student/parent opt in to a push notification whenever thầy sends
+  // an update announcement from /admin/push-broadcast. Tapping the
+  // notification (handled in sw.js) reopens the game and force-reloads it,
+  // which — combined with the no-store Cache-Control on the game's static
+  // files — always lands on the latest deployed version.
+  if (IS_WEB && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window) {
+    const settingsNotifRow = $('settingsNotifRow');
+    const btnEnableNotif = $('btnEnableNotif');
+    const notifStatusText = $('notifStatusText');
+    settingsNotifRow.hidden = false;
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; i++) outputArray[i] = rawData.charCodeAt(i);
+      return outputArray;
+    }
+
+    async function refreshNotifStatus() {
+      if (Notification.permission === 'denied') {
+        notifStatusText.textContent = 'Trình duyệt đang chặn thông báo — vào cài đặt trình duyệt để bật lại.';
+        btnEnableNotif.textContent = '🔕 Đã chặn';
+        btnEnableNotif.disabled = true;
+        return;
+      }
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        notifStatusText.textContent = sub
+          ? 'Đã bật — sẽ báo ngay khi có bản cập nhật mới.'
+          : 'Bật để biết ngay khi game có bản mới.';
+        btnEnableNotif.textContent = sub ? '🔔 Đã bật (bấm để tắt)' : '🔔 Bật thông báo';
+      } catch (e) { /* service worker not ready yet — leave default label */ }
+    }
+    refreshNotifStatus();
+
+    btnEnableNotif.addEventListener('click', async () => {
+      sfx.click();
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const existing = await reg.pushManager.getSubscription();
+        if (existing) {
+          const endpoint = existing.endpoint;
+          await existing.unsubscribe();
+          fetch('/api/game/push-unsubscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint }),
+          }).catch(() => {});
+          refreshNotifStatus();
+          return;
+        }
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') { refreshNotifStatus(); return; }
+        const keyRes = await fetch('/api/game/vapid-public-key').then((r) => r.json());
+        if (!keyRes.ok) {
+          notifStatusText.textContent = 'Thông báo chưa sẵn sàng, thầy/cô thử lại sau nhé.';
+          return;
+        }
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(keyRes.publicKey),
+        });
+        const subJson = sub.toJSON();
+        await fetch('/api/game/push-subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ endpoint: subJson.endpoint, keys: subJson.keys }),
+        });
+        refreshNotifStatus();
+      } catch (e) {
+        notifStatusText.textContent = 'Không bật được thông báo, thầy/cô thử lại sau nhé.';
+      }
+    });
+  }
+
   /* ================= INSTALL TO PHONE/MÁY TÍNH ================= */
   if (IS_WEB) {
     const btnInstallApp = $('btnInstallApp');

@@ -1,0 +1,25 @@
+<div class="space-y-6 max-w-2xl">
+  <div class="card p-5">
+    <p class="text-xs text-muted uppercase tracking-wide">Số thiết bị đã bật thông báo</p>
+    <p class="text-2xl font-bold text-ink mt-1"><%= subscriberCount %></p>
+  </div>
+
+  <% if (!vapidConfigured) { %>
+    <div class="card p-5 bg-amber-50 border border-amber-200">
+      <p class="text-sm text-amber-800">Server chưa cấu hình <code>VAPID_PUBLIC_KEY</code> / <code>VAPID_PRIVATE_KEY</code> nên chưa gửi thông báo được. Thêm 2 biến này trong phần cấu hình Node App trên hosting rồi khởi động lại app.</p>
+    </div>
+  <% } %>
+
+  <form action="/admin/push-broadcast" method="POST" class="card p-6 space-y-5">
+    <div>
+      <label class="label">Tiêu đề thông báo *</label>
+      <input class="input" type="text" name="title" maxlength="100" placeholder="Toán Vui Cấp 1 có bản cập nhật mới!" required />
+    </div>
+    <div>
+      <label class="label">Nội dung *</label>
+      <textarea class="input" name="body" rows="4" maxlength="300" placeholder="Bấm vào đây để mở game và xem ngay tính năng mới nhé!" required></textarea>
+      <p class="text-xs text-muted mt-1">Học sinh/phụ huynh đã bật thông báo sẽ thấy thông báo này trên điện thoại. Bấm vào thông báo sẽ tự mở game và tải đúng bản mới nhất.</p>
+    </div>
+    <button type="submit" class="btn-primary">Gửi thông báo ngay</button>
+  </form>
+</div>

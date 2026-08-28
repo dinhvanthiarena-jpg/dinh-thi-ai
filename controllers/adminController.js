@@ -8,6 +8,16 @@ const GalleryPhoto = require('../models/GalleryPhoto');
 const ChatMessage = require('../models/ChatMessage');
 const Tool = require('../models/Tool');
 const GameInstall = require('../models/GameInstall');
+const PushSubscription = require('../models/PushSubscription');
+const webpush = require('web-push');
+
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    `mailto:${process.env.ADMIN_EMAIL || 'admin@3dvietpro.com'}`,
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+}
 
 // Admin pastes whatever YouTube link they copied (watch?v=, youtu.be/, shorts/,
 // or already an /embed/ link) — normalize all of them to the /embed/ form the
@@ -251,6 +261,65 @@ exports.gameInstallList = async (req, res) => {
     activatedCount,
     trialCount: installs.length - activatedCount,
   });
+};
+
+exports.pushBroadcastForm = async (req, res) => {
+  const subscriberCount = await PushSubscription.count();
+  res.render('admin/push-broadcast', {
+    title: 'Thông báo cập nhật',
+    subscriberCount,
+    vapidConfigured: !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY),
+  });
+};
+
+// Sends one push notification to every subscribed device. Tapping it opens
+// the game, which — thanks to the no-store Cache-Control on the game's
+// static files — always fetches the latest deployed version, so this really
+// does double as an "update available" nudge, not just a message.
+exports.pushBroadcastSend = async (req, res) => {
+  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+    req.flash('error', 'Chưa cấu hình VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY trên server.');
+    return res.redirect('/admin/push-broadcast');
+  }
+  const { title, body } = req.body || {};
+  if (!title || !title.trim() || !body || !body.trim()) {
+    req.flash('error', 'Vui lòng nhập đủ tiêu đề và nội dung thông báo.');
+    return res.redirect('/admin/push-broadcast');
+  }
+
+  const subs = await PushSubscription.findAll();
+  const payload = JSON.stringify({
+    title: title.trim().slice(0, 100),
+    body: body.trim().slice(0, 300),
+    url: '/game/',
+  });
+
+  let sent = 0;
+  let removed = 0;
+  await Promise.all(
+    subs.map(async (sub) => {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          payload
+        );
+        sent++;
+      } catch (e) {
+        // 404/410 means the browser dropped this subscription (uninstalled,
+        // cleared data, expired) — Facebook-style dead-link cleanup, not an
+        // error worth logging.
+        if (e.statusCode === 404 || e.statusCode === 410) {
+          await sub.destroy();
+          removed++;
+        } else {
+          console.error('[push-broadcast]', e.message);
+        }
+      }
+    })
+  );
+
+  req.flash('success', `Đã gửi thông báo tới ${sent} thiết bị${removed ? `, dọn ${removed} đăng ký đã hết hạn` : ''}.`);
+  res.redirect('/admin/push-broadcast');
 };
 
 // --- Chatbot conversations ---

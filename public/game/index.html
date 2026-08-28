@@ -457,6 +457,14 @@
       <label class="settings-label" for="teacherNameInput">Tên giáo viên</label>
       <input type="text" id="teacherNameInput" class="license-input settings-name-input" maxlength="60" autocomplete="off" placeholder="Thầy/Cô ..." />
 
+      <div class="settings-notif-row" id="settingsNotifRow" hidden>
+        <div>
+          <p class="settings-label" style="margin:0">Thông báo cập nhật</p>
+          <p class="settings-desc" id="notifStatusText" style="margin:2px 0 0;">Bật để biết ngay khi game có bản mới.</p>
+        </div>
+        <button class="btn btn-secondary btn-lg" id="btnEnableNotif">🔔 Bật thông báo</button>
+      </div>
+
       <button class="btn btn-primary btn-xl" id="btnSaveSettings">Lưu thay đổi</button>
       <p class="settings-saved-msg" id="settingsSavedMsg" hidden>Đã lưu!</p>
     </div>

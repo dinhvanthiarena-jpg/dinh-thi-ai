@@ -1,7 +1,7 @@
 // Minimal app-shell cache so the PWA install prompt qualifies and the game
 // still opens (from cache) with a flaky connection. Bump CACHE_NAME whenever
 // the shipped files change so old caches don't linger.
-const CACHE_NAME = 'tvc1-shell-v14';
+const CACHE_NAME = 'tvc1-shell-v15';
 const SHELL_FILES = [
   './',
   './index.html',
@@ -22,6 +22,40 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
+  );
+});
+
+// Server-sent update announcements (see /admin/push-broadcast). Tapping the
+// notification focuses/opens the game and force-reloads it — combined with
+// the no-store Cache-Control on the game's static files, that guarantees
+// the tap actually lands on the latest deployed version, not whatever was
+// already loaded in a background tab.
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { /* non-JSON payload, ignore */ }
+  const title = data.title || 'Toán Vui Cấp 1';
+  const options = {
+    body: data.body || 'Có bản cập nhật mới!',
+    icon: './icons/icon-192.png',
+    badge: './icons/icon-192.png',
+    data: { url: data.url || './' },
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = new URL((event.notification.data && event.notification.data.url) || './', self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      for (const client of windowClients) {
+        if ('focus' in client) {
+          if ('navigate' in client) client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
+    })
   );
 });
 

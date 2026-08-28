@@ -470,6 +470,18 @@ button:focus-visible,
   letter-spacing: normal;
   margin-bottom: 20px;
 }
+.settings-notif-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  background: var(--color-muted);
+  border-radius: var(--radius-md);
+}
+.settings-notif-row .settings-desc { margin: 2px 0 0; font-size: 0.82rem; }
+.settings-notif-row .btn { flex-shrink: 0; padding: 10px 16px; font-size: 0.9rem; }
 #btnSaveSettings { width: 100%; }
 .settings-saved-msg {
   margin: 14px 0 0;

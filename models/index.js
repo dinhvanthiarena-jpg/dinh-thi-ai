@@ -12,6 +12,7 @@ const SocialPost = require('./SocialPost');
 const RepliedComment = require('./RepliedComment');
 const Tool = require('./Tool');
 const GameInstall = require('./GameInstall');
+const PushSubscription = require('./PushSubscription');
 
 Course.hasMany(Lesson, { foreignKey: 'CourseId', onDelete: 'CASCADE' });
 Lesson.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
@@ -51,4 +52,5 @@ module.exports = {
   RepliedComment,
   Tool,
   GameInstall,
+  PushSubscription,
 };

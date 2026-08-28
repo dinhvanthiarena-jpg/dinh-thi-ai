@@ -1,4 +1,5 @@
 const GameInstall = require('../models/GameInstall');
+const PushSubscription = require('../models/PushSubscription');
 const homeworkHelperService = require('../services/homeworkHelperService');
 
 // Called by the desktop game on every launch. Upserts by installId so the
@@ -65,4 +66,46 @@ exports.homeworkHelp = async (req, res) => {
     console.error('[homework-help]', e.message);
     res.status(502).json({ ok: false, message: 'Thầy/cô AI chưa đọc được ảnh này, thử chụp lại rõ hơn giúp em nhé.' });
   }
+};
+
+// The VAPID public key is meant to be public (it's how the browser proves
+// which server is allowed to send pushes to a subscription it creates) —
+// serving it from an endpoint instead of hardcoding it in the client bundle
+// just means it can rotate without a redeploy.
+exports.vapidPublicKey = (req, res) => {
+  if (!process.env.VAPID_PUBLIC_KEY) {
+    return res.status(503).json({ ok: false, message: 'Thông báo chưa được bật trên server.' });
+  }
+  res.json({ ok: true, publicKey: process.env.VAPID_PUBLIC_KEY });
+};
+
+exports.pushSubscribe = async (req, res) => {
+  const { endpoint, keys, appId } = req.body || {};
+  if (typeof endpoint !== 'string' || !endpoint.trim() || !keys || typeof keys.p256dh !== 'string' || typeof keys.auth !== 'string') {
+    return res.status(400).json({ ok: false, message: 'Thiếu thông tin đăng ký thông báo.' });
+  }
+  try {
+    const existing = await PushSubscription.findOne({ where: { endpoint: endpoint.trim() } });
+    const data = {
+      appId: typeof appId === 'string' ? appId.slice(0, 60) : 'toan-vui-cap1',
+      endpoint: endpoint.trim(),
+      p256dh: keys.p256dh.slice(0, 255),
+      auth: keys.auth.slice(0, 255),
+    };
+    if (existing) await existing.update(data);
+    else await PushSubscription.create(data);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('[push-subscribe]', e.message);
+    res.status(500).json({ ok: false, message: 'Không lưu được đăng ký thông báo.' });
+  }
+};
+
+exports.pushUnsubscribe = async (req, res) => {
+  const { endpoint } = req.body || {};
+  if (typeof endpoint !== 'string' || !endpoint.trim()) {
+    return res.status(400).json({ ok: false });
+  }
+  await PushSubscription.destroy({ where: { endpoint: endpoint.trim() } });
+  res.json({ ok: true });
 };
