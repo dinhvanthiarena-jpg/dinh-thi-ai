@@ -482,46 +482,320 @@
   // this is a review/reading list (tap to reveal each solution), not a
   // timed quiz, so it reuses the setup screen's grade-card styling but
   // renders a plain scrollable list instead of the game flow.
+  // Mỗi bài gồm 3 bước dạy (teach) học sinh phải xem hết rồi mới mở được lời giải:
+  //   1. Đọc kỹ đề  — tách ra đề cho gì, đề hỏi gì
+  //   2. Kiến thức  — quy tắc/công thức cần dùng, kèm ví dụ nhỏ dễ hơn
+  //   3. Hướng làm  — các bước sẽ làm, cố ý KHÔNG nêu đáp số để phần lời giải còn giá trị
   const GIFTED_PROBLEMS = {
     1: [
-      { level: 'Cơ bản', text: 'Tìm số thích hợp điền vào dãy số sau: 5, 7, 9, 11, ...', solution: 'Mỗi số sau hơn số liền trước 2 đơn vị (5→7, 7→9, 9→11 đều cách nhau 2). Vậy số tiếp theo là 11 + 2 = <strong>13</strong>.' },
-      { level: 'Cơ bản', text: 'Hộp thứ nhất có nhiều hơn hộp thứ hai 3 cái bút. Hộp thứ hai có 6 cái bút. Hỏi hộp thứ nhất có bao nhiêu cái bút?', solution: 'Hộp thứ nhất nhiều hơn 3 cái nên có: 6 + 3 = <strong>9 cái bút</strong>.' },
-      { level: 'Nâng cao', text: 'An cho em 2 quả táo thì An còn lại nhiều hơn em 1 quả. Biết sau khi được cho, em có 4 quả táo. Hỏi lúc đầu An có bao nhiêu quả táo?', solution: 'Sau khi cho, An còn nhiều hơn em 1 quả nên An còn: 4 + 1 = 5 (quả). Vì An đã cho đi 2 quả nên lúc đầu An có: 5 + 2 = <strong>7 quả táo</strong>.' },
-      { level: 'Nâng cao', text: 'Điền số thích hợp vào ô trống để phép tính đúng: 8 + ☐ = 15 − 3', solution: '15 − 3 = 12. Vậy 8 + ☐ = 12, nên ☐ = 12 − 8 = <strong>4</strong>.' },
-      { level: 'Nâng cao', text: 'Ba bạn xếp hàng: Lan đứng trước Hoa, Hoa đứng trước Mai. Hỏi ai đứng cuối hàng?', solution: 'Thứ tự xếp hàng là Lan → Hoa → Mai, nên bạn đứng cuối hàng là <strong>Mai</strong>.' },
-      { level: 'Nâng cao', text: 'Tìm một số biết số đó cộng với 5 thì bằng số lớn nhất có 1 chữ số.', solution: 'Số lớn nhất có 1 chữ số là 9. Số cần tìm là: 9 − 5 = <strong>4</strong>.' },
+      {
+        level: 'Cơ bản',
+        text: 'Tìm số thích hợp điền vào dãy số sau: 5, 7, 9, 11, ...',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho một <strong>dãy số</strong>: 5, 7, 9, 11 và dấu ba chấm ở cuối. Dấu ba chấm nghĩa là dãy còn tiếp tục.<br><br>Đề hỏi: <strong>số tiếp theo</strong> sau số 11 là số nào?' },
+          { t: 'Kiến thức cần dùng', b: 'Đây là <strong>dãy số cách đều</strong>: cứ mỗi số sau lại hơn số liền trước đúng một khoảng bằng nhau.<br><br>Muốn tìm khoảng cách đó, con lấy <strong>số sau trừ số trước</strong>.<br><br>Ví dụ dễ hơn: dãy 2, 4, 6, ... có 4 − 2 = 2 và 6 − 4 = 2, khoảng cách là 2, nên số tiếp theo là 6 + 2 = 8.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính hiệu của từng cặp số liền nhau: 7 − 5, rồi 9 − 7, rồi 11 − 9.<br><br>Bước 2: Xem ba hiệu đó có bằng nhau không. Nếu bằng nhau thì đó chính là khoảng cách của dãy.<br><br>Bước 3: Lấy số cuối cùng đang có (là 11) <strong>cộng</strong> khoảng cách vừa tìm được.' },
+        ],
+        solution: 'Mỗi số sau hơn số liền trước 2 đơn vị (5→7, 7→9, 9→11 đều cách nhau 2). Vậy số tiếp theo là 11 + 2 = <strong>13</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Hộp thứ nhất có nhiều hơn hộp thứ hai 3 cái bút. Hộp thứ hai có 6 cái bút. Hỏi hộp thứ nhất có bao nhiêu cái bút?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hai điều:<br>• Hộp thứ hai có <strong>6</strong> cái bút.<br>• Hộp thứ nhất <strong>nhiều hơn</strong> hộp thứ hai <strong>3</strong> cái.<br><br>Đề hỏi: hộp thứ nhất có bao nhiêu cái bút?' },
+          { t: 'Kiến thức cần dùng', b: 'Từ khoá quan trọng nhất trong bài là <strong>“nhiều hơn”</strong>. Khi một bên nhiều hơn bên kia, muốn tìm bên nhiều thì con lấy bên ít <strong>cộng</strong> phần nhiều hơn.<br><br>Ví dụ dễ hơn: Nam có 4 viên bi, Bình nhiều hơn Nam 2 viên. Vậy Bình có 4 + 2 = 6 viên.<br><br>Chú ý: nếu đề nói “ít hơn” thì làm ngược lại, phải <strong>trừ</strong>.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định bên nào ít hơn — ở đây là hộp thứ hai (6 cái).<br><br>Bước 2: Lấy số bút của hộp thứ hai <strong>cộng</strong> với 3 cái nhiều hơn.<br><br>Bước 3: Nhớ viết kèm đơn vị “cái bút” vào đáp số.' },
+        ],
+        solution: 'Hộp thứ nhất nhiều hơn 3 cái nên có: 6 + 3 = <strong>9 cái bút</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'An cho em 2 quả táo thì An còn lại nhiều hơn em 1 quả. Biết sau khi được cho, em có 4 quả táo. Hỏi lúc đầu An có bao nhiêu quả táo?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Bài này có <strong>hai thời điểm</strong>, phải phân biệt thật rõ:<br>• <strong>Lúc sau</strong> (đã cho xong): em có 4 quả, An còn nhiều hơn em 1 quả.<br>• <strong>Lúc đầu</strong>: chưa cho, An có bao nhiêu?<br><br>Đề hỏi số táo của An <strong>lúc đầu</strong>.' },
+          { t: 'Kiến thức cần dùng', b: 'Đây là <strong>bài toán ngược</strong>: đề cho biết tình hình lúc sau, bắt tìm lúc đầu.<br><br>Quy tắc: đi ngược thời gian thì làm <strong>phép tính ngược lại</strong>. Lúc xuôi An <em>cho đi</em> (bớt) 2 quả, nên khi đi ngược về lúc đầu con phải <em>cộng lại</em> 2 quả.<br><br>Ví dụ dễ hơn: Lan tiêu 5 000 đồng, còn 10 000 đồng. Lúc đầu Lan có 10 000 + 5 000 = 15 000 đồng.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tìm số táo An còn <strong>lúc sau</strong>. Đề nói An còn nhiều hơn em 1 quả, mà em có 4 quả — dùng phép cộng.<br><br>Bước 2: Từ số táo lúc sau, <strong>cộng thêm 2 quả An đã cho đi</strong> để quay về lúc đầu.<br><br>Bẫy hay mắc: nhiều bạn vội lấy 4 + 2 ngay. Không được — phải tìm số táo của <strong>An</strong> trước, chứ 4 là số táo của <strong>em</strong>.' },
+        ],
+        solution: 'Sau khi cho, An còn nhiều hơn em 1 quả nên An còn: 4 + 1 = 5 (quả). Vì An đã cho đi 2 quả nên lúc đầu An có: 5 + 2 = <strong>7 quả táo</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Điền số thích hợp vào ô trống để phép tính đúng: 8 + ☐ = 15 − 3',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Dấu “=” chia phép tính làm hai vế:<br>• Vế trái: 8 + ☐ (còn thiếu một số).<br>• Vế phải: 15 − 3 (tính được ngay).<br><br>Đề hỏi: điền số nào vào ô trống để hai vế <strong>bằng nhau</strong>?' },
+          { t: 'Kiến thức cần dùng', b: 'Hai bước then chốt:<br><br>1. Vế nào <strong>tính được thì tính trước</strong> để phép tính gọn lại.<br><br>2. Tìm <strong>số hạng chưa biết</strong>: lấy <strong>tổng trừ đi số hạng đã biết</strong>.<br><br>Ví dụ dễ hơn: 3 + ☐ = 10 thì ☐ = 10 − 3 = 7.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính vế phải 15 − 3 trước, được một số cụ thể.<br><br>Bước 2: Viết lại thành dạng 8 + ☐ = (số vừa tính).<br><br>Bước 3: Lấy số vừa tính <strong>trừ</strong> 8 để ra ô trống.<br><br>Bước 4: Thử lại — thay số tìm được vào ô trống rồi tính cả hai vế xem có bằng nhau không.' },
+        ],
+        solution: '15 − 3 = 12. Vậy 8 + ☐ = 12, nên ☐ = 12 − 8 = <strong>4</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Ba bạn xếp hàng: Lan đứng trước Hoa, Hoa đứng trước Mai. Hỏi ai đứng cuối hàng?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hai thông tin về vị trí:<br>• Lan đứng <strong>trước</strong> Hoa.<br>• Hoa đứng <strong>trước</strong> Mai.<br><br>Đề hỏi: ai đứng <strong>cuối hàng</strong>?' },
+          { t: 'Kiến thức cần dùng', b: 'Dạng bài này gọi là <strong>suy luận thứ tự</strong>. Cách làm chắc nhất là <strong>vẽ dãy ra giấy</strong> rồi nối các thông tin lại với nhau.<br><br>Quy ước: viết người đứng trước ở bên trái, dùng mũi tên →.<br><br>Ví dụ dễ hơn: “A trước B” viết là A → B. Thêm “B trước C” thì nối thành A → B → C. Người ở tận cùng bên phải là người cuối hàng.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Viết thông tin thứ nhất: Lan → Hoa.<br><br>Bước 2: Thông tin thứ hai cũng bắt đầu bằng Hoa, nên nối tiếp vào sau Hoa.<br><br>Bước 3: Nhìn dãy vừa nối, bạn nào nằm ở <strong>cuối cùng bên phải</strong> chính là người đứng cuối hàng.' },
+        ],
+        solution: 'Thứ tự xếp hàng là Lan → Hoa → Mai, nên bạn đứng cuối hàng là <strong>Mai</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tìm một số biết số đó cộng với 5 thì bằng số lớn nhất có 1 chữ số.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề không cho sẵn con số ở vế phải mà <strong>mô tả</strong> nó: “số lớn nhất có 1 chữ số”.<br><br>Đề hỏi: số nào cộng với 5 thì được số đó?' },
+          { t: 'Kiến thức cần dùng', b: 'Hai kiến thức ghép lại:<br><br>1. Các số <strong>có 1 chữ số</strong> là: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9. Số <strong>lớn nhất</strong> trong đó là 9 (số bé nhất là 0).<br><br>2. Tìm số hạng chưa biết: lấy <strong>tổng trừ số hạng đã biết</strong>.<br><br>Ví dụ dễ hơn: “Số đó cộng 3 bằng số lớn nhất có 1 chữ số” → 9 − 3 = 6.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Dịch phần mô tả thành con số cụ thể — “số lớn nhất có 1 chữ số” là số nào?<br><br>Bước 2: Viết lại đề thành phép tính: số cần tìm + 5 = (số vừa xác định).<br><br>Bước 3: Lấy số đó <strong>trừ</strong> 5.<br><br>Chú ý phân biệt: “1 chữ số” khác “1 số”. Nếu đề hỏi số lớn nhất có <strong>2</strong> chữ số thì là 99.' },
+        ],
+        solution: 'Số lớn nhất có 1 chữ số là 9. Số cần tìm là: 9 − 5 = <strong>4</strong>.',
+      },
     ],
     2: [
-      { level: 'Cơ bản', text: 'Tìm x, biết: x + 24 = 57', solution: 'x = 57 − 24 = <strong>33</strong>.' },
-      { level: 'Cơ bản', text: 'Một lớp có 35 học sinh, trong đó có 19 bạn nam. Hỏi lớp đó có bao nhiêu bạn nữ?', solution: 'Số bạn nữ là: 35 − 19 = <strong>16 bạn</strong>.' },
-      { level: 'Nâng cao', text: 'Tìm 3 số tự nhiên liên tiếp có tổng bằng 24.', solution: 'Số ở giữa bằng tổng chia cho 3: 24 : 3 = 8. Vậy 3 số liên tiếp cần tìm là <strong>7, 8, 9</strong>.' },
-      { level: 'Nâng cao', text: 'Có một số sách xếp đều vào 6 ngăn, mỗi ngăn 8 quyển thì vừa hết. Nếu xếp mỗi ngăn 6 quyển thì cần bao nhiêu ngăn?', solution: 'Tổng số sách là: 8 × 6 = 48 (quyển). Nếu mỗi ngăn 6 quyển thì cần: 48 : 6 = <strong>8 ngăn</strong>.' },
-      { level: 'Nâng cao', text: 'Tìm một số, biết nếu thêm 15 vào số đó rồi bớt đi 7 thì được kết quả là 42.', solution: 'Gọi số cần tìm là x, ta có x + 15 − 7 = 42, nghĩa là x + 8 = 42. Vậy x = 42 − 8 = <strong>34</strong>.' },
-      { level: 'Nâng cao', text: 'Mẹ có 50 000 đồng, mua bút hết 23 000 đồng, mua vở hết 15 000 đồng. Hỏi mẹ còn lại bao nhiêu tiền?', solution: 'Số tiền còn lại là: 50 000 − 23 000 − 15 000 = <strong>12 000 đồng</strong>.' },
+      {
+        level: 'Cơ bản',
+        text: 'Tìm x, biết: x + 24 = 57',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Trong phép cộng <strong>x + 24 = 57</strong>:<br>• x và 24 là hai <strong>số hạng</strong>.<br>• 57 là <strong>tổng</strong>.<br><br>Đề hỏi: số hạng x bằng bao nhiêu?' },
+          { t: 'Kiến thức cần dùng', b: 'Quy tắc phải thuộc lòng: <strong>số hạng chưa biết = tổng − số hạng đã biết</strong>.<br><br>Vì sao? Vì phép trừ là phép tính ngược của phép cộng.<br><br>Ví dụ dễ hơn: x + 4 = 10 thì x = 10 − 4 = 6. Thử lại: 6 + 4 = 10, đúng.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định tổng là 57, số hạng đã biết là 24.<br><br>Bước 2: Lấy 57 <strong>trừ</strong> 24. Đặt tính dọc cho chắc, nhớ viết thẳng hàng đơn vị dưới đơn vị, chục dưới chục.<br><br>Bước 3: <strong>Thử lại</strong> — lấy kết quả cộng 24 xem có ra 57 không.' },
+        ],
+        solution: 'x = 57 − 24 = <strong>33</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một lớp có 35 học sinh, trong đó có 19 bạn nam. Hỏi lớp đó có bao nhiêu bạn nữ?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho:<br>• Cả lớp có <strong>35</strong> học sinh — đây là <strong>tổng</strong>.<br>• Trong đó có <strong>19</strong> bạn nam — đây là <strong>một phần</strong>.<br><br>Đề hỏi: số bạn nữ, tức là <strong>phần còn lại</strong>.' },
+          { t: 'Kiến thức cần dùng', b: 'Cả lớp chỉ gồm hai nhóm: nam và nữ. Nên:<br><br><strong>nam + nữ = cả lớp</strong><br><br>Muốn tìm một phần khi biết tổng và phần kia, con lấy <strong>tổng trừ phần đã biết</strong>.<br><br>Ví dụ dễ hơn: rổ có 10 quả, trong đó 4 quả táo, vậy quả còn lại là 10 − 4 = 6 quả.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định đâu là tổng (35) và đâu là phần đã biết (19).<br><br>Bước 2: Lấy 35 <strong>trừ</strong> 19. Đặt tính dọc, chú ý phải <strong>mượn</strong> vì 5 nhỏ hơn 9.<br><br>Bước 3: Kiểm tra kết quả có hợp lý không — số nữ phải nhỏ hơn 35.' },
+        ],
+        solution: 'Số bạn nữ là: 35 − 19 = <strong>16 bạn</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tìm 3 số tự nhiên liên tiếp có tổng bằng 24.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: '“Ba số tự nhiên <strong>liên tiếp</strong>” nghĩa là ba số đứng sát nhau, số sau hơn số trước 1 đơn vị — ví dụ 4, 5, 6.<br><br>Đề cho: tổng của ba số ấy bằng <strong>24</strong>.<br>Đề hỏi: ba số đó là những số nào?' },
+          { t: 'Kiến thức cần dùng', b: 'Mẹo rất nhanh cho <strong>ba</strong> số liên tiếp: số ở giữa luôn bằng <strong>tổng chia cho 3</strong>.<br><br>Vì sao? Số đầu kém số giữa 1 đơn vị, số cuối hơn số giữa 1 đơn vị — phần thiếu và phần thừa bù trừ hết cho nhau, nên ba số cộng lại đúng bằng ba lần số giữa.<br><br>Ví dụ dễ hơn: 4 + 5 + 6 = 15, mà 15 : 3 = 5 — đúng là số ở giữa.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Lấy tổng 24 <strong>chia cho 3</strong> để ra số ở giữa.<br><br>Bước 2: Số đầu = số giữa <strong>trừ 1</strong>; số cuối = số giữa <strong>cộng 1</strong>.<br><br>Bước 3: Thử lại — cộng cả ba số xem có đúng bằng 24 không.' },
+        ],
+        solution: 'Số ở giữa bằng tổng chia cho 3: 24 : 3 = 8. Vậy 3 số liên tiếp cần tìm là <strong>7, 8, 9</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Có một số sách xếp đều vào 6 ngăn, mỗi ngăn 8 quyển thì vừa hết. Nếu xếp mỗi ngăn 6 quyển thì cần bao nhiêu ngăn?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Bài có <strong>hai cách xếp</strong> cùng một số sách:<br>• Cách 1: 6 ngăn, mỗi ngăn 8 quyển → vừa hết.<br>• Cách 2: mỗi ngăn 6 quyển → cần bao nhiêu ngăn?<br><br>Điều quan trọng: <strong>số sách không đổi</strong>, chỉ cách xếp thay đổi.' },
+          { t: 'Kiến thức cần dùng', b: 'Dạng này gọi là <strong>rút về đơn vị</strong> hoặc “tìm đại lượng trung gian”. Không thể đi thẳng từ câu hỏi tới đáp số — phải tìm <strong>tổng số sách</strong> trước.<br><br>• Tổng = số ngăn × số quyển mỗi ngăn.<br>• Số ngăn = tổng : số quyển mỗi ngăn.<br><br>Ví dụ dễ hơn: 2 rổ, mỗi rổ 5 quả → tổng 10 quả. Nếu mỗi rổ 2 quả thì cần 10 : 2 = 5 rổ.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tìm <strong>tổng số sách</strong> bằng cách nhân 8 × 6.<br><br>Bước 2: Lấy tổng số sách vừa tìm <strong>chia cho 6</strong> (số quyển mỗi ngăn ở cách xếp mới).<br><br>Bước 3: Nghĩ xem kết quả có hợp lý không — xếp ít quyển mỗi ngăn hơn thì phải cần <strong>nhiều ngăn hơn</strong>.' },
+        ],
+        solution: 'Tổng số sách là: 8 × 6 = 48 (quyển). Nếu mỗi ngăn 6 quyển thì cần: 48 : 6 = <strong>8 ngăn</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tìm một số, biết nếu thêm 15 vào số đó rồi bớt đi 7 thì được kết quả là 42.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Số cần tìm bị làm <strong>hai việc liên tiếp</strong>:<br>1. Thêm 15.<br>2. Rồi bớt 7.<br>Kết quả cuối cùng là <strong>42</strong>.<br><br>Đề hỏi: số ban đầu là số nào?' },
+          { t: 'Kiến thức cần dùng', b: 'Có hai cách, cách nào cũng được:<br><br><strong>Cách 1 — rút gọn:</strong> thêm 15 rồi bớt 7 thì thực chất chỉ thêm 15 − 7 = 8. Bài trở thành x + 8 = 42.<br><br><strong>Cách 2 — làm ngược:</strong> đi ngược từ 42 về đầu, đổi mọi phép tính: bớt 7 thành cộng 7, thêm 15 thành trừ 15.<br><br>Ví dụ dễ hơn: x + 3 − 1 = 10 → x + 2 = 10 → x = 8.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Rút gọn hai việc thành một — tính 15 − 7.<br><br>Bước 2: Viết lại thành x + (số vừa rút gọn) = 42.<br><br>Bước 3: Tìm x bằng cách lấy 42 trừ đi số đó.<br><br>Bước 4: Thử lại theo đúng thứ tự đề bài: lấy x cộng 15, rồi trừ 7, xem có ra 42 không.' },
+        ],
+        solution: 'Gọi số cần tìm là x, ta có x + 15 − 7 = 42, nghĩa là x + 8 = 42. Vậy x = 42 − 8 = <strong>34</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Mẹ có 50 000 đồng, mua bút hết 23 000 đồng, mua vở hết 15 000 đồng. Hỏi mẹ còn lại bao nhiêu tiền?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho:<br>• Số tiền ban đầu: <strong>50 000</strong> đồng.<br>• Tiêu lần 1 (mua bút): <strong>23 000</strong> đồng.<br>• Tiêu lần 2 (mua vở): <strong>15 000</strong> đồng.<br><br>Đề hỏi: còn lại bao nhiêu tiền?' },
+          { t: 'Kiến thức cần dùng', b: 'Tiêu tiền là <strong>bớt đi</strong>, nên mỗi lần mua là một phép <strong>trừ</strong>.<br><br>Hai cách làm, cùng ra một kết quả:<br>• Trừ lần lượt: 50 000 − 23 000 rồi trừ tiếp 15 000.<br>• Cộng gộp trước: tính tổng tiền đã tiêu (23 000 + 15 000) rồi lấy 50 000 trừ đi một lần.<br><br>Ví dụ dễ hơn: có 10, tiêu 3 rồi tiêu 2 → còn 10 − 3 − 2 = 5, hoặc 10 − (3 + 2) = 5.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Chọn một trong hai cách ở trên.<br><br>Bước 2: Khi đặt tính, viết các số <strong>thẳng cột</strong> theo hàng nghìn — số tiền nhiều chữ số rất dễ lệch cột.<br><br>Bước 3: Kiểm tra tính hợp lý — tiền còn lại phải <strong>nhỏ hơn</strong> 50 000 đồng.' },
+        ],
+        solution: 'Số tiền còn lại là: 50 000 − 23 000 − 15 000 = <strong>12 000 đồng</strong>.',
+      },
     ],
     3: [
-      { level: 'Cơ bản', text: 'Tìm x, biết: x × 6 = 42', solution: 'x = 42 : 6 = <strong>7</strong>.' },
-      { level: 'Cơ bản', text: 'Một cửa hàng có 84 quả cam, đã bán 1/4 số cam đó. Hỏi cửa hàng còn lại bao nhiêu quả cam?', solution: 'Số cam đã bán là: 84 : 4 = 21 (quả). Số cam còn lại là: 84 − 21 = <strong>63 quả</strong>.' },
-      { level: 'Nâng cao', text: 'Tìm số tự nhiên bé nhất có 2 chữ số, biết số đó chia cho 4 thì dư 3.', solution: 'Thử các số có 2 chữ số từ nhỏ: 10 chia 4 dư 2; 11 chia 4 dư 3 (vì 4 × 2 = 8, 11 − 8 = 3). Vậy số cần tìm là <strong>11</strong>.' },
-      { level: 'Nâng cao', text: 'Một phép chia có số bị chia là 47, số chia là 6. Tìm thương và số dư.', solution: '6 × 7 = 42, mà 47 − 42 = 5 (< 6) nên: 47 : 6 = <strong>7, dư 5</strong>.' },
-      { level: 'Nâng cao', text: 'Tổng của hai số là 96. Số thứ nhất hơn số thứ hai 12 đơn vị. Tìm hai số đó.', solution: 'Số lớn là: (96 + 12) : 2 = 54. Số bé là: 54 − 12 = <strong>42</strong>. Vậy hai số cần tìm là <strong>54 và 42</strong>.' },
-      { level: 'Nâng cao', text: 'Có 27 cái kẹo chia đều cho 4 bạn. Hỏi mỗi bạn được nhiều nhất bao nhiêu cái kẹo và còn dư mấy cái?', solution: '27 : 4 = 6, dư 3 (vì 4 × 6 = 24, 27 − 24 = 3). Vậy mỗi bạn được nhiều nhất <strong>6 cái kẹo</strong>, còn dư <strong>3 cái</strong>.' },
+      {
+        level: 'Cơ bản',
+        text: 'Tìm x, biết: x × 6 = 42',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Trong phép nhân <strong>x × 6 = 42</strong>:<br>• x và 6 là hai <strong>thừa số</strong>.<br>• 42 là <strong>tích</strong>.<br><br>Đề hỏi: thừa số x bằng bao nhiêu?' },
+          { t: 'Kiến thức cần dùng', b: 'Quy tắc: <strong>thừa số chưa biết = tích : thừa số đã biết</strong>.<br><br>Phép chia là phép tính ngược của phép nhân, giống như trừ là ngược của cộng.<br><br>Ví dụ dễ hơn: x × 3 = 12 thì x = 12 : 3 = 4. Thử lại: 4 × 3 = 12, đúng.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định tích là 42, thừa số đã biết là 6.<br><br>Bước 2: Lấy 42 <strong>chia</strong> cho 6. Nhớ lại bảng nhân 6: 6 × 7 = 42.<br><br>Bước 3: Thử lại bằng phép nhân.' },
+        ],
+        solution: 'x = 42 : 6 = <strong>7</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một cửa hàng có 84 quả cam, đã bán 1/4 số cam đó. Hỏi cửa hàng còn lại bao nhiêu quả cam?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho:<br>• Tổng số cam: <strong>84</strong> quả.<br>• Đã bán: <strong>1/4</strong> số cam đó.<br><br>Đề hỏi số cam <strong>còn lại</strong>, chứ không hỏi số cam đã bán — đọc kỹ chỗ này.' },
+          { t: 'Kiến thức cần dùng', b: 'Muốn tìm <strong>một phần mấy của một số</strong>, con lấy số đó <strong>chia cho mẫu số</strong>.<br><br>Ví dụ: 1/4 của 20 là 20 : 4 = 5. 1/3 của 9 là 9 : 3 = 3.<br><br>Sau khi có phần đã bán rồi, muốn tìm phần còn lại thì lấy <strong>tổng trừ phần đã bán</strong>.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính số cam <strong>đã bán</strong>: lấy 84 chia cho 4.<br><br>Bước 2: Lấy 84 <strong>trừ</strong> số cam vừa bán để ra số còn lại.<br><br>Mẹo kiểm tra: bán 1/4 thì còn 3/4, nên có thể thử cách khác: 84 : 4 × 3 — hai cách phải ra cùng một kết quả.' },
+        ],
+        solution: 'Số cam đã bán là: 84 : 4 = 21 (quả). Số cam còn lại là: 84 − 21 = <strong>63 quả</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tìm số tự nhiên bé nhất có 2 chữ số, biết số đó chia cho 4 thì dư 3.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Số cần tìm phải thoả <strong>hai điều kiện cùng lúc</strong>:<br>1. Là số có <strong>2 chữ số</strong> (tức từ 10 đến 99).<br>2. Chia cho 4 thì <strong>dư 3</strong>.<br><br>Và trong tất cả các số thoả cả hai, phải chọn số <strong>bé nhất</strong>.' },
+          { t: 'Kiến thức cần dùng', b: 'Nhắc lại phép chia có dư: <strong>số bị chia = thương × số chia + số dư</strong>, và <strong>số dư luôn nhỏ hơn số chia</strong>.<br><br>Cách kiểm tra một số chia 4 dư mấy: tìm số lớn nhất chia hết cho 4 mà không vượt quá nó, rồi lấy hiệu.<br><br>Ví dụ: 11 chia 4 — số chia hết cho 4 gần nhất mà không vượt 11 là 8, hiệu 11 − 8 = 3, vậy 11 chia 4 dư 3.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Số có 2 chữ số bé nhất là 10 — bắt đầu thử từ đó.<br><br>Bước 2: Thử lần lượt 10, 11, 12... mỗi số xem chia 4 dư mấy.<br><br>Bước 3: <strong>Dừng ngay</strong> ở số đầu tiên cho số dư bằng 3 — vì đang tìm số bé nhất.<br><br>Bẫy hay mắc: đáp án <strong>không phải</strong> 3, vì 3 chỉ có 1 chữ số.' },
+        ],
+        solution: 'Thử các số có 2 chữ số từ nhỏ: 10 chia 4 dư 2; 11 chia 4 dư 3 (vì 4 × 2 = 8, 11 − 8 = 3). Vậy số cần tìm là <strong>11</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một phép chia có số bị chia là 47, số chia là 6. Tìm thương và số dư.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho tên gọi rõ ràng:<br>• <strong>Số bị chia</strong>: 47 (số đem đi chia).<br>• <strong>Số chia</strong>: 6 (chia cho mấy).<br><br>Đề hỏi <strong>hai thứ</strong>: thương và số dư — phải trả lời đủ cả hai.' },
+          { t: 'Kiến thức cần dùng', b: 'Công thức: <strong>số bị chia = thương × số chia + số dư</strong>.<br><br>Quy tắc vàng: <strong>số dư luôn nhỏ hơn số chia</strong>. Nếu con tính ra số dư bằng hoặc lớn hơn 6 thì chắc chắn sai, phải tăng thương lên.<br><br>Ví dụ: 14 : 4 → 4 × 3 = 12, dư 2. Số dư 2 < 4, hợp lệ.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Đọc bảng nhân 6 tìm tích <strong>lớn nhất mà không vượt quá 47</strong>: 6 × 6 = 36, 6 × 7 = 42, 6 × 8 = 48 (đã vượt).<br><br>Bước 2: Thương chính là số nhân vừa chọn được.<br><br>Bước 3: Số dư = 47 <strong>trừ</strong> tích đó.<br><br>Bước 4: Kiểm tra số dư có nhỏ hơn 6 không.' },
+        ],
+        solution: '6 × 7 = 42, mà 47 − 42 = 5 (< 6) nên: 47 : 6 = <strong>7, dư 5</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tổng của hai số là 96. Số thứ nhất hơn số thứ hai 12 đơn vị. Tìm hai số đó.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho:<br>• <strong>Tổng</strong> hai số = 96.<br>• <strong>Hiệu</strong> hai số = 12 (số thứ nhất hơn số thứ hai 12).<br><br>Đề hỏi: cả hai số là bao nhiêu?' },
+          { t: 'Kiến thức cần dùng', b: 'Đây là dạng kinh điển <strong>“tìm hai số khi biết tổng và hiệu”</strong>. Có hai công thức, thuộc một cái là đủ:<br><br>• <strong>Số lớn = (tổng + hiệu) : 2</strong><br>• <strong>Số bé = (tổng − hiệu) : 2</strong><br><br>Hình dung bằng sơ đồ đoạn thẳng: nếu bỏ đi phần hiệu thì hai đoạn bằng nhau, nên chia đôi được số bé.<br><br>Ví dụ dễ hơn: tổng 10, hiệu 2 → số lớn (10 + 2) : 2 = 6, số bé 6 − 2 = 4.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tìm số lớn bằng công thức (96 + 12) : 2.<br><br>Bước 2: Tìm số bé — lấy số lớn <strong>trừ</strong> hiệu 12, hoặc lấy tổng 96 trừ số lớn.<br><br>Bước 3: <strong>Thử lại cả hai điều kiện</strong>: cộng hai số có ra 96 không, và trừ hai số có ra 12 không.' },
+        ],
+        solution: 'Số lớn là: (96 + 12) : 2 = 54. Số bé là: 54 − 12 = <strong>42</strong>. Vậy hai số cần tìm là <strong>54 và 42</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Có 27 cái kẹo chia đều cho 4 bạn. Hỏi mỗi bạn được nhiều nhất bao nhiêu cái kẹo và còn dư mấy cái?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: <strong>27</strong> cái kẹo, chia đều cho <strong>4</strong> bạn.<br><br>Chữ “<strong>nhiều nhất</strong>” và “<strong>còn dư</strong>” là dấu hiệu cho biết đây là <strong>phép chia có dư</strong> — kẹo không chia hết được, phần lẻ để lại.' },
+          { t: 'Kiến thức cần dùng', b: 'Trong bài toán thực tế, số kẹo mỗi bạn phải là <strong>số nguyên</strong> — không ai chia nửa cái kẹo cho công bằng được.<br><br>Vậy: <strong>27 : 4 = thương (dư số dư)</strong>, trong đó thương là số kẹo mỗi bạn, số dư là số kẹo còn thừa.<br><br>Nhớ: <strong>số dư phải nhỏ hơn 4</strong>. Nếu dư từ 4 trở lên thì vẫn còn chia thêm được cho mỗi bạn 1 cái nữa.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Đọc bảng nhân 4, tìm tích lớn nhất không vượt quá 27.<br><br>Bước 2: Thương là số kẹo <strong>mỗi bạn</strong> được.<br><br>Bước 3: Lấy 27 trừ tích đó ra <strong>số kẹo còn dư</strong>.<br><br>Bước 4: Trả lời <strong>đủ cả hai ý</strong> mà đề hỏi, kèm đơn vị “cái kẹo”.' },
+        ],
+        solution: '27 : 4 = 6, dư 3 (vì 4 × 6 = 24, 27 − 24 = 3). Vậy mỗi bạn được nhiều nhất <strong>6 cái kẹo</strong>, còn dư <strong>3 cái</strong>.',
+      },
     ],
     4: [
-      { level: 'Cơ bản', text: 'Một hình chữ nhật có chiều dài 15cm, chiều rộng 9cm. Tính chu vi hình đó.', solution: 'Chu vi hình chữ nhật là: (15 + 9) × 2 = <strong>48cm</strong>.' },
-      { level: 'Cơ bản', text: 'Tìm x, biết: x : 7 = 128', solution: 'x = 128 × 7 = <strong>896</strong>.' },
-      { level: 'Nâng cao', text: 'Tổng hai số là 158, hiệu hai số là 24. Tìm hai số đó.', solution: 'Số lớn là: (158 + 24) : 2 = 91. Số bé là: 91 − 24 = <strong>67</strong>. Vậy hai số cần tìm là <strong>91 và 67</strong>.' },
-      { level: 'Nâng cao', text: 'Một mảnh vườn hình chữ nhật có chu vi 60m, chiều dài hơn chiều rộng 6m. Tính diện tích mảnh vườn.', solution: 'Nửa chu vi là: 60 : 2 = 30 (m). Chiều dài là: (30 + 6) : 2 = 18 (m); chiều rộng là: 30 − 18 = 12 (m). Diện tích là: 18 × 12 = <strong>216m²</strong>.' },
-      { level: 'Nâng cao', text: 'Tìm một số, biết nếu lấy số đó nhân với 3 rồi cộng thêm 25 thì được 100.', solution: 'Gọi số cần tìm là x: 3 × x + 25 = 100, nên 3 × x = 75. Vậy x = 75 : 3 = <strong>25</strong>.' },
-      { level: 'Nâng cao', text: 'Một đội công nhân sửa xong một quãng đường trong 6 ngày, mỗi ngày sửa 250m. Nếu muốn xong trong 5 ngày thì mỗi ngày phải sửa bao nhiêu mét?', solution: 'Tổng quãng đường là: 250 × 6 = 1500 (m). Muốn xong trong 5 ngày thì mỗi ngày phải sửa: 1500 : 5 = <strong>300m</strong>.' },
+      {
+        level: 'Cơ bản',
+        text: 'Một hình chữ nhật có chiều dài 15cm, chiều rộng 9cm. Tính chu vi hình đó.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho một hình chữ nhật với:<br>• Chiều dài: <strong>15cm</strong><br>• Chiều rộng: <strong>9cm</strong><br><br>Đề hỏi <strong>chu vi</strong> — tức là độ dài đường bao quanh hình, đi hết một vòng.' },
+          { t: 'Kiến thức cần dùng', b: 'Hình chữ nhật có 4 cạnh: hai cạnh dài bằng nhau và hai cạnh rộng bằng nhau. Đi một vòng là đi qua đủ 4 cạnh.<br><br><strong>Chu vi = (chiều dài + chiều rộng) × 2</strong><br><br>Đừng nhầm với <strong>diện tích = chiều dài × chiều rộng</strong>. Chu vi có đơn vị cm, diện tích có đơn vị cm².<br><br>Ví dụ dễ hơn: hình dài 3cm rộng 2cm có chu vi (3 + 2) × 2 = 10cm.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Cộng chiều dài với chiều rộng trước — <strong>trong ngoặc làm trước</strong>.<br><br>Bước 2: Lấy kết quả đó nhân với 2.<br><br>Bước 3: Ghi đơn vị <strong>cm</strong> (không phải cm²) vào đáp số.' },
+        ],
+        solution: 'Chu vi hình chữ nhật là: (15 + 9) × 2 = <strong>48cm</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Tìm x, biết: x : 7 = 128',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Trong phép chia <strong>x : 7 = 128</strong>:<br>• x là <strong>số bị chia</strong> (số đem đi chia) — đây là cái phải tìm.<br>• 7 là <strong>số chia</strong>.<br>• 128 là <strong>thương</strong>.' },
+          { t: 'Kiến thức cần dùng', b: 'Quy tắc: <strong>số bị chia = thương × số chia</strong>.<br><br>Rất nhiều bạn nhầm thành chia. Cách nhớ chắc: phép chia và phép nhân ngược nhau, muốn “gỡ” phép chia thì phải <strong>nhân</strong>.<br><br>Ví dụ dễ hơn: x : 3 = 4 thì x = 4 × 3 = 12. Thử lại: 12 : 3 = 4, đúng.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Nhận ra x đứng ở vị trí số bị chia.<br><br>Bước 2: Lấy thương 128 <strong>nhân</strong> với số chia 7. Đặt tính dọc vì là nhân số có 3 chữ số.<br><br>Bước 3: Thử lại — lấy kết quả chia cho 7 xem có ra 128 không.' },
+        ],
+        solution: 'x = 128 × 7 = <strong>896</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tổng hai số là 158, hiệu hai số là 24. Tìm hai số đó.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Lần này đề nói thẳng luôn:<br>• <strong>Tổng</strong> = 158<br>• <strong>Hiệu</strong> = 24<br><br>Đề hỏi hai số đó là bao nhiêu.' },
+          { t: 'Kiến thức cần dùng', b: 'Vẫn là dạng <strong>tổng – hiệu</strong>:<br><br>• <strong>Số lớn = (tổng + hiệu) : 2</strong><br>• <strong>Số bé = (tổng − hiệu) : 2</strong><br><br>Cách nhớ: cộng hiệu vào thì ra <em>lớn</em>, trừ hiệu đi thì ra <em>bé</em>.<br><br>Mẹo kiểm tra nhanh: tổng và hiệu phải <strong>cùng chẵn hoặc cùng lẻ</strong>, nếu không thì không có đáp án là số tự nhiên. Ở đây 158 và 24 đều chẵn — hợp lệ.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính (158 + 24) trước, rồi chia 2 để ra số lớn.<br><br>Bước 2: Tìm số bé bằng một trong hai cách: số lớn − 24, hoặc 158 − số lớn.<br><br>Bước 3: Thử lại cả hai điều kiện — tổng phải bằng 158 và hiệu phải bằng 24.' },
+        ],
+        solution: 'Số lớn là: (158 + 24) : 2 = 91. Số bé là: 91 − 24 = <strong>67</strong>. Vậy hai số cần tìm là <strong>91 và 67</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một mảnh vườn hình chữ nhật có chu vi 60m, chiều dài hơn chiều rộng 6m. Tính diện tích mảnh vườn.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho:<br>• Chu vi = <strong>60m</strong><br>• Chiều dài hơn chiều rộng <strong>6m</strong> (đây là <strong>hiệu</strong>)<br><br>Đề hỏi <strong>diện tích</strong> — mà muốn tính diện tích thì phải biết cả chiều dài lẫn chiều rộng. Vậy bài này có <strong>ba chặng</strong>.' },
+          { t: 'Kiến thức cần dùng', b: 'Ghép ba kiến thức:<br><br>1. Chu vi = (dài + rộng) × 2, nên <strong>nửa chu vi = dài + rộng</strong> — đây chính là <strong>tổng</strong> hai cạnh.<br><br>2. Có tổng và hiệu rồi thì dùng công thức <strong>tổng – hiệu</strong> để tìm từng cạnh.<br><br>3. <strong>Diện tích = dài × rộng</strong>, đơn vị là m².<br><br>Bẫy lớn nhất: lấy thẳng 60 làm tổng hai cạnh. Sai — 60 là chu vi, tổng hai cạnh chỉ bằng <strong>một nửa</strong>.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính <strong>nửa chu vi</strong> = 60 : 2. Đây là tổng của chiều dài và chiều rộng.<br><br>Bước 2: Dùng tổng vừa tìm và hiệu 6m để tính chiều dài = (tổng + 6) : 2.<br><br>Bước 3: Tính chiều rộng = tổng − chiều dài.<br><br>Bước 4: Nhân hai cạnh để ra diện tích, ghi đơn vị <strong>m²</strong>.' },
+        ],
+        solution: 'Nửa chu vi là: 60 : 2 = 30 (m). Chiều dài là: (30 + 6) : 2 = 18 (m); chiều rộng là: 30 − 18 = 12 (m). Diện tích là: 18 × 12 = <strong>216m²</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tìm một số, biết nếu lấy số đó nhân với 3 rồi cộng thêm 25 thì được 100.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Số cần tìm bị làm hai việc theo thứ tự:<br>1. <strong>Nhân</strong> với 3.<br>2. Rồi <strong>cộng</strong> thêm 25.<br>Kết quả là <strong>100</strong>.<br><br>Viết thành phép tính: 3 × x + 25 = 100.' },
+          { t: 'Kiến thức cần dùng', b: 'Quy tắc gỡ ngược: <strong>việc nào làm sau cùng thì gỡ trước tiên</strong>.<br><br>Ở đây phép cộng 25 làm sau cùng, nên phải gỡ nó trước bằng cách <strong>trừ</strong> 25. Sau đó mới gỡ phép nhân bằng cách <strong>chia</strong>.<br><br>Ví dụ dễ hơn: 2 × x + 1 = 9 → 2 × x = 9 − 1 = 8 → x = 8 : 2 = 4.<br><br>Sai lầm hay gặp: chia 100 cho 3 ngay từ đầu.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Lấy 100 <strong>trừ</strong> 25 để biết 3 × x bằng bao nhiêu.<br><br>Bước 2: Lấy kết quả đó <strong>chia</strong> cho 3 để ra x.<br><br>Bước 3: Thử lại đúng thứ tự đề bài — nhân x với 3 trước, rồi cộng 25, xem có ra 100 không.' },
+        ],
+        solution: 'Gọi số cần tìm là x: 3 × x + 25 = 100, nên 3 × x = 75. Vậy x = 75 : 3 = <strong>25</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một đội công nhân sửa xong một quãng đường trong 6 ngày, mỗi ngày sửa 250m. Nếu muốn xong trong 5 ngày thì mỗi ngày phải sửa bao nhiêu mét?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Hai phương án cho <strong>cùng một quãng đường</strong>:<br>• Phương án cũ: 6 ngày, mỗi ngày 250m.<br>• Phương án mới: 5 ngày, mỗi ngày ? mét.<br><br>Điều không đổi là <strong>tổng quãng đường</strong>.' },
+          { t: 'Kiến thức cần dùng', b: 'Đây là bài <strong>rút về đơn vị</strong>, phải đi vòng qua tổng quãng đường:<br><br>• Tổng = số ngày × số mét mỗi ngày.<br>• Số mét mỗi ngày = tổng : số ngày.<br><br>Nhận xét quan trọng: làm <strong>ít ngày hơn</strong> thì mỗi ngày phải làm <strong>nhiều hơn</strong>. Đây gọi là hai đại lượng <strong>tỉ lệ nghịch</strong> — dùng nó để kiểm tra đáp án có hợp lý không.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính <strong>tổng quãng đường</strong> theo phương án cũ: 250 × 6.<br><br>Bước 2: Lấy tổng đó <strong>chia cho 5</strong> ngày.<br><br>Bước 3: Kiểm tra — kết quả phải <strong>lớn hơn 250m</strong>. Nếu nhỏ hơn thì chắc chắn làm nhầm phép tính.' },
+        ],
+        solution: 'Tổng quãng đường là: 250 × 6 = 1500 (m). Muốn xong trong 5 ngày thì mỗi ngày phải sửa: 1500 : 5 = <strong>300m</strong>.',
+      },
     ],
     5: [
-      { level: 'Cơ bản', text: 'Tính: 24,5 + 13,75', solution: '24,5 + 13,75 = <strong>38,25</strong>.' },
-      { level: 'Cơ bản', text: 'Một lớp có 40 học sinh, số học sinh nam chiếm 60% số học sinh cả lớp. Hỏi lớp đó có bao nhiêu học sinh nam?', solution: 'Số học sinh nam là: 40 × 60 : 100 = <strong>24 học sinh</strong>.' },
-      { level: 'Nâng cao', text: 'Tổng hai số là 84. Tỉ số của số bé và số lớn là 3/4. Tìm hai số đó.', solution: 'Tổng số phần bằng nhau là 3 + 4 = 7 phần. Số bé là: 84 : 7 × 3 = 36. Số lớn là: 84 − 36 = <strong>48</strong>. Vậy hai số cần tìm là <strong>36 và 48</strong>.' },
-      { level: 'Nâng cao', text: 'Một hình thang có đáy lớn 18cm, đáy bé 12cm, chiều cao 8cm. Tính diện tích hình thang đó.', solution: 'Diện tích hình thang là: (18 + 12) × 8 : 2 = <strong>120cm²</strong>.' },
-      { level: 'Nâng cao', text: 'Một chiếc áo giá 250 000 đồng được giảm giá 20%. Hỏi giá chiếc áo sau khi giảm là bao nhiêu?', solution: 'Số tiền được giảm là: 250 000 × 20 : 100 = 50 000 (đồng). Giá sau khi giảm là: 250 000 − 50 000 = <strong>200 000 đồng</strong>.' },
-      { level: 'Nâng cao', text: 'Một vòi nước chảy một mình thì đầy bể trong 6 giờ, vòi khác chảy một mình thì đầy bể đó trong 4 giờ. Nếu cả hai vòi cùng chảy thì sau bao lâu đầy bể?', solution: 'Mỗi giờ vòi 1 chảy được 1/6 bể, vòi 2 chảy được 1/4 bể. Cả hai vòi mỗi giờ chảy được: 1/6 + 1/4 = 5/12 (bể). Thời gian chảy đầy bể là: 1 : 5/12 = 12/5 = 2,4 giờ = <strong>2 giờ 24 phút</strong>.' },
+      {
+        level: 'Cơ bản',
+        text: 'Tính: 24,5 + 13,75',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đây là phép cộng <strong>hai số thập phân</strong>:<br>• 24,5 — có 1 chữ số ở phần thập phân.<br>• 13,75 — có 2 chữ số ở phần thập phân.<br><br>Hai số có số chữ số thập phân <strong>khác nhau</strong> — đây chính là chỗ dễ sai.' },
+          { t: 'Kiến thức cần dùng', b: 'Quy tắc cộng số thập phân:<br><br>1. Đặt tính dọc sao cho <strong>dấu phẩy thẳng cột với dấu phẩy</strong>.<br>2. Có thể <strong>thêm chữ số 0</strong> vào cuối phần thập phân cho hai số bằng nhau về số chữ số — giá trị không đổi (24,5 = 24,50).<br>3. Cộng như số tự nhiên, rồi <strong>hạ dấu phẩy thẳng xuống</strong>.<br><br>Ví dụ dễ hơn: 1,2 + 0,35 → viết 1,20 + 0,35 = 1,55.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Viết 24,5 thành <strong>24,50</strong> cho đều hai chữ số thập phân.<br><br>Bước 2: Đặt tính dọc, dấu phẩy thẳng hàng.<br><br>Bước 3: Cộng từ phải sang trái, nhớ sang cột bên trái khi tổng vượt 10.<br><br>Bước 4: Hạ dấu phẩy xuống kết quả.' },
+        ],
+        solution: '24,5 + 13,75 = <strong>38,25</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một lớp có 40 học sinh, số học sinh nam chiếm 60% số học sinh cả lớp. Hỏi lớp đó có bao nhiêu học sinh nam?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho:<br>• Cả lớp: <strong>40</strong> học sinh — đây là “toàn bộ”, ứng với <strong>100%</strong>.<br>• Nam chiếm <strong>60%</strong> của cả lớp.<br><br>Đề hỏi: bao nhiêu học sinh nam?' },
+          { t: 'Kiến thức cần dùng', b: '<strong>Phần trăm</strong> nghĩa là “trên một trăm”: 60% chính là 60/100 của toàn bộ.<br><br>Quy tắc <strong>tìm a% của một số</strong>:<br><br><strong>kết quả = số đó × a : 100</strong><br><br>Ví dụ dễ hơn: 50% của 20 là 20 × 50 : 100 = 10 (đúng bằng một nửa).<br><br>Mẹo kiểm tra: 60% hơn một nửa một chút, nên đáp án phải lớn hơn 20 và nhỏ hơn 40.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Lấy tổng số học sinh 40 <strong>nhân</strong> 60.<br><br>Bước 2: Lấy kết quả <strong>chia</strong> cho 100.<br><br>Bước 3: Đối chiếu với mẹo kiểm tra ở trên — số nam phải nằm giữa 20 và 40.<br><br>Nếu muốn, tính thêm số nữ để hiểu rõ: 100% − 60% = 40% là nữ.' },
+        ],
+        solution: 'Số học sinh nam là: 40 × 60 : 100 = <strong>24 học sinh</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tổng hai số là 84. Tỉ số của số bé và số lớn là 3/4. Tìm hai số đó.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho:<br>• <strong>Tổng</strong> hai số = 84.<br>• <strong>Tỉ số</strong> số bé : số lớn = <strong>3/4</strong>.<br><br>Tỉ số 3/4 nghĩa là: nếu số bé gồm 3 phần bằng nhau thì số lớn gồm 4 phần <strong>cũng bằng đúng như thế</strong>.' },
+          { t: 'Kiến thức cần dùng', b: 'Đây là dạng <strong>“tìm hai số khi biết tổng và tỉ số”</strong>. Cách làm bằng <strong>sơ đồ đoạn thẳng</strong>:<br><br>1. Vẽ số bé 3 phần, số lớn 4 phần.<br>2. <strong>Tổng số phần</strong> = 3 + 4 = 7 phần, ứng với 84.<br>3. <strong>Giá trị một phần</strong> = tổng : tổng số phần.<br>4. Mỗi số = giá trị một phần × số phần của nó.<br><br>Ví dụ dễ hơn: tổng 10, tỉ số 2/3 → 5 phần, một phần là 2 → hai số là 4 và 6.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Cộng hai chữ số của tỉ số để ra <strong>tổng số phần</strong>.<br><br>Bước 2: Lấy 84 chia cho tổng số phần để ra <strong>giá trị một phần</strong>.<br><br>Bước 3: Nhân giá trị một phần với 3 để ra <strong>số bé</strong>.<br><br>Bước 4: Số lớn = 84 − số bé (hoặc nhân với 4).<br><br>Bước 5: Thử lại cả hai điều kiện — tổng bằng 84 và tỉ số rút gọn được thành 3/4.' },
+        ],
+        solution: 'Tổng số phần bằng nhau là 3 + 4 = 7 phần. Số bé là: 84 : 7 × 3 = 36. Số lớn là: 84 − 36 = <strong>48</strong>. Vậy hai số cần tìm là <strong>36 và 48</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một hình thang có đáy lớn 18cm, đáy bé 12cm, chiều cao 8cm. Tính diện tích hình thang đó.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho đủ ba số đo của hình thang:<br>• Đáy lớn: <strong>18cm</strong><br>• Đáy bé: <strong>12cm</strong><br>• Chiều cao: <strong>8cm</strong><br><br>Đề hỏi <strong>diện tích</strong>.' },
+          { t: 'Kiến thức cần dùng', b: 'Công thức diện tích hình thang:<br><br><strong>S = (đáy lớn + đáy bé) × chiều cao : 2</strong><br><br>Cách nhớ: cộng hai đáy, nhân chiều cao, rồi chia đôi.<br><br>Lưu ý quan trọng: <strong>chiều cao</strong> là đoạn vuông góc nối hai đáy, không phải cạnh bên xiên.<br><br>Ví dụ dễ hơn: đáy 5 và 3, cao 2 → (5 + 3) × 2 : 2 = 8cm².' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Cộng hai đáy: 18 + 12.<br><br>Bước 2: Nhân kết quả với chiều cao 8.<br><br>Bước 3: <strong>Chia cho 2</strong> — rất nhiều bạn quên bước này.<br><br>Bước 4: Ghi đơn vị <strong>cm²</strong> vì là diện tích.' },
+        ],
+        solution: 'Diện tích hình thang là: (18 + 12) × 8 : 2 = <strong>120cm²</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một chiếc áo giá 250 000 đồng được giảm giá 20%. Hỏi giá chiếc áo sau khi giảm là bao nhiêu?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho:<br>• Giá gốc: <strong>250 000</strong> đồng (ứng với 100%).<br>• Giảm: <strong>20%</strong>.<br><br>Đề hỏi <strong>giá sau khi giảm</strong>, chứ không hỏi số tiền được giảm — đọc kỹ chỗ này.' },
+          { t: 'Kiến thức cần dùng', b: 'Hai cách làm, cách nào cũng đúng:<br><br><strong>Cách 1 (hai bước):</strong> tính số tiền giảm = giá gốc × 20 : 100, rồi lấy giá gốc trừ đi.<br><br><strong>Cách 2 (một bước):</strong> giảm 20% thì còn lại 100% − 20% = <strong>80%</strong>, nên giá mới = giá gốc × 80 : 100.<br><br>Ví dụ dễ hơn: áo 100 000 giảm 20% → giảm 20 000, còn 80 000.<br><br>Mẹo kiểm tra: giá mới phải <strong>nhỏ hơn</strong> giá gốc.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Chọn một trong hai cách trên.<br><br>Bước 2: Nếu làm cách 1 — tính số tiền được giảm trước, rồi mới trừ.<br><br>Bước 3: Làm xong nên thử lại bằng cách còn lại, hai cách phải ra <strong>cùng một kết quả</strong>.<br><br>Bước 4: Ghi đơn vị “đồng”.' },
+        ],
+        solution: 'Số tiền được giảm là: 250 000 × 20 : 100 = 50 000 (đồng). Giá sau khi giảm là: 250 000 − 50 000 = <strong>200 000 đồng</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một vòi nước chảy một mình thì đầy bể trong 6 giờ, vòi khác chảy một mình thì đầy bể đó trong 4 giờ. Nếu cả hai vòi cùng chảy thì sau bao lâu đầy bể?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho:<br>• Vòi 1 chảy một mình: đầy bể sau <strong>6 giờ</strong>.<br>• Vòi 2 chảy một mình: đầy bể sau <strong>4 giờ</strong>.<br><br>Đề hỏi: hai vòi cùng chảy thì bao lâu đầy?<br><br>Bẫy kinh điển: cộng 6 + 4 = 10 giờ. Sai hoàn toàn — hai vòi cùng chảy thì phải <strong>nhanh hơn</strong> cả khi chảy một mình.' },
+          { t: 'Kiến thức cần dùng', b: 'Mẹo của dạng này: coi cả bể là <strong>1 đơn vị công việc</strong>, rồi tính <strong>mỗi giờ làm được bao nhiêu phần</strong>.<br><br>• Vòi 1 xong trong 6 giờ → mỗi giờ chảy được <strong>1/6</strong> bể.<br>• Vòi 2 xong trong 4 giờ → mỗi giờ chảy được <strong>1/4</strong> bể.<br>• Cùng chảy → mỗi giờ được <strong>1/6 + 1/4</strong> bể.<br><br>Có phần chảy mỗi giờ rồi thì: <strong>thời gian = 1 : (phần chảy mỗi giờ)</strong>.<br><br>Nhắc lại cộng phân số khác mẫu: quy đồng về mẫu chung (của 6 và 4 là 12).' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Viết phần bể mỗi vòi chảy được trong 1 giờ.<br><br>Bước 2: Quy đồng mẫu số rồi cộng hai phân số lại.<br><br>Bước 3: Lấy <strong>1 chia cho</strong> phân số vừa tìm (chia phân số = nhân với phân số đảo ngược).<br><br>Bước 4: Đổi kết quả ra giờ và phút cho dễ hiểu (0,4 giờ = 0,4 × 60 phút).<br><br>Bước 5: Kiểm tra — đáp án phải <strong>nhỏ hơn 4 giờ</strong>.' },
+        ],
+        solution: 'Mỗi giờ vòi 1 chảy được 1/6 bể, vòi 2 chảy được 1/4 bể. Cả hai vòi mỗi giờ chảy được: 1/6 + 1/4 = 5/12 (bể). Thời gian chảy đầy bể là: 1 : 5/12 = 12/5 = 2,4 giờ = <strong>2 giờ 24 phút</strong>.',
+      },
     ],
   };
 
@@ -545,23 +819,86 @@
       const card = document.createElement('div');
       card.className = 'gifted-card';
       const levelClass = p.level === 'Nâng cao' ? 'gifted-level-advanced' : 'gifted-level-basic';
+      const steps = p.teach || [];
       card.innerHTML = `
         <div class="gifted-card-head">
           <span class="gifted-level ${levelClass}">${p.level}</span>
           <span class="gifted-num">Bài ${i + 1}</span>
         </div>
         <p class="gifted-question">${p.text}</p>
-        <button type="button" class="gifted-reveal-btn">Xem lời giải</button>
+        <button type="button" class="gifted-learn-btn">Học cách làm</button>
+        <div class="gifted-teach" hidden>
+          <div class="gifted-teach-dots" aria-hidden="true"></div>
+          <p class="gifted-step-count"></p>
+          <h4 class="gifted-step-title"></h4>
+          <div class="gifted-step-body"></div>
+          <button type="button" class="gifted-step-next"></button>
+        </div>
+        <button type="button" class="gifted-reveal-btn" hidden>Xem lời giải</button>
+        <p class="gifted-locked-note">Xem hết phần hướng dẫn thì nút lời giải mới hiện ra.</p>
         <p class="gifted-solution" hidden>${p.solution}</p>
       `;
+
+      const learnBtn = card.querySelector('.gifted-learn-btn');
+      const teachBox = card.querySelector('.gifted-teach');
+      const dotsEl = card.querySelector('.gifted-teach-dots');
+      const countEl = card.querySelector('.gifted-step-count');
+      const titleEl = card.querySelector('.gifted-step-title');
+      const bodyEl = card.querySelector('.gifted-step-body');
+      const nextBtn = card.querySelector('.gifted-step-next');
       const revealBtn = card.querySelector('.gifted-reveal-btn');
+      const noteEl = card.querySelector('.gifted-locked-note');
       const solutionEl = card.querySelector('.gifted-solution');
+
+      // Chỉ mở nút lời giải sau khi học sinh đã xem hết các bước hướng dẫn.
+      let stepIdx = 0;
+      let unlocked = steps.length === 0;
+      if (unlocked) { learnBtn.hidden = true; revealBtn.hidden = false; noteEl.hidden = true; }
+
+      dotsEl.innerHTML = steps.map(() => '<i></i>').join('');
+      const dots = Array.from(dotsEl.children);
+
+      function paintStep() {
+        const s = steps[stepIdx];
+        countEl.textContent = `Bước ${stepIdx + 1}/${steps.length}`;
+        titleEl.textContent = s.t;
+        bodyEl.innerHTML = s.b;
+        nextBtn.textContent = stepIdx < steps.length - 1 ? 'Đã hiểu, bước tiếp theo' : 'Đã hiểu hết, mở lời giải';
+        dots.forEach((d, k) => d.classList.toggle('on', k <= stepIdx));
+      }
+
+      learnBtn.addEventListener('click', () => {
+        sfx.click();
+        learnBtn.hidden = true;
+        teachBox.hidden = false;
+        stepIdx = 0;
+        paintStep();
+      });
+
+      nextBtn.addEventListener('click', () => {
+        sfx.click();
+        if (stepIdx < steps.length - 1) {
+          stepIdx += 1;
+          paintStep();
+          teachBox.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          return;
+        }
+        unlocked = true;
+        teachBox.hidden = true;
+        noteEl.hidden = true;
+        revealBtn.hidden = false;
+        learnBtn.hidden = false;
+        learnBtn.textContent = 'Xem lại hướng dẫn';
+      });
+
       revealBtn.addEventListener('click', () => {
+        if (!unlocked) return;
         sfx.click();
         const willShow = solutionEl.hidden;
         solutionEl.hidden = !willShow;
         revealBtn.textContent = willShow ? 'Ẩn lời giải' : 'Xem lời giải';
       });
+
       giftedProblemList.appendChild(card);
     });
   }

@@ -929,6 +929,87 @@ button:focus-visible,
   color: rgba(255,255,255,0.9);
 }
 
+/* ==== Phần dạy trước khi mở lời giải ==== */
+.gifted-learn-btn {
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #A5B4FC 0%, #6366F1 55%, #3730A3 100%);
+  border: 2px solid #29216B;
+  border-radius: 999px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 8px 18px;
+  box-shadow: var(--gloss-shadow-sm);
+  transition: transform 150ms ease-out;
+}
+.gifted-learn-btn:hover { transform: translateY(-2px); }
+.gifted-learn-btn:active { transform: translateY(2px) scale(0.97); }
+
+.gifted-teach {
+  margin-top: 12px;
+  padding: 14px 16px 16px;
+  background: rgba(99,102,241,0.12);
+  border: 2px solid rgba(165,180,252,0.45);
+  border-radius: 12px;
+}
+.gifted-teach-dots { display: flex; gap: 6px; margin-bottom: 10px; }
+.gifted-teach-dots i {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+  transition: background 200ms ease-out;
+}
+.gifted-teach-dots i.on { background: #A5B4FC; }
+.gifted-step-count {
+  margin: 0 0 4px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #C7D2FE;
+}
+.gifted-step-title {
+  margin: 0 0 8px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.02rem;
+  color: #fff;
+}
+.gifted-step-body {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.92);
+}
+.gifted-step-body strong { color: #FDE68A; font-weight: 800; }
+.gifted-step-body em { font-style: italic; color: rgba(255,255,255,0.75); }
+.gifted-step-next {
+  margin-top: 14px;
+  width: 100%;
+  min-height: 46px;
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #7DD3FC 0%, #0EA5E9 55%, #075985 100%);
+  border: 2px solid #05364F;
+  border-radius: 999px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: var(--gloss-shadow-sm);
+  transition: transform 150ms ease-out;
+}
+.gifted-step-next:hover { transform: translateY(-2px); }
+.gifted-step-next:active { transform: translateY(2px) scale(0.98); }
+
+.gifted-locked-note {
+  margin: 8px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.5);
+}
+
 /* ==== Game HUD ==== */
 .game-hud {
   width: 100%;
