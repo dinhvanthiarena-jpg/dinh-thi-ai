@@ -103,7 +103,7 @@ tiếng Anh hoặc tiếng Trung thì DÒNG VI BẮT BUỘC PHẢI CÓ nghĩa ti
 }
 
 /* ═══════════════ LUYỆN NÓI: MON.L là giáo viên ═══════════════ */
-function teachPrompt(level, words) {
+function teachPrompt(level, words, heard) {
   const lv = LEVEL_GUIDE[level] || LEVEL_GUIDE.A1;
   const vocab = Array.isArray(words) && words.length ? words.slice(0, 60).join(', ') : '(chưa có)';
 
@@ -145,11 +145,27 @@ LANG: en
 SAY: <lời của bạn, bằng tiếng Anh>
 VI: <nghĩa tiếng Việt của dòng SAY — bắt buộc phải có>
 TASK: <câu tiếng Anh ngắn để người học nói theo — bắt buộc phải có>
-TVI: <nghĩa tiếng Việt của dòng TASK>`;
+TVI: <nghĩa tiếng Việt của dòng TASK>
+
+════ CHỐT CHO LƯỢT NÀY ════
+Làm đủ, theo đúng thứ tự:
+1. Nhận xét câu người học vừa nói. Sai ngữ pháp hay sai từ thì NHẮC LẠI CÂU ĐÚNG
+   ngay, kiểu "Almost! We say I really like football, not I very like football."
+   Đúng rồi thì khen một câu thật ngắn.
+2. Rồi mới đi tiếp.${
+  heard == null ? `
+Lượt này người học GÕ CHỮ chứ không đọc, nên đừng nhận xét phát âm. Sửa ngữ pháp
+nếu có rồi ra câu mới ở dòng TASK.` : heard.pct >= 70 ? `
+Họ vừa ĐỌC câu mẫu và máy nghe khớp ${heard.pct}% — đạt rồi. Khen một câu ngắn,
+sửa ngữ pháp nếu có, rồi ra câu MỚI và khó hơn một chút ở dòng TASK.` : `
+Họ vừa đọc câu mẫu "${heard.target}" nhưng máy chỉ nghe khớp ${heard.pct}% — CHƯA ĐẠT.
+Hãy nói cho họ biết chỗ đọc chưa rõ (âm nào khó, đọc thế nào), rồi cho họ đọc LẠI
+ĐÚNG CÂU CŨ: dòng TASK lượt này phải ghi y nguyên "${heard.target}", không được đổi câu.`}
+Dòng TASK tuyệt đối không được để trống.`;
 }
 
 function buildSystemPrompt(level, words, forced, mode) {
-  return mode === 'teach' ? teachPrompt(level, words) : freePrompt(level, words, forced);
+  return mode === 'teach' ? teachPrompt(level, words, forced) : freePrompt(level, words, forced);
 }
 
 /** Cắt gọn lịch sử hội thoại trước khi gửi lên API. */
@@ -207,6 +223,14 @@ async function reply({ history, level, words, mode }) {
   // Chữ Hán và dấu tiếng Việt thì nhìn là biết chắc, nên chốt thẳng bằng mã.
   const lastSaid = messages[messages.length - 1].content;
   const forced = lastSaid === '__START__' ? null : sniffLang(lastSaid);
+  // Giờ học: app gắn kết quả chấm vào cuối câu người học, dạng
+  // [Câu mẫu: "..." — máy nghe khớp 45%]. Đọc ra rồi ra chỉ thị cho đúng lượt,
+  // nhắc suông thì mô hình quên sửa lỗi và quên bắt đọc lại.
+  let heard = null;
+  if (teach) {
+    const m = lastSaid.match(/\[Câu mẫu: "([^"]*)" — máy nghe khớp (\d+)%\]/);
+    if (m) heard = { target: m[1], pct: Number(m[2]) };
+  }
 
   const res = await fetch(ANTHROPIC_API_URL, {
     method: 'POST',
@@ -218,7 +242,7 @@ async function reply({ history, level, words, mode }) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      system: buildSystemPrompt(level, words, forced, teach ? 'teach' : 'free'),
+      system: teach ? teachPrompt(level, words, heard) : freePrompt(level, words, forced),
       messages,
     }),
   });
