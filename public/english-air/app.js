@@ -1857,7 +1857,10 @@ function veManQR(don) {
   box.append(el("p", "pro-fine", "Mở app ngân hàng bất kỳ rồi quét. Số tiền và nội dung đã điền sẵn."));
   const cho = el("span", "pro-wait");
   cho.append(el("i"));
-  cho.append(document.createTextNode("Đang chờ tiền về…"));
+  // Chưa nối tự đối soát thì đừng hứa "vài giây" — thầy còn phải bấm duyệt tay.
+  cho.append(document.createTextNode(don.tuDong
+    ? "Đang chờ tiền về…"
+    : "Đã chuyển rồi? Thầy sẽ xác nhận trong ít phút."));
   box.append(cho);
   b.append(box);
 

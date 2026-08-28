@@ -141,6 +141,7 @@ router.post('/api/mua', express.json(), async (req, res) => {
     ten: pro.PLANS[plan].ten,
     qr: pro.anhQR(order),
     ck: pro.thongTinChuyenKhoan(order),
+    tuDong: pro.tuDongDoiSoat(),
   });
 });
 

@@ -23,6 +23,7 @@
  */
 
 const { ProOrder, User } = require('../models');
+const telegram = require('./telegramService');
 
 const PLANS = {
   month: { months: 1, amount: 29000, ten: 'Gói tháng', nguoi: 1 },
@@ -41,6 +42,24 @@ function giaMoiThang(plan) {
 
 const proMode = () => (process.env.PRO_MODE || 'off').toLowerCase();
 const dangThuPhi = () => proMode() === 'on';
+
+/**
+ * Nhắn cho thầy qua Telegram. Chỉ chạy khi có TELEGRAM_ADMIN_CHAT.
+ * Quan trọng khi CHƯA nối SePay: thầy biết ngay có người vừa đặt mua để còn
+ * mở app ngân hàng xem tiền về chưa rồi bấm duyệt.
+ */
+async function baoThay(text) {
+  const chat = process.env.TELEGRAM_ADMIN_CHAT;
+  if (!chat) return;
+  try {
+    await telegram.sendMessage(chat, text);
+  } catch (err) {
+    console.error('[pro/telegram]', err.message);
+  }
+}
+
+/** Ngân hàng có tự báo tiền về không, hay thầy phải duyệt tay. */
+const tuDongDoiSoat = () => Boolean(process.env.SEPAY_WEBHOOK_KEY);
 
 /** Đã cấu hình đủ để nhận tiền chưa. */
 function sanSangNhanTien() {
@@ -88,13 +107,26 @@ async function taoDon(userId, plan) {
   // Mã trùng thì bốc lại, xác suất gần như không có nhưng cứ chắc.
   let code = taoMa();
   for (let i = 0; i < 5 && (await ProOrder.findOne({ where: { code } })); i += 1) code = taoMa();
-  return ProOrder.create({
+  const order = await ProOrder.create({
     code,
     plan,
     amount: goi.amount,
     months: goi.months,
     UserId: userId,
   });
+  const nguoi = await User.findByPk(userId);
+  baoThay(
+    `Có người đặt mua ${goi.ten} — ${goi.amount.toLocaleString('vi-VN')}đ
+` +
+    `Người mua: ${nguoi ? nguoi.name + ' (' + nguoi.email + ')' : '#' + userId}
+` +
+    `Nội dung chuyển khoản: ${code}
+` +
+    (tuDongDoiSoat()
+      ? 'Tiền về là hệ thống tự mở gói.'
+      : 'Chưa nối SePay — xem tiền về thì vào 3dvietpro.com/admin/pro-orders bấm duyệt.')
+  );
+  return order;
 }
 
 /**
@@ -128,6 +160,15 @@ async function ghiNhanDaTra(order, { bankRef = '', bankAmount = null, raw = '', 
   if (user.familyOwner && maNha) {
     await User.update({ proUntil: hetHan }, { where: { familyCode: maNha, familyOwner: false } });
   }
+
+  baoThay(
+    `Đã mở gói ${PLANS[order.plan].ten} cho ${user.name} (${user.email})
+` +
+    `Đơn ${order.code} — ${order.amount.toLocaleString('vi-VN')}đ
+` +
+    `Hạn tới ${hetHan.toLocaleDateString('vi-VN')}` +
+    (boi === 'sepay' ? '' : ` — duyệt bởi ${boi || 'tay'}`)
+  );
 
   await order.update({
     familyCode: order.plan === 'family' ? maNha : '',
@@ -203,6 +244,8 @@ function duocDung(user) {
 
 module.exports = {
   PLANS,
+  tuDongDoiSoat,
+  baoThay,
   NGAY_DUNG_THU,
   TOI_DA_GIA_DINH,
   giaMoiThang,
