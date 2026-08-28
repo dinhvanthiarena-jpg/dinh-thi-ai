@@ -298,7 +298,9 @@
       <!-- ================= GỌI VIDEO ================= -->
       <section class="view" id="view-call" hidden aria-labelledby="callTitle">
         <div class="call-hero">
-          <div class="call-hero-art" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+          <div class="call-preview" aria-hidden="true">
+            <img class="cp-room" src="assets/call-card.jpg" alt="" decoding="async" />
+          </div>
           <h1 id="callTitle">Gọi video với MON.L</h1>
           <p class="sub">Luyện nói bằng chính những đoạn hội thoại bạn đã học. MON.L nói trước, bạn trả lời — app nghe và chấm ngay.</p>
         </div>
@@ -499,16 +501,27 @@
 
 <!-- ================= CUỘC GỌI VỚI MON.L ================= -->
 <div class="call" id="call" hidden role="dialog" aria-modal="true" aria-labelledby="callName">
+  <div class="call-scene" aria-hidden="true">
+    <div class="scene-fit">
+      <img class="scene-room" src="assets/mon-room.jpg" alt="" decoding="async" />
+      <div class="call-mon" id="callMascot"><span class="mon-beat"><img src="assets/mon-stand.png" alt="" decoding="async" /></span></div>
+    </div>
+    <div class="scene-veil"></div>
+  </div>
+
   <div class="call-top">
     <div class="call-who">
       <span class="call-av" data-mascot="head" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></span>
       <span><b id="callName">MON.L</b><small id="callTimer">00:00</small></span>
     </div>
     <span class="call-state" id="callState">Đang kết nối…</span>
+    <button class="call-icon" id="btnCallLog" type="button" aria-pressed="false" aria-label="Xem lại hội thoại">
+      <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chat"/></svg>
+    </button>
   </div>
 
   <div class="call-stage">
-    <div class="call-mascot" id="callMascot" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+    <ul class="call-log" id="callLog"></ul>
     <div class="call-bubble" id="callBubble" aria-live="polite">
       <b id="callSaid">…</b>
       <small id="callSaidVi"></small>
@@ -518,7 +531,10 @@
       <b id="callTarget">—</b>
       <small id="callTargetVi"></small>
     </div>
-    <ul class="call-log" id="callLog"></ul>
+    <div class="call-you" id="callYou" hidden>
+      <span class="cy-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <span>MON.L đang nghe bạn nói…</span>
+    </div>
   </div>
 
   <div class="call-foot">

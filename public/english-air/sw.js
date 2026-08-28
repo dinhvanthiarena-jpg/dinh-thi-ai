@@ -3,7 +3,7 @@
    Toàn bộ app chạy offline sau lần mở đầu tiên.
    Đổi CACHE khi sửa file để buộc tải lại bản mới.
    ============================================================ */
-const CACHE = "english-air-v13";
+const CACHE = "english-air-v15";
 
 const SHELL = [
   "./",
@@ -19,7 +19,10 @@ const SHELL = [
   "./icons/icon-512.png",
   "./icons/icon-maskable-512.png",
   "./icons/apple-touch-icon.png",
-  "./assets/mascot.png"
+  "./assets/mascot.png",
+  "./assets/mon-room.jpg",
+  "./assets/mon-stand.png",
+  "./assets/call-card.jpg"
 ];
 
 self.addEventListener("install", e => {

@@ -1042,6 +1042,33 @@ $("#btnWeak").addEventListener("click", () => startLesson(null, { words: weakWor
                 không có mạng.
    Cả hai đều dùng micro (Web Speech API); gõ chữ là đường lui khi không nói được. */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+/* Khung cảnh: tính lại cỡ căn phòng để MON.L đứng lọt giữa thanh trên và bóng nói.
+   Máy nào cũng vừa, không phải đoán bằng media query. */
+const SCENE = { top: 0.12561, bot: 0.65922, ratio: 0.47551 };
+function fitScene() {
+  const call = $("#call");
+  if (call.hidden) return;
+  const vh = call.clientHeight;
+  const head = $(".call-top").offsetHeight + 8;
+  const stage = $(".call-stage");
+  const first = [...stage.children].find(n => !n.hidden && n.offsetHeight > 0);
+  const limit = (first || $(".call-foot")).getBoundingClientRect().top;
+  let h = Math.max(240, limit - 10 - head) / (SCENE.bot - SCENE.top);
+  let t = head - SCENE.top * h;
+  if (t + h < vh) { h = (vh - head) / (1 - SCENE.top); t = head - SCENE.top * h; }
+  call.style.setProperty("--scene-h", h + "px");
+  call.style.setProperty("--scene-t", t + "px");
+}
+if (window.ResizeObserver) {
+  // Bóng nói cao thấp tuỳ câu, cứ đổi là phải tính lại chỗ đứng cho MON.L.
+  const ro = new ResizeObserver(fitScene);
+  [".call-stage", "#callBubble", "#callTask", ".call-foot"].forEach(sel => ro.observe($(sel)));
+}
+addEventListener("resize", fitScene);
+addEventListener("orientationchange", () => setTimeout(fitScene, 120));
+
+
 const CHAT_URL = "../api/english-air/chat";
 
 const C = { mode: "free", msgs: [], lines: [], i: 0, target: null,
@@ -1130,8 +1157,12 @@ function startCall(mode) {
   $("#callTask").hidden = true;
   $("#callType").hidden = !!SR;
   $("#btnMic").disabled = !SR;
+  $("#callYou").hidden = true;
+  $("#call").classList.remove("show-log");
+  $("#btnCallLog").setAttribute("aria-pressed", "false");
   $("#call").hidden = false;
   document.body.style.overflow = "hidden";
+  fitScene();
 
   C.t0 = Date.now();
   clearInterval(C.timer);
@@ -1155,6 +1186,7 @@ function startCall(mode) {
 function endCall(finished) {
   stopListening();
   clearInterval(C.timer);
+  $("#callYou").hidden = true;
   $("#call").hidden = true;
   document.body.style.overflow = "";
   stopSpeak();
@@ -1295,6 +1327,7 @@ function startListening() {
   r.lang = "en-US"; r.interimResults = false; r.maxAlternatives = 3;
   $("#btnMic").classList.add("listening");
   $("#callMascot").classList.add("listening");
+  $("#callYou").hidden = false;
   setState("Đang nghe bạn…", "listen");
   r.onresult = e => {
     const alts = [...e.results[0]].map(a => a.transcript);
@@ -1316,6 +1349,7 @@ function stopListening() {
   C.listening = false;
   $("#btnMic").classList.remove("listening");
   $("#callMascot").classList.remove("listening");
+  $("#callYou").hidden = true;
   if (!C.busy) setState("Tới lượt bạn");
   if (C.rec) { try { C.rec.stop(); } catch {} C.rec = null; }
 }
@@ -1331,6 +1365,12 @@ $("#btnStartFree").addEventListener("click", () => startCall("free"));
 $("#btnStartCall").addEventListener("click", () => startCall("script"));
 $("#btnMic").addEventListener("click", () => C.listening ? stopListening() : startListening());
 $("#btnHangup").addEventListener("click", () => endCall(true));
+$("#btnCallLog").addEventListener("click", () => {
+  const on = $("#call").classList.toggle("show-log");
+  $("#btnCallLog").setAttribute("aria-pressed", String(on));
+  if (on) { const l = $("#callLog"); l.scrollTop = l.scrollHeight; }
+  fitScene();
+});
 $("#btnCallHear").addEventListener("click", () => speak($("#callSaid").textContent));
 $("#btnCallSkip").addEventListener("click", showChoices);
 $("#btnCallSend").addEventListener("click", sendTyped);
