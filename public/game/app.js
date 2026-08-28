@@ -423,7 +423,7 @@
   /* ================= DOM refs ================= */
   const $ = (id) => document.getElementById(id);
   const screens = {
-    license: $('screen-license'), home: $('screen-home'), setup: $('screen-setup'), game: $('screen-game'), result: $('screen-result'), homework: $('screen-homework'), gifted: $('screen-gifted'),
+    license: $('screen-license'), home: $('screen-home'), setup: $('screen-setup'), game: $('screen-game'), result: $('screen-result'), homework: $('screen-homework'), gifted: $('screen-gifted'), call: $('screen-call'),
   };
   function showScreen(name) {
     Object.values(screens).forEach(s => s.classList.remove('active'));
@@ -2357,6 +2357,261 @@
       }
     }
     $('btnHomeworkSubmit').addEventListener('click', () => { sfx.click(); homeworkSubmit(); });
+  }
+
+  /* ================= GỌI BOOM (video call quái vật, nói chuyện tự do) ================= */
+  if (IS_WEB) {
+    const callAvatar = $('callAvatar');
+    const callTimer = $('callTimer');
+    const callStateEl = $('callState');
+    const callLog = $('callLog');
+    const callBubble = $('callBubble');
+    const callSaid = $('callSaid');
+    const callYou = $('callYou');
+    const callHeard = $('callHeard');
+    const callHeardText = $('callHeardText');
+    const callType = $('callType');
+    const callInput = $('callInput');
+    const btnCallSend = $('btnCallSend');
+    const btnCallHear = $('btnCallHear');
+    const btnMic = $('btnMic');
+    const btnHangup = $('btnHangup');
+    const btnCallSkip = $('btnCallSkip');
+
+    const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let callRecognition = null;
+    let callHistory = [];
+    let callTimerId = null;
+    let callSeconds = 0;
+    let callBusy = false;
+    let callEnded = true;
+    let callTypedOnly = !SpeechRecognitionCtor;
+    let callVoice = null;
+
+    function callPickVoice() {
+      if (!('speechSynthesis' in window)) return null;
+      const voices = window.speechSynthesis.getVoices();
+      const viVoices = voices.filter((v) => /^vi(-|_)?VN$/i.test(v.lang) || /vietnam/i.test(v.name));
+      if (!viVoices.length) return null;
+      const scored = viVoices.map((v) => {
+        let score = 0;
+        if (/natural|online|neural/i.test(v.name)) score += 3;
+        if (/google/i.test(v.name)) score += 2;
+        return { v, score };
+      });
+      scored.sort((a, b) => b.score - a.score);
+      return scored[0].v;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => { callVoice = callPickVoice(); };
+      callVoice = callPickVoice();
+    }
+
+    function callFormatTime(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+    function callStartTimer() {
+      callSeconds = 0;
+      callTimer.textContent = '00:00';
+      clearInterval(callTimerId);
+      callTimerId = setInterval(() => {
+        callSeconds += 1;
+        callTimer.textContent = callFormatTime(callSeconds);
+      }, 1000);
+    }
+    function callStopTimer() {
+      clearInterval(callTimerId);
+      callTimerId = null;
+    }
+
+    function callSetState(text, mod) {
+      callStateEl.textContent = text;
+      callStateEl.classList.remove('think', 'err');
+      if (mod) callStateEl.classList.add(mod);
+    }
+
+    function callAppendLog(role, text) {
+      const li = document.createElement('li');
+      li.className = role === 'user' ? 'you' : 'mon';
+      li.textContent = text;
+      callLog.appendChild(li);
+      callLog.hidden = false;
+      callLog.scrollTop = callLog.scrollHeight;
+    }
+
+    function callAutoListenIfPossible() {
+      if (callEnded || callBusy || callTypedOnly) return;
+      setTimeout(() => { if (!callEnded && !callBusy) callStartListening(); }, 400);
+    }
+
+    // BOOM's reply always lands in the big bubble, and also gets appended to
+    // the scrollback log — the bubble is "what's being said right now", the
+    // log is the running transcript underneath it.
+    function callSpeak(text) {
+      callSaid.textContent = text;
+      callAppendLog('assistant', text);
+      if (!('speechSynthesis' in window) || muted) {
+        callBusy = false;
+        callSetState('Đến lượt cậu rồi đó!');
+        callAutoListenIfPossible();
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'vi-VN';
+      if (callVoice) utter.voice = callVoice;
+      utter.rate = 1.0;
+      utter.pitch = 1.05;
+      utter.onstart = () => callAvatar.classList.add('talking');
+      utter.onend = () => {
+        callAvatar.classList.remove('talking');
+        callBusy = false;
+        if (callEnded) return;
+        callSetState('Đến lượt cậu rồi đó!');
+        callAutoListenIfPossible();
+      };
+      utter.onerror = () => {
+        callAvatar.classList.remove('talking');
+        callBusy = false;
+      };
+      window.speechSynthesis.speak(utter);
+    }
+    function callReplayLast() {
+      if (!('speechSynthesis' in window) || !callSaid.textContent || callSaid.textContent === '…') return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(callSaid.textContent);
+      utter.lang = 'vi-VN';
+      if (callVoice) utter.voice = callVoice;
+      utter.onstart = () => callAvatar.classList.add('talking');
+      utter.onend = () => callAvatar.classList.remove('talking');
+      window.speechSynthesis.speak(utter);
+    }
+
+    async function callAsk(userText) {
+      if (userText) {
+        callHistory.push({ role: 'user', content: userText });
+        callAppendLog('user', userText);
+      }
+      callBusy = true;
+      callSetState('BOOM đang nghĩ…', 'think');
+      try {
+        const res = await fetch('/api/game/boom-chat', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ history: callHistory, grade: state.grade || null }),
+        });
+        const data = await res.json().catch(() => ({ ok: false }));
+        if (callEnded) return;
+        if (!res.ok || !data.ok) {
+          callBusy = false;
+          callSetState((data && data.message) || 'BOOM đang bận, thử lại nhé.', 'err');
+          return;
+        }
+        callHistory.push({ role: 'assistant', content: data.reply });
+        callSpeak(data.reply);
+      } catch (e) {
+        if (callEnded) return;
+        callBusy = false;
+        callSetState('Không kết nối được, kiểm tra mạng giúp BOOM nhé.', 'err');
+      }
+    }
+
+    function callStartListening() {
+      if (!SpeechRecognitionCtor || callBusy || callEnded || callTypedOnly) return;
+      try {
+        callRecognition = new SpeechRecognitionCtor();
+        callRecognition.lang = 'vi-VN';
+        callRecognition.interimResults = false;
+        callRecognition.maxAlternatives = 1;
+        callRecognition.onstart = () => {
+          callYou.hidden = false;
+          btnMic.classList.add('on');
+          callSetState('Đang nghe cậu nói…');
+        };
+        callRecognition.onresult = (ev) => {
+          const text = ev.results[0][0].transcript.trim();
+          if (text) {
+            callHeardText.textContent = `Cậu: "${text}"`;
+            callHeard.hidden = false;
+            callAsk(text);
+          }
+        };
+        callRecognition.onerror = () => {
+          callYou.hidden = true;
+          btnMic.classList.remove('on');
+          if (!callBusy) callSetState('Không nghe rõ, bấm mic để nói lại nhé.');
+        };
+        callRecognition.onend = () => {
+          callYou.hidden = true;
+          btnMic.classList.remove('on');
+        };
+        callRecognition.start();
+      } catch (e) {}
+    }
+    function callStopListening() {
+      if (callRecognition) { try { callRecognition.stop(); } catch (e) {} }
+      callYou.hidden = true;
+      btnMic.classList.remove('on');
+    }
+    function callSwitchToTyped() {
+      callTypedOnly = true;
+      callStopListening();
+      btnMic.hidden = true;
+      btnCallSkip.hidden = true;
+      callType.hidden = false;
+      callInput.focus();
+    }
+    function callSendTyped() {
+      const text = callInput.value.trim();
+      if (!text || callBusy) return;
+      callInput.value = '';
+      callHeardText.textContent = `Cậu: "${text}"`;
+      callHeard.hidden = false;
+      callAsk(text);
+    }
+
+    function callStart() {
+      callEnded = false;
+      callBusy = false;
+      callHistory = [];
+      callLog.innerHTML = '';
+      callLog.hidden = true;
+      callHeard.hidden = true;
+      callSaid.textContent = 'BOOM đang kết nối…';
+      callSetState('Đang kết nối…');
+      callStartTimer();
+      callTypedOnly = !SpeechRecognitionCtor;
+      btnMic.hidden = callTypedOnly;
+      btnCallSkip.hidden = callTypedOnly;
+      callType.hidden = !callTypedOnly;
+      callAsk(null); // history rỗng -> server tự chào mở màn (xem __START__ trong boomChatService)
+    }
+    function callEnd() {
+      callEnded = true;
+      callBusy = false;
+      callStopListening();
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      callAvatar.classList.remove('talking');
+      callStopTimer();
+    }
+
+    $('btnOpenCall').addEventListener('click', () => {
+      sfx.click();
+      showScreen('call');
+      callStart();
+    });
+    btnHangup.addEventListener('click', () => { sfx.click(); callEnd(); showScreen('home'); });
+    btnMic.addEventListener('click', () => {
+      sfx.click();
+      if (btnMic.classList.contains('on')) callStopListening();
+      else callStartListening();
+    });
+    btnCallHear.addEventListener('click', () => { sfx.click(); callReplayLast(); });
+    btnCallSkip.addEventListener('click', () => { sfx.click(); callSwitchToTyped(); });
+    btnCallSend.addEventListener('click', () => { sfx.click(); callSendTyped(); });
+    callInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); callSendTyped(); } });
   }
 
   /* ================= AUTO UPDATE ================= */

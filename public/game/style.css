@@ -350,6 +350,20 @@ button:focus-visible,
 .btn-homework-icon:hover { transform: translateY(-2px) scale(1.04); }
 .btn-homework-icon:active { transform: translateY(2px) scale(0.96); }
 
+.home-secondary-actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+/* No real BOOM artwork yet — a green gem circle + emoji stands in until
+   thầy sends one, same fallback approach as the "Ôn học sinh giỏi" icon. */
+.btn-call-icon {
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #86EFAC 0%, #16A34A 55%, #14532D 100%);
+  border: 3px solid rgba(255,255,255,0.35);
+  box-shadow: var(--gloss-shadow-sm);
+}
+.btn-call-icon .call-icon-emoji { font-size: 34px; line-height: 1; }
+
 /* ==== License screen ==== */
 .license-title {
   font-family: 'Corbel', 'Calibri', var(--font-heading);
@@ -1735,6 +1749,186 @@ button:focus-visible,
   font-family: var(--font-heading);
   font-weight: 700;
   color: var(--color-destructive);
+}
+
+/* ==== Gọi BOOM (free AI conversation call screen) ==== */
+.call-wrap {
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+}
+.call-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+.call-who { display: flex; align-items: center; gap: 12px; }
+.call-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: conic-gradient(from -20deg, #C9963A, #F3D48A, #C9963A, #8B5E1F, #C9963A, #F3D48A, #C9963A, #8B5E1F, #C9963A);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.35), inset 0 0 0 2px #6B4413;
+  transition: transform 150ms ease-out;
+  flex-shrink: 0;
+}
+.call-avatar.talking { animation: call-avatar-pulse 0.6s ease-in-out infinite; }
+@keyframes call-avatar-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.call-who-text { display: flex; flex-direction: column; text-align: left; color: #fff; }
+.call-who-text b { font-family: var(--font-heading); font-weight: 800; font-size: 1.1rem; }
+.call-who-text small { color: rgba(255,255,255,0.6); font-weight: 700; }
+.call-state {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #34D399;
+  text-align: right;
+}
+.call-state.think { color: #F59E0B; }
+.call-state.err { color: #EF4444; }
+
+.call-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  overflow-y: auto;
+}
+.call-bubble {
+  background: var(--gloss-shine), linear-gradient(180deg, rgba(30,41,82,0.92), rgba(15,21,50,0.92));
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius-lg);
+  padding: 20px 22px;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1.5;
+  text-align: center;
+  max-width: 92%;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+.call-log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.call-log li {
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  max-width: 80%;
+}
+.call-log li.mon { align-self: flex-start; background: rgba(255,255,255,0.1); color: #fff; }
+.call-log li.you { align-self: flex-end; background: rgba(52,211,153,0.25); color: #fff; }
+
+.call-you {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #34D399;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.cy-bars { display: flex; align-items: flex-end; gap: 3px; height: 20px; }
+.cy-bars i { width: 3px; background: #34D399; border-radius: 2px; display: block; animation: cy-bar 0.9s ease-in-out infinite; }
+.cy-bars i:nth-child(1) { height: 6px; animation-delay: 0s; }
+.cy-bars i:nth-child(2) { height: 14px; animation-delay: 0.1s; }
+.cy-bars i:nth-child(3) { height: 20px; animation-delay: 0.2s; }
+.cy-bars i:nth-child(4) { height: 12px; animation-delay: 0.3s; }
+.cy-bars i:nth-child(5) { height: 8px; animation-delay: 0.4s; }
+@keyframes cy-bar { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+
+.call-foot { display: flex; flex-direction: column; gap: 14px; align-items: center; flex-shrink: 0; }
+.call-heard {
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 8px 18px;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.9rem;
+  font-weight: 700;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.call-type { display: flex; gap: 10px; width: 100%; }
+.call-type input {
+  flex: 1;
+  min-width: 0;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  padding: 12px 18px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+.call-type input::placeholder { color: rgba(255,255,255,0.4); }
+
+.call-actions { display: flex; align-items: center; gap: 24px; }
+.round-btn.lg {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gloss-shine), linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05));
+  border: 2px solid rgba(255,255,255,0.2);
+  color: #fff;
+  transition: transform 150ms ease-out;
+}
+.round-btn.lg:active { transform: scale(0.92); }
+.round-btn.lg.danger {
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #FCA5A5 0%, #EF4444 55%, #8A1414 100%);
+  border-color: #7F1D1D;
+  color: #fff;
+}
+.mic-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gloss-shine-strong), linear-gradient(180deg, #8CF0AE 0%, #22C55E 55%, #0F6B31 100%);
+  border: 3px solid #0B4A22;
+  color: #fff;
+  box-shadow: var(--gloss-shadow);
+  transition: transform 150ms ease-out;
+}
+.mic-btn:active { transform: scale(0.92); }
+.mic-btn:disabled { opacity: 0.45; }
+.mic-btn.on { animation: mic-pulse 1s ease-in-out infinite; }
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+  50% { box-shadow: 0 0 0 14px rgba(34,197,94,0); }
 }
 
 /* ==== Responsive ==== */

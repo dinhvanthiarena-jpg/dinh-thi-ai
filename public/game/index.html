@@ -99,9 +99,14 @@
           <span class="btn-gifted-label">Ôn học sinh giỏi</span>
         </button>
       </div>
-      <button class="btn-homework-icon" id="btnOpenHomework" aria-label="Chụp bài tập, AI giảng bài">
-        <img src="assets/ui/icon-camera.png" alt="" aria-hidden="true" />
-      </button>
+      <div class="home-secondary-actions">
+        <button class="btn-homework-icon" id="btnOpenHomework" aria-label="Chụp bài tập, AI giảng bài">
+          <img src="assets/ui/icon-camera.png" alt="" aria-hidden="true" />
+        </button>
+        <button class="btn-homework-icon btn-call-icon" id="btnOpenCall" aria-label="Gọi BOOM nói chuyện">
+          <span class="call-icon-emoji" aria-hidden="true">👹</span>
+        </button>
+      </div>
       <p class="app-version" id="appVersion"></p>
     </div>
 
@@ -357,6 +362,57 @@
         </div>
       </div>
       <div class="gifted-problem-list" id="giftedProblemList" hidden></div>
+    </div>
+  </section>
+
+  <!-- SCREEN: GỌI BOOM -->
+  <section id="screen-call" class="screen">
+    <div class="call-wrap">
+      <div class="call-top">
+        <div class="call-who">
+          <div class="call-avatar" id="callAvatar" aria-hidden="true"><span class="call-avatar-emoji">👹</span></div>
+          <div class="call-who-text">
+            <b>BOOM</b>
+            <small id="callTimer">00:00</small>
+          </div>
+        </div>
+        <span class="call-state" id="callState">Đang kết nối…</span>
+      </div>
+
+      <div class="call-stage">
+        <ul class="call-log" id="callLog" hidden></ul>
+        <div class="call-bubble" id="callBubble" aria-live="polite">
+          <b id="callSaid">…</b>
+        </div>
+        <div class="call-you" id="callYou" hidden>
+          <span class="cy-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          <span>BOOM đang nghe cậu nói…</span>
+        </div>
+      </div>
+
+      <div class="call-foot">
+        <div class="call-heard" id="callHeard" hidden><span id="callHeardText"></span></div>
+
+        <div class="call-type" id="callType" hidden>
+          <input type="text" id="callInput" placeholder="Gõ điều muốn nói với BOOM…" aria-label="Gõ câu trả lời" />
+          <button class="round-btn lg" id="btnCallSend" type="button" aria-label="Gửi">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg>
+          </button>
+        </div>
+
+        <div class="call-actions">
+          <button class="round-btn lg" id="btnCallHear" type="button" aria-label="Nghe lại">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05A4.5 4.5 0 0 0 16.5 12zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          </button>
+          <button class="mic-btn" id="btnMic" type="button" aria-label="Bấm để nói">
+            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
+          </button>
+          <button class="round-btn lg danger" id="btnHangup" type="button" aria-label="Kết thúc cuộc gọi">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a1 1 0 0 1-.29-.7c0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .27-.11.52-.29.7l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28a11.3 11.3 0 0 0-2.66-1.85.99.99 0 0 1-.56-.9v-3.1A17.5 17.5 0 0 0 12 9z"/></svg>
+          </button>
+        </div>
+        <button class="btn btn-text btn-block" id="btnCallSkip" type="button" hidden>Không nói được, gõ chữ</button>
+      </div>
     </div>
   </section>
 
