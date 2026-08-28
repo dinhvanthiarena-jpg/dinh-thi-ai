@@ -118,6 +118,143 @@
     </symbol>
 
     <!-- ===== minh hoạ 48x48 ===== -->
+    <!-- ===== CẢNH MINH HOẠ BÀI HỌC =====
+         Khung 320x200 phủ kín, mỗi cảnh ba lớp: nền, hậu cảnh, rồi nhân vật ở
+         trước. Màu cố định chứ không currentColor — cảnh cần nhiều màu mới ra
+         chiều sâu. Tông tím cho hợp nền app. -->
+
+    <symbol id="s-school" viewBox="0 0 320 200">
+      <defs><linearGradient id="g-school" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3B1D6E"/><stop offset="1" stop-color="#241046"/></linearGradient></defs>
+      <rect width="320" height="200" fill="url(#g-school)"/>
+      <rect x="46" y="34" width="176" height="98" rx="6" fill="#1B0E36"/>
+      <rect x="52" y="40" width="164" height="86" rx="3" fill="#2C5F4E"/>
+      <g stroke="#A7E8C8" stroke-width="3" stroke-linecap="round" opacity=".75" fill="none">
+        <path d="M68 62h58M68 76h84M68 90h44"/><circle cx="182" cy="76" r="14"/></g>
+      <rect x="30" y="132" width="260" height="8" rx="4" fill="#1B0E36"/>
+      <g><ellipse cx="238" cy="180" rx="34" ry="9" fill="#180C31"/>
+        <path d="M222 178c0-16 7-28 16-28s16 12 16 28Z" fill="#7C3AED"/>
+        <path d="M228 150h16l4 10h-24Z" fill="#A78BFA"/>
+        <circle cx="238" cy="140" r="13" fill="#F1C4A0"/>
+        <path d="M226 138c0-9 5-14 12-14s12 5 12 14c-4-4-8-6-12-6s-8 2-12 6Z" fill="#3F2A1D"/>
+        <circle cx="234" cy="141" r="1.6" fill="#2B1A12"/><circle cx="242" cy="141" r="1.6" fill="#2B1A12"/>
+        <path d="M234 147c2.4 2 5.6 2 8 0" stroke="#2B1A12" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <rect x="248" y="158" width="22" height="16" rx="2" fill="#F59E0B"/>
+        <rect x="248" y="158" width="22" height="4" rx="2" fill="#FBBF24"/></g>
+      <g><ellipse cx="86" cy="182" rx="26" ry="8" fill="#180C31"/>
+        <path d="M74 180c0-13 5-22 12-22s12 9 12 22Z" fill="#EC4899"/>
+        <circle cx="86" cy="152" r="11" fill="#E8B48C"/>
+        <path d="M75 152c0-8 5-12 11-12s11 4 11 12c0-4-4-6-11-6s-11 2-11 6Z" fill="#241A2E"/>
+        <circle cx="82" cy="153" r="1.4" fill="#2B1A12"/><circle cx="90" cy="153" r="1.4" fill="#2B1A12"/></g>
+    </symbol>
+
+    <symbol id="s-clock" viewBox="0 0 320 200">
+      <defs><linearGradient id="g-clock" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#2E1A5C"/><stop offset="1" stop-color="#180D33"/></linearGradient></defs>
+      <rect width="320" height="200" fill="url(#g-clock)"/>
+      <circle cx="252" cy="46" r="20" fill="#FCD34D" opacity=".28"/>
+      <circle cx="252" cy="46" r="13" fill="#FBBF24"/>
+      <g opacity=".5" fill="#4C2A8C">
+        <rect x="18" y="112" width="26" height="72" rx="3"/><rect x="52" y="96" width="22" height="88" rx="3"/>
+        <rect x="278" y="104" width="26" height="80" rx="3"/></g>
+      <rect x="0" y="180" width="320" height="20" fill="#150B2C"/>
+      <circle cx="160" cy="98" r="62" fill="#1C1040"/>
+      <circle cx="160" cy="98" r="54" fill="#F5F3FF"/>
+      <circle cx="160" cy="98" r="46" fill="#EDE9FE"/>
+      <g stroke="#6D28D9" stroke-width="3" stroke-linecap="round">
+        <path d="M160 62v6M160 128v6M124 98h6M190 98h6"/></g>
+      <path d="M160 98V70" stroke="#4C1D95" stroke-width="5" stroke-linecap="round"/>
+      <path d="M160 98l22 14" stroke="#DB2777" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="160" cy="98" r="5" fill="#4C1D95"/>
+    </symbol>
+
+    <symbol id="s-friend" viewBox="0 0 320 200">
+      <defs><linearGradient id="g-friend" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3A1C69"/><stop offset="1" stop-color="#1F0E3F"/></linearGradient></defs>
+      <rect width="320" height="200" fill="url(#g-friend)"/>
+      <circle cx="60" cy="44" r="26" fill="#FFFFFF" opacity=".07"/>
+      <circle cx="266" cy="60" r="34" fill="#FFFFFF" opacity=".05"/>
+      <ellipse cx="160" cy="186" rx="96" ry="11" fill="#160B2F"/>
+      <g><path d="M96 186c0-30 13-50 30-50s30 20 30 50Z" fill="#38BDF8"/>
+        <circle cx="126" cy="120" r="19" fill="#F1C4A0"/>
+        <path d="M107 118c0-13 8-20 19-20s19 7 19 20c-5-6-11-9-19-9s-14 3-19 9Z" fill="#3F2A1D"/>
+        <circle cx="120" cy="121" r="2.2" fill="#2B1A12"/><circle cx="132" cy="121" r="2.2" fill="#2B1A12"/>
+        <path d="M119 129c4 4 10 4 14 0" stroke="#2B1A12" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>
+      <g><path d="M164 186c0-30 13-50 30-50s30 20 30 50Z" fill="#F472B6"/>
+        <circle cx="194" cy="120" r="19" fill="#E8B48C"/>
+        <path d="M175 120c0-14 8-22 19-22s19 8 19 22c0 6-3 9-6 9 2-8-4-13-13-13s-15 5-13 13c-3 0-6-3-6-9Z" fill="#2A1830"/>
+        <circle cx="188" cy="121" r="2.2" fill="#2B1A12"/><circle cx="200" cy="121" r="2.2" fill="#2B1A12"/>
+        <path d="M187 129c4 4 10 4 14 0" stroke="#2B1A12" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>
+      <path d="M150 150c8-6 12-6 20 0" stroke="#FDE68A" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="s-bread" viewBox="0 0 320 200">
+      <defs><linearGradient id="g-bread" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3D2060"/><stop offset="1" stop-color="#1E0F3A"/></linearGradient></defs>
+      <rect width="320" height="200" fill="url(#g-bread)"/>
+      <rect x="0" y="128" width="320" height="72" fill="#4A2B1F"/>
+      <rect x="0" y="128" width="320" height="7" fill="#6B3E2C"/>
+      <ellipse cx="160" cy="150" rx="74" ry="12" fill="#2F1A13"/>
+      <ellipse cx="160" cy="142" rx="72" ry="16" fill="#F5F3FF"/>
+      <ellipse cx="160" cy="136" rx="72" ry="16" fill="#FFFFFF"/>
+      <path d="M104 132c14-22 42-30 56-30s42 8 56 30Z" fill="#E9D5FF"/>
+      <g><ellipse cx="160" cy="112" rx="42" ry="16" fill="#D97706"/>
+        <ellipse cx="160" cy="108" rx="42" ry="16" fill="#F59E0B"/>
+        <path d="M124 104c8-7 20-11 36-11s28 4 36 11c-10 5-22 8-36 8s-26-3-36-8Z" fill="#FBBF24"/>
+        <g fill="#7C2D12" opacity=".55"><ellipse cx="142" cy="103" rx="4" ry="2.4"/><ellipse cx="168" cy="99" rx="5" ry="2.6"/><ellipse cx="182" cy="106" rx="4" ry="2.2"/></g></g>
+      <g stroke="#C4B5FD" stroke-width="4" stroke-linecap="round" opacity=".6" fill="none">
+        <path d="M138 62c0-10 8-10 8-20s-8-10-8-20"/><path d="M160 58c0-10 8-10 8-20s-8-10-8-20"/>
+        <path d="M182 62c0-10 8-10 8-20s-8-10-8-20"/></g>
+    </symbol>
+
+    <symbol id="s-car" viewBox="0 0 320 200">
+      <defs><linearGradient id="g-car" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3A1C69"/><stop offset="1" stop-color="#1C0E3B"/></linearGradient></defs>
+      <rect width="320" height="200" fill="url(#g-car)"/>
+      <circle cx="264" cy="42" r="16" fill="#FDE68A" opacity=".9"/>
+      <g fill="#301856" opacity=".85">
+        <rect x="12" y="66" width="34" height="80" rx="3"/><rect x="54" y="50" width="28" height="96" rx="3"/>
+        <rect x="238" y="60" width="32" height="86" rx="3"/><rect x="278" y="78" width="30" height="68" rx="3"/></g>
+      <g fill="#C4B5FD" opacity=".4">
+        <rect x="19" y="74" width="8" height="9"/><rect x="33" y="74" width="8" height="9"/>
+        <rect x="19" y="92" width="8" height="9"/><rect x="61" y="60" width="8" height="9"/>
+        <rect x="245" y="70" width="8" height="9"/><rect x="259" y="70" width="8" height="9"/></g>
+      <rect x="0" y="146" width="320" height="54" fill="#241338"/>
+      <g stroke="#F5F3FF" stroke-width="4" stroke-dasharray="18 16" opacity=".45"><path d="M0 176h320"/></g>
+      <g><path d="M74 148V126c0-6 4-10 10-10h20l16-20h44l10 20h20c6 0 10 4 10 10v22Z" fill="#EF4444"/>
+        <path d="M112 100h38l8 16h-58Z" fill="#93C5FD"/>
+        <rect x="74" y="132" width="130" height="16" rx="4" fill="#DC2626"/>
+        <circle cx="102" cy="150" r="16" fill="#1B1024"/><circle cx="102" cy="150" r="7" fill="#9CA3AF"/>
+        <circle cx="178" cy="150" r="16" fill="#1B1024"/><circle cx="178" cy="150" r="7" fill="#9CA3AF"/>
+        <rect x="196" y="126" width="12" height="8" rx="3" fill="#FDE68A"/></g>
+    </symbol>
+
+    <symbol id="s-family" viewBox="0 0 320 200">
+      <defs><linearGradient id="g-fam" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#42206F"/><stop offset="1" stop-color="#1E0F3C"/></linearGradient></defs>
+      <rect width="320" height="200" fill="url(#g-fam)"/>
+      <path d="M84 106V72l40-30 40 30v34Z" fill="#2A1550"/>
+      <path d="M118 42h-38l44-33 44 33h-38Z" fill="#7C3AED" opacity=".35"/>
+      <circle cx="252" cy="52" r="24" fill="#FBBF24" opacity=".25"/>
+      <circle cx="252" cy="52" r="15" fill="#FCD34D"/>
+      <ellipse cx="160" cy="188" rx="110" ry="10" fill="#160B2F"/>
+      <g><path d="M60 188c0-30 12-48 28-48s28 18 28 48Z" fill="#6366F1"/>
+        <circle cx="88" cy="124" r="18" fill="#E8B48C"/>
+        <path d="M70 124c0-13 8-20 18-20s18 7 18 20c0-6-8-9-18-9s-18 3-18 9Z" fill="#2A1830"/>
+        <circle cx="82" cy="125" r="2" fill="#2B1A12"/><circle cx="94" cy="125" r="2" fill="#2B1A12"/>
+        <path d="M82 132c3.6 3.4 8.4 3.4 12 0" stroke="#2B1A12" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+      <g><path d="M204 188c0-30 12-48 28-48s28 18 28 48Z" fill="#F472B6"/>
+        <circle cx="232" cy="124" r="18" fill="#F1C4A0"/>
+        <path d="M214 126c0-14 8-22 18-22s18 8 18 22c0 7-4 10-7 10 2-9-3-14-11-14s-13 5-11 14c-3 0-7-3-7-10Z" fill="#3F2A1D"/>
+        <circle cx="226" cy="125" r="2" fill="#2B1A12"/><circle cx="238" cy="125" r="2" fill="#2B1A12"/>
+        <path d="M226 132c3.6 3.4 8.4 3.4 12 0" stroke="#2B1A12" stroke-width="2" fill="none" stroke-linecap="round"/></g>
+      <g><path d="M136 188c0-20 8-32 24-32s24 12 24 32Z" fill="#34D399"/>
+        <circle cx="160" cy="144" r="14" fill="#F1C4A0"/>
+        <path d="M146 143c0-10 6-16 14-16s14 6 14 16c-4-5-8-7-14-7s-10 2-14 7Z" fill="#4A2E1C"/>
+        <circle cx="155" cy="145" r="1.8" fill="#2B1A12"/><circle cx="165" cy="145" r="1.8" fill="#2B1A12"/>
+        <path d="M155 151c3 2.8 7 2.8 10 0" stroke="#2B1A12" stroke-width="1.8" fill="none" stroke-linecap="round"/></g>
+    </symbol>
+
     <!-- Hình minh hoạ cho bài học. Vẽ đơn sắc theo currentColor để ăn theo chủ đề
          sáng/tối, và phóng to trong khung ảnh vẫn nét vì là SVG. -->
     <symbol id="p-man" viewBox="0 0 48 48"><circle cx="24" cy="14" r="7" fill="currentColor"/><path d="M10 40c0-7.7 6.3-13 14-13s14 5.3 14 13v2H10Z" fill="currentColor"/></symbol>

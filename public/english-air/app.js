@@ -503,7 +503,12 @@ function khungAnh(w) {
     // Ảnh thiếu file thì gỡ cả khung đi, thà không có còn hơn ô vỡ.
     im.addEventListener("error", () => box.remove());
     box.append(im);
+  } else if (document.getElementById("s-" + w.pic)) {
+    // Cảnh vẽ tay: phủ kín khung, tự mang nền và chiều sâu của nó.
+    box.classList.add("canh");
+    box.append(svgUse("s-" + w.pic, "0 0 320 200"));
   } else {
+    // Chưa vẽ cảnh cho chủ đề này thì dùng tạm hình nét đơn trên nền dịu.
     box.classList.add("ve");
     box.append(pic(w.pic));
   }

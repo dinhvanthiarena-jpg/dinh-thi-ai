@@ -1175,6 +1175,9 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
    tự dựng khung cảnh quanh nó, không thì nhìn trống trải. */
 .pic-hero.ve { background:
     radial-gradient(120% 100% at 50% 0%, var(--brand-soft) 0%, var(--muted) 70%); }
+/* Cảnh vẽ tay phủ kín khung — nó tự mang nền riêng nên không cần nền phụ. */
+.pic-hero.canh { background: none; }
+.pic-hero.canh svg { width: 100%; height: 100%; display: block; }
 .pic-hero.ve svg { width: 44%; max-width: 150px; height: auto; color: var(--brand-ink);
   filter: drop-shadow(0 6px 14px rgba(0,0,0,.18)); }
 
