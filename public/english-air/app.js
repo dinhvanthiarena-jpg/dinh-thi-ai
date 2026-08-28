@@ -1797,14 +1797,43 @@ function theGoi(g, noiBat, d) {
     }
   }
 
-  if (d.dangNhap && d.sanSang) {
-    const nut = el("button", "btn " + (noiBat ? "btn-primary" : "btn-soft") + " btn-block mt");
-    nut.type = "button";
-    nut.textContent = "Mua " + g.ten.toLowerCase();
-    nut.addEventListener("click", () => muaGoi(g.ma));
-    the.append(nut);
-  }
+  // Nút luôn hiện. Trước đây chưa cấu hình ngân hàng thì tôi ẩn nút đi, thành ra
+  // bấm vào thẻ chẳng có gì xảy ra — người dùng tưởng app hỏng.
+  const nut = el("button", "btn " + (noiBat ? "btn-primary" : "btn-soft") + " btn-block mt");
+  nut.type = "button";
+  nut.textContent = "Mua " + g.ten.toLowerCase();
+  nut.addEventListener("click", ev => { ev.stopPropagation(); chonGoi(g.ma); });
+  the.append(nut);
+
+  // Bấm vào chỗ nào trong thẻ cũng được, không phải nhắm đúng cái nút.
+  the.addEventListener("click", () => chonGoi(g.ma));
+  the.style.cursor = "pointer";
   return the;
+}
+
+/** Bấm chọn một gói. Mỗi nhánh đều phải nói cho người ta biết chuyện gì đang xảy ra. */
+function chonGoi(ma) {
+  const d = P2.data || {};
+  if (!d.dangNhap) {
+    openSheet({
+      title: "Cần đăng nhập trước",
+      body: "Gói Pro gắn với tài khoản của bạn, nên phải đăng nhập rồi mới mua được.",
+      yes: "Đăng nhập", no: "Để sau",
+      onYes() { location.href = "../auth/login?next=/english-air/"; }
+    });
+    return;
+  }
+  if (!d.sanSang) {
+    openSheet({
+      title: "Chưa mở bán được",
+      body: "Thầy Đinh Thi chưa bật tài khoản nhận tiền cho app, nên chưa ai mua gói được. " +
+            "Khi nào bật xong, bấm vào đây sẽ ra mã QR để quét bằng app ngân hàng.",
+      yes: "Đã hiểu", no: "Đóng",
+      onYes() {}
+    });
+    return;
+  }
+  muaGoi(ma);
 }
 
 function oVaoNhom() {
@@ -1868,7 +1897,9 @@ function veManQR(don) {
     const img = el("img"); img.src = don.qr; img.alt = "Mã QR chuyển khoản"; img.decoding = "async";
     box.append(img);
   }
-  box.append(el("p", "pro-fine", "Mở app ngân hàng bất kỳ rồi quét. Số tiền và nội dung đã điền sẵn."));
+  box.append(el("p", "pro-fine",
+    "Mở app ngân hàng bất kỳ rồi quét. Số tiền và nội dung đã điền sẵn. "
+    + "Bạn KHÔNG phải nhập số thẻ ở đâu cả."));
   const cho = el("span", "pro-wait");
   cho.append(el("i"));
   // Chưa nối tự đối soát thì đừng hứa "vài giây" — thầy còn phải bấm duyệt tay.
