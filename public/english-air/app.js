@@ -1196,7 +1196,8 @@ addEventListener("orientationchange", () => setTimeout(fitScene, 120));
 
 const CHAT_URL = "../api/english-air/chat";
 
-const C = { mode: "free", lang: "en", speaking: false, sayDone: null, watch: null,
+const C = { mode: "free", lang: "en", speaking: false, sayDone: null,
+            watch: null, im: null, chotNghe: null,
             msgs: [], target: null,
             right: 0, asked: 0, t0: 0, timer: null, rec: null, listening: false, busy: false };
 
@@ -1458,61 +1459,87 @@ function micFailed(msg) {
   $("#callInput").focus();
 }
 
+/* Nghe cho hết câu. Trình duyệt hay chốt sớm sau mỗi khoảng lặng ngắn, nên nếu
+   cứ thấy "kết quả cuối" là gửi đi thì người ta mới ngập ngừng một nhịp đã bị
+   cắt lời. Cách làm: gom hết các mẩu lại, mỗi lần còn nghe thấy tiếng thì lùi
+   hạn chót; im đủ NGHE_LANG mới coi là nói xong. Trình duyệt tự tắt giữa chừng
+   thì mở lại mà nghe tiếp. */
+const NGHE_LANG = 2500;      // im lặng bấy nhiêu mili giây thì coi như hết câu
+const NGHE_TOI_DA = 60000;   // trần an toàn cho một lượt nói
+const MO_LAI_TOI_DA = 12;    // số lần mở lại bộ nghe, chặn vòng lặp khi micro hỏng
+
 function startListening() {
   if (!SR || C.listening || C.busy) return;
   const r = new SR();
   C.rec = r; C.listening = true;
   const lg = NO_LISTEN[C.lang] ? "en" : C.lang;
   r.lang = langInfo(lg).sr;
-  // Lấy cả kết quả tạm: iPhone rất hay tắt bộ nghe mà không bắn kết quả cuối,
-  // có bản tạm thì còn vớt được câu người ta vừa nói.
   r.interimResults = true;
   r.maxAlternatives = 3;
+  try { r.continuous = true; } catch { /* máy nào không cho thì thôi */ }
+
   $("#btnMic").classList.add("listening");
   $("#callMascot").classList.add("listening");
   $("#callYou").hidden = false;
   setState("Đang nghe bạn…", "listen");
 
-  let xong = false;
-  let tam = "";
-  const nop = alts => {
+  let xong = false, dungHan = false;
+  let daNoi = "", tam = "", altCuoi = null;
+  let moLai = 0;
+  const batDau = Date.now();
+
+  /** Chốt lượt nghe: gom hết những gì nghe được rồi gửi đi. */
+  const chot = () => {
     if (xong) return;
-    xong = true;
-    clearTimeout(C.watch);
+    xong = true; dungHan = true;
+    clearTimeout(C.im); clearTimeout(C.watch);
+    const t = (daNoi + " " + tam).trim();
     stopListening();
-    const t = (alts[0] || "").trim();
     if (!t) { micFailed("Không nghe rõ, bạn nói lại hoặc gõ chữ nhé."); return; }
+    const alts = altCuoi && altCuoi.length ? altCuoi : [t];
     if (C.mode === "free" || !C.target) heardReply(t);
     else heardReply(t, alts.reduce((best, x) => Math.max(best, similar(x, C.target.en)), 0));
   };
+  C.chotNghe = chot;
+
+  /** Còn nghe thấy tiếng thì lùi hạn chót ra sau. */
+  const hoanLai = () => {
+    clearTimeout(C.im);
+    C.im = setTimeout(chot, NGHE_LANG);
+  };
 
   r.onresult = e => {
-    const cuoi = e.results[e.results.length - 1];
-    if (!cuoi.isFinal) {
-      tam = [...e.results].map(x => x[0].transcript).join(" ").trim();
-      if (tam) setState("Nghe: " + tam.slice(-38), "listen");
-      return;
+    let fin = "", int = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const res = e.results[i];
+      if (res.isFinal) { fin += res[0].transcript + " "; altCuoi = [...res].map(x => x.transcript); }
+      else int += res[0].transcript + " ";
     }
-    nop([...cuoi].map(x => x.transcript));
+    if (fin.trim()) daNoi = (daNoi + " " + fin).trim();
+    tam = int.trim();
+    const hien = (daNoi + " " + tam).trim();
+    if (hien) setState("Nghe: " + hien.slice(-38), "listen");
+    hoanLai();
   };
 
   r.onerror = ev => {
     if (xong) return;
     if (ev.error === "no-speech") {
-      xong = true; clearTimeout(C.watch); stopListening();
-      setState("Không nghe thấy gì, bấm micro nói lại");
+      // Chưa nói gì thì cứ nghe tiếp, đừng vội tắt.
+      if (!daNoi && !tam && Date.now() - batDau < NGHE_TOI_DA) return;
+      chot();
       return;
     }
-    // Máy không nghe được thứ tiếng này thì lùi về tiếng Anh, đừng bắt người học xoay xở.
     if (ev.error === "language-not-supported" && C.lang !== "en") {
-      xong = true; clearTimeout(C.watch); stopListening();
+      xong = true; dungHan = true; clearTimeout(C.im); clearTimeout(C.watch); stopListening();
       NO_LISTEN[C.lang] = true;
       C.lang = "en";
       toast("Máy chưa nghe được tiếng đó, chuyển sang nghe tiếng Anh.");
       setTimeout(startListening, 250);
       return;
     }
-    xong = true; clearTimeout(C.watch); stopListening();
+    if (daNoi || tam) { chot(); return; }
+    xong = true; dungHan = true; clearTimeout(C.im); clearTimeout(C.watch); stopListening();
     micFailed(ev.error === "not-allowed"
       ? "Chưa được cấp quyền micro. Vào Cài đặt cho phép rồi thử lại, hoặc gõ chữ nhé."
       : "Máy không nghe được (" + ev.error + "). Bạn gõ chữ bên dưới nhé.");
@@ -1520,15 +1547,18 @@ function startListening() {
 
   r.onend = () => {
     if (xong) return;
-    // Tắt mà không ra kết quả nào. Có bản tạm thì dùng tạm, không thì phải BÁO,
-    // đừng im lặng — im lặng là lúc người ta tưởng app hỏng.
-    if (tam) { nop([tam]); return; }
-    xong = true; clearTimeout(C.watch); stopListening();
+    // Trình duyệt tự tắt nhưng người ta chưa dừng hẳn: mở lại mà nghe tiếp.
+    if (!dungHan && moLai < MO_LAI_TOI_DA && Date.now() - batDau < NGHE_TOI_DA) {
+      moLai++;
+      try { r.start(); return; } catch { /* mở lại không được thì chốt */ }
+    }
+    if (daNoi || tam) { chot(); return; }
+    xong = true; clearTimeout(C.im); clearTimeout(C.watch); stopListening();
     micFailed("Máy chưa nghe được gì. Bạn bấm micro nói lại, hoặc gõ chữ bên dưới.");
   };
 
   clearTimeout(C.watch);
-  C.watch = setTimeout(() => { try { r.stop(); } catch {} }, 12000);
+  C.watch = setTimeout(chot, NGHE_TOI_DA);
   try {
     r.start();
   } catch (err) {
@@ -1538,7 +1568,9 @@ function startListening() {
 }
 function stopListening() {
   C.listening = false;
+  C.chotNghe = null;
   clearTimeout(C.watch);
+  clearTimeout(C.im);
   $("#btnMic").classList.remove("listening");
   $("#callMascot").classList.remove("listening");
   $("#callYou").hidden = true;
@@ -1561,7 +1593,8 @@ $("#btnStartCall").addEventListener("click", () => { primeSpeech(); startCall("t
 $("#btnMic").addEventListener("click", () => {
   primeSpeech();
   // Đang nói dở mà người học bấm micro thì cắt lời ngay — như nói chuyện thật.
-  if (C.listening) { stopListening(); return; }
+  // Đang nghe mà bấm nút là ý "tớ nói xong rồi" — phải gửi đi, đừng vứt bỏ.
+  if (C.listening) { (C.chotNghe || stopListening)(); return; }
   if (C.speaking) {
     stopSpeak();
     if (C.sayDone) C.sayDone();
