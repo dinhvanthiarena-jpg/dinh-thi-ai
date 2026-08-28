@@ -2475,6 +2475,24 @@
       callRefreshVoices();
     }
 
+    // iPhone/iPad chỉ cho phát tiếng lần đầu ngay trong lúc ngón tay còn
+    // chạm màn hình. Câu nói đầu của Mon.L lại đến sau một lượt chờ mạng
+    // (fetch), nên phải "mồi" sẵn ngay lúc bấm nút — không thì cả cuộc gọi
+    // im lặng mà chẳng báo lỗi gì. Cùng cách english-air đã làm.
+    let callSpeechPrimed = false;
+    function callPrimeSpeech() {
+      if (!('speechSynthesis' in window)) return;
+      callRefreshVoices();
+      if (callSpeechPrimed) return;
+      callSpeechPrimed = true;
+      try {
+        const utter = new SpeechSynthesisUtterance(' ');
+        utter.volume = 0;
+        utter.lang = 'vi-VN';
+        window.speechSynthesis.speak(utter);
+      } catch (e) {}
+    }
+
     function callFormatTime(sec) {
       const m = Math.floor(sec / 60).toString().padStart(2, '0');
       const s = (sec % 60).toString().padStart(2, '0');
@@ -2741,6 +2759,7 @@
     if (btnCallPreview) {
       btnCallPreview.addEventListener('click', () => {
         sfx.click();
+        callPrimeSpeech();
         const line = CALL_PREVIEW_LINES[callPreviewTurn++ % CALL_PREVIEW_LINES.length];
         previewMon.classList.add('talking');
         let previewDone = false;
@@ -2765,6 +2784,7 @@
     btnCallPreviewBack.addEventListener('click', () => { sfx.click(); showScreen('home'); });
     btnStartCallReal.addEventListener('click', () => {
       sfx.click();
+      callPrimeSpeech();
       callPreviewWrap.hidden = true;
       callLiveWrap.hidden = false;
       callStart();
@@ -2772,13 +2792,14 @@
     btnHangup.addEventListener('click', () => { sfx.click(); callShowPreview(); showScreen('home'); });
     btnMic.addEventListener('click', () => {
       sfx.click();
+      callPrimeSpeech();
       if (btnMic.classList.contains('on')) callStopListening();
       else callStartListening();
     });
-    btnCallHear.addEventListener('click', () => { sfx.click(); callReplayLast(); });
+    btnCallHear.addEventListener('click', () => { sfx.click(); callPrimeSpeech(); callReplayLast(); });
     btnCallSkip.addEventListener('click', () => { sfx.click(); callSwitchToTyped(); });
-    btnCallSend.addEventListener('click', () => { sfx.click(); callSendTyped(); });
-    callInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); callSendTyped(); } });
+    btnCallSend.addEventListener('click', () => { sfx.click(); callPrimeSpeech(); callSendTyped(); });
+    callInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); callPrimeSpeech(); callSendTyped(); } });
   }
 
   /* ================= AUTO UPDATE ================= */
