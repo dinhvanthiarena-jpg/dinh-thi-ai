@@ -633,6 +633,33 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 }
 .tile-w:active { transform: scale(.96); }
 .tile-w.used { opacity: 0; visibility: hidden; }
+/* Thẻ gốc mờ đi trong lúc bản kéo đang bay, để thấy rõ mình đang cầm cái nào. */
+.tile-w.dang-keo { opacity: .28; }
+/* Bản đang bay theo tay: nằm trên mọi thứ, không ăn sự kiện chuột. */
+.tile-fly { position: fixed; z-index: 90; margin: 0; pointer-events: none;
+  justify-content: center; box-shadow: inset 0 0 0 2px var(--brand), 0 10px 24px rgba(0,0,0,.32);
+  background: var(--card); transition: none; will-change: transform, left, top; }
+/* Chỉ lúc buông mới cho chạy mượt về đích — lúc kéo phải bám tay tức thì. */
+.tile-fly.ve { transition: left .2s var(--e), top .2s var(--e),
+  transform .2s var(--e), opacity .2s var(--e); }
+
+/* Ô trống đang được nhắm tới */
+.slot.over { border-style: solid; border-color: var(--brand);
+  background: var(--brand-soft); transform: scale(1.06); }
+.slot { transition: transform var(--t1) var(--e), background var(--t1) var(--e),
+  border-color var(--t1) var(--e); }
+/* Thả từ sai thì ô lắc đầu */
+.slot.rung { animation: lacDau .34s var(--e); }
+@keyframes lacDau {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-7px); }
+  45% { transform: translateX(6px); }
+  70% { transform: translateX(-4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slot.rung { animation: none; }
+  .tile-fly.ve { transition-duration: .01s; }
+}
 
 /* chọn hình */
 .pics { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }

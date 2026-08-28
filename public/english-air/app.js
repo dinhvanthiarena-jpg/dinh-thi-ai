@@ -773,6 +773,7 @@ const DRILL = {
     st.append(el("p", "ask", d.sent.vi));
     const anh = anhChoCau(d);
     if (anh) st.append(anh);
+
     const parts = d.sent.en.split(" ");
     const line = el("div", "blanks");
     const slots = [];
@@ -781,6 +782,7 @@ const DRILL = {
         const s = el("button", "slot"); s.type = "button";
         s.dataset.pos = String(i);
         s.setAttribute("aria-label", "Ô trống " + (slots.length + 1));
+        // Bấm vào ô đã điền thì nhả từ ra, trả thẻ về ngân hàng.
         s.addEventListener("click", () => {
           if (P.answered || !s.dataset.word) return;
           const t = bank.querySelector(`.tile-w[data-w="${CSS.escape(s.dataset.word)}"].used`);
@@ -791,22 +793,112 @@ const DRILL = {
         slots.push(s); line.append(s);
       } else line.append(el("span", "fixed", w));
     });
+
     const bank = el("div", "bank");
     d.bank.forEach(w => {
       const t = el("button", "tile-w", w); t.type = "button"; t.dataset.w = w;
-      t.addEventListener("click", () => {
-        if (P.answered || t.classList.contains("used")) return;
-        const free = slots.find(s => !s.dataset.word);
-        if (!free) return;
-        free.textContent = w; free.dataset.word = w; free.classList.add("filled");
-        t.classList.add("used");
-        sync();
+      ganKeo(t, w);
+      // Bàn phím và người không kéo được vẫn dùng được: bấm là thử ô trống đầu tiên.
+      t.addEventListener("click", ev => {
+        if (ev.detail !== 0) return;          // chuột/cảm ứng đã đi đường kéo rồi
+        const o = slots.find(x => !x.dataset.word);
+        if (o) thuDat(t, w, o);
       });
       bank.append(t);
     });
+
+    /** Đặt một từ vào ô — chỉ nhận nếu đúng, sai thì ô rung và từ ở nguyên chỗ. */
+    function thuDat(t, w, o) {
+      if (P.answered || !o) return false;
+      const k = slots.indexOf(o);
+      if (norm(w) !== norm(d.answers[k])) {
+        o.classList.remove("rung");
+        void o.offsetWidth;                   // ép trình duyệt chạy lại hoạt ảnh
+        o.classList.add("rung");
+        return false;
+      }
+      o.textContent = w; o.dataset.word = w; o.classList.add("filled");
+      t.classList.add("used");
+      sync();
+      return true;
+    }
+
+    /** Kéo thả kiểu mềm: thẻ nghiêng và giãn theo tay, thả trúng ô thì bắt vào. */
+    function ganKeo(t, w) {
+      t.addEventListener("pointerdown", ev => {
+        if (P.answered || t.classList.contains("used")) return;
+        ev.preventDefault();
+        const r = t.getBoundingClientRect();
+        const bay = t.cloneNode(true);
+        bay.className = "tile-w tile-fly";
+        bay.style.width = r.width + "px";
+        bay.style.height = r.height + "px";
+        document.body.append(bay);
+
+        const lech = { x: ev.clientX - r.left, y: ev.clientY - r.top };
+        let x = ev.clientX, y = ev.clientY, vx = 0, truocX = ev.clientX;
+        t.classList.add("dang-keo");
+
+        const ve = () => {
+          bay.style.left = (x - lech.x) + "px";
+          bay.style.top = (y - lech.y) + "px";
+          // Nghiêng và hơi dẹt theo tốc độ ngang — đó là cái làm nó thấy mềm.
+          const ng = clamp(vx * 0.7, -15, 15);
+          const gian = 1 + Math.min(Math.abs(vx) / 260, 0.12);
+          bay.style.transform = `rotate(${ng}deg) scale(${1.06 * gian}, ${1.06 / gian})`;
+        };
+        ve();
+
+        const oGan = () => {
+          let tot = null, gan = Infinity;
+          slots.forEach(o => {
+            if (o.dataset.word) return;
+            const b = o.getBoundingClientRect();
+            const dd = Math.hypot(x - (b.left + b.width / 2), y - (b.top + b.height / 2));
+            if (dd < gan) { gan = dd; tot = o; }
+          });
+          return gan < 110 ? tot : null;
+        };
+
+        const dichuyen = e2 => {
+          vx = e2.clientX - truocX; truocX = e2.clientX;
+          x = e2.clientX; y = e2.clientY;
+          ve();
+          const o = oGan();
+          slots.forEach(n => n.classList.toggle("over", n === o));
+        };
+
+        const buong = () => {
+          window.removeEventListener("pointermove", dichuyen);
+          window.removeEventListener("pointerup", buong);
+          window.removeEventListener("pointercancel", buong);
+          const o = oGan();
+          slots.forEach(n => n.classList.remove("over"));
+          t.classList.remove("dang-keo");
+
+          const dich = o && !o.dataset.word && norm(w) === norm(d.answers[slots.indexOf(o)])
+            ? o.getBoundingClientRect()
+            : t.getBoundingClientRect();
+          const nhan = !!(o && thuDat(t, w, o));
+
+          // Cho thẻ bay về đích rồi mới biến mất, không nhảy cóc.
+          bay.classList.add("ve");
+          bay.style.left = dich.left + "px";
+          bay.style.top = dich.top + "px";
+          bay.style.transform = "rotate(0deg) scale(1)";
+          if (nhan) bay.style.opacity = "0";
+          setTimeout(() => bay.remove(), 220);
+        };
+
+        window.addEventListener("pointermove", dichuyen);
+        window.addEventListener("pointerup", buong);
+        window.addEventListener("pointercancel", buong);
+      });
+    }
+
     function sync() {
-      const filled = slots.every(s => s.dataset.word);
-      P.picked = { slots, ok: slots.every((s, k) => norm(s.dataset.word || "") === norm(d.answers[k])) };
+      const filled = slots.every(o => o.dataset.word);
+      P.picked = { slots, ok: slots.every((o, k) => norm(o.dataset.word || "") === norm(d.answers[k])) };
       setBtn("Kiểm tra", "btn-primary", filled);
     }
     st.append(line, el("div", "bank-line"), bank);
