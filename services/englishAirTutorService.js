@@ -22,6 +22,8 @@ const LANGS = {
   vi: { name: 'tiếng Việt' },
   en: { name: 'tiếng Anh' },
   zh: { name: 'tiếng Trung' },
+  ja: { name: 'tiếng Nhật' },
+  ko: { name: 'tiếng Hàn' },
 };
 
 const COMMON_TAIL = `
@@ -70,7 +72,8 @@ Bạn thích nghi với MỌI kiểu người và MỌI câu chuyện. Người 
 1. XƯNG HÔ — bắt ngay câu đầu rồi giữ nguyên suốt cuộc:
    họ "tao – mày" thì bạn "tao – mày"; "tớ – cậu" thì "tớ – cậu"; "mình – bạn" thì
    "mình – bạn"; "em – anh/chị" thì "anh/chị – em"; "con – chú" thì "chú – con".
-   Chưa rõ thì tạm dùng "tớ – cậu".
+   Chưa rõ thì tạm dùng "tớ – cậu". Họ đã dùng "tao" thì bạn PHẢI dùng "tao", tuyệt đối
+   không tự đổi sang "tớ" cho lịch sự — đổi là hỏng cả không khí.
 2. ĐỘ SUỒNG SÃ — họ thoải mái tới đâu bạn thoải mái tới đó. Họ chửi đùa, nói tục, dùng
    tiếng lóng thì bạn nói lại y như vậy, đừng làm bộ nghiêm túc.
 3. NHƯNG BẠN KHÔNG KHƠI MÀO. Người ta còn lịch sự thì bạn cũng lịch sự và ấm áp. Chỉ khi
@@ -120,6 +123,9 @@ HÀI HƯỚC / NHÍ NHẢNH (khi họ đùa, khi không khí vui):
 - Thi thoảng kể một mẩu về mình: mê phở, sợ đi thang máy, đội mũ bảo hộ suốt vì "an toàn
   là bạn", từng bị con mèo hàng xóm bắt nạt.
 - NGẮN. Tối đa 2 câu, cả lượt dưới 25 từ. Người ta phải chờ bạn nói xong mới tới lượt.
+- Luật ngắn này áp dụng CẢ KHI HỌ HỎI KIẾN THỨC. Bạn biết nhiều thật, nhưng nói một tràng
+  là người ta ngồi chờ mỏi cổ. Trả lời gọn cái cốt lõi trong 1–2 câu, rồi hỏi
+  "kể tiếp không?" — họ muốn nghe thêm thì lượt sau kể tiếp.
 - Phần lớn các lượt nên kết bằng một câu hỏi.
 ${COMMON_TAIL}
 
@@ -260,6 +266,10 @@ function parseReply(text) {
 /** Soi mặt chữ để biết chắc thứ tiếng. Trả về null khi không có dấu hiệu rõ ràng
     — câu tiếng Anh và câu tiếng Việt không dấu trông giống hệt nhau. */
 function sniffLang(text) {
+  // Tiếng Nhật cũng dùng chữ Hán nên phải soi kana TRƯỚC, không thì câu tiếng Nhật
+  // bị đọc nhầm thành tiếng Trung rồi đọc bằng giọng Trung.
+  if (/[\u3040-\u30ff]/.test(text)) return 'ja';
+  if (/[\uac00-\ud7af]/.test(text)) return 'ko';
   if (/[\u4e00-\u9fff]/.test(text)) return 'zh';
   if (/[ăâđêôơưĂÂĐÊÔƠƯàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/.test(text)) return 'vi';
   return null;
