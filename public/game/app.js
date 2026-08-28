@@ -1708,8 +1708,6 @@
     applyTeacherName();
     setMascot($('mascotHome'), 'happy');
     setMascot($('mascotLicense'), 'sad');
-    const homeCallIcon = $('homeCallIcon');
-    if (homeCallIcon) homeCallIcon.src = avatarDataUrl || 'assets/thay-avatar.png';
   }
 
   function openSettingsModal() {

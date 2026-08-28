@@ -362,10 +362,7 @@ button:focus-visible,
 .btn-call-icon {
   background: var(--brand-fill);
   color: #fff;
-  overflow: hidden;
-  padding: 0;
 }
-.btn-call-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* ==== License screen ==== */
 .license-title {
