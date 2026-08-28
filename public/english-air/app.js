@@ -85,7 +85,8 @@ const DEFAULTS = {
   done: {}, srs: {},
   goal: 30, goalDay: "", todayXp: 0,
   weekXp: 0, weekStart: "", tier: 0,
-  joined: today(), sound: true, motion: false, showVi: true, theme: ""
+  joined: today(), sound: true, motion: false, showVi: true, theme: "",
+  callLang: "en", kidVoice: true
 };
 let S = load();
 function load() { try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { return Object.assign({}, DEFAULTS); } }
@@ -152,11 +153,31 @@ function paintStats() {
 }
 
 /* ---------- 3. Phát âm ---------- */
+/* MON.L nói được ba thứ tiếng. Mỗi thứ tiếng cần một mã giọng riêng. */
+const CALL_LANGS = {
+  en: { name: "Tiếng Anh", tts: "en-US", sr: "en-US", hint: "Nói tiếng Anh với MON.L." },
+  vi: { name: "Tiếng Việt", tts: "vi-VN", sr: "vi-VN", hint: "Nói tiếng Việt — hợp với bé mới bắt đầu." },
+  zh: { name: "Tiếng Trung", tts: "zh-CN", sr: "zh-CN", hint: "Nói tiếng Trung, có kèm phiên âm pinyin." },
+};
+/* Nâng cao độ giọng lên cho ra chất con trai nhỏ, hợp với MON.L. */
+const KID_PITCH = 1.65;
+
+let voices = [];
 let voice = null;
 function pickVoice() {
   if (!window.speechSynthesis) return;
-  const v = speechSynthesis.getVoices();
-  voice = v.find(x => /^en[-_]US/i.test(x.lang)) || v.find(x => /^en/i.test(x.lang)) || null;
+  voices = speechSynthesis.getVoices() || [];
+  voice = voiceFor("en-US");
+}
+/** Tìm giọng khớp thứ tiếng; ưu tiên giọng nam vì nâng cao độ lên nghe mới ra con trai. */
+function voiceFor(tag) {
+  const base = String(tag).split("-")[0].toLowerCase();
+  const pool = voices.filter(v => String(v.lang).toLowerCase().replace("_", "-").startsWith(base));
+  if (!pool.length) return null;
+  const boyish = /david|guy|mark|daniel|alex|fred|male|nam\b|minh|yunxi|kangkang|liang/i;
+  return pool.find(v => boyish.test(v.name))
+      || pool.find(v => String(v.lang).toLowerCase().replace("_", "-") === String(tag).toLowerCase())
+      || pool[0];
 }
 if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 function speak(text, slow) {
@@ -1092,7 +1113,7 @@ addEventListener("orientationchange", () => setTimeout(fitScene, 120));
 
 const CHAT_URL = "../api/english-air/chat";
 
-const C = { mode: "free", msgs: [], lines: [], i: 0, target: null,
+const C = { mode: "free", lang: "en", msgs: [], lines: [], i: 0, target: null,
             right: 0, asked: 0, t0: 0, timer: null, rec: null, listening: false, busy: false };
 
 function callDialogues() {
@@ -1131,6 +1152,8 @@ const STARTER_DIALOGUE = {
 function renderCall() {
   const n = callDialogues().length;
   $("#callLocked").hidden = n > 0;
+  $$(".lang-chip").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === S.callLang)));
+  $("#callLangNote").textContent = (CALL_LANGS[S.callLang] || CALL_LANGS.en).hint;
   $("#callMicNote").textContent = SR
     ? "Lần đầu bấm micro, trình duyệt sẽ hỏi quyền dùng micro — chọn Cho phép."
     : "Trình duyệt này chưa nghe được bằng micro, bạn gõ chữ để nói chuyện nhé.";
@@ -1149,8 +1172,11 @@ function pushLog(who, text) {
 }
 
 /** MON.L nói: hiện câu, chạy hoạt ảnh, nhảy một nhịp mỗi từ cho khớp miệng. */
-function monSays(en, vi, after) {
+function monSays(en, vi, after, py) {
+  const L = CALL_LANGS[C.lang] || CALL_LANGS.en;
   $("#callSaid").textContent = en;
+  $("#callSaidPy").textContent = py || "";
+  $("#callSaidPy").hidden = !py;
   $("#callSaidVi").textContent = S.showVi ? (vi || "") : "";
   const m = $("#callMascot");
   m.classList.add("talking");
@@ -1170,7 +1196,9 @@ function monSays(en, vi, after) {
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(en);
-    u.lang = "en-US"; if (voice) u.voice = voice; u.rate = 0.94;
+    u.lang = L.tts;
+    const v = voiceFor(L.tts); if (v) u.voice = v;
+    u.rate = 0.94; u.pitch = S.kidVoice ? KID_PITCH : 1;
     u.onboundary = () => { m.classList.remove("pulse"); void m.offsetWidth; m.classList.add("pulse"); };
     u.onend = done;
     u.onerror = done;
@@ -1183,6 +1211,9 @@ function monSays(en, vi, after) {
 /* ----- bắt đầu / kết thúc ----- */
 function startCall(mode) {
   C.mode = mode;
+  // Luyện hội thoại trong bài luôn là tiếng Anh vì đó là lời thoại đã học.
+  C.lang = mode === "free" ? (CALL_LANGS[S.callLang] ? S.callLang : "en") : "en";
+  $("#callSaidPy").hidden = true;
   C.msgs = []; C.lines = []; C.i = 0; C.target = null;
   C.right = 0; C.asked = 0; C.busy = false;
   $("#callLog").textContent = "";
@@ -1251,6 +1282,7 @@ async function askTutor(first) {
       body: JSON.stringify({
         history: first ? [{ role: "user", content: "Hi MON.L!" }] : C.msgs,
         level: level().code,
+        lang: C.lang,
         words: seenWords().slice(-60).map(w => w.en),
       }),
     });
@@ -1265,7 +1297,7 @@ async function askTutor(first) {
       setState("Tới lượt bạn");
       $("#btnMic").disabled = !SR;
       C.busy = false;
-    });
+    }, data.py);
   } catch (err) {
     C.busy = false;
     setState("Mất kết nối");
@@ -1358,7 +1390,8 @@ function startListening() {
   if (!SR || C.listening || C.busy) return;
   const r = new SR();
   C.rec = r; C.listening = true;
-  r.lang = "en-US"; r.interimResults = false; r.maxAlternatives = 3;
+  r.lang = (CALL_LANGS[C.lang] || CALL_LANGS.en).sr;
+  r.interimResults = false; r.maxAlternatives = 3;
   $("#btnMic").classList.add("listening");
   $("#callMascot").classList.add("listening");
   $("#callYou").hidden = false;
@@ -1395,6 +1428,9 @@ function sendTyped() {
   $("#callInput").value = "";
   heardReply(v);
 }
+$$(".lang-chip").forEach(b => b.addEventListener("click", () => {
+  S.callLang = b.dataset.lang; save(); renderCall();
+}));
 $("#btnStartFree").addEventListener("click", () => { primeSpeech(); startCall("free"); });
 $("#btnStartCall").addEventListener("click", () => { primeSpeech(); startCall("script"); });
 $("#btnMic").addEventListener("click", () => { primeSpeech(); C.listening ? stopListening() : startListening(); });
@@ -1427,6 +1463,7 @@ $("#callPreview").addEventListener("click", () => {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(line.en);
     u.lang = "en-US"; if (voice) u.voice = voice; u.rate = 0.94;
+    u.pitch = S.kidVoice ? KID_PITCH : 1;
     u.onboundary = () => { box.classList.remove("pulse"); void box.offsetWidth; box.classList.add("pulse"); };
     u.onend = stop; u.onerror = stop;
     speechSynthesis.speak(u);
@@ -1494,6 +1531,7 @@ function renderProfile() {
   $("#optSound").checked = S.sound;
   $("#optMotion").checked = S.motion;
   $("#optVi").checked = S.showVi;
+  $("#optKid").checked = S.kidVoice !== false;
   paintRail();
 }
 $$("[data-goal]").forEach(b => b.addEventListener("click", () => {
@@ -1502,6 +1540,7 @@ $$("[data-goal]").forEach(b => b.addEventListener("click", () => {
 $("#optSound").addEventListener("change", e => { S.sound = e.target.checked; save(); });
 $("#optMotion").addEventListener("change", e => { S.motion = e.target.checked; save(); applyTheme(); });
 $("#optVi").addEventListener("change", e => { S.showVi = e.target.checked; save(); });
+$("#optKid").addEventListener("change", e => { S.kidVoice = e.target.checked; save(); });
 $("#btnTheme").addEventListener("click", () => {
   S.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; save(); applyTheme();
 });

@@ -287,13 +287,25 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .cont-row { display: flex; align-items: center; width: 100%; font-size: .86rem; font-weight: 800; }
 .cont-go { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; }
 
-.unit { margin-top: var(--s5); text-align: center; }
-.unit h2 { font-size: 1.3rem; }
-.unit-meta { color: var(--muted-fg); font-size: .88rem; font-weight: 700; margin-top: 2px; }
-.nodes { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s5) var(--s2); margin-top: var(--s5); }
-.node { display: flex; flex-direction: column; align-items: center; gap: var(--s2); }
+/* Mỗi chương gói vào một thẻ riêng — 6 mốc xếp vừa đúng 2 hàng, không còn khoảng trống. */
+.unit { margin-top: var(--s4); padding: var(--s4) var(--s3) var(--s3); text-align: center;
+  border-radius: var(--r3); background: var(--card); box-shadow: var(--sh-1); }
+.unit h2 { font-size: 1.16rem; }
+.unit-meta { color: var(--muted-fg); font-size: .82rem; font-weight: 700; margin-top: 2px; }
+.nodes {
+  position: relative; display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: var(--s3) var(--s1); margin-top: var(--s3);
+}
+.node { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+/* Vạch nối giữa các mốc cùng hàng, cho ra dáng một chặng đường chứ không phải chấm rời. */
+.node::before {
+  content: ""; position: absolute; top: 42px; right: 50%; width: 100%; height: 3px;
+  border-radius: var(--rf); background: var(--line); z-index: 0;
+}
+.node:nth-child(3n + 1)::before { display: none; }
+.node.done::before, .node.current::before { background: var(--brand-soft); }
 .node-btn {
-  position: relative; width: 76px; height: 76px; border-radius: var(--rf);
+  position: relative; z-index: 1; width: 84px; height: 84px; border-radius: var(--rf);
   display: grid; place-items: center;
   background: var(--muted); color: var(--muted-fg);
   transition: transform var(--t1) var(--e);
@@ -307,7 +319,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .node-ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
 .node-ring .bgc { stroke: var(--brand-soft); }
 .node-ring .fgc { stroke: var(--brand); transform: rotate(-90deg); transform-origin: 50% 50%; }
-.node-label { font-size: .82rem; font-weight: 800; color: var(--muted-fg); line-height: 1.3; }
+.node-label { font-size: .8rem; font-weight: 800; color: var(--muted-fg); line-height: 1.25; }
 .node.current .node-label { color: var(--brand-ink); }
 .node.done .node-label { color: var(--fg); }
 
@@ -362,8 +374,8 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 }
 
 /* màn khoá tính năng */
-.locked { text-align: center; padding: var(--s4) 0 var(--s6); }
-.locked[hidden] { display: none; }
+.lockview { text-align: center; padding: var(--s4) 0 var(--s6); }
+.lockview[hidden] { display: none; }
 .locked-art { position: relative; height: 190px; display: grid; place-items: center; }
 .locked-mascot { width: 132px; height: 132px; }
 .locked-mascot svg, .locked-mascot img { width: 100%; height: 100%; }
@@ -689,6 +701,14 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 /* ---------- 15b. GỌI VIDEO LUYỆN NÓI ---------- */
 .call-hero { text-align: center; padding: var(--s5) 0 var(--s4); }
+.lang-pick { display: flex; gap: var(--s2); margin-top: var(--s4); }
+.lang-chip { flex: 1; min-width: 0; min-height: 48px; padding: 0 var(--s2); border-radius: var(--rf);
+  background: var(--muted); color: var(--muted-fg); font-size: .9rem; font-weight: 800;
+  transition: background var(--t1) var(--e), color var(--t1) var(--e); }
+.lang-chip[aria-pressed="true"] { background: var(--brand-fill); color: #fff; }
+.say-py { display: block; margin-top: 3px; color: #6D28D9; font-size: .92rem; font-weight: 700; font-style: italic; }
+.say-py[hidden] { display: none; }
+
 .call-preview { position: relative; display: block; width: 186px; aspect-ratio: 3 / 4;
   margin: 0 auto var(--s4); padding: 0; border: 0; border-radius: 20px; overflow: hidden;
   background: var(--muted); box-shadow: var(--sh-2); cursor: pointer; }
@@ -976,11 +996,13 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   .pills { gap: 4px; }
   .pill { padding-inline: var(--s2); gap: 3px; font-size: .84rem; }
   .p-theme { padding-inline: var(--s1); }
-  .node-btn { width: 66px; height: 66px; }
-  .node-label { font-size: .74rem; }
+  .node-btn { width: 68px; height: 68px; }
+  .node-label { font-size: .72rem; }
+  .node::before { top: 34px; }
+  .unit { padding: var(--s3) var(--s2); }
   .vcard-en { font-size: 1.7rem; }
   .big-count { font-size: 1.5rem; }
-  .nodes { gap: var(--s4) var(--s1); }
+  .nodes { gap: var(--s3) 0; }
 }
 
 /* ---------- 20. MÁY TÍNH BẢNG & MÀN RỘNG ---------- */
@@ -1005,8 +1027,9 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   .navlink.is-active { background: var(--brand-soft); color: var(--brand-ink); }
   .banner { margin-inline: 0; border-radius: var(--r3); overflow: hidden; }
   .banner-wave { display: none; }
-  .nodes { gap: var(--s6) var(--s3); }
-  .node-btn { width: 84px; height: 84px; }
+  .nodes { gap: var(--s4) var(--s2); }
+  .node-btn { width: 96px; height: 96px; }
+  .node::before { top: 48px; }
   .pics { gap: var(--s4); }
   .mascot-top { width: 130px; height: 130px; }
 }

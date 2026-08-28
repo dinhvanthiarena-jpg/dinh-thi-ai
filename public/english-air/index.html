@@ -259,7 +259,7 @@
         <ul class="wlist" id="wordList"></ul>
 
         <!-- Chưa đủ số bài thì khoá kho từ, giống cách AirLearn mở dần tính năng -->
-        <div class="locked" id="wordsLocked" hidden>
+        <div class="lockview" id="wordsLocked" hidden>
           <div class="locked-art" aria-hidden="true">
             <span class="chip-float f1">Create</span><span class="chip-float f2">Learn</span>
             <span class="chip-float f3">Smile</span><span class="chip-float f4">Roar</span>
@@ -315,6 +315,12 @@
           <div class="ci-row"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chat"/></svg>
             <span><b>Không nói được vẫn học</b><small>Chọn câu đúng bằng tay cũng được tính.</small></span></div>
         </div>
+        <div class="lang-pick" role="group" aria-label="Chọn thứ tiếng để nói chuyện">
+          <button class="lang-chip" type="button" data-lang="en" aria-pressed="true">Tiếng Anh</button>
+          <button class="lang-chip" type="button" data-lang="vi" aria-pressed="false">Tiếng Việt</button>
+          <button class="lang-chip" type="button" data-lang="zh" aria-pressed="false">Tiếng Trung</button>
+        </div>
+        <p class="fine" id="callLangNote"></p>
         <p class="fine" id="callMicNote"></p>
         <button class="btn btn-primary btn-block mt" id="btnStartFree" type="button">Gọi nói chuyện tự do</button>
         <button class="btn btn-soft btn-block mt" id="btnStartCall" type="button">Luyện hội thoại trong bài</button>
@@ -364,6 +370,7 @@
         <div class="card set"><label class="switch"><input type="checkbox" id="optSound" checked /><span class="track" aria-hidden="true"></span><span>Phát âm tự động</span></label></div>
         <div class="card set"><label class="switch"><input type="checkbox" id="optMotion" /><span class="track" aria-hidden="true"></span><span>Giảm chuyển động</span></label></div>
         <div class="card set"><label class="switch"><input type="checkbox" id="optVi" checked /><span class="track" aria-hidden="true"></span><span>Hiện nghĩa tiếng Việt trong hội thoại</span></label></div>
+        <div class="card set"><label class="switch"><input type="checkbox" id="optKid" checked /><span class="track" aria-hidden="true"></span><span>Giọng trẻ con cho MON.L</span></label></div>
 
         <div class="card install" id="installCard" hidden>
           <h3>Cài lên màn hình chính</h3>
@@ -527,6 +534,7 @@
     <ul class="call-log" id="callLog"></ul>
     <div class="call-bubble" id="callBubble" aria-live="polite">
       <b id="callSaid">…</b>
+      <small class="say-py" id="callSaidPy" hidden></small>
       <small id="callSaidVi"></small>
     </div>
     <div class="call-task" id="callTask" hidden>
