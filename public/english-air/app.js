@@ -1136,10 +1136,19 @@ function styleBrief() {
   if (says.length < 2) return null;
   const all = says.join(" ").toLowerCase();
   const co = w => new RegExp("(^|\\P{L})" + w + "(\\P{L}|$)", "iu").test(all);
-  const PAIRS = [["tao", "mày"], ["tớ", "cậu"], ["mình", "bạn"],
-                 ["em", "anh"], ["em", "chị"], ["con", "chú"], ["con", "cô"]];
+  // Ghi rõ MON.L phải tự xưng gì và gọi họ là gì. Có cặp đối xứng (tao–mày:
+  // ai cũng "tao" khi nói về mình), có cặp lệch (em–anh: họ "em" thì mình "anh").
+  const PAIRS = [
+    { ho: "tao", ban: "mày", tu: "tao", goi: "mày" },
+    { ho: "tớ", ban: "cậu", tu: "tớ", goi: "cậu" },
+    { ho: "mình", ban: "bạn", tu: "mình", goi: "bạn" },
+    { ho: "em", ban: "anh", tu: "anh", goi: "em" },
+    { ho: "em", ban: "chị", tu: "chị", goi: "em" },
+    { ho: "con", ban: "chú", tu: "chú", goi: "con" },
+    { ho: "con", ban: "cô", tu: "cô", goi: "con" },
+  ];
   let xung = null;
-  for (const [a, b] of PAIRS) if (co(a) && co(b)) { xung = a + " – " + b; break; }
+  for (const c of PAIRS) if (co(c.ho) && co(c.ban)) { xung = { tu: c.tu, goi: c.goi }; break; }
 
   const dem = new Map();
   for (const w of all.split(/[^\p{L}\p{N}]+/u)) {

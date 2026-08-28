@@ -72,7 +72,8 @@ ${style ? `════ SỔ TAY CÁCH NÓI CỦA CHÍNH NGƯỜI NÀY ═══
 App đã ghi lại cách người này nói, gom từ những lần trò chuyện trước. Hãy nói theo
 đúng giọng đó NGAY TỪ CÂU ĐẦU, đừng đợi họ mở lời rồi mới bắt chước.${
   style.xung ? `
-Xưng hô họ quen dùng: ${style.xung} — dùng đúng cặp này.` : ''}${
+XƯNG HÔ — bắt buộc: bạn tự xưng "${style.xung.tu}" và gọi họ là "${style.xung.goi}".
+Dùng đúng hai chữ này ngay từ câu đầu và giữ nguyên suốt cuộc.` : ''}${
   style.hay ? `
 Những chữ họ hay dùng: ${style.hay}` : ''}${
   style.mau ? `
@@ -295,7 +296,9 @@ function sniffLang(text) {
 function trimStyle(style) {
   if (!style || typeof style !== 'object') return null;
   const chu = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
-  const xung = chu(style.xung, 40);
+  const xung = style.xung && typeof style.xung === 'object'
+    ? { tu: chu(style.xung.tu, 16), goi: chu(style.xung.goi, 16) }
+    : null;
   const hay = Array.isArray(style.hay)
     ? style.hay.filter((w) => typeof w === 'string').slice(0, 25).map((w) => chu(w, 24)).join(', ')
     : '';
@@ -303,6 +306,7 @@ function trimStyle(style) {
     ? style.mau.filter((t) => typeof t === 'string').slice(0, 6)
         .map((t) => '  "' + chu(t, 160) + '"').join('\n')
     : '';
+  if (xung && (!xung.tu || !xung.goi)) return { hay, mau, xung: null };
   if (!xung && !hay && !mau) return null;
   return { xung, hay, mau };
 }
