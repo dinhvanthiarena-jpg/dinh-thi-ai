@@ -208,22 +208,27 @@ function deviceLang() {
 const KID_PITCH = 1.65;
 
 let voices = [];
-let voice = null;
 function pickVoice() {
   if (!window.speechSynthesis) return;
   voices = speechSynthesis.getVoices() || [];
-  voice = voiceFor("en-US");
 }
-/** Tìm giọng khớp thứ tiếng; ưu tiên giọng nam vì nâng cao độ lên nghe mới ra con trai. */
+const chuanTag = t => String(t || "").toLowerCase().replace("_", "-");
+
+/** Tìm giọng khớp thứ tiếng. Khớp ĐÚNG mã trước, rồi mới tới cùng gốc ngôn ngữ. */
 function voiceFor(tag) {
-  const base = String(tag).split("-")[0].toLowerCase();
-  const pool = voices.filter(v => String(v.lang).toLowerCase().replace("_", "-").startsWith(base));
+  const muon = chuanTag(tag);
+  const goc = muon.split("-")[0];
+  const pool = voices.filter(v => chuanTag(v.lang).split("-")[0] === goc);
   if (!pool.length) return null;
-  const boyish = /david|guy|mark|daniel|alex|fred|male|nam\b|minh|yunxi|kangkang|liang/i;
-  return pool.find(v => boyish.test(v.name))
-      || pool.find(v => String(v.lang).toLowerCase().replace("_", "-") === String(tag).toLowerCase())
+  // Giọng con trai để nâng cao độ nghe mới ra trẻ con. Chỉ dò trong pool đã lọc
+  // đúng thứ tiếng rồi — nếu không, "Nam" của tiếng Việt lọt vào giọng tiếng Anh.
+  const contrai = /david|guy|mark|daniel|alex|fred|male|james|george|ryan|yunxi|kangkang/i;
+  return pool.find(v => chuanTag(v.lang) === muon && contrai.test(v.name))
+      || pool.find(v => chuanTag(v.lang) === muon)
+      || pool.find(v => contrai.test(v.name))
       || pool[0];
 }
+
 if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 /* Chữ nước nào phải đọc bằng giọng nước đó. Trước đây mọi thứ đều đặt en-US,
    nên "quả táo" bị đọc bằng giọng Anh nghe méo hết cả. */
@@ -238,6 +243,9 @@ function tiengCua(text) {
   return "en-US";
 }
 
+// Đánh số lượt đọc nối, để lượt mới cắt được lượt cũ.
+let lanLuotId = 0;
+
 function dungGiong(u, tag) {
   u.lang = tag;
   const v = voiceFor(tag);
@@ -246,6 +254,7 @@ function dungGiong(u, tag) {
 
 function speak(text, slow, lang) {
   if (!S.sound || !window.speechSynthesis || !text) return;
+  lanLuotId += 1;   // cắt lượt đọc nối đang chạy, không thì hai bên chồng tiếng
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
@@ -255,22 +264,37 @@ function speak(text, slow, lang) {
   } catch { /* bỏ qua */ }
 }
 
-/** Đọc lần lượt nhiều đoạn, mỗi đoạn một thứ tiếng — dùng để đọc từ rồi đọc nghĩa.
-    Không gọi cancel giữa chừng, cứ xếp vào hàng đợi cho máy đọc nối nhau. */
+/* Đọc lần lượt nhiều đoạn, mỗi đoạn một thứ tiếng.
+   PHẢI đọc xong câu trước rồi mới bắt đầu câu sau. Xếp cả loạt vào hàng đợi một
+   lúc thì máy hay lấy giọng của câu này áp cho câu kia — câu tiếng Anh bị đọc
+   bằng giọng Việt, nghe sai hoàn toàn. */
 function docLanLuot(khuc) {
   if (!S.sound || !window.speechSynthesis) return;
   const ds = (khuc || []).filter(k => k && k.text);
   if (!ds.length) return;
-  try {
-    speechSynthesis.cancel();
-    ds.forEach(k => {
+  const phien = ++lanLuotId;
+  try { speechSynthesis.cancel(); } catch { /* bỏ qua */ }
+
+  const doc = i => {
+    // Lượt đọc mới đè lên thì lượt cũ dừng hẳn, không chen ngang nhau.
+    if (phien !== lanLuotId || i >= ds.length) return;
+    const k = ds[i];
+    try {
       const u = new SpeechSynthesisUtterance(k.text);
       dungGiong(u, k.lang || tiengCua(k.text));
       u.rate = k.slow ? 0.55 : 0.92;
+      let daSang = false;
+      const sang = () => { if (daSang) return; daSang = true; doc(i + 1); };
+      u.onend = sang;
+      u.onerror = sang;
+      // Máy nào nuốt mất onend thì vẫn phải đi tiếp: ước lượng theo độ dài câu.
+      setTimeout(sang, 1200 + k.text.length * 90);
       speechSynthesis.speak(u);
-    });
-  } catch { /* bỏ qua */ }
+    } catch { /* bỏ qua */ }
+  };
+  doc(0);
 }
+
 const stopSpeak = () => { if (window.speechSynthesis) speechSynthesis.cancel(); };
 
 /* iPhone/iPad chỉ cho phát tiếng lần đầu ngay trong lúc ngón tay còn chạm màn hình.
@@ -3019,6 +3043,24 @@ $("#optSound").addEventListener("change", e => { S.sound = e.target.checked; sav
 $("#optMotion").addEventListener("change", e => { S.motion = e.target.checked; save(); applyTheme(); });
 $("#optVi").addEventListener("change", e => { S.showVi = e.target.checked; save(); });
 $("#optKid").addEventListener("change", e => { S.kidVoice = e.target.checked; save(); });
+/* Máy nào thiếu giọng của một thứ tiếng thì hệ thống đọc bằng giọng khác, nghe
+   sai hẳn. Nút này cho biết máy đang có giọng nào và đọc thử để tự nghe. */
+$("#btnThuGiong").addEventListener("click", () => {
+  pickVoice();
+  const co = t => { const v = voiceFor(t); return v ? v.name : null; };
+  const anh = co("en-US"), viet = co("vi-VN");
+  const o = $("#giongInfo");
+  o.textContent = "Tiếng Anh: " + (anh || "MÁY CHƯA CÓ GIỌNG TIẾNG ANH")
+                + " · Tiếng Việt: " + (viet || "máy chưa có giọng tiếng Việt");
+  if (!anh) {
+    toast("Máy chưa cài giọng tiếng Anh — vào Cài đặt máy để tải thêm.");
+  }
+  docLanLuot([
+    { text: "Good morning. This is the English voice.", lang: "en-US" },
+    { text: "Đây là giọng tiếng Việt.", lang: "vi-VN" },
+  ]);
+});
+
 $("#optMoHet").addEventListener("change", e => {
   S.moHet = e.target.checked;
   save();
