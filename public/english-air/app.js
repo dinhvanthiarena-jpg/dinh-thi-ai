@@ -917,7 +917,7 @@ const DRILL = {
 
   reverse(d, st) {
     showMascot(true); setKicker("Dịch sang tiếng Anh");
-    st.append(el("p", "ask", "“" + d.word.vi + "”"));
+    st.append(cauHoiNgheDuoc("“" + d.word.vi + "”", "vi-VN", d.word.vi));
     const anh = anhChoTu(d.word);
     if (anh) st.append(anh);
     st.append(optList(d.opts, w => w.en, d.word.en));
@@ -983,7 +983,7 @@ const DRILL = {
 
   blanks(d, st) {
     showMascot(true); setKicker("Dịch câu này");
-    st.append(el("p", "ask", d.sent.vi));
+    st.append(cauHoiNgheDuoc(d.sent.vi, "vi-VN"));
     const anh = anhChoCau(d);
     if (anh) st.append(anh);
 
@@ -1341,7 +1341,7 @@ const DRILL = {
 
   type(d, st) {
     showMascot(true); setKicker("Viết bằng tiếng Anh");
-    st.append(el("p", "ask", d.word.vi));
+    st.append(cauHoiNgheDuoc(d.word.vi, "vi-VN"));
     const box = el("textarea", "type-in"); box.rows = 2;
     box.setAttribute("aria-label", "Nhập từ tiếng Anh cho: " + d.word.vi);
     box.autocapitalize = "off"; box.autocomplete = "off"; box.spellcheck = false;
@@ -1353,6 +1353,16 @@ const DRILL = {
     setTimeout(() => box.focus(), 150);
   }
 };
+
+/** Câu hỏi bằng tiếng Việt, chạm vào là nghe. Trước đây chỉ có chữ để nhìn. */
+function cauHoiNgheDuoc(hienThi, lang, docText) {
+  const b = el("button", "ask ask-nghe"); b.type = "button";
+  b.setAttribute("aria-label", "Nghe lại: " + (docText || hienThi));
+  b.append(el("span", null, hienThi));
+  b.append(icon("i-sound", "ic ic-sm"));
+  b.addEventListener("click", () => speak(docText || hienThi, false, lang));
+  return b;
+}
 
 function optList(opts, label, rightEn) {
   const list = el("div", "opts");
@@ -1414,9 +1424,14 @@ function nextPressed() {
   }
   if (d.word) srsUpdate(d.word.en, P.correct);
 
+  // Đọc đáp án bằng đúng giọng của từng thứ tiếng, dùng chung cho cả đúng lẫn sai.
+  const khucDoc = d.word
+    ? [{ text: d.word.en, lang: "en-US" }, { text: d.word.vi, lang: "vi-VN" }]
+    : (d.sent ? [{ text: d.sent.en, lang: "en-US" }, { text: d.sent.vi, lang: "vi-VN" }] : []);
+
   if (P.correct) {
-    speak(d.word ? d.word.en : (d.sent ? d.sent.en : ""));
-    feedback(true, praise(), d.word ? `${d.word.en} — ${d.word.vi}` : (d.sent ? d.sent.en : ""));
+    docLanLuot(khucDoc);
+    feedback(true, praise(), d.word ? `${d.word.en} — ${d.word.vi}` : (d.sent ? d.sent.en : ""), khucDoc);
   } else {
     P.wrong++;
     S.hearts = clamp(S.hearts - 1, 0, TIM_TOI_DA);
@@ -1424,7 +1439,9 @@ function nextPressed() {
     if (S.hearts === TIM_TOI_DA - 1) S.heartAt = Date.now();
     save(); paintHearts();
     const h = $("#pHearts"); h.classList.add("hit"); setTimeout(() => h.classList.remove("hit"), 400);
-    feedback(false, "Chưa đúng", "Đáp án: " + answerOf(d));
+    // Sai thì càng phải nghe: đọc đáp án ngay chứ không chỉ hiện chữ.
+    docLanLuot(khucDoc);
+    feedback(false, "Chưa đúng", "Đáp án: " + answerOf(d), khucDoc);
     P.slides.push(s);
   }
   setBtn("Tiếp theo", P.correct ? "btn-ok" : "btn-danger", true);
@@ -1437,14 +1454,19 @@ function answerOf(d) {
   if (d.type === "truefalse") return d.answer ? "Đúng" : `Sai — “${d.word.vi}” là “${d.word.en}”`;
   return d.word.en;
 }
-function feedback(ok, title, detail) {
+let fbDoc = null;
+function feedback(ok, title, detail, doc) {
   const fb = $("#feedback");
   fb.hidden = false;
   $(".p-foot").className = "p-foot " + (ok ? "ok" : "bad");
   $("#fbTitle").textContent = title;
   $("#fbDetail").textContent = detail;
   $("#fbIcon").firstElementChild.firstElementChild.setAttribute("href", ok ? "#i-check" : "#i-close");
+  // Nghe lại đáp án — nhất là lúc sai, đó mới là lúc cần nghe nhất.
+  fbDoc = (doc || []).filter(k => k && k.text);
+  $("#fbSay").hidden = !fbDoc.length;
 }
+$("#fbSay").addEventListener("click", () => { if (fbDoc && fbDoc.length) docLanLuot(fbDoc); });
 function advance() {
   if (S.hearts <= 0 && P.i >= P.teachN) return sheetNoHearts();
   P.i++;

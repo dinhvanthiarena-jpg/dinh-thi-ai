@@ -1240,6 +1240,21 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .sign-nghe:active { transform: scale(.95); }
 .sign-nghe .ic { width: 15px; height: 15px; }
 
+/* Câu hỏi tiếng Việt bấm nghe được — phải tự dựng lại nét vì nó là nút. */
+.ask-nghe { display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--s2); width: 100%; border: 0; background: none; color: inherit;
+  font-family: inherit; cursor: pointer; transition: opacity var(--t1) var(--e); }
+.ask-nghe:active { opacity: .6; }
+.ask-nghe .ic { flex: none; color: var(--brand); opacity: .8; }
+
+/* Nút nghe lại đáp án trong khung phản hồi */
+.fb-say { flex: none; width: 40px; height: 40px; margin-left: auto;
+  border: 0; border-radius: var(--rf); display: grid; place-items: center;
+  background: rgba(255,255,255,.22); color: #fff; cursor: pointer;
+  transition: transform var(--t1) var(--e); }
+.fb-say:active { transform: scale(.9); }
+.fb-say[hidden] { display: none; }
+
 /* ---------- 15j. CHỌN GIỌNG ĐỌC ---------- */
 .giong-hang { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; }
 .giong-nut { display: flex; align-items: center; gap: var(--s3); width: 100%;
