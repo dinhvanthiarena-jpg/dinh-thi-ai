@@ -175,7 +175,7 @@ function paintStats() {
 /* MON.L nói được ba thứ tiếng. Người học KHÔNG chọn trước — cứ nói, MON.L
    nghe ra rồi đáp lại đúng thứ tiếng đó, và bộ nghe cũng đổi theo. */
 const CALL_LANGS = {
-  en: { name: "English", tts: "en-US", sr: "en-US" },
+  en: { name: "English", tts: "en-GB", sr: "en-GB" },
   vi: { name: "Tiếng Việt", tts: "vi-VN", sr: "vi-VN" },
   zh: { name: "中文", tts: "zh-CN", sr: "zh-CN" },
   ja: { name: "日本語", tts: "ja-JP", sr: "ja-JP" },
@@ -226,26 +226,31 @@ function luaChonGiong(goc) {
   return { uri: g.uri || null, pitch: g.pitch || 1, rate: g.rate || 1 };
 }
 
-/** Tìm giọng khớp thứ tiếng. Khớp ĐÚNG mã trước, rồi mới tới cùng gốc ngôn ngữ. */
+/** Tìm giọng khớp thứ tiếng.
+    Tiếng Anh lấy giọng người Anh (en-GB) chứ không phải giọng Mỹ, tiếng Việt lấy
+    giọng nữ — nghe chuẩn hơn hẳn với người Việt học tiếng Anh. */
+const GIONG_NU = /female|linh|hoaimy|serena|kate|sonia|libby|hazel|samantha|victoria|karen|moira|fiona|tessa|zira|susan|catherine|amy|emma|joanna|salli/i;
+
 function voiceFor(tag) {
   const muon = chuanTag(tag);
   const goc = muon.split("-")[0];
   const pool = voices.filter(v => chuanTag(v.lang).split("-")[0] === goc);
   if (!pool.length) return null;
+
   // Người dùng đã tự chọn giọng cho thứ tiếng này thì tôn trọng lựa chọn đó.
   const uri = luaChonGiong(goc).uri;
   if (uri) {
     const v = pool.find(x => x.voiceURI === uri) || pool.find(x => x.name === uri);
     if (v) return v;
   }
-  // Giọng con trai để nâng cao độ nghe mới ra trẻ con. Chỉ dò trong pool đã lọc
-  // đúng thứ tiếng rồi — nếu không, "Nam" của tiếng Việt lọt vào giọng tiếng Anh.
-  const contrai = /david|guy|mark|daniel|alex|fred|male|james|george|ryan|yunxi|kangkang/i;
-  return pool.find(v => chuanTag(v.lang) === muon && contrai.test(v.name))
-      || pool.find(v => chuanTag(v.lang) === muon)
-      || pool.find(v => contrai.test(v.name))
-      || pool[0];
+
+  const dungMa = pool.filter(v => chuanTag(v.lang) === muon);
+  const nu = ds => ds.find(v => GIONG_NU.test(v.name));
+  // Khớp đúng mã và là giọng nữ là tốt nhất; rồi tới khớp đúng mã; rồi giọng nữ
+  // cùng gốc; cuối cùng lấy tạm cái gì có.
+  return nu(dungMa) || dungMa[0] || nu(pool) || pool[0];
 }
+
 
 if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 /* Chữ nước nào phải đọc bằng giọng nước đó. Trước đây mọi thứ đều đặt en-US,
@@ -258,7 +263,7 @@ function tiengCua(text) {
   if (/[\u3040-\u30ff]/.test(s)) return "ja-JP";
   if (/[\uac00-\ud7af]/.test(s)) return "ko-KR";
   if (/[\u4e00-\u9fff]/.test(s)) return "zh-CN";
-  return "en-US";
+  return "en-GB";
 }
 
 // Đánh số lượt đọc nối, để lượt mới cắt được lượt cũ.
@@ -336,7 +341,7 @@ function primeSpeech() {
   speechPrimed = true;
   try {
     const u = new SpeechSynthesisUtterance(" ");
-    u.volume = 0; u.lang = "en-US";
+    u.volume = 0; u.lang = "en-GB";
     speechSynthesis.speak(u);
   } catch { /* bỏ qua */ }
 }
@@ -769,7 +774,7 @@ const TEACH = {
       const loa = el("span", "grow-loa"); loa.append(icon("i-sound", "ic ic-sm"));
       row.append(el("div", "gform", g.label), ex, loa);
       row.addEventListener("click", () => docLanLuot([
-        { text: g.en, lang: "en-US" },
+        { text: g.en, lang: "en-GB" },
         g.vi ? { text: g.vi, lang: "vi-VN" } : null,
       ].filter(Boolean)));
       t.append(row);
@@ -884,7 +889,7 @@ function vocabSlide(d, st, label) {
     s.setAttribute("aria-label", "Nghe ví dụ: " + d.ex.en);
     s.append(icon("i-sound", "ic ic-sm"));
     s.addEventListener("click", () => docLanLuot([
-      { text: d.ex.en, lang: "en-US" },
+      { text: d.ex.en, lang: "en-GB" },
       { text: d.ex.vi, lang: "vi-VN" },
     ]));
     const txt = el("div"); txt.append(el("b", null, d.ex.en), el("small", null, d.ex.vi));
@@ -893,7 +898,7 @@ function vocabSlide(d, st, label) {
   // Vừa mở thẻ là dạy luôn bằng tiếng, không bắt người ta tự bấm: đọc từ tiếng
   // Anh trước, rồi nghĩa tiếng Việt, mỗi bên bằng giọng bản ngữ của nó.
   docLanLuot([
-    { text: d.en, lang: "en-US" },
+    { text: d.en, lang: "en-GB" },
     { text: d.vi, lang: "vi-VN" },
   ]);
 }
@@ -1239,7 +1244,7 @@ const DRILL = {
         chu2.append(el("b", null, d.cau.en));
         if (d.cau.vi) chu2.append(el("small", null, d.cau.vi));
         b.addEventListener("click", () => docLanLuot([
-          { text: d.cau.en, lang: "en-US" },
+          { text: d.cau.en, lang: "en-GB" },
           d.cau.vi ? { text: d.cau.vi, lang: "vi-VN" } : null,
         ].filter(Boolean)));
         box.append(b, chu2);
@@ -1247,9 +1252,9 @@ const DRILL = {
       }
 
       docLanLuot([
-        { text: chu, lang: "en-US" },
-        d.tu ? { text: d.tu, lang: "en-US" } : null,
-        d.cau ? { text: d.cau.en, lang: "en-US" } : null,
+        { text: chu, lang: "en-GB" },
+        d.tu ? { text: d.tu, lang: "en-GB" } : null,
+        d.cau ? { text: d.cau.en, lang: "en-GB" } : null,
         d.cau && d.cau.vi ? { text: d.cau.vi, lang: "vi-VN" } : null,
       ].filter(Boolean));
     }
@@ -1289,8 +1294,8 @@ const DRILL = {
       nhac.append(el("b", null, chu), el("span", null, "như trong"), el("em", null, d.tu));
       if (d.word && d.word.vi) nhac.append(el("small", null, d.word.vi));
       nhac.addEventListener("click", () => docLanLuot([
-        { text: chu, lang: "en-US" },
-        { text: d.tu, lang: "en-US" },
+        { text: chu, lang: "en-GB" },
+        { text: d.tu, lang: "en-GB" },
         d.word && d.word.vi ? { text: d.word.vi, lang: "vi-VN" } : null,
       ].filter(Boolean)));
       st.append(nhac);
@@ -1426,8 +1431,8 @@ function nextPressed() {
 
   // Đọc đáp án bằng đúng giọng của từng thứ tiếng, dùng chung cho cả đúng lẫn sai.
   const khucDoc = d.word
-    ? [{ text: d.word.en, lang: "en-US" }, { text: d.word.vi, lang: "vi-VN" }]
-    : (d.sent ? [{ text: d.sent.en, lang: "en-US" }, { text: d.sent.vi, lang: "vi-VN" }] : []);
+    ? [{ text: d.word.en, lang: "en-GB" }, { text: d.word.vi, lang: "vi-VN" }]
+    : (d.sent ? [{ text: d.sent.en, lang: "en-GB" }, { text: d.sent.vi, lang: "vi-VN" }] : []);
 
   if (P.correct) {
     docLanLuot(khucDoc);
@@ -3165,7 +3170,7 @@ function tenGiong(v) {
 function veDongGiong(goc) {
   const o = $(goc === "en" ? "#giongAnh" : "#giongViet");
   if (!o) return;
-  const v = voiceFor(goc === "en" ? "en-US" : "vi-VN");
+  const v = voiceFor(goc === "en" ? "en-GB" : "vi-VN");
   if (!v) { o.textContent = "máy chưa có giọng này"; o.classList.add("thieu"); return; }
   const ch = luaChonGiong(goc);
   const kieu = KIEU_GIONG.find(k => Math.abs(ch.pitch - k.pitch) < 0.01 && Math.abs(ch.rate - k.rate) < 0.01);
@@ -3213,7 +3218,7 @@ function moChonGiong(goc) {
         $$(".giong-o", box).forEach(x => x.classList.remove("on"));
         b.classList.add("on");
         veDongGiong(goc);
-        speak(CAU_THU[goc], false, goc === "en" ? "en-US" : "vi-VN");
+        speak(CAU_THU[goc], false, goc === "en" ? "en-GB" : "vi-VN");
       });
       box.append(b);
     });
@@ -3241,7 +3246,7 @@ function moChonGiong(goc) {
 $("#btnGiongAnh").addEventListener("click", () => moChonGiong("en"));
 $("#btnGiongViet").addEventListener("click", () => moChonGiong("vi"));
 $("#btnThuGiong").addEventListener("click", () => docLanLuot([
-  { text: CAU_THU.en, lang: "en-US" },
+  { text: CAU_THU.en, lang: "en-GB" },
   { text: CAU_THU.vi, lang: "vi-VN" },
 ]));
 // Danh sách giọng đến muộn trên vài máy, nên vẽ lại khi có.
