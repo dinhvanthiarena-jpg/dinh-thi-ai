@@ -2390,7 +2390,54 @@ function diemDoc(nghe, mau) {
   return Math.max(0, Math.round((1 - d / Math.max(a.length, b.length)) * 100));
 }
 
+/* ═══════════ VIDEO NHÂN VẬT ═══════════
+   Có video thì MON.L cử động cả người; không có thì vẫn là ảnh tĩnh cộng lớp
+   miệng như cũ — thả video vào lúc nào cũng được, không thả cũng không vỡ. */
+const VIDEO_MON = { noi: "assets/mon-noi.mp4", cho: "assets/mon-cho.mp4" };
+const coVideo = {};
+
+function doVideoMon() {
+  const v = $("#monVid");
+  if (!v) return;
+  Object.entries(VIDEO_MON).forEach(([ten, duong]) => {
+    const thu = document.createElement("video");
+    thu.muted = true;
+    thu.preload = "metadata";
+    // Chỉ nhận khi trình duyệt thật sự đọc được, chứ không chỉ vì file tồn tại.
+    thu.addEventListener("loadedmetadata", () => {
+      coVideo[ten] = duong;
+      batVideo();
+    }, { once: true });
+    thu.addEventListener("error", () => {}, { once: true });
+    thu.src = duong;
+  });
+}
+
+function batVideo() {
+  const v = $("#monVid");
+  if (!v || (!coVideo.noi && !coVideo.cho)) return;
+  $("#callMascot").classList.add("co-video");
+  v.hidden = false;
+  datVideo(false);
+}
+
+/** Chuyển giữa vòng nói và vòng chờ. Chỉ có một video thì dùng cho cả hai. */
+let videoDang = null;
+function datVideo(dangNoi) {
+  const v = $("#monVid");
+  if (!v || v.hidden) return;
+  const muon = (dangNoi ? coVideo.noi : coVideo.cho) || coVideo.cho || coVideo.noi;
+  if (!muon) return;
+  if (videoDang !== muon) {
+    videoDang = muon;
+    v.src = muon;
+  }
+  // play() có thể bị chặn nếu người dùng chưa chạm màn hình — bỏ qua cho êm.
+  v.play().catch(() => {});
+}
+
 function renderCall() {
+  doVideoMon();
   $("#callMicNote").textContent = !SR
     ? "Trình duyệt này chưa nghe được bằng micro, bạn gõ chữ để nói chuyện nhé."
     : (isIosStandalone()
@@ -2420,7 +2467,7 @@ function monSays(en, vi, after, py) {
   $("#callSaidPy").hidden = !py;
   $("#callSaidVi").textContent = S.showVi ? (vi || "") : "";
   const m = $("#callMascot");
-  m.classList.add("talking");
+  m.classList.add("talking"); datVideo(true);
   setState("Đang nói…");
 
   let ended = false;
@@ -2834,9 +2881,9 @@ $("#callPreview").addEventListener("click", () => {
   const line = PREVIEW_LINES[previewTurn++ % PREVIEW_LINES.length];
   const box = $("#previewMon");
   toast(line.vi);
-  box.classList.add("talking");
+  box.classList.add("talking"); datVideo(true);
   let ended = false;
-  const stop = () => { if (ended) return; ended = true; box.classList.remove("talking", "pulse"); };
+  const stop = () => { if (ended) return; ended = true; box.classList.remove("talking", "pulse"); datVideo(false); };
   if (!S.sound || !window.speechSynthesis) { setTimeout(stop, 600 + line.en.length * 45); return; }
   try {
     speechSynthesis.cancel();

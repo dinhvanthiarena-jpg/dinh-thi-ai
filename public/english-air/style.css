@@ -869,6 +869,13 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 }
 .call-mon .mon-beat { display: block; position: relative; width: 100%; height: 100%; transform-origin: 50% 100%; }
 .mon-base, .mon-mouth { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* Lớp video đè lên ảnh tĩnh. Có video thì ẩn ảnh đi cho khỏi chồng hai lớp. */
+.mon-vid { position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; display: block; }
+.call-mon.co-video .mon-base, .call-mon.co-video .mon-mouth { display: none; }
+/* Có video rồi thì tắt các hoạt ảnh giả — để chính video lo cử động. */
+.call-mon.co-video { animation: monIn 700ms var(--e) both; }
+.call-mon.co-video.talking { animation: monIn 700ms var(--e) both; }
 /* Nền là bản vẽ KHÔNG CÓ MIỆNG, lớp miệng chồng lên trên. Lúc ngậm phải ẩn hẳn
    lớp này đi (opacity 0) — bóp mỏng thôi thì vẫn còn một vệt, nhìn là biết ngay. */
 .mon-mouth { transform-origin: 50% 24.89%; transform: scaleY(.08); opacity: 0;
