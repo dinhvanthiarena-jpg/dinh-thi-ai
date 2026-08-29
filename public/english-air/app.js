@@ -91,6 +91,7 @@ const DEFAULTS = {
   // Đang mở sẵn hết bài để thầy kiểm tra nội dung. Khi nào cần học lần lượt
   // trở lại thì đổi về false — ai đã tự gạt công tắc thì giữ lựa chọn của họ.
   moHet: true,
+  thi: {},   // kết quả đề thi theo ngày
   // Giọng người dùng tự chọn, theo gốc ngôn ngữ: { en: "...", vi: "..." }
   giong: {},
   // Ảnh đại diện: {k:"m"} linh vật, {k:"e",i:<số>} mặt vui, {k:"a",d:"data:…"} ảnh tự tải
@@ -593,10 +594,12 @@ function buildPractice(words, sentences, max) {
 
 /* ---------- 8. Trình chiếu ---------- */
 const P = { slides: [], i: 0, cur: null, teachN: 0, answered: false, correct: false,
-            wrong: 0, attempts: 0, startedAt: 0, lessonId: null, mode: "lesson", picked: null, hintUsed: false };
+            wrong: 0, attempts: 0, startedAt: 0, lessonId: null, mode: "lesson", picked: null, hintUsed: false, laThi: null };
 
 function startLesson(id, opts = {}) {
   regenHearts();
+  P.laThi = null;          // vào bài học thì không còn là đề thi nữa
+  $("#pHearts").hidden = false;
   P.slides = [];
   if (S.hearts <= 0) return sheetNoHearts();
 
@@ -1853,9 +1856,11 @@ function nextPressed() {
   if (P.correct) {
     docLanLuot(khucDoc);
     feedback(true, praise(), d.word ? `${d.word.en} — ${d.word.vi}` : (d.sent ? d.sent.en : ""), khucDoc);
+    if (P.laThi) P.laThi.dung += 1;
   } else {
     P.wrong++;
-    S.hearts = clamp(S.hearts - 1, 0, TIM_TOI_DA);
+    // Đang thi thì không trừ tim: hết tim giữa đề là phải bỏ dở, vô lý.
+    if (!P.laThi) S.hearts = clamp(S.hearts - 1, 0, TIM_TOI_DA);
     // Vừa sứt quả đầu từ lúc đầy thì mới bắt đầu tính giờ hồi.
     if (S.hearts === TIM_TOI_DA - 1) S.heartAt = Date.now();
     save(); paintHearts();
@@ -1863,7 +1868,8 @@ function nextPressed() {
     // Sai thì càng phải nghe: đọc đáp án ngay chứ không chỉ hiện chữ.
     docLanLuot(khucDoc);
     feedback(false, "Chưa đúng", "Đáp án: " + answerOf(d), khucDoc);
-    P.slides.push(s);
+    // Bài học thì cho gặp lại câu sai để nhớ; đề thi thì không, sai là sai.
+    if (!P.laThi) P.slides.push(s);
   }
   setBtn("Tiếp theo", P.correct ? "btn-ok" : "btn-danger", true);
 }
@@ -1891,7 +1897,7 @@ function feedback(ok, title, detail, doc) {
 }
 $("#fbSay").addEventListener("click", () => { if (fbDoc && fbDoc.length) docLanLuot(fbDoc); });
 function advance() {
-  if (S.hearts <= 0 && P.i >= P.teachN) return sheetNoHearts();
+  if (!P.laThi && S.hearts <= 0 && P.i >= P.teachN) return sheetNoHearts();
   P.i++;
   if (P.i >= P.slides.length) return finish();
   renderSlide();
@@ -1913,6 +1919,7 @@ const weakWords = () => seenWords().filter(w => S.srs[w.en].wrong > 0).sort((a, 
 
 /* ---------- 14. Kết thúc bài ---------- */
 function finish() {
+  if (P.laThi) return xongDeThi();
   const secs = Math.round((Date.now() - P.startedAt) / 1000);
   const tries = Math.max(1, P.attempts);
   const acc = clamp(Math.round(((tries - P.wrong) / tries) * 100), 0, 100);
@@ -1932,6 +1939,7 @@ function finish() {
   $("#resTime").textContent = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0");
   $("#resAcc").textContent = acc + "%";
   $("#resXp").textContent = xp;
+  $("#resSub").hidden = true;
   $("#resTitle").textContent = P.wrong === 0 ? "Chậm mà chắc, rất tuyệt!" : acc >= 80 ? "Làm tốt lắm, giữ nhịp nhé!" : "Xong rồi, cứ từ từ mà chắc!";
   $("#resNote").textContent = P.wrong === 0 ? "Không sai câu nào — thưởng thêm 5 XP." : "Ôn lại chương này sẽ chắc hơn.";
   $("#result").dataset.streak = firstToday ? "1" : "";
@@ -3540,6 +3548,196 @@ async function gacCua() {
 }
 gacCua();
 
+/* ═══════════════ ĐỀ THI MỖI NGÀY ═══════════════
+   Mỗi ngày một đề mới, nhưng trong cùng một ngày thì đề GIỮ NGUYÊN — làm dở
+   thoát ra vào lại vẫn đúng đề đó, không phải đề khác. Muốn vậy phải sinh đề
+   từ một hạt giống cố định theo ngày, chứ không dùng ngẫu nhiên thường. */
+const MUC_THI = [
+  { ma: "de",  ten: "Dễ",  mo: "20 câu · chọn nghĩa và nghe",       so: 20, kieu: ["choice", "reverse", "listen", "picture"] },
+  { ma: "vua", ten: "Vừa", mo: "30 câu · thêm điền từ và đúng/sai",  so: 30, kieu: ["choice", "reverse", "listen", "picture", "truefalse", "blanks"] },
+  { ma: "kho", ten: "Khó", mo: "40 câu · thêm tự viết và ghép chữ",  so: 40, kieu: ["reverse", "listen", "truefalse", "blanks", "type", "ghepChu"] },
+];
+
+/** Bộ sinh số giả ngẫu nhiên có hạt giống — cùng hạt thì cùng dãy số. */
+function mayNgau(hat) {
+  let x = hat >>> 0;
+  return () => {
+    // Thuật toán xorshift32: gọn, đủ đều cho việc trộn đề.
+    x ^= x << 13; x >>>= 0;
+    x ^= x >> 17;
+    x ^= x << 5;  x >>>= 0;
+    return x / 4294967296;
+  };
+}
+
+function hatCuaNgay(ngay, mucMa, lv) {
+  const chuoi = ngay + "|" + mucMa + "|" + lv;
+  let h = 2166136261;
+  for (let i = 0; i < chuoi.length; i += 1) {
+    h ^= chuoi.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/** Trộn một danh sách theo máy ngẫu nhiên có hạt — luôn ra cùng thứ tự. */
+function tronTheoHat(ds, r) {
+  const a = ds.slice();
+  for (let i = a.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(r() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** Dựng đề của hôm nay cho một mức khó. */
+function deHomNay(mucMa) {
+  const muc = MUC_THI.find(m => m.ma === mucMa) || MUC_THI[0];
+  const lv = level();
+  const r = mayNgau(hatCuaNgay(today(), muc.ma, lv.id));
+
+  // Chỉ lấy từ trong trình độ đang học, để đề không hỏi thứ chưa dạy.
+  const tuLv = lv.units.flatMap(unitWords).filter(Boolean);
+  const cauLv = lv.units.flatMap(unitSentences).filter(Boolean);
+  if (tuLv.length < 4) return [];
+
+  const q = [];
+  const kho = tronTheoHat(tuLv, r);
+  const khoCau = tronTheoHat(cauLv, r);
+  let iCau = 0;
+
+  for (let i = 0; i < muc.so; i += 1) {
+    const kieu = muc.kieu[Math.floor(r() * muc.kieu.length)];
+    const w = kho[i % kho.length];
+
+    if (kieu === "blanks") {
+      const s = khoCau[iCau++ % Math.max(1, khoCau.length)];
+      const phan = s && s.en ? s.en.split(" ") : [];
+      if (phan.length >= 3) {
+        const n = phan.length >= 5 ? 2 : 1;
+        const idx = tronTheoHat(phan.map((_, k) => k), r).slice(0, n).sort((x, y) => x - y);
+        const dap = idx.map(k => phan[k]);
+        const them = tronTheoHat(SINGLE.filter(x => !phan.includes(x.en)), r).slice(0, 2).map(x => x.en);
+        q.push({ type: "blanks", sent: s, idx, answers: dap, bank: tronTheoHat(dap.concat(them), r) });
+        continue;
+      }
+    }
+    if (kieu === "picture") {
+      const coAnh = kho.filter(x => x.pic || hinhChoChu(x.en));
+      if (coAnh.length >= 4) {
+        const w2 = coAnh[i % coAnh.length];
+        const khac = tronTheoHat(coAnh.filter(x => x.en !== w2.en), r).slice(0, 3);
+        q.push({ type: "picture", word: w2, opts: tronTheoHat([w2].concat(khac), r) });
+        continue;
+      }
+    }
+    if (kieu === "ghepChu") {
+      const ngan = kho.filter(x => x.en.replace(/[^a-z]/gi, "").length <= 9);
+      if (ngan.length) { q.push({ type: "ghepChu", word: ngan[i % ngan.length] }); continue; }
+    }
+    if (kieu === "truefalse") {
+      const noiDoi = r() < 0.5;
+      const khac = kho[(i + 3) % kho.length];
+      q.push({ type: "truefalse", word: w, shown: noiDoi ? khac.en : w.en, answer: !noiDoi });
+      continue;
+    }
+    if (kieu === "type") { q.push({ type: "type", word: w }); continue; }
+
+    const khac = tronTheoHat(tuLv.filter(x => x.en !== w.en), r).slice(0, 3);
+    q.push({ type: kieu, word: w, opts: tronTheoHat([w].concat(khac), r) });
+  }
+  return q;
+}
+
+/** Đã làm đề hôm nay chưa, và được bao nhiêu điểm. */
+function ketQuaThi(mucMa) {
+  const kho = S.thi || {};
+  const k = today() + "|" + S.level + "|" + mucMa;
+  return kho[k] || null;
+}
+function luuKetQuaThi(mucMa, diem, tong) {
+  const kho = Object.assign({}, S.thi || {});
+  kho[today() + "|" + S.level + "|" + mucMa] = { diem, tong, luc: Date.now() };
+  // Chỉ giữ 60 kết quả gần nhất, không thì càng học càng phình.
+  const khoa = Object.keys(kho).sort();
+  while (khoa.length > 60) delete kho[khoa.shift()];
+  S.thi = kho;
+  save();
+}
+
+function xongDeThi() {
+  const t = P.laThi;
+  const secs = Math.round((Date.now() - P.startedAt) / 1000);
+  const pc = Math.round((t.dung / t.tong) * 100);
+  luuKetQuaThi(t.ma, t.dung, t.tong);
+
+  // Thi xong vẫn được XP, nhưng theo điểm chứ không cào bằng.
+  const xp = Math.round((pc / 100) * (t.tong / 2));
+  markStudied(); addXp(xp); save();
+
+  P.laThi = null;
+  $("#pHearts").hidden = false;
+  $("#player").hidden = true;
+  $("#result").hidden = false;
+  $("#resTime").textContent = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0");
+  $("#resAcc").textContent = pc + "%";
+  $("#resXp").textContent = xp;
+  $("#resTitle").textContent =
+    pc >= 90 ? "Xuất sắc! Đề " + t.ten.toLowerCase() + " không làm khó được bạn."
+    : pc >= 70 ? "Khá lắm! Còn vài chỗ nữa là trọn vẹn."
+    : pc >= 50 ? "Qua rồi, nhưng nên ôn lại mấy chỗ sai."
+    : "Chưa đạt. Học lại vài bài rồi thi tiếp nhé.";
+  $("#resSub").hidden = false;
+  $("#resSub").textContent = "Đề " + t.ten.toLowerCase() + " · đúng " + t.dung + "/" + t.tong + " câu";
+}
+
+function moManThi() {
+  const box = el("div", "thi-ds");
+  MUC_THI.forEach(m => {
+    const kq = ketQuaThi(m.ma);
+    const b = el("button", "thi-o" + (kq ? " xong" : ""));
+    b.type = "button";
+    const txt = el("span");
+    txt.append(el("strong", null, m.ten), el("small", null, m.mo));
+    b.append(el("i", "thi-ma", m.ten[0]), txt);
+    if (kq) {
+      const pc = Math.round((kq.diem / kq.tong) * 100);
+      b.append(el("span", "thi-diem" + (pc >= 80 ? " tot" : pc >= 50 ? " kha" : " chua"), pc + "%"));
+    } else {
+      b.append(icon("i-chevron", "ic ic-sm"));
+    }
+    b.addEventListener("click", () => {
+      closeSheet();
+      batDauThi(m.ma);
+    });
+    box.append(b);
+  });
+
+  openSheet({
+    title: "Đề thi hôm nay",
+    body: "Mỗi ngày một đề mới. Trong ngày làm lại thì vẫn đúng đề đó.",
+    no: "Đóng",
+    slot: box,
+  });
+}
+
+function batDauThi(mucMa) {
+  const muc = MUC_THI.find(m => m.ma === mucMa) || MUC_THI[0];
+  const de = deHomNay(mucMa);
+  if (!de.length) return toast("Trình độ này chưa đủ từ để ra đề.");
+
+  P.slides = de.map(d => ({ phase: "drill", d }));
+  P.i = 0; P.teachN = 0; P.wrong = 0; P.attempts = 0;
+  P.lessonId = null;
+  P.laThi = { ma: mucMa, ten: muc.ten, dung: 0, tong: de.length };
+  P.startedAt = Date.now();
+  P.mode = "thi";
+  $("#player").hidden = false;
+  document.body.style.overflow = "hidden";
+  $("#pHearts").hidden = true;   // thi thì không mất tim, cứ làm hết đề
+  renderSlide();
+}
+
 /* ---------- 19. Giải đấu ---------- */
 const AVCOL = ["#0369A1", "#B45309", "#047857", "#BE185D", "#6D28D9", "#B91C1C", "#0F766E", "#4F46E5"];
 const leagueName = () => "Giải " + LEAGUES[clamp(S.tier, 0, LEAGUES.length - 1)].name;
@@ -3794,6 +3992,11 @@ $("#btnLevel").addEventListener("click", () => {
     });
     box.append(b);
   });
+  const thi = el("button", "btn btn-primary btn-block mt", "Làm đề thi hôm nay");
+  thi.type = "button";
+  thi.addEventListener("click", () => { closeSheet(); moManThi(); });
+  box.append(thi);
+
   openSheet({ title: "Chọn trình độ", body: "Chuyển bất cứ lúc nào, tiến độ mỗi trình độ giữ riêng.", no: "Đóng", slot: box });
 });
 $("#btnXp").addEventListener("click", () => toast(`${S.xp} XP · tuần này ${S.weekXp} XP`));

@@ -180,6 +180,11 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 /* ---------- 5. NÚT ---------- */
 .card { background: var(--card); border-radius: var(--r3); box-shadow: var(--sh-1); padding: var(--s4); }
+/* Bất kỳ class nào đặt display đều đè lên thuộc tính hidden của trình duyệt —
+   class thắng quy tắc mặc định. Nút .btn ẩn vẫn hiện ra thành một nút trống to
+   tướng ở cuối tấm trượt. Chốt một lần cho mọi phần tử. */
+[hidden] { display: none !important; }
+
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
   min-height: 54px; padding: 0 var(--s5); border-radius: var(--rf);
@@ -1313,6 +1318,28 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   .xa-o.rung { animation: none; }
   .xa-bay.ve { transition-duration: .01s; }
 }
+
+/* ---------- 15n. ĐỀ THI MỖI NGÀY ---------- */
+.thi-ds { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s2); }
+.thi-o { display: flex; align-items: center; gap: var(--s3); width: 100%;
+  padding: var(--s3) var(--s4); border: 0; border-radius: var(--r3);
+  background: var(--muted); color: var(--fg); font-family: inherit;
+  text-align: left; cursor: pointer; transition: transform var(--t1) var(--e); }
+.thi-o:active { transform: scale(.98); }
+.thi-o.xong { box-shadow: inset 0 0 0 2px var(--ok); }
+.thi-ma { flex: none; width: 38px; height: 38px; border-radius: var(--r2);
+  display: grid; place-items: center; font-style: normal;
+  background: var(--brand-fill); color: #fff; font-size: 1.02rem; font-weight: 900; }
+.thi-o span { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.thi-o strong { font-size: .98rem; font-weight: 900; }
+.thi-o small { font-size: .8rem; font-weight: 600; color: var(--muted-fg); margin-top: 1px; }
+.thi-diem { flex: none; padding: 5px 10px; border-radius: var(--rf);
+  font-size: .82rem; font-weight: 900; }
+.thi-diem.tot  { background: var(--ok-soft);   color: var(--ok-ink); }
+.thi-diem.kha  { background: var(--amber-soft); color: var(--amber-ink); }
+.thi-diem.chua { background: var(--bad-soft);  color: var(--bad-ink); }
+.res-sub { margin-top: var(--s2); text-align: center; font-size: .92rem;
+  font-weight: 700; color: var(--muted-fg); }
 
 /* ---------- 15m. ĐỌC THỬ VÀ CHẤM ĐIỂM ---------- */
 .dt { display: flex; flex-direction: column; align-items: center; gap: var(--s2);
