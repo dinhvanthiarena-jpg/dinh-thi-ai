@@ -3174,8 +3174,21 @@ function veDongGiong(goc) {
   if (!v) { o.textContent = "máy chưa có giọng này"; o.classList.add("thieu"); return; }
   const ch = luaChonGiong(goc);
   const kieu = KIEU_GIONG.find(k => Math.abs(ch.pitch - k.pitch) < 0.01 && Math.abs(ch.rate - k.rate) < 0.01);
-  o.textContent = tenGiong(v) + (ch.uri && kieu ? " — " + kieu.ten : "");
-  o.classList.remove("thieu");
+  // Ghi rõ giọng nước nào: "Daniel · Anh" khác hẳn "Samantha · Mỹ", nhìn là biết
+  // ngay máy có đúng giọng bản ngữ mình muốn hay chỉ có giọng thay thế.
+  o.textContent = tenGiong(v) + " · " + nuocCuaGiong(v.lang) + (ch.uri && kieu ? " — " + kieu.ten : "");
+  o.classList.toggle("thieu", goc === "en" && chuanTag(v.lang) !== "en-gb");
+}
+
+/** Đổi mã ngôn ngữ thành tên nước cho dễ đọc. */
+function nuocCuaGiong(lang) {
+  const t = chuanTag(lang);
+  const bang = {
+    "en-gb": "Anh", "en-us": "Mỹ", "en-au": "Úc", "en-ie": "Ireland",
+    "en-in": "Ấn Độ", "en-za": "Nam Phi", "en-ca": "Canada", "en-nz": "New Zealand",
+    "vi-vn": "Việt Nam",
+  };
+  return bang[t] || t.toUpperCase();
 }
 
 /* Máy thường chỉ cài sẵn một hai giọng cho mỗi thứ tiếng. Từ mỗi giọng gốc ta
@@ -3245,10 +3258,17 @@ function moChonGiong(goc) {
 
 $("#btnGiongAnh").addEventListener("click", () => moChonGiong("en"));
 $("#btnGiongViet").addEventListener("click", () => moChonGiong("vi"));
-$("#btnThuGiong").addEventListener("click", () => docLanLuot([
-  { text: CAU_THU.en, lang: "en-GB" },
-  { text: CAU_THU.vi, lang: "vi-VN" },
-]));
+$("#btnThuGiong").addEventListener("click", () => {
+  pickVoice();
+  const anh = voiceFor("en-GB");
+  if (anh && chuanTag(anh.lang) !== "en-gb") {
+    toast("Máy chưa có giọng Anh-Anh, đang dùng tạm giọng " + nuocCuaGiong(anh.lang) + ".");
+  }
+  docLanLuot([
+    { text: CAU_THU.en, lang: "en-GB" },
+    { text: CAU_THU.vi, lang: "vi-VN" },
+  ]);
+});
 // Danh sách giọng đến muộn trên vài máy, nên vẽ lại khi có.
 if (window.speechSynthesis) {
   const veCa = () => { veDongGiong("en"); veDongGiong("vi"); };
