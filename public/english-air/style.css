@@ -875,6 +875,12 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   object-fit: cover; display: block; z-index: 1; }
 /* Có video thì giấu hẳn ảnh phòng và nhân vật tĩnh đi. */
 .scene-fit.co-video .scene-room, .scene-fit.co-video .call-mon { visibility: hidden; }
+/* Khung cảnh vốn đóng cứng theo tỉ lệ ảnh phòng (0.476). Video quay dọc tỉ lệ
+   khác (0.571) nên nhét vào khung đó là cụt mất hai bên. Có video thì cho khung
+   phủ trọn màn hình, để video tự cover — cắt ít nhất mà vẫn kín. */
+.scene-fit.co-video {
+  left: 0; top: 0; transform: none; width: 100%; height: 100%;
+}
 /* Nền là bản vẽ KHÔNG CÓ MIỆNG, lớp miệng chồng lên trên. Lúc ngậm phải ẩn hẳn
    lớp này đi (opacity 0) — bóp mỏng thôi thì vẫn còn một vệt, nhìn là biết ngay. */
 .mon-mouth { transform-origin: 50% 24.89%; transform: scaleY(.08); opacity: 0;
