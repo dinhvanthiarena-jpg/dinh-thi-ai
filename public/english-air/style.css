@@ -365,7 +365,19 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   background: var(--muted); color: var(--muted-fg);
   font-size: .84rem; font-weight: 800; flex: none;
 }
-.round-btn[aria-pressed="true"] { background: var(--brand-soft); color: var(--brand-ink); }
+/* Nút icon đang bật phải thấy rõ là đang bật. Nền nhạt cùng tông thì nhìn y hệt
+   lúc tắt, người ta bấm xong không biết đã ăn hay chưa. */
+.round-btn[aria-pressed="true"],
+.round-btn[aria-expanded="true"] {
+  background: var(--brand-fill); color: #fff;
+  box-shadow: 0 0 0 4px var(--brand-soft);
+}
+.round-btn, .sort-pill {
+  transition: transform var(--t1) var(--e), background var(--t1) var(--e),
+              color var(--t1) var(--e), box-shadow var(--t1) var(--e);
+}
+.round-btn:active, .sort-pill:active { transform: scale(.88); }
+.sort-pill:active { filter: brightness(1.2); }
 
 .search-wrap {
   display: flex; align-items: center; gap: var(--s2);
