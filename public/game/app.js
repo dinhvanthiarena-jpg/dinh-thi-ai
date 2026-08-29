@@ -941,20 +941,76 @@
     giftedProblemList.hidden = true;
   }
 
+  // Pulls a single clean numeric answer out of a solution string, when one
+  // exists, so the card can offer a "thử tính xem!" self-check quiz before
+  // revealing the written solution. Deliberately conservative: only fires
+  // when there's exactly one <strong> tag and its whole content is just a
+  // number (optionally with a short unit like "cm"/"quyển vở" attached) —
+  // solutions with two numbers ("54 và 42"), a remainder ("7, dư 5"), or a
+  // name ("Mai") are skipped rather than risk extracting the wrong answer.
+  function extractSingleAnswer(solutionHtml) {
+    const matches = solutionHtml.match(/<strong>([\s\S]*?)<\/strong>/g);
+    if (!matches || matches.length !== 1) return null;
+    const inner = matches[0].replace(/<\/?strong>/g, '').trim();
+    const m = inner.match(/^(\d+(?:[.,]\d+)?)(?:[^\d,]*)$/);
+    if (!m) return null;
+    const numStr = m[1].replace(',', '.');
+    const value = parseFloat(numStr);
+    if (!Number.isFinite(value)) return null;
+    return { answer: value, decimal: numStr.includes('.') };
+  }
+
+  function giftedDoneKey(grade) { return `mathgame_gifted_done_${grade}`; }
+  function giftedDoneSet(grade) {
+    try {
+      const raw = JSON.parse(localStorage.getItem(giftedDoneKey(grade)) || '[]');
+      return new Set(Array.isArray(raw) ? raw : []);
+    } catch (e) { return new Set(); }
+  }
+  function giftedMarkDone(grade, idx) {
+    const s = giftedDoneSet(grade);
+    if (s.has(idx)) return false;
+    s.add(idx);
+    localStorage.setItem(giftedDoneKey(grade), JSON.stringify([...s]));
+    return true;
+  }
+
   function giftedRenderProblems(grade) {
     giftedCurrentGrade = grade;
     giftedGradePicker.hidden = true;
     giftedProblemList.hidden = false;
     giftedProblemList.innerHTML = '';
-    (GIFTED_PROBLEMS[grade] || []).forEach((p, i) => {
+
+    const problems = GIFTED_PROBLEMS[grade] || [];
+    const progressWrap = document.createElement('div');
+    progressWrap.className = 'gifted-progress';
+    progressWrap.innerHTML = `
+      <div class="gifted-progress-track"><div class="gifted-progress-fill" id="giftedProgressFill"></div></div>
+      <p class="gifted-progress-text" id="giftedProgressText"></p>
+    `;
+    giftedProblemList.appendChild(progressWrap);
+    const progressFill = progressWrap.querySelector('#giftedProgressFill');
+    const progressText = progressWrap.querySelector('#giftedProgressText');
+    function updateProgress() {
+      const done = giftedDoneSet(grade).size;
+      progressText.textContent = `Đã học ${done}/${problems.length} bài`;
+      progressFill.style.width = (problems.length ? (done / problems.length * 100) : 0) + '%';
+    }
+    updateProgress();
+
+    problems.forEach((p, i) => {
       const card = document.createElement('div');
       card.className = 'gifted-card';
       const levelClass = p.level === 'Nâng cao' ? 'gifted-level-advanced' : 'gifted-level-basic';
       const steps = p.teach || [];
+      const selfCheck = extractSingleAnswer(p.solution);
       card.innerHTML = `
         <div class="gifted-card-head">
           <span class="gifted-level ${levelClass}">${p.level}</span>
-          <span class="gifted-num">Bài ${i + 1}</span>
+          <span class="gifted-head-right">
+            <span class="gifted-done-badge" hidden>✓ Đã học</span>
+            <span class="gifted-num">Bài ${i + 1}</span>
+          </span>
         </div>
         <p class="gifted-question">${p.text}</p>
         <button type="button" class="gifted-learn-btn">Học cách làm</button>
@@ -964,6 +1020,10 @@
           <h4 class="gifted-step-title"></h4>
           <div class="gifted-step-body"></div>
           <button type="button" class="gifted-step-next"></button>
+        </div>
+        <div class="gifted-selfcheck" hidden>
+          <p class="gifted-selfcheck-title">🧠 Con thử tính xem đáp số là bao nhiêu?</p>
+          <div class="gifted-selfcheck-choices"></div>
         </div>
         <button type="button" class="gifted-reveal-btn" hidden>Xem lời giải</button>
         <p class="gifted-locked-note">Xem hết phần hướng dẫn thì nút lời giải mới hiện ra.</p>
@@ -977,11 +1037,17 @@
       const titleEl = card.querySelector('.gifted-step-title');
       const bodyEl = card.querySelector('.gifted-step-body');
       const nextBtn = card.querySelector('.gifted-step-next');
+      const selfCheckBox = card.querySelector('.gifted-selfcheck');
+      const selfCheckChoices = card.querySelector('.gifted-selfcheck-choices');
       const revealBtn = card.querySelector('.gifted-reveal-btn');
       const noteEl = card.querySelector('.gifted-locked-note');
       const solutionEl = card.querySelector('.gifted-solution');
+      const doneBadge = card.querySelector('.gifted-done-badge');
 
-      // Chỉ mở nút lời giải sau khi học sinh đã xem hết các bước hướng dẫn.
+      if (giftedDoneSet(grade).has(i)) doneBadge.hidden = false;
+
+      // Chỉ mở nút lời giải sau khi học sinh đã xem hết các bước hướng dẫn
+      // (và, nếu có, trả lời xong phần tự thử sức bên dưới).
       let stepIdx = 0;
       let unlocked = steps.length === 0;
       if (unlocked) { learnBtn.hidden = true; revealBtn.hidden = false; noteEl.hidden = true; }
@@ -994,8 +1060,53 @@
         countEl.textContent = `Bước ${stepIdx + 1}/${steps.length}`;
         titleEl.textContent = s.t;
         bodyEl.innerHTML = s.b;
-        nextBtn.textContent = stepIdx < steps.length - 1 ? 'Đã hiểu, bước tiếp theo' : 'Đã hiểu hết, mở lời giải';
+        nextBtn.textContent = stepIdx < steps.length - 1 ? 'Đã hiểu, bước tiếp theo' : 'Đã hiểu hết';
         dots.forEach((d, k) => d.classList.toggle('on', k <= stepIdx));
+      }
+
+      function unlockSolution() {
+        unlocked = true;
+        teachBox.hidden = true;
+        selfCheckBox.hidden = true;
+        noteEl.hidden = true;
+        revealBtn.hidden = false;
+        learnBtn.hidden = false;
+        learnBtn.textContent = 'Xem lại hướng dẫn';
+      }
+
+      function renderSelfCheck() {
+        selfCheckBox.hidden = false;
+        selfCheckChoices.innerHTML = '';
+        const distractors = makeDistractors(selfCheck.answer, selfCheck.decimal);
+        const choices = [selfCheck.answer, ...distractors].sort(() => Math.random() - 0.5);
+        let answered = false;
+        choices.forEach((choice) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'gifted-check-btn';
+          btn.textContent = fmtNum(choice);
+          btn.addEventListener('click', () => {
+            if (answered) return;
+            answered = true;
+            const isCorrect = choice === selfCheck.answer;
+            const allBtns = [...selfCheckChoices.children];
+            allBtns.forEach((b) => {
+              b.disabled = true;
+              if (b !== btn) b.classList.add('dim');
+            });
+            btn.classList.add(isCorrect ? 'correct' : 'wrong');
+            if (!isCorrect) {
+              allBtns.forEach((b) => {
+                if (Number(b.textContent.replace(',', '.')) === selfCheck.answer) b.classList.add('correct');
+              });
+            }
+            const r = btn.getBoundingClientRect();
+            burstParticles(r.left + r.width / 2, r.top + r.height / 2, isCorrect ? 'var(--ok)' : 'var(--bad)', isCorrect ? 12 : 6);
+            if (isCorrect) sfx.correct(); else sfx.wrong();
+            setTimeout(unlockSolution, 950);
+          });
+          selfCheckChoices.appendChild(btn);
+        });
       }
 
       learnBtn.addEventListener('click', () => {
@@ -1014,12 +1125,12 @@
           teachBox.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
           return;
         }
-        unlocked = true;
         teachBox.hidden = true;
-        noteEl.hidden = true;
-        revealBtn.hidden = false;
-        learnBtn.hidden = false;
-        learnBtn.textContent = 'Xem lại hướng dẫn';
+        if (selfCheck) {
+          renderSelfCheck();
+        } else {
+          unlockSolution();
+        }
       });
 
       revealBtn.addEventListener('click', () => {
@@ -1028,6 +1139,10 @@
         const willShow = solutionEl.hidden;
         solutionEl.hidden = !willShow;
         revealBtn.textContent = willShow ? 'Ẩn lời giải' : 'Xem lời giải';
+        if (willShow) {
+          doneBadge.hidden = false;
+          if (giftedMarkDone(grade, i)) updateProgress();
+        }
       });
 
       giftedProblemList.appendChild(card);
