@@ -1254,8 +1254,13 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .giong-ten.thieu { color: var(--bad); }
 .giong-nut .ic { flex: none; color: var(--muted-fg); }
 
-.giong-ds { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s2);
-  max-height: 46vh; overflow-y: auto; }
+.giong-ds { display: flex; flex-direction: column; gap: 6px; margin-top: var(--s2);
+  max-height: 48vh; overflow-y: auto; }
+/* Tên giọng gốc, phía trên nhóm các kiểu của nó */
+.giong-dau { margin-top: var(--s3); padding: 0 var(--s2); text-align: left;
+  font-size: .76rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--muted-fg); }
+.giong-dau:first-child { margin-top: 0; }
 .giong-o { display: flex; align-items: center; gap: var(--s3); width: 100%;
   padding: var(--s3) var(--s4); border: 0; border-radius: var(--r2);
   background: var(--muted); color: var(--fg); font-family: inherit;

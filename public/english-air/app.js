@@ -217,6 +217,15 @@ function pickVoice() {
 }
 const chuanTag = t => String(t || "").toLowerCase().replace("_", "-");
 
+/** Lựa chọn giọng của người dùng cho một gốc ngôn ngữ.
+    Chịu cả dạng cũ (chỉ lưu tên giọng) để ai đã chọn rồi không bị mất. */
+function luaChonGiong(goc) {
+  const g = (S.giong || {})[goc];
+  if (!g) return { uri: null, pitch: 1, rate: 1 };
+  if (typeof g === "string") return { uri: g, pitch: 1, rate: 1 };
+  return { uri: g.uri || null, pitch: g.pitch || 1, rate: g.rate || 1 };
+}
+
 /** Tìm giọng khớp thứ tiếng. Khớp ĐÚNG mã trước, rồi mới tới cùng gốc ngôn ngữ. */
 function voiceFor(tag) {
   const muon = chuanTag(tag);
@@ -224,9 +233,9 @@ function voiceFor(tag) {
   const pool = voices.filter(v => chuanTag(v.lang).split("-")[0] === goc);
   if (!pool.length) return null;
   // Người dùng đã tự chọn giọng cho thứ tiếng này thì tôn trọng lựa chọn đó.
-  const daChon = S.giong && S.giong[goc];
-  if (daChon) {
-    const v = pool.find(x => x.voiceURI === daChon) || pool.find(x => x.name === daChon);
+  const uri = luaChonGiong(goc).uri;
+  if (uri) {
+    const v = pool.find(x => x.voiceURI === uri) || pool.find(x => x.name === uri);
     if (v) return v;
   }
   // Giọng con trai để nâng cao độ nghe mới ra trẻ con. Chỉ dò trong pool đã lọc
@@ -259,6 +268,16 @@ function dungGiong(u, tag) {
   u.lang = tag;
   const v = voiceFor(tag);
   if (v) u.voice = v;
+  // Cùng một giọng gốc nhưng đổi cao độ và tốc độ là ra hẳn một giọng khác —
+  // đó là cách có nhiều giọng trên máy vốn chỉ cài sẵn một hai giọng.
+  const ch = luaChonGiong(chuanTag(tag).split("-")[0]);
+  u.pitch = clamp(ch.pitch, 0.5, 2);
+  u.__heSoToc = ch.rate;
+}
+
+/** Nhân tốc độ đã chọn vào tốc độ gốc của câu. */
+function apToc(u, toc) {
+  u.rate = clamp(toc * (u.__heSoToc || 1), 0.4, 1.6);
 }
 
 function speak(text, slow, lang) {
@@ -268,7 +287,7 @@ function speak(text, slow, lang) {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     dungGiong(u, lang || tiengCua(text));
-    u.rate = slow ? 0.55 : 0.92;
+    apToc(u, slow ? 0.55 : 0.92);
     speechSynthesis.speak(u);
   } catch { /* bỏ qua */ }
 }
@@ -291,7 +310,7 @@ function docLanLuot(khuc) {
     try {
       const u = new SpeechSynthesisUtterance(k.text);
       dungGiong(u, k.lang || tiengCua(k.text));
-      u.rate = k.slow ? 0.55 : 0.92;
+      apToc(u, k.slow ? 0.55 : 0.92);
       let daSang = false;
       const sang = () => { if (daSang) return; daSang = true; doc(i + 1); };
       u.onend = sang;
@@ -2257,7 +2276,7 @@ $("#callPreview").addEventListener("click", () => {
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(line.en);
-    dungGiong(u, tiengCua(line.en)); u.rate = 0.94;
+    dungGiong(u, tiengCua(line.en)); apToc(u, 0.94);
     u.pitch = S.kidVoice ? KID_PITCH : 1;
     u.onboundary = () => { box.classList.remove("pulse"); void box.offsetWidth; box.classList.add("pulse"); };
     u.onend = stop; u.onerror = stop;
@@ -3065,36 +3084,57 @@ function veDongGiong(goc) {
   const o = $(goc === "en" ? "#giongAnh" : "#giongViet");
   if (!o) return;
   const v = voiceFor(goc === "en" ? "en-US" : "vi-VN");
-  o.textContent = v ? tenGiong(v) : "máy chưa có giọng này";
-  o.classList.toggle("thieu", !v);
+  if (!v) { o.textContent = "máy chưa có giọng này"; o.classList.add("thieu"); return; }
+  const ch = luaChonGiong(goc);
+  const kieu = KIEU_GIONG.find(k => Math.abs(ch.pitch - k.pitch) < 0.01 && Math.abs(ch.rate - k.rate) < 0.01);
+  o.textContent = tenGiong(v) + (ch.uri && kieu ? " — " + kieu.ten : "");
+  o.classList.remove("thieu");
 }
+
+/* Máy thường chỉ cài sẵn một hai giọng cho mỗi thứ tiếng. Từ mỗi giọng gốc ta
+   dựng thêm mấy kiểu bằng cách đổi cao độ và tốc độ — nghe ra hẳn người khác. */
+const KIEU_GIONG = [
+  { ten: "bình thường", pitch: 1,    rate: 1 },
+  { ten: "trẻ trung",   pitch: 1.35, rate: 1.05 },
+  { ten: "trầm ấm",     pitch: 0.78, rate: 0.95 },
+  { ten: "chậm rãi",    pitch: 1,    rate: 0.78 },
+  { ten: "nhanh nhẹn",  pitch: 1.1,  rate: 1.25 },
+];
 
 function moChonGiong(goc) {
   pickVoice();
   const ds = voices.filter(v => chuanTag(v.lang).split("-")[0] === goc);
+  const dangDung = luaChonGiong(goc);
   const box = el("div", "giong-ds");
+
   if (!ds.length) {
     box.append(el("p", "pro-fine",
-      goc === "en"
-        ? "Máy này chưa cài giọng tiếng Anh. Vào Cài đặt máy → Trợ năng → Nội dung đọc để tải thêm."
-        : "Máy này chưa cài giọng tiếng Việt. Vào Cài đặt máy → Trợ năng → Nội dung đọc để tải thêm."));
+      "Máy này chưa cài giọng " + (goc === "en" ? "tiếng Anh" : "tiếng Việt") +
+      ". Vào Cài đặt máy → Trợ năng → Nội dung đọc để tải thêm."));
   }
-  const dangDung = voiceFor(goc === "en" ? "en-US" : "vi-VN");
+
   ds.forEach(v => {
-    const b = el("button", "giong-o" + (dangDung && v.voiceURI === dangDung.voiceURI ? " on" : ""));
-    b.type = "button";
-    const txt = el("span");
-    txt.append(el("strong", null, tenGiong(v)), el("small", null, v.lang + (v.localService ? " · trên máy" : " · qua mạng")));
-    b.append(txt, icon("i-sound", "ic ic-sm"));
-    b.addEventListener("click", () => {
-      S.giong = Object.assign({}, S.giong, { [goc]: v.voiceURI });
-      save();
-      $$(".giong-o", box).forEach(x => x.classList.remove("on"));
-      b.classList.add("on");
-      veDongGiong(goc);
-      speak(CAU_THU[goc], false, goc === "en" ? "en-US" : "vi-VN");
+    box.append(el("div", "giong-dau", tenGiong(v) + " · " + v.lang +
+      (v.localService ? " · trên máy" : " · qua mạng")));
+    KIEU_GIONG.forEach(k => {
+      const dangChon = dangDung.uri === v.voiceURI
+        && Math.abs(dangDung.pitch - k.pitch) < 0.01
+        && Math.abs(dangDung.rate - k.rate) < 0.01;
+      const b = el("button", "giong-o" + (dangChon ? " on" : ""));
+      b.type = "button";
+      const txt = el("span");
+      txt.append(el("strong", null, tenGiong(v) + " — " + k.ten));
+      b.append(txt, icon("i-sound", "ic ic-sm"));
+      b.addEventListener("click", () => {
+        S.giong = Object.assign({}, S.giong, { [goc]: { uri: v.voiceURI, pitch: k.pitch, rate: k.rate } });
+        save();
+        $$(".giong-o", box).forEach(x => x.classList.remove("on"));
+        b.classList.add("on");
+        veDongGiong(goc);
+        speak(CAU_THU[goc], false, goc === "en" ? "en-US" : "vi-VN");
+      });
+      box.append(b);
     });
-    box.append(b);
   });
 
   if (ds.length) {
@@ -3110,7 +3150,7 @@ function moChonGiong(goc) {
 
   openSheet({
     title: goc === "en" ? "Giọng tiếng Anh" : "Giọng tiếng Việt",
-    body: "Chạm vào một giọng để nghe thử và chọn luôn.",
+    body: "Chạm vào một kiểu để nghe thử và chọn luôn.",
     no: "Xong",
     slot: box,
   });
