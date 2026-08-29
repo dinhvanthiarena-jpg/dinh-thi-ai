@@ -2419,9 +2419,26 @@ function doVideoMon() {
   });
 }
 
+/* Trình duyệt tự DỪNG video ngay tại chỗ vòng lại — đo được trên máy thật: tới
+   giây 7,8 nó seek về 0 rồi phát luôn sự kiện pause. Câu nói thì dài 13 giây,
+   nên MON.L há mồm đứng im suốt 5 giây còn lại. Tự canh lấy, đừng tin loop. */
+function gacVideo(v) {
+  if (daGacVideo) return;
+  daGacVideo = true;
+  v.addEventListener("pause", () => {
+    if (videoDangNoi) v.play().catch(() => {});
+  });
+  v.addEventListener("ended", () => {
+    if (!videoDangNoi) return;
+    try { v.currentTime = 0.04; } catch (e) {}
+    v.play().catch(() => {});
+  });
+}
+
 function batVideo() {
   const v = $("#monVid");
   if (!v || (!coVideo.noi && !coVideo.cho)) return;
+  gacVideo(v);
   document.querySelector(".scene-fit").classList.add("co-video");
   v.hidden = false;
   datVideo(false);
@@ -2430,6 +2447,8 @@ function batVideo() {
 /** Chuyển giữa vòng nói và vòng chờ. Chỉ có một video thì dùng cho cả hai. */
 let videoDang = null;
 let hoiTua = null;
+let videoDangNoi = false;   // đang trong lúc MON.L nói, video phải chạy liên tục
+let daGacVideo = false;
 function datVideo(dangNoi) {
   const v = $("#monVid");
   if (!v || v.hidden) return;
@@ -2450,6 +2469,7 @@ function datVideo(dangNoi) {
     // Tắt loop TRƯỚC khi dừng. Còn loop thì cú "hết bài, quay về đầu" của trình
     // duyệt nuốt sạch lệnh tua trong hai giây liền — đo trên máy thật ra đúng
     // hai giây rưỡi MON.L há mồm đứng đó.
+    videoDangNoi = false;
     v.loop = false;
     v.pause();
     if (v.readyState >= 1) dat(); else v.addEventListener("loadedmetadata", dat, { once: true });
@@ -2468,6 +2488,7 @@ function datVideo(dangNoi) {
   }
   v.classList.remove("dung-yen");
   clearInterval(hoiTua); hoiTua = null;
+  videoDangNoi = true;
   v.loop = true;
   // play() có thể bị chặn nếu người dùng chưa chạm màn hình — bỏ qua cho êm.
   v.play().catch(() => {});
