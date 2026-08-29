@@ -2396,9 +2396,11 @@ function diemDoc(nghe, mau) {
 const VIDEO_MON = { noi: "assets/mon-noi.mp4", cho: "assets/mon-cho.mp4" };
 const coVideo = {};
 
+let daDoVideo = false;
 function doVideoMon() {
   const v = $("#monVid");
-  if (!v) return;
+  if (!v || daDoVideo) return;
+  daDoVideo = true;
   Object.entries(VIDEO_MON).forEach(([ten, duong]) => {
     const thu = document.createElement("video");
     thu.muted = true;
@@ -2529,6 +2531,9 @@ function startCall(mode) {
   $("#btnCallLog").setAttribute("aria-pressed", "false");
   $("#call").hidden = false;
   document.body.style.overflow = "hidden";
+  // Dò lại ở đây nữa: vào thẳng cuộc gọi mà không qua tab Gọi thì renderCall
+  // không chạy, thiếu dòng này là ngồi nhìn ảnh tĩnh.
+  doVideoMon(); batVideo();
   fitScene();
 
   C.t0 = Date.now();
