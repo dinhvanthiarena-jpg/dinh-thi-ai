@@ -535,6 +535,13 @@ function buildPractice(words, sentences, max) {
 
   // Xen một lượt tô chữ cho đỡ ngán: chọn chữ cái đầu của một từ vừa học, ưu
   // tiên từ một tiếng cho khớp giữa chữ được tô và từ đọc lên sau đó.
+  // Ghép chữ: chỉ lấy từ NGẮN và có ảnh, từ dài quá thì ghép mãi không xong.
+  const coAnh = pool.filter(w => w.en.replace(/[^a-z]/gi, "").length <= 9
+    && (w.pic || hinhChoChu(w.en)));
+  if (coAnh.length) {
+    q.push({ type: "ghepChu", word: sample(coAnh, 1)[0] });
+  }
+
   const netCo = window.NET_CHU || {};
   const tuNgan = pool.filter(w => !w.en.includes(" ") && netCo[w.en[0].toUpperCase()]);
   if (tuNgan.length) {
@@ -553,10 +560,13 @@ function buildPractice(words, sentences, max) {
   // slice là nó rụng mất và người học chẳng bao giờ gặp.
   const head = q[0] && q[0].type === "match" ? [q.shift()] : [];
   const bTo = q.find(x => x.type === "viet");
-  const conLai = shuffle(q.filter(x => x.type !== "viet"));
-  const ds = head.concat(conLai).slice(0, Math.max(1, max - (bTo ? 1 : 0)));
-  // Chèn vào giữa chứ không để đầu — mở bài nào cũng tô chữ thì lại thành nhàm.
+  const bGhep = q.find(x => x.type === "ghepChu");
+  const dacBiet = [bTo, bGhep].filter(Boolean);
+  const conLai = shuffle(q.filter(x => x.type !== "viet" && x.type !== "ghepChu"));
+  const ds = head.concat(conLai).slice(0, Math.max(1, max - dacBiet.length));
+  // Chèn vào giữa chứ không để đầu — mở bài nào cũng đúng một kiểu thì thành nhàm.
   if (bTo) ds.splice(Math.min(2, ds.length), 0, bTo);
+  if (bGhep) ds.splice(Math.min(5, ds.length), 0, bGhep);
   return ds;
 }
 
@@ -1309,6 +1319,77 @@ const DRILL = {
     setBtn("Kiểm tra", "btn-primary", false);
   },
 
+  /* Ghép chữ cái thành từ: nhìn ảnh rồi bấm các chữ cái cho đúng thứ tự.
+     Luyện đúng cái mà bài chọn đáp án không luyện được — nhớ mặt chữ. */
+  ghepChu(d, st) {
+    showMascot(false); setKicker("Nhìn ảnh, ghép thành từ");
+    const tu = d.word.en;
+    st.append(el("p", "ask", d.word.vi));
+
+    const anh = anhChoTu(d.word);
+    if (anh) st.append(anh);
+
+    const chuCan = [...tu.toUpperCase()];
+    const oTrong = [];
+    const hang = el("div", "gc-hang");
+    chuCan.forEach((c, i) => {
+      if (c === " ") { hang.append(el("span", "gc-cach")); oTrong.push(null); return; }
+      const o = el("button", "gc-o"); o.type = "button";
+      o.dataset.vt = String(i);
+      o.setAttribute("aria-label", "Ô chữ thứ " + (oTrong.filter(Boolean).length + 1));
+      o.addEventListener("click", () => {
+        if (P.answered || !o.dataset.chu) return;
+        const v = bang.querySelector(`.gc-chu[data-id="${o.dataset.tuO}"]`);
+        if (v) v.classList.remove("used");
+        o.textContent = ""; delete o.dataset.chu; delete o.dataset.tuO;
+        o.classList.remove("filled");
+        soat();
+      });
+      oTrong.push(o); hang.append(o);
+    });
+    st.append(hang);
+
+    // Chữ cái của từ, xáo lên, thêm vài chữ nhiễu cho khỏi đoán bừa.
+    const nhieu = "ABCDEFGHIJKLMNOPRSTUVWY".split("");
+    const themN = clamp(Math.round(chuCan.filter(c => c !== " ").length / 3), 2, 4);
+    const kho = shuffle(
+      chuCan.filter(c => c !== " ")
+        .concat(sample(nhieu.filter(c => !tu.toUpperCase().includes(c)), themN))
+    );
+
+    const bang = el("div", "gc-bang");
+    kho.forEach((c, i) => {
+      const b = el("button", "gc-chu", c); b.type = "button";
+      b.dataset.id = String(i);
+      b.addEventListener("click", () => {
+        if (P.answered || b.classList.contains("used")) return;
+        const o = oTrong.find(x => x && !x.dataset.chu);
+        if (!o) return;
+        o.textContent = c; o.dataset.chu = c; o.dataset.tuO = b.dataset.id;
+        o.classList.add("filled");
+        b.classList.add("used");
+        rung(6);
+        soat();
+      });
+      bang.append(b);
+    });
+    st.append(bang);
+
+    function soat() {
+      const day = oTrong.filter(Boolean).every(o => o.dataset.chu);
+      const ghep = chuCan.map((c, i) => {
+        if (c === " ") return " ";
+        const o = oTrong[i];
+        return (o && o.dataset.chu) || "_";
+      }).join("");
+      P.picked = { ghep, ok: ghep === tu.toUpperCase() };
+      setBtn("Kiểm tra", "btn-primary", day);
+    }
+    P.picked = null;
+    setBtn("Kiểm tra", "btn-primary", false);
+    docLanLuot([{ text: d.word.vi, lang: "vi-VN" }]);
+  },
+
   match(d, st) {
     showMascot(false); setKicker("Nối từ với nghĩa");
     const grid = el("div", "match");
@@ -1414,7 +1495,13 @@ function nextPressed() {
   P.correct = !!P.picked.ok;
   const st = $("#stage");
 
-  if (d.type === "blanks") {
+  if (d.type === "ghepChu") {
+    const dung = [...d.word.en.toUpperCase()];
+    $$(".gc-o", st).forEach(o => {
+      const i = +o.dataset.vt;
+      o.classList.add(o.dataset.chu === dung[i] ? "ok" : "bad");
+    });
+  } else if (d.type === "blanks") {
     P.picked.slots.forEach((sl, k) => sl.classList.add(norm(sl.dataset.word || "") === norm(d.answers[k]) ? "ok" : "bad"));
   } else if (P.picked.node) {
     P.picked.node.classList.add(P.correct ? "ok" : "bad");
@@ -1455,6 +1542,7 @@ const PRAISE = ["Chính xác", "Tuyệt vời", "Giỏi lắm", "Đúng rồi", 
 const praise = () => PRAISE[Math.floor(Math.random() * PRAISE.length)];
 function answerOf(d) {
   if (d.type === "blanks") return d.sent.en;
+  if (d.type === "ghepChu") return d.word.en;
   if (d.type === "choice") return d.word.vi;
   if (d.type === "truefalse") return d.answer ? "Đúng" : `Sai — “${d.word.vi}” là “${d.word.en}”`;
   return d.word.en;

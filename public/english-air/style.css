@@ -1275,6 +1275,35 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .cong-hoac::before, .cong-hoac::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .cong-hoac span { font-size: .8rem; font-weight: 700; color: var(--muted-fg); }
 
+/* ---------- 15k. GHÉP CHỮ CÁI THÀNH TỪ ---------- */
+.gc-hang { display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 6px; margin-top: var(--s4); }
+.gc-cach { width: 14px; }
+.gc-o { width: 42px; height: 52px; display: grid; place-items: center;
+  border: 2px dashed var(--line-hi); border-radius: var(--r2);
+  background: none; color: var(--fg); font-family: inherit;
+  font-size: 1.32rem; font-weight: 900; cursor: pointer;
+  transition: transform var(--t1) var(--e), background var(--t1) var(--e),
+              border-color var(--t1) var(--e); }
+.gc-o.filled { border-style: solid; border-color: var(--brand); background: var(--brand-soft); }
+.gc-o.ok  { border-style: solid; border-color: var(--ok);  background: var(--ok-soft);  color: var(--ok-ink); }
+.gc-o.bad { border-style: solid; border-color: var(--bad); background: var(--bad-soft); color: var(--bad-ink); }
+.gc-o:active { transform: scale(.92); }
+
+.gc-bang { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s2);
+  margin-top: var(--s5); }
+.gc-chu { width: 46px; height: 52px; display: grid; place-items: center;
+  border: 0; border-radius: var(--r2); background: var(--card); color: var(--fg);
+  box-shadow: inset 0 0 0 2px var(--line), 0 2px 0 var(--line);
+  font-family: inherit; font-size: 1.28rem; font-weight: 900; cursor: pointer;
+  transition: opacity var(--t1) var(--e), transform var(--t1) var(--e); }
+.gc-chu:active { transform: scale(.9); }
+.gc-chu.used { opacity: 0; visibility: hidden; }
+@media (max-width: 359px) {
+  .gc-o { width: 36px; height: 46px; font-size: 1.15rem; }
+  .gc-chu { width: 40px; height: 46px; font-size: 1.12rem; }
+}
+
 /* ---------- 15j. CHỌN GIỌNG ĐỌC ---------- */
 .giong-hang { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; }
 .giong-nut { display: flex; align-items: center; gap: var(--s3); width: 100%;
