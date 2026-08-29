@@ -2238,7 +2238,7 @@ button:focus-visible,
   background: rgba(255,255,255,0.96);
   border-radius: var(--r3);
   padding: 20px 22px;
-  color: var(--ink-deep);
+  color: #2B1245;
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.15rem;
@@ -2266,7 +2266,7 @@ button:focus-visible,
   font-family: var(--font-body, inherit);
   font-weight: 600;
   font-size: 0.85rem;
-  color: var(--muted-fg);
+  color: #6B5A85;
   line-height: 1.4;
 }
 .call-said-py { font-style: italic; }
