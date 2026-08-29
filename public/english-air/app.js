@@ -86,7 +86,7 @@ const DEFAULTS = {
   goal: 30, goalDay: "", todayXp: 0,
   weekXp: 0, weekStart: "", tier: 0,
   joined: today(), sound: true, motion: false, showVi: true, theme: "",
-  kidVoice: true,
+  kidVoice: true, khauHinh: true,
   ten: "",
   // Đang mở sẵn hết bài để thầy kiểm tra nội dung. Khi nào cần học lần lượt
   // trở lại thì đổi về false — ai đã tự gạt công tắc thì giữ lựa chọn của họ.
@@ -2390,6 +2390,115 @@ function diemDoc(nghe, mau) {
   return Math.max(0, Math.round((1 - d / Math.max(a.length, b.length)) * 100));
 }
 
+/* ═══════════ CÁCH CŨ: CHO CHẠY VIDEO ═══════════
+   Thân người cử động đẹp hơn, nhưng miệng máy theo lời trong video chứ không
+   theo lời đang đọc. Thầy tự chọn trong Hồ sơ → Cài đặt.
+   (phần cũ giữ nguyên, chỉ đổi tên hàm cho khỏi đụng)
+   VIDEO NHÂN VẬT ═══════════
+   Có video thì MON.L cử động cả người; không có thì vẫn là ảnh tĩnh cộng lớp
+   miệng như cũ — thả video vào lúc nào cũng được, không thả cũng không vỡ. */
+const VIDEO_MON = { noi: "assets/mon-noi.mp4", cho: "assets/mon-cho.mp4" };
+/* Giây đứng yên trong video nói. Không phải giây 0: ngay đầu video MON.L đang
+   há miệng to, hai tay buông thõng — dừng ở đó thì trông như bị đơ giữa câu.
+   Giây 2,083 (khung 50) là lúc miệng ngậm, mắt mở, hai tay đưa ra chào. */
+const KHUNG_YEN = 2.083;
+const coVideo = {};
+
+let daDoVideo = false;
+function doVideoMonPhim() {
+  const v = $("#monVid");
+  if (!v || daDoVideo) return;
+  daDoVideo = true;
+  Object.entries(VIDEO_MON).forEach(([ten, duong]) => {
+    const thu = document.createElement("video");
+    thu.muted = true;
+    thu.preload = "metadata";
+    // Chỉ nhận khi trình duyệt thật sự đọc được, chứ không chỉ vì file tồn tại.
+    thu.addEventListener("loadedmetadata", () => {
+      coVideo[ten] = duong;
+      batVideoPhim();
+    }, { once: true });
+    thu.addEventListener("error", () => {}, { once: true });
+    thu.src = duong;
+  });
+}
+
+/* Trình duyệt tự DỪNG video ngay tại chỗ vòng lại — đo được trên máy thật: tới
+   giây 7,8 nó seek về 0 rồi phát luôn sự kiện pause. Câu nói thì dài 13 giây,
+   nên MON.L há mồm đứng im suốt 5 giây còn lại. Tự canh lấy, đừng tin loop. */
+function gacVideo(v) {
+  if (daGacVideo) return;
+  daGacVideo = true;
+  v.addEventListener("pause", () => {
+    if (videoDangNoi) v.play().catch(() => {});
+  });
+  v.addEventListener("ended", () => {
+    if (!videoDangNoi) return;
+    try { v.currentTime = 0.04; } catch (e) {}
+    v.play().catch(() => {});
+  });
+}
+
+function batVideoPhim() {
+  const v = $("#monVid");
+  if (!v || (!coVideo.noi && !coVideo.cho)) return;
+  gacVideo(v);
+  document.querySelector(".scene-fit").classList.add("co-video");
+  v.hidden = false;
+  datVideoPhim(false);
+}
+
+/** Chuyển giữa vòng nói và vòng chờ. Chỉ có một video thì dùng cho cả hai. */
+let videoDang = null;
+let hoiTua = null;
+let videoDangNoi = false;   // đang trong lúc MON.L nói, video phải chạy liên tục
+let daGacVideo = false;
+function datVideoPhim(dangNoi) {
+  const v = $("#monVid");
+  if (!v || v.hidden) return;
+  const muon = (dangNoi ? coVideo.noi : coVideo.cho) || coVideo.cho || coVideo.noi;
+  if (!muon) return;
+  if (videoDang !== muon) {
+    videoDang = muon;
+    v.src = muon;
+  }
+  const motVideo = !(coVideo.noi && coVideo.cho);
+  v.playbackRate = 1;
+  if (motVideo && !dangNoi) {
+    // Chỉ có video ĐANG NÓI mà cho chạy cả lúc chờ thì MON.L nhép miệng liên tục,
+    // nhìn như người lảm nhảm một mình. Không nói thì đứng yên: dừng hẳn video ở
+    // khung miệng ngậm, chỉ còn nhịp thở rất nhẹ do CSS làm.
+    v.classList.add("dung-yen");
+    const dat = () => { try { v.currentTime = KHUNG_YEN; } catch (e) {} };
+    // Tắt loop TRƯỚC khi dừng. Còn loop thì cú "hết bài, quay về đầu" của trình
+    // duyệt nuốt sạch lệnh tua trong hai giây liền — đo trên máy thật ra đúng
+    // hai giây rưỡi MON.L há mồm đứng đó.
+    videoDangNoi = false;
+    v.loop = false;
+    v.pause();
+    if (v.readyState >= 1) dat(); else v.addEventListener("loadedmetadata", dat, { once: true });
+    // Lệnh tua hay bị nuốt khi video vừa vòng về đầu hoặc vừa nạp xong: đứng ở
+    // khung 0 là MON.L há mồm ra giữa lúc đang nghe. Thử lại vài nhịp cho chắc.
+    clearInterval(hoiTua);
+    let lan = 0;
+    // Canh suốt chứ không tắt ngay khi tua trúng một lần: video có thuộc tính
+    // loop, nên cú "hết bài, quay về đầu" đang chờ sẵn sẽ kéo nó về khung 0
+    // NGAY SAU khi mình tua xong. Tắt sớm là dính đúng cái bẫy đó.
+    hoiTua = setInterval(() => {
+      if (!v.paused || ++lan > 30) { clearInterval(hoiTua); hoiTua = null; return; }
+      if (Math.abs(v.currentTime - KHUNG_YEN) > 0.12) dat();
+    }, 110);
+    return;
+  }
+  v.classList.remove("dung-yen");
+  clearInterval(hoiTua); hoiTua = null;
+  videoDangNoi = true;
+  v.loop = true;
+  // play() có thể bị chặn nếu người dùng chưa chạm màn hình — bỏ qua cho êm.
+  v.play().catch(() => {});
+}
+
+
 /* ═══════════ MẬT MON.L: NỀN TĨNH + KHẨU HÌNH ═══════════
    Video quay sẵn thì miệng máy theo lời TRONG VIDEO, không theo lời đang đọc —
    nhép loạn, không bao giờ chuẩn được. Nên nền là một khung tĩnh cắt từ chính
@@ -2402,7 +2511,12 @@ const O_MOI = { x: 240, y: 330, w: 290, h: 260, W: 768, H: 1344 };
 const KHAU_HINH = ["he", "tron", "rang", "vua", "to", "cuoi"];
 
 let daDoCanh = false;
+/** Bật khớp khẩu hình thì miệng đúng nhưng thân đứng yên; tắt thì thân cử động
+    nhưng miệng máy theo video. Không có cách nào được cả hai. */
+function dungKhauHinh() { return S.khauHinh !== false; }
+
 function doVideoMon() {              // giữ tên cũ để các chỗ gọi không phải sửa
+  if (!dungKhauHinh()) { doVideoMonPhim(); return; }
   if (daDoCanh) return;
   daDoCanh = true;
   const anh = new Image();
@@ -2419,7 +2533,10 @@ function doVideoMon() {              // giữ tên cũ để các chỗ gọi kh
   anh.addEventListener("error", () => {}, { once: true });
   anh.src = ANH_CANH;
 }
-function batVideo() { doVideoMon(); datOMoi(); }
+function batVideo() {
+  if (!dungKhauHinh()) { batVideoPhim(); return; }
+  doVideoMon(); datOMoi();
+}
 
 /** Nền phủ kín kiểu cover nên phải tự tính miếng miệng rơi vào đâu trên màn. */
 function datOMoi() {
@@ -2471,6 +2588,7 @@ function datKhau(ten) {
 }
 /** Nhép đúng một từ: chia thời gian của từ cho số khẩu hình trong từ đó. */
 function nhepTu(tu) {
+  if (!dungKhauHinh()) return;
   xoaHenMoi();
   const chuoi = khauCuaTu(tu);
   if (!chuoi.length) { datKhau(""); return; }
@@ -2486,6 +2604,7 @@ function tuTaiViTri(cau, vt) {
 
 /** Giữ tên cũ. Không nói thì ngậm miệng lại. */
 function datVideo(dangNoi) {
+  if (!dungKhauHinh()) { datVideoPhim(dangNoi); return; }
   if (dangNoi) return;
   xoaHenMoi();
   datKhau("");
@@ -4049,6 +4168,7 @@ function renderProfile() {
   $("#optMotion").checked = S.motion;
   $("#optVi").checked = S.showVi;
   $("#optKid").checked = S.kidVoice !== false;
+  $("#optKhau").checked = S.khauHinh !== false;
   $("#optMoHet").checked = !!S.moHet;
   paintRail();
 }
@@ -4059,6 +4179,12 @@ $("#optSound").addEventListener("change", e => { S.sound = e.target.checked; sav
 $("#optMotion").addEventListener("change", e => { S.motion = e.target.checked; save(); applyTheme(); });
 $("#optVi").addEventListener("change", e => { S.showVi = e.target.checked; save(); });
 $("#optKid").addEventListener("change", e => { S.kidVoice = e.target.checked; save(); });
+$("#optKhau").addEventListener("change", e => {
+  S.khauHinh = e.target.checked; save();
+  // Đổi kiểu là phải nạp lại: hai cách dùng hai bộ ảnh khác hẳn nhau.
+  toast(e.target.checked ? "Miệng sẽ khớp với chữ đang đọc." : "MON.L sẽ cử động cả người như cũ.");
+  setTimeout(() => location.reload(), 900);
+});
 /* Mỗi máy có sẵn một bộ giọng khác nhau, và giọng máy tự chọn không phải lúc nào
    cũng dễ nghe. Cho người dùng tự chọn, nghe thử ngay trong lúc chọn. */
 const CAU_THU = { en: "Good morning. Nice to meet you.", vi: "Chào bạn, hôm nay học gì nào?" };
