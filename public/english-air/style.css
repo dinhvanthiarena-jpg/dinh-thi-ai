@@ -873,6 +873,14 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
    nhét vào ô nhân vật — nhét vào thì thành bức tranh trong tranh. */
 .scene-vid { position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; display: block; z-index: 1; }
+/* Lúc không nói video dừng hẳn. Dừng trơ ra thì thành ảnh chụp, nên để lại nhịp
+   thở rất nhẹ — đủ để biết là người đang đứng đợi, không phải màn hình đơ. */
+.scene-vid.dung-yen { animation: monVidTho 5.4s ease-in-out infinite; }
+@keyframes monVidTho {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50%      { transform: scale(1.007) translateY(-.35%); }
+}
+@media (prefers-reduced-motion: reduce) { .scene-vid.dung-yen { animation: none; } }
 /* Có video thì giấu hẳn ảnh phòng và nhân vật tĩnh đi. */
 .scene-fit.co-video .scene-room, .scene-fit.co-video .call-mon { visibility: hidden; }
 /* Khung cảnh vốn đóng cứng theo tỉ lệ ảnh phòng (0.476). Video quay dọc tỉ lệ

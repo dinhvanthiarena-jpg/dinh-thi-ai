@@ -2394,6 +2394,8 @@ function diemDoc(nghe, mau) {
    Có video thì MON.L cử động cả người; không có thì vẫn là ảnh tĩnh cộng lớp
    miệng như cũ — thả video vào lúc nào cũng được, không thả cũng không vỡ. */
 const VIDEO_MON = { noi: "assets/mon-noi.mp4", cho: "assets/mon-cho.mp4" };
+/* Giây đứng yên trong video nói — khung nào miệng ngậm nhất thì dừng ở đó. */
+const KHUNG_YEN = 0;
 const coVideo = {};
 
 let daDoVideo = false;
@@ -2434,10 +2436,19 @@ function datVideo(dangNoi) {
     videoDang = muon;
     v.src = muon;
   }
-  // Chỉ có một video dùng cho cả hai trạng thái thì cho lúc chờ chạy chậm lại —
-  // nhìn ra vẻ đang đứng đợi, khác hẳn lúc đang nói.
   const motVideo = !(coVideo.noi && coVideo.cho);
-  v.playbackRate = motVideo && !dangNoi ? 0.72 : 1;
+  v.playbackRate = 1;
+  if (motVideo && !dangNoi) {
+    // Chỉ có video ĐANG NÓI mà cho chạy cả lúc chờ thì MON.L nhép miệng liên tục,
+    // nhìn như người lảm nhảm một mình. Không nói thì đứng yên: dừng hẳn video ở
+    // khung miệng ngậm, chỉ còn nhịp thở rất nhẹ do CSS làm.
+    v.classList.add("dung-yen");
+    const dat = () => { try { v.currentTime = KHUNG_YEN; } catch (e) {} };
+    v.pause();
+    if (v.readyState >= 1) dat(); else v.addEventListener("loadedmetadata", dat, { once: true });
+    return;
+  }
+  v.classList.remove("dung-yen");
   // play() có thể bị chặn nếu người dùng chưa chạm màn hình — bỏ qua cho êm.
   v.play().catch(() => {});
 }
