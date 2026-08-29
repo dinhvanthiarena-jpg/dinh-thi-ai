@@ -1,8 +1,0 @@
-=== ID dung trong app.js nhung KHONG co trong index.html ===
-view-
-
-=== Hinh/icon goi nhung khong co symbol ===
-p-, s-
-
-=== Ham NGHI la goi ma khong dinh nghia (can soi tay) ===
-after, boDanhDau, chuanTag, chính, deaccent, gradient, label, lessonState, lessonsOf, lệch, matchMedia, micro, ngayVN, norm, onYes, rotate, scale, thường, thật, tien, trước, unitSentences, unitWords, xứng
