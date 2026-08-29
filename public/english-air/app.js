@@ -2474,6 +2474,22 @@ function pushLog(who, text) {
   st.scrollTop = st.scrollHeight;
 }
 
+/** Bảng nói chỉ cao một đoạn; câu dài thì cuộn. Gọi lại mỗi khi đổi chữ để
+    cuộn về đầu câu và bật/tắt vệt mờ báo "còn chữ ở dưới". */
+function chinhCuonNoi() {
+  const hop = $("#callBubble"), cuon = $("#callRoll");
+  if (!hop || !cuon) return;
+  cuon.scrollTop = 0;
+  const du = cuon.scrollHeight - cuon.clientHeight > 2;
+  hop.classList.toggle("co-cuon", du);
+  hop.classList.remove("het-cuon");
+}
+$("#callRoll") && $("#callRoll").addEventListener("scroll", () => {
+  const cuon = $("#callRoll");
+  const day = cuon.scrollTop + cuon.clientHeight >= cuon.scrollHeight - 2;
+  $("#callBubble").classList.toggle("het-cuon", day);
+});
+
 /** MON.L nói: hiện câu, chạy hoạt ảnh, nhảy một nhịp mỗi từ cho khớp miệng. */
 function monSays(en, vi, after, py) {
   const L = langInfo(C.lang);
@@ -2483,6 +2499,7 @@ function monSays(en, vi, after, py) {
   $("#callSaidPy").textContent = py || "";
   $("#callSaidPy").hidden = !py;
   $("#callSaidVi").textContent = S.showVi ? (vi || "") : "";
+  chinhCuonNoi();
   const m = $("#callMascot");
   m.classList.add("talking"); datVideo(true);
   setState("Đang nói…");
@@ -2610,6 +2627,7 @@ async function askTutor(first) {
       setState("Cần gói Pro");
       $("#callSaid").textContent = j.error || "Phần này nằm trong gói Pro.";
       $("#callSaidVi").textContent = "";
+      chinhCuonNoi();
       openSheet({
         title: "Nâng cấp Mon.L Pro",
         body: "Học 60 bài thì miễn phí mãi. Riêng phần gọi nói chuyện tự do với MON.L cần gói Pro.",
@@ -2654,6 +2672,7 @@ async function askTutor(first) {
     setState("Mất kết nối");
     $("#callSaid").textContent = "MON.L chưa nói chuyện tự do được lúc này.";
     $("#callSaidVi").textContent = String(err.message || "").slice(0, 120);
+    chinhCuonNoi();
     $("#btnMic").disabled = true;
     openSheet({
       title: "Chưa gọi tự do được",

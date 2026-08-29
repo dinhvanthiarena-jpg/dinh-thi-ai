@@ -990,6 +990,25 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   transform: translateX(-50%) rotate(45deg); border-radius: 5px;
   background: rgba(255,255,255,.95);
 }
+/* Bảng chỉ cao đúng một đoạn ngắn. Câu dài thì cuộn trong đó, chứ không đẩy
+   bảng phình lên che mất MON.L. */
+.bubble-roll {
+  max-height: clamp(76px, 17vh, 128px);
+  overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: rgba(109,40,217,.34) transparent;
+}
+.bubble-roll::-webkit-scrollbar { width: 5px; }
+.bubble-roll::-webkit-scrollbar-thumb { background: rgba(109,40,217,.34); border-radius: 99px; }
+.bubble-roll::-webkit-scrollbar-track { background: transparent; }
+.bubble-roll:focus-visible { outline: 2px solid #6D28D9; outline-offset: 3px; border-radius: 8px; }
+/* Còn chữ ở dưới thì làm mờ dần mép dưới — không có dấu hiệu gì thì người đọc
+   tưởng câu hết ở đó, không biết là cuộn được. */
+.call-bubble.co-cuon .bubble-roll {
+  -webkit-mask-image: linear-gradient(180deg, #000 76%, rgba(0,0,0,.15) 100%);
+          mask-image: linear-gradient(180deg, #000 76%, rgba(0,0,0,.15) 100%);
+}
+.call-bubble.co-cuon.het-cuon .bubble-roll { -webkit-mask-image: none; mask-image: none; }
+
 .call-bubble b { display: block; font-size: 1.12rem; font-weight: 800; line-height: 1.34;
   color: var(--callink); text-wrap: balance; }
 .call-bubble small { display: block; margin-top: var(--s1); color: #5B4A73; font-size: .88rem; font-weight: 600; }
