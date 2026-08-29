@@ -482,7 +482,14 @@ function buildPractice(words, sentences, max) {
   const tuNgan = pool.filter(w => !w.en.includes(" ") && netCo[w.en[0].toUpperCase()]);
   if (tuNgan.length) {
     const w = sample(tuNgan, 1)[0];
-    q.push({ type: "viet", chu: w.en[0].toUpperCase(), tu: w.en, word: w });
+    // Kèm một câu có chứa từ đó: ưu tiên câu ví dụ của chính từ, không có thì
+    // lấy trong các câu của bài. Tô xong mà chỉ có mỗi chữ cái thì phí.
+    // Tách câu thành từng chữ rồi so sánh, khỏi phải dựng regex — dấu gạch chéo
+    // ngược qua nhiều lớp công cụ hay bị nuốt mất, đã dính bẫy đó vài lần.
+    const tuThuong = w.en.toLowerCase();
+    const coTu = s => s.en.toLowerCase().split(/[^a-z']+/).includes(tuThuong);
+    const cau = w.ex || (sentences || []).find(coTu) || null;
+    q.push({ type: "viet", chu: w.en[0].toUpperCase(), tu: w.en, word: w, cau });
   }
 
   // Cắt bớt cho vừa số câu thì phải chừa chỗ cho bài tô chữ, không thì trộn xong
@@ -1167,8 +1174,30 @@ const DRILL = {
       P.picked = { ok: true };
       P.answered = false;
       setBtn("Kiểm tra", "btn-primary", true);
-      docLanLuot([{ text: chu, lang: "en-US" },
-                  d.tu ? { text: d.tu, lang: "en-US" } : null].filter(Boolean));
+
+      // Phần thưởng sau khi tô: hiện hẳn câu có chứa từ, rồi đọc cả chuỗi.
+      if (d.cau && !st.querySelector(".to-cau")) {
+        const box = el("div", "to-cau");
+        const b = el("button", "to-cau-nut"); b.type = "button";
+        b.setAttribute("aria-label", "Nghe lại: " + d.cau.en);
+        b.append(icon("i-sound", "ic ic-sm"));
+        const chu2 = el("div", "to-cau-chu");
+        chu2.append(el("b", null, d.cau.en));
+        if (d.cau.vi) chu2.append(el("small", null, d.cau.vi));
+        b.addEventListener("click", () => docLanLuot([
+          { text: d.cau.en, lang: "en-US" },
+          d.cau.vi ? { text: d.cau.vi, lang: "vi-VN" } : null,
+        ].filter(Boolean)));
+        box.append(b, chu2);
+        st.append(box);
+      }
+
+      docLanLuot([
+        { text: chu, lang: "en-US" },
+        d.tu ? { text: d.tu, lang: "en-US" } : null,
+        d.cau ? { text: d.cau.en, lang: "en-US" } : null,
+        d.cau && d.cau.vi ? { text: d.cau.vi, lang: "vi-VN" } : null,
+      ].filter(Boolean));
     }
 
     /** Đổi toạ độ màn hình sang toạ độ trong khung vẽ. */
@@ -1198,6 +1227,20 @@ const DRILL = {
     svg.addEventListener("pointerup", thoi);
     svg.addEventListener("pointercancel", thoi);
     svg.addEventListener("pointerleave", thoi);
+
+    // Cho biết ngay chữ này dùng làm gì, chứ không bắt tô xong mới được biết.
+    if (d.tu) {
+      const nhac = el("button", "to-tu"); nhac.type = "button";
+      nhac.setAttribute("aria-label", "Nghe: " + d.tu);
+      nhac.append(el("b", null, chu), el("span", null, "như trong"), el("em", null, d.tu));
+      if (d.word && d.word.vi) nhac.append(el("small", null, d.word.vi));
+      nhac.addEventListener("click", () => docLanLuot([
+        { text: chu, lang: "en-US" },
+        { text: d.tu, lang: "en-US" },
+        d.word && d.word.vi ? { text: d.word.vi, lang: "vi-VN" } : null,
+      ].filter(Boolean)));
+      st.append(nhac);
+    }
 
     const goi = el("p", "to-goi", "Đặt ngón tay lên chấm sáng rồi kéo theo nét.");
     st.append(goi);
