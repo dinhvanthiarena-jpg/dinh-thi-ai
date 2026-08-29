@@ -166,6 +166,7 @@ function paintStats() {
     $("#btnHeart").classList.add("empty");
   }
   $("#levelCode").textContent = level().code;
+  $("#btnLevel").dataset.lv = S.level;   // đổi màu nút theo trình độ đang học
 }
 
 /* ---------- 3. Phát âm ---------- */

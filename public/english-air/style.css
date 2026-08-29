@@ -132,14 +132,27 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   padding: calc(var(--s3) + env(safe-area-inset-top)) var(--s4) var(--s3);
   background: linear-gradient(180deg, var(--sky-1), var(--sky-2));
 }
-.flagchip { position: relative; width: 52px; height: 44px; flex: none; }
+/* Nút đổi trình độ. Trước đây bấm vào chẳng có phản hồi gì nên người ta tưởng
+   nút chết; và màu lúc nào cũng như nhau nên không biết đang ở trình độ nào. */
+.flagchip { position: relative; width: 52px; height: 44px; flex: none;
+  transition: transform var(--t1) var(--e); }
+.flagchip:active { transform: scale(.9); }
+.flagchip:active .flagchip-face { filter: brightness(1.3); }
+.flagchip:active .flagchip-lv { transform: scale(1.15); }
 .flagchip-face {
   display: grid; place-items: center; width: 52px; height: 44px;
   border-radius: var(--r1); background: linear-gradient(150deg, #9333EA, #5B21B6);
   color: #fff; font-size: .72rem; font-weight: 900; letter-spacing: .5px;
   box-shadow: var(--sh-1);
+  transition: filter var(--t1) var(--e), background var(--t2) var(--e);
 }
+/* Mỗi trình độ một màu riêng, nhìn là biết ngay đang học ở đâu. */
+.flagchip[data-lv="a2"] .flagchip-face { background: linear-gradient(150deg, #10B981, #047857); }
+.flagchip[data-lv="a2"] .flagchip-lv { background: #059669; }
+.flagchip[data-lv="b1"] .flagchip-face { background: linear-gradient(150deg, #F59E0B, #B45309); }
+.flagchip[data-lv="b1"] .flagchip-lv { background: #D97706; }
 .flagchip-lv {
+  transition: transform var(--t1) var(--e), background var(--t2) var(--e);
   position: absolute; right: -4px; bottom: -5px;
   min-width: 24px; padding: 0 5px; height: 20px;
   display: grid; place-items: center; border-radius: var(--rf);
