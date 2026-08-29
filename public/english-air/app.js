@@ -2429,6 +2429,7 @@ function batVideo() {
 
 /** Chuyển giữa vòng nói và vòng chờ. Chỉ có một video thì dùng cho cả hai. */
 let videoDang = null;
+let hoiTua = null;
 function datVideo(dangNoi) {
   const v = $("#monVid");
   if (!v || v.hidden) return;
@@ -2448,9 +2449,20 @@ function datVideo(dangNoi) {
     const dat = () => { try { v.currentTime = KHUNG_YEN; } catch (e) {} };
     v.pause();
     if (v.readyState >= 1) dat(); else v.addEventListener("loadedmetadata", dat, { once: true });
+    // Lệnh tua hay bị nuốt khi video vừa vòng về đầu hoặc vừa nạp xong: đứng ở
+    // khung 0 là MON.L há mồm ra giữa lúc đang nghe. Thử lại vài nhịp cho chắc.
+    clearInterval(hoiTua);
+    let lan = 0;
+    hoiTua = setInterval(() => {
+      if (!v.paused || Math.abs(v.currentTime - KHUNG_YEN) < 0.12 || ++lan > 14) {
+        clearInterval(hoiTua); hoiTua = null; return;
+      }
+      dat();
+    }, 110);
     return;
   }
   v.classList.remove("dung-yen");
+  clearInterval(hoiTua); hoiTua = null;
   // play() có thể bị chặn nếu người dùng chưa chạm màn hình — bỏ qua cho êm.
   v.play().catch(() => {});
 }
