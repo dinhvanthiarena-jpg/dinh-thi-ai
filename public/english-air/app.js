@@ -2416,7 +2416,7 @@ function doVideoMon() {
 function batVideo() {
   const v = $("#monVid");
   if (!v || (!coVideo.noi && !coVideo.cho)) return;
-  $("#callMascot").classList.add("co-video");
+  document.querySelector(".scene-fit").classList.add("co-video");
   v.hidden = false;
   datVideo(false);
 }
@@ -2432,6 +2432,10 @@ function datVideo(dangNoi) {
     videoDang = muon;
     v.src = muon;
   }
+  // Chỉ có một video dùng cho cả hai trạng thái thì cho lúc chờ chạy chậm lại —
+  // nhìn ra vẻ đang đứng đợi, khác hẳn lúc đang nói.
+  const motVideo = !(coVideo.noi && coVideo.cho);
+  v.playbackRate = motVideo && !dangNoi ? 0.72 : 1;
   // play() có thể bị chặn nếu người dùng chưa chạm màn hình — bỏ qua cho êm.
   v.play().catch(() => {});
 }
