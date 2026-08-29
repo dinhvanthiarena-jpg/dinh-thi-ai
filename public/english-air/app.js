@@ -535,6 +535,18 @@ function buildPractice(words, sentences, max) {
 
   // Xen một lượt tô chữ cho đỡ ngán: chọn chữ cái đầu của một từ vừa học, ưu
   // tiên từ một tiếng cho khớp giữa chữ được tô và từ đọc lên sau đó.
+  // Xếp ảnh vào ô: cần ít nhất 3 từ có ảnh khác nhau mới chơi được.
+  const coAnhRieng = pool.filter(w => w.pic || hinhChoChu(w.en));
+  const nhomKhac = [];
+  coAnhRieng.forEach(w => {
+    const h = w.pic || hinhChoChu(w.en);
+    if (!nhomKhac.some(x => (x.pic || hinhChoChu(x.en)) === h)) nhomKhac.push(w);
+  });
+  if (nhomKhac.length >= 3) {
+    const ba = sample(nhomKhac, 3);
+    q.push({ type: "xepAnh", nhom: ba, the: shuffle(ba.slice()) });
+  }
+
   // Ghép chữ: chỉ lấy từ NGẮN và có ảnh, từ dài quá thì ghép mãi không xong.
   const coAnh = pool.filter(w => w.en.replace(/[^a-z]/gi, "").length <= 9
     && (w.pic || hinhChoChu(w.en)));
@@ -561,12 +573,15 @@ function buildPractice(words, sentences, max) {
   const head = q[0] && q[0].type === "match" ? [q.shift()] : [];
   const bTo = q.find(x => x.type === "viet");
   const bGhep = q.find(x => x.type === "ghepChu");
-  const dacBiet = [bTo, bGhep].filter(Boolean);
-  const conLai = shuffle(q.filter(x => x.type !== "viet" && x.type !== "ghepChu"));
+  const bXep = q.find(x => x.type === "xepAnh");
+  const dacBiet = [bTo, bGhep, bXep].filter(Boolean);
+  const RIENG = ["viet", "ghepChu", "xepAnh"];
+  const conLai = shuffle(q.filter(x => !RIENG.includes(x.type)));
   const ds = head.concat(conLai).slice(0, Math.max(1, max - dacBiet.length));
   // Chèn vào giữa chứ không để đầu — mở bài nào cũng đúng một kiểu thì thành nhàm.
   if (bTo) ds.splice(Math.min(2, ds.length), 0, bTo);
   if (bGhep) ds.splice(Math.min(5, ds.length), 0, bGhep);
+  if (bXep) ds.splice(Math.min(8, ds.length), 0, bXep);
   return ds;
 }
 
@@ -1390,6 +1405,125 @@ const DRILL = {
     docLanLuot([{ text: d.word.vi, lang: "vi-VN" }]);
   },
 
+  /* Kéo thẻ ảnh vào đúng ô: mỗi ô mang một từ tiếng Anh, thẻ nào thuộc từ nào thì
+     kéo vào ô đó. Thả sai thì ô lắc đầu và thẻ bật về — cùng luật với bài điền từ. */
+  xepAnh(d, st) {
+    showMascot(false); setKicker("Kéo ảnh vào đúng ô");
+    st.append(el("p", "ask", "Mỗi ảnh thuộc về từ nào?"));
+
+    const oCua = new Map();
+    const hangO = el("div", "xa-o-hang");
+    d.nhom.forEach(w => {
+      const o = el("div", "xa-o");
+      o.dataset.en = w.en;
+      o.append(el("b", null, w.en), el("small", null, w.vi));
+      const ro = el("div", "xa-ro");
+      o.append(ro);
+      oCua.set(w.en, ro);
+      hangO.append(o);
+    });
+    st.append(hangO);
+
+    const kho = el("div", "xa-kho");
+    let conLai = d.the.length;
+
+    d.the.forEach(w => {
+      const t = el("button", "xa-the"); t.type = "button";
+      t.dataset.en = w.en;
+      const anh = khungAnh(w);
+      if (anh) { anh.classList.add("nho"); t.append(anh); }
+      ganKeoThe(t, w);
+      // Bấm thường: bỏ vào ô đầu tiên còn hợp, cho người không kéo được.
+      t.addEventListener("click", ev => {
+        if (ev.detail !== 0) return;
+        thuBo(t, w, oCua.get(w.en) || null);
+      });
+      kho.append(t);
+    });
+    st.append(kho);
+
+    function thuBo(t, w, ro) {
+      if (P.answered || !ro) return false;
+      const dungO = ro.parentElement.dataset.en === w.en;
+      if (!dungO) {
+        const o = ro.parentElement;
+        o.classList.remove("rung"); void o.offsetWidth; o.classList.add("rung");
+        rung([10, 50, 10]);
+        return false;
+      }
+      const anh = t.querySelector(".pic-hero");
+      if (anh) ro.append(anh);
+      t.classList.add("used");
+      conLai -= 1;
+      rung(12);
+      P.picked = { ok: conLai === 0 };
+      setBtn("Kiểm tra", "btn-primary", conLai === 0);
+      if (conLai === 0) docLanLuot(d.nhom.map(x => ({ text: x.en, lang: "en-GB" })));
+      return true;
+    }
+
+    function ganKeoThe(t, w) {
+      t.addEventListener("pointerdown", ev => {
+        if (P.answered || t.classList.contains("used")) return;
+        ev.preventDefault();
+        try { t.setPointerCapture(ev.pointerId); } catch { /* trình duyệt cũ */ }
+        const r = t.getBoundingClientRect();
+        const bay = t.cloneNode(true);
+        bay.className = "xa-the xa-bay";
+        bay.style.width = r.width + "px";
+        bay.style.height = r.height + "px";
+        document.body.append(bay);
+        const lech = { x: ev.clientX - r.left, y: ev.clientY - r.top };
+        let x = ev.clientX, y = ev.clientY;
+        const ve = () => {
+          bay.style.left = (x - lech.x) + "px";
+          bay.style.top = (y - lech.y) + "px";
+        };
+        ve();
+        t.classList.add("dang-keo");
+
+        const oGan = () => {
+          let tot = null, gan = Infinity;
+          $$(".xa-o", hangO).forEach(o => {
+            const b = o.getBoundingClientRect();
+            if (x >= b.left && x <= b.right && y >= b.top && y <= b.bottom) { tot = o; gan = 0; return; }
+            const dd = Math.hypot(x - (b.left + b.width / 2), y - (b.top + b.height / 2));
+            if (dd < gan) { gan = dd; tot = o; }
+          });
+          return gan < 140 ? tot : null;
+        };
+
+        const dichuyen = e2 => {
+          x = e2.clientX; y = e2.clientY; ve();
+          const o = oGan();
+          $$(".xa-o", hangO).forEach(n => n.classList.toggle("over", n === o));
+        };
+        const buong = () => {
+          try { t.releasePointerCapture(ev.pointerId); } catch { /* đã nhả */ }
+          window.removeEventListener("pointermove", dichuyen);
+          window.removeEventListener("pointerup", buong);
+          window.removeEventListener("pointercancel", buong);
+          const o = oGan();
+          $$(".xa-o", hangO).forEach(n => n.classList.remove("over"));
+          t.classList.remove("dang-keo");
+          const nhan = o ? thuBo(t, w, o.querySelector(".xa-ro")) : false;
+          const dich = nhan ? o.getBoundingClientRect() : t.getBoundingClientRect();
+          bay.classList.add("ve");
+          bay.style.left = dich.left + "px";
+          bay.style.top = dich.top + "px";
+          if (nhan) bay.style.opacity = "0";
+          setTimeout(() => bay.remove(), 220);
+        };
+        window.addEventListener("pointermove", dichuyen);
+        window.addEventListener("pointerup", buong);
+        window.addEventListener("pointercancel", buong);
+      });
+    }
+
+    P.picked = null;
+    setBtn("Kiểm tra", "btn-primary", false);
+  },
+
   match(d, st) {
     showMascot(false); setKicker("Nối từ với nghĩa");
     const grid = el("div", "match");
@@ -1542,6 +1676,7 @@ const PRAISE = ["Chính xác", "Tuyệt vời", "Giỏi lắm", "Đúng rồi", 
 const praise = () => PRAISE[Math.floor(Math.random() * PRAISE.length)];
 function answerOf(d) {
   if (d.type === "blanks") return d.sent.en;
+  if (d.type === "xepAnh") return d.nhom.map(w => w.en).join(", ");
   if (d.type === "ghepChu") return d.word.en;
   if (d.type === "choice") return d.word.vi;
   if (d.type === "truefalse") return d.answer ? "Đúng" : `Sai — “${d.word.vi}” là “${d.word.en}”`;

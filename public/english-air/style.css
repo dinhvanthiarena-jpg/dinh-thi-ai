@@ -1275,6 +1275,42 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .cong-hoac::before, .cong-hoac::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .cong-hoac span { font-size: .8rem; font-weight: 700; color: var(--muted-fg); }
 
+/* ---------- 15l. KÉO ẢNH VÀO ĐÚNG Ô ---------- */
+.xa-o-hang { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2);
+  margin-top: var(--s4); }
+.xa-o { display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: var(--s2); border-radius: var(--r3);
+  border: 2px dashed var(--line-hi); min-height: 128px;
+  transition: transform var(--t1) var(--e), border-color var(--t1) var(--e),
+              background var(--t1) var(--e); }
+.xa-o.over { border-style: solid; border-color: var(--brand);
+  background: var(--brand-soft); transform: scale(1.04); }
+.xa-o.rung { animation: lacDau .34s var(--e); }
+.xa-o b { font-size: .92rem; font-weight: 900; }
+.xa-o small { font-size: .74rem; font-weight: 700; color: var(--muted-fg);
+  text-align: center; line-height: 1.25; }
+.xa-ro { width: 100%; flex: 1; display: grid; place-items: center; }
+.xa-ro .pic-hero { margin: 0; aspect-ratio: 1; max-height: none; width: 100%; }
+
+.xa-kho { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s3);
+  margin-top: var(--s5); }
+.xa-the { width: 92px; height: 92px; padding: 0; border: 0; border-radius: var(--r3);
+  overflow: hidden; background: var(--card); box-shadow: var(--sh-1); cursor: grab;
+  /* Không có dòng này thì ngón tay vừa nhích là trình duyệt cuộn trang. */
+  touch-action: none; -webkit-user-select: none; user-select: none;
+  transition: opacity var(--t1) var(--e), transform var(--t1) var(--e); }
+.xa-the .pic-hero { margin: 0; width: 100%; height: 100%; aspect-ratio: 1;
+  max-height: none; border-radius: 0; box-shadow: none; }
+.xa-the.dang-keo { opacity: .28; }
+.xa-the.used { opacity: 0; visibility: hidden; }
+.xa-bay { position: fixed; z-index: 90; margin: 0; pointer-events: none;
+  box-shadow: 0 12px 28px rgba(0,0,0,.4); transition: none; }
+.xa-bay.ve { transition: left .2s var(--e), top .2s var(--e), opacity .2s var(--e); }
+@media (prefers-reduced-motion: reduce) {
+  .xa-o.rung { animation: none; }
+  .xa-bay.ve { transition-duration: .01s; }
+}
+
 /* ---------- 15k. GHÉP CHỮ CÁI THÀNH TỪ ---------- */
 .gc-hang { display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
   gap: 6px; margin-top: var(--s4); }
