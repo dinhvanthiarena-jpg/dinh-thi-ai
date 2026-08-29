@@ -3,7 +3,7 @@
    Toàn bộ app chạy offline sau lần mở đầu tiên.
    Đổi CACHE khi sửa file để buộc tải lại bản mới.
    ============================================================ */
-const CACHE = "english-air-v93";
+const CACHE = "english-air-v94";
 
 const SHELL = [
   "./",

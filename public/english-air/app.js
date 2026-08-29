@@ -2447,6 +2447,10 @@ function datVideo(dangNoi) {
     // khung miệng ngậm, chỉ còn nhịp thở rất nhẹ do CSS làm.
     v.classList.add("dung-yen");
     const dat = () => { try { v.currentTime = KHUNG_YEN; } catch (e) {} };
+    // Tắt loop TRƯỚC khi dừng. Còn loop thì cú "hết bài, quay về đầu" của trình
+    // duyệt nuốt sạch lệnh tua trong hai giây liền — đo trên máy thật ra đúng
+    // hai giây rưỡi MON.L há mồm đứng đó.
+    v.loop = false;
     v.pause();
     if (v.readyState >= 1) dat(); else v.addEventListener("loadedmetadata", dat, { once: true });
     // Lệnh tua hay bị nuốt khi video vừa vòng về đầu hoặc vừa nạp xong: đứng ở
@@ -2464,6 +2468,7 @@ function datVideo(dangNoi) {
   }
   v.classList.remove("dung-yen");
   clearInterval(hoiTua); hoiTua = null;
+  v.loop = true;
   // play() có thể bị chặn nếu người dùng chưa chạm màn hình — bỏ qua cho êm.
   v.play().catch(() => {});
 }
