@@ -2422,6 +2422,8 @@ function doVideoMon() {
 /* Trình duyệt tự DỪNG video ngay tại chỗ vòng lại — đo được trên máy thật: tới
    giây 7,8 nó seek về 0 rồi phát luôn sự kiện pause. Câu nói thì dài 13 giây,
    nên MON.L há mồm đứng im suốt 5 giây còn lại. Tự canh lấy, đừng tin loop. */
+let canhVideo = null;
+function veDau(v) { try { v.currentTime = 0.04; } catch (e) {} }
 function gacVideo(v) {
   if (daGacVideo) return;
   daGacVideo = true;
@@ -2430,9 +2432,20 @@ function gacVideo(v) {
   });
   v.addEventListener("ended", () => {
     if (!videoDangNoi) return;
-    try { v.currentTime = 0.04; } catch (e) {}
+    veDau(v);
     v.play().catch(() => {});
   });
+  // Bắt sự kiện thôi thì chưa đủ tin: có máy nuốt mất pause, có máy chặn play()
+  // vì lúc đó chưa có cú chạm nào, có máy tự dừng video khi giọng đọc bật lên.
+  // Nên canh thẳng: cứ 0,4 giây ngó một lần, đang nói mà video đứng là cho chạy
+  // tiếp — nói dài bao nhiêu thì MON.L cử động bấy nhiêu.
+  clearInterval(canhVideo);
+  canhVideo = setInterval(() => {
+    if (!videoDangNoi || v.hidden) return;
+    const het = v.duration && v.currentTime >= v.duration - 0.06;
+    if (v.ended || het) veDau(v);
+    if (v.paused) v.play().catch(() => {});
+  }, 400);
 }
 
 function batVideo() {
