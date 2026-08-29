@@ -1240,6 +1240,33 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .sign-nghe:active { transform: scale(.95); }
 .sign-nghe .ic { width: 15px; height: 15px; }
 
+/* ---------- 15j. CHỌN GIỌNG ĐỌC ---------- */
+.giong-hang { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; }
+.giong-nut { display: flex; align-items: center; gap: var(--s3); width: 100%;
+  padding: var(--s3) var(--s4); border: 0; background: none; color: inherit;
+  font-family: inherit; text-align: left; cursor: pointer;
+  border-bottom: 1px solid var(--line); transition: background var(--t1) var(--e); }
+.giong-nut:last-child { border-bottom: 0; }
+.giong-nut:active { background: var(--muted); }
+.giong-nhan { flex: none; font-size: .92rem; font-weight: 800; }
+.giong-ten { flex: 1; min-width: 0; text-align: right; font-size: .85rem; font-weight: 700;
+  color: var(--brand); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.giong-ten.thieu { color: var(--bad); }
+.giong-nut .ic { flex: none; color: var(--muted-fg); }
+
+.giong-ds { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s2);
+  max-height: 46vh; overflow-y: auto; }
+.giong-o { display: flex; align-items: center; gap: var(--s3); width: 100%;
+  padding: var(--s3) var(--s4); border: 0; border-radius: var(--r2);
+  background: var(--muted); color: var(--fg); font-family: inherit;
+  text-align: left; cursor: pointer; transition: transform var(--t1) var(--e); }
+.giong-o:active { transform: scale(.98); }
+.giong-o.on { box-shadow: inset 0 0 0 2px var(--brand); background: var(--brand-soft); }
+.giong-o span { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.giong-o strong { font-size: .95rem; font-weight: 800; }
+.giong-o small { font-size: .78rem; font-weight: 600; color: var(--muted-fg); margin-top: 1px; }
+.giong-o .ic { flex: none; color: var(--brand); }
+
 /* ---------- 15i. TÔ CHỮ BẰNG NGÓN TAY ---------- */
 .to-khung { width: 100%; max-width: 300px; margin: var(--s4) auto 0;
   aspect-ratio: 100 / 120; max-height: 46vh;

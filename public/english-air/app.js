@@ -91,6 +91,8 @@ const DEFAULTS = {
   // Đang mở sẵn hết bài để thầy kiểm tra nội dung. Khi nào cần học lần lượt
   // trở lại thì đổi về false — ai đã tự gạt công tắc thì giữ lựa chọn của họ.
   moHet: true,
+  // Giọng người dùng tự chọn, theo gốc ngôn ngữ: { en: "...", vi: "..." }
+  giong: {},
   // Ảnh đại diện: {k:"m"} linh vật, {k:"e",i:<số>} mặt vui, {k:"a",d:"data:…"} ảnh tự tải
   avatar: { k: "m" }
 };
@@ -221,6 +223,12 @@ function voiceFor(tag) {
   const goc = muon.split("-")[0];
   const pool = voices.filter(v => chuanTag(v.lang).split("-")[0] === goc);
   if (!pool.length) return null;
+  // Người dùng đã tự chọn giọng cho thứ tiếng này thì tôn trọng lựa chọn đó.
+  const daChon = S.giong && S.giong[goc];
+  if (daChon) {
+    const v = pool.find(x => x.voiceURI === daChon) || pool.find(x => x.name === daChon);
+    if (v) return v;
+  }
   // Giọng con trai để nâng cao độ nghe mới ra trẻ con. Chỉ dò trong pool đã lọc
   // đúng thứ tiếng rồi — nếu không, "Nam" của tiếng Việt lọt vào giọng tiếng Anh.
   const contrai = /david|guy|mark|daniel|alex|fred|male|james|george|ryan|yunxi|kangkang/i;
@@ -3044,23 +3052,84 @@ $("#optSound").addEventListener("change", e => { S.sound = e.target.checked; sav
 $("#optMotion").addEventListener("change", e => { S.motion = e.target.checked; save(); applyTheme(); });
 $("#optVi").addEventListener("change", e => { S.showVi = e.target.checked; save(); });
 $("#optKid").addEventListener("change", e => { S.kidVoice = e.target.checked; save(); });
-/* Máy nào thiếu giọng của một thứ tiếng thì hệ thống đọc bằng giọng khác, nghe
-   sai hẳn. Nút này cho biết máy đang có giọng nào và đọc thử để tự nghe. */
-$("#btnThuGiong").addEventListener("click", () => {
+/* Mỗi máy có sẵn một bộ giọng khác nhau, và giọng máy tự chọn không phải lúc nào
+   cũng dễ nghe. Cho người dùng tự chọn, nghe thử ngay trong lúc chọn. */
+const CAU_THU = { en: "Good morning. Nice to meet you.", vi: "Chào bạn, hôm nay học gì nào?" };
+
+function tenGiong(v) {
+  // Bỏ phần thừa kiểu "Microsoft David Desktop - English (United States)"
+  return String(v.name).replace(/^(Microsoft|Google)\s+/i, "").replace(/\s*-\s*.*$/, "").trim() || v.name;
+}
+
+function veDongGiong(goc) {
+  const o = $(goc === "en" ? "#giongAnh" : "#giongViet");
+  if (!o) return;
+  const v = voiceFor(goc === "en" ? "en-US" : "vi-VN");
+  o.textContent = v ? tenGiong(v) : "máy chưa có giọng này";
+  o.classList.toggle("thieu", !v);
+}
+
+function moChonGiong(goc) {
   pickVoice();
-  const co = t => { const v = voiceFor(t); return v ? v.name : null; };
-  const anh = co("en-US"), viet = co("vi-VN");
-  const o = $("#giongInfo");
-  o.textContent = "Tiếng Anh: " + (anh || "MÁY CHƯA CÓ GIỌNG TIẾNG ANH")
-                + " · Tiếng Việt: " + (viet || "máy chưa có giọng tiếng Việt");
-  if (!anh) {
-    toast("Máy chưa cài giọng tiếng Anh — vào Cài đặt máy để tải thêm.");
+  const ds = voices.filter(v => chuanTag(v.lang).split("-")[0] === goc);
+  const box = el("div", "giong-ds");
+  if (!ds.length) {
+    box.append(el("p", "pro-fine",
+      goc === "en"
+        ? "Máy này chưa cài giọng tiếng Anh. Vào Cài đặt máy → Trợ năng → Nội dung đọc để tải thêm."
+        : "Máy này chưa cài giọng tiếng Việt. Vào Cài đặt máy → Trợ năng → Nội dung đọc để tải thêm."));
   }
-  docLanLuot([
-    { text: "Good morning. This is the English voice.", lang: "en-US" },
-    { text: "Đây là giọng tiếng Việt.", lang: "vi-VN" },
-  ]);
-});
+  const dangDung = voiceFor(goc === "en" ? "en-US" : "vi-VN");
+  ds.forEach(v => {
+    const b = el("button", "giong-o" + (dangDung && v.voiceURI === dangDung.voiceURI ? " on" : ""));
+    b.type = "button";
+    const txt = el("span");
+    txt.append(el("strong", null, tenGiong(v)), el("small", null, v.lang + (v.localService ? " · trên máy" : " · qua mạng")));
+    b.append(txt, icon("i-sound", "ic ic-sm"));
+    b.addEventListener("click", () => {
+      S.giong = Object.assign({}, S.giong, { [goc]: v.voiceURI });
+      save();
+      $$(".giong-o", box).forEach(x => x.classList.remove("on"));
+      b.classList.add("on");
+      veDongGiong(goc);
+      speak(CAU_THU[goc], false, goc === "en" ? "en-US" : "vi-VN");
+    });
+    box.append(b);
+  });
+
+  if (ds.length) {
+    const tuChon = el("button", "btn btn-text btn-block mt", "Để máy tự chọn");
+    tuChon.type = "button";
+    tuChon.addEventListener("click", () => {
+      const g = Object.assign({}, S.giong); delete g[goc];
+      S.giong = g; save(); veDongGiong(goc); closeSheet();
+      toast("Đã trả về giọng mặc định của máy.");
+    });
+    box.append(tuChon);
+  }
+
+  openSheet({
+    title: goc === "en" ? "Giọng tiếng Anh" : "Giọng tiếng Việt",
+    body: "Chạm vào một giọng để nghe thử và chọn luôn.",
+    no: "Xong",
+    slot: box,
+  });
+}
+
+$("#btnGiongAnh").addEventListener("click", () => moChonGiong("en"));
+$("#btnGiongViet").addEventListener("click", () => moChonGiong("vi"));
+$("#btnThuGiong").addEventListener("click", () => docLanLuot([
+  { text: CAU_THU.en, lang: "en-US" },
+  { text: CAU_THU.vi, lang: "vi-VN" },
+]));
+// Danh sách giọng đến muộn trên vài máy, nên vẽ lại khi có.
+if (window.speechSynthesis) {
+  const veCa = () => { veDongGiong("en"); veDongGiong("vi"); };
+  veCa();
+  const cu = speechSynthesis.onvoiceschanged;
+  speechSynthesis.onvoiceschanged = () => { if (cu) cu(); veCa(); };
+}
+
 
 $("#optMoHet").addEventListener("change", e => {
   S.moHet = e.target.checked;
