@@ -885,6 +885,100 @@ function grammarRow(r) {
   return { label: r[0], en: r[1], vi: third };
 }
 
+/* ═══════════ ĐỌC THỬ VÀ CHẤM ĐIỂM ═══════════
+   Người học đọc theo mẫu, máy nghe rồi chấm xem lệch bao nhiêu. Dùng đúng bộ
+   nghe của trình duyệt như phần gọi MON.L, nhưng đặt sẵn tiếng Anh và chỉ nghe
+   một câu rồi dừng. */
+let doDangNghe = null;
+
+function khoiDocThu(mau, nhan) {
+  const box = el("div", "dt");
+
+  const nut = el("button", "dt-nut"); nut.type = "button";
+  nut.setAttribute("aria-label", "Đọc thử: " + mau);
+  nut.append(icon("i-mic"));
+
+  const chu = el("div", "dt-chu", SR ? "Bấm micro rồi đọc: " + nhan : "Máy này chưa nghe được bằng micro.");
+  const diem = el("div", "dt-diem"); diem.hidden = true;
+
+  if (!SR) nut.disabled = true;
+
+  nut.addEventListener("click", () => {
+    if (doDangNghe) { try { doDangNghe.stop(); } catch { /* đang dừng */ } return; }
+    stopSpeak();
+    let xong = false;
+    let r;
+    try { r = new SR(); } catch { chu.textContent = "Không mở được micro."; return; }
+    doDangNghe = r;
+    r.lang = "en-GB";
+    r.interimResults = false;
+    r.maxAlternatives = 3;
+
+    const ketThuc = () => {
+      if (xong) return;
+      xong = true;
+      doDangNghe = null;
+      box.classList.remove("dang-nghe");
+    };
+
+    r.onresult = ev => {
+      // Lấy phương án nào khớp nhất, không phải phương án đầu — máy hay đoán
+      // sang từ thông dụng hơn, mà người ta đọc đúng từ đang học rồi.
+      const ds = [...(ev.results[0] || [])].map(x => x.transcript);
+      let tot = ds[0] || "", cao = -1;
+      ds.forEach(t => { const p = diemDoc(t, mau); if (p > cao) { cao = p; tot = t; } });
+      hienDiem(cao, tot);
+      ketThuc();
+    };
+    r.onerror = e => {
+      chu.textContent = e.error === "not-allowed"
+        ? "Bạn chưa cho phép dùng micro. Mở lại quyền micro rồi thử nhé."
+        : e.error === "no-speech" ? "Không nghe thấy gì. Bấm rồi đọc to hơn chút nhé."
+        : "Micro trục trặc, bạn thử lại nhé.";
+      ketThuc();
+    };
+    r.onend = ketThuc;
+
+    try {
+      r.start();
+      box.classList.add("dang-nghe");
+      chu.textContent = "Đang nghe… đọc đi nào!";
+      diem.hidden = true;
+    } catch { chu.textContent = "Không mở được micro."; ketThuc(); }
+  });
+
+  function hienDiem(p, nghe) {
+    diem.hidden = false;
+    diem.textContent = "";
+    const muc = p >= 85 ? "tot" : p >= 60 ? "kha" : "chua";
+    diem.className = "dt-diem " + muc;
+
+    const vong = el("div", "dt-vong");
+    vong.style.setProperty("--p", p + "%");
+    vong.append(el("b", null, p + "%"));
+    diem.append(vong);
+
+    const loi = el("div", "dt-loi");
+    loi.append(el("strong", null,
+      p >= 85 ? "Chuẩn rồi!" : p >= 60 ? "Gần đúng rồi" : "Đọc lại nhé"));
+    loi.append(el("small", null,
+      p >= 85 ? "Nghe rõ và đúng trọng âm." : "Máy nghe thành: “" + nghe + "”"));
+    diem.append(loi);
+
+    const ngheMau = el("button", "dt-mau"); ngheMau.type = "button";
+    ngheMau.setAttribute("aria-label", "Nghe lại mẫu");
+    ngheMau.append(icon("i-sound", "ic ic-sm"));
+    ngheMau.addEventListener("click", () => speak(mau, true, "en-GB"));
+    diem.append(ngheMau);
+
+    rung(p >= 85 ? [12, 40, 12] : 10);
+    chu.textContent = "Bấm micro để đọc lại.";
+  }
+
+  box.append(nut, chu, diem);
+  return box;
+}
+
 function vocabSlide(d, st, label) {
   showMascot(true); setKicker(label);
   const card = el("div", "vcard");
@@ -907,6 +1001,9 @@ function vocabSlide(d, st, label) {
   hangVi.append(el("div", "vcard-vi", d.vi), nutVi);
   card.append(hangVi);
   st.append(card);
+  // Học từ mới xong là đọc thử luôn, không đợi tới phần luyện tập.
+  st.append(khoiDocThu(d.en, d.en));
+
   if (d.note) { const n = el("div", "note"); n.append(icon("i-bulb", "ic ic-sm"), markup(el("span"), d.note)); st.append(n); }
   if (d.ex) {
     const ex = el("div", "example");
@@ -2075,6 +2172,38 @@ function similar(heardText, target) {
   const pool = a.slice(); let hit = 0;
   b.forEach(w => { const k = pool.indexOf(w); if (k >= 0) { pool.splice(k, 1); hit++; } });
   return hit / b.length;
+}
+
+/* Chấm phát âm mịn theo TỪNG KÝ TỰ, không phải khớp cả từ.
+   similar() ở trên chỉ đếm từ trùng nguyên vẹn — với một từ đơn như "park" thì
+   hoặc 0% hoặc 100%, chẳng cho biết đọc lệch nhiều hay ít. */
+function khoangCach(a, b) {
+  const m = a.length, n = b.length;
+  if (!m) return n;
+  if (!n) return m;
+  let truoc = Array.from({ length: n + 1 }, (_, j) => j);
+  for (let i = 1; i <= m; i += 1) {
+    const nay = [i];
+    for (let j = 1; j <= n; j += 1) {
+      nay[j] = Math.min(
+        truoc[j] + 1,
+        nay[j - 1] + 1,
+        truoc[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+    }
+    truoc = nay;
+  }
+  return truoc[n];
+}
+
+/** Điểm giống nhau 0–100 giữa câu nghe được và câu mẫu. */
+function diemDoc(nghe, mau) {
+  const a = norm(nghe).replace(/[^a-z0-9 ]/g, "");
+  const b = norm(mau).replace(/[^a-z0-9 ]/g, "");
+  if (!b) return 0;
+  if (a === b) return 100;
+  const d = khoangCach(a, b);
+  return Math.max(0, Math.round((1 - d / Math.max(a.length, b.length)) * 100));
 }
 
 function renderCall() {

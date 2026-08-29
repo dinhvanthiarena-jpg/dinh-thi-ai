@@ -1314,6 +1314,58 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   .xa-bay.ve { transition-duration: .01s; }
 }
 
+/* ---------- 15m. ĐỌC THỬ VÀ CHẤM ĐIỂM ---------- */
+.dt { display: flex; flex-direction: column; align-items: center; gap: var(--s2);
+  margin-top: var(--s5); }
+.dt-nut { width: 66px; height: 66px; border: 0; border-radius: var(--rf);
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--brand-fill); color: #fff; box-shadow: var(--sh-2);
+  transition: transform var(--t1) var(--e), background var(--t2) var(--e); }
+.dt-nut .ic { width: 28px; height: 28px; }
+.dt-nut:active { transform: scale(.92); }
+.dt-nut[disabled] { opacity: .45; cursor: default; }
+/* Đang nghe: nút đỏ và có sóng lan ra, để biết máy đang mở micro. */
+.dt.dang-nghe .dt-nut { background: var(--bad); animation: dtNhip 1.1s ease-in-out infinite; }
+@keyframes dtNhip {
+  0%   { box-shadow: 0 0 0 0 rgba(244,63,94,.55); }
+  70%  { box-shadow: 0 0 0 18px rgba(244,63,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(244,63,94,0); }
+}
+.dt-chu { font-size: .85rem; font-weight: 700; color: var(--muted-fg); text-align: center; }
+
+.dt-diem { display: flex; align-items: center; gap: var(--s3); width: 100%;
+  margin-top: var(--s2); padding: var(--s3) var(--s4); border-radius: var(--r3);
+  text-align: left; animation: up var(--t3) var(--e) both; }
+.dt-diem[hidden] { display: none; }
+.dt-diem.tot  { background: var(--ok-soft); }
+.dt-diem.kha  { background: var(--amber-soft); }
+.dt-diem.chua { background: var(--bad-soft); }
+
+/* Vòng tròn điểm: phần tô chạy theo biến --p */
+.dt-vong { flex: none; width: 56px; height: 56px; border-radius: var(--rf);
+  display: grid; place-items: center; position: relative; }
+.dt-vong::before { content: ""; position: absolute; inset: 0; border-radius: var(--rf);
+  background: conic-gradient(currentColor var(--p), rgba(127,127,127,.22) 0); }
+.dt-vong::after { content: ""; position: absolute; inset: 5px; border-radius: var(--rf);
+  background: var(--bg); }
+.dt-vong b { position: relative; font-size: .88rem; font-weight: 900; }
+.dt-diem.tot  .dt-vong { color: var(--ok); }
+.dt-diem.kha  .dt-vong { color: var(--amber); }
+.dt-diem.chua .dt-vong { color: var(--bad); }
+.dt-diem.tot  .dt-vong b, .dt-diem.tot  .dt-loi strong { color: var(--ok-ink); }
+.dt-diem.kha  .dt-vong b, .dt-diem.kha  .dt-loi strong { color: var(--amber-ink); }
+.dt-diem.chua .dt-vong b, .dt-diem.chua .dt-loi strong { color: var(--bad-ink); }
+
+.dt-loi { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.dt-loi strong { font-size: .95rem; font-weight: 900; }
+.dt-loi small { font-size: .8rem; font-weight: 600; color: var(--muted-fg);
+  margin-top: 2px; overflow: hidden; text-overflow: ellipsis; }
+.dt-mau { flex: none; width: 38px; height: 38px; border: 0; border-radius: var(--rf);
+  display: grid; place-items: center; cursor: pointer;
+  background: rgba(127,127,127,.18); color: inherit; }
+.dt-mau:active { transform: scale(.9); }
+@media (prefers-reduced-motion: reduce) { .dt.dang-nghe .dt-nut { animation: none; } }
+
 /* ---------- 15k. GHÉP CHỮ CÁI THÀNH TỪ ---------- */
 .gc-hang { display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
   gap: 6px; margin-top: var(--s4); }
