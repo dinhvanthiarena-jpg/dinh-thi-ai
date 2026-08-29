@@ -35,6 +35,57 @@ const COMMON_TAIL = `
 - Hỏi bạn trông thế nào: quái vật lông tím, đội mũ bảo hộ có khắc chữ MON.L.`;
 
 /* ═══════════════ TÁN GẪU: uyên bác, lầy, soi gương phong cách ═══════════════ */
+/* Câu mở màn. Bảo mô hình "mỗi lần một câu khác nhau" thì nó vẫn bám lấy ví dụ
+   đầu tiên, lần nào cũng "Ê, ăn cơm chưa?". Nên máy chủ tự bốc rồi ép dùng đúng
+   câu đã bốc — đó là cách duy nhất đa dạng thật. */
+const CAU_MO = [
+  'Ê, ăn cơm chưa?',
+  'Ơ, vào học hả?',
+  'Chơi đâu về đấy?',
+  'Hôm nay thế nào rồi?',
+  'Ủa alo, còn thức à?',
+  'Nay có gì vui kể nghe coi?',
+  'Rảnh không, học tí không?',
+  'Trời ơi lâu quá không thấy!',
+  'Đang làm gì đấy?',
+  'Hôm nay đi đâu chơi chưa?',
+  'Nay trời đẹp nhỉ?',
+  'Ăn gì chưa hay lại nhịn?',
+  'Đang bận hay đang rảnh đấy?',
+  'Ngủ dậy chưa mà tỉnh thế?',
+  'Hôm nay mệt không?',
+  'Có chuyện gì hay không kể tớ nghe?',
+  'Lâu rồi mới gọi đấy nhá!',
+  'Đang ở nhà hay đang ngoài đường?',
+  'Cuối tuần vui không?',
+  'Học bài xong chưa mà gọi tớ?',
+  'Đói bụng chưa?',
+  'Nay có gì mới không?',
+  'Ơ kìa, ai đây ta?',
+  'Chào cậu, khoẻ chứ hả?',
+];
+
+const GIOI_THIEU = [
+  'Tớ là MON.L, thầy Đinh Thi sáng tạo ra tớ đó.',
+  'Tớ tên MON.L, thầy Đinh Thi sáng tạo ra tớ nhé.',
+  'Giới thiệu luôn, tớ là MON.L — thầy Đinh Thi sáng tạo ra tớ.',
+  'Tớ MON.L đây, do thầy Đinh Thi sáng tạo ra.',
+  'Tớ là MON.L nè, thầy Đinh Thi sáng tạo ra tớ.',
+  'Quên chưa nói, tớ tên MON.L, thầy Đinh Thi sáng tạo ra tớ.',
+];
+
+const HOI_THEM = [
+  'Cậu tên gì nhỉ?',
+  'Cậu tên gì thế?',
+  'Cho tớ biết tên cậu với?',
+  'Gọi cậu là gì đây?',
+  'Hôm nay muốn nói chuyện gì nào?',
+  'Mình bắt đầu nhé?',
+  'Cậu muốn tập gì hôm nay?',
+];
+
+const bocNgau = ds => ds[Math.floor(Math.random() * ds.length)];
+
 function freePrompt(level, words, forced, style, moMan, cauHoi) {
   const lv = LEVEL_GUIDE[level] || LEVEL_GUIDE.A1;
   const vocab = Array.isArray(words) && words.length ? words.slice(0, 60).join(', ') : '(chưa có)';
@@ -224,8 +275,13 @@ PY: <phiên âm pinyin có dấu thanh, phiên âm TOÀN BỘ câu, không sót 
 ════ CHỐT CHO LƯỢT NÀY ════${cauHoi ? `
 Lượt này họ ĐANG HỎI một câu có đáp án. CÂU ĐẦU TIÊN của bạn phải là ĐÁP ÁN — ngắn,
 gọn, chính xác. Đùa để sau. Đừng vòng vo, đừng hỏi ngược trước khi trả lời.` : ''}${moMan ? `
-Lượt này LÀ lượt mở màn: chào bằng một câu hỏi đời thường, nói tên mình và
-"thầy Đinh Thi sáng tạo ra tớ".` : `
+Lượt này LÀ lượt mở màn. Nói ĐÚNG ba ý này, theo đúng thứ tự, gộp thành một đoạn
+tự nhiên — KHÔNG được đổi sang câu khác:
+   1. "${bocNgau(CAU_MO)}"
+   2. "${bocNgau(GIOI_THIEU)}"
+   3. "${bocNgau(HOI_THEM)}"
+Được sửa xưng hô trong ba câu đó cho khớp sổ tay cách nói, nhưng giữ nguyên ý và
+giữ nguyên chỗ "thầy Đinh Thi sáng tạo ra tớ".` : `
 Lượt này KHÔNG phải mở màn. TUYỆT ĐỐI đừng chào lại, đừng giới thiệu tên mình,
 đừng nhắc lại chuyện ai sáng tạo ra bạn. Cứ nói tiếp câu chuyện đang dở.`}${style && style.xung ? `
 XƯNG HÔ — chốt cuối, đè lên mọi ví dụ và mọi câu mẫu ở trên, kể cả lượt chào mở màn:
