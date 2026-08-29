@@ -94,6 +94,18 @@ router.get('/toi', an(async (req, res) => {
   res.json({ dangNhap: true, ...tk.goiVe(req.user) });
 }));
 
+/** App hỏi máy chủ xem có bật đăng nhập Google không, và bật thì Client ID nào. */
+router.get('/google-info', an(async (req, res) => {
+  res.json({ bat: tk.coGoogle(), clientId: process.env.GOOGLE_CLIENT_ID || '' });
+}));
+
+router.post('/google', express.json(), an(async (req, res) => {
+  const kq = await tk.vaoBangGoogle((req.body || {}).token);
+  if (kq.loi) return res.status(400).json({ error: kq.loi });
+  tk.datCookie(res, kq.user);
+  res.json({ dangNhap: true, moi: kq.moi, ...tk.goiVe(kq.user) });
+}));
+
 router.post('/dang-ky', express.json(), an(async (req, res) => {
   if (req.user) return res.json({ dangNhap: true, ...tk.goiVe(req.user) });
   const { ten, sdt, matKhau } = req.body || {};

@@ -1255,6 +1255,14 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .fb-say:active { transform: scale(.9); }
 .fb-say[hidden] { display: none; }
 
+/* Nút đăng nhập Google ở cửa vào */
+#congGoogle { margin-top: var(--s5); }
+#congGoogle[hidden] { display: none; }
+#gsiNut { display: flex; justify-content: center; min-height: 44px; }
+.cong-hoac { display: flex; align-items: center; gap: var(--s3); margin-top: var(--s4); }
+.cong-hoac::before, .cong-hoac::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.cong-hoac span { font-size: .8rem; font-weight: 700; color: var(--muted-fg); }
+
 /* ---------- 15j. CHỌN GIỌNG ĐỌC ---------- */
 .giong-hang { display: flex; flex-direction: column; gap: 0; padding: 0; overflow: hidden; }
 .giong-nut { display: flex; align-items: center; gap: var(--s3); width: 100%;

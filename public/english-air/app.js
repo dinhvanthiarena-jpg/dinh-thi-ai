@@ -2904,6 +2904,7 @@ function moCong() {
   $("#cong").hidden = false;
   document.body.style.overflow = "hidden";
   veCong();
+  batGoogle();
   setTimeout(() => $(dangKyDangMo() ? "#fTen" : "#fSdt").focus(), 80);
 }
 const dangKyDangMo = () => TK.kieu === "dangKy";
@@ -3011,6 +3012,65 @@ $("#btnThoat").addEventListener("click", () => openSheet({
     moCong();
   },
 }));
+
+/* ĐĂNG NHẬP BẰNG GMAIL
+   Ai đã có Gmail thì khỏi phải nghĩ mật khẩu mới. Máy chủ tự hỏi Google xem tấm
+   vé có thật không — không bao giờ tin lời trình duyệt nói nó là ai. */
+let gsiDaNap = false;
+async function batGoogle() {
+  const oNut = $("#gsiNut");
+  if (!oNut) return;
+  let tin;
+  try {
+    const r = await fetch(TK_URL + "/google-info", { credentials: "same-origin" });
+    tin = await r.json();
+  } catch { return; }
+  if (!tin.bat || !tin.clientId) return;   // thầy chưa bật thì không hiện gì cả
+
+  const dung = () => {
+    if (!window.google || !google.accounts || !google.accounts.id) return;
+    google.accounts.id.initialize({
+      client_id: tin.clientId,
+      callback: async res => {
+        loiCong("");
+        try {
+          const r = await fetch(TK_URL + "/google", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ token: res.credential }),
+          });
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) { loiCong(j.error || "Chưa vào được bằng Gmail."); return; }
+          TK.toi = j;
+          if (j.ten && !S.ten) { S.ten = j.ten; save(); veTen(); }
+          dongCong();
+          toast(j.moi ? `Chào ${j.ten}, bắt đầu thôi!` : `Chào bạn quay lại, ${j.ten}!`);
+          veTheTaiKhoan();
+          veThePro();
+          keoVe();
+        } catch {
+          loiCong("Không nối được máy chủ. Bạn kiểm tra mạng rồi thử lại nhé.");
+        }
+      },
+    });
+    google.accounts.id.renderButton(oNut, {
+      theme: "filled_blue", size: "large", shape: "pill",
+      text: "continue_with", locale: "vi", width: 300,
+    });
+    $("#congGoogle").hidden = false;
+  };
+
+  if (gsiDaNap) return dung();
+  const sc = document.createElement("script");
+  sc.src = "https://accounts.google.com/gsi/client";
+  sc.async = true;
+  sc.defer = true;
+  sc.onload = () => { gsiDaNap = true; dung(); };
+  // Không tải được thì thôi, người ta vẫn đăng ký bằng số điện thoại được.
+  sc.onerror = () => {};
+  document.head.append(sc);
+}
 
 /** Chưa đăng nhập thì chặn ở cửa; mất mạng thì cho vào để không kẹt người học. */
 async function gacCua() {

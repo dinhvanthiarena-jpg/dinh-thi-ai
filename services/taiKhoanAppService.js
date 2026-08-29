@@ -120,7 +120,68 @@ async function themEmail(user, email) {
   return { ok: true };
 }
 
+/* ═══════════════ ĐĂNG NHẬP BẰNG GMAIL ═══════════════
+   Dùng Google Identity Services: trình duyệt lấy về một tấm vé (ID token), máy
+   chủ hỏi thẳng Google xem vé đó có thật và có đúng là cấp cho app này không.
+   Hỏi thẳng Google nên không cần thêm thư viện, và cũng không bao giờ tin lời
+   trình duyệt nói — người ta có thể tự bịa ra email bất kỳ. */
+const GOOGLE_KIEM = 'https://oauth2.googleapis.com/tokeninfo?id_token=';
+
+function coGoogle() {
+  return Boolean(process.env.GOOGLE_CLIENT_ID);
+}
+
+async function kiemVeGoogle(token) {
+  const id = process.env.GOOGLE_CLIENT_ID;
+  if (!id) return { loi: 'Máy chủ chưa bật đăng nhập Google.' };
+  if (!token || typeof token !== 'string') return { loi: 'Thiếu thông tin đăng nhập.' };
+
+  let d;
+  try {
+    const r = await fetch(GOOGLE_KIEM + encodeURIComponent(token), { signal: AbortSignal.timeout(10000) });
+    d = await r.json();
+    if (!r.ok) return { loi: 'Google không nhận đăng nhập này.' };
+  } catch {
+    return { loi: 'Không hỏi được Google, bạn thử lại nhé.' };
+  }
+
+  // Vé phải cấp cho ĐÚNG app này, không thì ai đó lấy vé của app khác đem sang.
+  if (d.aud !== id) return { loi: 'Đăng nhập không hợp lệ.' };
+  if (d.email_verified !== 'true' && d.email_verified !== true) {
+    return { loi: 'Email này chưa được Google xác minh.' };
+  }
+  const email = String(d.email || '').toLowerCase();
+  if (!email) return { loi: 'Không lấy được email từ Google.' };
+  return { email, ten: d.name || d.given_name || email.split('@')[0], anh: d.picture || '' };
+}
+
+/** Có tài khoản thì vào luôn, chưa có thì tạo mới — khỏi phải đăng ký riêng. */
+async function vaoBangGoogle(token) {
+  const v = await kiemVeGoogle(token);
+  if (v.loi) return { loi: v.loi };
+
+  let user = await User.findOne({ where: { email: v.email } });
+  if (user) {
+    if (!user.isActive) return { loi: 'Tài khoản này đang bị khoá.' };
+    // Ai đăng ký bằng số điện thoại trước rồi mới nối Gmail thì giữ nguyên tên họ đã đặt.
+    if (!user.avatarUrl && v.anh) { user.avatarUrl = v.anh; await user.save(); }
+    return { user, moi: false };
+  }
+
+  // Mật khẩu ngẫu nhiên: tài khoản này vào bằng Google nên không ai cần biết nó.
+  const matKhau = require('crypto').randomBytes(24).toString('hex');
+  user = await User.create({
+    name: String(v.ten).slice(0, 60),
+    email: v.email,
+    phone: null,
+    avatarUrl: v.anh || '',
+    password: matKhau,
+  });
+  return { user, moi: true };
+}
+
 module.exports = {
+  coGoogle, vaoBangGoogle,
   chuanSdt, sdtHopLe, datCookie, goiVe,
   dangKySdt, dangNhapSdt, doiMatKhau, themEmail,
 };
