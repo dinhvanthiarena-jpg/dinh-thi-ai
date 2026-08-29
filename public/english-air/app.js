@@ -2493,6 +2493,9 @@ function monSays(en, vi, after, py) {
     ended = true;
     C.speaking = false; C.sayDone = null;
     m.classList.remove("talking", "pulse");
+    // Nói xong là đứng yên lại. Thiếu dòng này thì video chạy mãi, MON.L nhép
+    // miệng cả lúc đang nghe người học nói.
+    datVideo(false);
     if (after) after();
   };
   C.speaking = true; C.sayDone = done;
