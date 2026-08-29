@@ -639,6 +639,7 @@ function setKicker(text) { $("#slideKicker").textContent = text || ""; }
 function showMascot(on) { $("#mascotTop").classList.toggle("hide", !on); }
 
 function renderSlide() {
+  donDocThu();   // đổi slide thì cắt micro và trả lại bộ nhớ đoạn ghi cũ
   paintProgress();
   P.answered = false; P.correct = false; P.picked = null; P.hintUsed = false;
   $("#feedback").hidden = true;
@@ -895,7 +896,18 @@ function grammarRow(r) {
    Người học đọc theo mẫu, máy nghe rồi chấm xem lệch bao nhiêu. Dùng đúng bộ
    nghe của trình duyệt như phần gọi MON.L, nhưng đặt sẵn tiếng Anh và chỉ nghe
    một câu rồi dừng. */
+/** Dọn phần đọc thử: tắt micro, huỷ đoạn ghi cũ. Không dọn thì đèn micro sáng
+    mãi và bộ nhớ cứ giữ từng đoạn thu của mọi từ đã học. */
+function donDocThu() {
+  if (doDangNghe) { try { doDangNghe.stop(); } catch { /* đang dừng */ } doDangNghe = null; }
+  if (banGhi && banGhi.state !== "inactive") { try { banGhi.stop(); } catch { /* đã dừng */ } }
+  banGhi = null;
+  if (tiengMinh) { URL.revokeObjectURL(tiengMinh); tiengMinh = null; }
+}
+
 let doDangNghe = null;
+let banGhi = null;      // MediaRecorder đang chạy
+let tiengMinh = null;   // địa chỉ tạm của đoạn vừa thu
 
 function khoiDocThu(mau, nhan) {
   const box = el("div", "dt");
@@ -938,6 +950,7 @@ function khoiDocThu(mau, nhan) {
       clearTimeout(canh);
       doDangNghe = null;
       box.classList.remove("dang-nghe");
+      dungThuAm();
       // Máy dừng mà chưa kịp gửi kết quả cuối thì vẫn chấm bằng cái nghe được.
       if (diem.hidden && nghePhu) hienDiem(diemDoc(nghePhu, mau), nghePhu);
     };
@@ -969,6 +982,10 @@ function khoiDocThu(mau, nhan) {
     };
     r.onend = ketThuc;
 
+    // Ghi âm thật để nghe lại giọng mình. Nhận dạng và ghi âm chạy song song;
+    // máy nào không cho hai thứ cùng dùng micro thì vẫn còn phần nhận dạng.
+    thuTiengMinh();
+
     try {
       r.start();
       box.classList.add("dang-nghe");
@@ -978,6 +995,51 @@ function khoiDocThu(mau, nhan) {
       canh = setTimeout(() => { try { r.stop(); } catch { /* đã dừng */ } ketThuc(); }, 9000);
     } catch { chu.textContent = "Không mở được micro."; ketThuc(); }
   });
+
+  async function thuTiengMinh() {
+    if (!navigator.mediaDevices || !window.MediaRecorder) return;
+    try {
+      const luong = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mieng = [];
+      const mr = new MediaRecorder(luong);
+      banGhi = mr;
+      mr.ondataavailable = e => { if (e.data && e.data.size) mieng.push(e.data); };
+      mr.onstop = () => {
+        // Trả micro lại cho máy, không thì đèn micro sáng mãi.
+        luong.getTracks().forEach(t => t.stop());
+        banGhi = null;
+        if (!mieng.length) return;
+        if (tiengMinh) URL.revokeObjectURL(tiengMinh);
+        tiengMinh = URL.createObjectURL(new Blob(mieng, { type: mr.mimeType || "audio/webm" }));
+        veNutTiengMinh();
+      };
+      mr.start();
+    } catch { /* không cho phép hoặc máy không hỗ trợ thì thôi */ }
+  }
+
+  function dungThuAm() {
+    if (banGhi && banGhi.state !== "inactive") {
+      try { banGhi.stop(); } catch { /* đã dừng */ }
+    }
+  }
+
+  let nutMinh = null;
+  function veNutTiengMinh() {
+    if (!tiengMinh || diem.hidden) return;
+    if (nutMinh && nutMinh.isConnected) return;
+    nutMinh = el("button", "dt-minh"); nutMinh.type = "button";
+    nutMinh.setAttribute("aria-label", "Nghe lại giọng mình");
+    nutMinh.append(icon("i-mic", "ic ic-sm"));
+    nutMinh.addEventListener("click", () => {
+      stopSpeak();
+      const am = new Audio(tiengMinh);
+      nutMinh.classList.add("dang-phat");
+      const het = () => nutMinh.classList.remove("dang-phat");
+      am.onended = het; am.onerror = het;
+      am.play().catch(het);
+    });
+    diem.append(nutMinh);
+  }
 
   function hienDiem(p, nghe) {
     diem.hidden = false;
@@ -1003,6 +1065,8 @@ function khoiDocThu(mau, nhan) {
     ngheMau.addEventListener("click", () => speak(mau, true, "en-GB"));
     diem.append(ngheMau);
 
+    nutMinh = null;
+    veNutTiengMinh();
     rung(p >= 85 ? [12, 40, 12] : 10);
     chu.textContent = "Bấm micro để đọc lại.";
   }

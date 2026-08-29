@@ -1360,10 +1360,16 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .dt-loi strong { font-size: .95rem; font-weight: 900; }
 .dt-loi small { font-size: .8rem; font-weight: 600; color: var(--muted-fg);
   margin-top: 2px; overflow: hidden; text-overflow: ellipsis; }
-.dt-mau { flex: none; width: 38px; height: 38px; border: 0; border-radius: var(--rf);
+.dt-mau, .dt-minh { flex: none; width: 38px; height: 38px; border: 0; border-radius: var(--rf);
   display: grid; place-items: center; cursor: pointer;
-  background: rgba(127,127,127,.18); color: inherit; }
-.dt-mau:active { transform: scale(.9); }
+  background: rgba(127,127,127,.18); color: inherit;
+  transition: transform var(--t1) var(--e), background var(--t1) var(--e); }
+.dt-mau:active, .dt-minh:active { transform: scale(.9); }
+/* Nút nghe lại giọng mình — khác màu nút nghe mẫu để khỏi lẫn. */
+.dt-minh { background: var(--brand-fill); color: #fff; }
+.dt-minh.dang-phat { animation: dtPhat .9s ease-in-out infinite; }
+@keyframes dtPhat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+@media (prefers-reduced-motion: reduce) { .dt-minh.dang-phat { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .dt.dang-nghe .dt-nut { animation: none; } }
 
 /* ---------- 15k. GHÉP CHỮ CÁI THÀNH TỪ ---------- */
