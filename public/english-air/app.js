@@ -328,7 +328,13 @@ function docLanLuot(khuc) {
   doc(0);
 }
 
-const stopSpeak = () => { if (window.speechSynthesis) speechSynthesis.cancel(); };
+/* Dừng đọc phải cắt cả CHUỖI đọc nối, không chỉ câu đang phát. Không tăng số
+   lượt thì cancel() làm onend bắn, onend lại kích câu tiếp theo — loa cứ kêu, mà
+   loa đang kêu thì micro không nghe được gì. */
+const stopSpeak = () => {
+  lanLuotId += 1;
+  if (window.speechSynthesis) { try { speechSynthesis.cancel(); } catch { /* bỏ qua */ } }
+};
 
 /* iPhone/iPad chỉ cho phát tiếng lần đầu ngay trong lúc ngón tay còn chạm màn hình.
    Câu nói đầu của MON.L lại đến sau một lượt chờ mạng, nên phải "mồi" sẵn lúc bấm nút,
@@ -898,35 +904,59 @@ function khoiDocThu(mau, nhan) {
   nut.setAttribute("aria-label", "Đọc thử: " + mau);
   nut.append(icon("i-mic"));
 
-  const chu = el("div", "dt-chu", SR ? "Bấm micro rồi đọc: " + nhan : "Máy này chưa nghe được bằng micro.");
+  // iPhone mở app từ màn hình chính hay chặn micro — báo trước còn hơn để họ
+  // bấm mãi không hiểu vì sao.
+  const nhacBanDau = !SR
+    ? "Máy này chưa nghe được bằng micro."
+    : isIosStandalone()
+      ? "Đang mở từ màn hình chính — iPhone kiểu này micro hay không chạy. Không được thì mở bằng Safari nhé."
+      : "Bấm micro rồi đọc: " + nhan;
+  const chu = el("div", "dt-chu", nhacBanDau);
   const diem = el("div", "dt-diem"); diem.hidden = true;
 
   if (!SR) nut.disabled = true;
 
   nut.addEventListener("click", () => {
     if (doDangNghe) { try { doDangNghe.stop(); } catch { /* đang dừng */ } return; }
-    stopSpeak();
+    stopSpeak();   // im hẳn loa đã, loa còn kêu thì micro không nghe được gì
     let xong = false;
     let r;
     try { r = new SR(); } catch { chu.textContent = "Không mở được micro."; return; }
     doDangNghe = r;
     r.lang = "en-GB";
-    r.interimResults = false;
+    // Nhận cả kết quả tạm: iPhone hay trả kết quả tạm rồi kết thúc mà không gửi
+    // kết quả cuối, không nhận tạm thì đọc xong chẳng thấy gì.
+    r.interimResults = true;
+    r.continuous = false;
     r.maxAlternatives = 3;
+    let nghePhu = "";
 
+    let canh = null;
     const ketThuc = () => {
       if (xong) return;
       xong = true;
+      clearTimeout(canh);
       doDangNghe = null;
       box.classList.remove("dang-nghe");
+      // Máy dừng mà chưa kịp gửi kết quả cuối thì vẫn chấm bằng cái nghe được.
+      if (diem.hidden && nghePhu) hienDiem(diemDoc(nghePhu, mau), nghePhu);
     };
 
     r.onresult = ev => {
-      // Lấy phương án nào khớp nhất, không phải phương án đầu — máy hay đoán
-      // sang từ thông dụng hơn, mà người ta đọc đúng từ đang học rồi.
-      const ds = [...(ev.results[0] || [])].map(x => x.transcript);
-      let tot = ds[0] || "", cao = -1;
+      // Gom mọi phương án của mọi đoạn, lấy phương án KHỚP NHẤT — máy hay đoán
+      // sang từ thông dụng hơn, trong khi người ta đọc đúng từ đang học rồi.
+      const ds = [];
+      let xongHan = false;
+      for (let i = 0; i < ev.results.length; i += 1) {
+        const kq = ev.results[i];
+        if (kq.isFinal) xongHan = true;
+        for (let j = 0; j < kq.length; j += 1) ds.push(kq[j].transcript);
+      }
+      if (!ds.length) return;
+      let tot = ds[0], cao = -1;
       ds.forEach(t => { const p = diemDoc(t, mau); if (p > cao) { cao = p; tot = t; } });
+      nghePhu = tot;
+      if (!xongHan) { chu.textContent = "Nghe được: " + tot + "…"; return; }
       hienDiem(cao, tot);
       ketThuc();
     };
@@ -944,6 +974,8 @@ function khoiDocThu(mau, nhan) {
       box.classList.add("dang-nghe");
       chu.textContent = "Đang nghe… đọc đi nào!";
       diem.hidden = true;
+      // Máy nào không tự dừng thì cắt sau 9 giây, đừng để nút đỏ mãi.
+      canh = setTimeout(() => { try { r.stop(); } catch { /* đã dừng */ } ketThuc(); }, 9000);
     } catch { chu.textContent = "Không mở được micro."; ketThuc(); }
   });
 
