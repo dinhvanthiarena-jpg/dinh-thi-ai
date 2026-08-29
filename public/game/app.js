@@ -3067,6 +3067,7 @@
     const btnMic = $('btnMic');
     const btnHangup = $('btnHangup');
     const btnCallSkip = $('btnCallSkip');
+    const callVidEl = $('callVid');
 
     // Toạ độ % của Mon.L trong assets/monl/mon-room.jpg — cùng con số với
     // english-air, vì dùng chung đúng file ảnh đó. scene-fit tính lại
@@ -3097,6 +3098,104 @@
     }
     window.addEventListener('resize', fitCallScene);
     window.addEventListener('orientationchange', () => setTimeout(fitCallScene, 120));
+
+    // Video thật của Mon.L (assets/monl/mon-noi.mp4) — quay sẵn cùng cảnh
+    // phòng mon-room.jpg, ported từ app tiếng Anh (dùng chung đúng file đó).
+    // Tải được thì thay hẳn ảnh phòng tĩnh + .call-mon; không tải được (mạng
+    // yếu, trình duyệt cũ) thì im lặng bỏ qua, lớp ảnh tĩnh + miệng ghép sẵn
+    // vẫn chạy y như trước — không có gì vỡ.
+    const CALL_VIDEO_SRC = 'assets/monl/mon-noi.mp4';
+    // Giây đứng yên trong video: đầu video Mon.L đang há miệng to, tay buông
+    // thõng — dừng ở giây 2,083 (khung 50) là lúc miệng ngậm, mắt mở, tay
+    // đưa ra chào. Cùng con số với app tiếng Anh vì dùng chung một file.
+    const CALL_VIDEO_HOLD = 2.083;
+    let callVideoTried = false;
+    let callVideoOk = false;
+    let callVideoGuarded = false;
+    let callVideoTalking = false;
+    let callVideoRetryId = null;
+    let callVideoHoldHandler = null;
+
+    function callProbeVideo() {
+      if (callVideoTried || !callVidEl) return;
+      callVideoTried = true;
+      const probe = document.createElement('video');
+      probe.muted = true;
+      probe.preload = 'metadata';
+      probe.addEventListener('loadedmetadata', () => { callVideoOk = true; callActivateVideo(); }, { once: true });
+      probe.addEventListener('error', () => {}, { once: true });
+      probe.src = CALL_VIDEO_SRC;
+    }
+    function callGuardVideo(v) {
+      if (callVideoGuarded) return;
+      callVideoGuarded = true;
+      // Trình duyệt tự DỪNG video khi vòng lại về đầu thay vì loop mượt —
+      // đo trên máy thật: video dài ngắn hơn câu nói thì Mon.L đứng há mồm
+      // im re giữa câu nếu không tự canh mà phát tiếp.
+      v.addEventListener('pause', () => { if (callVideoTalking) v.play().catch(() => {}); });
+      v.addEventListener('ended', () => {
+        if (!callVideoTalking) return;
+        try { v.currentTime = 0.04; } catch (e) {}
+        v.play().catch(() => {});
+      });
+    }
+    function callActivateVideo() {
+      if (!callVideoOk || !callVidEl) return;
+      callGuardVideo(callVidEl);
+      sceneFitEl.classList.add('co-video');
+      callVidEl.hidden = false;
+      callVidEl.src = CALL_VIDEO_SRC;
+      callSetVideoTalking(false);
+    }
+    // Chuyển video giữa "đang nói" (loop liên tục) và "đứng yên" (dừng cứng
+    // ở khung miệng ngậm, chỉ còn nhịp thở rất nhẹ do CSS — dừng trơ ra thì
+    // trông như ảnh chụp bị đơ).
+    //
+    // Set currentTime thẳng trên video CHƯA từng phát bị một số trình duyệt
+    // (đo được ngay trong lúc build) âm thầm bỏ qua — không lỗi, không sự
+    // kiện gì, cứ đứng nguyên ở giây 0. Cho phát thật một nhịp rồi dừng
+    // ĐÚNG LÚC bằng timeupdate thì luôn ăn chắc, nên dùng cách đó thay vì
+    // tua thẳng: tăng playbackRate cho đoạn chạy tới rất nhanh (không kịp
+    // giật hình), dừng lại ngay khi chạm khung cần giữ.
+    function callSetVideoTalking(talking) {
+      if (!callVideoOk || !callVidEl || callVidEl.hidden) return;
+      clearInterval(callVideoRetryId); callVideoRetryId = null;
+      if (callVideoHoldHandler) { callVidEl.removeEventListener('timeupdate', callVideoHoldHandler); callVideoHoldHandler = null; }
+      if (!talking) {
+        callVidEl.classList.add('dung-yen');
+        callVideoTalking = false;
+        callVidEl.loop = false;
+        // Nếu đang ở quá khung cần dừng (vừa nói xong một câu dài, video đã
+        // chạy qua giây giữ từ lâu), tua ngược về đầu trước rồi chạy tới lại
+        // — chạy tới từ vị trí hiện tại thì sẽ hết video (8 giây) mà không
+        // bao giờ chạm lại khung 2,083 giây.
+        if (callVidEl.currentTime > CALL_VIDEO_HOLD + 0.05) { try { callVidEl.currentTime = 0; } catch (e) {} }
+        callVidEl.playbackRate = 16;
+        callVideoHoldHandler = () => {
+          if (callVidEl.currentTime >= CALL_VIDEO_HOLD) {
+            callVidEl.pause();
+            callVidEl.playbackRate = 1;
+            callVidEl.removeEventListener('timeupdate', callVideoHoldHandler);
+            callVideoHoldHandler = null;
+          }
+        };
+        callVidEl.addEventListener('timeupdate', callVideoHoldHandler);
+        callVidEl.play().catch(() => {});
+        // Dự phòng cho trình duyệt không bắn timeupdate đều đặn: tự dừng
+        // cứng trong nửa giây — vẫn còn hơn kẹt chạy mãi hoặc đứng ở giây 0.
+        let tries = 0;
+        callVideoRetryId = setInterval(() => {
+          if (callVidEl.paused || ++tries > 10) { clearInterval(callVideoRetryId); callVideoRetryId = null; return; }
+          if (callVidEl.currentTime >= CALL_VIDEO_HOLD) { callVidEl.pause(); callVidEl.playbackRate = 1; }
+        }, 60);
+        return;
+      }
+      callVidEl.classList.remove('dung-yen');
+      callVidEl.playbackRate = 1;
+      callVideoTalking = true;
+      callVidEl.loop = true;
+      callVidEl.play().catch(() => {});
+    }
 
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
     let callRecognition = null;
@@ -3249,12 +3348,13 @@
         callSpeakDone = true;
         callAvatar.classList.remove('talking');
         callMascotEl.classList.remove('talking');
+        callSetVideoTalking(false);
         callBusy = false;
         if (callEnded) return;
         callSetState('Đến lượt cậu rồi đó!');
         callAutoListenIfPossible();
       };
-      utter.onstart = () => { callAvatar.classList.add('talking'); callMascotEl.classList.add('talking'); };
+      utter.onstart = () => { callAvatar.classList.add('talking'); callMascotEl.classList.add('talking'); callSetVideoTalking(true); };
       // Mỗi từ nói ra thì "nhấn" thêm một nhịp cho khớp trọng âm — buộc
       // reflow (offsetWidth) để retrigger được animation dù class không đổi.
       utter.onboundary = () => {
@@ -3276,8 +3376,8 @@
       const voice = callVoiceCache[callLang];
       if (voice) utter.voice = voice;
       let replayDone = false;
-      const finishReplay = () => { if (!replayDone) { replayDone = true; callAvatar.classList.remove('talking'); callMascotEl.classList.remove('talking'); } };
-      utter.onstart = () => { callAvatar.classList.add('talking'); callMascotEl.classList.add('talking'); };
+      const finishReplay = () => { if (!replayDone) { replayDone = true; callAvatar.classList.remove('talking'); callMascotEl.classList.remove('talking'); callSetVideoTalking(false); } };
+      utter.onstart = () => { callAvatar.classList.add('talking'); callMascotEl.classList.add('talking'); callSetVideoTalking(true); };
       utter.onend = finishReplay;
       utter.onerror = finishReplay;
       window.speechSynthesis.speak(utter);
@@ -3407,6 +3507,7 @@
       callSaidVi.hidden = true;
       callMascotEl.classList.remove('talking', 'listening', 'pulse');
       callSetState('Đang kết nối…');
+      callProbeVideo();
       callStartTimer();
       callTypedOnly = !SpeechRecognitionCtor;
       btnMic.hidden = callTypedOnly;
@@ -3424,6 +3525,7 @@
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       callAvatar.classList.remove('talking');
       callMascotEl.classList.remove('talking', 'listening', 'pulse');
+      callSetVideoTalking(false);
       callStopTimer();
     }
     function callShowPreview() {

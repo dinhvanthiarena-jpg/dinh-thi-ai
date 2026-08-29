@@ -2153,6 +2153,31 @@ button:focus-visible,
 .call-mon.pulse .mon-beat { animation: monBeat 200ms ease-out; }
 .call-mon.listening { animation: monLean 1.9s ease-in-out infinite; }
 
+/* Video thật của Mon.L (mon-noi.mp4) — quay sẵn CẢ căn phòng lẫn nhân vật
+   trong cùng một cảnh, nên khi có video nó thay hẳn ảnh phòng tĩnh +
+   .call-mon chứ không chồng lên trên (chồng lên thì thành "tranh trong
+   tranh"). Không tải được video thì .co-video không bao giờ được thêm,
+   ảnh tĩnh + lớp miệng ghép ở trên vẫn hoạt động y như cũ — class names
+   giữ nguyên như bên app tiếng Anh (dung-yen/co-video) để dễ đồng bộ sau
+   này, hai bên dùng chung một file .mp4. */
+.scene-vid {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block; z-index: 1;
+}
+.scene-vid.dung-yen { animation: monVidTho 5.4s ease-in-out infinite; }
+@keyframes monVidTho {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.007) translateY(-0.35%); }
+}
+@media (prefers-reduced-motion: reduce) { .scene-vid.dung-yen { animation: none; } }
+/* Không phủ kín cả màn hình như bên app tiếng Anh (bên đó .call-top/.call-foot
+   chỉ là lớp overlay mỏng đè lên nền video toàn màn hình) — .scene-fit ở đây
+   đã được fitCallScene() đo đạc chính xác để vừa khít giữa thanh trên và
+   khung thoại/nút bấm, nên video cứ nằm nguyên trong khung đó (object-fit
+   cover sẽ tự cắt bớt hai bên do tỉ lệ video hơi khác ảnh phòng), không thay
+   kích thước/vị trí của .scene-fit — thay là bị cắt mất đầu Mon.L ngay. */
+.scene-fit.co-video .scene-room, .scene-fit.co-video .call-mon { visibility: hidden; }
+
 .call-top {
   position: relative;
   z-index: 2;
