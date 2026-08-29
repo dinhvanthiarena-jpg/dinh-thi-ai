@@ -883,6 +883,16 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 @media (prefers-reduced-motion: reduce) { .scene-vid.dung-yen { animation: none; } }
 /* Có video thì giấu hẳn ảnh phòng và nhân vật tĩnh đi. */
 .scene-fit.co-video .scene-room, .scene-fit.co-video .call-mon { visibility: hidden; }
+
+/* ----- Nền tĩnh cắt từ video + miếng miệng đắp lên -----
+   Miệng phải khớp với chữ đang đọc, mà video quay sẵn thì không khớp được.
+   Nên nền đứng yên, chỉ cái miệng thay đổi. Vị trí miếng miệng do JS tính,
+   vì nền phủ kiểu cover nên tỉ lệ đổi theo từng máy. */
+.mon-canh { position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block; z-index: 1; }
+.mon-moi { position: absolute; z-index: 2; display: block; pointer-events: none; }
+.scene-fit.co-canh { left: 0; top: 0; transform: none; width: 100%; height: 100%; }
+.scene-fit.co-canh .scene-room, .scene-fit.co-canh .call-mon { visibility: hidden; }
 /* Khung cảnh vốn đóng cứng theo tỉ lệ ảnh phòng (0.476). Video quay dọc tỉ lệ
    khác (0.571) nên nhét vào khung đó là cụt mất hai bên. Có video thì cho khung
    phủ trọn màn hình, để video tự cover — cắt ít nhất mà vẫn kín. */

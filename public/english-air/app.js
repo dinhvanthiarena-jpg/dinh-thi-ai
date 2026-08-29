@@ -2390,108 +2390,105 @@ function diemDoc(nghe, mau) {
   return Math.max(0, Math.round((1 - d / Math.max(a.length, b.length)) * 100));
 }
 
-/* ═══════════ VIDEO NHÂN VẬT ═══════════
-   Có video thì MON.L cử động cả người; không có thì vẫn là ảnh tĩnh cộng lớp
-   miệng như cũ — thả video vào lúc nào cũng được, không thả cũng không vỡ. */
-const VIDEO_MON = { noi: "assets/mon-noi.mp4", cho: "assets/mon-cho.mp4" };
-/* Giây đứng yên trong video nói. Không phải giây 0: ngay đầu video MON.L đang
-   há miệng to, hai tay buông thõng — dừng ở đó thì trông như bị đơ giữa câu.
-   Giây 2,083 (khung 50) là lúc miệng ngậm, mắt mở, hai tay đưa ra chào. */
-const KHUNG_YEN = 2.083;
-const coVideo = {};
+/* ═══════════ MẬT MON.L: NỀN TĨNH + KHẨU HÌNH ═══════════
+   Video quay sẵn thì miệng máy theo lời TRONG VIDEO, không theo lời đang đọc —
+   nhép loạn, không bao giờ chuẩn được. Nên nền là một khung tĩnh cắt từ chính
+   video đó (khung 50: miệng ngậm, mắt mở, hai tay đưa ra chào), còn miệng là
+   những miếng rời cũng cắt ra từ video, đắp chồng lên đúng chỗ cũ. Đọc tới chữ
+   nào thì đắp khẩu hình của chữ đó. */
+const ANH_CANH = "assets/mon-canh.webp";
+/* Ô miệng trong khung gốc 768x1344 — cắt ra chỗ nào thì đắp lại đúng chỗ đó. */
+const O_MOI = { x: 240, y: 330, w: 290, h: 260, W: 768, H: 1344 };
+const KHAU_HINH = ["he", "tron", "rang", "vua", "to", "cuoi"];
 
-let daDoVideo = false;
-function doVideoMon() {
-  const v = $("#monVid");
-  if (!v || daDoVideo) return;
-  daDoVideo = true;
-  Object.entries(VIDEO_MON).forEach(([ten, duong]) => {
-    const thu = document.createElement("video");
-    thu.muted = true;
-    thu.preload = "metadata";
-    // Chỉ nhận khi trình duyệt thật sự đọc được, chứ không chỉ vì file tồn tại.
-    thu.addEventListener("loadedmetadata", () => {
-      coVideo[ten] = duong;
-      batVideo();
-    }, { once: true });
-    thu.addEventListener("error", () => {}, { once: true });
-    thu.src = duong;
+let daDoCanh = false;
+function doVideoMon() {              // giữ tên cũ để các chỗ gọi không phải sửa
+  if (daDoCanh) return;
+  daDoCanh = true;
+  const anh = new Image();
+  anh.addEventListener("load", () => {
+    const c = $("#monCanh");
+    if (!c) return;
+    c.src = ANH_CANH;
+    c.hidden = false;
+    document.querySelector(".scene-fit").classList.add("co-canh");
+    datOMoi();
+    // Nạp sẵn từng khẩu hình, không thì chữ đầu tiên đắp vào bị trống một nhịp.
+    KHAU_HINH.forEach((k) => { new Image().src = "assets/moi-" + k + ".webp"; });
+  }, { once: true });
+  anh.addEventListener("error", () => {}, { once: true });
+  anh.src = ANH_CANH;
+}
+function batVideo() { doVideoMon(); datOMoi(); }
+
+/** Nền phủ kín kiểu cover nên phải tự tính miếng miệng rơi vào đâu trên màn. */
+function datOMoi() {
+  const khung = document.querySelector(".scene-fit");
+  const moi = $("#monMoi");
+  if (!khung || !moi) return;
+  const r = khung.getBoundingClientRect();
+  if (!r.width) return;
+  const s = Math.max(r.width / O_MOI.W, r.height / O_MOI.H);
+  const lechX = (r.width - O_MOI.W * s) / 2;
+  const lechY = (r.height - O_MOI.H * s) / 2;
+  moi.style.left = (lechX + O_MOI.x * s) + "px";
+  moi.style.top = (lechY + O_MOI.y * s) + "px";
+  moi.style.width = (O_MOI.w * s) + "px";
+  moi.style.height = (O_MOI.h * s) + "px";
+}
+addEventListener("resize", datOMoi);
+
+/* ----- Chữ nào thì khẩu hình nào -----
+   Để trống là ngậm miệng: m, b, p bắt buộc phải khép môi mới kêu được. */
+const KHAU_CUA_CHU = {
+  a: "to", e: "cuoi", i: "he", y: "he", o: "tron", u: "tron",
+  m: "", b: "", p: "",
+  f: "rang", v: "rang", s: "rang", x: "rang", z: "rang", j: "rang",
+  t: "rang", d: "rang", n: "rang", l: "rang", r: "rang",
+  c: "vua", k: "vua", g: "vua", q: "tron", w: "tron", h: "he",
+};
+/** Một từ -> chuỗi khẩu hình. Gộp chữ liền nhau cùng khẩu hình làm một. */
+function khauCuaTu(tu) {
+  const ra = [];
+  deaccent(tu).split("").forEach((c) => {
+    if (!(c in KHAU_CUA_CHU)) return;
+    const k = KHAU_CUA_CHU[c];
+    if (ra.length && ra[ra.length - 1] === k) return;
+    ra.push(k);
   });
+  return ra.slice(0, 7);
 }
 
-/* Trình duyệt tự DỪNG video ngay tại chỗ vòng lại — đo được trên máy thật: tới
-   giây 7,8 nó seek về 0 rồi phát luôn sự kiện pause. Câu nói thì dài 13 giây,
-   nên MON.L há mồm đứng im suốt 5 giây còn lại. Tự canh lấy, đừng tin loop. */
-function gacVideo(v) {
-  if (daGacVideo) return;
-  daGacVideo = true;
-  v.addEventListener("pause", () => {
-    if (videoDangNoi) v.play().catch(() => {});
-  });
-  v.addEventListener("ended", () => {
-    if (!videoDangNoi) return;
-    try { v.currentTime = 0.04; } catch (e) {}
-    v.play().catch(() => {});
-  });
+let henMoi = [];
+function xoaHenMoi() { henMoi.forEach(clearTimeout); henMoi = []; }
+function datKhau(ten) {
+  const moi = $("#monMoi");
+  if (!moi) return;
+  if (!ten) { moi.hidden = true; return; }
+  moi.src = "assets/moi-" + ten + ".webp";
+  moi.hidden = false;
+  datOMoi();
+}
+/** Nhép đúng một từ: chia thời gian của từ cho số khẩu hình trong từ đó. */
+function nhepTu(tu) {
+  xoaHenMoi();
+  const chuoi = khauCuaTu(tu);
+  if (!chuoi.length) { datKhau(""); return; }
+  const nhip = Math.max(55, Math.min(130, (90 + 52 * String(tu).length) / chuoi.length));
+  chuoi.forEach((k, i) => henMoi.push(setTimeout(() => datKhau(k), i * nhip)));
+  henMoi.push(setTimeout(() => datKhau(""), chuoi.length * nhip));
+}
+/** Lấy từ đang đọc từ vị trí ký tự mà trình duyệt báo. */
+function tuTaiViTri(cau, vt) {
+  const m = String(cau).slice(vt || 0).match(/^\S+/);
+  return m ? m[0] : "";
 }
 
-function batVideo() {
-  const v = $("#monVid");
-  if (!v || (!coVideo.noi && !coVideo.cho)) return;
-  gacVideo(v);
-  document.querySelector(".scene-fit").classList.add("co-video");
-  v.hidden = false;
-  datVideo(false);
-}
-
-/** Chuyển giữa vòng nói và vòng chờ. Chỉ có một video thì dùng cho cả hai. */
-let videoDang = null;
-let hoiTua = null;
-let videoDangNoi = false;   // đang trong lúc MON.L nói, video phải chạy liên tục
-let daGacVideo = false;
+/** Giữ tên cũ. Không nói thì ngậm miệng lại. */
 function datVideo(dangNoi) {
-  const v = $("#monVid");
-  if (!v || v.hidden) return;
-  const muon = (dangNoi ? coVideo.noi : coVideo.cho) || coVideo.cho || coVideo.noi;
-  if (!muon) return;
-  if (videoDang !== muon) {
-    videoDang = muon;
-    v.src = muon;
-  }
-  const motVideo = !(coVideo.noi && coVideo.cho);
-  v.playbackRate = 1;
-  if (motVideo && !dangNoi) {
-    // Chỉ có video ĐANG NÓI mà cho chạy cả lúc chờ thì MON.L nhép miệng liên tục,
-    // nhìn như người lảm nhảm một mình. Không nói thì đứng yên: dừng hẳn video ở
-    // khung miệng ngậm, chỉ còn nhịp thở rất nhẹ do CSS làm.
-    v.classList.add("dung-yen");
-    const dat = () => { try { v.currentTime = KHUNG_YEN; } catch (e) {} };
-    // Tắt loop TRƯỚC khi dừng. Còn loop thì cú "hết bài, quay về đầu" của trình
-    // duyệt nuốt sạch lệnh tua trong hai giây liền — đo trên máy thật ra đúng
-    // hai giây rưỡi MON.L há mồm đứng đó.
-    videoDangNoi = false;
-    v.loop = false;
-    v.pause();
-    if (v.readyState >= 1) dat(); else v.addEventListener("loadedmetadata", dat, { once: true });
-    // Lệnh tua hay bị nuốt khi video vừa vòng về đầu hoặc vừa nạp xong: đứng ở
-    // khung 0 là MON.L há mồm ra giữa lúc đang nghe. Thử lại vài nhịp cho chắc.
-    clearInterval(hoiTua);
-    let lan = 0;
-    // Canh suốt chứ không tắt ngay khi tua trúng một lần: video có thuộc tính
-    // loop, nên cú "hết bài, quay về đầu" đang chờ sẵn sẽ kéo nó về khung 0
-    // NGAY SAU khi mình tua xong. Tắt sớm là dính đúng cái bẫy đó.
-    hoiTua = setInterval(() => {
-      if (!v.paused || ++lan > 30) { clearInterval(hoiTua); hoiTua = null; return; }
-      if (Math.abs(v.currentTime - KHUNG_YEN) > 0.12) dat();
-    }, 110);
-    return;
-  }
-  v.classList.remove("dung-yen");
-  clearInterval(hoiTua); hoiTua = null;
-  videoDangNoi = true;
-  v.loop = true;
-  // play() có thể bị chặn nếu người dùng chưa chạm màn hình — bỏ qua cho êm.
-  v.play().catch(() => {});
+  if (dangNoi) return;
+  xoaHenMoi();
+  datKhau("");
 }
 
 function renderCall() {
@@ -2567,7 +2564,10 @@ function monSays(en, vi, after, py) {
     u.lang = L.tts;
     const v = voiceFor(L.tts); if (v) u.voice = v;
     u.rate = 0.94; u.pitch = S.kidVoice ? KID_PITCH : 1;
-    u.onboundary = () => { m.classList.remove("pulse"); void m.offsetWidth; m.classList.add("pulse"); };
+    u.onboundary = (ev) => {
+      m.classList.remove("pulse"); void m.offsetWidth; m.classList.add("pulse");
+      nhepTu(tuTaiViTri(en, ev && ev.charIndex));
+    };
     u.onend = done;
     u.onerror = done;
     speechSynthesis.speak(u);
@@ -2973,7 +2973,10 @@ $("#callPreview").addEventListener("click", () => {
     const u = new SpeechSynthesisUtterance(line.en);
     dungGiong(u, tiengCua(line.en)); apToc(u, 0.94);
     u.pitch = S.kidVoice ? KID_PITCH : 1;
-    u.onboundary = () => { box.classList.remove("pulse"); void box.offsetWidth; box.classList.add("pulse"); };
+    u.onboundary = (ev) => {
+      box.classList.remove("pulse"); void box.offsetWidth; box.classList.add("pulse");
+      nhepTu(tuTaiViTri(line.en, ev && ev.charIndex));
+    };
     u.onend = stop; u.onerror = stop;
     speechSynthesis.speak(u);
     setTimeout(stop, 1400 + line.en.length * 95);
