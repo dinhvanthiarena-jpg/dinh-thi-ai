@@ -813,7 +813,11 @@ const TEACH = {
         { text: g.en, lang: "en-GB" },
         g.vi ? { text: g.vi, lang: "vi-VN" } : null,
       ].filter(Boolean)));
-      t.append(row);
+      // Hàng là nút nghe, nên nút micro phải nằm ngoài hàng chứ không lồng vào
+      // trong — nút trong nút thì trình duyệt không cho.
+      const boc = el("div", "grow-boc");
+      boc.append(row, nutDocNho(g.en));
+      t.append(boc);
     });
     st.append(t);
     if (d.tip) {
@@ -850,7 +854,8 @@ const TEACH = {
       bb.append(el("b", null, l.en));
       if (S.showVi) bb.append(el("small", null, l.vi));
       bb.addEventListener("click", () => speak(l.en));
-      line.append(el("span", "dwho", l.who), bb);
+      // Mỗi lượt thoại đọc thử được luôn — hội thoại là chỗ luyện nói sát thực tế nhất.
+      line.append(el("span", "dwho", l.who), bb, nutDocNho(l.en));
       box.append(line);
     });
     st.append(box);
@@ -1077,6 +1082,80 @@ function khoiDocThu(mau, nhan) {
 
   box.append(nut, chu, diem);
   return box;
+}
+
+/** Nút micro nhỏ gắn cạnh một câu mẫu: đọc theo, chấm xong hiện luôn % ngay
+    trên nút. Dùng cho hội thoại và bảng ngữ pháp, nơi mỗi màn có nhiều câu nên
+    không đặt vừa khối chấm điểm lớn. */
+function nutDocNho(mau) {
+  const b = el("button", "mic-nho"); b.type = "button";
+  b.setAttribute("aria-label", "Đọc thử: " + mau);
+  const ic = icon("i-mic", "ic ic-sm");
+  const so = el("span", "mic-so");
+  b.append(ic, so);
+
+  b.addEventListener("click", ev => {
+    ev.stopPropagation();          // đừng kích luôn nút nghe của cả dòng
+    if (!SR) { toast("Máy này chưa nghe được bằng micro."); return; }
+    if (doDangNghe) { try { doDangNghe.stop(); } catch { /* đang dừng */ } return; }
+    stopSpeak();
+
+    let xong = false, nghePhu = "", canh = null;
+    let r;
+    try { r = new SR(); } catch { toast("Không mở được micro."); return; }
+    doDangNghe = r;
+    r.lang = "en-GB";
+    r.interimResults = true;
+    r.continuous = false;
+    r.maxAlternatives = 3;
+
+    const ketThuc = () => {
+      if (xong) return;
+      xong = true;
+      clearTimeout(canh);
+      doDangNghe = null;
+      b.classList.remove("dang-nghe");
+      if (!so.textContent && nghePhu) hienSo(diemDoc(nghePhu, mau));
+    };
+    const hienSo = p => {
+      so.textContent = p + "%";
+      b.classList.remove("tot", "kha", "chua");
+      b.classList.add(p >= 85 ? "tot" : p >= 60 ? "kha" : "chua");
+      rung(p >= 85 ? [12, 40, 12] : 10);
+    };
+
+    r.onresult = e2 => {
+      const ds = [];
+      let het = false;
+      for (let i = 0; i < e2.results.length; i += 1) {
+        const kq = e2.results[i];
+        if (kq.isFinal) het = true;
+        for (let j = 0; j < kq.length; j += 1) ds.push(kq[j].transcript);
+      }
+      if (!ds.length) return;
+      let cao = -1;
+      ds.forEach(t => { const p = diemDoc(t, mau); if (p > cao) { cao = p; nghePhu = t; } });
+      if (!het) return;
+      hienSo(cao);
+      ketThuc();
+    };
+    r.onerror = e2 => {
+      toast(e2.error === "not-allowed" ? "Bạn chưa cho phép dùng micro."
+        : e2.error === "no-speech" ? "Không nghe thấy gì, đọc to hơn chút nhé."
+        : "Micro trục trặc, thử lại nhé.");
+      ketThuc();
+    };
+    r.onend = ketThuc;
+
+    try {
+      r.start();
+      b.classList.add("dang-nghe");
+      b.classList.remove("tot", "kha", "chua");
+      so.textContent = "";
+      canh = setTimeout(() => { try { r.stop(); } catch { /* đã dừng */ } ketThuc(); }, 9000);
+    } catch { toast("Không mở được micro."); ketThuc(); }
+  });
+  return b;
 }
 
 function vocabSlide(d, st, label) {
