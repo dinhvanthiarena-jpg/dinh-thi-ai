@@ -1430,7 +1430,9 @@ const DRILL = {
     d.the.forEach(w => {
       const t = el("button", "xa-the"); t.type = "button";
       t.dataset.en = w.en;
-      const anh = khungAnh(w);
+      // Phải dùng anhChoTu chứ không phải khungAnh: khungAnh chỉ nhận từ có ảnh
+      // RIÊNG, còn phần lọc ở trên lại dò cảnh theo chữ — nên thẻ ra trống trơn.
+      const anh = anhChoTu(w);
       if (anh) { anh.classList.add("nho"); t.append(anh); }
       ganKeoThe(t, w);
       // Bấm thường: bỏ vào ô đầu tiên còn hợp, cho người không kéo được.

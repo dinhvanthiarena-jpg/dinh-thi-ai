@@ -1301,6 +1301,9 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   transition: opacity var(--t1) var(--e), transform var(--t1) var(--e); }
 .xa-the .pic-hero { margin: 0; width: 100%; height: 100%; aspect-ratio: 1;
   max-height: none; border-radius: 0; box-shadow: none; }
+/* Trong thẻ nhỏ 92px, hình nét đơn để 44% thì bé xíu không nhìn ra gì. */
+.pic-hero.nho.ve svg { width: 66%; max-width: none; }
+.xa-ro .pic-hero.nho.ve svg { width: 62%; }
 .xa-the.dang-keo { opacity: .28; }
 .xa-the.used { opacity: 0; visibility: hidden; }
 .xa-bay { position: fixed; z-index: 90; margin: 0; pointer-events: none;
