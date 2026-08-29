@@ -6,7 +6,7 @@
   </div>
   <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
     <% shopeePicks.forEach(function(p) { %>
-      <a href="<%= p.url %>" target="_blank" rel="noopener sponsored" class="group block">
+      <a href="/go/shopee?url=<%= encodeURIComponent(p.url) %>&name=<%= encodeURIComponent(p.name) %>" target="_blank" rel="noopener sponsored" class="group block">
         <div class="aspect-square rounded-xl overflow-hidden bg-white border border-orange-100 shadow-sm">
           <img src="<%= p.image %>" alt="<%= p.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" referrerpolicy="no-referrer" />
         </div>

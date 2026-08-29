@@ -16,6 +16,7 @@
       </div>
       <nav class="flex-1 px-3 py-6 space-y-1 text-sm">
         <a href="/admin" class="flex items-center gap-3 px-3 py-2.5 rounded-lg <%= currentPath === '/admin' ? 'bg-white/10 text-white' : 'text-indigo-200 hover:bg-white/5' %>">Tổng quan</a>
+        <a href="/admin/analytics" class="flex items-center gap-3 px-3 py-2.5 rounded-lg <%= currentPath && currentPath.startsWith('/admin/analytics') ? 'bg-white/10 text-white' : 'text-indigo-200 hover:bg-white/5' %>">Thống kê</a>
         <a href="/admin/courses" class="flex items-center gap-3 px-3 py-2.5 rounded-lg <%= currentPath && currentPath.startsWith('/admin/courses') ? 'bg-white/10 text-white' : 'text-indigo-200 hover:bg-white/5' %>">Khóa học</a>
         <a href="/admin/blog" class="flex items-center gap-3 px-3 py-2.5 rounded-lg <%= currentPath && currentPath.startsWith('/admin/blog') ? 'bg-white/10 text-white' : 'text-indigo-200 hover:bg-white/5' %>">Bài viết</a>
         <a href="/admin/gallery" class="flex items-center gap-3 px-3 py-2.5 rounded-lg <%= currentPath && currentPath.startsWith('/admin/gallery') ? 'bg-white/10 text-white' : 'text-indigo-200 hover:bg-white/5' %>">Ảnh hoạt động</a>

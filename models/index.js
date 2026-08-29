@@ -15,6 +15,8 @@ const GameInstall = require('./GameInstall');
 const PushSubscription = require('./PushSubscription');
 const ProOrder = require('./ProOrder');
 const MonlTienDo = require('./MonlTienDo');
+const PageView = require('./PageView');
+const AffiliateClick = require('./AffiliateClick');
 
 Course.hasMany(Lesson, { foreignKey: 'CourseId', onDelete: 'CASCADE' });
 Lesson.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
@@ -63,4 +65,6 @@ module.exports = {
   PushSubscription,
   ProOrder,
   MonlTienDo,
+  PageView,
+  AffiliateClick,
 };

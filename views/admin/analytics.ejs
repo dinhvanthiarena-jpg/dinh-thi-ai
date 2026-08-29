@@ -1,0 +1,109 @@
+<div class="space-y-8">
+  <div class="grid sm:grid-cols-2 gap-6">
+    <div class="card p-6">
+      <h2 class="text-lg font-bold text-ink mb-1">Lượt xem bài viết — theo ngày</h2>
+      <p class="text-xs text-muted mb-4">30 ngày gần nhất</p>
+      <div class="max-h-96 overflow-y-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-muted border-b border-primary-100">
+              <th class="py-2">Ngày</th>
+              <th class="py-2 text-right">Lượt xem</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!viewsByDay.length) { %>
+              <tr><td colspan="2" class="py-6 text-center text-muted">Chưa có dữ liệu.</td></tr>
+            <% } %>
+            <% viewsByDay.forEach(function(row) { %>
+              <tr class="border-b border-primary-50">
+                <td class="py-2 text-ink"><%= new Date(row.day).toLocaleDateString('vi-VN') %></td>
+                <td class="py-2 text-right font-semibold text-primary-700"><%= row.total %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card p-6">
+      <h2 class="text-lg font-bold text-ink mb-1">Lượt xem bài viết — theo tháng</h2>
+      <p class="text-xs text-muted mb-4">12 tháng gần nhất</p>
+      <div class="max-h-96 overflow-y-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-muted border-b border-primary-100">
+              <th class="py-2">Tháng</th>
+              <th class="py-2 text-right">Lượt xem</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!viewsByMonth.length) { %>
+              <tr><td colspan="2" class="py-6 text-center text-muted">Chưa có dữ liệu.</td></tr>
+            <% } %>
+            <% viewsByMonth.forEach(function(row) { %>
+              <tr class="border-b border-primary-50">
+                <td class="py-2 text-ink"><%= row.month %></td>
+                <td class="py-2 text-right font-semibold text-primary-700"><%= row.total %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid sm:grid-cols-2 gap-6">
+    <div class="card p-6">
+      <h2 class="text-lg font-bold text-ink mb-1">Lượt bấm link Shopee — theo ngày</h2>
+      <p class="text-xs text-muted mb-4">30 ngày gần nhất</p>
+      <div class="max-h-96 overflow-y-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-muted border-b border-primary-100">
+              <th class="py-2">Ngày</th>
+              <th class="py-2 text-right">Lượt bấm</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!clicksByDay.length) { %>
+              <tr><td colspan="2" class="py-6 text-center text-muted">Chưa có dữ liệu.</td></tr>
+            <% } %>
+            <% clicksByDay.forEach(function(row) { %>
+              <tr class="border-b border-primary-50">
+                <td class="py-2 text-ink"><%= new Date(row.day).toLocaleDateString('vi-VN') %></td>
+                <td class="py-2 text-right font-semibold text-orange-600"><%= row.total %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card p-6">
+      <h2 class="text-lg font-bold text-ink mb-1">Lượt bấm link Shopee — theo tháng</h2>
+      <p class="text-xs text-muted mb-4">12 tháng gần nhất</p>
+      <div class="max-h-96 overflow-y-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-muted border-b border-primary-100">
+              <th class="py-2">Tháng</th>
+              <th class="py-2 text-right">Lượt bấm</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!clicksByMonth.length) { %>
+              <tr><td colspan="2" class="py-6 text-center text-muted">Chưa có dữ liệu.</td></tr>
+            <% } %>
+            <% clicksByMonth.forEach(function(row) { %>
+              <tr class="border-b border-primary-50">
+                <td class="py-2 text-ink"><%= row.month %></td>
+                <td class="py-2 text-right font-semibold text-orange-600"><%= row.total %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

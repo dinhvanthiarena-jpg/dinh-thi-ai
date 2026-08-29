@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const BlogPost = require('../models/BlogPost');
 const User = require('../models/User');
+const PageView = require('../models/PageView');
 
 exports.list = async (req, res) => {
   const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
@@ -31,6 +32,7 @@ exports.show = async (req, res, next) => {
   if (!post) return next();
 
   await post.increment('viewCount', { by: 1 });
+  await PageView.create({ path: `/blog/${post.slug}`, postSlug: post.slug });
 
   const candidates = await BlogPost.findAll({
     where: { id: { [Op.ne]: post.id }, isPublished: true },

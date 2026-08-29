@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
+const analyticsController = require('../controllers/analyticsController');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
@@ -11,6 +12,7 @@ router.use((req, res, next) => {
 });
 
 router.get('/', adminController.dashboard);
+router.get('/analytics', analyticsController.dashboard);
 
 router.get('/courses', adminController.courseList);
 router.get('/courses/new', adminController.courseNewForm);
