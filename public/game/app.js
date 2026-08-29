@@ -679,6 +679,36 @@
         ],
         solution: 'Số lớn nhất có 1 chữ số là 9. Số cần tìm là: 9 − 5 = <strong>4</strong>.',
       },
+      {
+        level: 'Cơ bản',
+        text: 'Rổ cam có ít hơn rổ táo 4 quả. Rổ táo có 12 quả. Hỏi rổ cam có bao nhiêu quả?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: rổ táo có <strong>12 quả</strong>; rổ cam <strong>ít hơn</strong> rổ táo <strong>4 quả</strong>.<br><br>Đề hỏi: rổ cam có bao nhiêu quả?' },
+          { t: 'Kiến thức cần dùng', b: 'Từ khoá quan trọng là "ít hơn". Khi một bên <strong>ít hơn</strong> bên kia, muốn tìm bên ít thì con lấy bên nhiều <strong>trừ đi</strong> phần ít hơn.<br><br>Ví dụ dễ hơn: Lan có 8 viên kẹo, Hoa ít hơn Lan 3 viên. Vậy Hoa có 8 − 3 = 5 viên.<br><br>Chú ý: "ít hơn" làm phép trừ, còn "nhiều hơn" làm phép cộng — rất dễ nhầm nên phải đọc kỹ đề.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định bên đã biết số lượng — ở đây là rổ táo (12 quả).<br><br>Bước 2: Lấy số quả táo <strong>trừ</strong> đi 4 quả ít hơn.<br><br>Bước 3: Nhớ viết đơn vị "quả" vào đáp số.' },
+        ],
+        solution: 'Rổ cam ít hơn rổ táo 4 quả nên có: 12 − 4 = <strong>8 quả</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Lớp có 18 bạn. Có 5 bạn chuyển đi trường khác, sau đó lớp nhận thêm 3 bạn mới. Hỏi lúc này lớp có bao nhiêu bạn?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề có 3 mốc thời gian: lúc đầu lớp có <strong>18 bạn</strong>; sau đó <strong>5 bạn chuyển đi</strong> (bớt); rồi có <strong>3 bạn mới đến</strong> (thêm).<br><br>Đề hỏi: số bạn lớp có hiện nay.' },
+          { t: 'Kiến thức cần dùng', b: 'Bài có 2 bước tính nối tiếp nhau — làm đúng thứ tự việc gì xảy ra trước. Việc nào làm số bạn <strong>giảm</strong> thì trừ, việc nào làm <strong>tăng</strong> thì cộng.<br><br>Ví dụ dễ hơn: có 10 con vịt, 2 con đi mất, rồi có thêm 4 con về. Số vịt lúc sau: 10 − 2 = 8, rồi 8 + 4 = 12.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Lấy số bạn lúc đầu <strong>trừ</strong> đi 5 bạn chuyển đi, được số bạn còn lại.<br><br>Bước 2: Lấy kết quả vừa tìm <strong>cộng thêm</strong> 3 bạn mới đến.<br><br>Bước 3: Đó chính là số bạn hiện có của lớp.' },
+        ],
+        solution: 'Sau khi 5 bạn chuyển đi, lớp còn: 18 − 5 = 13 (bạn). Có thêm 3 bạn mới đến nên lớp có: 13 + 3 = <strong>16 bạn</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Số liền sau của một số là 15. Hỏi số liền trước của số đó là số nào?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: <strong>số liền sau</strong> của số cần tìm là 15.<br><br>Đề hỏi: <strong>số liền trước</strong> của chính số đó (không phải số liền trước của 15!) — phải tìm ra "số cần tìm" trước đã.' },
+          { t: 'Kiến thức cần dùng', b: 'Số liền sau = số đó + 1. Số liền trước = số đó − 1.<br><br>Nếu biết số liền sau, muốn tìm ra chính số đó thì lấy số liền sau <strong>trừ 1</strong> (vì số liền sau đã +1 rồi, nên đi ngược lại phải −1).<br><br>Ví dụ dễ hơn: số liền sau của số cần tìm là 6, vậy số cần tìm là 6 − 1 = 5.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Từ "số liền sau là 15", tìm ra số cần tìm bằng cách lấy 15 − 1.<br><br>Bước 2: Có số cần tìm rồi, tìm tiếp số liền trước của chính nó bằng cách trừ thêm 1 lần nữa.<br><br>Bẫy hay mắc: nhiều bạn vội tìm số liền trước của 15 (là 14) — sai đề, vì 15 không phải là số cần tìm, mà là số liền sau của nó.' },
+        ],
+        solution: 'Số cần tìm là: 15 − 1 = 14. Số liền trước của 14 là: 14 − 1 = <strong>13</strong>.',
+      },
     ],
     2: [
       {
@@ -740,6 +770,36 @@
           { t: 'Hướng làm bài này', b: 'Bước 1: Chọn một trong hai cách ở trên.<br><br>Bước 2: Khi đặt tính, viết các số <strong>thẳng cột</strong> theo hàng nghìn — số tiền nhiều chữ số rất dễ lệch cột.<br><br>Bước 3: Kiểm tra tính hợp lý — tiền còn lại phải <strong>nhỏ hơn</strong> 50 000 đồng.' },
         ],
         solution: 'Số tiền còn lại là: 50 000 − 23 000 − 15 000 = <strong>12 000 đồng</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Mẹ đưa cho Lan tờ 20 nghìn đồng để mua vở. Quyển vở giá 12 nghìn đồng. Hỏi Lan còn lại bao nhiêu nghìn đồng?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: Lan có <strong>20 nghìn đồng</strong>; mua vở hết <strong>12 nghìn đồng</strong>.<br><br>Đề hỏi: còn lại bao nhiêu?' },
+          { t: 'Kiến thức cần dùng', b: 'Đây là dạng toán "có bao nhiêu, tiêu hết bao nhiêu, còn lại bao nhiêu" — luôn dùng phép <strong>trừ</strong>: số tiền còn lại = số tiền có − số tiền đã tiêu.<br><br>Ví dụ dễ hơn: có 15 nghìn, tiêu 5 nghìn, còn lại 15 − 5 = 10 nghìn.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định số tiền lúc đầu (20 nghìn) và số tiền đã tiêu (12 nghìn).<br><br>Bước 2: Lấy số tiền lúc đầu <strong>trừ</strong> số tiền đã tiêu.<br><br>Bước 3: Nhớ viết đơn vị "nghìn đồng" vào đáp số.' },
+        ],
+        solution: 'Số tiền Lan còn lại là: 20 − 12 = <strong>8 nghìn đồng</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Hai số có tổng là 16, số lớn hơn số bé là 4. Tìm số lớn.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: <strong>tổng</strong> hai số là 16; số lớn <strong>hơn</strong> số bé 4 đơn vị (đây là <strong>hiệu</strong>).<br><br>Đề hỏi: số lớn là bao nhiêu.' },
+          { t: 'Kiến thức cần dùng', b: 'Đây là dạng toán tìm hai số biết tổng và hiệu. Công thức: <strong>Số lớn = (Tổng + Hiệu) : 2</strong>.<br><br>Vì sao? Nếu bớt phần hơn (hiệu) khỏi số lớn thì hai số bằng nhau, tổng lúc đó chia đôi ra mỗi số.<br><br>Ví dụ dễ hơn: tổng 10, hiệu 2 → số lớn = (10+2):2 = 6, số bé = 6−2 = 4. Thử lại: 6+4=10 ✓, 6−4=2 ✓.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Lấy Tổng cộng Hiệu: 16 + 4.<br><br>Bước 2: Lấy kết quả đó chia đôi (chia 2) để ra số lớn.<br><br>Bước 3: Thử lại bằng cách lấy số lớn trừ hiệu xem có ra số bé hợp lý không (cộng số lớn với số bé phải bằng đúng tổng ban đầu).' },
+        ],
+        solution: 'Số lớn là: (16 + 4) : 2 = <strong>10</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'An có 14 viên bi, Bình có 8 viên bi. Hỏi An phải cho Bình bao nhiêu viên bi để hai bạn có số bi bằng nhau?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: An có <strong>14 viên</strong>, Bình có <strong>8 viên</strong>.<br><br>Đề hỏi: An cho Bình bao nhiêu viên để sau khi cho, hai bạn bằng nhau.' },
+          { t: 'Kiến thức cần dùng', b: 'Mẹo hay: khi bạn A cho bạn B một số viên bi để hai bên bằng nhau, số bi cho đi đúng bằng <strong>một nửa</strong> phần chênh lệch (hiệu) giữa hai bên — vì A cho đi 1 viên thì A giảm 1, B tăng 1, khoảng cách giữa hai bên giảm 2 viên mỗi lần cho.<br><br>Ví dụ dễ hơn: A có 10, B có 4, hiệu là 6. A cho B: 6:2 = 3 viên → A còn 7, B có 7, bằng nhau.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính hiệu số bi giữa An và Bình: 14 − 8.<br><br>Bước 2: Lấy hiệu đó chia 2, ra số viên An cần cho.<br><br>Bước 3: Thử lại: An cho xong còn bao nhiêu, Bình nhận xong có bao nhiêu — hai số đó phải bằng nhau.' },
+        ],
+        solution: 'Hiệu số bi là: 14 − 8 = 6 (viên). An phải cho Bình: 6 : 2 = <strong>3 viên bi</strong>.',
       },
     ],
     3: [
@@ -803,6 +863,36 @@
         ],
         solution: '27 : 4 = 6, dư 3 (vì 4 × 6 = 24, 27 − 24 = 3). Vậy mỗi bạn được nhiều nhất <strong>6 cái kẹo</strong>, còn dư <strong>3 cái</strong>.',
       },
+      {
+        level: 'Cơ bản',
+        text: 'Bao thứ nhất nặng 24kg, bao thứ hai nặng 30kg. Hỏi trung bình mỗi bao nặng bao nhiêu ki-lô-gam?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho khối lượng của 2 bao: <strong>24kg</strong> và <strong>30kg</strong>.<br><br>Đề hỏi: trung bình mỗi bao nặng bao nhiêu.' },
+          { t: 'Kiến thức cần dùng', b: 'Muốn tìm <strong>trung bình cộng</strong> của các số, con lấy <strong>tổng</strong> các số đó chia cho <strong>số lượng</strong> các số.<br><br>Ví dụ dễ hơn: trung bình cộng của 6 và 8 là (6+8):2 = 7.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính tổng khối lượng hai bao: 24 + 30.<br><br>Bước 2: Lấy tổng đó chia cho 2 (vì có 2 bao).<br><br>Bước 3: Viết đơn vị "kg" vào đáp số.' },
+        ],
+        solution: 'Tổng khối lượng hai bao là: 24 + 30 = 54 (kg). Trung bình mỗi bao nặng: 54 : 2 = <strong>27kg</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tổ 1 trồng được 8 cây, tổ 2 trồng được gấp 3 lần tổ 1. Hỏi tổ 2 trồng được nhiều hơn tổ 1 bao nhiêu cây?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: tổ 1 trồng <strong>8 cây</strong>; tổ 2 trồng <strong>gấp 3 lần</strong> tổ 1.<br><br>Đề hỏi: tổ 2 <strong>nhiều hơn</strong> tổ 1 bao nhiêu cây (không phải hỏi tổ 2 trồng được bao nhiêu cây).' },
+          { t: 'Kiến thức cần dùng', b: '"Gấp mấy lần" dùng phép <strong>nhân</strong>. Bài này có 2 bước: trước tiên tìm số cây tổ 2 (= tổ 1 × 3), sau đó mới tìm phần <strong>nhiều hơn</strong> (lấy tổ 2 trừ tổ 1).<br><br>Ví dụ dễ hơn: A có 3 cái kẹo, B có gấp 4 lần A. B có 3×4=12 cái. B nhiều hơn A: 12−3=9 cái.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính số cây tổ 2 trồng được: lấy số cây tổ 1 nhân 3.<br><br>Bước 2: Lấy số cây tổ 2 vừa tìm được <strong>trừ</strong> đi số cây tổ 1, ra phần nhiều hơn.<br><br>Bẫy hay mắc: nhiều bạn dừng lại ở bước 1 và trả lời luôn số cây của tổ 2 — nhưng đề hỏi phần nhiều hơn, phải làm thêm bước trừ.' },
+        ],
+        solution: 'Số cây tổ 2 trồng được là: 8 × 3 = 24 (cây). Tổ 2 nhiều hơn tổ 1: 24 − 8 = <strong>16 cây</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một mảnh vườn hình vuông có cạnh dài 9m. Hỏi chu vi mảnh vườn đó là bao nhiêu mét?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho mảnh vườn <strong>hình vuông</strong>, cạnh dài 9m.<br><br>Đề hỏi <strong>chu vi</strong> (độ dài đường bao quanh) của mảnh vườn.' },
+          { t: 'Kiến thức cần dùng', b: 'Hình vuông có <strong>4 cạnh bằng nhau</strong>. Muốn tính chu vi hình vuông, con lấy độ dài một cạnh nhân với 4.<br><br>Ví dụ dễ hơn: hình vuông cạnh 5cm có chu vi 5×4=20cm.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định độ dài cạnh hình vuông (9m).<br><br>Bước 2: Lấy độ dài cạnh đó <strong>nhân</strong> với 4.<br><br>Bước 3: Viết đơn vị "m" vào đáp số.' },
+        ],
+        solution: 'Chu vi mảnh vườn là: 9 × 4 = <strong>36m</strong>.',
+      },
     ],
     4: [
       {
@@ -865,6 +955,36 @@
         ],
         solution: 'Tổng quãng đường là: 250 × 6 = 1500 (m). Muốn xong trong 5 ngày thì mỗi ngày phải sửa: 1500 : 5 = <strong>300m</strong>.',
       },
+      {
+        level: 'Nâng cao',
+        text: 'Tổng của hai số là 45. Số thứ nhất gấp 4 lần số thứ hai. Tìm số thứ hai.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: <strong>tổng</strong> hai số là 45; số thứ nhất <strong>gấp 4 lần</strong> số thứ hai (đây là <strong>tỉ số</strong>).<br><br>Đề hỏi: số thứ hai.' },
+          { t: 'Kiến thức cần dùng', b: 'Dạng toán "Tổng - Tỉ": nếu số lớn gấp n lần số bé, ta coi số bé là <strong>1 phần</strong> thì số lớn là <strong>n phần</strong>, tổng cộng có (n+1) phần bằng tổng hai số.<br><br>Ví dụ dễ hơn: tổng 12, số lớn gấp 3 lần số bé → có 3+1=4 phần bằng nhau, mỗi phần = 12:4=3, số bé=3, số lớn=9.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính tổng số phần bằng nhau: 4 + 1 = 5 phần (vì số thứ nhất là 4 phần, số thứ hai là 1 phần).<br><br>Bước 2: Lấy tổng hai số (45) chia cho tổng số phần (5), ra giá trị của 1 phần — đó chính là số thứ hai.<br><br>Bước 3: Thử lại: số thứ nhất = số thứ hai × 4, cộng với số thứ hai phải ra đúng 45.' },
+        ],
+        solution: 'Tổng số phần bằng nhau là: 4 + 1 = 5 (phần). Số thứ hai là: 45 : 5 = <strong>9</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Trung bình cộng của ba số là 24. Biết số thứ nhất là 20, số thứ hai là 22. Tìm số thứ ba.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: trung bình cộng của <strong>3 số</strong> là 24; số thứ nhất <strong>20</strong>, số thứ hai <strong>22</strong>.<br><br>Đề hỏi: số thứ ba.' },
+          { t: 'Kiến thức cần dùng', b: 'Vì trung bình cộng = tổng : số lượng các số, nên ngược lại: <strong>tổng = trung bình cộng × số lượng các số</strong>.<br><br>Ví dụ dễ hơn: trung bình cộng của 2 số là 5, vậy tổng 2 số là 5×2=10.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính tổng của cả ba số: lấy trung bình cộng (24) nhân với 3.<br><br>Bước 2: Lấy tổng ba số vừa tìm được, <strong>trừ</strong> đi số thứ nhất và số thứ hai đã biết.<br><br>Bước 3: Kết quả còn lại chính là số thứ ba.' },
+        ],
+        solution: 'Tổng ba số là: 24 × 3 = 72. Số thứ ba là: 72 − 20 − 22 = <strong>30</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Người ta trồng cây dọc một con đường dài 100m, cứ cách 10m trồng một cây, trồng ở cả hai đầu đường. Hỏi trồng được bao nhiêu cây?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: đường dài <strong>100m</strong>; khoảng cách giữa 2 cây liền nhau là <strong>10m</strong>; trồng ở <strong>cả hai đầu</strong> đường.<br><br>Đề hỏi: số cây trồng được.' },
+          { t: 'Kiến thức cần dùng', b: 'Đây là dạng "toán trồng cây" quen thuộc. Số khoảng cách trên đường = độ dài đường : khoảng cách mỗi đoạn. Nếu trồng ở <strong>cả hai đầu</strong> thì số cây = số khoảng cách <strong>+ 1</strong> (vì cây đầu tiên không nằm sau một khoảng cách nào).<br><br>Ví dụ dễ hơn: đường dài 20m, cách 5m trồng 1 cây, trồng cả 2 đầu: có 20:5=4 khoảng cách, số cây = 4+1 = 5 cây.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính số khoảng cách trên đường: lấy độ dài đường chia cho khoảng cách mỗi đoạn (100:10).<br><br>Bước 2: Vì trồng cả hai đầu, lấy số khoảng cách vừa tìm được <strong>cộng thêm 1</strong>.<br><br>Bẫy hay mắc: nếu đề nói chỉ trồng một đầu (đầu kia không trồng) thì không cộng thêm 1 — phải đọc kỹ đề bài mỗi lần.' },
+        ],
+        solution: 'Số khoảng cách trên đường là: 100 : 10 = 10 (khoảng). Vì trồng cả hai đầu nên số cây trồng được là: 10 + 1 = <strong>11 cây</strong>.',
+      },
     ],
     5: [
       {
@@ -926,6 +1046,36 @@
           { t: 'Hướng làm bài này', b: 'Bước 1: Viết phần bể mỗi vòi chảy được trong 1 giờ.<br><br>Bước 2: Quy đồng mẫu số rồi cộng hai phân số lại.<br><br>Bước 3: Lấy <strong>1 chia cho</strong> phân số vừa tìm (chia phân số = nhân với phân số đảo ngược).<br><br>Bước 4: Đổi kết quả ra giờ và phút cho dễ hiểu (0,4 giờ = 0,4 × 60 phút).<br><br>Bước 5: Kiểm tra — đáp án phải <strong>nhỏ hơn 4 giờ</strong>.' },
         ],
         solution: 'Mỗi giờ vòi 1 chảy được 1/6 bể, vòi 2 chảy được 1/4 bể. Cả hai vòi mỗi giờ chảy được: 1/6 + 1/4 = 5/12 (bể). Thời gian chảy đầy bể là: 1 : 5/12 = 12/5 = 2,4 giờ = <strong>2 giờ 24 phút</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một ô tô đi với vận tốc 45 km/giờ trong 3 giờ. Hỏi ô tô đi được quãng đường bao nhiêu ki-lô-mét?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: vận tốc <strong>45 km/giờ</strong>; thời gian đi là <strong>3 giờ</strong>.<br><br>Đề hỏi: quãng đường đi được.' },
+          { t: 'Kiến thức cần dùng', b: 'Công thức chuyển động đều: <strong>Quãng đường = Vận tốc × Thời gian</strong> (S = v × t).<br><br>Ví dụ dễ hơn: xe đi vận tốc 40km/giờ trong 2 giờ thì đi được 40×2=80km.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định vận tốc (45 km/giờ) và thời gian (3 giờ) — đơn vị thời gian phải khớp với đơn vị trong vận tốc (đều là "giờ").<br><br>Bước 2: Lấy vận tốc <strong>nhân</strong> với thời gian.<br><br>Bước 3: Viết đơn vị "km" vào đáp số.' },
+        ],
+        solution: 'Quãng đường ô tô đi được là: 45 × 3 = <strong>135km</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một lớp có số học sinh giỏi là 9 bạn, chiếm 30% số học sinh cả lớp. Hỏi lớp đó có bao nhiêu học sinh?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: <strong>9 bạn</strong> học sinh giỏi ứng với <strong>30%</strong> số học sinh cả lớp.<br><br>Đề hỏi: cả lớp có bao nhiêu học sinh (đi tìm 100%, tức là tổng số học sinh).' },
+          { t: 'Kiến thức cần dùng', b: 'Đây là dạng toán ngược của tìm tỉ số phần trăm: biết một phần và tỉ số phần trăm của phần đó so với tổng, muốn tìm tổng thì lấy phần đã biết <strong>chia cho tỉ số phần trăm rồi nhân với 100</strong>.<br><br>Công thức: Tổng = (Phần đã biết : Tỉ số phần trăm) × 100.<br><br>Ví dụ dễ hơn: 20% của một số là 8, vậy số đó là (8:20)×100=40.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Lấy số học sinh giỏi (9) chia cho 30.<br><br>Bước 2: Lấy kết quả đó nhân với 100, ra tổng số học sinh cả lớp.<br><br>Bước 3: Thử lại: 30% của kết quả vừa tìm được có đúng bằng 9 không.' },
+        ],
+        solution: 'Số học sinh cả lớp là: 9 : 30 × 100 = <strong>30 học sinh</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một hình tam giác có đáy dài 12cm, chiều cao 8cm. Hỏi diện tích hình tam giác đó là bao nhiêu xăng-ti-mét vuông?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hình tam giác có đáy <strong>12cm</strong>, chiều cao <strong>8cm</strong>.<br><br>Đề hỏi: diện tích hình tam giác.' },
+          { t: 'Kiến thức cần dùng', b: 'Công thức tính diện tích hình tam giác: <strong>Diện tích = (đáy × chiều cao) : 2</strong>.<br><br>Ví dụ dễ hơn: tam giác đáy 6cm, cao 4cm có diện tích (6×4):2=12cm².' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Lấy đáy <strong>nhân</strong> với chiều cao: 12 × 8.<br><br>Bước 2: Lấy kết quả đó <strong>chia cho 2</strong> (đừng quên bước chia 2 — đây là bẫy hay mắc nhất).<br><br>Bước 3: Viết đơn vị "cm²" vào đáp số.' },
+        ],
+        solution: 'Diện tích hình tam giác là: (12 × 8) : 2 = <strong>48cm²</strong>.',
       },
     ],
   };
