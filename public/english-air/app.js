@@ -86,7 +86,7 @@ const DEFAULTS = {
   goal: 30, goalDay: "", todayXp: 0,
   weekXp: 0, weekStart: "", tier: 0,
   joined: today(), sound: true, motion: false, showVi: true, theme: "",
-  kidVoice: true, khauHinh: true,
+  kidVoice: true,
   ten: "",
   // Đang mở sẵn hết bài để thầy kiểm tra nội dung. Khi nào cần học lần lượt
   // trở lại thì đổi về false — ai đã tự gạt công tắc thì giữ lựa chọn của họ.
@@ -2390,11 +2390,7 @@ function diemDoc(nghe, mau) {
   return Math.max(0, Math.round((1 - d / Math.max(a.length, b.length)) * 100));
 }
 
-/* ═══════════ CÁCH CŨ: CHO CHẠY VIDEO ═══════════
-   Thân người cử động đẹp hơn, nhưng miệng máy theo lời trong video chứ không
-   theo lời đang đọc. Thầy tự chọn trong Hồ sơ → Cài đặt.
-   (phần cũ giữ nguyên, chỉ đổi tên hàm cho khỏi đụng)
-   VIDEO NHÂN VẬT ═══════════
+/* ═══════════ VIDEO NHÂN VẬT ═══════════
    Có video thì MON.L cử động cả người; không có thì vẫn là ảnh tĩnh cộng lớp
    miệng như cũ — thả video vào lúc nào cũng được, không thả cũng không vỡ. */
 const VIDEO_MON = { noi: "assets/mon-noi.mp4", cho: "assets/mon-cho.mp4" };
@@ -2405,7 +2401,7 @@ const KHUNG_YEN = 2.083;
 const coVideo = {};
 
 let daDoVideo = false;
-function doVideoMonPhim() {
+function doVideoMon() {
   const v = $("#monVid");
   if (!v || daDoVideo) return;
   daDoVideo = true;
@@ -2416,7 +2412,7 @@ function doVideoMonPhim() {
     // Chỉ nhận khi trình duyệt thật sự đọc được, chứ không chỉ vì file tồn tại.
     thu.addEventListener("loadedmetadata", () => {
       coVideo[ten] = duong;
-      batVideoPhim();
+      batVideo();
     }, { once: true });
     thu.addEventListener("error", () => {}, { once: true });
     thu.src = duong;
@@ -2439,13 +2435,13 @@ function gacVideo(v) {
   });
 }
 
-function batVideoPhim() {
+function batVideo() {
   const v = $("#monVid");
   if (!v || (!coVideo.noi && !coVideo.cho)) return;
   gacVideo(v);
   document.querySelector(".scene-fit").classList.add("co-video");
   v.hidden = false;
-  datVideoPhim(false);
+  datVideo(false);
 }
 
 /** Chuyển giữa vòng nói và vòng chờ. Chỉ có một video thì dùng cho cả hai. */
@@ -2453,7 +2449,7 @@ let videoDang = null;
 let hoiTua = null;
 let videoDangNoi = false;   // đang trong lúc MON.L nói, video phải chạy liên tục
 let daGacVideo = false;
-function datVideoPhim(dangNoi) {
+function datVideo(dangNoi) {
   const v = $("#monVid");
   if (!v || v.hidden) return;
   const muon = (dangNoi ? coVideo.noi : coVideo.cho) || coVideo.cho || coVideo.noi;
@@ -2496,118 +2492,6 @@ function datVideoPhim(dangNoi) {
   v.loop = true;
   // play() có thể bị chặn nếu người dùng chưa chạm màn hình — bỏ qua cho êm.
   v.play().catch(() => {});
-}
-
-
-/* ═══════════ MẬT MON.L: NỀN TĨNH + KHẨU HÌNH ═══════════
-   Video quay sẵn thì miệng máy theo lời TRONG VIDEO, không theo lời đang đọc —
-   nhép loạn, không bao giờ chuẩn được. Nên nền là một khung tĩnh cắt từ chính
-   video đó (khung 50: miệng ngậm, mắt mở, hai tay đưa ra chào), còn miệng là
-   những miếng rời cũng cắt ra từ video, đắp chồng lên đúng chỗ cũ. Đọc tới chữ
-   nào thì đắp khẩu hình của chữ đó. */
-const ANH_CANH = "assets/mon-canh.webp";
-/* Ô miệng trong khung gốc 768x1344 — cắt ra chỗ nào thì đắp lại đúng chỗ đó. */
-const O_MOI = { x: 240, y: 330, w: 290, h: 260, W: 768, H: 1344 };
-const KHAU_HINH = ["he", "tron", "rang", "vua", "to", "cuoi"];
-
-let daDoCanh = false;
-/** Bật khớp khẩu hình thì miệng đúng nhưng thân đứng yên; tắt thì thân cử động
-    nhưng miệng máy theo video. Không có cách nào được cả hai. */
-function dungKhauHinh() { return S.khauHinh !== false; }
-
-function doVideoMon() {              // giữ tên cũ để các chỗ gọi không phải sửa
-  if (!dungKhauHinh()) { doVideoMonPhim(); return; }
-  if (daDoCanh) return;
-  daDoCanh = true;
-  const anh = new Image();
-  anh.addEventListener("load", () => {
-    const c = $("#monCanh");
-    if (!c) return;
-    c.src = ANH_CANH;
-    c.hidden = false;
-    document.querySelector(".scene-fit").classList.add("co-canh");
-    datOMoi();
-    // Nạp sẵn từng khẩu hình, không thì chữ đầu tiên đắp vào bị trống một nhịp.
-    KHAU_HINH.forEach((k) => { new Image().src = "assets/moi-" + k + ".webp"; });
-  }, { once: true });
-  anh.addEventListener("error", () => {}, { once: true });
-  anh.src = ANH_CANH;
-}
-function batVideo() {
-  if (!dungKhauHinh()) { batVideoPhim(); return; }
-  doVideoMon(); datOMoi();
-}
-
-/** Nền phủ kín kiểu cover nên phải tự tính miếng miệng rơi vào đâu trên màn. */
-function datOMoi() {
-  const khung = document.querySelector(".scene-fit");
-  const moi = $("#monMoi");
-  if (!khung || !moi) return;
-  const r = khung.getBoundingClientRect();
-  if (!r.width) return;
-  const s = Math.max(r.width / O_MOI.W, r.height / O_MOI.H);
-  const lechX = (r.width - O_MOI.W * s) / 2;
-  const lechY = (r.height - O_MOI.H * s) / 2;
-  moi.style.left = (lechX + O_MOI.x * s) + "px";
-  moi.style.top = (lechY + O_MOI.y * s) + "px";
-  moi.style.width = (O_MOI.w * s) + "px";
-  moi.style.height = (O_MOI.h * s) + "px";
-}
-addEventListener("resize", datOMoi);
-
-/* ----- Chữ nào thì khẩu hình nào -----
-   Để trống là ngậm miệng: m, b, p bắt buộc phải khép môi mới kêu được. */
-const KHAU_CUA_CHU = {
-  a: "to", e: "cuoi", i: "he", y: "he", o: "tron", u: "tron",
-  m: "", b: "", p: "",
-  f: "rang", v: "rang", s: "rang", x: "rang", z: "rang", j: "rang",
-  t: "rang", d: "rang", n: "rang", l: "rang", r: "rang",
-  c: "vua", k: "vua", g: "vua", q: "tron", w: "tron", h: "he",
-};
-/** Một từ -> chuỗi khẩu hình. Gộp chữ liền nhau cùng khẩu hình làm một. */
-function khauCuaTu(tu) {
-  const ra = [];
-  deaccent(tu).split("").forEach((c) => {
-    if (!(c in KHAU_CUA_CHU)) return;
-    const k = KHAU_CUA_CHU[c];
-    if (ra.length && ra[ra.length - 1] === k) return;
-    ra.push(k);
-  });
-  return ra.slice(0, 7);
-}
-
-let henMoi = [];
-function xoaHenMoi() { henMoi.forEach(clearTimeout); henMoi = []; }
-function datKhau(ten) {
-  const moi = $("#monMoi");
-  if (!moi) return;
-  if (!ten) { moi.hidden = true; return; }
-  moi.src = "assets/moi-" + ten + ".webp";
-  moi.hidden = false;
-  datOMoi();
-}
-/** Nhép đúng một từ: chia thời gian của từ cho số khẩu hình trong từ đó. */
-function nhepTu(tu) {
-  if (!dungKhauHinh()) return;
-  xoaHenMoi();
-  const chuoi = khauCuaTu(tu);
-  if (!chuoi.length) { datKhau(""); return; }
-  const nhip = Math.max(55, Math.min(130, (90 + 52 * String(tu).length) / chuoi.length));
-  chuoi.forEach((k, i) => henMoi.push(setTimeout(() => datKhau(k), i * nhip)));
-  henMoi.push(setTimeout(() => datKhau(""), chuoi.length * nhip));
-}
-/** Lấy từ đang đọc từ vị trí ký tự mà trình duyệt báo. */
-function tuTaiViTri(cau, vt) {
-  const m = String(cau).slice(vt || 0).match(/^\S+/);
-  return m ? m[0] : "";
-}
-
-/** Giữ tên cũ. Không nói thì ngậm miệng lại. */
-function datVideo(dangNoi) {
-  if (!dungKhauHinh()) { datVideoPhim(dangNoi); return; }
-  if (dangNoi) return;
-  xoaHenMoi();
-  datKhau("");
 }
 
 function renderCall() {
@@ -2683,10 +2567,7 @@ function monSays(en, vi, after, py) {
     u.lang = L.tts;
     const v = voiceFor(L.tts); if (v) u.voice = v;
     u.rate = 0.94; u.pitch = S.kidVoice ? KID_PITCH : 1;
-    u.onboundary = (ev) => {
-      m.classList.remove("pulse"); void m.offsetWidth; m.classList.add("pulse");
-      nhepTu(tuTaiViTri(en, ev && ev.charIndex));
-    };
+    u.onboundary = () => { m.classList.remove("pulse"); void m.offsetWidth; m.classList.add("pulse"); };
     u.onend = done;
     u.onerror = done;
     speechSynthesis.speak(u);
@@ -3092,10 +2973,7 @@ $("#callPreview").addEventListener("click", () => {
     const u = new SpeechSynthesisUtterance(line.en);
     dungGiong(u, tiengCua(line.en)); apToc(u, 0.94);
     u.pitch = S.kidVoice ? KID_PITCH : 1;
-    u.onboundary = (ev) => {
-      box.classList.remove("pulse"); void box.offsetWidth; box.classList.add("pulse");
-      nhepTu(tuTaiViTri(line.en, ev && ev.charIndex));
-    };
+    u.onboundary = () => { box.classList.remove("pulse"); void box.offsetWidth; box.classList.add("pulse"); };
     u.onend = stop; u.onerror = stop;
     speechSynthesis.speak(u);
     setTimeout(stop, 1400 + line.en.length * 95);
@@ -4168,7 +4046,6 @@ function renderProfile() {
   $("#optMotion").checked = S.motion;
   $("#optVi").checked = S.showVi;
   $("#optKid").checked = S.kidVoice !== false;
-  $("#optKhau").checked = S.khauHinh !== false;
   $("#optMoHet").checked = !!S.moHet;
   paintRail();
 }
@@ -4179,12 +4056,6 @@ $("#optSound").addEventListener("change", e => { S.sound = e.target.checked; sav
 $("#optMotion").addEventListener("change", e => { S.motion = e.target.checked; save(); applyTheme(); });
 $("#optVi").addEventListener("change", e => { S.showVi = e.target.checked; save(); });
 $("#optKid").addEventListener("change", e => { S.kidVoice = e.target.checked; save(); });
-$("#optKhau").addEventListener("change", e => {
-  S.khauHinh = e.target.checked; save();
-  // Đổi kiểu là phải nạp lại: hai cách dùng hai bộ ảnh khác hẳn nhau.
-  toast(e.target.checked ? "Miệng sẽ khớp với chữ đang đọc." : "MON.L sẽ cử động cả người như cũ.");
-  setTimeout(() => location.reload(), 900);
-});
 /* Mỗi máy có sẵn một bộ giọng khác nhau, và giọng máy tự chọn không phải lúc nào
    cũng dễ nghe. Cho người dùng tự chọn, nghe thử ngay trong lúc chọn. */
 const CAU_THU = { en: "Good morning. Nice to meet you.", vi: "Chào bạn, hôm nay học gì nào?" };
