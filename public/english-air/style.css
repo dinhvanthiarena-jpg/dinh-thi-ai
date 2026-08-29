@@ -1331,7 +1331,10 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   display: grid; place-items: center; font-style: normal;
   background: var(--brand-fill); color: #fff; font-size: 1.02rem; font-weight: 900; }
 .thi-o span { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.thi-o strong { font-size: .98rem; font-weight: 900; }
+.thi-o strong { display: flex; align-items: center; gap: 6px; font-size: .98rem; font-weight: 900; }
+.thi-cefr { font-style: normal; padding: 2px 7px; border-radius: var(--rf);
+  background: var(--brand-soft); color: var(--brand-ink);
+  font-size: .68rem; font-weight: 900; letter-spacing: .03em; }
 .thi-o small { font-size: .8rem; font-weight: 600; color: var(--muted-fg); margin-top: 1px; }
 .thi-diem { flex: none; padding: 5px 10px; border-radius: var(--rf);
   font-size: .82rem; font-weight: 900; }

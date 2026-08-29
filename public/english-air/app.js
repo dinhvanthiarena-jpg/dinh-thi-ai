@@ -3552,11 +3552,28 @@ gacCua();
    Mỗi ngày một đề mới, nhưng trong cùng một ngày thì đề GIỮ NGUYÊN — làm dở
    thoát ra vào lại vẫn đúng đề đó, không phải đề khác. Muốn vậy phải sinh đề
    từ một hạt giống cố định theo ngày, chứ không dùng ngẫu nhiên thường. */
+/* Ba cấp theo chuẩn Cambridge YLE cho thiếu nhi — Starters (Pre-A1),
+   Movers (A1), Flyers (A2). Giữ đúng các DẠNG BÀI của kỳ thi thật:
+   nghe chọn tranh, đọc rồi tick đúng/sai, sắp chữ cái thành từ, điền từ
+   vào chỗ trống, nối từ. Số câu rút bớt cho vừa một lượt học trên điện thoại. */
 const MUC_THI = [
-  { ma: "de",  ten: "Dễ",  mo: "20 câu · chọn nghĩa và nghe",       so: 20, kieu: ["choice", "reverse", "listen", "picture"] },
-  { ma: "vua", ten: "Vừa", mo: "30 câu · thêm điền từ và đúng/sai",  so: 30, kieu: ["choice", "reverse", "listen", "picture", "truefalse", "blanks"] },
-  { ma: "kho", ten: "Khó", mo: "40 câu · thêm tự viết và ghép chữ",  so: 40, kieu: ["reverse", "listen", "truefalse", "blanks", "type", "ghepChu"] },
+  {
+    ma: "starters", ten: "Starters", cefr: "Pre-A1",
+    mo: "20 câu · nghe chọn tranh, tick đúng sai, sắp chữ cái",
+    so: 20, kieu: ["picture", "listen", "truefalse", "ghepChu", "choice"],
+  },
+  {
+    ma: "movers", ten: "Movers", cefr: "A1",
+    mo: "30 câu · thêm điền từ vào chỗ trống và nối từ",
+    so: 30, kieu: ["picture", "listen", "truefalse", "ghepChu", "choice", "reverse", "blanks"],
+  },
+  {
+    ma: "flyers", ten: "Flyers", cefr: "A2",
+    mo: "40 câu · thêm tự viết từ, câu dài hơn",
+    so: 40, kieu: ["listen", "truefalse", "ghepChu", "reverse", "blanks", "type", "picture"],
+  },
 ];
+
 
 /** Bộ sinh số giả ngẫu nhiên có hạt giống — cùng hạt thì cùng dãy số. */
 function mayNgau(hat) {
@@ -3683,12 +3700,12 @@ function xongDeThi() {
   $("#resAcc").textContent = pc + "%";
   $("#resXp").textContent = xp;
   $("#resTitle").textContent =
-    pc >= 90 ? "Xuất sắc! Đề " + t.ten.toLowerCase() + " không làm khó được bạn."
+    pc >= 90 ? "Xuất sắc! Đề " + t.ten + " không làm khó được bạn."
     : pc >= 70 ? "Khá lắm! Còn vài chỗ nữa là trọn vẹn."
     : pc >= 50 ? "Qua rồi, nhưng nên ôn lại mấy chỗ sai."
     : "Chưa đạt. Học lại vài bài rồi thi tiếp nhé.";
   $("#resSub").hidden = false;
-  $("#resSub").textContent = "Đề " + t.ten.toLowerCase() + " · đúng " + t.dung + "/" + t.tong + " câu";
+  $("#resSub").textContent = "Đề " + t.ten + " · đúng " + t.dung + "/" + t.tong + " câu";
 }
 
 function moManThi() {
@@ -3698,7 +3715,9 @@ function moManThi() {
     const b = el("button", "thi-o" + (kq ? " xong" : ""));
     b.type = "button";
     const txt = el("span");
-    txt.append(el("strong", null, m.ten), el("small", null, m.mo));
+    const ten = el("strong");
+    ten.append(document.createTextNode(m.ten), el("em", "thi-cefr", m.cefr));
+    txt.append(ten, el("small", null, m.mo));
     b.append(el("i", "thi-ma", m.ten[0]), txt);
     if (kq) {
       const pc = Math.round((kq.diem / kq.tong) * 100);
@@ -3715,7 +3734,7 @@ function moManThi() {
 
   openSheet({
     title: "Đề thi hôm nay",
-    body: "Mỗi ngày một đề mới. Trong ngày làm lại thì vẫn đúng đề đó.",
+    body: "Ba cấp theo chuẩn Cambridge cho thiếu nhi. Mỗi ngày một đề mới; trong ngày làm lại vẫn đúng đề đó.",
     no: "Đóng",
     slot: box,
   });
@@ -3992,7 +4011,7 @@ $("#btnLevel").addEventListener("click", () => {
     });
     box.append(b);
   });
-  const thi = el("button", "btn btn-primary btn-block mt", "Làm đề thi hôm nay");
+  const thi = el("button", "btn btn-primary btn-block mt", "Đề thi Cambridge hôm nay");
   thi.type = "button";
   thi.addEventListener("click", () => { closeSheet(); moManThi(); });
   box.append(thi);
