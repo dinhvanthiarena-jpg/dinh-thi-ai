@@ -977,7 +977,11 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 /* Bóng nói kiểu truyện tranh, luôn sáng để đọc được trên nền ảnh. */
 .call-bubble {
-  position: relative; width: 100%; padding: var(--s4); border-radius: 22px;
+  /* Bảng trắng ôm lấy chữ chứ không kéo hết bề ngang: câu ngắn mà bảng dài cả
+     màn hình thì che mất MON.L một cách vô cớ. */
+  position: relative; align-self: center;
+  width: fit-content; max-width: 100%;
+  padding: var(--s3) var(--s4); border-radius: 20px;
   background: rgba(255,255,255,.95); color: var(--callink);
   box-shadow: 0 14px 34px rgba(0,0,0,.32); text-align: center;
 }
@@ -986,7 +990,8 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   transform: translateX(-50%) rotate(45deg); border-radius: 5px;
   background: rgba(255,255,255,.95);
 }
-.call-bubble b { display: block; font-size: 1.18rem; font-weight: 800; line-height: 1.42; color: var(--callink); }
+.call-bubble b { display: block; font-size: 1.12rem; font-weight: 800; line-height: 1.34;
+  color: var(--callink); text-wrap: balance; }
 .call-bubble small { display: block; margin-top: var(--s1); color: #5B4A73; font-size: .88rem; font-weight: 600; }
 .call-lab { display: block; font-size: .7rem; font-weight: 900; letter-spacing: .08em;
   text-transform: uppercase; color: #6D28D9; margin-bottom: var(--s1); }
