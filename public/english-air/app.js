@@ -2453,11 +2453,12 @@ function datVideo(dangNoi) {
     // khung 0 là MON.L há mồm ra giữa lúc đang nghe. Thử lại vài nhịp cho chắc.
     clearInterval(hoiTua);
     let lan = 0;
+    // Canh suốt chứ không tắt ngay khi tua trúng một lần: video có thuộc tính
+    // loop, nên cú "hết bài, quay về đầu" đang chờ sẵn sẽ kéo nó về khung 0
+    // NGAY SAU khi mình tua xong. Tắt sớm là dính đúng cái bẫy đó.
     hoiTua = setInterval(() => {
-      if (!v.paused || Math.abs(v.currentTime - KHUNG_YEN) < 0.12 || ++lan > 14) {
-        clearInterval(hoiTua); hoiTua = null; return;
-      }
-      dat();
+      if (!v.paused || ++lan > 30) { clearInterval(hoiTua); hoiTua = null; return; }
+      if (Math.abs(v.currentTime - KHUNG_YEN) > 0.12) dat();
     }, 110);
     return;
   }
