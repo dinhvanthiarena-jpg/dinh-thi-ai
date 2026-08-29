@@ -92,6 +92,7 @@ const DEFAULTS = {
   // trở lại thì đổi về false — ai đã tự gạt công tắc thì giữ lựa chọn của họ.
   moHet: true,
   thi: {},   // kết quả đề thi theo ngày
+  xemThu: false,   // đã chọn xem thử trước khi đăng ký
   // Giọng người dùng tự chọn, theo gốc ngôn ngữ: { en: "...", vi: "..." }
   giong: {},
   // Ảnh đại diện: {k:"m"} linh vật, {k:"e",i:<số>} mặt vui, {k:"a",d:"data:…"} ảnh tự tải
@@ -3377,6 +3378,16 @@ function dongCong() {
   document.body.style.overflow = "";
 }
 
+/* Cửa đăng ký trước đây không có lối ra nào — ai chưa muốn đăng ký thì kẹt luôn,
+   chẳng xem được app có gì mà quyết. Cho vào xem thử, tiến độ vẫn giữ trên máy,
+   chỉ là chưa đồng bộ lên tài khoản. */
+$("#congXemThu").addEventListener("click", () => {
+  S.xemThu = true;
+  save();
+  dongCong();
+  toast("Cứ xem thoải mái. Đăng ký lúc nào cũng được ở mục Hồ sơ.");
+});
+
 $("#congDoi").addEventListener("click", () => {
   TK.kieu = TK.kieu === "dangKy" ? "dangNhap" : "dangKy";
   veCong();
@@ -3453,13 +3464,23 @@ function veTheTaiKhoan() {
   const the = $("#tkThe");
   if (!the) return;
   const t = TK.toi;
-  if (!t || !t.dangNhap) { the.hidden = true; return; }
+  if (!t || !t.dangNhap) {
+    // Đang xem thử thì mời đăng ký ngay tại đây, đừng để họ quên mất.
+    the.hidden = false;
+    $("#tkTen").textContent = "Chưa có tài khoản";
+    $("#tkSdt").textContent = "Đăng ký để giữ tiến độ trên mọi máy";
+    $("#btnThoat").textContent = "Đăng ký";
+    return;
+  }
+  $("#btnThoat").textContent = "Đăng xuất";
   the.hidden = false;
   $("#tkTen").textContent = t.ten || "Tài khoản của bạn";
   $("#tkSdt").textContent = t.sdt || t.email || "";
 }
 
-$("#btnThoat").addEventListener("click", () => openSheet({
+$("#btnThoat").addEventListener("click", () => {
+  if (!TK.toi || !TK.toi.dangNhap) { TK.kieu = "dangKy"; moCong(); return; }
+  openSheet({
   title: "Đăng xuất?",
   body: "Tiến độ học vẫn nằm trên máy này. Đăng nhập lại lúc nào cũng được.",
   yes: "Đăng xuất",
@@ -3474,7 +3495,8 @@ $("#btnThoat").addEventListener("click", () => openSheet({
     veTheTaiKhoan();
     moCong();
   },
-}));
+  });
+});
 
 /* ĐĂNG NHẬP BẰNG GMAIL
    Ai đã có Gmail thì khỏi phải nghĩ mật khẩu mới. Máy chủ tự hỏi Google xem tấm
@@ -3539,7 +3561,7 @@ async function batGoogle() {
 async function gacCua() {
   const t = await hoiTaiKhoan();
   veTheTaiKhoan();
-  if (t.dangNhap || t.ngoaiTuyen) {
+  if (t.dangNhap || t.ngoaiTuyen || S.xemThu) {
     if (t.dangNhap && t.ten && !S.ten) { S.ten = t.ten; save(); veTen(); }
     if (t.dangNhap) keoVe();
     return;
