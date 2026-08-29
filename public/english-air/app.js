@@ -2394,8 +2394,10 @@ function diemDoc(nghe, mau) {
    Có video thì MON.L cử động cả người; không có thì vẫn là ảnh tĩnh cộng lớp
    miệng như cũ — thả video vào lúc nào cũng được, không thả cũng không vỡ. */
 const VIDEO_MON = { noi: "assets/mon-noi.mp4", cho: "assets/mon-cho.mp4" };
-/* Giây đứng yên trong video nói — khung nào miệng ngậm nhất thì dừng ở đó. */
-const KHUNG_YEN = 0;
+/* Giây đứng yên trong video nói. Không phải giây 0: ngay đầu video MON.L đang
+   há miệng to, hai tay buông thõng — dừng ở đó thì trông như bị đơ giữa câu.
+   Giây 2,083 (khung 50) là lúc miệng ngậm, mắt mở, hai tay đưa ra chào. */
+const KHUNG_YEN = 2.083;
 const coVideo = {};
 
 let daDoVideo = false;
