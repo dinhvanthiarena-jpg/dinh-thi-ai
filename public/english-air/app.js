@@ -34,6 +34,10 @@ const pic  = id => svgUse("p-" + id, "0 0 48 48");
    assets/mascot.png thì tự thay toàn bộ sang ảnh đó — không có file cũng
    không vỡ giao diện, nên thả ảnh vào lúc nào cũng được.                */
 const MASCOT_SRC = "assets/mascot.png";
+/* Ô tròn nhỏ (ảnh đại diện, dấu hiệu thương hiệu…) dùng logo tròn; chỗ nào
+   cần cả người thì vẫn là ảnh nhân vật đứng. */
+const AVATAR_SRC = "assets/avatar.webp";
+const anhCuaO = kind => (kind === "full" ? MASCOT_SRC : AVATAR_SRC);
 
 function useMascotImage() {
   const probe = new Image();
@@ -46,8 +50,9 @@ function useMascotImage() {
 /** Đổi một ô linh vật SVG thành thẻ ảnh, giữ nguyên kích thước ô. */
 function swapMascot(box) {
   if (box.querySelector("img")) return;
-  const img = el("img", "mascot-img mascot-" + (box.dataset.mascot || "head"));
-  img.src = MASCOT_SRC;
+  const kind = box.dataset.mascot || "head";
+  const img = el("img", "mascot-img mascot-" + kind);
+  img.src = anhCuaO(kind);
   img.alt = "";
   img.decoding = "async";
   box.textContent = "";

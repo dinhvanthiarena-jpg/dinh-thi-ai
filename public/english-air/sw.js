@@ -3,7 +3,7 @@
    Toàn bộ app chạy offline sau lần mở đầu tiên.
    Đổi CACHE khi sửa file để buộc tải lại bản mới.
    ============================================================ */
-const CACHE = "english-air-v112";
+const CACHE = "english-air-v113";
 
 const SHELL = [
   "./",
@@ -21,6 +21,7 @@ const SHELL = [
   "./icons/icon-maskable-512.png",
   "./icons/apple-touch-icon.png",
   "./assets/mascot.png",
+  "./assets/avatar.webp",
   "./assets/mon-room.jpg",
   "./assets/mon-closed.png",
   "./assets/mon-mouth.png",
