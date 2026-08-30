@@ -3069,6 +3069,7 @@
     const btnHangup = $('btnHangup');
     const btnCallSkip = $('btnCallSkip');
     const callVidEl = $('callVid');
+    const callVidIdleEl = $('callVidIdle');
 
     // Toạ độ % của Mon trong assets/monl/mon-room.jpg — cùng con số với
     // english-air, vì dùng chung đúng file ảnh đó. scene-fit tính lại
@@ -3100,129 +3101,91 @@
     window.addEventListener('resize', fitCallScene);
     window.addEventListener('orientationchange', () => setTimeout(fitCallScene, 120));
 
-    // Video thật của Mon (assets/monl/mon-noi.mp4) — quay sẵn cùng cảnh
-    // phòng mon-room.jpg, ported từ app tiếng Anh (dùng chung đúng file đó).
-    // Tải được thì thay hẳn ảnh phòng tĩnh + .call-mon; không tải được (mạng
-    // yếu, trình duyệt cũ) thì im lặng bỏ qua, lớp ảnh tĩnh + miệng ghép sẵn
-    // vẫn chạy y như trước — không có gì vỡ.
-    const CALL_VIDEO_SRC = 'assets/monl/mon-noi.mp4';
-    // Giây đứng yên trong video: đầu video Mon đang há miệng to, tay buông
-    // thõng — dừng ở giây 2,083 (khung 50) là lúc miệng ngậm, mắt mở, tay
-    // đưa ra chào. Cùng con số với app tiếng Anh vì dùng chung một file.
-    const CALL_VIDEO_HOLD = 2.083;
+    // Hai video thật của Mon: một video khi ĐANG NÓI (mon-noi.mp4, loop
+    // liên tục khi Mon phát biểu) và một video khi ĐANG YÊN LẶNG/NGHE
+    // (mon-doi.mp4, loop nhẹ nhàng lúc chờ hoặc nghe cậu nói) — quay sẵn
+    // cùng cảnh phòng mon-room.jpg. Chuyển qua lại bằng cách ẩn/hiện +
+    // play/pause chứ không dừng cứng ở một khung hình như bản trước, nhìn
+    // tự nhiên hơn hẳn. Tải được cả hai thì thay hẳn ảnh phòng tĩnh +
+    // .call-mon; không tải được (mạng yếu, trình duyệt cũ) thì im lặng bỏ
+    // qua, lớp ảnh tĩnh + miệng ghép sẵn vẫn chạy y như trước.
+    const CALL_VIDEO_TALK_SRC = 'assets/monl/mon-noi.mp4';
+    const CALL_VIDEO_IDLE_SRC = 'assets/monl/mon-doi.mp4';
     let callVideoTried = false;
     let callVideoOk = false;
-    let callVideoGuarded = false;
     let callVideoTalking = false;
-    let callVideoRetryId = null;
-    let callVideoHoldHandler = null;
     let callVideoLoopHandler = null;
-    // Sau lần đầu tiên video đã thật sự PHÁT (không còn ở giây 0 tinh),
-    // set currentTime thẳng ăn chắc luôn — chỉ lần đầu tiên (video chưa
-    // từng phát) mới cần "mẹo" chạy nhanh rồi phanh ở dưới.
-    let callVideoEverPlayed = false;
+    let callVideoLoopHandlerEl = null;
 
-    function callProbeVideo() {
-      if (callVideoTried || !callVidEl) return;
-      callVideoTried = true;
-      const probe = document.createElement('video');
-      probe.muted = true;
-      probe.preload = 'metadata';
-      probe.addEventListener('loadedmetadata', () => { callVideoOk = true; callActivateVideo(); }, { once: true });
-      probe.addEventListener('error', () => {}, { once: true });
-      probe.src = CALL_VIDEO_SRC;
+    function callProbeOne(src) {
+      return new Promise((resolve) => {
+        const probe = document.createElement('video');
+        probe.muted = true;
+        probe.preload = 'metadata';
+        probe.addEventListener('loadedmetadata', () => resolve(true), { once: true });
+        probe.addEventListener('error', () => resolve(false), { once: true });
+        probe.src = src;
+      });
     }
-    function callGuardVideo(v) {
-      if (callVideoGuarded) return;
-      callVideoGuarded = true;
-      // Trình duyệt tự DỪNG video khi vòng lại về đầu thay vì loop mượt —
-      // đo trên máy thật: video dài ngắn hơn câu nói thì Mon đứng há mồm
-      // im re giữa câu nếu không tự canh mà phát tiếp.
-      v.addEventListener('pause', () => { if (callVideoTalking) v.play().catch(() => {}); });
+    function callProbeVideo() {
+      if (callVideoTried || !callVidEl || !callVidIdleEl) return;
+      callVideoTried = true;
+      Promise.all([callProbeOne(CALL_VIDEO_TALK_SRC), callProbeOne(CALL_VIDEO_IDLE_SRC)]).then(([okTalk, okIdle]) => {
+        if (!okTalk || !okIdle) return; // 1 trong 2 lỗi thì bỏ hẳn video, giữ ảnh tĩnh như cũ
+        callVideoOk = true;
+        callActivateVideo();
+      });
+    }
+    // Trình duyệt tự DỪNG video khi vòng lại về đầu thay vì loop mượt — đo
+    // trên máy thật: video dài ngắn hơn câu nói thì Mon đứng há mồm im re
+    // giữa câu nếu không tự canh mà phát tiếp. isTalkVideo cho biết video
+    // này chỉ nên đang phát khi callVideoTalking đúng bằng giá trị đó.
+    function callGuardVideo(v, isTalkVideo) {
+      v.addEventListener('pause', () => { if (callVideoTalking === isTalkVideo) v.play().catch(() => {}); });
       v.addEventListener('ended', () => {
-        if (!callVideoTalking) return;
+        if (callVideoTalking !== isTalkVideo) return;
         try { v.currentTime = 0.04; } catch (e) {}
         v.play().catch(() => {});
       });
     }
     function callActivateVideo() {
-      if (!callVideoOk || !callVidEl) return;
-      callGuardVideo(callVidEl);
+      if (!callVideoOk) return;
+      callGuardVideo(callVidEl, true);
+      callGuardVideo(callVidIdleEl, false);
       sceneFitEl.classList.add('co-video');
-      callVidEl.hidden = false;
-      callVidEl.src = CALL_VIDEO_SRC;
+      callVidEl.src = CALL_VIDEO_TALK_SRC;
+      callVidIdleEl.src = CALL_VIDEO_IDLE_SRC;
       callSetVideoTalking(false);
     }
-    // Chuyển video giữa "đang nói" (loop liên tục) và "đứng yên" (dừng cứng
-    // ở khung miệng ngậm, chỉ còn nhịp thở rất nhẹ do CSS — dừng trơ ra thì
-    // trông như ảnh chụp bị đơ).
-    //
-    // Set currentTime thẳng trên video CHƯA từng phát bị một số trình duyệt
-    // (đo được ngay trong lúc build) âm thầm bỏ qua — không lỗi, không sự
-    // kiện gì, cứ đứng nguyên ở giây 0. Cho phát thật một nhịp rồi dừng
-    // ĐÚNG LÚC bằng timeupdate thì luôn ăn chắc, nên dùng cách đó thay vì
-    // tua thẳng: tăng playbackRate cho đoạn chạy tới rất nhanh (không kịp
-    // giật hình), dừng lại ngay khi chạm khung cần giữ.
-    function callSetVideoTalking(talking) {
-      if (!callVideoOk || !callVidEl || callVidEl.hidden) return;
-      clearInterval(callVideoRetryId); callVideoRetryId = null;
-      if (callVideoHoldHandler) { callVidEl.removeEventListener('timeupdate', callVideoHoldHandler); callVideoHoldHandler = null; }
-      if (callVideoLoopHandler) { callVidEl.removeEventListener('timeupdate', callVideoLoopHandler); callVideoLoopHandler = null; }
-      if (!talking) {
-        callVidEl.classList.add('dung-yen');
-        callVideoTalking = false;
-        callVidEl.loop = false;
-        // Video đã phát ít nhất 1 lần rồi thì tua thẳng ăn chắc, không cần
-        // "mẹo" chạy nhanh (playbackRate=16) rồi phanh gấp nữa — cách đó
-        // nhìn giật vì lặp lại mỗi lần Mon nói xong MỘT câu trong cả cuộc.
-        if (callVideoEverPlayed) {
-          callVidEl.pause();
-          try { callVidEl.currentTime = CALL_VIDEO_HOLD; } catch (e) {}
-          callVidEl.playbackRate = 1;
-          return;
-        }
-        // Lần đầu tiên (video chưa từng phát): set currentTime thẳng không
-        // ăn ở một số trình duyệt (đo được lúc build) — phải chạy nhanh rồi
-        // phanh đúng lúc bằng timeupdate thì mới ăn chắc.
-        if (callVidEl.currentTime > CALL_VIDEO_HOLD + 0.05) { try { callVidEl.currentTime = 0; } catch (e) {} }
-        callVidEl.playbackRate = 16;
-        callVideoHoldHandler = () => {
-          if (callVidEl.currentTime >= CALL_VIDEO_HOLD) {
-            callVidEl.pause();
-            callVidEl.playbackRate = 1;
-            callVidEl.removeEventListener('timeupdate', callVideoHoldHandler);
-            callVideoHoldHandler = null;
-          }
-        };
-        callVidEl.addEventListener('timeupdate', callVideoHoldHandler);
-        callVidEl.play().catch(() => {});
-        // Dự phòng cho trình duyệt không bắn timeupdate đều đặn: tự dừng
-        // cứng trong nửa giây — vẫn còn hơn kẹt chạy mãi hoặc đứng ở giây 0.
-        let tries = 0;
-        callVideoRetryId = setInterval(() => {
-          if (callVidEl.paused || ++tries > 10) { clearInterval(callVideoRetryId); callVideoRetryId = null; return; }
-          if (callVidEl.currentTime >= CALL_VIDEO_HOLD) { callVidEl.pause(); callVidEl.playbackRate = 1; }
-        }, 60);
-        return;
+    // KHÔNG dùng loop=true gốc của trình duyệt — nhiều trình duyệt tự DỪNG
+    // video khi chạy hết rồi mới lặp lại, gây khựng hình rõ rệt mỗi lần lặp
+    // (15 giây/lần với video này). Tự canh gần hết video rồi tua ngược về
+    // đầu bằng tay (timeupdate) thì mượt hơn hẳn. Chỉ giữ MỘT handler đang
+    // hoạt động tại một thời điểm — gỡ cái cũ trước khi gắn cái mới, không
+    // thì mỗi lần đổi trạng thái nói/nghe lại chồng thêm một listener.
+    function callLoopSmoothly(v) {
+      if (callVideoLoopHandler && callVideoLoopHandlerEl) {
+        callVideoLoopHandlerEl.removeEventListener('timeupdate', callVideoLoopHandler);
       }
-      callVidEl.classList.remove('dung-yen');
-      callVidEl.playbackRate = 1;
-      callVideoTalking = true;
-      callVideoEverPlayed = true;
-      // KHÔNG dùng loop=true gốc của trình duyệt — nhiều trình duyệt tự
-      // DỪNG video khi chạy hết rồi mới lặp lại, gây khựng hình rõ rệt mỗi
-      // lần lặp (8 giây/lần với câu nói dài). Tự canh gần hết video rồi
-      // tua ngược về đầu bằng tay (timeupdate) thì mượt hơn hẳn.
-      callVidEl.loop = false;
+      v.loop = false;
       callVideoLoopHandler = () => {
-        if (!callVideoTalking) return;
-        const dur = callVidEl.duration || 8;
-        if (callVidEl.currentTime >= dur - 0.15) {
-          try { callVidEl.currentTime = 0.05; } catch (e) {}
-        }
+        const dur = v.duration || 15;
+        if (v.currentTime >= dur - 0.15) { try { v.currentTime = 0.05; } catch (e) {} }
       };
-      callVidEl.addEventListener('timeupdate', callVideoLoopHandler);
-      callVidEl.play().catch(() => {});
+      callVideoLoopHandlerEl = v;
+      v.addEventListener('timeupdate', callVideoLoopHandler);
+    }
+    function callSetVideoTalking(talking) {
+      if (!callVideoOk) return;
+      callVideoTalking = talking;
+      const showEl = talking ? callVidEl : callVidIdleEl;
+      const hideEl = talking ? callVidIdleEl : callVidEl;
+      hideEl.pause();
+      hideEl.hidden = true;
+      showEl.hidden = false;
+      showEl.playbackRate = 1;
+      callLoopSmoothly(showEl);
+      showEl.play().catch(() => {});
     }
 
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
