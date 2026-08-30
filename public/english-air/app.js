@@ -2491,7 +2491,7 @@ const VIDEO_MON = { noi: "assets/mon-noi.mp4", cho: "assets/mon-cho.mp4" };
 const THE_VIDEO = { noi: "#monVid", cho: "#monVidCho" };
 /* Giây đứng yên trong đoạn nói — chỉ dùng khi KHÔNG có đoạn nghỉ riêng.
    Giây 12,208 (khung 293) là chỗ miệng ngậm nhất, mắt mở, đứng tự nhiên. */
-const KHUNG_YEN = 12.208;
+const KHUNG_YEN = 13.7;
 const coVideo = {};
 
 const the = ten => $(THE_VIDEO[ten]);
