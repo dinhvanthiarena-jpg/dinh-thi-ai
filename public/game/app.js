@@ -3171,6 +3171,14 @@
       sceneFitEl.classList.add('co-video');
       callVidEl.src = CALL_VIDEO_TALK_SRC;
       callVidIdleEl.src = CALL_VIDEO_IDLE_SRC;
+      // Bỏ hẳn thuộc tính hidden (display:none) ngay từ đây — nhiều trình
+      // duyệt di động tự PAUSE video khi nó display:none để tiết kiệm pin,
+      // và không tự phát lại khi hiện ra nữa (đây chính là lý do nhân vật
+      // "đứng yên" dù JS đã gọi play()). Từ giờ chỉ đổi độ trong suốt bằng
+      // class .co-hidden (opacity:0), video vẫn luôn ở trạng thái hiển thị
+      // "có thể render" nên không bị trình duyệt tự ý dừng.
+      callVidEl.hidden = false;
+      callVidIdleEl.hidden = false;
       callVidEl.play().catch(() => {});
       callVidIdleEl.play().catch(() => {});
       callSetVideoTalking(false);
@@ -3178,8 +3186,12 @@
     function callSetVideoTalking(talking) {
       if (!callVideoOk) return;
       callVideoTalking = talking;
-      callVidEl.hidden = !talking;
-      callVidIdleEl.hidden = talking;
+      callVidEl.classList.toggle('co-hidden', !talking);
+      callVidIdleEl.classList.toggle('co-hidden', talking);
+      // Phòng khi video đang hiện lỡ bị trình duyệt tự dừng vì lý do khác
+      // (tab ẩn rồi hiện lại, mất focus...) — gọi lại play() cho chắc mỗi
+      // lần đổi trạng thái, gọi trên video đã đang phát thì cũng vô hại.
+      (talking ? callVidEl : callVidIdleEl).play().catch(() => {});
     }
 
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;

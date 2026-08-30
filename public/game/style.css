@@ -2258,6 +2258,10 @@ button:focus-visible,
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; display: block; z-index: 1;
 }
+/* Đổi qua lại giữa video "đang nói"/"đang nghe" bằng opacity chứ không
+   phải display:none — nhiều trình duyệt di động tự PAUSE video khi nó
+   display:none để tiết kiệm pin và không tự phát lại khi hiện ra nữa. */
+.scene-vid.co-hidden { opacity: 0; pointer-events: none; }
 /* Không phủ kín cả màn hình như bên app tiếng Anh (bên đó .call-top/.call-foot
    chỉ là lớp overlay mỏng đè lên nền video toàn màn hình) — .scene-fit ở đây
    đã được fitCallScene() đo đạc chính xác để vừa khít giữa thanh trên và
