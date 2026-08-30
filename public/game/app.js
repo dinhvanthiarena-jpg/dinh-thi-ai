@@ -3123,6 +3123,7 @@
         // set currentTime thẳng trên video CHƯA từng phát bị một số trình
         // duyệt âm thầm bỏ qua (đo được lúc build), play() rồi pause() thì
         // luôn ăn chắc.
+        callVidEl.classList.toggle('dung-yen', !callVideoTalking);
         callVidEl.play().then(() => { if (!callVideoTalking) callVidEl.pause(); }).catch(() => {});
       }, { once: true });
       callVidEl.addEventListener('error', () => {}, { once: true });
@@ -3157,6 +3158,7 @@
     function callSetVideoTalking(talking) {
       callVideoTalking = talking;
       if (!callVideoOk) return;
+      callVidEl.classList.toggle('dung-yen', !talking);
       if (talking) callVidEl.play().catch(() => {});
       else callVidEl.pause();
     }
@@ -3320,7 +3322,15 @@
         callSetState('Đến lượt cậu rồi đó!');
         callAutoListenIfPossible();
       };
-      watchdogId = setTimeout(finishSpeak, 2000 + text.length * 130);
+      // Chẻ theo câu nghĩa là TỔNG thời gian nói = thời gian nói của từng
+      // câu CỘNG các khoảng ngắt hơi giữa câu — canh sát theo mỗi ký tự
+      // như một utterance duy nhất thì không đủ dư cho câu dài nhiều câu
+      // (nhiều khoảng ngắt cộng dồn), dễ tự cắt lời Mon giữa chừng đúng
+      // như trần cứng 12 giây hồi trước. Canh RẤT dư — watchdog chỉ là
+      // lưới đỡ khi trình duyệt "nuốt" utterance chứ không phải mốc canh
+      // chính xác, onend của câu cuối luôn tới trước nếu TTS chạy bình
+      // thường.
+      watchdogId = setTimeout(finishSpeak, 4000 + text.length * 220);
       chunks.forEach((chunk, i) => {
         const utter = new SpeechSynthesisUtterance(chunk);
         utter.lang = L.tts;
@@ -3364,7 +3374,7 @@
         callMascotEl.classList.remove('talking');
         callSetVideoTalking(false);
       };
-      watchdogId = setTimeout(finishReplay, 2000 + text.length * 130);
+      watchdogId = setTimeout(finishReplay, 4000 + text.length * 220);
       chunks.forEach((chunk, i) => {
         const utter = new SpeechSynthesisUtterance(chunk);
         utter.lang = L.tts;
