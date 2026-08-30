@@ -226,7 +226,10 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .mascot-img { display: block; width: 100%; height: 100%; }
 .mascot-full { object-fit: contain; }
 /* Ảnh thương hiệu vốn đã là huy hiệu tròn nên để nguyên, không cắt. */
-.mascot-head { object-fit: contain; }
+/* Logo là ảnh VUÔNG, phần vẽ bên trong mới là hình tròn. Không bo thì bốn góc
+   đen thòi ra khỏi ô tròn, nhìn như dán nhầm ảnh. Bo ngay trên thẻ ảnh thì chỗ nào
+   đặt cũng đúng, khỏi phải sửa từng ô một. */
+.mascot-head { object-fit: contain; border-radius: var(--rf); }
 .brand-mark, .hello-mascot, .avatar, .empty-mascot { border-radius: var(--rf); }
 .has-mascot-img .avatar { background: none; }
 
