@@ -3100,10 +3100,13 @@
     window.addEventListener('resize', fitCallScene);
     window.addEventListener('orientationchange', () => setTimeout(fitCallScene, 120));
 
-    // Chỉ dùng MỘT video thật của Mon — lúc ĐANG NÓI (mon-noi.mp4). Lúc
-    // không nói (chờ/nghe) quay lại lớp ảnh tĩnh + miệng ghép sẵn như ban
-    // đầu, đơn giản và chắc chắn hơn hẳn so với việc bắt một video thứ hai
-    // cũng phải phát mượt suốt cuộc gọi.
+    // Chỉ dùng MỘT video thật của Mon (mon-noi.mp4) — nhưng dùng cho CẢ
+    // hai trạng thái nói/im lặng, không quay lại lớp ảnh tĩnh ghép sẵn
+    // (mon-closed.png/mon-mouth.png) nữa vì đó là nhân vật thiết kế cũ,
+    // không còn khớp bộ nhận diện mới. Video tải xong là hiện lên và Ở
+    // NGUYÊN đó suốt cuộc gọi — lúc nói thì phát, lúc im lặng thì dừng lại
+    // (đứng ở khung hình gần đầu video), không ẩn/hiện qua lại giữa video
+    // và ảnh tĩnh nữa.
     const CALL_VIDEO_SRC = 'assets/monl/mon-noi.mp4';
     let callVideoTried = false;
     let callVideoOk = false;
@@ -3112,7 +3115,16 @@
     function callProbeVideo() {
       if (callVideoTried || !callVidEl) return;
       callVideoTried = true;
-      callVidEl.addEventListener('loadedmetadata', () => { callVideoOk = true; }, { once: true });
+      callVidEl.addEventListener('loadedmetadata', () => {
+        callVideoOk = true;
+        sceneFitEl.classList.add('co-video');
+        callVidEl.hidden = false;
+        // Phát một nhịp rồi dừng ngay để có sẵn một khung hình hiện ra —
+        // set currentTime thẳng trên video CHƯA từng phát bị một số trình
+        // duyệt âm thầm bỏ qua (đo được lúc build), play() rồi pause() thì
+        // luôn ăn chắc.
+        callVidEl.play().then(() => { if (!callVideoTalking) callVidEl.pause(); }).catch(() => {});
+      }, { once: true });
       callVidEl.addEventListener('error', () => {}, { once: true });
       callVidEl.src = CALL_VIDEO_SRC;
       callGuardVideo(callVidEl);
@@ -3121,7 +3133,7 @@
     // Trình duyệt tự DỪNG video khi vòng lại về đầu thay vì loop mượt —
     // đo trên máy thật: video dài ngắn hơn câu nói thì Mon đứng há mồm im
     // re giữa câu nếu không tự canh mà phát tiếp. Chỉ phát lại khi ĐANG ở
-    // lượt nói — video này không cần chạy khi Mon đang im lặng/nghe.
+    // lượt nói — dừng lúc im lặng là chủ ý, không phải sự cố cần cứu.
     function callGuardVideo(v) {
       v.addEventListener('pause', () => { if (callVideoTalking && !callEnded) v.play().catch(() => {}); });
       v.addEventListener('ended', () => {
@@ -3145,15 +3157,8 @@
     function callSetVideoTalking(talking) {
       callVideoTalking = talking;
       if (!callVideoOk) return;
-      if (talking) {
-        sceneFitEl.classList.add('co-video');
-        callVidEl.hidden = false;
-        callVidEl.play().catch(() => {});
-      } else {
-        callVidEl.pause();
-        callVidEl.hidden = true;
-        sceneFitEl.classList.remove('co-video');
-      }
+      if (talking) callVidEl.play().catch(() => {});
+      else callVidEl.pause();
     }
 
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
