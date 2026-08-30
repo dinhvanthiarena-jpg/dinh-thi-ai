@@ -701,8 +701,6 @@ button:focus-visible,
 .squad-photo {
   width: 100%;
   max-width: 320px;
-  border-radius: var(--r3);
-  box-shadow: var(--sh-3);
 }
 .squad-slogan {
   font-family: var(--font-heading);
