@@ -2270,26 +2270,6 @@ button:focus-visible,
   line-height: 1.4;
 }
 .call-said-py { font-style: italic; }
-.call-log {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  max-height: 200px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.call-log li {
-  padding: 8px 14px;
-  border-radius: var(--r1);
-  font-size: 0.85rem;
-  font-weight: 600;
-  max-width: 80%;
-}
-.call-log li.mon { align-self: flex-start; background: rgba(255,255,255,0.1); color: #fff; }
-.call-log li.you { align-self: flex-end; background: var(--brand-fill); color: #fff; }
 
 .call-you {
   display: flex;

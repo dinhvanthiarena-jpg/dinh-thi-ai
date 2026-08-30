@@ -3051,7 +3051,6 @@
     const callTopEl = document.querySelector('#screen-call .call-top');
     const callStageEl = document.querySelector('#screen-call .call-stage');
     const callFootEl = document.querySelector('#screen-call .call-foot');
-    const callLog = $('callLog');
     const callBubble = $('callBubble');
     const callSaid = $('callSaid');
     const callSaidLang = $('callSaidLang');
@@ -3326,15 +3325,6 @@
       if (mod) callStateEl.classList.add(mod);
     }
 
-    function callAppendLog(role, text) {
-      const li = document.createElement('li');
-      li.className = role === 'user' ? 'you' : 'mon';
-      li.textContent = text;
-      callLog.appendChild(li);
-      callLog.hidden = false;
-      callLog.scrollTop = callLog.scrollHeight;
-    }
-
     function callAutoListenIfPossible() {
       if (callEnded || callBusy || callTypedOnly) return;
       setTimeout(() => { if (!callEnded && !callBusy) callStartListening(); }, 400);
@@ -3355,7 +3345,6 @@
       callSaidPy.hidden = !py;
       callSaidVi.textContent = viGloss || '';
       callSaidVi.hidden = !viGloss;
-      callAppendLog('assistant', text);
       if (!('speechSynthesis' in window) || muted) {
         callBusy = false;
         callSetState('Đến lượt cậu rồi đó!');
@@ -3456,7 +3445,6 @@
     async function callAsk(userText) {
       if (userText) {
         callHistory.push({ role: 'user', content: userText });
-        callAppendLog('user', userText);
       }
       callBusy = true;
       callSetState('Mon.L đang nghĩ…', 'think');
@@ -3566,8 +3554,6 @@
       callHistory = [];
       callPendingAnswer = null;
       callLang = 'vi'; // Mon.L luôn mở màn bằng tiếng Việt, đây là app tiếng Việt
-      callLog.innerHTML = '';
-      callLog.hidden = true;
       callHeard.hidden = true;
       callAvatarImg.src = avatarDataUrl || 'assets/thay-avatar.png';
       callSaid.textContent = 'Mon.L đang kết nối…';
