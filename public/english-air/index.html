@@ -1753,6 +1753,13 @@
     <small id="callSaidVi"></small>
     </div>
   </div>
+    <div class="call-type" id="callType" hidden>
+      <input type="text" id="callInput" placeholder="Gõ câu tiếng Anh của bạn…" aria-label="Gõ câu trả lời" />
+      <button class="round-btn lg" id="btnCallSend" type="button" aria-label="Gửi">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
+      </button>
+    </div>
+
   <div class="call-stage">
     <ul class="call-log" id="callLog"></ul>
     <div class="call-task" id="callTask" hidden>
@@ -1769,13 +1776,6 @@
   <div class="call-foot">
     <div class="call-heard" id="callHeard" hidden><span id="callHeardText"></span></div>
     <div class="call-choices" id="callChoices" hidden></div>
-
-    <div class="call-type" id="callType" hidden>
-      <input type="text" id="callInput" placeholder="Gõ câu tiếng Anh của bạn…" aria-label="Gõ câu trả lời" />
-      <button class="round-btn lg" id="btnCallSend" type="button" aria-label="Gửi">
-        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
-      </button>
-    </div>
 
     <div class="call-actions">
       <button class="round-btn lg" id="btnCallHear" type="button" aria-label="Nghe lại">
