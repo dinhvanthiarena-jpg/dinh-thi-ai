@@ -2075,14 +2075,14 @@ button:focus-visible,
   color: var(--bad);
 }
 
-/* ==== Gọi Mon.L (free AI conversation call screen) ====
+/* ==== Gọi Mon (free AI conversation call screen) ====
    Same room photo + character art + two-step flow (preview card first,
    then the actual cinematic call) as english-air's own "Gọi Mon.L" —
    reusing its exact assets/monl images and scene-fit math since it's the
    same shared mascot. Deliberately stays dark even though the rest of the
    app is dark-violet too — the room photo itself supplies the mood. */
 
-/* ---- Trước khi gọi: thẻ xem trước phòng + Mon.L ---- */
+/* ---- Trước khi gọi: thẻ xem trước phòng + Mon ---- */
 .call-preview-wrap {
   /* #screen-call::before (the blurred call-card.jpg backdrop for the LIVE
      call scene) is position:absolute with z-index:0, which — since this
@@ -2154,7 +2154,7 @@ button:focus-visible,
 .ci-row b { display: block; font-size: 0.96rem; color: var(--fg); }
 .ci-row small { display: block; color: var(--muted-fg); font-size: 0.84rem; font-weight: 600; margin-top: 2px; }
 
-/* ---- Hoạt hình nhân vật Mon.L (dùng chung cho thẻ xem trước và cảnh gọi thật) ---- */
+/* ---- Hoạt hình nhân vật Mon (dùng chung cho thẻ xem trước và cảnh gọi thật) ---- */
 @keyframes monIn {
   0% { opacity: 0; transform: translateY(5%) scale(0.92); }
   60% { opacity: 1; transform: translateY(-1.2%) scale(1.02); }
@@ -2188,7 +2188,7 @@ button:focus-visible,
   50% { transform: translateY(-1.6%) rotate(1deg) scale(1.035); }
 }
 
-/* ---- Đang gọi: cảnh phòng thật của Mon.L, chữ nổi trên cảnh ---- */
+/* ---- Đang gọi: cảnh phòng thật của Mon, chữ nổi trên cảnh ---- */
 /* .screen already sets position:fixed — do NOT add position:relative
    here, it would override that (higher specificity, #id beats .class)
    and silently break inset:0's full-viewport sizing, collapsing the
@@ -2247,7 +2247,7 @@ button:focus-visible,
 .call-mon.pulse .mon-beat { animation: monBeat 200ms ease-out; }
 .call-mon.listening { animation: monLean 1.9s ease-in-out infinite; }
 
-/* Video thật của Mon.L (mon-noi.mp4) — quay sẵn CẢ căn phòng lẫn nhân vật
+/* Video thật của Mon (mon-noi.mp4) — quay sẵn CẢ căn phòng lẫn nhân vật
    trong cùng một cảnh, nên khi có video nó thay hẳn ảnh phòng tĩnh +
    .call-mon chứ không chồng lên trên (chồng lên thì thành "tranh trong
    tranh"). Không tải được video thì .co-video không bao giờ được thêm,
@@ -2269,7 +2269,7 @@ button:focus-visible,
    đã được fitCallScene() đo đạc chính xác để vừa khít giữa thanh trên và
    khung thoại/nút bấm, nên video cứ nằm nguyên trong khung đó (object-fit
    cover sẽ tự cắt bớt hai bên do tỉ lệ video hơi khác ảnh phòng), không thay
-   kích thước/vị trí của .scene-fit — thay là bị cắt mất đầu Mon.L ngay. */
+   kích thước/vị trí của .scene-fit — thay là bị cắt mất đầu Mon ngay. */
 .scene-fit.co-video .scene-room, .scene-fit.co-video .call-mon { visibility: hidden; }
 
 .call-top {

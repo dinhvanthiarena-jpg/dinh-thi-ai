@@ -2292,7 +2292,7 @@
     }
     const stars = computeStars();
     const total = state.mode === 'practice' ? state.totalQuestions : state.answered;
-    const shareText = `Con vừa đạt ${state.score} điểm (${state.correct}/${total} câu đúng) trong game Toán Vui Cấp 1! Cùng chơi thử nhé!`;
+    const shareText = `Con vừa đạt ${state.score} điểm (${state.correct}/${total} câu đúng) trong game Mon-Maths! Cùng chơi thử nhé!`;
     const shareUrl = window.location.origin + window.location.pathname;
 
     // Facebook's own sharer.php link is unreliable on phones: when the
@@ -2318,12 +2318,12 @@
 
     if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
       try {
-        await navigator.share({ files: [imageFile], title: 'Toán Vui Cấp 1', text: shareText });
+        await navigator.share({ files: [imageFile], title: 'Mon-Maths', text: shareText });
       } catch (e) { /* user cancelled */ }
       return;
     }
     if (navigator.share) {
-      try { await navigator.share({ title: 'Toán Vui Cấp 1', text: shareText, url: shareUrl }); } catch (e) { /* user cancelled */ }
+      try { await navigator.share({ title: 'Mon-Maths', text: shareText, url: shareUrl }); } catch (e) { /* user cancelled */ }
       return;
     }
     // Desktop fallback (no Web Share API): Facebook's popup share dialog
@@ -2868,7 +2868,7 @@
       ctx.fillStyle = '#FFD76A';
       ctx.font = 'bold 24px "Baloo 2", system-ui, sans-serif';
       ctx.textBaseline = 'alphabetic';
-      ctx.fillText('Toán Vui Cấp 1 — Lời giảng của Cô', pad, 40);
+      ctx.fillText('Mon-Maths — Lời giảng của Cô', pad, 40);
       ctx.font = '14px system-ui, sans-serif';
       ctx.fillStyle = '#F5DEB3';
       ctx.fillText(`Lưu lại ngày ${new Date().toLocaleDateString('vi-VN')} để học lại sau này`, pad, 66);
@@ -2897,7 +2897,7 @@
 
       ctx.font = 'italic 13px system-ui, sans-serif';
       ctx.fillStyle = '#8A6A3F';
-      ctx.fillText('Toán Vui Cấp 1 · 3dvietpro.com/game', pad, totalHeight - 18);
+      ctx.fillText('Mon-Maths · 3dvietpro.com/game', pad, totalHeight - 18);
 
       const a = document.createElement('a');
       a.href = canvas.toDataURL('image/png');
@@ -3070,7 +3070,7 @@
     const btnCallSkip = $('btnCallSkip');
     const callVidEl = $('callVid');
 
-    // Toạ độ % của Mon.L trong assets/monl/mon-room.jpg — cùng con số với
+    // Toạ độ % của Mon trong assets/monl/mon-room.jpg — cùng con số với
     // english-air, vì dùng chung đúng file ảnh đó. scene-fit tính lại
     // height/top mỗi khi đổi cỡ màn hình để nhân vật luôn đứng đúng chỗ
     // giữa thanh trên và bong bóng thoại, không bị méo/lệch.
@@ -3100,13 +3100,13 @@
     window.addEventListener('resize', fitCallScene);
     window.addEventListener('orientationchange', () => setTimeout(fitCallScene, 120));
 
-    // Video thật của Mon.L (assets/monl/mon-noi.mp4) — quay sẵn cùng cảnh
+    // Video thật của Mon (assets/monl/mon-noi.mp4) — quay sẵn cùng cảnh
     // phòng mon-room.jpg, ported từ app tiếng Anh (dùng chung đúng file đó).
     // Tải được thì thay hẳn ảnh phòng tĩnh + .call-mon; không tải được (mạng
     // yếu, trình duyệt cũ) thì im lặng bỏ qua, lớp ảnh tĩnh + miệng ghép sẵn
     // vẫn chạy y như trước — không có gì vỡ.
     const CALL_VIDEO_SRC = 'assets/monl/mon-noi.mp4';
-    // Giây đứng yên trong video: đầu video Mon.L đang há miệng to, tay buông
+    // Giây đứng yên trong video: đầu video Mon đang há miệng to, tay buông
     // thõng — dừng ở giây 2,083 (khung 50) là lúc miệng ngậm, mắt mở, tay
     // đưa ra chào. Cùng con số với app tiếng Anh vì dùng chung một file.
     const CALL_VIDEO_HOLD = 2.083;
@@ -3136,7 +3136,7 @@
       if (callVideoGuarded) return;
       callVideoGuarded = true;
       // Trình duyệt tự DỪNG video khi vòng lại về đầu thay vì loop mượt —
-      // đo trên máy thật: video dài ngắn hơn câu nói thì Mon.L đứng há mồm
+      // đo trên máy thật: video dài ngắn hơn câu nói thì Mon đứng há mồm
       // im re giữa câu nếu không tự canh mà phát tiếp.
       v.addEventListener('pause', () => { if (callVideoTalking) v.play().catch(() => {}); });
       v.addEventListener('ended', () => {
@@ -3174,7 +3174,7 @@
         callVidEl.loop = false;
         // Video đã phát ít nhất 1 lần rồi thì tua thẳng ăn chắc, không cần
         // "mẹo" chạy nhanh (playbackRate=16) rồi phanh gấp nữa — cách đó
-        // nhìn giật vì lặp lại mỗi lần Mon.L nói xong MỘT câu trong cả cuộc.
+        // nhìn giật vì lặp lại mỗi lần Mon nói xong MỘT câu trong cả cuộc.
         if (callVideoEverPlayed) {
           callVidEl.pause();
           try { callVidEl.currentTime = CALL_VIDEO_HOLD; } catch (e) {}
@@ -3228,7 +3228,7 @@
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
     let callRecognition = null;
     let callHistory = [];
-    // Đáp án đúng (số, đã máy chủ tính ra) của bài toán Mon.L vừa ra, hoặc
+    // Đáp án đúng (số, đã máy chủ tính ra) của bài toán Mon vừa ra, hoặc
     // null khi lượt trước không phải một bài toán có đáp án cụ thể.
     let callPendingAnswer = null;
     let callTimerId = null;
@@ -3237,7 +3237,7 @@
     let callEnded = true;
     let callTypedOnly = !SpeechRecognitionCtor;
 
-    // Mon.L nói được ba thứ tiếng — bạn học không chọn trước, cứ nói, server
+    // Mon nói được ba thứ tiếng — bạn học không chọn trước, cứ nói, server
     // (boomChatService.js) tự nghe ra rồi trả lời đúng thứ tiếng đó, client
     // chỉ cần đổi giọng đọc/giọng nghe theo callLang mỗi lượt.
     const CALL_LANGS = {
@@ -3266,7 +3266,7 @@
         let score = 0;
         if (/natural|online|neural/i.test(v.name)) score += 3;
         if (/google/i.test(v.name)) score += 2;
-        // Mon.L là "con quái vật siêu mê toán" giọng bé trai — ưu tiên
+        // Mon là "con quái vật siêu mê toán" giọng bé trai — ưu tiên
         // giọng nam nếu máy có (vd Edge/Windows "vi-VN-NamMinhNeural"),
         // pitch sẽ được đẩy cao thêm ở nơi gọi để nghe trẻ con/dễ thương.
         if (/namminh/i.test(v.name)) score += 4;
@@ -3285,7 +3285,7 @@
     }
 
     // iPhone/iPad chỉ cho phát tiếng lần đầu ngay trong lúc ngón tay còn
-    // chạm màn hình. Câu nói đầu của Mon.L lại đến sau một lượt chờ mạng
+    // chạm màn hình. Câu nói đầu của Mon lại đến sau một lượt chờ mạng
     // (fetch), nên phải "mồi" sẵn ngay lúc bấm nút — không thì cả cuộc gọi
     // im lặng mà chẳng báo lỗi gì. Cùng cách english-air đã làm.
     let callSpeechPrimed = false;
@@ -3332,10 +3332,10 @@
       setTimeout(() => { if (!callEnded && !callBusy) callStartListening(); }, 400);
     }
 
-    // Mon.L's reply always lands in the big bubble, and also gets appended to
+    // Mon's reply always lands in the big bubble, and also gets appended to
     // the scrollback log — the bubble is "what's being said right now", the
     // log is the running transcript underneath it. lang/viGloss/py come from
-    // the server (boomChatService.js), which detects which of Mon.L's three
+    // the server (boomChatService.js), which detects which of Mon's three
     // languages the reply is actually in.
     function callSpeak(text, lang, viGloss, py) {
       if (CALL_LANGS[lang]) callLang = lang;
@@ -3368,7 +3368,7 @@
       // fire onstart/onend — without a watchdog the mic/state machine would
       // lock up forever waiting for a callback that's never coming. Canh
       // theo TOÀN BỘ độ dài câu (không còn trần cứng 12 giây như trước —
-      // trần đó tự cắt lời Mon.L giữa chừng với câu dài rồi bật mic đè lên
+      // trần đó tự cắt lời Mon giữa chừng với câu dài rồi bật mic đè lên
       // tiếng đang đọc, nghe như bị đứt đoạn).
       let callSpeakDone = false;
       let watchdogId = null;
@@ -3389,7 +3389,7 @@
         const utter = new SpeechSynthesisUtterance(chunk);
         utter.lang = L.tts;
         if (voice) utter.voice = voice;
-        // Giọng bé trai dễ thương cho Mon.L — pitch cao hơn giọng người lớn
+        // Giọng bé trai dễ thương cho Mon — pitch cao hơn giọng người lớn
         // mặc định (1.0), rate nhỉnh hơn một chút cho nghe nhí nhảnh.
         utter.rate = 1.05;
         utter.pitch = 1.3;
@@ -3449,7 +3449,7 @@
         callHistory.push({ role: 'user', content: userText });
       }
       callBusy = true;
-      callSetState('Mon.L đang nghĩ…', 'think');
+      callSetState('Mon đang nghĩ…', 'think');
       try {
         const res = await fetch('/api/game/boom-chat', {
           method: 'POST',
@@ -3460,14 +3460,14 @@
         if (callEnded) return;
         if (!res.ok || !data.ok) {
           callBusy = false;
-          callSetState((data && data.message) || 'Mon.L đang bận, thử lại nhé.', 'err');
+          callSetState((data && data.message) || 'Mon đang bận, thử lại nhé.', 'err');
           return;
         }
         callHistory.push({ role: 'assistant', content: data.reply });
-        // Đáp án đúng (đã máy tính ra) của bài toán Mon.L VỪA ra ở lượt này —
+        // Đáp án đúng (đã máy tính ra) của bài toán Mon VỪA ra ở lượt này —
         // nhớ lại để gửi kèm lượt sau, cho server chấm điểm chính xác thay vì
         // để mô hình tự đoán lại phép tính (không đáng tin với model nhỏ).
-        // CHỈ ghi đè khi lượt này thật sự có một đáp án mới (Mon.L vừa ra
+        // CHỈ ghi đè khi lượt này thật sự có một đáp án mới (Mon vừa ra
         // bài mới) — một lượt chỉ nhắc lại gợi ý cho CÙNG bài cũ (không ra
         // EXPR mới) không được xoá mất đáp án đang chờ, không thì lần trả
         // lời đúng tiếp theo cho đúng bài đó sẽ mất "trí nhớ" và bị chấm sai.
@@ -3476,7 +3476,7 @@
       } catch (e) {
         if (callEnded) return;
         callBusy = false;
-        callSetState('Không kết nối được, kiểm tra mạng giúp Mon.L nhé.', 'err');
+        callSetState('Không kết nối được, kiểm tra mạng giúp Mon nhé.', 'err');
       }
     }
 
@@ -3555,10 +3555,10 @@
       callBusy = false;
       callHistory = [];
       callPendingAnswer = null;
-      callLang = 'vi'; // Mon.L luôn mở màn bằng tiếng Việt, đây là app tiếng Việt
+      callLang = 'vi'; // Mon luôn mở màn bằng tiếng Việt, đây là app tiếng Việt
       callHeard.hidden = true;
       callAvatarImg.src = avatarDataUrl || 'assets/thay-avatar.png';
-      callSaid.textContent = 'Mon.L đang kết nối…';
+      callSaid.textContent = 'Mon đang kết nối…';
       callSaidLang.hidden = true;
       callSaidPy.hidden = true;
       callSaidVi.hidden = true;
@@ -3592,11 +3592,11 @@
       previewMon.classList.remove('talking', 'pulse');
     }
 
-    // Bấm thẻ xem trước phòng của Mon.L: chỉ là một câu chào demo phát cục
+    // Bấm thẻ xem trước phòng của Mon: chỉ là một câu chào demo phát cục
     // bộ (không gọi server) để nghe thử giọng trước khi bấm gọi thật —
     // giống hệt cách english-air làm ở đúng chỗ này.
     const CALL_PREVIEW_LINES = [
-      'Chào cậu! Tớ là Mon.L, con quái vật siêu mê toán nè!',
+      'Chào cậu! Tớ là Mon, con quái vật siêu mê toán nè!',
       'Bấm nút "Gọi nói chuyện tự do" là tớ nghe cậu liền!',
       'Đừng lo, cứ nói chuyện thoải mái với tớ thôi, tớ hiền lắm!',
     ];

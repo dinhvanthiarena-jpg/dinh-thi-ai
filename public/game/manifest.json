@@ -1,6 +1,6 @@
 {
-  "name": "Toán Vui Cấp 1",
-  "short_name": "Toán Vui Cấp 1",
+  "name": "Mon-Maths",
+  "short_name": "Mon-Maths",
   "description": "Game toán học vui nhộn dành cho học sinh cấp 1 (lớp 1-5)",
   "start_url": "./index.html",
   "scope": "./",
