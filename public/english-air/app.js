@@ -110,8 +110,10 @@ function load() {
   // Đổi giọng mặc định sang Daniel, cao độ bình thường. Máy nào đã cài rồi thì
   // vẫn phải áp một lần, không thì người đang dùng mãi không thấy đổi. Chỉ một
   // lần thôi — sau đó ai tự chọn giọng nào là giữ nguyên giọng ấy.
-  if (!s.giongChot) {
-    s.giongChot = 1;
+  // Đặt lại giọng tiếng Anh về Daniel — bình thường. Để số ở đây để sau này
+  // muốn áp lại một lần nữa thì chỉ việc tăng số lên.
+  if ((s.giongChot || 0) < 2) {
+    s.giongChot = 2;
     s.kidVoice = false;
     if (s.giong && s.giong.en) delete s.giong.en;
   }
@@ -2490,11 +2492,11 @@ function diemDoc(nghe, mau) {
 const VIDEO_MON = {
   noi: "assets/mon-noi.mp4",
   cho: "assets/mon-cho.mp4",
-  nhay: "assets/mon-nhay.mp4",
 };
-const THE_VIDEO = { noi: "#monVid", cho: "#monVidCho", nhay: "#monVidNhay" };
-/* Vòng lúc không nói: nghỉ trước cho êm, rồi mới nhảy. */
-const VONG_NGHI = ["cho", "nhay"];
+const THE_VIDEO = { noi: "#monVid", cho: "#monVidCho" };
+/* Vòng lúc không nói. Giữ dạng danh sách để sau này thêm đoạn nữa thì chỉ
+   viết thêm một dòng, không phải sửa lại cả phần chạy video. */
+const VONG_NGHI = ["cho"];
 let chiNghi = 0;
 /* Giây đứng yên trong đoạn nói — chỉ dùng khi KHÔNG có đoạn nghỉ nào tải được. */
 const KHUNG_YEN = 13.7;
@@ -2515,11 +2517,7 @@ function doVideoMon() {
     v.preload = "auto";
     v.src = duong;
   };
-  // Hai đoạn cần ngay thì tải ngay. Đoạn nhảy nặng hơn cả mà mãi 15 giây nữa mới
-  // tới lượt, nên khoán lại vài giây — ai gọi một câu rồi tắt thì không phải tốn
-  // thêm một megabyte dữ liệu di động cho cái họ chưa kịp thấy.
   nap("noi"); nap("cho");
-  setTimeout(() => nap("nhay"), 4000);
 }
 
 /** Đoạn nghỉ nào đang tới lượt và tải được. Không có đoạn nào thì trả về rỗng. */
