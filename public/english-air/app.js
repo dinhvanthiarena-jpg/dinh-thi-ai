@@ -2967,6 +2967,8 @@ function startListening() {
   $("#btnMic").classList.add("listening");
   $("#callMascot").classList.add("listening");
   $("#callYou").hidden = false;
+  const oNghe0 = $("#callYouText");
+  if (oNghe0) oNghe0.textContent = "ON-Language đang nghe bạn nói…";
   setState("Đang nghe bạn…", "listen");
 
   let xong = false, dungHan = false;
@@ -3005,6 +3007,10 @@ function startListening() {
     tam = int.trim();
     const hien = (daNoi + " " + tam).trim();
     if (hien) setState("Nghe: " + hien.slice(-38), "listen");
+    // Hiện luôn ngay trong ô "đang nghe" cho to và rõ. Dòng nhỏ trên đỉnh dễ bỏ qua,
+    // nên người học không biết máy có ăn tiếng mình hay không.
+    const oNghe = $("#callYouText");
+    if (oNghe) oNghe.textContent = hien || "ON-Language đang nghe bạn nói…";
     hoanLai();
   };
 
@@ -3045,12 +3051,30 @@ function startListening() {
 
   clearTimeout(C.watch);
   C.watch = setTimeout(chot, NGHE_TOI_DA);
-  try {
-    r.start();
-  } catch (err) {
-    xong = true; clearTimeout(C.watch); stopListening();
-    micFailed("Không mở được micro. Bạn gõ chữ bên dưới nhé.");
-  }
+
+  // LOA ĐANG KÊU THÌ MICRO KHÔNG NGHE ĐƯỢC GÌ. App có thể đã coi là "nói xong"
+  // trong khi máy vẫn đang phát nốt — nhất là trên iPhone, đường tiếng đổi qua
+  // lại mất một nhịp. Nên cắt tiếng trước, rồi ĐỢI cho nó im hẳn mới mở micro.
+  stopSpeak();
+  const moMic = () => {
+    if (xong) return;
+    try {
+      r.start();
+    } catch (err) {
+      xong = true; clearTimeout(C.watch); stopListening();
+      micFailed("Không mở được micro. Bạn gõ chữ bên dưới nhé.");
+    }
+  };
+  let doi = 0;
+  const doiLoaTat = () => {
+    const conKeu = window.speechSynthesis &&
+      (speechSynthesis.speaking || speechSynthesis.pending);
+    // Chờ tối đa 0,7 giây thôi — có máy báo "đang nói" mãi không thôi, chờ nữa
+    // thì người học đứng đợi không biết để làm gì.
+    if (!conKeu || ++doi > 7) return moMic();
+    setTimeout(doiLoaTat, 100);
+  };
+  doiLoaTat();
 }
 function stopListening() {
   C.listening = false;
