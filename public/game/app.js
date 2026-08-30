@@ -3115,6 +3115,11 @@
     let callVideoTalking = false;
     let callVideoRetryId = null;
     let callVideoHoldHandler = null;
+    let callVideoLoopHandler = null;
+    // Sau lần đầu tiên video đã thật sự PHÁT (không còn ở giây 0 tinh),
+    // set currentTime thẳng ăn chắc luôn — chỉ lần đầu tiên (video chưa
+    // từng phát) mới cần "mẹo" chạy nhanh rồi phanh ở dưới.
+    let callVideoEverPlayed = false;
 
     function callProbeVideo() {
       if (callVideoTried || !callVidEl) return;
@@ -3161,14 +3166,23 @@
       if (!callVideoOk || !callVidEl || callVidEl.hidden) return;
       clearInterval(callVideoRetryId); callVideoRetryId = null;
       if (callVideoHoldHandler) { callVidEl.removeEventListener('timeupdate', callVideoHoldHandler); callVideoHoldHandler = null; }
+      if (callVideoLoopHandler) { callVidEl.removeEventListener('timeupdate', callVideoLoopHandler); callVideoLoopHandler = null; }
       if (!talking) {
         callVidEl.classList.add('dung-yen');
         callVideoTalking = false;
         callVidEl.loop = false;
-        // Nếu đang ở quá khung cần dừng (vừa nói xong một câu dài, video đã
-        // chạy qua giây giữ từ lâu), tua ngược về đầu trước rồi chạy tới lại
-        // — chạy tới từ vị trí hiện tại thì sẽ hết video (8 giây) mà không
-        // bao giờ chạm lại khung 2,083 giây.
+        // Video đã phát ít nhất 1 lần rồi thì tua thẳng ăn chắc, không cần
+        // "mẹo" chạy nhanh (playbackRate=16) rồi phanh gấp nữa — cách đó
+        // nhìn giật vì lặp lại mỗi lần Mon.L nói xong MỘT câu trong cả cuộc.
+        if (callVideoEverPlayed) {
+          callVidEl.pause();
+          try { callVidEl.currentTime = CALL_VIDEO_HOLD; } catch (e) {}
+          callVidEl.playbackRate = 1;
+          return;
+        }
+        // Lần đầu tiên (video chưa từng phát): set currentTime thẳng không
+        // ăn ở một số trình duyệt (đo được lúc build) — phải chạy nhanh rồi
+        // phanh đúng lúc bằng timeupdate thì mới ăn chắc.
         if (callVidEl.currentTime > CALL_VIDEO_HOLD + 0.05) { try { callVidEl.currentTime = 0; } catch (e) {} }
         callVidEl.playbackRate = 16;
         callVideoHoldHandler = () => {
@@ -3193,7 +3207,20 @@
       callVidEl.classList.remove('dung-yen');
       callVidEl.playbackRate = 1;
       callVideoTalking = true;
-      callVidEl.loop = true;
+      callVideoEverPlayed = true;
+      // KHÔNG dùng loop=true gốc của trình duyệt — nhiều trình duyệt tự
+      // DỪNG video khi chạy hết rồi mới lặp lại, gây khựng hình rõ rệt mỗi
+      // lần lặp (8 giây/lần với câu nói dài). Tự canh gần hết video rồi
+      // tua ngược về đầu bằng tay (timeupdate) thì mượt hơn hẳn.
+      callVidEl.loop = false;
+      callVideoLoopHandler = () => {
+        if (!callVideoTalking) return;
+        const dur = callVidEl.duration || 8;
+        if (callVidEl.currentTime >= dur - 0.15) {
+          try { callVidEl.currentTime = 0.05; } catch (e) {}
+        }
+      };
+      callVidEl.addEventListener('timeupdate', callVideoLoopHandler);
       callVidEl.play().catch(() => {});
     }
 
@@ -3238,6 +3265,11 @@
         let score = 0;
         if (/natural|online|neural/i.test(v.name)) score += 3;
         if (/google/i.test(v.name)) score += 2;
+        // Mon.L là "con quái vật siêu mê toán" giọng bé trai — ưu tiên
+        // giọng nam nếu máy có (vd Edge/Windows "vi-VN-NamMinhNeural"),
+        // pitch sẽ được đẩy cao thêm ở nơi gọi để nghe trẻ con/dễ thương.
+        if (/namminh/i.test(v.name)) score += 4;
+        if (/\b(male|boy)\b/i.test(v.name)) score += 2;
         return { v, score };
       });
       scored.sort((a, b) => b.score - a.score);
@@ -3331,21 +3363,28 @@
         return;
       }
       window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = L.tts;
       const voice = callVoiceCache[callLang];
-      if (voice) utter.voice = voice;
-      utter.rate = 1.0;
-      utter.pitch = 1.05;
+      // Đọc nguyên một câu dài trong MỘT utterance thì một số trình duyệt
+      // (rõ nhất là Chrome) tự động NGẮT GIỮA CHỪNG sau khoảng 15 giây liên
+      // tục nói — bài giải toán/dạy học sinh giỏi thường dài hơn mức đó.
+      // Chẻ theo câu rồi phát nối tiếp (giống homeworkSpeak ở trên) thì mỗi
+      // utterance ngắn, không bao giờ chạm ngưỡng đó, mà nghe còn tự nhiên
+      // hơn vì có khoảng ngắt hơi giữa các câu.
+      const sentences = text.split(/(?<=[.!?…:])\s+/).map((s) => s.trim()).filter(Boolean);
+      const chunks = sentences.length ? sentences : [text];
       // Some browsers (no matching voice for the current language, some
       // automated/embedded WebViews) silently accept an utterance but never
       // fire onstart/onend — without a watchdog the mic/state machine would
-      // lock up forever waiting for a callback that's never coming.
-      // ~120ms/char at rate 1.0 is a generous upper bound for speech length.
+      // lock up forever waiting for a callback that's never coming. Canh
+      // theo TOÀN BỘ độ dài câu (không còn trần cứng 12 giây như trước —
+      // trần đó tự cắt lời Mon.L giữa chừng với câu dài rồi bật mic đè lên
+      // tiếng đang đọc, nghe như bị đứt đoạn).
       let callSpeakDone = false;
+      let watchdogId = null;
       const finishSpeak = () => {
         if (callSpeakDone) return;
         callSpeakDone = true;
+        clearTimeout(watchdogId);
         callAvatar.classList.remove('talking');
         callMascotEl.classList.remove('talking');
         callSetVideoTalking(false);
@@ -3354,34 +3393,64 @@
         callSetState('Đến lượt cậu rồi đó!');
         callAutoListenIfPossible();
       };
-      utter.onstart = () => { callAvatar.classList.add('talking'); callMascotEl.classList.add('talking'); callSetVideoTalking(true); };
-      // Mỗi từ nói ra thì "nhấn" thêm một nhịp cho khớp trọng âm — buộc
-      // reflow (offsetWidth) để retrigger được animation dù class không đổi.
-      utter.onboundary = () => {
-        callMascotEl.classList.remove('pulse');
-        void callMascotEl.offsetWidth;
-        callMascotEl.classList.add('pulse');
-      };
-      utter.onend = finishSpeak;
-      utter.onerror = finishSpeak;
-      window.speechSynthesis.speak(utter);
-      setTimeout(finishSpeak, Math.min(12000, 1500 + text.length * 120));
+      watchdogId = setTimeout(finishSpeak, 2000 + text.length * 130);
+      chunks.forEach((chunk, i) => {
+        const utter = new SpeechSynthesisUtterance(chunk);
+        utter.lang = L.tts;
+        if (voice) utter.voice = voice;
+        // Giọng bé trai dễ thương cho Mon.L — pitch cao hơn giọng người lớn
+        // mặc định (1.0), rate nhỉnh hơn một chút cho nghe nhí nhảnh.
+        utter.rate = 1.05;
+        utter.pitch = 1.3;
+        if (i === 0) {
+          utter.onstart = () => { callAvatar.classList.add('talking'); callMascotEl.classList.add('talking'); callSetVideoTalking(true); };
+        }
+        // Mỗi từ nói ra thì "nhấn" thêm một nhịp cho khớp trọng âm — buộc
+        // reflow (offsetWidth) để retrigger được animation dù class không đổi.
+        utter.onboundary = () => {
+          callMascotEl.classList.remove('pulse');
+          void callMascotEl.offsetWidth;
+          callMascotEl.classList.add('pulse');
+        };
+        if (i === chunks.length - 1) {
+          utter.onend = finishSpeak;
+          utter.onerror = finishSpeak;
+        }
+        window.speechSynthesis.speak(utter);
+      });
     }
     function callReplayLast() {
       if (!('speechSynthesis' in window) || !callSaid.textContent || callSaid.textContent === '…') return;
       window.speechSynthesis.cancel();
       const L = CALL_LANGS[callLang] || CALL_LANGS.vi;
-      const utter = new SpeechSynthesisUtterance(callSaid.textContent);
-      utter.lang = L.tts;
+      const text = callSaid.textContent;
       const voice = callVoiceCache[callLang];
-      if (voice) utter.voice = voice;
+      const sentences = text.split(/(?<=[.!?…:])\s+/).map((s) => s.trim()).filter(Boolean);
+      const chunks = sentences.length ? sentences : [text];
       let replayDone = false;
-      const finishReplay = () => { if (!replayDone) { replayDone = true; callAvatar.classList.remove('talking'); callMascotEl.classList.remove('talking'); callSetVideoTalking(false); } };
-      utter.onstart = () => { callAvatar.classList.add('talking'); callMascotEl.classList.add('talking'); callSetVideoTalking(true); };
-      utter.onend = finishReplay;
-      utter.onerror = finishReplay;
-      window.speechSynthesis.speak(utter);
-      setTimeout(finishReplay, Math.min(12000, 1500 + callSaid.textContent.length * 120));
+      let watchdogId = null;
+      const finishReplay = () => {
+        if (replayDone) return;
+        replayDone = true;
+        clearTimeout(watchdogId);
+        callAvatar.classList.remove('talking');
+        callMascotEl.classList.remove('talking');
+        callSetVideoTalking(false);
+      };
+      watchdogId = setTimeout(finishReplay, 2000 + text.length * 130);
+      chunks.forEach((chunk, i) => {
+        const utter = new SpeechSynthesisUtterance(chunk);
+        utter.lang = L.tts;
+        if (voice) utter.voice = voice;
+        utter.rate = 1.05;
+        utter.pitch = 1.3;
+        if (i === 0) utter.onstart = () => { callAvatar.classList.add('talking'); callMascotEl.classList.add('talking'); callSetVideoTalking(true); };
+        if (i === chunks.length - 1) {
+          utter.onend = finishReplay;
+          utter.onerror = finishReplay;
+        }
+        window.speechSynthesis.speak(utter);
+      });
     }
 
     async function callAsk(userText) {
@@ -3557,6 +3626,8 @@
         const utter = new SpeechSynthesisUtterance(line);
         utter.lang = 'vi-VN';
         if (callVoiceCache.vi) utter.voice = callVoiceCache.vi;
+        utter.rate = 1.05;
+        utter.pitch = 1.3;
         utter.onend = finishPreview;
         utter.onerror = finishPreview;
         window.speechSynthesis.speak(utter);
