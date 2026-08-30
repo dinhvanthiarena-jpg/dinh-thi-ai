@@ -329,6 +329,7 @@ button:focus-visible,
 }
 .btn-play {
   min-width: 200px;
+  background: linear-gradient(135deg, var(--brand-fill), var(--heart));
 }
 .btn-gifted {
   background: var(--card);
