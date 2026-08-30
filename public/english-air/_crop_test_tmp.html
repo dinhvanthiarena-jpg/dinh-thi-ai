@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+  body { margin: 0; background: #000; display: flex; flex-wrap: wrap; gap: 10px; padding: 10px; }
+  .box { position: relative; width: 300px; height: 260px; overflow: hidden; background: #140722; border-radius: 12px; }
+  .box img { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 100%; height: 100%; object-fit: cover; }
+  .label { position: absolute; top: 4px; left: 4px; color: #0f0; font: 12px monospace; background: rgba(0,0,0,.6); padding: 2px 6px; z-index: 5; }
+  .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,6,26,.55) 0, rgba(15,6,26,0) 30%, rgba(15,6,26,.55) 72%, rgba(15,6,26,.94) 100%); }
+</style></head>
+<body>
+  <div class="box"><span class="label">op-y: 26% (current)</span><img src="assets/nhom.webp" style="object-position:50% 26%"><div class="veil"></div></div>
+  <div class="box"><span class="label">op-y: 10%</span><img src="assets/nhom.webp" style="object-position:50% 10%"><div class="veil"></div></div>
+  <div class="box"><span class="label">op-y: 0%</span><img src="assets/nhom.webp" style="object-position:50% 0%"><div class="veil"></div></div>
+  <div class="box"><span class="label">op-y: 15%</span><img src="assets/nhom.webp" style="object-position:50% 15%"><div class="veil"></div></div>
+  <div class="box"><span class="label">op-y: 20%</span><img src="assets/nhom.webp" style="object-position:50% 20%"><div class="veil"></div></div>
+</body></html>
