@@ -2483,14 +2483,20 @@ function diemDoc(nghe, mau) {
 }
 
 /* ═══════════ VIDEO NHÂN VẬT ═══════════
-   Hai đoạn: đang nói và đang nghỉ. Mỗi đoạn một THẺ VIDEO RIÊNG, đổi qua lại
-   bằng cách ẩn hiện chứ không đổi src — đổi src là trình duyệt nạp lại từ đầu,
-   chớp đen một cái mỗi lần ON-Language bắt đầu hay ngừng nói.
-   Chỉ có đoạn nói thì lúc nghỉ dừng đứng ở khung miệng ngậm. */
-const VIDEO_MON = { noi: "assets/mon-noi.mp4", cho: "assets/mon-cho.mp4" };
-const THE_VIDEO = { noi: "#monVid", cho: "#monVidCho" };
-/* Giây đứng yên trong đoạn nói — chỉ dùng khi KHÔNG có đoạn nghỉ riêng.
-   Giây 12,208 (khung 293) là chỗ miệng ngậm nhất, mắt mở, đứng tự nhiên. */
+   Ba đoạn: đang nói, đang nghỉ, đang nhảy. Đang nói thì chạy đoạn nói; không
+   nói thì luân phiên nghỉ rồi nhảy, hết đoạn này sang đoạn kia.
+   Mỗi đoạn một THẺ VIDEO RIÊNG, đổi qua lại bằng ẩn hiện chứ không đổi src —
+   đổi src là trình duyệt nạp lại từ đầu, chớp đen một cái mỗi lần đổi. */
+const VIDEO_MON = {
+  noi: "assets/mon-noi.mp4",
+  cho: "assets/mon-cho.mp4",
+  nhay: "assets/mon-nhay.mp4",
+};
+const THE_VIDEO = { noi: "#monVid", cho: "#monVidCho", nhay: "#monVidNhay" };
+/* Vòng lúc không nói: nghỉ trước cho êm, rồi mới nhảy. */
+const VONG_NGHI = ["cho", "nhay"];
+let chiNghi = 0;
+/* Giây đứng yên trong đoạn nói — chỉ dùng khi KHÔNG có đoạn nghỉ nào tải được. */
 const KHUNG_YEN = 13.7;
 const coVideo = {};
 
@@ -2506,51 +2512,72 @@ function doVideoMon() {
     // Chỉ nhận khi trình duyệt thật sự đọc được, chứ không chỉ vì tệp tồn tại.
     v.addEventListener("loadedmetadata", () => { coVideo[ten] = duong; batVideo(); }, { once: true });
     v.addEventListener("error", () => {}, { once: true });
+    v.preload = "auto";
     v.src = duong;
   });
 }
 
+/** Đoạn nghỉ nào đang tới lượt và tải được. Không có đoạn nào thì trả về rỗng. */
+function nghiTiepTheo() {
+  for (let i = 0; i < VONG_NGHI.length; i++) {
+    const ten = VONG_NGHI[(chiNghi + i) % VONG_NGHI.length];
+    if (coVideo[ten]) { chiNghi = (chiNghi + i) % VONG_NGHI.length; return ten; }
+  }
+  return "";
+}
+
 let canhVideo = null, daGacVideo = false;
-let videoDangChay = null;   // thẻ nào đang phải chạy
+let videoDangChay = null;     // thẻ nào đang phải chạy
+let dangNoiVideo = false;
+function sangDoanKe() {
+  chiNghi = (chiNghi + 1) % VONG_NGHI.length;
+  datVideo(false);
+}
 function gacVideo() {
   if (daGacVideo) return;
   daGacVideo = true;
-  // Bắt sự kiện thôi chưa đủ tin: có máy nuốt mất pause, có máy chặn play() vì
-   // chưa có cú chạm nào, có máy tự dừng video khi giọng đọc bật lên. Nên canh
-   // thẳng: cứ 0,4 giây ngó một lần, thẻ nào đang phải chạy mà đứng thì cho chạy tiếp.
   Object.keys(THE_VIDEO).forEach(ten => {
     const v = the(ten);
     if (!v) return;
-    v.addEventListener("pause", () => { if (videoDangChay === v) v.play().catch(() => {}); });
+    v.addEventListener("pause", () => { if (videoDangChay === v && !v.ended) v.play().catch(() => {}); });
     v.addEventListener("ended", () => {
       if (videoDangChay !== v) return;
-      try { v.currentTime = 0.04; } catch (e) {}
-      v.play().catch(() => {});
+      // Đang nói thì quay lại đầu đoạn nói; đang nghỉ thì sang đoạn kế tiếp.
+      if (dangNoiVideo) { try { v.currentTime = 0.04; } catch (e) {} v.play().catch(() => {}); }
+      else sangDoanKe();
     });
   });
+  // Bắt sự kiện thôi chưa đủ tin: có máy nuốt mất pause, có máy chặn play() vì
+  // chưa có cú chạm nào, có máy tự dừng video khi giọng đọc bật lên. Nên canh
+  // thẳng: cứ 0,4 giây ngó một lần.
   clearInterval(canhVideo);
   canhVideo = setInterval(() => {
     const v = videoDangChay;
     if (!v || v.hidden) return;
     const het = v.duration && v.currentTime >= v.duration - 0.06;
-    if (v.ended || het) { try { v.currentTime = 0.04; } catch (e) {} }
+    if (v.ended || het) {
+      if (dangNoiVideo) { try { v.currentTime = 0.04; } catch (e) {} v.play().catch(() => {}); }
+      else sangDoanKe();
+      return;
+    }
     if (v.paused) v.play().catch(() => {});
   }, 400);
 }
 
 function batVideo() {
-  if (!coVideo.noi && !coVideo.cho) return;
+  if (!Object.keys(coVideo).length) return;
   gacVideo();
   document.querySelector(".scene-fit").classList.add("co-video");
-  datVideo(false);
+  datVideo(dangNoiVideo);
 }
 
-/** Chuyển giữa đoạn nói và đoạn nghỉ. */
+/** Chuyển giữa đoạn nói và vòng nghỉ. */
 let hoiTua = null;
 function datVideo(dangNoi) {
-  // Có đủ hai đoạn thì đổi thẻ; thiếu một đoạn thì dùng đoạn còn lại cho cả hai.
-  const muon = dangNoi ? (coVideo.noi ? "noi" : "cho") : (coVideo.cho ? "cho" : "noi");
-  if (!coVideo[muon]) return;
+  dangNoiVideo = !!dangNoi;
+  // Đang nói mà có đoạn nói thì dùng nó; còn lại lấy đoạn nghỉ tới lượt.
+  const muon = (dangNoi && coVideo.noi) ? "noi" : (nghiTiepTheo() || (coVideo.noi ? "noi" : ""));
+  if (!muon) return;
   const v = the(muon);
   if (!v) return;
 
@@ -2563,10 +2590,9 @@ function datVideo(dangNoi) {
   });
 
   clearInterval(hoiTua); hoiTua = null;
-  // Có đoạn nghỉ riêng thì lúc nào cũng có cái để chạy — không phải dừng hình nữa.
-  if (muon === "cho" && !coVideo.cho) return;
-  if (!dangNoi && !coVideo.cho) {
-    // Chỉ có đoạn nói: không nói thì dừng hẳn ở khung miệng ngậm.
+
+  // Không có đoạn nghỉ nào tải được: đành dừng đoạn nói ở khung miệng ngậm.
+  if (!dangNoi && muon === "noi") {
     videoDangChay = null;
     v.classList.add("dung-yen");
     v.loop = false;
@@ -2580,9 +2606,14 @@ function datVideo(dangNoi) {
     }, 110);
     return;
   }
+
   v.classList.remove("dung-yen");
-  v.loop = true;
+  // Đoạn nói chạy vòng cho tới khi nói xong; đoạn nghỉ chạy hết rồi nhường đoạn kia.
+  v.loop = dangNoi;
   videoDangChay = v;
+  if (v.ended || (v.duration && v.currentTime >= v.duration - 0.06)) {
+    try { v.currentTime = 0.04; } catch (e) {}
+  }
   // play() có thể bị chặn nếu người dùng chưa chạm màn hình — bỏ qua cho êm.
   v.play().catch(() => {});
 }
