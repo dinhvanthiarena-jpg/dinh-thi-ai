@@ -1,6 +1,6 @@
 /* ============================================================
    English Air — giao diện dựng theo bản ghi màn hình AirLearn
-   Tím thương hiệu MON.L, nền đậm mặc định, bo tròn nhiều.
+   Tím thương hiệu ON-Language, nền đậm mặc định, bo tròn nhiều.
    ============================================================ */
 
 /* ---------- 1. TOKEN ---------- */
@@ -232,7 +232,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 
 /* ---------- 6. MÀN HỌC ---------- */
-/* Hero: MON.L đứng giữa vầng sáng tím, có bong bóng lời chào. */
+/* Hero: ON-Language đứng giữa vầng sáng tím, có bong bóng lời chào. */
 .hero {
   position: relative; display: flex; flex-direction: column; align-items: center;
   padding: var(--s5) 0 var(--s4); margin: 0 calc(var(--gut) * -1);
@@ -805,7 +805,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 /* ---------- 15b. GỌI VIDEO LUYỆN NÓI ---------- */
 .call-hero { text-align: center; padding: var(--s5) 0 var(--s4); }
-/* Nhãn nhỏ cho biết MON.L vừa nghe ra thứ tiếng nào — người học không phải chọn. */
+/* Nhãn nhỏ cho biết ON-Language vừa nghe ra thứ tiếng nào — người học không phải chọn. */
 .say-lang { display: inline-block; margin-bottom: 6px; padding: 3px 10px; border-radius: var(--rf);
   background: #EDE4FB; color: #5B21B6; font-size: .66rem; font-weight: 900;
   letter-spacing: .08em; text-transform: uppercase; }
@@ -817,7 +817,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   margin: 0 auto var(--s4); padding: 0; border: 0; border-radius: 20px; overflow: hidden;
   background: var(--muted); box-shadow: var(--sh-2); cursor: pointer; }
 .cp-room { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-/* Đặt MON.L đúng chỗ cũ trong tấm ảnh 3:4, rồi cho cử động y như trong cuộc gọi. */
+/* Đặt ON-Language đúng chỗ cũ trong tấm ảnh 3:4, rồi cho cử động y như trong cuộc gọi. */
 .cp-mon { position: absolute; left: 23.481%; top: 8.564%; width: 56.906%; height: 84.185%;
   transform-origin: 50% 100%; animation: monBreathe 4.2s ease-in-out infinite; }
 .cp-mon .mon-beat { display: block; position: relative; width: 100%; height: 100%; transform-origin: 50% 100%; }
@@ -847,7 +847,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   filter: blur(34px) saturate(.7) brightness(.42);
 }
 
-/* ----- Căn phòng: MON.L đứng đúng chỗ cũ, ảnh giữ nguyên độ nét ----- */
+/* ----- Căn phòng: ON-Language đứng đúng chỗ cũ, ảnh giữ nguyên độ nét ----- */
 .call-scene { position: absolute; inset: 0; overflow: hidden; }
 .scene-fit {
   position: absolute; left: 50%; top: var(--scene-t); transform: translateX(-50%);
@@ -978,7 +978,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 /* Bóng nói kiểu truyện tranh, luôn sáng để đọc được trên nền ảnh. */
 .call-bubble {
   /* Bảng trắng ôm lấy chữ chứ không kéo hết bề ngang: câu ngắn mà bảng dài cả
-     màn hình thì che mất MON.L một cách vô cớ. */
+     màn hình thì che mất ON-Language một cách vô cớ. */
   position: relative; align-self: center;
   width: fit-content; max-width: 100%;
   padding: var(--s3) var(--s4); border-radius: 20px;
@@ -991,7 +991,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   background: rgba(255,255,255,.95);
 }
 /* Bảng chỉ cao đúng một đoạn ngắn. Câu dài thì cuộn trong đó, chứ không đẩy
-   bảng phình lên che mất MON.L. */
+   bảng phình lên che mất ON-Language. */
 .bubble-roll {
   max-height: clamp(76px, 17vh, 128px);
   overflow-y: auto; overscroll-behavior: contain;
@@ -1666,7 +1666,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 :root[data-theme="dark"] .streak { background: linear-gradient(180deg, #2A1C10, var(--card) 45%); }
 .streak[hidden] { display: none; }
 .streak-body { width: 100%; max-width: 460px; margin: 0 auto; padding: 0 var(--s4) calc(var(--s6) + env(safe-area-inset-bottom)); text-align: center; }
-/* Ô này trước là ngọn lửa cao, nay là mặt MON.L nên phải vuông và bo tròn. */
+/* Ô này trước là ngọn lửa cao, nay là mặt ON-Language nên phải vuông và bo tròn. */
 .flame { width: 128px; height: 128px; margin: var(--s3) auto var(--s4);
   border-radius: var(--rf); overflow: hidden; display: grid; place-items: center;
   background: var(--brand-soft); }
@@ -1787,7 +1787,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important;
 }
 
-/* ═══════════ NHÓM BẠN HỌC MON.L ═══════════ */
+/* ═══════════ NHÓM BẠN HỌC ON-Language ═══════════ */
 /* Nút vào, nằm trong Hồ sơ. Cùng dáng với thẻ Pro cho khỏi lạc nhịp. */
 .nhom-banner {
   display: flex; align-items: center; gap: var(--s3); width: 100%;

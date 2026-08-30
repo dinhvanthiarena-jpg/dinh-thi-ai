@@ -34,7 +34,7 @@ async function veTrangPro(req, res, loiNhom) {
   const u = res.locals.currentUser;
   const maNhom = u && u.familyCode ? u.familyCode : '';
   res.render('pro/index', {
-    title: 'Mon.L Pro',
+    title: 'ON-Language Pro',
     plans: pro.PLANS,
     giaThang: {
       month: pro.giaMoiThang('month'),
@@ -84,7 +84,7 @@ router.get('/don/:code', requireAuth, an(async (req, res) => {
   const order = await ProOrder.findOne({ where: { code: req.params.code } });
   if (!order || order.UserId !== res.locals.currentUser.id) return res.redirect('/pro');
   res.render('pro/don', {
-    title: 'Thanh toán Mon.L Pro',
+    title: 'Thanh toán ON-Language Pro',
     order,
     qr: pro.anhQR(order),
     ck: pro.thongTinChuyenKhoan(order),
@@ -99,7 +99,7 @@ router.get('/don/:code/trang-thai', requireAuth, an(async (req, res) => {
   res.json({ status: order.status, proUntil: res.locals.currentUser.proUntil });
 }));
 
-/* ---------- App Mon.L hỏi xem người này được dùng gì ---------- */
+/* ---------- App ON-Language hỏi xem người này được dùng gì ---------- */
 router.get('/api/quyen', an((req, res) => {
   const u = res.locals.currentUser;
   res.json({
@@ -111,7 +111,7 @@ router.get('/api/quyen', an((req, res) => {
 }));
 
 /* ══════════════════════════════════════════════════════════════
-   API cho app Mon.L — bán gói ngay trong app, không phải nhảy ra web.
+   API cho app ON-Language — bán gói ngay trong app, không phải nhảy ra web.
    App và web cùng một tên miền nên dùng chung phiên đăng nhập, chỉ cần
    gọi kèm credentials: "same-origin".
    ══════════════════════════════════════════════════════════════ */

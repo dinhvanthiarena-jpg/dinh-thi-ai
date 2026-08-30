@@ -1,5 +1,5 @@
 /* ============================================================
-   Mon.L — logic ứng dụng
+   ON-Language — logic ứng dụng
    Bố cục và luồng dựng theo bản ghi màn hình AirLearn:
    dạy trước (biển báo / thẻ từ / hội thoại) rồi mới luyện tập.
    ============================================================ */
@@ -188,7 +188,7 @@ function paintStats() {
 }
 
 /* ---------- 3. Phát âm ---------- */
-/* MON.L nói được ba thứ tiếng. Người học KHÔNG chọn trước — cứ nói, MON.L
+/* ON-Language nói được ba thứ tiếng. Người học KHÔNG chọn trước — cứ nói, ON-Language
    nghe ra rồi đáp lại đúng thứ tiếng đó, và bộ nghe cũng đổi theo. */
 const CALL_LANGS = {
   en: { name: "English", tts: "en-GB", sr: "en-GB" },
@@ -202,7 +202,7 @@ const CALL_LANGS = {
   ru: { name: "Русский", tts: "ru-RU", sr: "ru-RU" },
   th: { name: "ไทย", tts: "th-TH", sr: "th-TH" },
 };
-/** MON.L nói được thứ tiếng nào cũng được, nên gặp mã lạ thì cứ dựng tạm một mục
+/** ON-Language nói được thứ tiếng nào cũng được, nên gặp mã lạ thì cứ dựng tạm một mục
     rồi để trình duyệt tự tìm giọng — còn hơn là ép về tiếng Anh. */
 function langInfo(code) {
   if (CALL_LANGS[code]) return CALL_LANGS[code];
@@ -223,7 +223,7 @@ function deviceLang() {
   if (tag.startsWith("en")) return "en";
   return "vi";
 }
-/* Nâng cao độ giọng lên cho ra chất con trai nhỏ, hợp với MON.L. */
+/* Nâng cao độ giọng lên cho ra chất con trai nhỏ, hợp với ON-Language. */
 const KID_PITCH = 1.65;
 
 let voices = [];
@@ -375,7 +375,7 @@ const stopSpeak = () => {
 };
 
 /* iPhone/iPad chỉ cho phát tiếng lần đầu ngay trong lúc ngón tay còn chạm màn hình.
-   Câu nói đầu của MON.L lại đến sau một lượt chờ mạng, nên phải "mồi" sẵn lúc bấm nút,
+   Câu nói đầu của ON-Language lại đến sau một lượt chờ mạng, nên phải "mồi" sẵn lúc bấm nút,
    không thì cả cuộc gọi im lặng mà chẳng báo lỗi gì. */
 let speechPrimed = false;
 function primeSpeech() {
@@ -390,7 +390,7 @@ function primeSpeech() {
   } catch { /* bỏ qua */ }
 }
 
-/** MON.L giải thích vì sao bài này chưa bấm vào được. */
+/** ON-Language giải thích vì sao bài này chưa bấm vào được. */
 function baoKhoa() {
   openSheet({
     top: mascotBox("head", "sheet-mon"),
@@ -472,10 +472,10 @@ function renderLearn() {
   const doneN = list.filter(l => S.done[l.id]).length;
   const cur = list.find(l => l.id === currentLessonId());
 
-  // MON.L nói một câu hợp với tình hình học của người dùng
+  // ON-Language nói một câu hợp với tình hình học của người dùng
   const left = clamp(S.goal - S.todayXp, 0, S.goal);
   $("#heroLine").textContent =
-    !doneN                       ? "Chào bạn! Mình là MON.L. Bắt đầu bài đầu tiên nhé?" :
+    !doneN                       ? "Chào bạn! Mình là ON-Language. Bắt đầu bài đầu tiên nhé?" :
     doneN === list.length        ? `Bạn xong hết trình độ ${lv.code} rồi! Đổi trình độ ở góc trên nhé.` :
     !S.streak                    ? "Lâu rồi chưa gặp! Học một bài cho ấm tay nào." :
     left === 0                   ? `Xong mục tiêu hôm nay rồi. Chuỗi ${S.streak} ngày, giỏi lắm!` :
@@ -510,7 +510,7 @@ function renderLearn() {
       const cell = el("div", "node " + st + (l.checkpoint ? " check" : ""));
       const b = el("button", "node-btn"); b.type = "button";
       // Trước đây nút khoá bị disabled nên bấm vào không có gì xảy ra, người học
-      // tưởng app hỏng. Nay vẫn bấm được, bấm thì MON.L nói cho biết vì sao.
+      // tưởng app hỏng. Nay vẫn bấm được, bấm thì ON-Language nói cho biết vì sao.
       b.setAttribute("aria-disabled", st === "locked" ? "true" : "false");
       const noiTrangThai = { done: "đã hoàn thành", current: "bài hiện tại", open: "mở sẵn", locked: "chưa mở khoá" };
       b.setAttribute("aria-label", `${l.title} — ${noiTrangThai[st]}`);
@@ -939,7 +939,7 @@ function grammarRow(r) {
 
 /* ═══════════ ĐỌC THỬ VÀ CHẤM ĐIỂM ═══════════
    Người học đọc theo mẫu, máy nghe rồi chấm xem lệch bao nhiêu. Dùng đúng bộ
-   nghe của trình duyệt như phần gọi MON.L, nhưng đặt sẵn tiếng Anh và chỉ nghe
+   nghe của trình duyệt như phần gọi ON-Language, nhưng đặt sẵn tiếng Anh và chỉ nghe
    một câu rồi dừng. */
 /** Dọn phần đọc thử: tắt micro, huỷ đoạn ghi cũ. Không dọn thì đèn micro sáng
     mãi và bộ nhớ cứ giữ từng đoạn thu của mọi từ đã học. */
@@ -2285,18 +2285,18 @@ function renderReview() {
 $("#btnDue").addEventListener("click", () => startLesson(null, { words: sample(dueWords(), 8), mode: "review", max: 10 }));
 $("#btnWeak").addEventListener("click", () => startLesson(null, { words: weakWords().slice(0, 8), mode: "review", max: 10 }));
 
-/* ---------- 18b. Gọi video với MON.L ----------
+/* ---------- 18b. Gọi video với ON-Language ----------
    Hai chế độ:
    • "free"   — nói chuyện tự do. Máy chủ /api/english-air/chat gọi Claude,
-                MON.L trả lời theo trình độ và vốn từ của người học.
-   • "teach" — luyện nói với MON.L trong vai giáo viên: nó nói tiếng Anh chuẩn,
+                ON-Language trả lời theo trình độ và vốn từ của người học.
+   • "teach" — luyện nói với ON-Language trong vai giáo viên: nó nói tiếng Anh chuẩn,
      ra câu cho mình nói theo, chấm phát âm rồi sửa. Cũng cần mạng. Cũ là
                 không có mạng.
    Cả hai đều dùng micro (Web Speech API); gõ chữ là đường lui khi không nói được. */
 /* ---------- Sổ tay cách nói ----------
    Mỗi câu người học nói trong lúc tán gẫu đều được ghi lại ngay trên máy họ.
    Từ đó rút ra cách xưng hô và những chữ họ hay dùng, gửi kèm mỗi lượt để
-   MON.L bắt đúng giọng — kể cả ở những lần gọi sau, khỏi phải làm quen lại.
+   ON-Language bắt đúng giọng — kể cả ở những lần gọi sau, khỏi phải làm quen lại.
    Sổ này chỉ nằm trong máy người học, và chỉ dùng cho chế độ nói tự do. */
 const STYLE_MAX = 40;
 const STYLE_STOP = new Set(("là và của có không được cho với thì mà ở này đó rồi nhé nha " +
@@ -2314,13 +2314,13 @@ function noteStyle(text) {
   save();
 }
 
-/** Rút gọn sổ thành vài dòng đủ để MON.L bắt giọng, không gửi cả cuốn lên. */
+/** Rút gọn sổ thành vài dòng đủ để ON-Language bắt giọng, không gửi cả cuốn lên. */
 function styleBrief() {
   const says = (S.style && S.style.says) || [];
   if (says.length < 2) return null;
   const all = says.join(" ").toLowerCase();
   const co = w => new RegExp("(^|\\P{L})" + w + "(\\P{L}|$)", "iu").test(all);
-  // Ghi rõ MON.L phải tự xưng gì và gọi họ là gì. Có cặp đối xứng (tao–mày:
+  // Ghi rõ ON-Language phải tự xưng gì và gọi họ là gì. Có cặp đối xứng (tao–mày:
   // ai cũng "tao" khi nói về mình), có cặp lệch (em–anh: họ "em" thì mình "anh").
   const PAIRS = [
     { ho: "tao", ban: "mày", tu: "tao", goi: "mày" },
@@ -2347,7 +2347,7 @@ function styleBrief() {
 
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-/* Khung cảnh: tính lại cỡ căn phòng để MON.L đứng lọt giữa thanh trên và bóng nói.
+/* Khung cảnh: tính lại cỡ căn phòng để ON-Language đứng lọt giữa thanh trên và bóng nói.
    Máy nào cũng vừa, không phải đoán bằng media query. */
 const SCENE = { top: 0.12561, bot: 0.65922, ratio: 0.47551 };
 function fitScene() {
@@ -2361,7 +2361,7 @@ function fitScene() {
   let h = Math.max(240, limit - 10 - head) / (SCENE.bot - SCENE.top);
   let t = head - SCENE.top * h;
   if (t + h < vh) { h = (vh - head) / (1 - SCENE.top); t = head - SCENE.top * h; }
-  // Cửa sổ cao bất thường (màn desktop dựng đứng) thì thôi, đừng để MON.L phình ra.
+  // Cửa sổ cao bất thường (màn desktop dựng đứng) thì thôi, đừng để ON-Language phình ra.
   if (h > 1500) {
     h = 1500;
     t = head + Math.max(0, (limit - head - (SCENE.bot - SCENE.top) * h) / 2) - SCENE.top * h;
@@ -2370,7 +2370,7 @@ function fitScene() {
   call.style.setProperty("--scene-t", t + "px");
 }
 if (window.ResizeObserver) {
-  // Bóng nói cao thấp tuỳ câu, cứ đổi là phải tính lại chỗ đứng cho MON.L.
+  // Bóng nói cao thấp tuỳ câu, cứ đổi là phải tính lại chỗ đứng cho ON-Language.
   const ro = new ResizeObserver(fitScene);
   [".call-stage", "#callBubble", "#callTask", ".call-foot"].forEach(sel => ro.observe($(sel)));
 }
@@ -2429,7 +2429,7 @@ function diemDoc(nghe, mau) {
 /* ═══════════ VIDEO NHÂN VẬT ═══════════
    Hai đoạn: đang nói và đang nghỉ. Mỗi đoạn một THẺ VIDEO RIÊNG, đổi qua lại
    bằng cách ẩn hiện chứ không đổi src — đổi src là trình duyệt nạp lại từ đầu,
-   chớp đen một cái mỗi lần MON.L bắt đầu hay ngừng nói.
+   chớp đen một cái mỗi lần ON-Language bắt đầu hay ngừng nói.
    Chỉ có đoạn nói thì lúc nghỉ dừng đứng ở khung miệng ngậm. */
 const VIDEO_MON = { noi: "assets/mon-noi.mp4", cho: "assets/mon-cho.mp4" };
 const THE_VIDEO = { noi: "#monVid", cho: "#monVidCho" };
@@ -2568,7 +2568,7 @@ $("#callRoll") && $("#callRoll").addEventListener("scroll", () => {
   $("#callBubble").classList.toggle("het-cuon", day);
 });
 
-/** MON.L nói: hiện câu, chạy hoạt ảnh, nhảy một nhịp mỗi từ cho khớp miệng. */
+/** ON-Language nói: hiện câu, chạy hoạt ảnh, nhảy một nhịp mỗi từ cho khớp miệng. */
 function monSays(en, vi, after, py) {
   const L = langInfo(C.lang);
   $("#callSaidLang").textContent = L.name;
@@ -2589,7 +2589,7 @@ function monSays(en, vi, after, py) {
     clearInterval(canh);
     C.speaking = false; C.sayDone = null;
     m.classList.remove("talking", "pulse");
-    // Nói xong là về đoạn nghỉ. Thiếu dòng này thì video chạy mãi, MON.L nhép
+    // Nói xong là về đoạn nghỉ. Thiếu dòng này thì video chạy mãi, ON-Language nhép
     // miệng cả lúc đang nghe người học nói.
     datVideo(false);
     if (after) after();
@@ -2699,7 +2699,7 @@ async function askTutor(first) {
       credentials: "same-origin",   // để máy chủ biết ai đang gọi, phục vụ gói Pro
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        // __START__ là dấu hiệu mở màn: MON.L chào bằng tiếng Việt và mời
+        // __START__ là dấu hiệu mở màn: ON-Language chào bằng tiếng Việt và mời
         // người học cứ nói tiếng gì cũng được.
         history: first ? [{ role: "user", content: "__START__" }] : C.msgs,
         mode: C.mode,
@@ -2717,8 +2717,8 @@ async function askTutor(first) {
       $("#callSaidVi").textContent = "";
       chinhCuonNoi();
       openSheet({
-        title: "Nâng cấp Mon.L Pro",
-        body: "Học 60 bài thì miễn phí mãi. Riêng phần gọi nói chuyện tự do với MON.L cần gói Pro.",
+        title: "Nâng cấp ON-Language Pro",
+        body: "Học 60 bài thì miễn phí mãi. Riêng phần gọi nói chuyện tự do với ON-Language cần gói Pro.",
         yes: "Xem gói Pro", no: "Để sau",
         onYes() { endCall(false); moPro(); }   // mở ngay trong app
       });
@@ -2729,7 +2729,7 @@ async function askTutor(first) {
       throw new Error(j.error || "Không gọi được máy chủ");
     }
     const data = await res.json();
-    // MON.L đáp bằng thứ tiếng nào thì từ đây nói và nghe bằng thứ tiếng đó.
+    // ON-Language đáp bằng thứ tiếng nào thì từ đây nói và nghe bằng thứ tiếng đó.
     if (/^[a-z]{2}$/.test(data.lang || "")) C.lang = data.lang;
     C.msgs.push({ role: "assistant", content: data.reply });
     if (!first) pushLog("mon", data.reply);
@@ -2748,7 +2748,7 @@ async function askTutor(first) {
         $("#callTask").hidden = true;
       }
     }
-    // Mở micro ngay khi MON.L bắt đầu nói, đừng đợi nó nói xong. Người học
+    // Mở micro ngay khi ON-Language bắt đầu nói, đừng đợi nó nói xong. Người học
     // phải cắt lời được, không thì ngồi chờ cả chục giây mới tới lượt mình.
     C.busy = false;
     $("#btnMic").disabled = !SR;
@@ -2758,7 +2758,7 @@ async function askTutor(first) {
   } catch (err) {
     C.busy = false;
     setState("Mất kết nối");
-    $("#callSaid").textContent = "MON.L chưa nói chuyện tự do được lúc này.";
+    $("#callSaid").textContent = "ON-Language chưa nói chuyện tự do được lúc này.";
     $("#callSaidVi").textContent = String(err.message || "").slice(0, 120);
     chinhCuonNoi();
     $("#btnMic").disabled = true;
@@ -2999,9 +2999,9 @@ $("#btnCallLog").addEventListener("click", () => {
 });
 $("#btnCallHear").addEventListener("click", () => { primeSpeech(); speak($("#callSaid").textContent); });
 
-/* Thẻ Gọi Air: bấm vào là MON.L chào ngay — để thấy nó cử động và nói được thật. */
+/* Thẻ Gọi Air: bấm vào là ON-Language chào ngay — để thấy nó cử động và nói được thật. */
 const PREVIEW_LINES = [
-  { en: "Hi! I am MON.L. Let us speak English!", vi: "Chào! Tớ là MON.L. Mình nói tiếng Anh nhé!" },
+  { en: "Hi! I am ON-Language. Let us speak English!", vi: "Chào! Tớ là ON-Language. Mình nói tiếng Anh nhé!" },
   { en: "Tap the green button and talk to me.", vi: "Bấm nút xanh rồi nói chuyện với tớ nhé." },
   { en: "Do not worry. Just try your best!", vi: "Đừng lo. Cứ thử hết sức nhé!" },
 ];
@@ -3030,7 +3030,7 @@ $("#btnCallSkip").addEventListener("click", showChoices);
 $("#btnCallSend").addEventListener("click", sendTyped);
 $("#callInput").addEventListener("keydown", e => { if (e.key === "Enter") sendTyped(); });
 
-/* ---------- 18c. Gói Mon.L Pro ----------
+/* ---------- 18c. Gói ON-Language Pro ----------
    Màn bán gói nằm hẳn trong app. Máy chủ chỉ lo hai việc app không làm được:
    sinh mã QR có sẵn số tiền, và nghe ngân hàng báo tiền về. App và web cùng
    một tên miền nên dùng chung phiên đăng nhập, chỉ cần gọi kèm credentials. */
@@ -3070,7 +3070,7 @@ function veManPro() {
   b.textContent = "";
 
   const h = el("h1");
-  h.append(document.createTextNode("Gọi video với MON.L, "));
+  h.append(document.createTextNode("Gọi video với ON-Language, "));
   h.append(el("em", null, `miễn phí ${d.ngayDungThu} ngày`));
   b.append(h);
   b.append(el("p", "pro-sub", "Kèm toàn bộ tính năng Pro."));
@@ -3309,7 +3309,7 @@ function veManXong() {
   box.append(el("div", "tick", "✓"));
   box.append(el("h1", null, "Đã nhận được tiền"));
   box.append(el("p", "pro-sub", "Gói Pro đã mở. Cảm ơn bạn nhiều!"));
-  const nut = el("button", "pro-cta", "Bắt đầu nói chuyện với MON.L");
+  const nut = el("button", "pro-cta", "Bắt đầu nói chuyện với ON-Language");
   nut.type = "button";
   nut.addEventListener("click", () => { dongPro(); primeSpeech(); startCall("free"); });
   box.append(nut);
@@ -3392,7 +3392,7 @@ function veAvatar() {
     o.append(document.createTextNode(m.e));
     return;
   }
-  // Mặc định: linh vật MON.L, dùng lại đúng cơ chế thay ảnh sẵn có
+  // Mặc định: linh vật ON-Language, dùng lại đúng cơ chế thay ảnh sẵn có
   o.dataset.mascot = "head";
   o.append(svgUse("m-air-head", "0 0 120 120"));
   if (document.documentElement.classList.contains("has-mascot-img")) swapMascot(o);
@@ -3413,7 +3413,7 @@ function moChonAvatar() {
   // Ô đầu tiên trả về linh vật
   const oMon = el("button", "av-opt" + (!S.avatar || S.avatar.k === "m" ? " on" : ""));
   oMon.type = "button";
-  oMon.setAttribute("aria-label", "Dùng linh vật MON.L");
+  oMon.setAttribute("aria-label", "Dùng linh vật ON-Language");
   oMon.style.background = "var(--brand-soft)";
   const mini = el("span", "av-mini");
   mini.dataset.mascot = "head";
@@ -3614,7 +3614,7 @@ async function hoiTaiKhoan() {
 
 function veCong() {
   const dangKy = TK.kieu === "dangKy";
-  $("#congTitle").textContent = dangKy ? "Chào bạn, tớ là MON.L" : "Chào bạn quay lại";
+  $("#congTitle").textContent = dangKy ? "Chào bạn, tớ là ON-Language" : "Chào bạn quay lại";
   $("#congSub").textContent = dangKy
     ? "Đăng ký để giữ tiến độ học của bạn trên mọi máy."
     : "Nhập số điện thoại và mật khẩu để học tiếp.";

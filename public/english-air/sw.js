@@ -1,9 +1,9 @@
 /* ============================================================
-   Mon.L — Service Worker
+   ON-Language — Service Worker
    Toàn bộ app chạy offline sau lần mở đầu tiên.
    Đổi CACHE khi sửa file để buộc tải lại bản mới.
    ============================================================ */
-const CACHE = "english-air-v106";
+const CACHE = "english-air-v107";
 
 const SHELL = [
   "./",

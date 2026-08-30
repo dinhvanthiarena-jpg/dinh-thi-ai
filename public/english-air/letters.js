@@ -1,5 +1,5 @@
 /* ============================================================
-   Mon.L — nét chữ để tô bằng ngón tay
+   ON-Language — nét chữ để tô bằng ngón tay
    Mỗi chữ là một danh sách NÉT, tô theo đúng thứ tự người ta
    viết tay thật: trên xuống dưới, trái sang phải.
    Khung 100 x 120, chữ nằm trong khoảng y = 14 … 106.

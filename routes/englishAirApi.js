@@ -37,7 +37,7 @@ router.post('/chat', async (req, res) => {
   // mọi người vẫn gọi thoải mái, đúng như đang để miễn phí.
   if (!pro.duocDung(res.locals.currentUser)) {
     return res.status(402).json({
-      error: 'Phần gọi tự do nằm trong gói Pro. Nâng cấp để nói chuyện thoải mái với MON.L nhé.',
+      error: 'Phần gọi tự do nằm trong gói Pro. Nâng cấp để nói chuyện thoải mái với ON-Language nhé.',
       nangCap: '/pro',
     });
   }
@@ -51,7 +51,7 @@ router.post('/chat', async (req, res) => {
     res.status(noKey ? 503 : 502).json({
       error: noKey
         ? 'Chế độ nói chuyện tự do chưa bật trên máy chủ.'
-        : 'MON.L đang bận, bạn thử lại sau một chút nhé.',
+        : 'ON-Language đang bận, bạn thử lại sau một chút nhé.',
     });
   }
 });

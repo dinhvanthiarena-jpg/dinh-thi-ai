@@ -1,5 +1,5 @@
 /**
- * Gói Pro của app Mon.L — bán bằng VietQR, tự đối soát.
+ * Gói Pro của app ON-Language — bán bằng VietQR, tự đối soát.
  *
  * Cách tiền về:
  *   1. Người học chọn gói, hệ thống tạo một đơn với mã riêng, ví dụ MONL7F3K.
