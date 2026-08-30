@@ -249,6 +249,11 @@ const GIONG_NU = /female|linh|hoaimy|serena|kate|sonia|libby|hazel|samantha|vict
 /* Giọng ưu tiên khi người dùng chưa tự chọn. Thầy chốt tiếng Anh dùng Daniel
    (giọng nam Anh Quốc) — nghe đằm và rõ phụ âm cuối hơn mấy giọng nữ máy. */
 const GIONG_CHOT = { en: /daniel/i };
+/* Tiếng Anh đã chốt Daniel — giọng NAM. Nếu tiếng Việt lại lấy giọng nữ thì
+   thành hai người thay nhau nói, không còn ra một nhân vật nữa. Nên máy nào có
+   giọng Việt nam thì lấy giọng nam. Máy chỉ có mỗi giọng nữ (iPhone chỉ có
+   Linh) thì đành chịu, vẫn hơn là đọc sai tiếng. */
+const GIONG_NAM = /male|an|nam|minh|standard-(b|d)|wavenet-(b|d)/i;
 
 function voiceFor(tag) {
   const muon = chuanTag(tag);
@@ -269,6 +274,10 @@ function voiceFor(tag) {
   if (chot) {
     const v = dungMa.find(x => chot.test(x.name)) || pool.find(x => chot.test(x.name));
     if (v) return v;
+  }
+  if (goc === "vi") {
+    const nam = dungMa.find(v => GIONG_NAM.test(v.name)) || pool.find(v => GIONG_NAM.test(v.name));
+    if (nam) return nam;
   }
   const nu = ds => ds.find(v => GIONG_NU.test(v.name));
   // Khớp đúng mã và là giọng nữ là tốt nhất; rồi tới khớp đúng mã; rồi giọng nữ
