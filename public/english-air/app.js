@@ -33,11 +33,9 @@ const pic  = id => svgUse("p-" + id, "0 0 48 48");
    Mặc định dùng hình vẽ SVG trong sprite. Nếu có file ảnh nhân vật thật ở
    assets/mascot.png thì tự thay toàn bộ sang ảnh đó — không có file cũng
    không vỡ giao diện, nên thả ảnh vào lúc nào cũng được.                */
-const MASCOT_SRC = "assets/mascot.png";
-/* Ô tròn nhỏ (ảnh đại diện, dấu hiệu thương hiệu…) dùng logo tròn; chỗ nào
-   cần cả người thì vẫn là ảnh nhân vật đứng. */
+/* Mọi ô linh vật — to hay nhỏ, tròn hay vuông — đều dùng chung một logo
+   ON-Language, để đi đâu trong app cũng thấy đúng một gương mặt. */
 const AVATAR_SRC = "assets/avatar.webp";
-const anhCuaO = kind => (kind === "full" ? MASCOT_SRC : AVATAR_SRC);
 
 function useMascotImage() {
   const probe = new Image();
@@ -45,14 +43,14 @@ function useMascotImage() {
     document.documentElement.classList.add("has-mascot-img");
     $$("[data-mascot]").forEach(swapMascot);
   };
-  probe.src = MASCOT_SRC;
+  probe.src = AVATAR_SRC;
 }
 /** Đổi một ô linh vật SVG thành thẻ ảnh, giữ nguyên kích thước ô. */
 function swapMascot(box) {
   if (box.querySelector("img")) return;
   const kind = box.dataset.mascot || "head";
   const img = el("img", "mascot-img mascot-" + kind);
-  img.src = anhCuaO(kind);
+  img.src = AVATAR_SRC;
   img.alt = "";
   img.decoding = "async";
   box.textContent = "";
