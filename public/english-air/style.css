@@ -1010,15 +1010,17 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 /* Bóng nói kiểu truyện tranh, luôn sáng để đọc được trên nền ảnh. */
 .call-bubble {
   /* Bảng trắng ôm lấy chữ chứ không kéo hết bề ngang: câu ngắn mà bảng dài cả
-     màn hình thì che mất ON-Language một cách vô cớ. */
-  position: relative; align-self: center;
-  width: fit-content; max-width: 100%;
+     màn hình thì che mất ON-Language một cách vô cớ.
+     Bảng nằm NGAY DƯỚI THANH ĐẦU chứ không ở đáy nữa — đáy là đúng tầm mặt nhân
+     vật, đọc chữ thì mất mặt, xem mặt thì mất chữ. */
+  position: relative; z-index: 3; align-self: center;
+  margin: 0 auto var(--s2); width: fit-content; max-width: calc(100% - var(--gut) * 2);
   padding: var(--s3) var(--s4); border-radius: 20px;
   background: rgba(255,255,255,.95); color: var(--callink);
   box-shadow: 0 14px 34px rgba(0,0,0,.32); text-align: center;
 }
 .call-bubble::before {
-  content: ""; position: absolute; top: -8px; left: 50%; width: 20px; height: 20px;
+  content: ""; position: absolute; bottom: -8px; left: 50%; width: 20px; height: 20px;
   transform: translateX(-50%) rotate(45deg); border-radius: 5px;
   background: rgba(255,255,255,.95);
 }
