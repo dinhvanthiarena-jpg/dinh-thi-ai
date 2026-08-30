@@ -754,7 +754,7 @@ button:focus-visible,
   font-size: 1.3rem;
   color: #fff;
 }
-.squad-avatar-en { background: var(--g2); }
+.squad-avatar-on { background: var(--g2); }
 .squad-avatar-boom { background: var(--amber-fill); }
 .squad-avatar-bibi { background: var(--heart); }
 .squad-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; padding-right: 70px; }
