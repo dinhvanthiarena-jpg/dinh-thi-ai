@@ -3069,7 +3069,6 @@
     const btnHangup = $('btnHangup');
     const btnCallSkip = $('btnCallSkip');
     const callVidEl = $('callVid');
-    const callVidIdleEl = $('callVidIdle');
 
     // Toạ độ % của Mon trong assets/monl/mon-room.jpg — cùng con số với
     // english-air, vì dùng chung đúng file ảnh đó. scene-fit tính lại
@@ -3101,52 +3100,32 @@
     window.addEventListener('resize', fitCallScene);
     window.addEventListener('orientationchange', () => setTimeout(fitCallScene, 120));
 
-    // Hai video thật của Mon: một video khi ĐANG NÓI (mon-noi.mp4, loop
-    // liên tục khi Mon phát biểu) và một video khi ĐANG YÊN LẶNG/NGHE
-    // (mon-doi.mp4, loop vui nhộn lúc chờ hoặc nghe cậu nói) — quay sẵn
-    // cùng cảnh phòng mon-room.jpg.
-    //
-    // CẢ HAI video phát liên tục suốt cuộc gọi, kể cả video đang bị ẩn —
-    // đổi trạng thái nói/nghe CHỈ ẩn/hiện chứ không play()/pause() theo mỗi
-    // lần đổi. Bản đầu tiên có play()/pause() ngay lúc chuyển thì bị đứng
-    // hình thật trên máy: video kia (13-18MB) chưa kịp buffer đủ tại đúng
-    // lúc cần phát, play() gọi ra nhưng phải chờ tải mới có hình → trông
-    // như đơ. Cho cả hai "khởi động máy" ngay từ đầu cuộc gọi (còn dư dả
-    // thời gian buffer trước khi thật sự cần đổi) thì lúc ẩn/hiện chỉ là
-    // đổi CSS, không có gì phải chờ tải nữa.
-    const CALL_VIDEO_TALK_SRC = 'assets/monl/mon-noi.mp4';
-    const CALL_VIDEO_IDLE_SRC = 'assets/monl/mon-doi.mp4';
+    // Chỉ dùng MỘT video thật của Mon — lúc ĐANG NÓI (mon-noi.mp4). Lúc
+    // không nói (chờ/nghe) quay lại lớp ảnh tĩnh + miệng ghép sẵn như ban
+    // đầu, đơn giản và chắc chắn hơn hẳn so với việc bắt một video thứ hai
+    // cũng phải phát mượt suốt cuộc gọi.
+    const CALL_VIDEO_SRC = 'assets/monl/mon-noi.mp4';
     let callVideoTried = false;
     let callVideoOk = false;
     let callVideoTalking = false;
 
-    function callProbeOne(src) {
-      return new Promise((resolve) => {
-        const probe = document.createElement('video');
-        probe.muted = true;
-        probe.preload = 'metadata';
-        probe.addEventListener('loadedmetadata', () => resolve(true), { once: true });
-        probe.addEventListener('error', () => resolve(false), { once: true });
-        probe.src = src;
-      });
-    }
     function callProbeVideo() {
-      if (callVideoTried || !callVidEl || !callVidIdleEl) return;
+      if (callVideoTried || !callVidEl) return;
       callVideoTried = true;
-      Promise.all([callProbeOne(CALL_VIDEO_TALK_SRC), callProbeOne(CALL_VIDEO_IDLE_SRC)]).then(([okTalk, okIdle]) => {
-        if (!okTalk || !okIdle) return; // 1 trong 2 lỗi thì bỏ hẳn video, giữ ảnh tĩnh như cũ
-        callVideoOk = true;
-        callActivateVideo();
-      });
+      callVidEl.addEventListener('loadedmetadata', () => { callVideoOk = true; }, { once: true });
+      callVidEl.addEventListener('error', () => {}, { once: true });
+      callVidEl.src = CALL_VIDEO_SRC;
+      callGuardVideo(callVidEl);
+      callLoopSmoothly(callVidEl);
     }
-    // Trình duyệt tự DỪNG video khi vòng lại về đầu thay vì loop mượt, và
-    // cũng có thể tự dừng linh tinh khi tab ẩn đi rồi hiện lại — cả hai
-    // video LUÔN phải đang phát suốt cuộc gọi nên hễ bị dừng ngoài ý muốn
-    // là phát lại ngay, không cần biết đang ẩn hay hiện.
+    // Trình duyệt tự DỪNG video khi vòng lại về đầu thay vì loop mượt —
+    // đo trên máy thật: video dài ngắn hơn câu nói thì Mon đứng há mồm im
+    // re giữa câu nếu không tự canh mà phát tiếp. Chỉ phát lại khi ĐANG ở
+    // lượt nói — video này không cần chạy khi Mon đang im lặng/nghe.
     function callGuardVideo(v) {
-      v.addEventListener('pause', () => { if (!callEnded) v.play().catch(() => {}); });
+      v.addEventListener('pause', () => { if (callVideoTalking && !callEnded) v.play().catch(() => {}); });
       v.addEventListener('ended', () => {
-        if (callEnded) return;
+        if (!callVideoTalking || callEnded) return;
         try { v.currentTime = 0.04; } catch (e) {}
         v.play().catch(() => {});
       });
@@ -3158,40 +3137,23 @@
     function callLoopSmoothly(v) {
       v.loop = false;
       v.addEventListener('timeupdate', () => {
+        if (!callVideoTalking) return;
         const dur = v.duration || 15;
         if (v.currentTime >= dur - 0.15) { try { v.currentTime = 0.05; } catch (e) {} }
       });
     }
-    function callActivateVideo() {
-      if (!callVideoOk) return;
-      callGuardVideo(callVidEl);
-      callGuardVideo(callVidIdleEl);
-      callLoopSmoothly(callVidEl);
-      callLoopSmoothly(callVidIdleEl);
-      sceneFitEl.classList.add('co-video');
-      callVidEl.src = CALL_VIDEO_TALK_SRC;
-      callVidIdleEl.src = CALL_VIDEO_IDLE_SRC;
-      // Bỏ hẳn thuộc tính hidden (display:none) ngay từ đây — nhiều trình
-      // duyệt di động tự PAUSE video khi nó display:none để tiết kiệm pin,
-      // và không tự phát lại khi hiện ra nữa (đây chính là lý do nhân vật
-      // "đứng yên" dù JS đã gọi play()). Từ giờ chỉ đổi độ trong suốt bằng
-      // class .co-hidden (opacity:0), video vẫn luôn ở trạng thái hiển thị
-      // "có thể render" nên không bị trình duyệt tự ý dừng.
-      callVidEl.hidden = false;
-      callVidIdleEl.hidden = false;
-      callVidEl.play().catch(() => {});
-      callVidIdleEl.play().catch(() => {});
-      callSetVideoTalking(false);
-    }
     function callSetVideoTalking(talking) {
-      if (!callVideoOk) return;
       callVideoTalking = talking;
-      callVidEl.classList.toggle('co-hidden', !talking);
-      callVidIdleEl.classList.toggle('co-hidden', talking);
-      // Phòng khi video đang hiện lỡ bị trình duyệt tự dừng vì lý do khác
-      // (tab ẩn rồi hiện lại, mất focus...) — gọi lại play() cho chắc mỗi
-      // lần đổi trạng thái, gọi trên video đã đang phát thì cũng vô hại.
-      (talking ? callVidEl : callVidIdleEl).play().catch(() => {});
+      if (!callVideoOk) return;
+      if (talking) {
+        sceneFitEl.classList.add('co-video');
+        callVidEl.hidden = false;
+        callVidEl.play().catch(() => {});
+      } else {
+        callVidEl.pause();
+        callVidEl.hidden = true;
+        sceneFitEl.classList.remove('co-video');
+      }
     }
 
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -3552,10 +3514,6 @@
       callAvatar.classList.remove('talking');
       callMascotEl.classList.remove('talking', 'listening', 'pulse');
       callSetVideoTalking(false);
-      // callEnded=true đã tắt guard tự phát lại ở trên rồi, giờ dừng hẳn 2
-      // video (không thì chúng cứ loop im lặng nền, tốn pin/băng thông).
-      callVidEl.pause();
-      callVidIdleEl.pause();
       callStopTimer();
     }
     function callShowPreview() {
