@@ -2506,15 +2506,20 @@ let daDoVideo = false;
 function doVideoMon() {
   if (daDoVideo) return;
   daDoVideo = true;
-  Object.entries(VIDEO_MON).forEach(([ten, duong]) => {
-    const v = the(ten);
-    if (!v) return;
+  const nap = ten => {
+    const v = the(ten), duong = VIDEO_MON[ten];
+    if (!v || !duong) return;
     // Chỉ nhận khi trình duyệt thật sự đọc được, chứ không chỉ vì tệp tồn tại.
     v.addEventListener("loadedmetadata", () => { coVideo[ten] = duong; batVideo(); }, { once: true });
     v.addEventListener("error", () => {}, { once: true });
     v.preload = "auto";
     v.src = duong;
-  });
+  };
+  // Hai đoạn cần ngay thì tải ngay. Đoạn nhảy nặng hơn cả mà mãi 15 giây nữa mới
+  // tới lượt, nên khoán lại vài giây — ai gọi một câu rồi tắt thì không phải tốn
+  // thêm một megabyte dữ liệu di động cho cái họ chưa kịp thấy.
+  nap("noi"); nap("cho");
+  setTimeout(() => nap("nhay"), 4000);
 }
 
 /** Đoạn nghỉ nào đang tới lượt và tải được. Không có đoạn nào thì trả về rỗng. */
