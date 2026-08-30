@@ -112,8 +112,8 @@ function load() {
   // lần thôi — sau đó ai tự chọn giọng nào là giữ nguyên giọng ấy.
   // Đặt lại giọng tiếng Anh về Daniel — bình thường. Để số ở đây để sau này
   // muốn áp lại một lần nữa thì chỉ việc tăng số lên.
-  if ((s.giongChot || 0) < 2) {
-    s.giongChot = 2;
+  if ((s.giongChot || 0) < 3) {
+    s.giongChot = 3;
     s.kidVoice = false;
     if (s.giong && s.giong.en) delete s.giong.en;
   }
@@ -253,12 +253,19 @@ function luaChonGiong(goc) {
 const GIONG_NU = /female|linh|hoaimy|serena|kate|sonia|libby|hazel|samantha|victoria|karen|moira|fiona|tessa|zira|susan|catherine|amy|emma|joanna|salli/i;
 /* Giọng ưu tiên khi người dùng chưa tự chọn. Thầy chốt tiếng Anh dùng Daniel
    (giọng nam Anh Quốc) — nghe đằm và rõ phụ âm cuối hơn mấy giọng nữ máy. */
-const GIONG_CHOT = { en: /daniel/i };
+const GIONG_CHOT = { en: /\bdaniel\b/i };
 /* Tiếng Anh đã chốt Daniel — giọng NAM. Nếu tiếng Việt lại lấy giọng nữ thì
    thành hai người thay nhau nói, không còn ra một nhân vật nữa. Nên máy nào có
    giọng Việt nam thì lấy giọng nam. Máy chỉ có mỗi giọng nữ (iPhone chỉ có
    Linh) thì đành chịu, vẫn hơn là đọc sai tiếng. */
-const GIONG_NAM = /male|an|nam|minh|standard-(b|d)|wavenet-(b|d)/i;
+/* Apple cài sẵn cả một họ giọng "vui nhộn" — Rocko, Sandy, Shelley, Grandma,
+   Grandpa… Chúng nằm chung danh sách với giọng đọc thật nean máy dễ vớ phải.
+   Để dạy học thì không dùng được: nghe như nhân vật hoạt hình, sai cả trọng âm. */
+const GIONG_TRO = /\b(rocko|sandy|shelley|grandma|grandpa|flo|eddy|reed|bubbles|jester|superstar|bells|boing|bad news|good news|trinoids|whisper|wobble|zarvox|organ|cellos|bahh|albert|junior|ralph|fred|kathy|princess|deranged|hysterical|bruce|agnes|victoria)\b/i;
+/** Bỏ giọng vui nhộn ra. Hết sạch thì đành giữ nguyên, còn hơn không có gì. */
+const locTro = ds => { const t = ds.filter(v => !GIONG_TRO.test(v.name)); return t.length ? t : ds; };
+
+const GIONG_NAM = /\b(male|an|nam|minh)\b|standard-(b|d)|wavenet-(b|d)/i;
 
 function voiceFor(tag) {
   const muon = chuanTag(tag);
@@ -280,14 +287,16 @@ function voiceFor(tag) {
     const v = dungMa.find(x => chot.test(x.name)) || pool.find(x => chot.test(x.name));
     if (v) return v;
   }
+  // Không có giọng đã chốt thì vẫn phải tránh họ giọng vui nhộn.
+  const maThat = locTro(dungMa), gocThat = locTro(pool);
   if (goc === "vi") {
-    const nam = dungMa.find(v => GIONG_NAM.test(v.name)) || pool.find(v => GIONG_NAM.test(v.name));
+    const nam = maThat.find(v => GIONG_NAM.test(v.name)) || gocThat.find(v => GIONG_NAM.test(v.name));
     if (nam) return nam;
   }
   const nu = ds => ds.find(v => GIONG_NU.test(v.name));
   // Khớp đúng mã và là giọng nữ là tốt nhất; rồi tới khớp đúng mã; rồi giọng nữ
   // cùng gốc; cuối cùng lấy tạm cái gì có.
-  return nu(dungMa) || dungMa[0] || nu(pool) || pool[0];
+  return nu(maThat) || maThat[0] || nu(gocThat) || gocThat[0];
 }
 
 
