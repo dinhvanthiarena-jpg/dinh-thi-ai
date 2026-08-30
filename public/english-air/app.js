@@ -4431,6 +4431,12 @@ if ("serviceWorker" in navigator) {
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden) reg.update().catch(() => {});
       });
+      // Có người mở app rồi để đó cả buổi, không đóng cũng không chuyển đi đâu —
+      // chỉ nghe theo lúc quay lại thì họ chẳng bao giờ nhận được bản mới. Nửa
+      // tiếng hỏi một lần, hỏi khi đang mở màn hình thôi cho đỡ tốn pin.
+      setInterval(() => {
+        if (!document.hidden) reg.update().catch(() => {});
+      }, 30 * 60 * 1000);
     } catch { /* không có service worker thì app vẫn chạy bình thường */ }
   });
 }
