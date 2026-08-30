@@ -1839,27 +1839,14 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
    mọi trang khác. Ảnh đầu trang vẫn phải tràn hết bề ngang nên phải kéo ngược
    ra khỏi phần đệm của khung. */
 
-.nhom-hero { position: relative; height: 42vh; min-height: 240px; max-height: 380px; overflow: hidden;
-  background: #140722; border-radius: 0 0 var(--r4) var(--r4);
-  margin-inline: calc(var(--gut) * -1); }
-/* Ảnh là ảnh DỌC. Trên màn rộng, phủ kín cả bề ngang là phóng to gấp mấy lần,
-   chỉ còn thấy mỗi con mắt. Nên giữ ảnh trong một cột hẹp ở giữa, phần thừa hai
-   bên trải chính ảnh đó đem làm mờ — nhìn ra có chủ ý, không phải để trống. */
-.nhom-hero::before {
-  content: ""; position: absolute; inset: -8%;
-  background: url("assets/nhom.webp") center / cover no-repeat;
-  filter: blur(38px) saturate(.75) brightness(.46);
-}
-.nhom-anh { position: absolute; left: 50%; top: 0; transform: translateX(-50%);
-  width: min(100%, 430px); height: 100%; object-fit: cover; object-position: 50% 54%; }
-/* Chỉ còn để làm mờ dịu đáy ảnh cho hoà vào nền tối của trang — không còn
-   phải làm nền cho chữ nữa (chữ đã chuyển xuống dưới ảnh), nên nhạt hơn
-   nhiều so với trước. Lý do đổi: ở đúng khung hình + tỉ lệ ảnh này, bạn
-   Bibi (nhân vật nhỏ đứng trước) luôn rơi vào đúng dải 70-100% chiều cao
-   khung — không có cách nào crop để "giấu" bạn ấy đi mà không cắt mất
-   mặt hai bạn lớn phía sau, nên gốc rễ là phải bỏ hẳn chữ đè lên ảnh. */
-.nhom-veil { position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(15,6,26,0) 0, rgba(15,6,26,0) 80%, rgba(15,6,26,.5) 100%); }
+/* Ảnh nhóm nền TRONG SUỐT nên cứ để nó đứng thẳng trên nền trang — không phải
+   cắt cúp, không phải phủ tối, không phải trải nền mờ. Mấy lớp đó trước đây
+   sinh ra chỉ để cứu cái nền đen của ảnh cũ; ảnh trong rồi thì thừa, mà còn
+   làm bẩn. Cả chế độ sáng lẫn tối đều nhìn được vì không có nền cứng nào. */
+.nhom-hero { position: relative; padding-top: var(--s3); }
+.nhom-anh { display: block; width: 100%; max-width: 360px; height: auto;
+  margin-inline: auto; }
+
 .nhom-hero-txt { text-align: center; padding: var(--s4) var(--gut) 0; color: var(--fg); }
 .nhom-eyebrow { display: block; font-size: .68rem; font-weight: 900; letter-spacing: .14em;
   text-transform: uppercase; color: var(--brand-ink); opacity: .92; }
