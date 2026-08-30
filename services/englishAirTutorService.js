@@ -293,11 +293,16 @@ Câu vừa rồi của người học là ${LANGS[forced].name}. Lượt này B�
 ${LANGS[forced].name}, dòng LANG ghi đúng "${forced}". Kể cả khi họ hỏi VỀ một thứ tiếng
 khác thì cả câu trả lời vẫn phải bằng ${LANGS[forced].name} — chỉ chèn từ ngoại ngữ đó
 kèm phiên âm.${
-  forced === 'vi' ? ' Dòng VI để trống.' : ' Dòng VI bắt buộc ghi nghĩa tiếng Việt.'}${
+  forced === 'vi' ? ' Dòng VI để trống. Dòng ANH BẮT BUỘC phải có — chính câu SAY nói lại bằng tiếng Anh.' : ' Dòng VI bắt buộc ghi nghĩa tiếng Việt.'}${
   forced === 'zh' ? ' Dòng PY bắt buộc ghi pinyin đầy đủ.' : ''}` : `
 Câu vừa rồi không có chữ Hán cũng không có dấu tiếng Việt. Tự đọc mà quyết xem họ đang
 dùng thứ tiếng nào rồi đáp đúng thứ tiếng đó. Nếu bạn trả lời bằng thứ tiếng KHÁC tiếng
-Việt thì DÒNG VI BẮT BUỘC PHẢI CÓ nghĩa tiếng Việt.`}`;
+Việt thì DÒNG VI BẮT BUỘC PHẢI CÓ nghĩa tiếng Việt.`}
+
+DÒNG ANH: trừ khi SAY đã là tiếng Anh, lượt nào cũng phải có. Người học sẽ NGHE
+dòng đó ngay sau khi nghe dòng SAY — đó là cách họ học tiếng Anh từ chính câu
+chuyện đang nói. Viết tiếng Anh tự nhiên, đúng mức độ khó của họ, không dịch sát
+từng chữ. Bỏ trống dòng này là sai định dạng.`;
 }
 
 /* ═══════════════ LUYỆN NÓI: giáo viên BIẾT LẮNG NGHE ═══════════════ */
