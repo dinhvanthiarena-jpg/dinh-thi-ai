@@ -444,7 +444,7 @@ function lessonMeta(l) {
 }
 
 /* ---------- 5. Điều hướng ---------- */
-const VIEWS = ["learn", "words", "review", "call", "league", "profile"];
+const VIEWS = ["learn", "words", "review", "call", "league", "nhom", "profile"];
 let view = "learn";
 function go(name) {
   if (!VIEWS.includes(name)) return;
@@ -459,11 +459,20 @@ function go(name) {
     b.classList.toggle("is-active", on);
     if (b.classList.contains("tab")) { on ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current"); }
   });
-  ({ learn: renderLearn, words: renderWords, review: renderReview, call: renderCall, league: renderLeague, profile: renderProfile })[name]();
+  ({ learn: renderLearn, words: renderWords, review: renderReview, call: renderCall,
+     league: renderLeague, nhom: renderNhom, profile: renderProfile })[name]();
   window.scrollTo({ top: 0 });
   if (location.hash.slice(1) !== name) history.replaceState(null, "", "#" + name);
 }
 $$("[data-nav]").forEach(b => b.addEventListener("click", () => go(b.dataset.nav)));
+
+/* ---------- 5b. Màn Hệ sinh thái ----------
+   Trang tĩnh: bốn người bạn và những gì cả nhà tin. Không có gì phải dựng lại
+   mỗi lần mở, chỉ cần chắc là mở ra thấy từ đầu trang. */
+function renderNhom() {
+  const v = $("#view-nhom");
+  if (v) v.scrollTop = 0;
+}
 
 /* ---------- 6. Màn Học ---------- */
 function renderLearn() {
@@ -3318,18 +3327,7 @@ function veManXong() {
 
 $("#btnProClose").addEventListener("click", dongPro);
 
-/* ----- Nhóm bạn học: bốn nhân vật, mỗi người một ứng dụng ----- */
-function moNhom() {
-  $("#nhom").hidden = false;
-  document.body.style.overflow = "hidden";
-  $("#nhom").scrollTop = 0;
-}
-function dongNhom() {
-  $("#nhom").hidden = true;
-  document.body.style.overflow = "";
-}
-$("#btnNhom").addEventListener("click", moNhom);
-$("#btnNhomClose").addEventListener("click", dongNhom);
+
 $$("#btnOpenPro, #btnOpenPro2").forEach(b => b.addEventListener("click", moPro));
 
 /** Cập nhật chữ trên thẻ Pro: chưa mua thì khoe giá, mua rồi thì khoe hạn. */
@@ -4318,7 +4316,6 @@ $("#btnHeart").addEventListener("click", () => {
 
 /* ---------- 22. Phím tắt ---------- */
 document.addEventListener("keydown", e => {
-  if (!$("#nhom").hidden) { if (e.key === "Escape") dongNhom(); return; }
   if (!$("#streakView").hidden) { if (e.key === "Escape") $("#btnStreakClose").click(); return; }
   if (!$("#flash").hidden) {
     if (e.key === "Escape") $("#btnFlashQuit").click();
@@ -4365,7 +4362,7 @@ if ("serviceWorker" in navigator) {
   function thuNapLai() {
     if (daNapLai) return;
     // Đang học dở thì khoan — nạp lại lúc đó là mất bài người ta đang làm.
-    const dangBan = ["#player", "#flash", "#call", "#result", "#cong", "#pro", "#nhom"]
+    const dangBan = ["#player", "#flash", "#call", "#result", "#cong", "#pro"]
       .some(sel => { const o = $(sel); return o && !o.hidden; });
     if (dangBan) { choNapLai = true; return; }
     daNapLai = true;

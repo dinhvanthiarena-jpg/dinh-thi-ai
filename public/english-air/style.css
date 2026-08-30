@@ -542,6 +542,10 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   transition: color var(--t1) var(--e);
 }
 .tab .ic { width: 22px; height: 22px; }
+/* Bảy tab trên màn hẹp thì nhãn dài sẽ xuống hai dòng, đẩy cao cả thanh và lệch
+   hết các tab khác. Giữ một dòng, dài quá thì cắt. */
+.tab span { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 400px) { .tab { font-size: .6rem; } .tab .ic { width: 20px; height: 20px; } }
 .tab.is-active { color: var(--brand-ink); }
 .tab:active { opacity: .55; }
 .sidenav, .rail { display: none; }
@@ -1806,12 +1810,13 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .nb-go { flex: none; color: var(--brand); display: grid; place-items: center; }
 
 /* ----- Cả màn hình ----- */
-.nhom { position: fixed; inset: 0; z-index: 66; overflow-y: auto;
-  background: var(--bg); -webkit-overflow-scrolling: touch; }
-.nhom[hidden] { display: none; }
+/* Trước là màn phủ toàn trang, nay là một tab — nằm trong khung nội dung như
+   mọi trang khác. Ảnh đầu trang vẫn phải tràn hết bề ngang nên phải kéo ngược
+   ra khỏi phần đệm của khung. */
 
-.nhom-hero { position: relative; height: 46vh; min-height: 260px; max-height: 420px; overflow: hidden;
-  background: #140722; }
+.nhom-hero { position: relative; height: 42vh; min-height: 240px; max-height: 380px; overflow: hidden;
+  background: #140722; border-radius: 0 0 var(--r4) var(--r4);
+  margin-inline: calc(var(--gut) * -1); }
 /* Ảnh là ảnh DỌC. Trên màn rộng, phủ kín cả bề ngang là phóng to gấp mấy lần,
    chỉ còn thấy mỗi con mắt. Nên giữ ảnh trong một cột hẹp ở giữa, phần thừa hai
    bên trải chính ảnh đó đem làm mờ — nhìn ra có chủ ý, không phải để trống. */
@@ -1835,7 +1840,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   font-style: italic; color: #F3E8FF; }
 
 .nhom-body { width: 100%; max-width: min(var(--shell), 620px); margin-inline: auto;
-  padding: var(--s5) var(--gut) calc(var(--s8) + env(safe-area-inset-bottom)); }
+  padding: var(--s5) 0 var(--s6); }
 .nhom-mo { font-size: 1.02rem; font-weight: 600; line-height: 1.6; color: var(--ink-deep);
   text-wrap: pretty; }
 .nhom-ten { margin-top: var(--s4); padding: var(--s3) var(--s4); border-radius: var(--r2);
