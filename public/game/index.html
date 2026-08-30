@@ -106,6 +106,9 @@
         <button class="btn-homework-icon btn-call-icon" id="btnOpenCall" aria-label="Gọi Mon.L nói chuyện">
           <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z"/></svg>
         </button>
+        <button class="btn-homework-icon" id="btnOpenSquad" aria-label="Đội bạn học Mon.L">
+          <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        </button>
       </div>
       <p class="app-version" id="appVersion"></p>
     </div>
@@ -125,6 +128,65 @@
           <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm6.93 6h-2.95a15.7 15.7 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.93 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14a7.99 7.99 0 0 1 0-4h3.38a17.2 17.2 0 0 0 0 4H4.26zm.81 2h2.95a15.7 15.7 0 0 0 1.38 3.56A7.99 7.99 0 0 1 5.07 16zm2.95-8H5.07a7.99 7.99 0 0 1 4.33-3.56A15.7 15.7 0 0 0 8.02 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66a15.36 15.36 0 0 1 0-4h4.68a15.36 15.36 0 0 1 0 4zm.25 5.56A15.7 15.7 0 0 0 15.97 16h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14a17.2 17.2 0 0 0 0-4h3.38a7.99 7.99 0 0 1 0 4h-3.38z"/></svg>
           3dvietpro.com
         </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN: SQUAD (Đội bạn học Mon.L — giới thiệu hệ sinh thái app học tập) -->
+  <section id="screen-squad" class="screen">
+    <div class="topbar">
+      <button class="icon-btn" id="btnBackFromSquad" aria-label="Quay lại">
+        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/></svg>
+      </button>
+      <h2 class="topbar-title">Đội bạn học Mon.L</h2>
+      <div style="width:44px"></div>
+    </div>
+
+    <div class="squad-wrap">
+      <img class="squad-photo" src="assets/monl/nhom-monl.jpg" alt="Nhóm bạn học Mon.L" loading="lazy" />
+      <p class="squad-slogan">Where Learning is Fun</p>
+      <p class="squad-intro">Mon.L không học một mình đâu! Đây là cả nhóm bạn thân của Mon.L — mỗi bạn giỏi hẳn một môn, cùng nhau biến việc học thành cuộc phiêu lưu vui nhộn mỗi ngày. Mỗi bạn trong nhóm chính là một app dạy học riêng — con thích môn nào thì "gọi" bạn đó ra học cùng nhé!</p>
+
+      <div class="squad-list">
+        <div class="squad-card">
+          <img class="squad-avatar" src="assets/monl/mon-badge.png" alt="" loading="lazy" />
+          <div class="squad-info">
+            <b>MON.L <small>· Thủ lĩnh nhóm</small></b>
+            <span class="squad-subject">Giỏi Toán, từ lớp 1 đến lớp 12</span>
+            <p class="squad-desc">Tò mò, năng nổ, luôn khởi xướng trò chơi học mới. Đội mũ có bảng chữ cái mini, thích dẫn bạn bè khám phá điều lạ.</p>
+          </div>
+          <span class="squad-tag squad-tag-here">Đang chơi ở đây!</span>
+        </div>
+
+        <a class="squad-card" href="https://3dvietpro.com/english-air/" target="_blank" rel="noopener">
+          <span class="squad-avatar squad-avatar-letter squad-avatar-en" aria-hidden="true">E</span>
+          <div class="squad-info">
+            <b>EN.L <small>· Cây hài của nhóm</small></b>
+            <span class="squad-subject">Giỏi Tiếng Anh, như một gia sư uyên bác</span>
+            <p class="squad-desc">Nghịch ngợm, hay pha trò làm cả nhóm cười — đôi khi hậu đậu nhưng lại tạo ra những khoảnh khắc học bất ngờ.</p>
+          </div>
+          <span class="squad-tag squad-tag-live">Chơi ngay →</span>
+        </a>
+
+        <div class="squad-card squad-card-soon">
+          <span class="squad-avatar squad-avatar-letter squad-avatar-boom" aria-hidden="true">B</span>
+          <div class="squad-info">
+            <b>BOOM.L <small>· Người năng động</small></b>
+            <span class="squad-subject">Giỏi Địa lý khắp thế giới</span>
+            <p class="squad-desc">Tăng động, thích vận động, luôn biến bài học thành trò chơi nhảy múa vui nhộn.</p>
+          </div>
+          <span class="squad-tag squad-tag-soon">Sắp ra mắt</span>
+        </div>
+
+        <div class="squad-card squad-card-soon">
+          <span class="squad-avatar squad-avatar-letter squad-avatar-bibi" aria-hidden="true">B</span>
+          <div class="squad-info">
+            <b>BIBI.L <small>· Em út đáng yêu</small></b>
+            <span class="squad-subject">Giỏi Lịch sử Việt Nam &amp; thế giới</span>
+            <p class="squad-desc">Rụt rè nhưng sáng tạo, hay hỏi "Tại sao?", "Cái gì vậy?" — luôn mang theo chiếc balo kỳ diệu.</p>
+          </div>
+          <span class="squad-tag squad-tag-soon">Sắp ra mắt</span>
+        </div>
       </div>
     </div>
   </section>

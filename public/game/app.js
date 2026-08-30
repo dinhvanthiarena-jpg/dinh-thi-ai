@@ -552,7 +552,7 @@
   /* ================= DOM refs ================= */
   const $ = (id) => document.getElementById(id);
   const screens = {
-    license: $('screen-license'), home: $('screen-home'), setup: $('screen-setup'), game: $('screen-game'), result: $('screen-result'), homework: $('screen-homework'), gifted: $('screen-gifted'), call: $('screen-call'),
+    license: $('screen-license'), home: $('screen-home'), setup: $('screen-setup'), game: $('screen-game'), result: $('screen-result'), homework: $('screen-homework'), gifted: $('screen-gifted'), call: $('screen-call'), squad: $('screen-squad'),
   };
   function showScreen(name) {
     Object.values(screens).forEach(s => s.classList.remove('active'));
@@ -1382,6 +1382,8 @@
   });
 
   $('btnBackFromSetup').addEventListener('click', () => { sfx.click(); showScreen('home'); });
+  $('btnOpenSquad').addEventListener('click', () => { sfx.click(); showScreen('squad'); });
+  $('btnBackFromSquad').addEventListener('click', () => { sfx.click(); showScreen('home'); });
 
   $('btnStartGame').addEventListener('click', () => {
     sfx.click();

@@ -688,6 +688,100 @@ button:focus-visible,
   color: var(--fg);
 }
 
+/* ==== Squad screen (Đội bạn học Mon.L) ==== */
+.squad-wrap {
+  width: 100%;
+  max-width: 640px;
+  padding: 10px 20px 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.squad-photo {
+  width: 100%;
+  max-width: 320px;
+  border-radius: var(--r3);
+  box-shadow: var(--sh-3);
+}
+.squad-slogan {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-style: italic;
+  color: var(--brand-ink);
+  margin: 0;
+}
+.squad-intro {
+  text-align: center;
+  color: var(--muted-fg);
+  font-weight: 600;
+  line-height: 1.55;
+  margin: 0 0 6px;
+}
+.squad-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.squad-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--card);
+  border-radius: var(--r2);
+  padding: 14px 16px;
+  box-shadow: var(--sh-1);
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+}
+.squad-card-soon { opacity: 0.72; }
+.squad-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--rf);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.squad-avatar-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.3rem;
+  color: #fff;
+}
+.squad-avatar-en { background: var(--g2); }
+.squad-avatar-boom { background: var(--amber-fill); }
+.squad-avatar-bibi { background: var(--heart); }
+.squad-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; padding-right: 70px; }
+.squad-info b {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.02rem;
+  color: var(--fg);
+}
+.squad-info b small { font-weight: 700; color: var(--muted-fg); font-size: 0.75rem; }
+.squad-subject { font-weight: 700; font-size: 0.82rem; color: var(--brand-ink); }
+.squad-desc { margin: 2px 0 0; font-size: 0.82rem; color: var(--muted-fg); line-height: 1.4; }
+.squad-tag {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.65rem;
+  padding: 4px 10px;
+  border-radius: var(--rf);
+  white-space: nowrap;
+}
+.squad-tag-here { background: var(--ok-soft); color: var(--ok-ink); }
+.squad-tag-live { background: var(--brand-soft); color: var(--brand-ink); }
+.squad-tag-soon { background: var(--amber-soft); color: var(--amber); }
+
 /* ==== Setup screen ==== */
 .setup-wrap {
   width: 100%;
@@ -829,7 +923,7 @@ button:focus-visible,
   right: 8px;
   font-size: 0.58rem;
   font-weight: 800;
-  color: #6B3A02;
+  color: var(--amber);
   background: var(--amber-soft);
   padding: 2px 8px;
   border-radius: var(--rf);
