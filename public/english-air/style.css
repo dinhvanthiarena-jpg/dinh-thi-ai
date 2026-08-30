@@ -1786,3 +1786,95 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 :root[data-motion="reduce"] *, :root[data-motion="reduce"] *::before, :root[data-motion="reduce"] *::after {
   animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important;
 }
+
+/* ═══════════ NHÓM BẠN HỌC MON.L ═══════════ */
+/* Nút vào, nằm trong Hồ sơ. Cùng dáng với thẻ Pro cho khỏi lạc nhịp. */
+.nhom-banner {
+  display: flex; align-items: center; gap: var(--s3); width: 100%;
+  padding: var(--s3); border: 1px solid var(--line); border-radius: var(--r3);
+  background: linear-gradient(135deg, var(--sky-2), var(--card));
+  box-shadow: var(--sh-1); text-align: left; transition: transform var(--t1) var(--e);
+}
+.nhom-banner:active { transform: scale(.99); }
+.nb-anh { flex: none; width: 56px; height: 56px; border-radius: var(--r2); overflow: hidden;
+  background: #1B0B2E; display: grid; place-items: center; }
+.nb-anh img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 34%; display: block; }
+.nb-txt { flex: 1; min-width: 0; }
+.nb-txt b { display: block; font-size: 1rem; font-weight: 800; color: var(--ink-deep); }
+.nb-txt small { display: block; margin-top: 2px; font-size: .82rem; font-weight: 600;
+  color: var(--muted-fg); line-height: 1.35; }
+.nb-go { flex: none; color: var(--brand); display: grid; place-items: center; }
+
+/* ----- Cả màn hình ----- */
+.nhom { position: fixed; inset: 0; z-index: 66; overflow-y: auto;
+  background: var(--bg); -webkit-overflow-scrolling: touch; }
+.nhom[hidden] { display: none; }
+
+.nhom-hero { position: relative; height: 46vh; min-height: 260px; max-height: 420px; overflow: hidden;
+  background: #140722; }
+.nhom-anh { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  object-position: 50% 30%; }
+.nhom-veil { position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(15,6,26,.55) 0, rgba(15,6,26,0) 30%,
+    rgba(15,6,26,.55) 72%, rgba(15,6,26,.94) 100%); }
+.nhom-hero-txt { position: absolute; left: 0; right: 0; bottom: var(--s4);
+  text-align: center; padding: 0 var(--gut); color: #fff; }
+.nhom-eyebrow { display: block; font-size: .68rem; font-weight: 900; letter-spacing: .14em;
+  text-transform: uppercase; color: #E9D5FF; opacity: .92; }
+.nhom-hero-txt b { display: block; margin-top: 4px; font-size: 2.4rem; font-weight: 900;
+  letter-spacing: .02em; line-height: 1; text-shadow: 0 3px 18px rgba(0,0,0,.5); }
+.nhom-hero-txt i { display: block; margin-top: 6px; font-size: .92rem; font-weight: 600;
+  font-style: italic; color: #F3E8FF; }
+
+.nhom-body { width: 100%; max-width: min(var(--shell), 620px); margin-inline: auto;
+  padding: var(--s5) var(--gut) calc(var(--s8) + env(safe-area-inset-bottom)); }
+.nhom-mo { font-size: 1.02rem; font-weight: 600; line-height: 1.6; color: var(--ink-deep);
+  text-wrap: pretty; }
+.nhom-ten { margin-top: var(--s4); padding: var(--s3) var(--s4); border-radius: var(--r2);
+  background: var(--muted); }
+.nhom-ten p { margin: 0; font-size: .92rem; line-height: 1.55; color: var(--muted-fg); }
+.nhom-ten p + p { margin-top: 4px; }
+.nhom-ten b { color: var(--brand-ink); font-weight: 900; }
+
+/* ----- Thẻ từng người bạn ----- */
+.ban { display: flex; gap: var(--s4); align-items: flex-start;
+  padding: var(--s4); margin-bottom: var(--s3);
+  border: 1px solid var(--line); border-radius: var(--r3);
+  background: var(--card); box-shadow: var(--sh-1); }
+.ban-anh { flex: none; width: 92px; border-radius: var(--r2); overflow: hidden;
+  background: #1B0B2E; aspect-ratio: 2 / 3; }
+.ban-anh img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ban-noi { flex: 1; min-width: 0; }
+.ban-mon { display: inline-block; padding: 3px 10px; border-radius: var(--rf);
+  background: var(--brand-soft); color: var(--brand-ink);
+  font-size: .7rem; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+.ban-noi h3 { margin: 6px 0 0; font-size: 1.24rem; font-weight: 900; letter-spacing: .01em;
+  color: var(--ink-deep); }
+.ban-vai { margin: 2px 0 0; font-size: .84rem; font-weight: 700; color: var(--brand); }
+.ban-noi p { margin: var(--s2) 0 0; font-size: .9rem; line-height: 1.55; color: var(--muted-fg); }
+.ban-kien b { color: var(--ink-deep); font-weight: 800; }
+.ban-net { font-style: italic; }
+
+/* ----- Nhóm này tin gì ----- */
+.nhom-gia { counter-reset: g; list-style: none; margin: 0; padding: 0; }
+.nhom-gia li { counter-increment: g; position: relative;
+  padding: var(--s3) var(--s3) var(--s3) calc(var(--s6) + var(--s2));
+  border-bottom: 1px solid var(--line); }
+.nhom-gia li:last-child { border-bottom: 0; }
+.nhom-gia li::before { content: counter(g, decimal-leading-zero);
+  position: absolute; left: 0; top: var(--s3);
+  font-size: .82rem; font-weight: 900; color: var(--line-hi);
+  font-variant-numeric: tabular-nums; }
+.nhom-gia b { display: block; font-size: .98rem; font-weight: 800; color: var(--ink-deep); }
+.nhom-gia span { display: block; margin-top: 2px; font-size: .88rem; line-height: 1.5;
+  color: var(--muted-fg); }
+
+.nhom-rung { font-size: .94rem; line-height: 1.6; color: var(--muted-fg); text-wrap: pretty; }
+.nhom-ky { margin-top: var(--s6); text-align: center;
+  font-size: .74rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--line-hi); }
+
+/* Màn rộng thì xếp bốn bạn thành hai cột cho đỡ phải cuộn dài. */
+@media (min-width: 560px) {
+  .ban-anh { width: 116px; }
+}

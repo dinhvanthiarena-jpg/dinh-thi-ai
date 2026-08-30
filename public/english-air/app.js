@@ -3317,6 +3317,19 @@ function veManXong() {
 }
 
 $("#btnProClose").addEventListener("click", dongPro);
+
+/* ----- Nhóm bạn học: bốn nhân vật, mỗi người một ứng dụng ----- */
+function moNhom() {
+  $("#nhom").hidden = false;
+  document.body.style.overflow = "hidden";
+  $("#nhom").scrollTop = 0;
+}
+function dongNhom() {
+  $("#nhom").hidden = true;
+  document.body.style.overflow = "";
+}
+$("#btnNhom").addEventListener("click", moNhom);
+$("#btnNhomClose").addEventListener("click", dongNhom);
 $$("#btnOpenPro, #btnOpenPro2").forEach(b => b.addEventListener("click", moPro));
 
 /** Cập nhật chữ trên thẻ Pro: chưa mua thì khoe giá, mua rồi thì khoe hạn. */
@@ -4305,6 +4318,7 @@ $("#btnHeart").addEventListener("click", () => {
 
 /* ---------- 22. Phím tắt ---------- */
 document.addEventListener("keydown", e => {
+  if (!$("#nhom").hidden) { if (e.key === "Escape") dongNhom(); return; }
   if (!$("#streakView").hidden) { if (e.key === "Escape") $("#btnStreakClose").click(); return; }
   if (!$("#flash").hidden) {
     if (e.key === "Escape") $("#btnFlashQuit").click();
@@ -4351,7 +4365,7 @@ if ("serviceWorker" in navigator) {
   function thuNapLai() {
     if (daNapLai) return;
     // Đang học dở thì khoan — nạp lại lúc đó là mất bài người ta đang làm.
-    const dangBan = ["#player", "#flash", "#call", "#result", "#cong", "#pro"]
+    const dangBan = ["#player", "#flash", "#call", "#result", "#cong", "#pro", "#nhom"]
       .some(sel => { const o = $(sel); return o && !o.hidden; });
     if (dangBan) { choNapLai = true; return; }
     daNapLai = true;

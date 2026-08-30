@@ -1397,6 +1397,18 @@
           </span>
         </button>
 
+        <h2 class="sec">Nhóm bạn học</h2>
+        <button class="nhom-banner" id="btnNhom" type="button">
+          <span class="nb-anh" aria-hidden="true"><img src="assets/nhom.webp" alt="" decoding="async" loading="lazy" /></span>
+          <span class="nb-txt">
+            <b>Bốn người bạn MON.L</b>
+            <small>Mỗi bạn dạy một môn — Toán, Ngoại ngữ, Địa lý, Lịch sử</small>
+          </span>
+          <span class="nb-go" aria-hidden="true">
+            <svg class="ic ic-sm" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
+          </span>
+        </button>
+
         <h2 class="sec">Mục tiêu hằng ngày</h2>
         <div class="card">
           <div class="row-between"><span>XP hôm nay</span><b><span id="goalNow">0</span> / <span id="goalTarget">30</span></b></div>
@@ -1616,6 +1628,96 @@
 </div>
 
 <!-- ================= MON.L PRO ================= -->
+<div class="nhom" id="nhom" hidden role="dialog" aria-modal="true" aria-labelledby="nhomTitle">
+  <div class="nhom-hero">
+    <img class="nhom-anh" src="assets/nhom.webp" alt="Bốn nhân vật MON.L đứng cạnh nhau" decoding="async" />
+    <div class="nhom-veil"></div>
+    <button class="pro-close" id="btnNhomClose" type="button" aria-label="Đóng">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+    <div class="nhom-hero-txt">
+      <span class="nhom-eyebrow">Hệ sinh thái ứng dụng học tập</span>
+      <b id="nhomTitle">MON.L</b>
+      <i>Where Learning is Fun</i>
+    </div>
+  </div>
+
+  <div class="nhom-body">
+    <p class="nhom-mo">Bốn người bạn, mỗi bạn giỏi một môn, mỗi bạn là một ứng dụng. Học với cả
+      nhóm là đi hết Toán, Ngoại ngữ, Địa lý và Lịch sử.</p>
+
+    <div class="nhom-ten">
+      <p><b>MON</b> là nhân vật trung tâm — thủ lĩnh đáng yêu, giỏi toán.</p>
+      <p><b>L</b> là <i>Learn</i> (học), <i>Laugh</i> (cười), và <i>Learning World</i> — thế giới học tập.</p>
+    </div>
+
+    <h2 class="sec">Bốn người bạn</h2>
+      <article class="ban">
+        <div class="ban-anh"><img src="assets/ban-mon.webp" alt="MON" decoding="async" loading="lazy" /></div>
+        <div class="ban-noi">
+          <span class="ban-mon">Toán</span>
+          <h3>MON</h3>
+          <p class="ban-vai">Thủ lĩnh của nhóm</p>
+          <p>Tò mò, chủ động, luôn khởi xướng trò chơi mới. Thích dẫn dắt bạn bè học những điều mới lạ.</p>
+          <p class="ban-kien"><b>Biết gì:</b> Toán từ lớp 1 đến lớp 12</p>
+          <p class="ban-net">Luôn đội một bảng chữ cái mini trên đầu, hoặc mang theo bảng từ thần kỳ.</p>
+        </div>
+      </article>
+      <article class="ban">
+        <div class="ban-anh"><img src="assets/ban-onl.webp" alt="ON.L" decoding="async" loading="lazy" /></div>
+        <div class="ban-noi">
+          <span class="ban-mon">Ngoại ngữ</span>
+          <h3>ON.L</h3>
+          <p class="ban-vai">Cây hài của nhóm</p>
+          <p>Rất nghịch, hay pha trò và làm mọi người cười. Đôi khi hậu đậu nhưng lại tạo ra những khoảnh khắc học bất ngờ.</p>
+          <p class="ban-kien"><b>Biết gì:</b> Giỏi nhiều thứ tiếng, từ lớp 1 đến hết đại học</p>
+          <p class="ban-net">Chính là bạn đang học cùng trong ứng dụng này.</p>
+        </div>
+      </article>
+      <article class="ban">
+        <div class="ban-anh"><img src="assets/ban-boom.webp" alt="BOOM.L" decoding="async" loading="lazy" /></div>
+        <div class="ban-noi">
+          <span class="ban-mon">Địa lý</span>
+          <h3>BOOM.L</h3>
+          <p class="ban-vai">Người năng động</p>
+          <p>Tăng động, luôn biến bài học thành trò chơi vận động vui vẻ.</p>
+          <p class="ban-kien"><b>Biết gì:</b> Địa lý toàn thế giới, từ lớp 1 đến hết đại học</p>
+          <p class="ban-net">Có tai nghe hoặc loa nhỏ, thích nhảy nhót.</p>
+        </div>
+      </article>
+      <article class="ban">
+        <div class="ban-anh"><img src="assets/ban-bibi.webp" alt="BIBI.L" decoding="async" loading="lazy" /></div>
+        <div class="ban-noi">
+          <span class="ban-mon">Lịch sử</span>
+          <h3>BIBI.L</h3>
+          <p class="ban-vai">Em út đáng yêu</p>
+          <p>Rụt rè nhưng rất sáng tạo, hay đặt câu hỏi “Tại sao?”, “Cái gì vậy?”.</p>
+          <p class="ban-kien"><b>Biết gì:</b> Lịch sử thế giới và lịch sử Việt Nam</p>
+          <p class="ban-net">Có một chiếc balo kỳ diệu chứa nhiều đồ dùng bất ngờ.</p>
+        </div>
+      </article>
+
+    <h2 class="sec">Nhóm này tin gì</h2>
+    <ol class="nhom-gia">
+      <li><b>Dễ hiểu</b><span>Chuyển kiến thức phức tạp thành nội dung trực quan, hiểu nhanh mà không thấy áp lực.</span></li>
+      <li><b>Học mà chơi</b><span>Trò chơi, thử thách, hoạt hình và tương tác — học thành việc đáng mong mỗi ngày.</span></li>
+      <li><b>Riêng cho từng người</b><span>Mỗi người một tốc độ. Ứng dụng dựng lộ trình vừa sức và chỉ ra chỗ cần bù.</span></li>
+      <li><b>Hiểu bản chất</b><span>Khuyến khích tư duy và đặt câu hỏi, chứ không học thuộc để trả bài.</span></li>
+      <li><b>Gắn với đời sống</b><span>Đưa Toán, Ngoại ngữ, Lịch sử, Địa lý vào tình huống gần gũi hằng ngày.</span></li>
+      <li><b>Tự học mỗi ngày</b><span>Tạo thói quen học đều đặn, tự giác khám phá, từng bước khá lên.</span></li>
+      <li><b>Công nghệ phục vụ giáo dục</b><span>Dùng AI để học tốt hơn — nhưng người học luôn là trung tâm.</span></li>
+      <li><b>Vui vẻ và truyền cảm hứng</b><span>Học không phải là áp lực, mà là một hành trình khám phá.</span></li>
+    </ol>
+
+    <h2 class="sec">Nơi nhóm sống</h2>
+    <p class="nhom-rung">Khu rừng sáng tạo — rừng cây biết nói, phát sáng khi chạm vào. Chữ và số
+      trốn trong cây, trong hoa, trong đá; muốn học thì phải đi tìm. Mỗi buổi học là một chuyến
+      phiêu lưu nhỏ, để không ai thấy mình đang bị bắt học.</p>
+
+    <p class="nhom-ky">MON.L — Định hướng giáo dục</p>
+  </div>
+</div>
+
 <div class="pro" id="pro" hidden role="dialog" aria-modal="true" aria-labelledby="proTitle">
   <div class="pro-hero">
     <img class="pro-room" src="assets/call-card.jpg" alt="" decoding="async" />
