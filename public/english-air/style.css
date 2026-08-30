@@ -1025,7 +1025,9 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 /* Bảng chỉ cao đúng một đoạn ngắn. Câu dài thì cuộn trong đó, chứ không đẩy
    bảng phình lên che mất ON-Language. */
 .bubble-roll {
-  max-height: clamp(76px, 17vh, 128px);
+  /* ĐÚNG HAI DÒNG. Bảng cao hơn là che kín mặt nhân vật — mất hết cái hay của
+     màn gọi. Câu dài thì cuộn, đã có vệt mờ báo cho biết còn chữ ở dưới. */
+  max-height: calc(1.12rem * 1.34 * 2 + 3px);
   overflow-y: auto; overscroll-behavior: contain;
   scrollbar-width: thin; scrollbar-color: rgba(109,40,217,.34) transparent;
 }
