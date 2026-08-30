@@ -335,7 +335,7 @@ function speak(text, slow, lang) {
    PHẢI đọc xong câu trước rồi mới bắt đầu câu sau. Xếp cả loạt vào hàng đợi một
    lúc thì máy hay lấy giọng của câu này áp cho câu kia — câu tiếng Anh bị đọc
    bằng giọng Việt, nghe sai hoàn toàn. */
-function docLanLuot(khuc, xong) {
+function docLanLuot(khuc, xong, batDau) {
   if (!S.sound || !window.speechSynthesis) return;
   const ds = (khuc || []).filter(k => k && k.text);
   if (!ds.length) { if (xong) xong(); return; }
@@ -352,6 +352,7 @@ function docLanLuot(khuc, xong) {
       dungGiong(u, k.lang || tiengCua(k.text));
       if (k.pitch) u.pitch = clamp(k.pitch, 0.5, 2);
       if (k.onTu) u.onboundary = k.onTu;
+      if (batDau) u.onstart = batDau;
       apToc(u, k.slow ? 0.55 : 0.92);
       let daSang = false;
       const sang = () => { if (daSang) return; daSang = true; doc(i + 1); };
@@ -2568,30 +2569,27 @@ $("#callRoll") && $("#callRoll").addEventListener("scroll", () => {
 });
 
 /** MON.L nói: hiện câu, chạy hoạt ảnh, nhảy một nhịp mỗi từ cho khớp miệng. */
-function monSays(en, vi, after, py, anh) {
+function monSays(en, vi, after, py) {
   const L = langInfo(C.lang);
-  // MON.L nói tiếng gì thì nói, nhưng luôn nói KÈM bản tiếng Anh — người học
-  // nghe được cùng một ý bằng cả hai thứ tiếng, đúng giọng của từng thứ tiếng.
-  const kemAnh = String(anh || "").trim();
   $("#callSaidLang").textContent = L.name;
   $("#callSaidLang").hidden = C.mode !== "free";
   $("#callSaid").textContent = en;
   $("#callSaidPy").textContent = py || "";
   $("#callSaidPy").hidden = !py;
-  // Chỗ dòng nhỏ: có nghĩa tiếng Việt thì để nghĩa, không thì để câu tiếng Anh.
-  $("#callSaidVi").textContent = S.showVi ? (vi || kemAnh) : (vi ? "" : kemAnh);
+  $("#callSaidVi").textContent = S.showVi ? (vi || "") : "";
   chinhCuonNoi();
   const m = $("#callMascot");
   m.classList.add("talking"); datVideo(true);
   setState("Đang nói…");
 
-  let ended = false;
+  let ended = false, canh = null;
   const done = () => {
     if (ended) return;
     ended = true;
+    clearInterval(canh);
     C.speaking = false; C.sayDone = null;
     m.classList.remove("talking", "pulse");
-    // Nói xong là đứng yên lại. Thiếu dòng này thì video chạy mãi, MON.L nhép
+    // Nói xong là về đoạn nghỉ. Thiếu dòng này thì video chạy mãi, MON.L nhép
     // miệng cả lúc đang nghe người học nói.
     datVideo(false);
     if (after) after();
@@ -2599,25 +2597,32 @@ function monSays(en, vi, after, py, anh) {
   C.speaking = true; C.sayDone = done;
   const caoDo = S.kidVoice ? KID_PITCH : 1;
   const nhip = () => { m.classList.remove("pulse"); void m.offsetWidth; m.classList.add("pulse"); };
-  // Hai khúc, hai thứ tiếng, đọc NỐI NHAU chứ không xếp cùng lúc vào hàng đợi:
-  // xếp cùng lúc là máy hay lấy giọng khúc này áp cho khúc kia, câu tiếng Anh
-  // bị đọc bằng giọng Việt. Cùng một cao độ để nghe vẫn là một người.
-  const khuc = [{ text: en, lang: L.tts, pitch: caoDo, onTu: nhip }];
-  if (kemAnh && kemAnh !== en) khuc.push({ text: kemAnh, lang: "en-GB", pitch: caoDo, onTu: nhip });
-  const doDai = khuc.reduce((n, k) => n + k.text.length, 0);
+  // Mã tiếng do máy chủ báo có lúc sai. Chữ trong câu mới là bằng chứng thật:
+  // có dấu tiếng Việt, có chữ Hán, có kana… thì theo chữ, đừng theo mã.
+  const tuChu = tiengCua(en);
+  const gocChu = tuChu.split("-")[0], gocMa = chuanTag(L.tts).split("-")[0];
+  const doc = (tuChu !== "en-GB" && gocChu !== gocMa) ? tuChu : L.tts;
+  const khuc = [{ text: en, lang: doc, pitch: caoDo, onTu: nhip }];
 
   if (!S.sound || !window.speechSynthesis) {
-    setTimeout(done, 700 + doDai * 45);
+    setTimeout(done, 700 + en.length * 45);
     return;
   }
   try {
-    docLanLuot(khuc, done);
-    // Máy không có giọng cho thứ tiếng này thì speak() im lặng không làm gì.
-    // Đợi mãi thì người học ngồi nhìn nút micro khoá — kiểm tra rồi thoát sớm.
-    setTimeout(() => { if (!speechSynthesis.speaking && !speechSynthesis.pending) done(); }, 900);
-    // Dự phòng cuối: vài trình duyệt không bắn onend. Chặn trên 22 giây vì giờ
-    // phải đọc hai khúc chứ không phải một.
-    setTimeout(done, Math.min(2600 + doDai * 95, 22000));
+    let daBatDau = false;
+    docLanLuot(khuc, done, () => { daBatDau = true; });
+    // KHÔNG được chốt "nói xong" bằng đồng hồ hẹn giờ — hẹn hụt là video nhảy về
+    // đoạn nghỉ trong khi loa vẫn đang kêu: nhân vật đứng im mà tiếng vẫn phát ra.
+    // Hỏi thẳng máy xem còn đang đọc không, nửa giây một lần.
+    const t0 = Date.now();
+    canh = setInterval(() => {
+      const dangDoc = speechSynthesis.speaking || speechSynthesis.pending;
+      // Chưa kịp bắt đầu thì chờ thêm; quá 2 giây mà vẫn im thì máy này không có
+      // giọng cho thứ tiếng đó — thoát sớm, không để người học ngồi nhìn nút khoá.
+      if (!daBatDau && !dangDoc) { if (Date.now() - t0 > 2000) done(); return; }
+      if (!dangDoc) done();
+      else if (Date.now() - t0 > 60000) done();   // chặn trên, phòng máy treo
+    }, 500);
   } catch { done(); }
 }
 
@@ -2749,7 +2754,7 @@ async function askTutor(first) {
     $("#btnMic").disabled = !SR;
     monSays(data.reply, data.vi, () => {
       if (!C.listening) setState("Tới lượt bạn");
-    }, data.py, data.anh);
+    }, data.py);
   } catch (err) {
     C.busy = false;
     setState("Mất kết nối");
