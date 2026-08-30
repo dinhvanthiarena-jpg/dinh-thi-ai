@@ -1110,19 +1110,20 @@
     return { answer: value, decimal: numStr.includes('.') };
   }
 
-  function giftedDoneKey(grade) { return `mathgame_gifted_done_${grade}`; }
-  function giftedDoneSet(grade) {
-    try {
-      const raw = JSON.parse(localStorage.getItem(giftedDoneKey(grade)) || '[]');
-      return new Set(Array.isArray(raw) ? raw : []);
-    } catch (e) { return new Set(); }
-  }
-  function giftedMarkDone(grade, idx) {
-    const s = giftedDoneSet(grade);
-    if (s.has(idx)) return false;
-    s.add(idx);
-    localStorage.setItem(giftedDoneKey(grade), JSON.stringify([...s]));
-    return true;
+  // Ôn học sinh giỏi chạy như một phiên luyện tập liên tục: hiện từng bài
+  // một (không phải cuộn xem hết 9 bài như bản cũ), bài kế tiếp được chọn
+  // NGẪU NHIÊN từ kho bài của lớp đó sau mỗi lần chấm — không bao giờ hết,
+  // tránh lặp lại đúng bài vừa làm.
+  let giftedScore = 0;
+  let giftedStreak = 0;
+  let giftedLastIdx = -1;
+
+  function giftedPickIndex(problems) {
+    if (problems.length <= 1) return 0;
+    let idx;
+    do { idx = Math.floor(Math.random() * problems.length); } while (idx === giftedLastIdx);
+    giftedLastIdx = idx;
+    return idx;
   }
 
   function giftedRenderProblems(grade) {
@@ -1130,25 +1131,36 @@
     giftedGradePicker.hidden = true;
     giftedProblemList.hidden = false;
     giftedProblemList.innerHTML = '';
+    giftedScore = 0;
+    giftedStreak = 0;
+    giftedLastIdx = -1;
 
     const problems = GIFTED_PROBLEMS[grade] || [];
-    const progressWrap = document.createElement('div');
-    progressWrap.className = 'gifted-progress';
-    progressWrap.innerHTML = `
-      <div class="gifted-progress-track"><div class="gifted-progress-fill" id="giftedProgressFill"></div></div>
-      <p class="gifted-progress-text" id="giftedProgressText"></p>
+    const scoreWrap = document.createElement('div');
+    scoreWrap.className = 'gifted-score';
+    scoreWrap.innerHTML = `
+      <span class="gifted-score-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg><span id="giftedScoreVal">0</span></span>
+      <span class="gifted-streak-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67z"/></svg><span id="giftedStreakVal">0</span></span>
     `;
-    giftedProblemList.appendChild(progressWrap);
-    const progressFill = progressWrap.querySelector('#giftedProgressFill');
-    const progressText = progressWrap.querySelector('#giftedProgressText');
-    function updateProgress() {
-      const done = giftedDoneSet(grade).size;
-      progressText.textContent = `Đã học ${done}/${problems.length} bài`;
-      progressFill.style.width = (problems.length ? (done / problems.length * 100) : 0) + '%';
-    }
-    updateProgress();
+    giftedProblemList.appendChild(scoreWrap);
+    const scoreVal = scoreWrap.querySelector('#giftedScoreVal');
+    const streakVal = scoreWrap.querySelector('#giftedStreakVal');
 
-    problems.forEach((p, i) => {
+    const cardHolder = document.createElement('div');
+    giftedProblemList.appendChild(cardHolder);
+
+    if (!problems.length) {
+      cardHolder.innerHTML = '<p class="gifted-question">Lớp này chưa có bài ôn học sinh giỏi.</p>';
+      return;
+    }
+
+    function loadNextProblem() {
+      const i = giftedPickIndex(problems);
+      renderCard(problems[i], i);
+    }
+
+    function renderCard(p, i) {
+      cardHolder.innerHTML = '';
       const card = document.createElement('div');
       card.className = 'gifted-card';
       const levelClass = p.level === 'Nâng cao' ? 'gifted-level-advanced' : 'gifted-level-basic';
@@ -1157,10 +1169,7 @@
       card.innerHTML = `
         <div class="gifted-card-head">
           <span class="gifted-level ${levelClass}">${p.level}</span>
-          <span class="gifted-head-right">
-            <span class="gifted-done-badge" hidden>✓ Đã học</span>
-            <span class="gifted-num">Bài ${i + 1}</span>
-          </span>
+          <span class="gifted-num">Bài ${i + 1}</span>
         </div>
         <p class="gifted-question">${p.text}</p>
         <button type="button" class="gifted-learn-btn">Học cách làm</button>
@@ -1174,10 +1183,12 @@
         <div class="gifted-selfcheck" hidden>
           <p class="gifted-selfcheck-title">🧠 Con thử tính xem đáp số là bao nhiêu?</p>
           <div class="gifted-selfcheck-choices"></div>
+          <button type="button" class="gifted-confirm-btn" disabled>Xác nhận</button>
         </div>
         <button type="button" class="gifted-reveal-btn" hidden>Xem lời giải</button>
         <p class="gifted-locked-note">Xem hết phần hướng dẫn thì nút lời giải mới hiện ra.</p>
         <p class="gifted-solution" hidden>${p.solution}</p>
+        <button type="button" class="gifted-next-btn" hidden>Bài tiếp theo →</button>
       `;
 
       const learnBtn = card.querySelector('.gifted-learn-btn');
@@ -1186,21 +1197,20 @@
       const countEl = card.querySelector('.gifted-step-count');
       const titleEl = card.querySelector('.gifted-step-title');
       const bodyEl = card.querySelector('.gifted-step-body');
-      const nextBtn = card.querySelector('.gifted-step-next');
+      const nextStepBtn = card.querySelector('.gifted-step-next');
       const selfCheckBox = card.querySelector('.gifted-selfcheck');
       const selfCheckChoices = card.querySelector('.gifted-selfcheck-choices');
+      const confirmBtn = card.querySelector('.gifted-confirm-btn');
       const revealBtn = card.querySelector('.gifted-reveal-btn');
       const noteEl = card.querySelector('.gifted-locked-note');
       const solutionEl = card.querySelector('.gifted-solution');
-      const doneBadge = card.querySelector('.gifted-done-badge');
-
-      if (giftedDoneSet(grade).has(i)) doneBadge.hidden = false;
+      const nextProblemBtn = card.querySelector('.gifted-next-btn');
 
       // Chỉ mở nút lời giải sau khi học sinh đã xem hết các bước hướng dẫn
       // (và, nếu có, trả lời xong phần tự thử sức bên dưới).
       let stepIdx = 0;
       let unlocked = steps.length === 0;
-      if (unlocked) { learnBtn.hidden = true; revealBtn.hidden = false; noteEl.hidden = true; }
+      if (unlocked) { learnBtn.hidden = true; revealBtn.hidden = false; noteEl.hidden = true; nextProblemBtn.hidden = false; }
 
       dotsEl.innerHTML = steps.map(() => '<i></i>').join('');
       const dots = Array.from(dotsEl.children);
@@ -1210,7 +1220,7 @@
         countEl.textContent = `Bước ${stepIdx + 1}/${steps.length}`;
         titleEl.textContent = s.t;
         bodyEl.innerHTML = s.b;
-        nextBtn.textContent = stepIdx < steps.length - 1 ? 'Đã hiểu, bước tiếp theo' : 'Đã hiểu hết';
+        nextStepBtn.textContent = stepIdx < steps.length - 1 ? 'Đã hiểu, bước tiếp theo' : 'Đã hiểu hết';
         dots.forEach((d, k) => d.classList.toggle('on', k <= stepIdx));
       }
 
@@ -1222,41 +1232,67 @@
         revealBtn.hidden = false;
         learnBtn.hidden = false;
         learnBtn.textContent = 'Xem lại hướng dẫn';
+        nextProblemBtn.hidden = false;
       }
 
+      // Chọn đáp án trước (chỉ tô sáng, chưa chấm) — bấm Xác nhận mới thật
+      // sự chấm điểm, tránh chấm hớ khi lỡ tay bấm nhầm.
       function renderSelfCheck() {
         selfCheckBox.hidden = false;
         selfCheckChoices.innerHTML = '';
         const distractors = makeDistractors(selfCheck.answer, selfCheck.decimal);
         const choices = [selfCheck.answer, ...distractors].sort(() => Math.random() - 0.5);
-        let answered = false;
+        let selected = null;
+        let graded = false;
         choices.forEach((choice) => {
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'gifted-check-btn';
           btn.textContent = fmtNum(choice);
           btn.addEventListener('click', () => {
-            if (answered) return;
-            answered = true;
-            const isCorrect = choice === selfCheck.answer;
-            const allBtns = [...selfCheckChoices.children];
-            allBtns.forEach((b) => {
-              b.disabled = true;
-              if (b !== btn) b.classList.add('dim');
-            });
-            btn.classList.add(isCorrect ? 'correct' : 'wrong');
-            if (!isCorrect) {
-              allBtns.forEach((b) => {
-                if (Number(b.textContent.replace(',', '.')) === selfCheck.answer) b.classList.add('correct');
-              });
-            }
-            const r = btn.getBoundingClientRect();
-            burstParticles(r.left + r.width / 2, r.top + r.height / 2, isCorrect ? 'var(--ok)' : 'var(--bad)', isCorrect ? 12 : 6);
-            if (isCorrect) sfx.correct(); else sfx.wrong();
-            setTimeout(unlockSolution, 950);
+            if (graded) return;
+            sfx.click();
+            selected = { btn, choice };
+            [...selfCheckChoices.children].forEach((b) => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            confirmBtn.disabled = false;
           });
           selfCheckChoices.appendChild(btn);
         });
+        confirmBtn.hidden = false;
+        confirmBtn.disabled = true;
+        confirmBtn.onclick = () => {
+          if (graded || !selected) return;
+          graded = true;
+          sfx.click();
+          const isCorrect = selected.choice === selfCheck.answer;
+          const allBtns = [...selfCheckChoices.children];
+          allBtns.forEach((b) => {
+            b.disabled = true;
+            if (b !== selected.btn) b.classList.add('dim');
+          });
+          selected.btn.classList.remove('selected');
+          selected.btn.classList.add(isCorrect ? 'correct' : 'wrong');
+          if (!isCorrect) {
+            allBtns.forEach((b) => {
+              if (Number(b.textContent.replace(',', '.')) === selfCheck.answer) b.classList.add('correct');
+            });
+          }
+          confirmBtn.hidden = true;
+          const r = selected.btn.getBoundingClientRect();
+          burstParticles(r.left + r.width / 2, r.top + r.height / 2, isCorrect ? 'var(--ok)' : 'var(--bad)', isCorrect ? 12 : 6);
+          if (isCorrect) {
+            sfx.correct();
+            giftedScore += 10;
+            giftedStreak += 1;
+          } else {
+            sfx.wrong();
+            giftedStreak = 0;
+          }
+          scoreVal.textContent = giftedScore;
+          streakVal.textContent = giftedStreak;
+          setTimeout(unlockSolution, 950);
+        };
       }
 
       learnBtn.addEventListener('click', () => {
@@ -1267,7 +1303,7 @@
         paintStep();
       });
 
-      nextBtn.addEventListener('click', () => {
+      nextStepBtn.addEventListener('click', () => {
         sfx.click();
         if (stepIdx < steps.length - 1) {
           stepIdx += 1;
@@ -1289,14 +1325,18 @@
         const willShow = solutionEl.hidden;
         solutionEl.hidden = !willShow;
         revealBtn.textContent = willShow ? 'Ẩn lời giải' : 'Xem lời giải';
-        if (willShow) {
-          doneBadge.hidden = false;
-          if (giftedMarkDone(grade, i)) updateProgress();
-        }
       });
 
-      giftedProblemList.appendChild(card);
-    });
+      nextProblemBtn.addEventListener('click', () => {
+        sfx.click();
+        loadNextProblem();
+        cardHolder.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      });
+
+      cardHolder.appendChild(card);
+    }
+
+    loadNextProblem();
   }
 
   giftedGradeRow.addEventListener('click', (e) => {

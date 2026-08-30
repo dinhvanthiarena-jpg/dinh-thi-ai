@@ -986,45 +986,44 @@ button:focus-visible,
 }
 .gifted-level-basic { background: var(--ok-soft); color: var(--ok-ink); }
 .gifted-level-advanced { background: #FFE7D6; color: #9A3412; }
-.gifted-head-right { display: flex; align-items: center; gap: 8px; }
 .gifted-num { font-family: var(--font-heading); font-weight: 700; font-size: 0.78rem; color: var(--muted-fg); }
-.gifted-done-badge {
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 0.68rem;
-  padding: 2px 9px;
-  border-radius: var(--rf);
-  background: var(--ok-soft);
-  color: var(--ok-ink);
-}
 
-/* ==== Thanh tiến độ "đã học bao nhiêu bài" ==== */
-.gifted-progress {
+/* ==== HUD điểm số cho phiên ôn liên tục (Điểm + chuỗi đúng liên tiếp) ==== */
+.gifted-score {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   padding: 2px 2px 4px;
 }
-.gifted-progress-track {
-  flex: 1;
-  height: 8px;
-  border-radius: var(--rf);
-  background: var(--muted);
-  overflow: hidden;
-}
-.gifted-progress-fill {
-  height: 100%;
-  border-radius: var(--rf);
-  background: linear-gradient(90deg, var(--brand-fill), var(--ok));
-  transition: width 300ms ease-out;
-}
-.gifted-progress-text {
-  flex-shrink: 0;
+.gifted-score-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-heading);
   font-weight: 800;
-  font-size: 0.78rem;
-  color: var(--muted-fg);
+  font-size: 1rem;
+  color: var(--brand-ink);
+  background: var(--card);
+  border-radius: var(--rf);
+  padding: 7px 16px;
+  box-shadow: var(--sh-1);
 }
+.gifted-score-pill svg { width: 18px; height: 18px; }
+.gifted-streak-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--flame);
+  background: var(--card);
+  border-radius: var(--rf);
+  padding: 7px 16px;
+  box-shadow: var(--sh-1);
+}
+.gifted-streak-pill svg { width: 18px; height: 18px; }
 .gifted-question { font-weight: 700; line-height: 1.55; margin: 0 0 12px; color: var(--fg); }
 .gifted-reveal-btn {
   background: var(--amber-fill);
@@ -1160,8 +1159,45 @@ button:focus-visible,
 .gifted-check-btn:active:not(:disabled) { transform: scale(0.96); }
 .gifted-check-btn:disabled { cursor: default; }
 .gifted-check-btn.dim { opacity: 0.5; }
+.gifted-check-btn.selected { box-shadow: inset 0 0 0 3px var(--brand-fill), var(--sh-1); background: var(--brand-soft); }
 .gifted-check-btn.correct { background: var(--ok); color: #fff; box-shadow: var(--sh-1); animation: pop-in 220ms ease-out; }
 .gifted-check-btn.wrong { background: var(--bad); color: #fff; box-shadow: var(--sh-1); animation: shake 420ms ease-in-out; }
+
+/* Chọn đáp án xong phải bấm Xác nhận mới chấm — tách làm 2 bước để tránh
+   bấm nhầm/chấm hớ, và để có một nhịp dừng rõ ràng trước khi biết đúng/sai. */
+.gifted-confirm-btn {
+  margin-top: 14px;
+  width: 100%;
+  min-height: 46px;
+  background: var(--ok);
+  border: none;
+  border-radius: var(--rf);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: var(--sh-1);
+  transition: transform 140ms ease-out, opacity 140ms ease-out;
+}
+.gifted-confirm-btn:active:not(:disabled) { transform: scale(0.97); }
+.gifted-confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Nút sang bài tiếp theo — hiện sau khi đã chấm điểm hoặc xem xong lời giải. */
+.gifted-next-btn {
+  margin-top: 14px;
+  width: 100%;
+  min-height: 48px;
+  background: linear-gradient(135deg, var(--brand-fill), var(--heart));
+  border: none;
+  border-radius: var(--rf);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-shadow: var(--sh-2);
+  transition: transform 140ms ease-out;
+}
+.gifted-next-btn:active { transform: scale(0.97); }
 
 /* ==== Game HUD ==== */
 .game-hud {
