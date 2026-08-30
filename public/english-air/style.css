@@ -1798,7 +1798,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .nhom-banner:active { transform: scale(.99); }
 .nb-anh { flex: none; width: 56px; height: 56px; border-radius: var(--r2); overflow: hidden;
   background: #1B0B2E; display: grid; place-items: center; }
-.nb-anh img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 34%; display: block; }
+.nb-anh img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; }
 .nb-txt { flex: 1; min-width: 0; }
 .nb-txt b { display: block; font-size: 1rem; font-weight: 800; color: var(--ink-deep); }
 .nb-txt small { display: block; margin-top: 2px; font-size: .82rem; font-weight: 600;
@@ -1812,8 +1812,16 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 .nhom-hero { position: relative; height: 46vh; min-height: 260px; max-height: 420px; overflow: hidden;
   background: #140722; }
-.nhom-anh { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-  object-position: 50% 30%; }
+/* Ảnh là ảnh DỌC. Trên màn rộng, phủ kín cả bề ngang là phóng to gấp mấy lần,
+   chỉ còn thấy mỗi con mắt. Nên giữ ảnh trong một cột hẹp ở giữa, phần thừa hai
+   bên trải chính ảnh đó đem làm mờ — nhìn ra có chủ ý, không phải để trống. */
+.nhom-hero::before {
+  content: ""; position: absolute; inset: -8%;
+  background: url("assets/nhom.webp") center / cover no-repeat;
+  filter: blur(38px) saturate(.75) brightness(.46);
+}
+.nhom-anh { position: absolute; left: 50%; top: 0; transform: translateX(-50%);
+  width: min(100%, 430px); height: 100%; object-fit: cover; object-position: 50% 26%; }
 .nhom-veil { position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(15,6,26,.55) 0, rgba(15,6,26,0) 30%,
     rgba(15,6,26,.55) 72%, rgba(15,6,26,.94) 100%); }
