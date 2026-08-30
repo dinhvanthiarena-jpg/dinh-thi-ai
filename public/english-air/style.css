@@ -1826,18 +1826,22 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   filter: blur(38px) saturate(.75) brightness(.46);
 }
 .nhom-anh { position: absolute; left: 50%; top: 0; transform: translateX(-50%);
-  width: min(100%, 430px); height: 100%; object-fit: cover; object-position: 50% 26%; }
+  width: min(100%, 430px); height: 100%; object-fit: cover; object-position: 50% 15%; }
+/* Chỉ còn để làm mờ dịu đáy ảnh cho hoà vào nền tối của trang — không còn
+   phải làm nền cho chữ nữa (chữ đã chuyển xuống dưới ảnh), nên nhạt hơn
+   nhiều so với trước. Lý do đổi: ở đúng khung hình + tỉ lệ ảnh này, bạn
+   Bibi (nhân vật nhỏ đứng trước) luôn rơi vào đúng dải 70-100% chiều cao
+   khung — không có cách nào crop để "giấu" bạn ấy đi mà không cắt mất
+   mặt hai bạn lớn phía sau, nên gốc rễ là phải bỏ hẳn chữ đè lên ảnh. */
 .nhom-veil { position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(15,6,26,.55) 0, rgba(15,6,26,0) 30%,
-    rgba(15,6,26,.55) 72%, rgba(15,6,26,.94) 100%); }
-.nhom-hero-txt { position: absolute; left: 0; right: 0; bottom: var(--s4);
-  text-align: center; padding: 0 var(--gut); color: #fff; }
+  background: linear-gradient(180deg, rgba(15,6,26,0) 0, rgba(15,6,26,0) 80%, rgba(15,6,26,.5) 100%); }
+.nhom-hero-txt { text-align: center; padding: var(--s4) var(--gut) 0; color: var(--fg); }
 .nhom-eyebrow { display: block; font-size: .68rem; font-weight: 900; letter-spacing: .14em;
-  text-transform: uppercase; color: #E9D5FF; opacity: .92; }
+  text-transform: uppercase; color: var(--brand-ink); opacity: .92; }
 .nhom-hero-txt b { display: block; margin-top: 4px; font-size: 2.4rem; font-weight: 900;
-  letter-spacing: .02em; line-height: 1; text-shadow: 0 3px 18px rgba(0,0,0,.5); }
+  letter-spacing: .02em; line-height: 1; color: var(--fg); }
 .nhom-hero-txt i { display: block; margin-top: 6px; font-size: .92rem; font-weight: 600;
-  font-style: italic; color: #F3E8FF; }
+  font-style: italic; color: var(--ink-deep); }
 
 .nhom-body { width: 100%; max-width: min(var(--shell), 620px); margin-inline: auto;
   padding: var(--s5) 0 var(--s6); }
