@@ -3103,19 +3103,22 @@
 
     // Hai video thật của Mon: một video khi ĐANG NÓI (mon-noi.mp4, loop
     // liên tục khi Mon phát biểu) và một video khi ĐANG YÊN LẶNG/NGHE
-    // (mon-doi.mp4, loop nhẹ nhàng lúc chờ hoặc nghe cậu nói) — quay sẵn
-    // cùng cảnh phòng mon-room.jpg. Chuyển qua lại bằng cách ẩn/hiện +
-    // play/pause chứ không dừng cứng ở một khung hình như bản trước, nhìn
-    // tự nhiên hơn hẳn. Tải được cả hai thì thay hẳn ảnh phòng tĩnh +
-    // .call-mon; không tải được (mạng yếu, trình duyệt cũ) thì im lặng bỏ
-    // qua, lớp ảnh tĩnh + miệng ghép sẵn vẫn chạy y như trước.
+    // (mon-doi.mp4, loop vui nhộn lúc chờ hoặc nghe cậu nói) — quay sẵn
+    // cùng cảnh phòng mon-room.jpg.
+    //
+    // CẢ HAI video phát liên tục suốt cuộc gọi, kể cả video đang bị ẩn —
+    // đổi trạng thái nói/nghe CHỈ ẩn/hiện chứ không play()/pause() theo mỗi
+    // lần đổi. Bản đầu tiên có play()/pause() ngay lúc chuyển thì bị đứng
+    // hình thật trên máy: video kia (13-18MB) chưa kịp buffer đủ tại đúng
+    // lúc cần phát, play() gọi ra nhưng phải chờ tải mới có hình → trông
+    // như đơ. Cho cả hai "khởi động máy" ngay từ đầu cuộc gọi (còn dư dả
+    // thời gian buffer trước khi thật sự cần đổi) thì lúc ẩn/hiện chỉ là
+    // đổi CSS, không có gì phải chờ tải nữa.
     const CALL_VIDEO_TALK_SRC = 'assets/monl/mon-noi.mp4';
     const CALL_VIDEO_IDLE_SRC = 'assets/monl/mon-doi.mp4';
     let callVideoTried = false;
     let callVideoOk = false;
     let callVideoTalking = false;
-    let callVideoLoopHandler = null;
-    let callVideoLoopHandlerEl = null;
 
     function callProbeOne(src) {
       return new Promise((resolve) => {
@@ -3136,56 +3139,47 @@
         callActivateVideo();
       });
     }
-    // Trình duyệt tự DỪNG video khi vòng lại về đầu thay vì loop mượt — đo
-    // trên máy thật: video dài ngắn hơn câu nói thì Mon đứng há mồm im re
-    // giữa câu nếu không tự canh mà phát tiếp. isTalkVideo cho biết video
-    // này chỉ nên đang phát khi callVideoTalking đúng bằng giá trị đó.
-    function callGuardVideo(v, isTalkVideo) {
-      v.addEventListener('pause', () => { if (callVideoTalking === isTalkVideo) v.play().catch(() => {}); });
+    // Trình duyệt tự DỪNG video khi vòng lại về đầu thay vì loop mượt, và
+    // cũng có thể tự dừng linh tinh khi tab ẩn đi rồi hiện lại — cả hai
+    // video LUÔN phải đang phát suốt cuộc gọi nên hễ bị dừng ngoài ý muốn
+    // là phát lại ngay, không cần biết đang ẩn hay hiện.
+    function callGuardVideo(v) {
+      v.addEventListener('pause', () => { if (!callEnded) v.play().catch(() => {}); });
       v.addEventListener('ended', () => {
-        if (callVideoTalking !== isTalkVideo) return;
+        if (callEnded) return;
         try { v.currentTime = 0.04; } catch (e) {}
         v.play().catch(() => {});
       });
     }
-    function callActivateVideo() {
-      if (!callVideoOk) return;
-      callGuardVideo(callVidEl, true);
-      callGuardVideo(callVidIdleEl, false);
-      sceneFitEl.classList.add('co-video');
-      callVidEl.src = CALL_VIDEO_TALK_SRC;
-      callVidIdleEl.src = CALL_VIDEO_IDLE_SRC;
-      callSetVideoTalking(false);
-    }
     // KHÔNG dùng loop=true gốc của trình duyệt — nhiều trình duyệt tự DỪNG
     // video khi chạy hết rồi mới lặp lại, gây khựng hình rõ rệt mỗi lần lặp
     // (15 giây/lần với video này). Tự canh gần hết video rồi tua ngược về
-    // đầu bằng tay (timeupdate) thì mượt hơn hẳn. Chỉ giữ MỘT handler đang
-    // hoạt động tại một thời điểm — gỡ cái cũ trước khi gắn cái mới, không
-    // thì mỗi lần đổi trạng thái nói/nghe lại chồng thêm một listener.
+    // đầu bằng tay (timeupdate) thì mượt hơn hẳn.
     function callLoopSmoothly(v) {
-      if (callVideoLoopHandler && callVideoLoopHandlerEl) {
-        callVideoLoopHandlerEl.removeEventListener('timeupdate', callVideoLoopHandler);
-      }
       v.loop = false;
-      callVideoLoopHandler = () => {
+      v.addEventListener('timeupdate', () => {
         const dur = v.duration || 15;
         if (v.currentTime >= dur - 0.15) { try { v.currentTime = 0.05; } catch (e) {} }
-      };
-      callVideoLoopHandlerEl = v;
-      v.addEventListener('timeupdate', callVideoLoopHandler);
+      });
+    }
+    function callActivateVideo() {
+      if (!callVideoOk) return;
+      callGuardVideo(callVidEl);
+      callGuardVideo(callVidIdleEl);
+      callLoopSmoothly(callVidEl);
+      callLoopSmoothly(callVidIdleEl);
+      sceneFitEl.classList.add('co-video');
+      callVidEl.src = CALL_VIDEO_TALK_SRC;
+      callVidIdleEl.src = CALL_VIDEO_IDLE_SRC;
+      callVidEl.play().catch(() => {});
+      callVidIdleEl.play().catch(() => {});
+      callSetVideoTalking(false);
     }
     function callSetVideoTalking(talking) {
       if (!callVideoOk) return;
       callVideoTalking = talking;
-      const showEl = talking ? callVidEl : callVidIdleEl;
-      const hideEl = talking ? callVidIdleEl : callVidEl;
-      hideEl.pause();
-      hideEl.hidden = true;
-      showEl.hidden = false;
-      showEl.playbackRate = 1;
-      callLoopSmoothly(showEl);
-      showEl.play().catch(() => {});
+      callVidEl.hidden = !talking;
+      callVidIdleEl.hidden = talking;
     }
 
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -3546,6 +3540,10 @@
       callAvatar.classList.remove('talking');
       callMascotEl.classList.remove('talking', 'listening', 'pulse');
       callSetVideoTalking(false);
+      // callEnded=true đã tắt guard tự phát lại ở trên rồi, giờ dừng hẳn 2
+      // video (không thì chúng cứ loop im lặng nền, tốn pin/băng thông).
+      callVidEl.pause();
+      callVidIdleEl.pause();
       callStopTimer();
     }
     function callShowPreview() {
