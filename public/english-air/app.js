@@ -506,14 +506,38 @@ function renderLearn() {
 
   const root = $("#unitList");
   root.textContent = "";
+  // Chương nào đang học thì mở sẵn; lần đầu vào chưa ai bấm gì thì cũng chỉ mở
+  // đúng chương đó — sáu chương bung hết ra một lúc là phải cuộn mỏi tay.
+  if (!chuongMo.size && cur) chuongMo.add(cur.unit.id);
   lv.units.forEach(u => {
-    const box = el("section", "unit");
-    box.append(el("h2", null, u.title));
+    const mo = chuongMo.has(u.id);
+    const box = el("section", "unit" + (mo ? " mo" : ""));
     const words = unitWords(u).length;
     const nBai = u.lessons.filter(x => !x.checkpoint).length;
-    box.append(el("p", "unit-meta", `${nBai} bài + ôn tập • ${words} từ vựng`));
+    const xong = u.lessons.filter(x => S.done[x.id]).length;
+
+    const dau = el("button", "unit-head"); dau.type = "button";
+    dau.setAttribute("aria-expanded", mo ? "true" : "false");
+    dau.setAttribute("aria-controls", "nodes-" + u.id);
+    const oIco = el("span", "unit-ico");
+    oIco.setAttribute("aria-hidden", "true");
+    oIco.append(anhChuong(u.id));
+    const chu = el("span", "unit-tt");
+    chu.append(el("b", null, u.title));
+    chu.append(el("small", null, `${nBai} bài + ôn tập • ${words} từ vựng`));
+    const dau3 = el("span", "unit-caret");
+    dau3.setAttribute("aria-hidden", "true");
+    dau3.append(icon("i-chevron"));
+    dau.append(oIco, chu, el("span", "unit-so", `${xong}/${u.lessons.length}`), dau3);
+    dau.addEventListener("click", () => {
+      chuongMo.has(u.id) ? chuongMo.delete(u.id) : chuongMo.add(u.id);
+      box.classList.toggle("mo");
+      dau.setAttribute("aria-expanded", chuongMo.has(u.id) ? "true" : "false");
+    });
+    box.append(dau);
 
     const grid = el("div", "nodes");
+    grid.id = "nodes-" + u.id;
     u.lessons.forEach(l => {
       const st = lessonState(l.id);
       const cell = el("div", "node " + st + (l.checkpoint ? " check" : ""));
@@ -534,6 +558,26 @@ function renderLearn() {
   });
   paintRail();
 }
+/* Mỗi chương một hình cho dễ nhận ra ngay, khỏi phải đọc chữ.
+   Chương lạ chưa có trong bảng thì lấy tạm quyển sách — thêm chương mới cũng
+   không vỡ giao diện. */
+const ANH_CHUONG = {
+  a1u1: "p-hello",   a1u2: "p-family", a1u3: "p-bread",
+  a1u4: "p-clock",   a1u5: "p-market", a1u6: "p-doctor",
+  a2u1: "p-book",    a2u2: "p-phone",  a2u3: "p-city",
+  a2u4: "p-work",    b1u1: "p-question", b1u2: "p-friend",
+};
+function anhChuong(id) {
+  const sv = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  sv.setAttribute("viewBox", "0 0 48 48");
+  const u = document.createElementNS("http://www.w3.org/2000/svg", "use");
+  u.setAttribute("href", "#" + (ANH_CHUONG[id] || "p-book"));
+  sv.append(u);
+  return sv;
+}
+/** Chương nào người học đang mở. Giữ giữa các lần dựng lại màn hình. */
+const chuongMo = new Set();
+
 /** Vòng tiến độ quanh nút bài hiện tại. */
 function ring(frac) {
   const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");

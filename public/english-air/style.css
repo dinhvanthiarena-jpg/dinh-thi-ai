@@ -306,14 +306,39 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .cont-go { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; }
 
 /* Mỗi chương gói vào một thẻ riêng — 6 mốc xếp vừa đúng 2 hàng, không còn khoảng trống. */
-.unit { margin-top: var(--s4); padding: var(--s4) var(--s3) var(--s3); text-align: center;
+.unit { margin-top: var(--s3); padding: var(--s2) var(--s3) var(--s2); text-align: center;
   border-radius: var(--r3); background: var(--card); box-shadow: var(--sh-1); }
 .unit h2 { font-size: 1.16rem; }
 .unit-meta { color: var(--muted-fg); font-size: .82rem; font-weight: 700; margin-top: 2px; }
+
+/* ----- Đầu chương: bấm vào mới mở sáu bài -----
+   Sáu chương bung hết một lúc thì màn Học dài hơn ba màn hình, cuộn mãi không
+   tới bài đang học. Gập lại, chỉ chương đang học mở sẵn. */
+.unit-head {
+  display: flex; align-items: center; gap: var(--s3); width: 100%;
+  padding: var(--s2) 0; text-align: left; min-height: 56px;
+}
+.unit-ico { flex: none; width: 44px; height: 44px; border-radius: var(--r2);
+  background: var(--muted); display: grid; place-items: center; overflow: hidden; }
+.unit-ico svg { width: 40px; height: 40px; display: block; }
+.unit-tt { flex: 1; min-width: 0; }
+.unit-tt b { display: block; font-size: 1.02rem; font-weight: 800; line-height: 1.25;
+  color: var(--ink-deep); text-wrap: balance; }
+.unit-tt small { display: block; margin-top: 2px; font-size: .78rem; font-weight: 700;
+  color: var(--muted-fg); }
+.unit-so { flex: none; font-size: .78rem; font-weight: 900; color: var(--muted-fg);
+  font-variant-numeric: tabular-nums; }
+.unit-caret { flex: none; color: var(--brand); display: grid; place-items: center;
+  transition: transform var(--t2) var(--e); }
+.unit-caret .ic { width: 20px; height: 20px; }
+.unit.mo .unit-caret { transform: rotate(180deg); }
+.unit-head:active { opacity: .6; }
+
 .nodes {
   position: relative; display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: var(--s3) var(--s1); margin-top: var(--s3);
+  gap: var(--s3) var(--s1); margin-top: var(--s2); padding-bottom: var(--s2);
 }
+.unit:not(.mo) .nodes { display: none; }
 .node { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 /* Vạch nối giữa các mốc cùng hàng, cho ra dáng một chặng đường chứ không phải chấm rời. */
 .node::before {
