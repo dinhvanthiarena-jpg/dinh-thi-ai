@@ -2426,108 +2426,97 @@ function diemDoc(nghe, mau) {
 }
 
 /* ═══════════ VIDEO NHÂN VẬT ═══════════
-   Có video thì MON.L cử động cả người; không có thì vẫn là ảnh tĩnh cộng lớp
-   miệng như cũ — thả video vào lúc nào cũng được, không thả cũng không vỡ. */
+   Hai đoạn: đang nói và đang nghỉ. Mỗi đoạn một THẺ VIDEO RIÊNG, đổi qua lại
+   bằng cách ẩn hiện chứ không đổi src — đổi src là trình duyệt nạp lại từ đầu,
+   chớp đen một cái mỗi lần MON.L bắt đầu hay ngừng nói.
+   Chỉ có đoạn nói thì lúc nghỉ dừng đứng ở khung miệng ngậm. */
 const VIDEO_MON = { noi: "assets/mon-noi.mp4", cho: "assets/mon-cho.mp4" };
-/* Giây đứng yên trong video nói. Không phải giây 0: ngay đầu video MON.L đang
-   há miệng to, hai tay buông thõng — dừng ở đó thì trông như bị đơ giữa câu.
-   Giây 2,083 (khung 50) là lúc miệng ngậm, mắt mở, hai tay đưa ra chào. */
+const THE_VIDEO = { noi: "#monVid", cho: "#monVidCho" };
+/* Giây đứng yên trong đoạn nói — chỉ dùng khi KHÔNG có đoạn nghỉ riêng.
+   Giây 12,208 (khung 293) là chỗ miệng ngậm nhất, mắt mở, đứng tự nhiên. */
 const KHUNG_YEN = 12.208;
 const coVideo = {};
 
+const the = ten => $(THE_VIDEO[ten]);
+
 let daDoVideo = false;
 function doVideoMon() {
-  const v = $("#monVid");
-  if (!v || daDoVideo) return;
+  if (daDoVideo) return;
   daDoVideo = true;
   Object.entries(VIDEO_MON).forEach(([ten, duong]) => {
-    const thu = document.createElement("video");
-    thu.muted = true;
-    thu.preload = "metadata";
-    // Chỉ nhận khi trình duyệt thật sự đọc được, chứ không chỉ vì file tồn tại.
-    thu.addEventListener("loadedmetadata", () => {
-      coVideo[ten] = duong;
-      batVideo();
-    }, { once: true });
-    thu.addEventListener("error", () => {}, { once: true });
-    thu.src = duong;
+    const v = the(ten);
+    if (!v) return;
+    // Chỉ nhận khi trình duyệt thật sự đọc được, chứ không chỉ vì tệp tồn tại.
+    v.addEventListener("loadedmetadata", () => { coVideo[ten] = duong; batVideo(); }, { once: true });
+    v.addEventListener("error", () => {}, { once: true });
+    v.src = duong;
   });
 }
 
-/* Trình duyệt tự DỪNG video ngay tại chỗ vòng lại — đo được trên máy thật: tới
-   giây 7,8 nó seek về 0 rồi phát luôn sự kiện pause. Câu nói thì dài 13 giây,
-   nên MON.L há mồm đứng im suốt 5 giây còn lại. Tự canh lấy, đừng tin loop. */
-let canhVideo = null;
-function veDau(v) { try { v.currentTime = 0.04; } catch (e) {} }
-function gacVideo(v) {
+let canhVideo = null, daGacVideo = false;
+let videoDangChay = null;   // thẻ nào đang phải chạy
+function gacVideo() {
   if (daGacVideo) return;
   daGacVideo = true;
-  v.addEventListener("pause", () => {
-    if (videoDangNoi) v.play().catch(() => {});
+  // Bắt sự kiện thôi chưa đủ tin: có máy nuốt mất pause, có máy chặn play() vì
+   // chưa có cú chạm nào, có máy tự dừng video khi giọng đọc bật lên. Nên canh
+   // thẳng: cứ 0,4 giây ngó một lần, thẻ nào đang phải chạy mà đứng thì cho chạy tiếp.
+  Object.keys(THE_VIDEO).forEach(ten => {
+    const v = the(ten);
+    if (!v) return;
+    v.addEventListener("pause", () => { if (videoDangChay === v) v.play().catch(() => {}); });
+    v.addEventListener("ended", () => {
+      if (videoDangChay !== v) return;
+      try { v.currentTime = 0.04; } catch (e) {}
+      v.play().catch(() => {});
+    });
   });
-  v.addEventListener("ended", () => {
-    if (!videoDangNoi) return;
-    veDau(v);
-    v.play().catch(() => {});
-  });
-  // Bắt sự kiện thôi thì chưa đủ tin: có máy nuốt mất pause, có máy chặn play()
-  // vì lúc đó chưa có cú chạm nào, có máy tự dừng video khi giọng đọc bật lên.
-  // Nên canh thẳng: cứ 0,4 giây ngó một lần, đang nói mà video đứng là cho chạy
-  // tiếp — nói dài bao nhiêu thì MON.L cử động bấy nhiêu.
   clearInterval(canhVideo);
   canhVideo = setInterval(() => {
-    if (!videoDangNoi || v.hidden) return;
+    const v = videoDangChay;
+    if (!v || v.hidden) return;
     const het = v.duration && v.currentTime >= v.duration - 0.06;
-    if (v.ended || het) veDau(v);
+    if (v.ended || het) { try { v.currentTime = 0.04; } catch (e) {} }
     if (v.paused) v.play().catch(() => {});
   }, 400);
 }
 
 function batVideo() {
-  const v = $("#monVid");
-  if (!v || (!coVideo.noi && !coVideo.cho)) return;
-  gacVideo(v);
+  if (!coVideo.noi && !coVideo.cho) return;
+  gacVideo();
   document.querySelector(".scene-fit").classList.add("co-video");
-  v.hidden = false;
   datVideo(false);
 }
 
-/** Chuyển giữa vòng nói và vòng chờ. Chỉ có một video thì dùng cho cả hai. */
-let videoDang = null;
+/** Chuyển giữa đoạn nói và đoạn nghỉ. */
 let hoiTua = null;
-let videoDangNoi = false;   // đang trong lúc MON.L nói, video phải chạy liên tục
-let daGacVideo = false;
 function datVideo(dangNoi) {
-  const v = $("#monVid");
-  if (!v || v.hidden) return;
-  const muon = (dangNoi ? coVideo.noi : coVideo.cho) || coVideo.cho || coVideo.noi;
-  if (!muon) return;
-  if (videoDang !== muon) {
-    videoDang = muon;
-    v.src = muon;
-  }
-  const motVideo = !(coVideo.noi && coVideo.cho);
-  v.playbackRate = 1;
-  if (motVideo && !dangNoi) {
-    // Chỉ có video ĐANG NÓI mà cho chạy cả lúc chờ thì MON.L nhép miệng liên tục,
-    // nhìn như người lảm nhảm một mình. Không nói thì đứng yên: dừng hẳn video ở
-    // khung miệng ngậm, chỉ còn nhịp thở rất nhẹ do CSS làm.
+  // Có đủ hai đoạn thì đổi thẻ; thiếu một đoạn thì dùng đoạn còn lại cho cả hai.
+  const muon = dangNoi ? (coVideo.noi ? "noi" : "cho") : (coVideo.cho ? "cho" : "noi");
+  if (!coVideo[muon]) return;
+  const v = the(muon);
+  if (!v) return;
+
+  Object.keys(THE_VIDEO).forEach(ten => {
+    const k = the(ten);
+    if (!k) return;
+    if (ten === muon) { k.hidden = false; return; }
+    k.hidden = true;
+    k.pause();
+  });
+
+  clearInterval(hoiTua); hoiTua = null;
+  // Có đoạn nghỉ riêng thì lúc nào cũng có cái để chạy — không phải dừng hình nữa.
+  if (muon === "cho" && !coVideo.cho) return;
+  if (!dangNoi && !coVideo.cho) {
+    // Chỉ có đoạn nói: không nói thì dừng hẳn ở khung miệng ngậm.
+    videoDangChay = null;
     v.classList.add("dung-yen");
-    const dat = () => { try { v.currentTime = KHUNG_YEN; } catch (e) {} };
-    // Tắt loop TRƯỚC khi dừng. Còn loop thì cú "hết bài, quay về đầu" của trình
-    // duyệt nuốt sạch lệnh tua trong hai giây liền — đo trên máy thật ra đúng
-    // hai giây rưỡi MON.L há mồm đứng đó.
-    videoDangNoi = false;
     v.loop = false;
     v.pause();
+    const dat = () => { try { v.currentTime = KHUNG_YEN; } catch (e) {} };
     if (v.readyState >= 1) dat(); else v.addEventListener("loadedmetadata", dat, { once: true });
-    // Lệnh tua hay bị nuốt khi video vừa vòng về đầu hoặc vừa nạp xong: đứng ở
-    // khung 0 là MON.L há mồm ra giữa lúc đang nghe. Thử lại vài nhịp cho chắc.
-    clearInterval(hoiTua);
     let lan = 0;
-    // Canh suốt chứ không tắt ngay khi tua trúng một lần: video có thuộc tính
-    // loop, nên cú "hết bài, quay về đầu" đang chờ sẵn sẽ kéo nó về khung 0
-    // NGAY SAU khi mình tua xong. Tắt sớm là dính đúng cái bẫy đó.
     hoiTua = setInterval(() => {
       if (!v.paused || ++lan > 30) { clearInterval(hoiTua); hoiTua = null; return; }
       if (Math.abs(v.currentTime - KHUNG_YEN) > 0.12) dat();
@@ -2535,9 +2524,8 @@ function datVideo(dangNoi) {
     return;
   }
   v.classList.remove("dung-yen");
-  clearInterval(hoiTua); hoiTua = null;
-  videoDangNoi = true;
   v.loop = true;
+  videoDangChay = v;
   // play() có thể bị chặn nếu người dùng chưa chạm màn hình — bỏ qua cho êm.
   v.play().catch(() => {});
 }
