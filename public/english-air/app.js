@@ -86,7 +86,8 @@ const DEFAULTS = {
   goal: 30, goalDay: "", todayXp: 0,
   weekXp: 0, weekStart: "", tier: 0,
   joined: today(), sound: true, motion: false, showVi: true, theme: "",
-  kidVoice: true,
+  kidVoice: false,
+  giongChot: 0,   // đánh dấu đã áp giọng mặc định mới, chỉ áp một lần
   ten: "",
   // Đang mở sẵn hết bài để thầy kiểm tra nội dung. Khi nào cần học lần lượt
   // trở lại thì đổi về false — ai đã tự gạt công tắc thì giữ lựa chọn của họ.
@@ -99,7 +100,20 @@ const DEFAULTS = {
   avatar: { k: "m" }
 };
 let S = load();
-function load() { try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { return Object.assign({}, DEFAULTS); } }
+function load() {
+  let s;
+  try { s = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || "{}")); }
+  catch { s = Object.assign({}, DEFAULTS); }
+  // Đổi giọng mặc định sang Daniel, cao độ bình thường. Máy nào đã cài rồi thì
+  // vẫn phải áp một lần, không thì người đang dùng mãi không thấy đổi. Chỉ một
+  // lần thôi — sau đó ai tự chọn giọng nào là giữ nguyên giọng ấy.
+  if (!s.giongChot) {
+    s.giongChot = 1;
+    s.kidVoice = false;
+    if (s.giong && s.giong.en) delete s.giong.en;
+  }
+  return s;
+}
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* chế độ riêng tư */ }
   henDayLen();   // gửi lên máy chủ, gộp nhiều lần sửa thành một lượt
@@ -232,6 +246,9 @@ function luaChonGiong(goc) {
     Tiếng Anh lấy giọng người Anh (en-GB) chứ không phải giọng Mỹ, tiếng Việt lấy
     giọng nữ — nghe chuẩn hơn hẳn với người Việt học tiếng Anh. */
 const GIONG_NU = /female|linh|hoaimy|serena|kate|sonia|libby|hazel|samantha|victoria|karen|moira|fiona|tessa|zira|susan|catherine|amy|emma|joanna|salli/i;
+/* Giọng ưu tiên khi người dùng chưa tự chọn. Thầy chốt tiếng Anh dùng Daniel
+   (giọng nam Anh Quốc) — nghe đằm và rõ phụ âm cuối hơn mấy giọng nữ máy. */
+const GIONG_CHOT = { en: /daniel/i };
 
 function voiceFor(tag) {
   const muon = chuanTag(tag);
@@ -247,6 +264,12 @@ function voiceFor(tag) {
   }
 
   const dungMa = pool.filter(v => chuanTag(v.lang) === muon);
+  // Chưa tự chọn thì lấy giọng đã chốt sẵn cho thứ tiếng này, nếu máy có.
+  const chot = GIONG_CHOT[goc];
+  if (chot) {
+    const v = dungMa.find(x => chot.test(x.name)) || pool.find(x => chot.test(x.name));
+    if (v) return v;
+  }
   const nu = ds => ds.find(v => GIONG_NU.test(v.name));
   // Khớp đúng mã và là giọng nữ là tốt nhất; rồi tới khớp đúng mã; rồi giọng nữ
   // cùng gốc; cuối cùng lấy tạm cái gì có.
@@ -303,20 +326,23 @@ function speak(text, slow, lang) {
    PHẢI đọc xong câu trước rồi mới bắt đầu câu sau. Xếp cả loạt vào hàng đợi một
    lúc thì máy hay lấy giọng của câu này áp cho câu kia — câu tiếng Anh bị đọc
    bằng giọng Việt, nghe sai hoàn toàn. */
-function docLanLuot(khuc) {
+function docLanLuot(khuc, xong) {
   if (!S.sound || !window.speechSynthesis) return;
   const ds = (khuc || []).filter(k => k && k.text);
-  if (!ds.length) return;
+  if (!ds.length) { if (xong) xong(); return; }
   const phien = ++lanLuotId;
   try { speechSynthesis.cancel(); } catch { /* bỏ qua */ }
 
   const doc = i => {
     // Lượt đọc mới đè lên thì lượt cũ dừng hẳn, không chen ngang nhau.
-    if (phien !== lanLuotId || i >= ds.length) return;
+    if (phien !== lanLuotId) return;
+    if (i >= ds.length) { if (xong) xong(); return; }
     const k = ds[i];
     try {
       const u = new SpeechSynthesisUtterance(k.text);
       dungGiong(u, k.lang || tiengCua(k.text));
+      if (k.pitch) u.pitch = clamp(k.pitch, 0.5, 2);
+      if (k.onTu) u.onboundary = k.onTu;
       apToc(u, k.slow ? 0.55 : 0.92);
       let daSang = false;
       const sang = () => { if (daSang) return; daSang = true; doc(i + 1); };
@@ -2545,14 +2571,18 @@ $("#callRoll") && $("#callRoll").addEventListener("scroll", () => {
 });
 
 /** MON.L nói: hiện câu, chạy hoạt ảnh, nhảy một nhịp mỗi từ cho khớp miệng. */
-function monSays(en, vi, after, py) {
+function monSays(en, vi, after, py, anh) {
   const L = langInfo(C.lang);
+  // MON.L nói tiếng gì thì nói, nhưng luôn nói KÈM bản tiếng Anh — người học
+  // nghe được cùng một ý bằng cả hai thứ tiếng, đúng giọng của từng thứ tiếng.
+  const kemAnh = String(anh || "").trim();
   $("#callSaidLang").textContent = L.name;
   $("#callSaidLang").hidden = C.mode !== "free";
   $("#callSaid").textContent = en;
   $("#callSaidPy").textContent = py || "";
   $("#callSaidPy").hidden = !py;
-  $("#callSaidVi").textContent = S.showVi ? (vi || "") : "";
+  // Chỗ dòng nhỏ: có nghĩa tiếng Việt thì để nghĩa, không thì để câu tiếng Anh.
+  $("#callSaidVi").textContent = S.showVi ? (vi || kemAnh) : (vi ? "" : kemAnh);
   chinhCuonNoi();
   const m = $("#callMascot");
   m.classList.add("talking"); datVideo(true);
@@ -2570,25 +2600,27 @@ function monSays(en, vi, after, py) {
     if (after) after();
   };
   C.speaking = true; C.sayDone = done;
+  const caoDo = S.kidVoice ? KID_PITCH : 1;
+  const nhip = () => { m.classList.remove("pulse"); void m.offsetWidth; m.classList.add("pulse"); };
+  // Hai khúc, hai thứ tiếng, đọc NỐI NHAU chứ không xếp cùng lúc vào hàng đợi:
+  // xếp cùng lúc là máy hay lấy giọng khúc này áp cho khúc kia, câu tiếng Anh
+  // bị đọc bằng giọng Việt. Cùng một cao độ để nghe vẫn là một người.
+  const khuc = [{ text: en, lang: L.tts, pitch: caoDo, onTu: nhip }];
+  if (kemAnh && kemAnh !== en) khuc.push({ text: kemAnh, lang: "en-GB", pitch: caoDo, onTu: nhip });
+  const doDai = khuc.reduce((n, k) => n + k.text.length, 0);
+
   if (!S.sound || !window.speechSynthesis) {
-    setTimeout(done, 700 + en.length * 45);
+    setTimeout(done, 700 + doDai * 45);
     return;
   }
   try {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(en);
-    u.lang = L.tts;
-    const v = voiceFor(L.tts); if (v) u.voice = v;
-    u.rate = 0.94; u.pitch = S.kidVoice ? KID_PITCH : 1;
-    u.onboundary = () => { m.classList.remove("pulse"); void m.offsetWidth; m.classList.add("pulse"); };
-    u.onend = done;
-    u.onerror = done;
-    speechSynthesis.speak(u);
+    docLanLuot(khuc, done);
     // Máy không có giọng cho thứ tiếng này thì speak() im lặng không làm gì.
     // Đợi mãi thì người học ngồi nhìn nút micro khoá — kiểm tra rồi thoát sớm.
-    setTimeout(() => { if (!speechSynthesis.speaking && !speechSynthesis.pending) done(); }, 700);
-    // Dự phòng cuối: vài trình duyệt không bắn onend. Chặn trên 12 giây.
-    setTimeout(done, Math.min(2200 + en.length * 90, 12000));
+    setTimeout(() => { if (!speechSynthesis.speaking && !speechSynthesis.pending) done(); }, 900);
+    // Dự phòng cuối: vài trình duyệt không bắn onend. Chặn trên 22 giây vì giờ
+    // phải đọc hai khúc chứ không phải một.
+    setTimeout(done, Math.min(2600 + doDai * 95, 22000));
   } catch { done(); }
 }
 
@@ -2720,7 +2752,7 @@ async function askTutor(first) {
     $("#btnMic").disabled = !SR;
     monSays(data.reply, data.vi, () => {
       if (!C.listening) setState("Tới lượt bạn");
-    }, data.py);
+    }, data.py, data.anh);
   } catch (err) {
     C.busy = false;
     setState("Mất kết nối");

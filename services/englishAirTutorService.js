@@ -404,6 +404,7 @@ function parseReply(text) {
   const out = {
     lang: (lang || '').toLowerCase(),
     vi: grab(/(?:^|\n)VI:[^\S\r\n]*(.*)/),
+    anh: grab(/(?:^|\n)ANH:[^\S\r\n]*(.*)/),
     py: grab(/PY:[^\S\r\n]*(.*)/),
     task: grab(/TASK:[^\S\r\n]*(.*)/),
     taskVi: grab(/TVI:[^\S\r\n]*(.*)/),
@@ -519,6 +520,8 @@ async function reply({ history, level, words, mode, style }) {
   }
   // Đã nói tiếng Việt rồi thì dòng nghĩa là thừa; pinyin chỉ có nghĩa với tiếng Trung.
   if (out.lang === 'vi') out.vi = '';
+  // SAY da la tieng Anh thi khong doc lai lan nua.
+  if (out.lang === 'en') out.anh = '';
   if (out.lang !== 'zh') out.py = '';
   return out;
 }
