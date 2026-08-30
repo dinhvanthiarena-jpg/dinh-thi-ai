@@ -1826,7 +1826,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   filter: blur(38px) saturate(.75) brightness(.46);
 }
 .nhom-anh { position: absolute; left: 50%; top: 0; transform: translateX(-50%);
-  width: min(100%, 430px); height: 100%; object-fit: cover; object-position: 50% 15%; }
+  width: min(100%, 430px); height: 100%; object-fit: cover; object-position: 50% 54%; }
 /* Chỉ còn để làm mờ dịu đáy ảnh cho hoà vào nền tối của trang — không còn
    phải làm nền cho chữ nữa (chữ đã chuyển xuống dưới ảnh), nên nhạt hơn
    nhiều so với trước. Lý do đổi: ở đúng khung hình + tỉ lệ ảnh này, bạn
