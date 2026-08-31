@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#100C1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Boom Geog">
+<meta name="description" content="Boom Geog — học địa lý Việt Nam và thế giới qua bài học ngắn, bản đồ tương tác và câu hỏi ôn tập.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Boom Geog — Địa Lý Vui</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <nav class="rail" aria-label="Điều hướng chính">
+    <div class="rail-brand" aria-hidden="true">
+      <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 4.2 5.6 4.2 9s-1.4 6.4-4.2 9c-2.8-2.6-4.2-5.6-4.2-9s1.4-6.4 4.2-9z"/></svg>
+    </div>
+    <button class="rail-btn" data-nav="home" aria-current="page">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9h12v-9"/></svg>
+      <span>Học</span>
+    </button>
+    <button class="rail-btn" data-nav="map">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M9 5 3 7v13l6-2 6 2 6-2V5l-6 2-6-2z"/><path d="M9 5v13M15 7v13"/></svg>
+      <span>Bản đồ</span>
+    </button>
+    <button class="rail-btn" data-nav="profile">
+      <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.6-4 5-6 8-6s6.4 2 8 6"/></svg>
+      <span>Hồ sơ</span>
+    </button>
+  </nav>
+
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="content" id="content" tabindex="-1"></main>
+    <nav class="tabbar" aria-label="Điều hướng chính">
+      <button class="tab-btn" data-nav="home" aria-current="page">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9h12v-9"/></svg>
+        <span>Học</span>
+      </button>
+      <button class="tab-btn" data-nav="map">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M9 5 3 7v13l6-2 6 2 6-2V5l-6 2-6-2z"/><path d="M9 5v13M15 7v13"/></svg>
+        <span>Bản đồ</span>
+      </button>
+      <button class="tab-btn" data-nav="profile">
+        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.6-4 5-6 8-6s6.4 2 8 6"/></svg>
+        <span>Hồ sơ</span>
+      </button>
+    </nav>
+  </div>
+</div>
+
+<div id="overlay-root"></div>
+
+<svg class="sr-only" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5 9.5 18 20 6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5S3.5 15 3.5 8.8C3.5 5.6 5.9 3.5 8.5 3.5c1.7 0 3 .8 3.5 2 .5-1.2 1.8-2 3.5-2 2.6 0 5 2.1 5 5.3 0 6.2-8.5 11.7-8.5 11.7z"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3s-5 4.8-5 9.5a5 5 0 0 0 10 0c0-1.4-.8-2.3-1.5-3 0 1.8-1 2.5-1 2.5.3-2.5-1-4.3-2.5-6 0 1.5-1 2.5-1 2.5C10.5 6 12 3 12 3z"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5 14.6 9l6 .9-4.3 4.2 1 6-5.3-2.8L6.7 20l1-6-4.3-4.2 6-.9z"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M4 12a8 8 0 0 0 14 5.3L20 15"/><path d="M20 4v5h-5M4 20v-5h5"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H12v16h6.5a1.5 1.5 0 0 0 1.5-1.5z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/><path d="M12 14v3M9 20h6l-1-3H10z"/></symbol>
+</svg>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

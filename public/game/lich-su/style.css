@@ -1,0 +1,282 @@
+/* ============================================================
+   BiBi History — app học Lịch sử Việt Nam & thế giới theo SGK
+   Tông hồng tím, nền đậm mặc định, bo tròn nhiều.
+   ============================================================ */
+
+/* ---------- 1. TOKEN ---------- */
+:root{
+  --purple:#8B2FC9; --magenta:#B8236F; --gold:#A5721E;
+  --fill: linear-gradient(135deg, #9B3FE0, #E8419B);
+  --bg:#FBF0F6; --fg:#2B0A2E; --card:#FFFFFF; --muted:#F7E4F0;
+  --muted-fg:#845877; --line:#F0D3E7; --line-hi:#E3AED0;
+  --sky1:#F3D6EE; --sky2:#FBF0F6;
+  --ok:#2F8F5B; --ok-soft:#E4F6EC; --bad:#C23A4D; --bad-soft:#FBE7E9;
+  --flame:#D9762D; --heart:#D6368F;
+  --sh1:0 1px 2px rgba(60,10,50,.08); --sh2:0 8px 20px rgba(60,10,50,.12); --sh3:0 20px 50px rgba(60,10,50,.18);
+  --gut:16px; --shell:520px;
+  color-scheme: light;
+}
+:root[data-theme="dark"]{
+  --purple:#C58CF0; --magenta:#F472B6; --gold:#E8B44C;
+  --fill: linear-gradient(135deg, #9B3FE0, #E8419B);
+  --bg:#1D0A22; --fg:#F7E9F5; --card:#2C1130; --muted:#391640;
+  --muted-fg:#C9A7C4; --line:#48214C; --line-hi:#6B2E6E;
+  --sky1:#3D1749; --sky2:#2C1130;
+  --ok:#4ADE80; --ok-soft:#163823; --bad:#F0555A; --bad-soft:#3D161C;
+  --flame:#FDBA74; --heart:#F472B6;
+  --sh1:0 1px 2px rgba(0,0,0,.5); --sh2:0 6px 20px rgba(0,0,0,.45); --sh3:0 24px 60px rgba(0,0,0,.6);
+  color-scheme: dark;
+}
+
+*{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  margin:0; min-height:100dvh; background:var(--bg); color:var(--fg);
+  font-family:"Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size:16px; line-height:1.5; font-weight:500;
+  -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;
+  overscroll-behavior-y:none;
+}
+h1,h2,h3{ font-family:"Fraunces", Georgia, serif; font-weight:700; margin:0; letter-spacing:-.01em; text-wrap:balance; color:var(--fg); }
+p{ margin:0; }
+ul,ol{ list-style:none; margin:0; padding:0; }
+button{ background:none; border:0; font:inherit; color:inherit; cursor:pointer; touch-action:manipulation; }
+button[disabled]{ cursor:not-allowed; }
+svg{ display:block; flex:none; }
+.ic{ width:22px; height:22px; }
+img{ max-width:100%; display:block; }
+:focus-visible{ outline:3px solid var(--purple); outline-offset:2px; border-radius:8px; }
+
+/* ---------- 2. KHUNG ---------- */
+.app{ display:flex; justify-content:center; min-height:100dvh; }
+.main{ flex:1; min-width:0; max-width:var(--shell); display:flex; flex-direction:column; min-height:100dvh; }
+.view{ animation:fadein .22s ease both; }
+@keyframes fadein{ from{ opacity:0; transform:translateY(6px); } }
+@media (prefers-reduced-motion: reduce){ .view{ animation:none; } }
+
+/* ---------- 3. TOPBAR ---------- */
+.topbar{
+  position:sticky; top:0; z-index:30; display:flex; align-items:center; gap:8px;
+  padding:calc(12px + env(safe-area-inset-top)) 14px 10px;
+  background:linear-gradient(180deg, var(--sky1), var(--sky2));
+}
+.gradechip{ display:flex; align-items:center; height:34px; padding:0 14px; border-radius:999px;
+  font-size:.78rem; font-weight:800; color:#fff; box-shadow:var(--sh1); transition:transform .12s ease; }
+.gradechip:active{ transform:scale(.94); }
+.spacer{ flex:1; }
+.stat-pill{ display:flex; align-items:center; gap:4px; font-size:.82rem; font-weight:800; }
+.stat-pill svg{ width:18px; height:18px; }
+.icon-btn{ width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--card); border:1px solid var(--line); }
+.icon-btn svg{ width:18px; height:18px; color:var(--fg); }
+
+/* ---------- 4. NỘI DUNG ---------- */
+.content{ flex:1; overflow-y:auto; padding:14px 16px calc(96px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling:touch; outline:none; }
+.section-title{ font-size:1.15rem; margin:4px 0 12px; }
+.card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; }
+.card + .card{ margin-top:10px; }
+
+/* ---------- 5. HERO / HOME ---------- */
+.hero{ position:relative; padding:22px 14px 18px; border-radius:24px; overflow:hidden; margin-bottom:16px;
+  background:radial-gradient(120% 140% at 50% -10%, color-mix(in srgb, var(--purple) 30%, transparent), transparent), var(--card);
+  border:1px solid var(--line); text-align:center; }
+.mascot{ width:118px; height:118px; margin:0 auto 8px; filter:drop-shadow(0 10px 18px rgba(0,0,0,.25)); }
+.mascot img{ width:100%; height:100%; object-fit:contain; }
+.speech{ display:inline-block; background:var(--muted); color:var(--fg); font-weight:700; font-size:.86rem;
+  padding:8px 14px; border-radius:14px; margin-bottom:10px; max-width:88%; }
+.hero-name{ font-size:1.3rem; margin-bottom:4px; }
+.hero-sub{ color:var(--muted-fg); font-size:.84rem; font-weight:600; }
+
+.stats-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:14px 0 16px; }
+.stat-card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:10px 6px; text-align:center; }
+.stat-card svg{ margin:0 auto 4px; width:20px; height:20px; }
+.stat-card b{ display:block; font-size:1.05rem; font-weight:800; }
+.stat-card span{ font-size:.68rem; color:var(--muted-fg); font-weight:700; }
+
+.continue-card{ display:flex; align-items:center; gap:12px; padding:14px; border-radius:18px; margin-bottom:22px;
+  background:var(--fill); color:#fff; box-shadow:var(--sh2); width:100%; text-align:left; }
+.continue-card .txt{ flex:1; }
+.continue-card .txt b{ display:block; font-size:.95rem; margin-bottom:2px; }
+.continue-card .txt span{ font-size:.76rem; opacity:.9; font-weight:600; }
+.continue-card .go{ width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,.22); display:grid; place-items:center; flex:none; }
+.continue-card .go svg{ width:18px; height:18px; color:#fff; }
+
+.grade-context{ font-size:.76rem; font-weight:700; color:var(--muted-fg); margin:0 0 16px; line-height:1.6; }
+.grade-context b{ color:var(--purple); }
+
+/* ---------- 6. CHƯƠNG / MỐC BÀI HỌC ---------- */
+.chapter{ margin-bottom:26px; }
+.chapter-head{ display:flex; align-items:baseline; gap:8px; margin-bottom:4px; flex-wrap:wrap; }
+.chapter-head .num{ font-size:.72rem; font-weight:800; color:var(--purple); letter-spacing:.08em; }
+.chapter-head h2{ font-size:1.05rem; }
+.chapter-scope{ font-size:.64rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; padding:2px 8px; border-radius:999px; color:#fff; }
+.chapter-scope.vn{ background:var(--purple); }
+.chapter-scope.tg{ background:#3D7FBF; }
+.chapter-scope.both{ background:var(--magenta); }
+.chapter.soon{ opacity:.55; }
+.soon-tag{ display:inline-block; font-size:.64rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+  background:var(--muted); color:var(--muted-fg); padding:2px 8px; border-radius:999px; margin-left:2px; }
+
+.node-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:18px 8px; padding:10px 6px 0; }
+.node-wrap{ display:flex; flex-direction:column; align-items:center; gap:6px; position:relative; }
+.node-btn{ position:relative; width:64px; height:64px; border-radius:50%; padding:0; display:grid; place-items:center; }
+.node-btn svg.ring{ position:absolute; inset:-6px; width:76px; height:76px; transform:rotate(-90deg); }
+.node-face{ width:56px; height:56px; border-radius:50%; display:grid; place-items:center; font-weight:800; font-size:1.15rem;
+  border:1px solid var(--line); background:var(--card); color:var(--muted-fg); transition:transform .12s ease; }
+.node-btn:active .node-face{ transform:scale(.92); }
+.node-wrap[data-state="done"] .node-face{ background:var(--fill); color:#fff; border-color:transparent; }
+.node-wrap[data-state="current"] .node-face{ background:var(--card); color:var(--purple); border-color:var(--purple); border-width:2px; }
+.node-wrap[data-state="locked"] .node-face{ color:var(--muted-fg); }
+.node-face svg{ width:22px; height:22px; }
+.node-label{ font-size:.68rem; font-weight:700; color:var(--muted-fg); text-align:center; max-width:74px; line-height:1.25; }
+.node-wrap[data-state="current"] .node-label{ color:var(--fg); }
+
+/* ---------- 7. TỪ ĐIỂN / DICT ---------- */
+.dict-item{ display:flex; gap:12px; align-items:flex-start; }
+.dict-badge{ width:40px; height:40px; border-radius:12px; background:var(--muted); display:grid; place-items:center; flex:none; }
+.dict-badge svg{ width:20px; height:20px; color:var(--purple); }
+.dict-item b{ display:block; font-size:.92rem; margin-bottom:2px; }
+.dict-item .era{ font-size:.68rem; font-weight:700; color:var(--magenta); text-transform:uppercase; letter-spacing:.04em; }
+.dict-item p{ font-size:.8rem; color:var(--muted-fg); line-height:1.5; margin-top:4px; }
+
+/* ---------- 8. ÔN TẬP ---------- */
+.flash{ perspective:1000px; height:132px; margin-bottom:12px; }
+.flash-inner{ position:relative; width:100%; height:100%; transition:transform .5s cubic-bezier(.22,.8,.32,1); transform-style:preserve-3d; }
+.flash.flip .flash-inner{ transform:rotateY(180deg); }
+.flash-face{ position:absolute; inset:0; backface-visibility:hidden; border-radius:16px; border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center; text-align:center; padding:14px; font-weight:700; background:var(--card); }
+.flash-face.back{ transform:rotateY(180deg); background:var(--muted); color:var(--purple); font-size:.92rem; }
+.flash-tag{ position:absolute; top:8px; left:10px; font-size:.62rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--muted-fg); }
+
+/* ---------- 9. HỎI BIBI (CHAT) ---------- */
+.chat-scroll{ display:flex; flex-direction:column; gap:10px; margin-bottom:10px; }
+.bubble{ max-width:82%; padding:10px 13px; border-radius:16px; font-size:.86rem; line-height:1.5; }
+.bubble.me{ align-self:flex-end; background:var(--fill); color:#fff; border-bottom-right-radius:4px; }
+.bubble.bibi{ align-self:flex-start; background:var(--card); border:1px solid var(--line); border-bottom-left-radius:4px; }
+.bubble.bibi b{ display:block; font-size:.68rem; color:var(--magenta); margin-bottom:3px; letter-spacing:.03em; }
+.chat-input{ display:flex; gap:8px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:8px 8px 8px 16px; }
+.chat-input input{ flex:1; border:0; background:none; font:inherit; color:var(--fg); outline:none; }
+.chat-input button{ width:36px; height:36px; border-radius:50%; background:var(--fill); display:grid; place-items:center; flex:none; }
+.chat-input button svg{ width:16px; height:16px; color:#fff; }
+.chat-note{ font-size:.72rem; color:var(--muted-fg); text-align:center; margin-bottom:14px; }
+
+/* ---------- 10. XẾP HẠNG ---------- */
+.rank-row{ display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--line); }
+.rank-row:last-child{ border-bottom:0; }
+.rank-num{ width:22px; text-align:center; font-weight:800; color:var(--muted-fg); font-size:.86rem; }
+.rank-av{ width:34px; height:34px; border-radius:50%; background:var(--muted); color:var(--purple); display:grid; place-items:center; font-weight:800; font-size:.8rem; flex:none; }
+.rank-row.me{ background:var(--muted); border-radius:12px; }
+.rank-row.me .rank-av{ background:var(--fill); color:#fff; }
+.rank-name{ flex:1; font-size:.86rem; font-weight:700; }
+.rank-xp{ font-size:.8rem; font-weight:800; color:var(--magenta); }
+
+/* ---------- 11. HỒ SƠ ---------- */
+.profile-head{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.profile-av{ width:56px; height:56px; border-radius:50%; background:var(--fill); overflow:hidden; display:grid; place-items:center; flex:none; }
+.profile-av img{ width:100%; height:100%; object-fit:cover; }
+.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:10px; }
+.cal-cell{ aspect-ratio:1; border-radius:9px; display:grid; place-items:center; font-size:.66rem; font-weight:700; color:var(--muted-fg); background:var(--muted); }
+.cal-cell.done{ background:var(--fill); color:#fff; }
+.cal-dow{ font-size:.6rem; text-align:center; color:var(--muted-fg); font-weight:800; }
+
+/* ---------- 12. TOAST ---------- */
+.toast{ position:fixed; left:50%; bottom:calc(88px + env(safe-area-inset-bottom)); transform:translate(-50%, 12px);
+  background:var(--fg); color:var(--bg); padding:10px 16px; border-radius:12px; font-size:.8rem; font-weight:700;
+  opacity:0; pointer-events:none; transition:all .25s ease; z-index:80; max-width:88vw; text-align:center; }
+.toast.show{ opacity:1; transform:translate(-50%, 0); }
+
+/* ---------- 13. TABBAR ---------- */
+.tabbar{ position:sticky; bottom:0; left:0; right:0; display:flex; background:var(--card); border-top:1px solid var(--line);
+  padding:8px 4px calc(10px + env(safe-area-inset-bottom)); z-index:20; }
+.tab{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:4px 0; color:var(--muted-fg); border-radius:12px; }
+.tab svg{ width:21px; height:21px; }
+.tab span{ font-size:.6rem; font-weight:700; }
+.tab.active{ color:var(--purple); }
+
+/* ============================================================
+   BỘ CHỌN LỚP (toàn màn hình)
+   ============================================================ */
+.gradepicker{ position:fixed; inset:0; background:var(--bg); z-index:70; display:none; flex-direction:column; }
+.gradepicker:not([hidden]){ display:flex; }
+.gp-top{ display:flex; align-items:center; gap:10px; padding:calc(14px + env(safe-area-inset-top)) 16px 12px; border-bottom:1px solid var(--line); }
+.gp-top h2{ font-size:1.15rem; flex:1; }
+.gp-close{ width:32px; height:32px; display:grid; place-items:center; color:var(--muted-fg); }
+.gp-close svg{ width:20px; height:20px; }
+.gp-list{ flex:1; overflow-y:auto; padding:12px 16px calc(24px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:10px; }
+.gp-item{ display:flex; align-items:center; gap:12px; padding:14px; border-radius:16px; border:1px solid var(--line); background:var(--card); text-align:left; width:100%; }
+.gp-item .gp-badge{ width:42px; height:42px; border-radius:12px; display:grid; place-items:center; color:#fff; font-weight:800; font-size:.95rem; flex:none; }
+.gp-item .gp-txt{ flex:1; }
+.gp-item .gp-txt b{ display:block; font-size:.94rem; }
+.gp-item .gp-txt span{ display:block; font-size:.76rem; color:var(--muted-fg); margin-top:2px; }
+.gp-item.active{ border-color:var(--purple); border-width:2px; }
+.gp-cap{ font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--muted-fg); margin:14px 4px 2px; }
+.gp-cap:first-child{ margin-top:0; }
+
+/* ============================================================
+   MÀN HỌC BÀI (LESSON PLAYER)
+   ============================================================ */
+.lesson-overlay{ position:fixed; inset:0; background:var(--bg); z-index:60; display:none; flex-direction:column; }
+.lesson-overlay:not([hidden]){ display:flex; }
+.lesson-top{ flex:none; padding:calc(14px + env(safe-area-inset-top)) 16px 0; max-width:var(--shell); margin:0 auto; width:100%; }
+.lesson-top-row{ display:flex; align-items:center; gap:10px; }
+.lesson-close{ width:30px; height:30px; display:grid; place-items:center; color:var(--muted-fg); }
+.lesson-close svg{ width:20px; height:20px; }
+.hearts{ display:flex; gap:4px; margin-left:auto; }
+.hearts svg{ width:19px; height:19px; color:var(--heart); }
+.hearts svg.lost{ color:var(--line-hi); }
+.lesson-kind{ display:inline-block; font-size:.64rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--purple); background:var(--muted); padding:3px 9px; border-radius:999px; margin:12px 0 8px; }
+.progress-track{ height:8px; border-radius:999px; background:var(--muted); overflow:hidden; }
+.progress-fill{ height:100%; border-radius:999px; background:var(--fill); transition:width .3s cubic-bezier(.22,.8,.32,1); }
+
+.lesson-body{ flex:1; overflow-y:auto; padding:20px 16px 18px; max-width:var(--shell); margin:0 auto; width:100%; display:flex; flex-direction:column; }
+.lesson-sky{ margin:6px -16px 0; padding:22px 16px 12px; text-align:center; background:linear-gradient(180deg, var(--sky1), transparent); }
+.lesson-title{ font-size:1.28rem; text-align:center; margin:8px 0 14px; }
+.lesson-txt{ font-size:.94rem; line-height:1.7; color:var(--fg); background:var(--card); border:1px solid var(--line);
+  border-radius:16px; padding:14px 16px; }
+.lesson-txt + .lesson-txt{ margin-top:10px; }
+
+.fact-card{ display:flex; gap:12px; align-items:flex-start; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:14px; }
+.fact-icon{ width:52px; height:52px; border-radius:14px; background:var(--muted); display:grid; place-items:center; flex:none; }
+.fact-icon svg{ width:28px; height:28px; color:var(--purple); }
+.fact-card h3{ font-size:1rem; margin-bottom:4px; }
+.fact-card .meta{ font-size:.7rem; font-weight:700; color:var(--magenta); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; display:block; }
+.fact-card p{ font-size:.85rem; line-height:1.6; color:var(--muted-fg); }
+
+.marker{ position:relative; border:2px dashed var(--gold); border-radius:16px; padding:16px; background:color-mix(in srgb, var(--gold) 10%, var(--card)); }
+.marker .marker-tag{ position:absolute; top:-11px; left:14px; background:var(--bg); padding:0 8px; font-size:.68rem; font-weight:800; color:var(--gold); text-transform:uppercase; letter-spacing:.05em; }
+.marker p{ font-size:.86rem; line-height:1.65; color:var(--fg); }
+.marker p + p{ margin-top:8px; }
+
+.heritage{ border-radius:18px; overflow:hidden; border:1px solid var(--line); }
+.heritage-top{ padding:26px 16px; text-align:center; background:linear-gradient(135deg, var(--purple), var(--magenta)); color:#fff; }
+.heritage-top svg{ width:40px; height:40px; margin:0 auto 8px; }
+.heritage-top b{ font-size:1rem; }
+.heritage-bottom{ padding:14px 16px; background:var(--card); font-size:.85rem; line-height:1.6; color:var(--muted-fg); }
+
+.opt-list{ display:flex; flex-direction:column; gap:10px; }
+.opt{ text-align:left; padding:13px 16px; border-radius:14px; border:2px solid var(--line); background:var(--card); font-size:.92rem; font-weight:600; }
+.opt.sel{ border-color:var(--purple); background:color-mix(in srgb, var(--purple) 10%, var(--card)); }
+.opt.ok{ border-color:var(--ok); background:var(--ok-soft); color:var(--ok); }
+.opt.bad{ border-color:var(--bad); background:var(--bad-soft); color:var(--bad); }
+.opt:disabled{ cursor:default; }
+
+.blank-sentence{ font-size:1.02rem; line-height:2.1; text-align:center; padding:8px; }
+.blank-slot{ display:inline-block; min-width:64px; padding:2px 8px; margin:0 2px; border-bottom:3px solid var(--line-hi); font-weight:800; color:var(--purple); }
+.wordbank{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:18px; }
+.chip{ padding:9px 16px; border-radius:999px; border:1px solid var(--line); background:var(--card); font-weight:700; font-size:.86rem; }
+.chip:disabled{ opacity:.35; }
+
+.lesson-foot{ flex:none; padding:12px 16px calc(16px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); background:var(--card); max-width:var(--shell); margin:0 auto; width:100%; }
+.btn-primary{ width:100%; padding:14px; border-radius:14px; background:var(--fill); color:#fff; font-weight:800; font-size:.96rem; box-shadow:var(--sh2); }
+.btn-primary:disabled{ opacity:.4; }
+.feedback-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; font-weight:800; font-size:.9rem; }
+.feedback-row.ok{ color:var(--ok); }
+.feedback-row.bad{ color:var(--bad); }
+.feedback-row svg{ width:22px; height:22px; }
+
+.finish-wrap{ text-align:center; padding:20px 6px; margin:auto 0; }
+.finish-wrap .mascot{ width:110px; height:110px; margin:0 auto 10px; }
+.finish-stats{ display:flex; justify-content:center; gap:10px; margin:18px 0; }
+.finish-stat{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px 18px; }
+.finish-stat b{ display:block; font-size:1.2rem; }
+.finish-stat span{ font-size:.68rem; color:var(--muted-fg); font-weight:700; }

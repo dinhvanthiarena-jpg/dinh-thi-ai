@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BiBi History — Học Lịch sử cùng BiBi</title>
+<meta name="theme-color" content="#1D0A22">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <div class="main">
+    <header class="topbar">
+      <button class="gradechip" id="gradeBtn" aria-label="Đổi lớp học"></button>
+      <div class="spacer"></div>
+      <div class="stat-pill" id="streakPill" style="color:var(--flame)"></div>
+      <div class="stat-pill" id="xpPill" style="color:var(--magenta); margin-left:10px;"></div>
+      <button class="icon-btn" id="themeBtn" style="margin-left:10px;" aria-label="Đổi giao diện sáng/tối"></button>
+    </header>
+
+    <main class="content" id="content" tabindex="-1"></main>
+
+    <nav class="tabbar" id="tabbar"></nav>
+  </div>
+
+  <div class="lesson-overlay" id="lessonOverlay" hidden></div>
+  <div class="gradepicker" id="gradePicker" hidden></div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="grades-data.js"></script>
+<script src="course-lop6.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
