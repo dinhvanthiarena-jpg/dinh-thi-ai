@@ -3204,6 +3204,15 @@
     }
 
     const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    // Trên web, "nghe" dùng Web Speech API của trình duyệt (SpeechRecognitionCtor
+    // ở trên) — Chrome/Android hỗ trợ tốt, nhưng Safari/iOS thì KHÔNG BAO GIỜ
+    // hỗ trợ, dù có đóng gói app kiểu gì đi nữa (giới hạn của WebKit, không
+    // phải lỗi code). Khi chạy trong app native (Capacitor) thì dùng thẳng bộ
+    // nhận diện giọng nói CỦA MÁY (iOS Speech framework / Android
+    // SpeechRecognizer) qua plugin @capacitor-community/speech-recognition —
+    // cái này CÓ hoạt động trên iPhone, vì không phụ thuộc WebKit nữa.
+    const CapSR = (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()
+      && window.Capacitor.Plugins && window.Capacitor.Plugins.SpeechRecognition) || null;
     let callRecognition = null;
     let callHistory = [];
     // Đáp án đúng (số, đã máy chủ tính ra) của bài toán Mon vừa ra, hoặc
@@ -3213,7 +3222,7 @@
     let callSeconds = 0;
     let callBusy = false;
     let callEnded = true;
-    let callTypedOnly = !SpeechRecognitionCtor;
+    let callTypedOnly = !SpeechRecognitionCtor && !CapSR;
 
     // Mon nói được ba thứ tiếng — bạn học không chọn trước, cứ nói, server
     // (boomChatService.js) tự nghe ra rồi trả lời đúng thứ tiếng đó, client
@@ -3466,32 +3475,49 @@
       }
     }
 
-    function callStartListening() {
-      if (!SpeechRecognitionCtor || callBusy || callEnded || callTypedOnly) return;
+    function callListenUIStart() {
+      callYou.hidden = false;
+      btnMic.classList.add('on');
+      callMascotEl.classList.add('listening');
+      callSetState('Đang nghe cậu nói…');
+    }
+    function callListenUIEnd() {
+      callYou.hidden = true;
+      btnMic.classList.remove('on');
+      callMascotEl.classList.remove('listening');
+    }
+    function callHandleHeard(text) {
+      if (!text) return;
+      callHeardText.textContent = `Cậu: "${text}"`;
+      callHeard.hidden = false;
+      callAsk(text);
+    }
+    function callStartListeningNative() {
+      const lg = CALL_NO_LISTEN[callLang] ? 'vi' : callLang;
+      const langTag = (CALL_LANGS[lg] || CALL_LANGS.vi).sr;
+      callListenUIStart();
+      CapSR.start({ language: langTag, maxResults: 1, partialResults: false, popup: false })
+        .then((res) => {
+          callListenUIEnd();
+          const text = ((res && res.matches && res.matches[0]) || '').trim();
+          callHandleHeard(text);
+        })
+        .catch(() => {
+          callListenUIEnd();
+          if (!callBusy) callSetState('Không nghe rõ, bấm mic để nói lại nhé.');
+        });
+    }
+    function callStartListeningWeb() {
       try {
         callRecognition = new SpeechRecognitionCtor();
         const lg = CALL_NO_LISTEN[callLang] ? 'vi' : callLang;
         callRecognition.lang = (CALL_LANGS[lg] || CALL_LANGS.vi).sr;
         callRecognition.interimResults = false;
         callRecognition.maxAlternatives = 1;
-        callRecognition.onstart = () => {
-          callYou.hidden = false;
-          btnMic.classList.add('on');
-          callMascotEl.classList.add('listening');
-          callSetState('Đang nghe cậu nói…');
-        };
-        callRecognition.onresult = (ev) => {
-          const text = ev.results[0][0].transcript.trim();
-          if (text) {
-            callHeardText.textContent = `Cậu: "${text}"`;
-            callHeard.hidden = false;
-            callAsk(text);
-          }
-        };
+        callRecognition.onstart = callListenUIStart;
+        callRecognition.onresult = (ev) => callHandleHeard(ev.results[0][0].transcript.trim());
         callRecognition.onerror = (ev) => {
-          callYou.hidden = true;
-          btnMic.classList.remove('on');
-          callMascotEl.classList.remove('listening');
+          callListenUIEnd();
           // Máy không nghe được thứ tiếng đang chọn thì lùi về tiếng Việt rồi
           // nghe lại ngay, đừng bắt bạn học tự xoay xở với lỗi khó hiểu.
           if (ev.error === 'language-not-supported' && callLang !== 'vi') {
@@ -3502,19 +3528,22 @@
           }
           if (!callBusy) callSetState('Không nghe rõ, bấm mic để nói lại nhé.');
         };
-        callRecognition.onend = () => {
-          callYou.hidden = true;
-          btnMic.classList.remove('on');
-          callMascotEl.classList.remove('listening');
-        };
+        callRecognition.onend = callListenUIEnd;
         callRecognition.start();
       } catch (e) {}
     }
+    // Web (Chrome/Android) dùng Web Speech API của trình duyệt; app native
+    // (Capacitor, kể cả trên iPhone) dùng thẳng bộ nghe của máy qua CapSR —
+    // xem giải thích đầy đủ ở khai báo CapSR phía trên.
+    function callStartListening() {
+      if (callBusy || callEnded || callTypedOnly) return;
+      if (CapSR) callStartListeningNative();
+      else if (SpeechRecognitionCtor) callStartListeningWeb();
+    }
     function callStopListening() {
       if (callRecognition) { try { callRecognition.stop(); } catch (e) {} }
-      callYou.hidden = true;
-      btnMic.classList.remove('on');
-      callMascotEl.classList.remove('listening');
+      if (CapSR) { CapSR.stop().catch(() => {}); }
+      callListenUIEnd();
     }
     function callSwitchToTyped() {
       callTypedOnly = true;
@@ -3552,9 +3581,15 @@
       callSetState('Đang kết nối…');
       callProbeVideo();
       callStartTimer();
-      callTypedOnly = !SpeechRecognitionCtor;
+      callTypedOnly = !SpeechRecognitionCtor && !CapSR;
       btnMic.hidden = callTypedOnly;
       btnCallSkip.hidden = callTypedOnly;
+      // CapSR có mặt (đang chạy app native) không có nghĩa là máy đó chắc
+      // chắn nghe được — kiểm tra thật rồi mới quyết, không thì bấm mic vô
+      // ích mà chẳng có gì xảy ra.
+      if (!callTypedOnly && CapSR) {
+        CapSR.available().then((r) => { if (!r || !r.available) callSwitchToTyped(); }).catch(() => callSwitchToTyped());
+      }
       callType.hidden = !callTypedOnly;
       // Cảnh phòng cần layout đã ổn định (chiều cao thật của .call-top/
       // .call-foot) mới tính đúng được — đợi một khung hình rồi mới fit.

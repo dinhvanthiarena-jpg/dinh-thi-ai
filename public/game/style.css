@@ -180,6 +180,11 @@ button:focus-visible,
   flex-direction: column;
   align-items: center;
   overflow-y: auto;
+  /* iPhone đời cũ (trước iOS 13) không tự bật cuộn chạm mượt cho
+     overflow-y:auto nằm trong vùng position:fixed — thiếu dòng này thì
+     vuốt lên không ăn, các nút nằm dưới màn hình đầu (như nút gọi Mon ở
+     trang chủ trên máy màn hình ngắn) sẽ không với tới được. */
+  -webkit-overflow-scrolling: touch;
   opacity: 0;
 }
 .screen.active {
@@ -262,22 +267,39 @@ button:focus-visible,
 .btn-lg { padding: 15px 26px; font-size: 1rem; }
 .btn-block { width: 100%; }
 
-/* ==== HOME ==== */
+/* ==== HOME ====
+   .screen-with-footer screens (license + home) split into two real flex
+   children instead of overlaying .contact-footer with position:absolute:
+   that overlay approach scrolled together with its content but stayed
+   pinned to a FIXED-size box (.screen's own, unaffected by its overflow),
+   so no amount of bottom padding could ever clear it — the footer always
+   ended up hiding the last row of buttons on short screens (confirmed: the
+   home screen's call/homework/squad icon row sat permanently behind it).
+   Splitting the scrollable area from the footer via flex :1 / flex-shrink:0
+   (same pattern already used for .call-wrap's .call-stage/.call-foot) makes
+   the footer a normal sibling that can never overlap anything. */
+.screen-with-footer { overflow: hidden; }
+.home-scroll {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+}
 .home-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100%;
-  /* .screen is itself a flex column, so without this, .home-wrap (its only
-     child) gets shrunk by the flex algorithm whenever content is taller
-     than the viewport — squishing the avatar ring down instead of letting
-     the screen's own overflow-y:auto scroll like it's meant to. */
+  /* .home-scroll is itself a flex column, so without this, .home-wrap (its
+     only child) gets shrunk by the flex algorithm whenever content is
+     taller than the viewport — squishing the avatar ring down instead of
+     letting .home-scroll's own overflow-y:auto scroll like it's meant to. */
   flex-shrink: 0;
-  /* Extra bottom padding so centered content never lands underneath the
-     fixed-height footer bar on shorter screens (it's opaque and would
-     just hide whatever sits behind it, like the homework button). */
-  padding: 40px 20px 150px;
+  padding: 40px 20px 24px;
   gap: 6px;
   text-align: center;
 }
@@ -503,10 +525,8 @@ button:focus-visible,
 }
 
 .contact-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  flex-shrink: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
