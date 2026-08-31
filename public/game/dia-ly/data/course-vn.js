@@ -7,12 +7,12 @@
 
 export const VN_LEVELS = [
   { id: "l45", label: "Lớp 4–5",  sub: "Làm quen",       ready: true  },
-  { id: "l6",  label: "Lớp 6",    sub: "Địa lí 6",        ready: false },
-  { id: "l7",  label: "Lớp 7",    sub: "Địa lí 7",        ready: false },
+  { id: "l6",  label: "Lớp 6",    sub: "VN trên bản đồ", ready: true  },
+  { id: "l7",  label: "Lớp 7",    sub: "VN trong châu Á",ready: true  },
   { id: "l8",  label: "Lớp 8",    sub: "Tự nhiên VN",     ready: true  },
   { id: "l9",  label: "Lớp 9",    sub: "Dân cư & kinh tế",ready: true  },
-  { id: "l10", label: "Lớp 10",   sub: "Địa lí 10",       ready: false },
-  { id: "l11", label: "Lớp 11",   sub: "Địa lí 11",       ready: false },
+  { id: "l10", label: "Lớp 10",   sub: "Hội nhập KT",    ready: true  },
+  { id: "l11", label: "Lớp 11",   sub: "Đối tác toàn cầu",ready: true  },
   { id: "l12", label: "Lớp 12",   sub: "VN chuyên sâu",   ready: true  },
 ];
 
@@ -523,16 +523,221 @@ const c4 = {
   ],
 };
 
+// ===== Lớp 6, 7, 10, 11 — phần Việt Nam. Chương trình thật của các lớp này thiên về Trái
+// Đất/bản đồ (lớp 6), các châu lục (lớp 7), đại cương KT-XH thế giới (lớp 10) và các cường
+// quốc/khu vực (lớp 11) — xem ở phân môn Thế giới cùng lớp. Ở đây soạn thêm nội dung song
+// song, áp dụng đúng kỹ năng/khái niệm của từng lớp vào chính nước mình, để bài học không
+// trống và có liên hệ thực tế Việt Nam.
+
+const c5 = {
+  id: "vn-l6-c1",
+  title: "Việt Nam trên bản đồ",
+  icon: "pin",
+  lessons: [
+    {
+      id: "vn-l6-c1-l1",
+      title: "Đọc bản đồ hành chính Việt Nam",
+      goal: "Áp dụng kỹ năng đọc bản đồ vào bản đồ nước mình",
+      teach: [
+        { t: "intro", title: "Bản đồ hành chính là gì?",
+          body: "Bản đồ hành chính thể hiện ranh giới các tỉnh, thành phố cùng vị trí thủ đô và trung tâm hành chính. Nhìn vào bản đồ, em có thể biết một tỉnh nằm ở miền nào, giáp những tỉnh nào.",
+          bullets: ["Mỗi màu trên bản đồ thường là một tỉnh, thành khác nhau", "Kí hiệu ngôi sao hoặc chấm tròn lớn thường là thủ đô, trung tâm tỉnh", "Việt Nam hiện có 34 tỉnh, thành sau đợt sáp nhập năm 2025"] },
+        { t: "topic", kicker: "Thực hành đọc bản đồ", title: "Xác định vị trí một tỉnh",
+          body: "Để xác định một tỉnh nằm ở đâu, em nhìn vào vị trí trên bản đồ so với các mốc quen thuộc: gần biển hay trong nội địa, ở phía Bắc/Trung/Nam, giáp tỉnh nào và giáp nước nào (nếu có đường biên giới).",
+          facts: [{ label: "Số tỉnh, thành", value: "34 (sau 2025)" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Việt Nam hiện có bao nhiêu tỉnh, thành sau sáp nhập 2025?", options: ["34", "63", "6", "20"], answer: 0 },
+        { t: "mapclick", q: "Hãy bấm vào Hà Nội trên bản đồ.", targetType: "province", targetId: "ha-noi" },
+        { t: "mapclick", q: "Hãy bấm vào TP. Hồ Chí Minh trên bản đồ.", targetType: "province", targetId: "tp-ho-chi-minh" },
+        { t: "truefalse", q: "Bản đồ hành chính thể hiện ranh giới các tỉnh, thành.", answer: true },
+      ],
+    },
+    {
+      id: "vn-l6-c1-l2",
+      title: "Việt Nam trong Đông Nam Á",
+      goal: "Vị trí Việt Nam so với các nước láng giềng",
+      teach: [
+        { t: "topic", kicker: "So sánh vị trí", title: "Việt Nam nằm ở rìa đông Đông Nam Á lục địa",
+          body: "So với các nước Đông Nam Á khác, Việt Nam có đường bờ biển dài nhất trong khối các nước lục địa (Lào, Campuchia, Thái Lan, Myanmar, Việt Nam), trải dài theo hướng Bắc – Nam kéo qua nhiều vĩ độ.",
+          facts: [{ label: "Bờ biển", value: "~3.260 km" }, { label: "Láng giềng", value: "Trung Quốc, Lào, Campuchia" }] },
+        { t: "culture", title: "Cầu nối trên bản đồ khu vực",
+          body: "Nhờ vị trí ở rìa đông bán đảo Đông Dương, Việt Nam vừa có thể giao lưu với các nước Đông Nam Á lục địa qua đường bộ, vừa thông thương với thế giới qua Biển Đông — một vị trí địa lí rất thuận lợi." },
+      ],
+      quiz: [
+        { t: "choice", q: "Việt Nam giáp những nước nào trong Đông Nam Á?", options: ["Lào, Campuchia", "Thái Lan, Myanmar", "Singapore, Malaysia", "Indonesia, Philippines"], answer: 0 },
+        { t: "truefalse", q: "Việt Nam có đường bờ biển dài nhất trong nhóm nước Đông Nam Á lục địa.", answer: true },
+        { t: "choice", q: "Việt Nam thông thương ra thế giới chủ yếu qua đâu?", options: ["Biển Đông", "Sa mạc", "Dãy Himalaya", "Bắc Băng Dương"], answer: 0 },
+      ],
+    },
+    {
+      id: "vn-l6-c1-l3",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại cách đọc bản đồ và vị trí Việt Nam trong khu vực",
+      quiz: [
+        { t: "choice", q: "Việt Nam có bao nhiêu tỉnh, thành hiện nay?", options: ["34", "63", "10", "6"], answer: 0 },
+        { t: "mapclick", q: "Bấm vào Đà Nẵng.", targetType: "province", targetId: "da-nang" },
+        { t: "choice", q: "Việt Nam giáp nước nào ở phía Bắc?", options: ["Trung Quốc", "Lào", "Thái Lan", "Nhật Bản"], answer: 0 },
+        { t: "drag", q: "Kéo mỗi thành phố vào đúng miền.",
+          buckets: ["Miền Bắc", "Miền Trung", "Miền Nam"],
+          items: [{ label: "Hà Nội", bucket: 0 }, { label: "Huế", bucket: 1 }, { label: "Cần Thơ", bucket: 2 }] },
+      ],
+    },
+  ],
+};
+
+const c6 = {
+  id: "vn-l7-c1",
+  title: "Việt Nam trong châu Á",
+  icon: "pin",
+  lessons: [
+    {
+      id: "vn-l7-c1-l1",
+      title: "Việt Nam — một phần của châu Á",
+      goal: "So sánh quy mô Việt Nam với châu Á",
+      teach: [
+        { t: "intro", title: "Một điểm nhỏ trên châu lục lớn nhất",
+          body: "Châu Á rất rộng lớn với gần 50 quốc gia. Việt Nam là một quốc gia thuộc khu vực Đông Nam Á của châu Á, có diện tích và dân số ở mức trung bình so với các nước châu Á khác nhưng có vị trí địa – chiến lược quan trọng.",
+          bullets: ["Việt Nam thuộc khu vực Đông Nam Á", "Châu Á có gần 50 quốc gia và vùng lãnh thổ", "Việt Nam có hơn 100 triệu dân — đông dân so với mặt bằng chung Đông Nam Á"] },
+        { t: "topic", kicker: "So sánh khu vực", title: "Đông Nam Á trong lòng châu Á",
+          body: "Đông Nam Á là một trong các khu vực của châu Á (cùng với Đông Á, Nam Á, Tây Nam Á, Trung Á), gồm phần lục địa (bán đảo Trung Ấn — có Việt Nam) và phần hải đảo (Indonesia, Philippines...).",
+          facts: [{ label: "Khu vực", value: "Đông Nam Á" }, { label: "Thuộc phần", value: "Lục địa (bán đảo Trung Ấn)" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Việt Nam thuộc khu vực nào của châu Á?", options: ["Đông Nam Á", "Nam Á", "Tây Nam Á", "Trung Á"], answer: 0 },
+        { t: "choice", q: "Việt Nam thuộc phần nào của Đông Nam Á?", options: ["Phần lục địa", "Phần hải đảo", "Cả hai như nhau", "Không thuộc phần nào"], answer: 0 },
+        { t: "truefalse", q: "Châu Á có gần 50 quốc gia và vùng lãnh thổ.", answer: true },
+      ],
+    },
+    {
+      id: "vn-l7-c1-l2",
+      title: "Việt Nam và cộng đồng ASEAN",
+      goal: "Vai trò của Việt Nam trong khối ASEAN",
+      teach: [
+        { t: "culture", title: "Thành viên tích cực của ASEAN",
+          body: "Việt Nam gia nhập ASEAN năm 1995, trở thành thành viên tích cực trong các hoạt động hợp tác kinh tế, văn hoá, an ninh khu vực. Việt Nam từng đảm nhiệm vai trò Chủ tịch ASEAN, cho thấy vị thế ngày càng quan trọng trong khu vực." },
+      ],
+      quiz: [
+        { t: "choice", q: "Việt Nam gia nhập ASEAN vào năm nào?", options: ["1995", "1975", "2000", "2010"], answer: 0 },
+        { t: "truefalse", q: "Việt Nam từng đảm nhiệm vai trò Chủ tịch ASEAN.", answer: true },
+        { t: "choice", q: "ASEAN là tổ chức hợp tác của khu vực nào?", options: ["Đông Nam Á", "Châu Âu", "Bắc Mỹ", "Châu Phi"], answer: 0 },
+      ],
+    },
+    {
+      id: "vn-l7-c1-l3",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại vị trí Việt Nam trong châu Á và ASEAN",
+      quiz: [
+        { t: "choice", q: "Việt Nam thuộc khu vực nào của châu Á?", options: ["Đông Nam Á", "Đông Á", "Nam Á", "Tây Á"], answer: 0 },
+        { t: "choice", q: "Việt Nam gia nhập ASEAN năm nào?", options: ["1995", "1986", "2007", "1945"], answer: 0 },
+        { t: "truefalse", q: "Việt Nam thuộc phần hải đảo của Đông Nam Á.", answer: false },
+      ],
+    },
+  ],
+};
+
+const c7 = {
+  id: "vn-l10-c1",
+  title: "Việt Nam trong nền kinh tế toàn cầu",
+  icon: "pin",
+  lessons: [
+    {
+      id: "vn-l10-c1-l1",
+      title: "Chuyển dịch cơ cấu kinh tế Việt Nam",
+      goal: "Xu hướng thay đổi tỉ trọng các ngành kinh tế",
+      teach: [
+        { t: "topic", kicker: "Xu hướng chuyển dịch", title: "Từ nông nghiệp sang công nghiệp, dịch vụ",
+          body: "Trong quá trình phát triển, tỉ trọng ngành nông nghiệp trong nền kinh tế Việt Nam giảm dần, trong khi tỉ trọng công nghiệp và dịch vụ ngày càng tăng — đây là xu hướng chuyển dịch cơ cấu kinh tế theo hướng công nghiệp hoá, hiện đại hoá.",
+          facts: [{ label: "Xu hướng", value: "Giảm nông nghiệp, tăng CN-DV" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Xu hướng chuyển dịch cơ cấu kinh tế Việt Nam là gì?", options: ["Giảm nông nghiệp, tăng công nghiệp - dịch vụ", "Chỉ phát triển nông nghiệp", "Không thay đổi", "Giảm cả 3 ngành"], answer: 0 },
+        { t: "truefalse", q: "Công nghiệp hoá, hiện đại hoá là mục tiêu chuyển dịch cơ cấu kinh tế Việt Nam.", answer: true },
+      ],
+    },
+    {
+      id: "vn-l10-c1-l2",
+      title: "Việt Nam hội nhập kinh tế quốc tế",
+      goal: "Các tổ chức và hiệp định Việt Nam tham gia",
+      teach: [
+        { t: "culture", title: "Mở cửa và hội nhập",
+          body: "Việt Nam tham gia nhiều tổ chức và hiệp định thương mại quốc tế như ASEAN, WTO (Tổ chức Thương mại Thế giới) và các hiệp định thương mại tự do (FTA) với nhiều đối tác, giúp hàng hoá Việt Nam xuất khẩu đi khắp thế giới." },
+      ],
+      quiz: [
+        { t: "choice", q: "WTO là viết tắt của tổ chức nào?", options: ["Tổ chức Thương mại Thế giới", "Tổ chức Y tế Thế giới", "Liên minh châu Âu", "Ngân hàng Thế giới"], answer: 0 },
+        { t: "truefalse", q: "Việt Nam đã kí nhiều hiệp định thương mại tự do (FTA) với các đối tác.", answer: true },
+      ],
+    },
+    {
+      id: "vn-l10-c1-l3",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại chuyển dịch cơ cấu và hội nhập kinh tế Việt Nam",
+      quiz: [
+        { t: "choice", q: "Xu hướng chuyển dịch cơ cấu kinh tế Việt Nam là gì?", options: ["Giảm nông nghiệp, tăng công nghiệp - dịch vụ", "Chỉ trồng lúa", "Không đổi", "Tăng nông nghiệp"], answer: 0 },
+        { t: "choice", q: "Việt Nam là thành viên của tổ chức thương mại thế giới nào?", options: ["WTO", "NATO", "EU", "OPEC"], answer: 0 },
+      ],
+    },
+  ],
+};
+
+const c8 = {
+  id: "vn-l11-c1",
+  title: "Việt Nam và các đối tác toàn cầu",
+  icon: "pin",
+  lessons: [
+    {
+      id: "vn-l11-c1-l1",
+      title: "Việt Nam trong ASEAN",
+      goal: "Hợp tác kinh tế, chính trị của Việt Nam với khối ASEAN",
+      teach: [
+        { t: "topic", kicker: "Hợp tác khu vực", title: "Việt Nam — mắt xích quan trọng của ASEAN",
+          body: "Việt Nam tích cực tham gia Cộng đồng ASEAN trên cả ba trụ cột: chính trị – an ninh, kinh tế và văn hoá – xã hội, góp phần giữ vững hoà bình, ổn định và thúc đẩy hợp tác phát triển trong khu vực.",
+          facts: [{ label: "Ba trụ cột ASEAN", value: "Chính trị-an ninh, Kinh tế, Văn hoá-xã hội" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Cộng đồng ASEAN có mấy trụ cột hợp tác?", options: ["3", "1", "5", "10"], answer: 0 },
+        { t: "truefalse", q: "Việt Nam tham gia tích cực vào Cộng đồng ASEAN.", answer: true },
+      ],
+    },
+    {
+      id: "vn-l11-c1-l2",
+      title: "Việt Nam trong chuỗi cung ứng toàn cầu",
+      goal: "Các đối tác thương mại lớn của Việt Nam",
+      teach: [
+        { t: "culture", title: "Mắt xích trong chuỗi sản xuất thế giới",
+          body: "Việt Nam trở thành điểm đến sản xuất quan trọng trong chuỗi cung ứng toàn cầu, với các đối tác thương mại và đầu tư lớn như Hoa Kỳ, Trung Quốc, Nhật Bản, Hàn Quốc và Liên minh châu Âu (EU)." },
+      ],
+      quiz: [
+        { t: "choice", q: "Đâu là một trong những đối tác thương mại lớn của Việt Nam?", options: ["Hoa Kỳ", "Nam Cực", "Không quốc gia nào", "Mặt Trăng"], answer: 0 },
+        { t: "truefalse", q: "Việt Nam là một điểm đến sản xuất quan trọng trong chuỗi cung ứng toàn cầu.", answer: true },
+      ],
+    },
+    {
+      id: "vn-l11-c1-l3",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại quan hệ của Việt Nam với ASEAN và các đối tác toàn cầu",
+      quiz: [
+        { t: "choice", q: "Cộng đồng ASEAN có mấy trụ cột?", options: ["3", "2", "5", "7"], answer: 0 },
+        { t: "choice", q: "Việt Nam có quan hệ thương mại lớn với đối tác nào?", options: ["Hoa Kỳ, Trung Quốc, Nhật Bản, EU", "Chỉ có Lào", "Không có đối tác nào", "Chỉ có Campuchia"], answer: 0 },
+      ],
+    },
+  ],
+};
+
 export const VN_COURSE = {
   subject: "vn",
   levels: {
     l45: { chapters: [c1] },
-    l6:  { chapters: [] },
-    l7:  { chapters: [] },
+    l6:  { chapters: [c5] },
+    l7:  { chapters: [c6] },
     l8:  { chapters: [c2] },
     l9:  { chapters: [c3] },
-    l10: { chapters: [] },
-    l11: { chapters: [] },
+    l10: { chapters: [c7] },
+    l11: { chapters: [c8] },
     l12: { chapters: [c4] },
   },
 };

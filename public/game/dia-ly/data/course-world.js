@@ -8,11 +8,11 @@ export const WORLD_LEVELS = [
   { id: "l45", label: "Lớp 4–5",  sub: "Làm quen",         ready: true  },
   { id: "l6",  label: "Lớp 6",    sub: "Trái Đất & Bản đồ",ready: true  },
   { id: "l7",  label: "Lớp 7",    sub: "Các châu lục",     ready: true  },
-  { id: "l8",  label: "Lớp 8",    sub: "Địa lí 8",         ready: false },
-  { id: "l9",  label: "Lớp 9",    sub: "Địa lí 9",         ready: false },
+  { id: "l8",  label: "Lớp 8",    sub: "Tự nhiên châu Á",  ready: true  },
+  { id: "l9",  label: "Lớp 9",    sub: "Dân cư châu Á",    ready: true  },
   { id: "l10", label: "Lớp 10",   sub: "Kinh tế - xã hội", ready: true  },
   { id: "l11", label: "Lớp 11",   sub: "Khu vực, quốc gia",ready: true  },
-  { id: "l12", label: "Lớp 12",   sub: "Địa lí 12",        ready: false },
+  { id: "l12", label: "Lớp 12",   sub: "Thế giới đương đại",ready: true },
 ];
 
 function place(id, name, capital, note) {
@@ -747,16 +747,181 @@ const c6 = {
   ],
 };
 
+// ===== Lớp 8, 9, 12 — phần Thế giới. Chương trình thật của các lớp này thiên về tự nhiên
+// Việt Nam (lớp 8), dân cư-kinh tế Việt Nam (lớp 9) và Việt Nam chuyên sâu (lớp 12) — xem ở
+// phân môn Việt Nam cùng lớp. Ở đây soạn nội dung song song về châu Á và thế giới đương đại,
+// dùng đúng khái niệm của từng lớp để so sánh Việt Nam với khu vực, thế giới.
+
+const c7 = {
+  id: "wd-l8-c1",
+  title: "Tự nhiên châu Á",
+  icon: "book",
+  lessons: [
+    {
+      id: "wd-l8-c1-l1",
+      title: "Vị trí, địa hình châu Á",
+      goal: "Đặc điểm vị trí và địa hình của châu lục lớn nhất",
+      teach: [
+        { t: "intro", title: "Châu lục của những kỷ lục",
+          body: "Châu Á là châu lục rộng nhất, có địa hình rất đa dạng và chứa nhiều kỷ lục địa lí của thế giới, từ đỉnh núi cao nhất đến hồ sâu nhất.",
+          bullets: ["Đỉnh Everest (Hi-ma-lay-a) — cao nhất thế giới, hơn 8.800m", "Cao nguyên Tây Tạng — cao nguyên lớn nhất, cao nhất thế giới", "Đồng bằng Tây Xi-bia và đồng bằng Ấn – Hằng rất rộng lớn"] },
+        { t: "topic", kicker: "Địa hình", title: "Núi cao ở trung tâm, đồng bằng ở rìa",
+          body: "Địa hình châu Á có xu hướng cao ở trung tâm (dãy Hi-ma-lay-a, cao nguyên Tây Tạng, Pa-mia) rồi thấp dần ra các phía, với nhiều đồng bằng rộng lớn ở rìa lục địa — nơi tập trung dân cư đông đúc.",
+          facts: [{ label: "Cao nhất", value: "Đỉnh Everest" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Đỉnh núi cao nhất thế giới thuộc dãy núi nào của châu Á?", options: ["Hi-ma-lay-a", "Andes", "Alps", "Rocky"], answer: 0 },
+        { t: "mapclick", q: "Hãy bấm vào một quốc gia bất kỳ thuộc CHÂU Á trên bản đồ.", targetType: "continent", targetId: "chau-a" },
+        { t: "truefalse", q: "Địa hình châu Á có xu hướng cao ở trung tâm, thấp dần ra rìa.", answer: true },
+        { t: "choice", q: "Cao nguyên nào được xem là cao nhất thế giới?", options: ["Tây Tạng", "Tây Nguyên", "Đề-can", "Mông Cổ"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l8-c1-l2",
+      title: "Khí hậu và đới thiên nhiên châu Á",
+      goal: "Sự phân hoá khí hậu đa dạng nhất trong các châu lục",
+      teach: [
+        { t: "topic", kicker: "Khí hậu", title: "Đa dạng nhất trong các châu lục",
+          body: "Do lãnh thổ trải dài từ vùng cực tới xích đạo và có địa hình núi cao đồ sộ, châu Á có gần như đầy đủ các đới và kiểu khí hậu trên Trái Đất: từ hàn đới ở phía Bắc, ôn đới, đến nhiệt đới gió mùa và xích đạo ở phía Nam.",
+          facts: [{ label: "Đặc điểm", value: "Đa dạng khí hậu nhất" }] },
+        { t: "culture", title: "Gió mùa châu Á",
+          body: "Khu vực Nam Á, Đông Nam Á và Đông Á (trong đó có Việt Nam) chịu ảnh hưởng mạnh của gió mùa — gió đổi hướng theo mùa, mang mưa lớn vào mùa hè và khô lạnh hoặc mát vào mùa đông." },
+      ],
+      quiz: [
+        { t: "choice", q: "Vì sao khí hậu châu Á rất đa dạng?", options: ["Lãnh thổ trải dài từ cực tới xích đạo", "Toàn bộ nằm trên xích đạo", "Toàn bộ là hoang mạc", "Không có núi"], answer: 0 },
+        { t: "choice", q: "Khu vực nào của châu Á chịu ảnh hưởng mạnh của gió mùa?", options: ["Nam Á, Đông Nam Á, Đông Á", "Bắc Á", "Trung Á", "Tây Á"], answer: 0 },
+        { t: "truefalse", q: "Việt Nam nằm trong khu vực chịu ảnh hưởng gió mùa châu Á.", answer: true },
+      ],
+    },
+    {
+      id: "wd-l8-c1-l3",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại vị trí, địa hình và khí hậu châu Á",
+      quiz: [
+        { t: "choice", q: "Đỉnh núi cao nhất thế giới thuộc châu lục nào?", options: ["Châu Á", "Châu Âu", "Châu Phi", "Châu Mỹ"], answer: 0 },
+        { t: "choice", q: "Châu Á có đặc điểm khí hậu như thế nào?", options: ["Rất đa dạng", "Chỉ có 1 kiểu khí hậu", "Toàn lạnh giá", "Toàn nóng ẩm"], answer: 0 },
+        { t: "truefalse", q: "Địa hình châu Á cao ở trung tâm, thấp dần ra rìa lục địa.", answer: true },
+      ],
+    },
+  ],
+};
+
+const c8 = {
+  id: "wd-l9-c1",
+  title: "Dân cư & kinh tế châu Á",
+  icon: "book",
+  lessons: [
+    {
+      id: "wd-l9-c1-l1",
+      title: "Dân cư châu Á",
+      goal: "Châu lục đông dân và đa dạng nhất thế giới",
+      teach: [
+        { t: "topic", kicker: "Dân cư", title: "Hơn một nửa dân số thế giới",
+          body: "Châu Á là châu lục đông dân nhất, chiếm hơn một nửa dân số thế giới, tập trung đông đúc ở các đồng bằng châu thổ và ven biển như đồng bằng Ấn – Hằng, đồng bằng Hoa Bắc, đồng bằng sông Hồng, sông Cửu Long.",
+          facts: [{ label: "Tỉ lệ", value: "Hơn 1/2 dân số thế giới" }] },
+        { t: "culture", title: "Đa dạng chủng tộc, tôn giáo, văn hoá",
+          body: "Châu Á là nơi khởi nguồn của nhiều tôn giáo lớn như Phật giáo, Hồi giáo, Ấn Độ giáo, và có sự đa dạng chủng tộc, ngôn ngữ, văn hoá bậc nhất thế giới." },
+      ],
+      quiz: [
+        { t: "choice", q: "Châu Á chiếm khoảng bao nhiêu phần dân số thế giới?", options: ["Hơn một nửa", "Một phần mười", "Một phần tư", "Gần như không đáng kể"], answer: 0 },
+        { t: "truefalse", q: "Châu Á là nơi khởi nguồn của nhiều tôn giáo lớn trên thế giới.", answer: true },
+        { t: "choice", q: "Dân cư châu Á tập trung đông đúc nhất ở đâu?", options: ["Các đồng bằng châu thổ, ven biển", "Sa mạc", "Núi cao", "Vùng cực"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l9-c1-l2",
+      title: "Các nền kinh tế lớn châu Á",
+      goal: "Những cường quốc kinh tế châu Á tiêu biểu",
+      teach: [
+        { t: "topic", kicker: "Kinh tế", title: "Nhiều nền kinh tế hàng đầu thế giới",
+          body: "Châu Á có nhiều nền kinh tế lớn và phát triển nhanh: Trung Quốc và Nhật Bản nằm trong nhóm các nền kinh tế lớn nhất thế giới, Hàn Quốc và Singapore nổi bật về công nghệ, còn Ấn Độ đang tăng trưởng rất nhanh với dân số đông đảo.",
+          facts: [{ label: "Tiêu biểu", value: "Trung Quốc, Nhật Bản, Hàn Quốc" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Quốc gia châu Á nào nổi bật về công nghệ, có thu nhập cao dù diện tích nhỏ?", options: ["Hàn Quốc", "Lào", "Mông Cổ", "Nê-pan"], answer: 0 },
+        { t: "mapclick", q: "Hãy bấm vào Trung Quốc trên bản đồ.", targetType: "country", targetId: "cn" },
+        { t: "truefalse", q: "Nhật Bản nằm trong nhóm các nền kinh tế lớn nhất thế giới.", answer: true },
+      ],
+    },
+    {
+      id: "wd-l9-c1-l3",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại dân cư và các nền kinh tế lớn châu Á",
+      quiz: [
+        { t: "choice", q: "Châu Á chiếm khoảng bao nhiêu dân số thế giới?", options: ["Hơn một nửa", "Một phần mười", "Rất ít", "Không đáng kể"], answer: 0 },
+        { t: "choice", q: "Quốc gia nào ở châu Á có nền kinh tế lớn hàng đầu thế giới?", options: ["Trung Quốc", "Lào", "Mông Cổ", "Bu-tan"], answer: 0 },
+        { t: "truefalse", q: "Châu Á là nơi khởi nguồn nhiều tôn giáo lớn.", answer: true },
+      ],
+    },
+  ],
+};
+
+const c9 = {
+  id: "wd-l12-c1",
+  title: "Toàn cầu hoá & thế giới đương đại",
+  icon: "book",
+  lessons: [
+    {
+      id: "wd-l12-c1-l1",
+      title: "Toàn cầu hoá là gì?",
+      goal: "Xu thế liên kết ngày càng chặt chẽ giữa các quốc gia",
+      teach: [
+        { t: "intro", title: "Thế giới ngày càng gắn kết",
+          body: "Toàn cầu hoá là quá trình các quốc gia trên thế giới ngày càng liên kết chặt chẽ về kinh tế, công nghệ, văn hoá. Hàng hoá, vốn đầu tư, thông tin và con người di chuyển giữa các nước dễ dàng hơn bao giờ hết.",
+          bullets: ["Thương mại quốc tế phát triển mạnh", "Các công ty đa quốc gia hoạt động ở nhiều nước", "Internet giúp thông tin lan truyền tức thời toàn cầu"] },
+        { t: "culture", title: "Cơ hội và thách thức",
+          body: "Toàn cầu hoá mang lại cơ hội tiếp cận thị trường rộng lớn, công nghệ mới, nhưng cũng đặt ra thách thức về cạnh tranh kinh tế và giữ gìn bản sắc văn hoá riêng của mỗi quốc gia." },
+      ],
+      quiz: [
+        { t: "choice", q: "Toàn cầu hoá là gì?", options: ["Quá trình các nước liên kết chặt chẽ hơn", "Các nước đóng cửa biên giới", "Ngừng giao thương quốc tế", "Chỉ một nước phát triển"], answer: 0 },
+        { t: "truefalse", q: "Toàn cầu hoá giúp hàng hoá, thông tin di chuyển dễ dàng hơn giữa các nước.", answer: true },
+        { t: "choice", q: "Công ty hoạt động ở nhiều quốc gia được gọi là gì?", options: ["Công ty đa quốc gia", "Công ty gia đình", "Công ty một người", "Hợp tác xã"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l12-c1-l2",
+      title: "Các vấn đề môi trường toàn cầu",
+      goal: "Biến đổi khí hậu và ô nhiễm môi trường",
+      teach: [
+        { t: "topic", kicker: "Biến đổi khí hậu", title: "Trái Đất đang ấm lên",
+          body: "Nhiệt độ trung bình Trái Đất đang tăng lên do khí thải nhà kính từ hoạt động sản xuất, giao thông của con người, gây ra hiện tượng băng tan, nước biển dâng, thời tiết cực đoan ngày càng nhiều.",
+          facts: [{ label: "Nguyên nhân chính", value: "Khí thải nhà kính" }] },
+        { t: "topic", kicker: "Ô nhiễm môi trường", title: "Rác thải nhựa và ô nhiễm không khí",
+          body: "Rác thải nhựa đổ ra đại dương và ô nhiễm không khí ở các đô thị lớn là hai vấn đề môi trường cấp bách, đòi hỏi sự hợp tác của tất cả các quốc gia để giải quyết.",
+          facts: [{ label: "Vấn đề nổi bật", value: "Rác nhựa đại dương, ô nhiễm không khí" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Nguyên nhân chính gây biến đổi khí hậu hiện nay là gì?", options: ["Khí thải nhà kính từ hoạt động con người", "Núi lửa phun trào", "Động đất", "Thuỷ triều"], answer: 0 },
+        { t: "truefalse", q: "Băng tan và nước biển dâng là hệ quả của biến đổi khí hậu.", answer: true },
+        { t: "choice", q: "Rác thải nhựa gây ô nhiễm chủ yếu ở đâu?", options: ["Đại dương", "Sa mạc", "Núi cao", "Tầng bình lưu"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l12-c1-l3",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại toàn cầu hoá và các vấn đề môi trường toàn cầu",
+      quiz: [
+        { t: "choice", q: "Toàn cầu hoá là quá trình gì?", options: ["Các nước liên kết chặt chẽ hơn", "Đóng cửa biên giới", "Ngừng giao thương", "Chia tách lãnh thổ"], answer: 0 },
+        { t: "choice", q: "Nguyên nhân chính của biến đổi khí hậu là gì?", options: ["Khí thải nhà kính", "Gió mùa", "Thuỷ triều", "Núi lửa"], answer: 0 },
+        { t: "truefalse", q: "Ô nhiễm rác thải nhựa đại dương là vấn đề môi trường toàn cầu cấp bách.", answer: true },
+      ],
+    },
+  ],
+};
+
 export const WORLD_COURSE = {
   subject: "world",
   levels: {
     l45: { chapters: [c1] },
     l6:  { chapters: [c2, c4] },
     l7:  { chapters: [c3] },
-    l8:  { chapters: [] },
-    l9:  { chapters: [] },
+    l8:  { chapters: [c7] },
+    l9:  { chapters: [c8] },
     l10: { chapters: [c5] },
     l11: { chapters: [c6] },
-    l12: { chapters: [] },
+    l12: { chapters: [c9] },
   },
 };
