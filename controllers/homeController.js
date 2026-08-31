@@ -55,7 +55,7 @@ exports.index = async (req, res) => {
       limit: 6,
     }),
     GalleryPhoto.findAll({ where: { isPublished: true }, order: [['eventDate', 'DESC']], limit: 6 }),
-    Tool.findAll({ where: { isPublished: true }, order: [['createdAt', 'DESC']], limit: 3 }),
+    Tool.findAll({ where: { isPublished: true }, order: [['createdAt', 'DESC']] }),
   ]);
 
   res.render('home', {
