@@ -7,7 +7,7 @@
 
 export const VN_LEVELS = [
   { id: "l45",   label: "Lớp 4–5",   sub: "Làm quen",     ready: true  },
-  { id: "l69",   label: "Lớp 6–9",   sub: "Trung học CS", ready: false },
+  { id: "l69",   label: "Lớp 6–9",   sub: "Trung học CS", ready: true  },
   { id: "l1012", label: "Lớp 10–12", sub: "Trung học PT", ready: false },
 ];
 
@@ -214,7 +214,199 @@ const c1 = {
   ],
 };
 
+// ===== Lớp 6-9 — nội dung tổng hợp theo mạch chương trình Địa lí 8 (tự nhiên Việt Nam)
+// và Địa lí 9 (dân cư, kinh tế Việt Nam), viết lại theo cách hiểu riêng, không sao chép
+// nguyên văn từ bất kỳ trang giáo án nào.
+
+const c2 = {
+  id: "vn-l69-c1",
+  title: "Tự nhiên Việt Nam",
+  icon: "pin",
+  lessons: [
+    {
+      id: "vn-l69-c1-l1",
+      title: "Vị trí & phạm vi lãnh thổ",
+      goal: "Vị trí địa lí và ý nghĩa của nó với tự nhiên, kinh tế",
+      teach: [
+        { t: "intro", title: "Việt Nam nằm ở đâu trên bản đồ thế giới?",
+          body: "Việt Nam nằm ở rìa đông bán đảo Đông Dương, gần trung tâm khu vực Đông Nam Á — nơi tiếp giáp giữa lục địa Á-Âu và Thái Bình Dương, trên đường hàng hải và hàng không quốc tế quan trọng.",
+          bullets: ["4 điểm cực: Bắc (Hà Giang), Nam (Cà Mau), Tây (Điện Biên), Đông (Khánh Hoà)", "Vừa gắn với lục địa vừa thông ra biển", "Nằm trong vùng nội chí tuyến bán cầu Bắc"] },
+        { t: "topic", kicker: "Ý nghĩa tự nhiên", title: "Vị trí quyết định khí hậu và sinh vật",
+          body: "Nằm hoàn toàn trong vùng nội chí tuyến bán cầu Bắc nên Việt Nam nhận lượng bức xạ Mặt Trời lớn quanh năm — nền tảng của khí hậu nhiệt đới. Vị trí giáp biển rộng lại mang đến lượng mưa và độ ẩm dồi dào, khác hẳn các nước cùng vĩ độ nhưng nằm sâu trong lục địa.",
+          facts: [{ label: "Vùng khí hậu", value: "Nhiệt đới ẩm" }, { label: "Ảnh hưởng biển", value: "Rất lớn" }] },
+        { t: "topic", kicker: "Ý nghĩa kinh tế", title: "Cầu nối giao thương",
+          body: "Vị trí nằm trên các tuyến hàng hải, hàng không quốc tế nối liền các nền kinh tế lớn của châu Á, cùng đường bờ biển dài, giúp Việt Nam thuận lợi giao lưu, buôn bán với nhiều quốc gia và phát triển kinh tế biển.",
+          facts: [{ label: "Bờ biển", value: "~3.260 km" }, { label: "Thuận lợi", value: "Giao thương quốc tế" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Việt Nam nằm trong đới khí hậu nào theo vị trí địa lí?",
+          options: ["Nhiệt đới", "Ôn đới", "Hàn đới", "Cận cực"], answer: 0 },
+        { t: "choice", q: "Điểm cực Bắc của Việt Nam thuộc tỉnh nào?", options: ["Hà Giang", "Điện Biên", "Cà Mau", "Khánh Hoà"], answer: 0 },
+        { t: "mapclick", q: "Bấm vào khu vực chứa điểm cực Nam của Việt Nam (Cà Mau).", targetType: "region", targetId: "nam" },
+        { t: "truefalse", q: "Việt Nam vừa gắn liền với lục địa Á-Âu vừa thông ra Thái Bình Dương.", answer: true },
+        { t: "blank", q: "Việt Nam nằm gần trung tâm khu vực ___.", answer: "Đông Nam Á", options: ["Đông Nam Á", "Nam Á", "Đông Á", "Trung Á"] },
+        { t: "choice", q: "Vị trí giáp biển rộng mang lại điều gì cho khí hậu Việt Nam?", options: ["Độ ẩm và lượng mưa lớn", "Khô hạn quanh năm", "Nhiệt độ rất thấp", "Không có gió"], answer: 0 },
+      ],
+    },
+    {
+      id: "vn-l69-c1-l2",
+      title: "Địa hình Việt Nam",
+      goal: "Đặc điểm chung và các khu vực địa hình",
+      teach: [
+        { t: "intro", title: "3/4 diện tích là đồi núi",
+          body: "Địa hình Việt Nam đa dạng nhưng đồi núi chiếm khoảng 3/4 diện tích lãnh thổ, chủ yếu là núi thấp và trung bình. Đồng bằng chỉ chiếm 1/4 nhưng lại là nơi tập trung dân cư đông đúc nhất.",
+          bullets: ["Hướng núi chính: Tây Bắc – Đông Nam và vòng cung", "Đỉnh cao nhất: Fansipan, 3.143m (Hoàng Liên Sơn)", "Địa hình trẻ lại, phân bậc rõ do vận động Tân kiến tạo"] },
+        { t: "topic", kicker: "Khu vực đồi núi", title: "Bốn vùng núi chính",
+          body: "Vùng núi Đông Bắc có địa hình núi thấp với các cánh cung lớn. Vùng núi Tây Bắc hiểm trở nhất, có Hoàng Liên Sơn — nóc nhà Đông Dương. Trường Sơn Bắc thấp, hẹp ngang; Trường Sơn Nam có các cao nguyên badan rộng lớn ở Tây Nguyên.",
+          facts: [{ label: "Cao nhất", value: "Fansipan 3.143m" }, { label: "Cao nguyên", value: "Tây Nguyên (badan)" }] },
+        { t: "topic", kicker: "Khu vực đồng bằng", title: "Hai đồng bằng châu thổ lớn",
+          body: "Đồng bằng sông Hồng và đồng bằng sông Cửu Long do phù sa sông bồi đắp, đất đai màu mỡ, là hai vựa lúa lớn nhất cả nước. Dải đồng bằng ven biển miền Trung nhỏ, hẹp, kém màu mỡ hơn do các dãy núi ăn lan sát ra biển.",
+          facts: [{ label: "Lớn nhất", value: "ĐB sông Cửu Long" }, { label: "Đặc điểm", value: "Đất phù sa màu mỡ" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Địa hình Việt Nam chủ yếu là dạng nào?", options: ["Đồi núi thấp", "Núi cao trên 3.000m", "Đồng bằng", "Cao nguyên đá vôi"], answer: 0 },
+        { t: "choice", q: "Đỉnh núi cao nhất Việt Nam là gì?", options: ["Fansipan", "Bà Nà", "Lang Biang", "Yên Tử"], answer: 0 },
+        { t: "truefalse", q: "Đồng bằng chiếm phần lớn diện tích lãnh thổ Việt Nam.", answer: false },
+        { t: "choice", q: "Đồng bằng nào lớn nhất Việt Nam?", options: ["Đồng bằng sông Cửu Long", "Đồng bằng sông Hồng", "Đồng bằng Thanh Hoá", "Đồng bằng Nghệ An"], answer: 0 },
+        { t: "blank", q: "Tây Nguyên có địa hình đặc trưng là các cao nguyên ___.", answer: "badan", options: ["badan", "đá vôi", "cát", "phù sa"] },
+        { t: "order", q: "Sắp xếp theo diện tích tăng dần.", items: ["Đồng bằng ven biển miền Trung", "Đồng bằng sông Hồng", "Đồng bằng sông Cửu Long"] },
+      ],
+    },
+    {
+      id: "vn-l69-c1-l3",
+      title: "Khí hậu, sông ngòi & biển đảo",
+      goal: "Nhiệt đới ẩm gió mùa, mạng lưới sông và Biển Đông",
+      teach: [
+        { t: "topic", kicker: "Khí hậu", title: "Nhiệt đới ẩm gió mùa",
+          body: "Khí hậu Việt Nam nóng ẩm quanh năm nhưng có sự phân hoá theo mùa nhờ gió mùa. Gió mùa Đông Bắc mang không khí lạnh, khô tới miền Bắc vào mùa đông; gió mùa mùa hạ mang hơi ẩm gây mưa lớn trên cả nước.",
+          facts: [{ label: "Kiểu khí hậu", value: "Nhiệt đới ẩm gió mùa" }, { label: "Lượng mưa TB", value: "1.500–2.000 mm/năm" }] },
+        { t: "topic", kicker: "Sông ngòi", title: "Mạng lưới sông dày đặc",
+          body: "Việt Nam có mạng lưới sông ngòi dày đặc nhưng phần lớn là sông nhỏ, ngắn và dốc do lãnh thổ hẹp ngang, núi ăn sát biển — trừ hai hệ thống lớn là sông Hồng và sông Mê Kông (Cửu Long) bắt nguồn từ ngoài lãnh thổ. Sông có chế độ nước theo mùa, mùa lũ trùng mùa mưa.",
+          facts: [{ label: "Sông lớn nhất", value: "Sông Mê Kông (Cửu Long)" }, { label: "Chế độ nước", value: "Theo mùa" }] },
+        { t: "culture", title: "Biển Đông và hai quần đảo",
+          body: "Biển Đông rộng lớn mang lại nguồn hải sản, dầu khí và tuyến giao thông biển quan trọng. Việt Nam có hai quần đảo xa bờ là Hoàng Sa (thuộc Đà Nẵng) và Trường Sa (thuộc Khánh Hoà) — đây là chủ quyền thiêng liêng cần được bảo vệ." },
+      ],
+      quiz: [
+        { t: "choice", q: "Khí hậu Việt Nam thuộc kiểu nào?", options: ["Nhiệt đới ẩm gió mùa", "Ôn đới lục địa", "Hàn đới", "Hoang mạc"], answer: 0 },
+        { t: "choice", q: "Gió mùa Đông Bắc mang tới miền Bắc điều gì vào mùa đông?", options: ["Không khí lạnh, khô", "Mưa rào nhiệt đới", "Nắng nóng gay gắt", "Bão lớn"], answer: 0 },
+        { t: "truefalse", q: "Phần lớn sông ngòi Việt Nam là sông nhỏ, ngắn và dốc.", answer: true },
+        { t: "choice", q: "Hai hệ thống sông lớn bắt nguồn từ ngoài lãnh thổ Việt Nam là?", options: ["Sông Hồng và sông Mê Kông", "Sông Hàn và sông Hương", "Sông Sài Gòn và sông Hậu", "Sông Cấm và sông Mã"], answer: 0 },
+        { t: "match", q: "Nối quần đảo với tỉnh, thành quản lí.", pairs: [["Hoàng Sa", "Đà Nẵng"], ["Trường Sa", "Khánh Hoà"]] },
+        { t: "blank", q: "Mùa lũ của sông ngòi Việt Nam trùng với mùa ___.", answer: "mưa", options: ["mưa", "khô", "đông", "xuân"] },
+      ],
+    },
+    {
+      id: "vn-l69-c1-l4",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại vị trí, địa hình, khí hậu, sông ngòi và biển đảo Việt Nam",
+      quiz: [
+        { t: "choice", q: "Việt Nam nằm trong đới khí hậu nào?", options: ["Nhiệt đới", "Ôn đới", "Hàn đới", "Cận nhiệt"], answer: 0 },
+        { t: "choice", q: "Địa hình Việt Nam chủ yếu là gì?", options: ["Đồi núi thấp", "Núi cao", "Cao nguyên đá vôi", "Đồng bằng"], answer: 0 },
+        { t: "choice", q: "Đỉnh núi cao nhất Việt Nam?", options: ["Fansipan", "Bà Nà", "Lang Biang", "Bạch Mã"], answer: 0 },
+        { t: "truefalse", q: "Đồng bằng sông Cửu Long là đồng bằng lớn nhất Việt Nam.", answer: true },
+        { t: "match", q: "Nối đặc điểm với đúng khu vực.",
+          pairs: [["Fansipan", "Vùng núi Tây Bắc"], ["Cao nguyên badan", "Trường Sơn Nam"], ["Quần đảo Hoàng Sa", "Đà Nẵng"]] },
+        { t: "choice", q: "Sông ngòi Việt Nam có chế độ nước như thế nào?", options: ["Theo mùa", "Không đổi quanh năm", "Chỉ có nước vào mùa đông", "Không có lũ"], answer: 0 },
+        { t: "order", q: "Sắp xếp theo diện tích tăng dần.", items: ["Đồng bằng ven biển miền Trung", "Đồng bằng sông Hồng", "Đồng bằng sông Cửu Long"] },
+      ],
+    },
+  ],
+};
+
+const c3 = {
+  id: "vn-l69-c2",
+  title: "Dân cư & Kinh tế Việt Nam",
+  icon: "pin",
+  lessons: [
+    {
+      id: "vn-l69-c2-l1",
+      title: "Dân cư Việt Nam",
+      goal: "Số dân, phân bố và các dân tộc",
+      teach: [
+        { t: "intro", title: "Hơn 100 triệu người, 54 dân tộc",
+          body: "Việt Nam là quốc gia đông dân, dân số đã vượt mốc 100 triệu người — đứng thứ 3 Đông Nam Á sau Indonesia và Philippines. Đất nước có 54 dân tộc anh em cùng sinh sống, trong đó dân tộc Kinh chiếm khoảng 85% dân số.",
+          bullets: ["Dân số đông, đang ở giai đoạn cơ cấu dân số vàng", "54 dân tộc, dân tộc Kinh chiếm đa số", "Phân bố dân cư rất không đều"] },
+        { t: "topic", kicker: "Phân bố dân cư", title: "Đông ở đồng bằng, thưa ở miền núi",
+          body: "Dân cư tập trung rất đông đúc ở hai đồng bằng châu thổ (sông Hồng, sông Cửu Long) và các thành phố lớn, trong khi vùng núi và cao nguyên dân cư thưa thớt hơn nhiều dù diện tích rộng lớn.",
+          facts: [{ label: "Nơi đông dân nhất", value: "Đồng bằng sông Hồng" }, { label: "Nơi thưa dân", value: "Miền núi, Tây Nguyên" }] },
+        { t: "culture", title: "Đô thị hoá đang tăng",
+          body: "Tỉ lệ dân số sống ở thành thị của Việt Nam đang tăng dần nhưng vẫn còn thấp hơn nhiều nước trong khu vực. Hà Nội và TP. Hồ Chí Minh là hai đô thị đặc biệt, quy mô dân số và kinh tế lớn nhất cả nước." },
+      ],
+      quiz: [
+        { t: "choice", q: "Dân số Việt Nam hiện nay khoảng bao nhiêu?", options: ["Hơn 100 triệu người", "Khoảng 50 triệu người", "Khoảng 20 triệu người", "Hơn 500 triệu người"], answer: 0 },
+        { t: "choice", q: "Việt Nam có bao nhiêu dân tộc?", options: ["54", "20", "100", "10"], answer: 0 },
+        { t: "truefalse", q: "Dân cư Việt Nam phân bố đều khắp cả nước.", answer: false },
+        { t: "choice", q: "Nơi nào tập trung dân cư đông đúc nhất?", options: ["Đồng bằng sông Hồng", "Tây Nguyên", "Trung du miền núi Bắc Bộ", "Vùng núi Tây Bắc"], answer: 0 },
+        { t: "blank", q: "Dân tộc chiếm đa số ở Việt Nam là dân tộc ___.", answer: "Kinh", options: ["Kinh", "Tày", "Thái", "Mường"] },
+      ],
+    },
+    {
+      id: "vn-l69-c2-l2",
+      title: "Các ngành kinh tế",
+      goal: "Nông nghiệp, công nghiệp và dịch vụ",
+      teach: [
+        { t: "topic", kicker: "Nông nghiệp", title: "Lúa gạo và cây công nghiệp",
+          body: "Hai đồng bằng châu thổ là vựa lúa của cả nước, trong đó Đồng bằng sông Cửu Long là vùng xuất khẩu gạo chủ lực. Tây Nguyên nổi tiếng với các cây công nghiệp lâu năm như cà phê, cao su, hồ tiêu nhờ đất badan màu mỡ.",
+          facts: [{ label: "Vựa lúa lớn nhất", value: "ĐB sông Cửu Long" }, { label: "Cây công nghiệp", value: "Cà phê, cao su, hồ tiêu" }] },
+        { t: "topic", kicker: "Công nghiệp", title: "Chế biến, chế tạo phát triển nhanh",
+          body: "Công nghiệp chế biến, chế tạo (điện tử, dệt may, cơ khí) phát triển mạnh, tập trung nhiều ở Đông Nam Bộ và Đồng bằng sông Hồng. Công nghiệp khai khoáng và năng lượng (than, dầu khí, thuỷ điện) cũng đóng vai trò quan trọng.",
+          facts: [{ label: "Trung tâm lớn", value: "Đông Nam Bộ" }, { label: "Ngành mũi nhọn", value: "Chế biến, chế tạo" }] },
+        { t: "topic", kicker: "Dịch vụ", title: "Ngành tăng tỉ trọng nhanh nhất",
+          body: "Dịch vụ (thương mại, du lịch, giao thông vận tải, tài chính – ngân hàng) đang chiếm tỉ trọng ngày càng cao trong nền kinh tế, đặc biệt tại các thành phố lớn và các điểm du lịch nổi tiếng trên cả nước.",
+          facts: [{ label: "Gồm", value: "Thương mại, du lịch, tài chính" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Vùng nào là vựa lúa xuất khẩu chủ lực của Việt Nam?", options: ["Đồng bằng sông Cửu Long", "Tây Nguyên", "Đông Bắc", "Tây Bắc"], answer: 0 },
+        { t: "choice", q: "Tây Nguyên nổi tiếng với loại cây trồng nào?", options: ["Cà phê", "Lúa nước", "Dừa", "Chè shan tuyết"], answer: 0 },
+        { t: "truefalse", q: "Ngành dịch vụ đang chiếm tỉ trọng ngày càng thấp trong kinh tế Việt Nam.", answer: false },
+        { t: "choice", q: "Trung tâm công nghiệp chế biến, chế tạo lớn nhất cả nước nằm ở vùng nào?", options: ["Đông Nam Bộ", "Tây Bắc", "Tây Nguyên", "Bắc Trung Bộ"], answer: 0 },
+        { t: "match", q: "Nối ngành kinh tế với ví dụ.", pairs: [["Nông nghiệp", "Trồng lúa, cà phê"], ["Công nghiệp", "Chế biến, chế tạo"], ["Dịch vụ", "Du lịch, thương mại"]] },
+      ],
+    },
+    {
+      id: "vn-l69-c2-l3",
+      title: "Các vùng kinh tế – xã hội",
+      goal: "6 vùng kinh tế của Việt Nam",
+      teach: [
+        { t: "intro", title: "Cả nước chia thành 6 vùng",
+          body: "Để thuận lợi cho quy hoạch và phát triển, Việt Nam được chia thành 6 vùng kinh tế – xã hội, mỗi vùng có thế mạnh tự nhiên và kinh tế riêng.",
+          bullets: ["Trung du và miền núi Bắc Bộ", "Đồng bằng sông Hồng", "Bắc Trung Bộ và Duyên hải miền Trung", "Tây Nguyên · Đông Nam Bộ · Đồng bằng sông Cửu Long"] },
+        { t: "topic", kicker: "Miền Bắc", title: "3 vùng phía Bắc",
+          body: "Trung du và miền núi Bắc Bộ mạnh về khoáng sản, thuỷ điện, cây công nghiệp lâu năm. Đồng bằng sông Hồng là vùng kinh tế trọng điểm, mạnh về lúa gạo, công nghiệp và dịch vụ quanh Hà Nội. Bắc Trung Bộ và Duyên hải miền Trung có thế mạnh kinh tế biển, du lịch.",
+          facts: [{ label: "Trọng điểm", value: "Đồng bằng sông Hồng" }] },
+        { t: "topic", kicker: "Miền Nam", title: "3 vùng phía Nam",
+          body: "Tây Nguyên mạnh về cây công nghiệp và thuỷ điện. Đông Nam Bộ là vùng kinh tế năng động, phát triển nhất cả nước với TP. Hồ Chí Minh làm trung tâm. Đồng bằng sông Cửu Long là vựa lúa, thuỷ sản lớn nhất cả nước.",
+          facts: [{ label: "Phát triển nhất", value: "Đông Nam Bộ" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Việt Nam được chia thành mấy vùng kinh tế – xã hội?", options: ["6", "3", "8", "63"], answer: 0 },
+        { t: "choice", q: "Vùng nào phát triển kinh tế năng động nhất cả nước?", options: ["Đông Nam Bộ", "Tây Bắc", "Tây Nguyên", "Trung du miền núi Bắc Bộ"], answer: 0 },
+        { t: "choice", q: "Vùng nào là vựa lúa, thuỷ sản lớn nhất cả nước?", options: ["Đồng bằng sông Cửu Long", "Đồng bằng sông Hồng", "Tây Nguyên", "Đông Nam Bộ"], answer: 0 },
+        { t: "match", q: "Nối vùng với thế mạnh nổi bật.",
+          pairs: [["Tây Nguyên", "Cây công nghiệp, thuỷ điện"], ["Đông Nam Bộ", "Công nghiệp, dịch vụ"], ["Đồng bằng sông Cửu Long", "Lúa gạo, thuỷ sản"]] },
+        { t: "truefalse", q: "TP. Hồ Chí Minh là trung tâm của vùng Đông Nam Bộ.", answer: true },
+      ],
+    },
+    {
+      id: "vn-l69-c2-l4",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại dân cư, kinh tế và các vùng kinh tế Việt Nam",
+      quiz: [
+        { t: "choice", q: "Dân số Việt Nam hiện nay khoảng bao nhiêu?", options: ["Hơn 100 triệu người", "50 triệu người", "20 triệu người", "300 triệu người"], answer: 0 },
+        { t: "choice", q: "Vùng nào là vựa lúa xuất khẩu chủ lực?", options: ["Đồng bằng sông Cửu Long", "Tây Nguyên", "Tây Bắc", "Đông Bắc"], answer: 0 },
+        { t: "choice", q: "Việt Nam có bao nhiêu vùng kinh tế – xã hội?", options: ["6", "3", "63", "34"], answer: 0 },
+        { t: "truefalse", q: "Ngành dịch vụ đang chiếm tỉ trọng ngày càng cao trong kinh tế Việt Nam.", answer: true },
+        { t: "match", q: "Nối vùng với thế mạnh.",
+          pairs: [["Tây Nguyên", "Cà phê, cao su"], ["Đông Nam Bộ", "Công nghiệp năng động nhất"], ["Đồng bằng sông Hồng", "Vùng kinh tế trọng điểm phía Bắc"]] },
+        { t: "choice", q: "Dân tộc nào chiếm đa số dân cư Việt Nam?", options: ["Kinh", "Tày", "Thái", "Khơ-me"], answer: 0 },
+      ],
+    },
+  ],
+};
+
 export const VN_COURSE = {
   subject: "vn",
-  levels: { l45: { chapters: [c1] }, l69: { chapters: [] }, l1012: { chapters: [] } },
+  levels: { l45: { chapters: [c1] }, l69: { chapters: [c2, c3] }, l1012: { chapters: [] } },
 };

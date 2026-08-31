@@ -6,7 +6,7 @@
 
 export const WORLD_LEVELS = [
   { id: "l45",   label: "Lớp 4–5",   sub: "Làm quen",     ready: true  },
-  { id: "l69",   label: "Lớp 6–9",   sub: "Trung học CS", ready: false },
+  { id: "l69",   label: "Lớp 6–9",   sub: "Trung học CS", ready: true  },
   { id: "l1012", label: "Lớp 10–12", sub: "Trung học PT", ready: false },
 ];
 
@@ -232,7 +232,188 @@ const c1 = {
   ],
 };
 
+// ===== Lớp 6-9 — nội dung tổng hợp theo mạch chương trình Địa lí 6 (Trái Đất, bản đồ,
+// các thành phần tự nhiên) và Địa lí 7 (các châu lục), viết lại theo cách hiểu riêng,
+// không sao chép nguyên văn từ bất kỳ trang giáo án nào.
+
+function topic2(kicker, title, body, facts) {
+  return { t: "topic", kicker, title, body, facts };
+}
+
+const c2 = {
+  id: "wd-l69-c1",
+  title: "Trái Đất & Bản đồ",
+  icon: "book",
+  lessons: [
+    {
+      id: "wd-l69-c1-l1",
+      title: "Trái Đất trong hệ Mặt Trời",
+      goal: "Hình dạng, kích thước và các chuyển động của Trái Đất",
+      teach: [
+        { t: "intro", title: "Hành tinh xanh của chúng ta",
+          body: "Trái Đất là hành tinh thứ ba tính từ Mặt Trời, có dạng hình cầu hơi dẹt ở hai cực. Đây là hành tinh duy nhất trong Hệ Mặt Trời được biết có sự sống, nhờ khoảng cách vừa đủ tới Mặt Trời và có bầu khí quyển, nước lỏng.",
+          bullets: ["Vị trí thứ 3 tính từ Mặt Trời", "Hình cầu, hơi dẹt ở hai cực", "Có 2 chuyển động chính: tự quay và quay quanh Mặt Trời"] },
+        { t: "topic", kicker: "Chuyển động tự quay", title: "Vì sao có ngày và đêm?",
+          body: "Trái Đất tự quay quanh trục của mình một vòng hết khoảng 24 giờ. Vì chỉ một nửa Trái Đất được Mặt Trời chiếu sáng tại một thời điểm, nơi được chiếu sáng là ban ngày, nơi khuất là ban đêm — và sự tự quay khiến ngày đêm luân phiên khắp nơi.",
+          facts: [{ label: "Thời gian 1 vòng", value: "~24 giờ" }, { label: "Kết quả", value: "Ngày và đêm" }] },
+        { t: "topic", kicker: "Chuyển động quanh Mặt Trời", title: "Vì sao có 4 mùa?",
+          body: "Trái Đất quay quanh Mặt Trời một vòng hết khoảng 365 ngày, trong khi trục Trái Đất luôn nghiêng một góc so với mặt phẳng quỹ đạo. Chính độ nghiêng này khiến các mùa Xuân, Hạ, Thu, Đông lần lượt xuất hiện ở mỗi bán cầu.",
+          facts: [{ label: "Thời gian 1 vòng", value: "~365 ngày" }, { label: "Kết quả", value: "Các mùa trong năm" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Trái Đất là hành tinh thứ mấy tính từ Mặt Trời?", options: ["Thứ ba", "Thứ nhất", "Thứ năm", "Thứ bảy"], answer: 0 },
+        { t: "choice", q: "Trái Đất tự quay quanh trục hết khoảng bao lâu?", options: ["24 giờ", "365 ngày", "1 giờ", "30 ngày"], answer: 0 },
+        { t: "truefalse", q: "Hiện tượng ngày và đêm là do Trái Đất tự quay quanh trục.", answer: true },
+        { t: "choice", q: "Các mùa trong năm xuất hiện là do đâu?", options: ["Trục Trái Đất nghiêng khi quay quanh Mặt Trời", "Trái Đất đứng yên", "Mặt Trời tự quay", "Mặt Trăng che Mặt Trời"], answer: 0 },
+        { t: "blank", q: "Trái Đất quay một vòng quanh Mặt Trời hết khoảng ___ ngày.", answer: "365", options: ["365", "24", "30", "100"] },
+      ],
+    },
+    {
+      id: "wd-l69-c1-l2",
+      title: "Bản đồ và cách sử dụng",
+      goal: "Tỉ lệ, kí hiệu và phương hướng trên bản đồ",
+      teach: [
+        { t: "intro", title: "Bản đồ là gì?",
+          body: "Bản đồ là hình vẽ thu nhỏ một phần hoặc toàn bộ bề mặt Trái Đất lên mặt phẳng, dựa trên các kí hiệu và tỉ lệ nhất định. Biết đọc bản đồ giúp em xác định vị trí, khoảng cách và đặc điểm của một nơi mà không cần tới tận nơi.",
+          bullets: ["Tỉ lệ bản đồ: cho biết mức thu nhỏ so với thực tế", "Kí hiệu bản đồ: điểm, đường, vùng diện tích", "Phương hướng: dựa vào lưới kinh – vĩ tuyến"] },
+        { t: "topic", kicker: "Tỉ lệ bản đồ", title: "Thu nhỏ bao nhiêu lần?",
+          body: "Tỉ lệ bản đồ cho biết một đơn vị đo trên bản đồ tương ứng với bao nhiêu đơn vị đo ngoài thực tế. Ví dụ tỉ lệ 1:1.000.000 nghĩa là 1cm trên bản đồ bằng 1.000.000cm (10km) ngoài thực địa. Tỉ lệ càng nhỏ, bản đồ thể hiện được khu vực càng rộng nhưng càng ít chi tiết.",
+          facts: [{ label: "Ví dụ", value: "1:1.000.000 = 1cm → 10km" }] },
+        { t: "topic", kicker: "Kí hiệu & phương hướng", title: "Đọc chú giải và xác định hướng",
+          body: "Mỗi bản đồ có bảng chú giải giải thích các kí hiệu được dùng (núi, sông, thành phố...). Phương hướng trên bản đồ thường xác định theo quy ước: đầu trên là hướng Bắc, đầu dưới là hướng Nam, bên phải là hướng Đông, bên trái là hướng Tây.",
+          facts: [{ label: "Đầu bản đồ (trên)", value: "Hướng Bắc" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Bản đồ tỉ lệ 1:1.000.000 nghĩa là 1cm trên bản đồ bằng bao nhiêu ngoài thực tế?", options: ["10 km", "1 km", "100 km", "1 m"], answer: 0 },
+        { t: "choice", q: "Trên một bản đồ thông thường, hướng Bắc nằm ở đâu?", options: ["Phía trên", "Phía dưới", "Bên trái", "Bên phải"], answer: 0 },
+        { t: "truefalse", q: "Tỉ lệ bản đồ càng nhỏ thì thể hiện khu vực càng rộng nhưng càng ít chi tiết.", answer: true },
+        { t: "choice", q: "Bảng chú giải trên bản đồ dùng để làm gì?", options: ["Giải thích các kí hiệu", "Đo khoảng cách thực", "Chỉ hướng gió", "Ghi tên người vẽ"], answer: 0 },
+        { t: "blank", q: "Bản đồ là hình vẽ ___ bề mặt Trái Đất lên mặt phẳng.", answer: "thu nhỏ", options: ["thu nhỏ", "phóng to", "gập đôi", "tô màu"] },
+      ],
+    },
+    {
+      id: "wd-l69-c1-l3",
+      title: "Khí quyển, thuỷ quyển, đất & sinh vật",
+      goal: "Các lớp bao quanh Trái Đất và vòng tuần hoàn nước",
+      teach: [
+        { t: "topic", kicker: "Khí quyển", title: "Lớp không khí bao quanh Trái Đất",
+          body: "Khí quyển là lớp không khí bao quanh Trái Đất, thành phần chính là khí Nitơ và khí Ôxy. Thời tiết là trạng thái khí quyển tại một nơi trong thời gian ngắn; khí hậu là quy luật lặp lại của thời tiết tại một nơi qua nhiều năm.",
+          facts: [{ label: "Thành phần chính", value: "Nitơ, Ôxy" }, { label: "Khác biệt", value: "Thời tiết ≠ khí hậu" }] },
+        { t: "topic", kicker: "Thuỷ quyển", title: "Vòng tuần hoàn của nước",
+          body: "Thuỷ quyển gồm toàn bộ nước trên Trái Đất: đại dương, sông hồ, băng và hơi nước. Nước bốc hơi lên tạo mây, mây ngưng tụ gây mưa, nước mưa chảy ra sông rồi đổ ra biển — cứ thế lặp lại thành vòng tuần hoàn không ngừng.",
+          facts: [{ label: "Phần lớn nước", value: "Ở đại dương" }, { label: "Chu trình", value: "Bốc hơi → mưa → dòng chảy" }] },
+        { t: "culture", title: "Đất và các đới thiên nhiên",
+          body: "Đất được hình thành từ đá gốc bị phong hoá kết hợp với sinh vật và khí hậu qua thời gian dài. Trên Trái Đất, thiên nhiên phân hoá thành các đới theo vĩ độ: đới nóng gần Xích đạo, đới ôn hoà ở vĩ độ trung bình, và đới lạnh gần hai cực." },
+      ],
+      quiz: [
+        { t: "choice", q: "Hai thành phần chính của khí quyển là gì?", options: ["Nitơ và Ôxy", "Hidro và Heli", "Carbon và Sắt", "Muối và nước"], answer: 0 },
+        { t: "choice", q: "Phần lớn nước trên Trái Đất tập trung ở đâu?", options: ["Đại dương", "Sông hồ", "Băng ở hai cực", "Trong đất"], answer: 0 },
+        { t: "truefalse", q: "Thời tiết và khí hậu là một khái niệm giống hệt nhau.", answer: false },
+        { t: "choice", q: "Đới thiên nhiên nào nằm gần Xích đạo?", options: ["Đới nóng", "Đới lạnh", "Đới ôn hoà", "Đới băng giá"], answer: 0 },
+        { t: "order", q: "Sắp xếp đúng thứ tự vòng tuần hoàn nước.", items: ["Nước bốc hơi", "Hơi nước ngưng tụ thành mây", "Mưa rơi xuống", "Nước chảy ra sông, biển"] },
+      ],
+    },
+    {
+      id: "wd-l69-c1-l4",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại Trái Đất, bản đồ và các thành phần tự nhiên",
+      quiz: [
+        { t: "choice", q: "Trái Đất tự quay quanh trục hết khoảng bao lâu?", options: ["24 giờ", "365 ngày", "1 tháng", "1 tuần"], answer: 0 },
+        { t: "choice", q: "Các mùa trong năm sinh ra do đâu?", options: ["Trục Trái Đất nghiêng khi quay quanh Mặt Trời", "Trái Đất đứng yên", "Gió mùa", "Nước biển dâng"], answer: 0 },
+        { t: "choice", q: "Trên bản đồ thông thường, phía trên là hướng nào?", options: ["Bắc", "Nam", "Đông", "Tây"], answer: 0 },
+        { t: "truefalse", q: "Khí quyển là lớp không khí bao quanh Trái Đất.", answer: true },
+        { t: "choice", q: "Đới thiên nhiên nào nằm gần hai cực Trái Đất?", options: ["Đới lạnh", "Đới nóng", "Đới ôn hoà", "Đới xích đạo"], answer: 0 },
+        { t: "blank", q: "Tỉ lệ bản đồ 1:1.000.000 nghĩa là 1cm trên bản đồ bằng ___ km ngoài thực tế.", answer: "10", options: ["10", "1", "100", "1000"] },
+      ],
+    },
+  ],
+};
+
+const c3 = {
+  id: "wd-l69-c2",
+  title: "Các châu lục",
+  icon: "book",
+  lessons: [
+    {
+      id: "wd-l69-c2-l1",
+      title: "Châu Á & Châu Âu",
+      goal: "Vị trí, tự nhiên và đặc điểm nổi bật hai châu lục",
+      teach: [
+        topic2("Châu Á", "Châu lục rộng và đông dân nhất",
+          "Châu Á là châu lục có diện tích lớn nhất và đông dân nhất thế giới, trải dài từ vùng cực Bắc lạnh giá tới vùng xích đạo nóng ẩm nên thiên nhiên vô cùng đa dạng. Đây cũng là nơi có đỉnh núi cao nhất thế giới.",
+          [{ label: "Đặc điểm", value: "Lớn và đông dân nhất" }, { label: "Đỉnh cao nhất TG", value: "Everest" }]),
+        topic2("Châu Âu", "Nhiều bán đảo, khí hậu ôn hoà",
+          "Châu Âu có đường bờ biển khúc khuỷu với rất nhiều bán đảo và biển ăn sâu vào đất liền. Phần lớn lãnh thổ có khí hậu ôn đới, mức sống và trình độ phát triển kinh tế cao, nhiều quốc gia liên kết chặt chẽ trong Liên minh châu Âu (EU).",
+          [{ label: "Đặc điểm", value: "Nhiều bán đảo" }, { label: "Khí hậu", value: "Ôn đới" }]),
+      ],
+      quiz: [
+        { t: "choice", q: "Châu lục nào rộng và đông dân nhất thế giới?", options: ["Châu Á", "Châu Âu", "Châu Phi", "Châu Đại Dương"], answer: 0 },
+        { t: "mapclick", q: "Hãy bấm vào một quốc gia bất kỳ thuộc CHÂU Á trên bản đồ.", targetType: "continent", targetId: "chau-a" },
+        { t: "mapclick", q: "Hãy bấm vào một quốc gia bất kỳ thuộc CHÂU ÂU trên bản đồ.", targetType: "continent", targetId: "chau-au" },
+        { t: "choice", q: "Đỉnh núi cao nhất thế giới thuộc châu lục nào?", options: ["Châu Á", "Châu Âu", "Châu Phi", "Châu Mỹ"], answer: 0 },
+        { t: "truefalse", q: "Châu Âu có đường bờ biển khúc khuỷu với nhiều bán đảo.", answer: true },
+      ],
+    },
+    {
+      id: "wd-l69-c2-l2",
+      title: "Châu Phi & Châu Mỹ",
+      goal: "Vị trí, tự nhiên và đặc điểm nổi bật hai châu lục",
+      teach: [
+        topic2("Châu Phi", "Lục địa của hoang mạc và xích đạo",
+          "Phần lớn lãnh thổ châu Phi nằm giữa hai chí tuyến nên khí hậu nóng quanh năm. Đây là nơi có hoang mạc Sahara — hoang mạc cát nóng lớn nhất thế giới, và sông Nile — dòng sông dài nhất thế giới.",
+          [{ label: "Hoang mạc lớn nhất TG", value: "Sahara" }, { label: "Sông dài nhất TG", value: "Sông Nile" }]),
+        topic2("Châu Mỹ", "Trải dài từ Bắc xuống Nam",
+          "Châu Mỹ gồm Bắc Mỹ và Nam Mỹ, nối với nhau bằng dải đất hẹp Trung Mỹ. Nam Mỹ có rừng nhiệt đới Amazon rộng lớn nhất thế giới và dãy núi Andes — dãy núi trên cạn dài nhất thế giới.",
+          [{ label: "Rừng lớn nhất TG", value: "Rừng Amazon" }, { label: "Dãy núi dài nhất TG", value: "Andes" }]),
+      ],
+      quiz: [
+        { t: "choice", q: "Hoang mạc cát lớn nhất thế giới nằm ở châu lục nào?", options: ["Châu Phi", "Châu Á", "Châu Mỹ", "Châu Đại Dương"], answer: 0 },
+        { t: "mapclick", q: "Hãy bấm vào một quốc gia bất kỳ thuộc CHÂU PHI trên bản đồ.", targetType: "continent", targetId: "chau-phi" },
+        { t: "mapclick", q: "Hãy bấm vào một quốc gia bất kỳ thuộc CHÂU MỸ trên bản đồ.", targetType: "continent", targetId: "chau-my" },
+        { t: "choice", q: "Rừng nhiệt đới lớn nhất thế giới nằm ở đâu?", options: ["Nam Mỹ (rừng Amazon)", "Châu Phi", "Đông Nam Á", "Châu Âu"], answer: 0 },
+        { t: "truefalse", q: "Châu Mỹ gồm Bắc Mỹ và Nam Mỹ nối với nhau qua Trung Mỹ.", answer: true },
+        { t: "choice", q: "Dòng sông dài nhất thế giới thuộc châu lục nào?", options: ["Châu Phi", "Châu Á", "Châu Mỹ", "Châu Âu"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l69-c2-l3",
+      title: "Châu Đại Dương & Châu Nam Cực",
+      goal: "Đặc điểm nổi bật hai châu lục còn lại",
+      teach: [
+        topic2("Châu Đại Dương", "Lục địa Úc và hàng nghìn hòn đảo",
+          "Châu Đại Dương gồm lục địa Australia và hàng nghìn hòn đảo lớn nhỏ rải rác giữa Thái Bình Dương. Đây là châu lục có dân số ít nhất trong số các châu lục có người sinh sống thường xuyên.",
+          [{ label: "Lục địa chính", value: "Australia" }, { label: "Đặc điểm", value: "Ít dân nhất" }]),
+        { t: "culture", title: "Châu Nam Cực — lục địa băng giá",
+          body: "Châu Nam Cực là nơi lạnh nhất, nhiều gió nhất Trái Đất, gần như toàn bộ bề mặt bị bao phủ bởi băng dày. Đây được xem như một hoang mạc lạnh vì lượng mưa rất ít, không có dân cư sinh sống lâu dài, chỉ có các trạm nghiên cứu khoa học của nhiều quốc gia." },
+      ],
+      quiz: [
+        { t: "choice", q: "Lục địa chính của châu Đại Dương là gì?", options: ["Australia", "Greenland", "Madagascar", "New Zealand"], answer: 0 },
+        { t: "mapclick", q: "Hãy bấm vào một quốc gia bất kỳ thuộc CHÂU ĐẠI DƯƠNG trên bản đồ.", targetType: "continent", targetId: "chau-dai-duong" },
+        { t: "choice", q: "Châu lục nào lạnh nhất và gần như không có dân cư sinh sống lâu dài?", options: ["Châu Nam Cực", "Châu Á", "Châu Âu", "Châu Phi"], answer: 0 },
+        { t: "truefalse", q: "Châu Nam Cực có rất nhiều thành phố lớn.", answer: false },
+        { t: "choice", q: "Vì sao châu Nam Cực được xem như một hoang mạc lạnh?", options: ["Vì lượng mưa rất ít", "Vì toàn cát", "Vì rất nóng", "Vì có nhiều rừng"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l69-c2-l4",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại đặc điểm nổi bật của 6 châu lục",
+      quiz: [
+        { t: "choice", q: "Châu lục nào rộng và đông dân nhất?", options: ["Châu Á", "Châu Âu", "Châu Phi", "Châu Mỹ"], answer: 0 },
+        { t: "choice", q: "Hoang mạc Sahara nằm ở châu lục nào?", options: ["Châu Phi", "Châu Á", "Châu Mỹ", "Châu Âu"], answer: 0 },
+        { t: "choice", q: "Rừng Amazon nằm ở châu lục nào?", options: ["Châu Mỹ", "Châu Phi", "Châu Á", "Châu Đại Dương"], answer: 0 },
+        { t: "choice", q: "Châu lục nào lạnh nhất, gần như không có dân cư thường trú?", options: ["Châu Nam Cực", "Châu Âu", "Châu Á", "Châu Đại Dương"], answer: 0 },
+        { t: "match", q: "Nối châu lục với đặc điểm nổi bật.",
+          pairs: [["Châu Á", "Đỉnh núi cao nhất thế giới"], ["Châu Âu", "Nhiều bán đảo"], ["Châu Đại Dương", "Lục địa Australia"]] },
+        { t: "truefalse", q: "Trái Đất có 6 châu lục.", answer: true },
+      ],
+    },
+  ],
+};
+
 export const WORLD_COURSE = {
   subject: "world",
-  levels: { l45: { chapters: [c1] }, l69: { chapters: [] }, l1012: { chapters: [] } },
+  levels: { l45: { chapters: [c1] }, l69: { chapters: [c2, c3] }, l1012: { chapters: [] } },
 };

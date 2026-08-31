@@ -336,6 +336,8 @@ svg[viewBox="0 0 24 24"], .ic, .ic-sm { fill: none; stroke: currentColor; stroke
 .node.current .node-btn::after { content: ""; position: absolute; top: -2px; right: -2px; width: 16px; height: 16px;
   border-radius: 50%; background: var(--world); box-shadow: 0 0 0 3px var(--bg); }
 .node.check .node-btn { background: var(--amber-soft); color: var(--amber); }
+.node.open .node-btn { background: var(--brand-soft); color: var(--brand); }
+.node.open .node-label { color: var(--fg); }
 .node-label { font-size: .78rem; font-weight: 800; color: var(--muted-fg); line-height: 1.25; max-width: 84px; text-align: center; }
 .node.current .node-label { color: var(--brand-ink); }
 .node.done .node-label { color: var(--fg); }

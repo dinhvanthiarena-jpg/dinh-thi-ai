@@ -64,6 +64,7 @@ const defaultState = () => ({
   heartsUpdatedAt: Date.now(),
   progress: {},     // lessonKey -> { done: bool, stars: 0-3 }
   openChapter: {},  // "subject:level" -> chapterId đang mở
+  moHet: true,      // mở hết bài học để duyệt nội dung, không bắt học tuần tự
 });
 
 function loadState() {
@@ -123,21 +124,24 @@ function findLesson(subject, level, lessonId) {
   }
   return null;
 }
-// bài kế tiếp mở khoá nếu bài liền trước đã xong (bài đầu chương mở nếu chương trước xong hết)
+// bài kế tiếp mở khoá nếu bài liền trước đã xong (bài đầu chương mở nếu chương trước xong hết).
+// "open" = bài chưa tới lượt nhưng đang bật "Mở hết bài học" (thầy duyệt nội dung) — vẫn vào
+// học được, chỉ nhìn nhạt hơn bài hiện tại để không phải nút nào cũng sáng rực.
 function lessonState(subject, level, chapterIdx, lessonIdx) {
   const chs = chapters(subject, level);
   const ch = chs[chapterIdx];
   const lesson = ch.lessons[lessonIdx];
   const done = isLessonDone(subject, level, lesson.id);
   if (done) return "done";
+  const openFallback = S.moHet ? "open" : "locked";
   if (lessonIdx > 0) {
     const prevDone = isLessonDone(subject, level, ch.lessons[lessonIdx - 1].id);
-    return prevDone ? "current" : "locked";
+    return prevDone ? "current" : openFallback;
   }
   if (chapterIdx === 0) return "current";
   const prevCh = chs[chapterIdx - 1];
   const prevChDone = prevCh.lessons.every((l) => isLessonDone(subject, level, l.id));
-  return prevChDone ? "current" : "locked";
+  return prevChDone ? "current" : openFallback;
 }
 function findEntity(subject, id) {
   return SUBJECTS[subject].map.find((e) => e.id === id);
@@ -648,6 +652,12 @@ function viewProfile() {
         <button class="switch ${S.theme === "dark" ? "on" : ""}" data-action="toggle-theme"><i></i></button>
       </div>
       <div class="settings-row">
+        <svg class="ic" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <b>Mở hết bài học</b>
+        <button class="switch ${S.moHet ? "on" : ""}" data-action="toggle-mohet"><i></i></button>
+      </div>
+      <p class="sub" style="padding:0 var(--s2) var(--s3)">Bật để vuốt xem trước mọi bài, không cần học tuần tự — hợp lúc thầy duyệt nội dung.</p>
+      <div class="settings-row">
         <svg class="ic" viewBox="0 0 24 24"><use href="#i-share"/></svg>
         <b>Cài vào màn hình chính</b>
       </div>
@@ -704,6 +714,7 @@ function onClick(e) {
   if (a === "quiz-next") { quizNext(); return; }
   if (a === "speak") { speak(t.dataset.text); return; }
   if (a === "toggle-theme") { S.theme = S.theme === "dark" ? "light" : "dark"; applyTheme(); save(); render(); return; }
+  if (a === "toggle-mohet") { S.moHet = !S.moHet; save(); render(); return; }
   if (a === "reset-progress") { if (confirm("Xoá hết tiến độ học? Không thể hoàn tác.")) { S.progress = {}; S.xp = 0; S.streak = 0; save(); render(); } return; }
   if (a === "close-sheet") { closeSheet(); return; }
 
