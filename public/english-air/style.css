@@ -647,7 +647,9 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
      chảy thì bố cục tự chừa đúng bằng chiều cao ảnh, không bao giờ tràn. */
   position: relative; z-index: 1;
   display: block; width: 132px; height: auto;
-  margin: -34px auto 0; pointer-events: none;
+  /* Chỉ chồng 6px thôi. Ảnh cắt sát ngay chỗ HAI BÀN TAY — không có đoạn cột
+     trống nào ở trên để giấu đi, nên kéo lên nhiều là bảng ăn mất tay và cả cái mũ. */
+  margin: -6px auto 0; pointer-events: none;
 }
 .sign-badge { width: 52px; height: 52px; margin: 0 auto var(--s3); border-radius: var(--rf); background: var(--brand-fill); color: #fff; display: grid; place-items: center; }
 .sign-badge svg { width: 26px; height: 26px; }
