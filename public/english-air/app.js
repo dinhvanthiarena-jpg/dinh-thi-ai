@@ -427,7 +427,11 @@ const unitWords = u => u.lessons.flatMap(lessonWords);
 const unitSentences = u => u.lessons.flatMap(l => l.sentences || []);
 const ALL_WORDS = COURSE.levels.flatMap(lv => lv.units.flatMap(unitWords));
 const SINGLE = ALL_WORDS.filter(w => !w.en.includes(" "));
-const PICS = ALL_WORDS.filter(w => w.pic);
+/* Kho từ dùng cho bài chọn ảnh: chỉ những từ thật sự vẽ được.
+   TÍNH MUỘN, không tính ngay lúc nạp: hàm dò cảnh khai báo mãi phía dưới, gọi
+   lên là cả app chết ngay từ dòng đầu. Tính một lần rồi giữ lại. */
+let PICS_KHO = null;
+const picsKho = () => (PICS_KHO || (PICS_KHO = ALL_WORDS.filter(veDuoc)));
 
 function currentLessonId() {
   const list = lessonsOf(level());
@@ -617,8 +621,8 @@ function buildPractice(words, sentences, max) {
 
   let picTurn = 0, tfTurn = 0;
   shuffle(pool).forEach((w, i) => {
-    if (w.pic && PICS.length >= 4 && picTurn++ % 2 === 0) {
-      q.push({ type: "picture", word: w, opts: shuffle([w, ...sample(PICS.filter(x => x.en !== w.en), 3)]) });
+    if (veDuoc(w) && picsKho().length >= 4 && picTurn++ % 2 === 0) {
+      q.push({ type: "picture", word: w, opts: shuffle([w, ...sample(picsKho().filter(x => x.en !== w.en), 3)]) });
       return;
     }
     if (tfTurn++ % 3 === 2) {                        // cứ ba từ lại một câu đúng/sai
@@ -834,6 +838,30 @@ const CANH = [
   ["phone|call|calling|text|message|internet|computer|email", "phone"],
   ["clock|time|hour|minute|late|early|oclock|schedule|wait", "clock"],
   ["what|where|when|who|why|how|question|ask|asking|please help", "question"],
+  /* Bổ sung — chỉ gán khi hình MINH HOẠ ĐÚNG nghĩa của từ. Thầy đã nhắc:
+     ảnh sai còn tệ hơn không có ảnh. Nên từ trừu tượng (fine, quite, enough,
+     probably, same, different…) cố ý KHÔNG gán hình nào cả. */
+  ["hotel|guest|reserve|check in|room service", "house"],
+  ["station|train|railway|platform|ticket", "car"],
+  ["university|college|campus|lecture|classmate", "school"],
+  ["grandmother|grandfather|grandma|grandpa|childhood|relative", "family"],
+  ["photo|picture|camera|souvenir|album", "phone"],
+  ["toy|story|cartoon|film|movie|cinema", "book"],
+  ["salary|career|hobby|interview|profession", "work"],
+  ["farmer|farming|harvest|crop|rice field", "village"],
+  ["driver|taxi driver|traffic light|parking", "car"],
+  ["police|policeman|officer|uniform|station guard", "city"],
+  ["carrot|potato|cabbage|salad bowl|greens", "apple"],
+  ["kilo|gram|weight|scale|box|bag|basket", "market"],
+  ["monday|tuesday|wednesday|thursday|friday|saturday|sunday|date|calendar", "clock"],
+  ["sick|ill|hurt|pain|injury|rest at home", "doctor"],
+  ["wind|windy|storm at sea|typhoon", "rain"],
+  ["walk|walking|step|footpath|pavement", "tree"],
+  ["crowded|noisy|modern|downtown area|skyscraper", "city"],
+  ["quiet|peaceful|ancient|old town|temple", "village"],
+  ["swim|swimming pool|seaside|shore", "fish"],
+  ["clean|wash|washing|tidy|laundry|housework", "house"],
+  ["watch tv|television|screen|channel", "phone"],
   ["man|boy|he|his|sir|mr", "man"],
   ["woman|girl|she|her|lady|ms|mrs", "woman"],
 ];
@@ -861,6 +889,27 @@ function anhChoCau(d) {
 function rung(kieu) {
   try { navigator.vibrate?.(kieu); } catch { /* trình duyệt chặn thì thôi */ }
 }
+
+/** Hình nhỏ cho MỘT Ô CHỌN trong bài chọn ảnh. Trả null khi không có hình nào
+    hợp — ô rỗng thì bài mất hết ý nghĩa, thà bỏ từ đó ra còn hơn.
+    Trước đây chỗ này chỉ vẽ w.pic. Nhưng phần đề thi lại nhận cả những từ chỉ
+    khớp CẢNH theo chữ (w.pic rỗng), nên bốn ô hiện ra trống trơn. */
+function hinhOChon(w) {
+  if (!w) return null;
+  if (w.pic && document.getElementById("p-" + w.pic)) return pic(w.pic);
+  const c = w.pic || hinhChoChu(w.en);
+  if (!c) return null;
+  if (document.getElementById("s-" + c)) {
+    const sv = svgUse("s-" + c, "0 0 320 200", "hinh-canh");
+    return sv;
+  }
+  if (document.getElementById("p-" + c)) return pic(c);
+  return null;
+}
+/** Từ này có vẽ được không — dùng để lọc trước khi ra đề. */
+const veDuoc = w => !!(w && ((w.pic && document.getElementById("p-" + w.pic)) ||
+  (() => { const c = w.pic || hinhChoChu(w.en);
+           return c && (document.getElementById("s-" + c) || document.getElementById("p-" + c)); })()));
 
 /** Một mục từ vựng: ảnh riêng nếu có, không thì dò cảnh theo chính chữ tiếng Anh. */
 function anhChoTu(w) {
@@ -1358,9 +1407,9 @@ const DRILL = {
     showMascot(true); setKicker("Chọn hình ảnh đúng");
     st.append(el("p", "ask", d.word.en));
     const grid = el("div", "pics");
-    d.opts.forEach(w => {
+    d.opts.filter(veDuoc).forEach(w => {
       const b = el("button", "pic"); b.type = "button"; b.dataset.en = w.en;
-      b.append(pic(w.pic), el("span", null, w.en));
+      b.append(hinhOChon(w), el("span", null, w.en));
       b.addEventListener("click", () => {
         if (P.answered) return;
         $$(".pic", grid).forEach(x => x.classList.remove("sel"));
@@ -4051,7 +4100,7 @@ function deHomNay(mucMa) {
       }
     }
     if (kieu === "picture") {
-      const coAnh = kho.filter(x => x.pic || hinhChoChu(x.en));
+      const coAnh = kho.filter(veDuoc);
       if (coAnh.length >= 4) {
         const w2 = coAnh[i % coAnh.length];
         const khac = tronTheoHat(coAnh.filter(x => x.en !== w2.en), r).slice(0, 3);
