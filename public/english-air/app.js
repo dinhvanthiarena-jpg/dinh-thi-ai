@@ -986,8 +986,11 @@ function signpost(title, body, ic) {
     { text: boDanhDau(body), lang: "vi-VN" },
   ]));
   card.append(ngheLai);
-  const legs = el("div", "sign-legs"); legs.append(el("i"), el("i"));
-  wrap.append(card, legs);
+  // ON-Language tự giơ tấm bảng lên, thay cho hai cại cột vẽ bằng CSS trước đây.
+  const mon = el("img", "sign-mon");
+  mon.src = "assets/mon-giobang.webp";
+  mon.alt = ""; mon.decoding = "async"; mon.loading = "lazy";
+  wrap.append(card, mon);
   const hill = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   hill.setAttribute("viewBox", "0 0 400 60"); hill.setAttribute("class", "hill"); hill.setAttribute("aria-hidden", "true");
   hill.setAttribute("preserveAspectRatio", "none");

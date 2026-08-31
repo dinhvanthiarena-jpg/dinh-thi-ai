@@ -630,20 +630,26 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .p-foot.bad .fb { color: var(--bad-ink); } .p-foot.bad .fb-ic { background: var(--bad); color: #fff; }
 
 /* ---------- 13. BIỂN BÁO DẠY ---------- */
-.sign { position: relative; padding-bottom: 86px; }
+.sign { position: relative; padding-bottom: 108px; }
+/* Viền tím phát sáng cho khớp với tấm bảng ON-Language đang giơ bên dưới. */
 .sign-card {
   position: relative; z-index: 2;
-  background: var(--card); border: 4px solid var(--ink-deep); border-radius: var(--r4);
+  background: var(--card); border: 3px solid #C084FC; border-radius: var(--r4);
+  box-shadow: 0 0 0 2px rgba(192,132,252,.22), 0 0 26px rgba(192,132,252,.30);
   padding: var(--s5) var(--s4); text-align: center;
+}
+/* ON-Language đứng dưới giơ tấm bảng. Hai cái cột trong ảnh thụt lên sau tấm
+   bảng (z-index thấp hơn) nên nhìn ra đúng là đang cầm, không phải dán cạnh nhau. */
+.sign-mon {
+  position: absolute; left: 50%; top: calc(100% - 40px);
+  transform: translateX(-50%); width: 132px; height: auto;
+  z-index: 1; display: block; pointer-events: none;
 }
 .sign-badge { width: 52px; height: 52px; margin: 0 auto var(--s3); border-radius: var(--rf); background: var(--brand-fill); color: #fff; display: grid; place-items: center; }
 .sign-badge svg { width: 26px; height: 26px; }
 .sign-word { color: var(--brand-ink); font-size: 1.5rem; font-weight: 900; margin-bottom: var(--s3); }
 .sign-body { font-size: 1.02rem; font-weight: 700; line-height: 1.62; }
 .sign-body em { font-style: normal; color: var(--brand-ink); font-weight: 900; }
-.sign-legs { position: absolute; left: 0; right: 0; top: calc(100% - 86px); height: 86px; z-index: 1; }
-.sign-legs i { position: absolute; top: -6px; width: 12px; height: 74px; background: var(--ink-deep); border-radius: 3px; }
-.sign-legs i:first-child { left: 26%; } .sign-legs i:last-child { right: 26%; }
 .hill { display: block; width: calc(100% + var(--s5)); margin: -34px calc(var(--s3) * -1) 0; fill: var(--brand-soft); }
 
 /* ---------- 14. DẠNG BÀI ---------- */
