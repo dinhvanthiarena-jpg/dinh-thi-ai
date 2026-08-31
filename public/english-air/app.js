@@ -989,7 +989,12 @@ function signpost(title, body, ic) {
   // ON-Language tự giơ tấm bảng lên, thay cho hai cại cột vẽ bằng CSS trước đây.
   const mon = el("img", "sign-mon");
   mon.src = "assets/mon-giobang.webp";
-  mon.alt = ""; mon.decoding = "async"; mon.loading = "lazy";
+  mon.alt = ""; mon.decoding = "async";
+  // Ghi sẵn kích thước thật của ảnh để trình duyệt chừa chỗ trước khi tải xong.
+  // Không ghi thì lúc chưa tải ảnh cao 0px, tải xong mới đẩy — mạng chậm là
+  // cả trang giật một cái. Cũng bỏ "tải muộn": ảnh chỉ 46 KB và luôn hiện ngay
+  // khi slide mở ra, hoãn lại chẳng được gì.
+  mon.width = 380; mon.height = 435;
   wrap.append(card, mon);
   const hill = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   hill.setAttribute("viewBox", "0 0 400 60"); hill.setAttribute("class", "hill"); hill.setAttribute("aria-hidden", "true");
