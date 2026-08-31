@@ -418,6 +418,25 @@ svg[viewBox="0 0 24 24"], .ic, .ic-sm { fill: none; stroke: currentColor; stroke
 .tf-btn.bad { background: var(--bad); color: #fff; box-shadow: none; }
 .tf-btn[disabled] { opacity: 1; }
 
+.drag-buckets { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--s3); }
+.drag-bucket { min-height: 96px; padding: var(--s3); border-radius: var(--r3);
+  background: var(--muted); box-shadow: inset 0 0 0 2px dashed var(--line-hi); box-shadow: inset 0 0 0 2px var(--line-hi);
+  border: 2px dashed var(--line-hi); text-align: center; transition: background var(--t1) var(--e), border-color var(--t1) var(--e); }
+.drag-bucket b { display: block; font-size: .84rem; color: var(--muted-fg); }
+.drag-bucket.hover { background: var(--brand-soft); border-color: var(--brand); }
+.drag-bucket-items { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: var(--s2); }
+.drag-pool { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s4); padding: var(--s3);
+  border-radius: var(--r3); background: var(--card); box-shadow: var(--sh-1); min-height: 60px; }
+.drag-chip { touch-action: none; user-select: none; cursor: grab;
+  min-height: 40px; padding: 0 var(--s3); display: inline-flex; align-items: center;
+  border-radius: var(--rf); background: var(--brand); color: #fff; font-weight: 800; font-size: .86rem;
+  box-shadow: var(--sh-1); transition: transform var(--t1) var(--e); }
+.drag-chip.dragging { cursor: grabbing; box-shadow: var(--sh-3); transform: scale(1.06); z-index: 200; }
+.drag-chip.ok { background: var(--ok); }
+.drag-chip.bad { background: var(--bad); animation: shake .35s; }
+.drag-chip.locked { cursor: default; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
 .type-input { min-height: 58px; width: 100%; padding: 0 var(--s4); border-radius: var(--r3);
   background: var(--card); box-shadow: inset 0 0 0 2px var(--line); font-size: 1.1rem; font-weight: 800; }
 .type-input:focus { box-shadow: inset 0 0 0 2px var(--brand); outline: none; }

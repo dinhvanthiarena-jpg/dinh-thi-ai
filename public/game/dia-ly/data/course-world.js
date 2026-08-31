@@ -5,9 +5,14 @@
 // vì rập khuôn "từ vựng" như app học ngoại ngữ.
 
 export const WORLD_LEVELS = [
-  { id: "l45",   label: "Lớp 4–5",   sub: "Làm quen",     ready: true  },
-  { id: "l69",   label: "Lớp 6–9",   sub: "Trung học CS", ready: true  },
-  { id: "l1012", label: "Lớp 10–12", sub: "Trung học PT", ready: false },
+  { id: "l45", label: "Lớp 4–5",  sub: "Làm quen",         ready: true  },
+  { id: "l6",  label: "Lớp 6",    sub: "Trái Đất & Bản đồ",ready: true  },
+  { id: "l7",  label: "Lớp 7",    sub: "Các châu lục",     ready: true  },
+  { id: "l8",  label: "Lớp 8",    sub: "Địa lí 8",         ready: false },
+  { id: "l9",  label: "Lớp 9",    sub: "Địa lí 9",         ready: false },
+  { id: "l10", label: "Lớp 10",   sub: "Kinh tế - xã hội", ready: true  },
+  { id: "l11", label: "Lớp 11",   sub: "Khu vực, quốc gia",ready: true  },
+  { id: "l12", label: "Lớp 12",   sub: "Địa lí 12",        ready: false },
 ];
 
 function place(id, name, capital, note) {
@@ -222,6 +227,15 @@ const c1 = {
         { t: "mapclick", q: "Bấm vào Ô-xtrây-li-a.", targetType: "country", targetId: "au" },
         { t: "match", q: "Nối quốc gia với châu lục.",
           pairs: [["Nhật Bản", "Châu Á"], ["Đức", "Châu Âu"], ["Ai Cập", "Châu Phi"], ["Bra-xin", "Châu Mỹ"]] },
+        { t: "drag", q: "Kéo mỗi quốc gia vào đúng châu lục.",
+          buckets: ["Châu Á", "Châu Âu", "Châu Phi", "Châu Mỹ", "Châu Đại Dương"],
+          items: [
+            { label: "Trung Quốc", bucket: 0 }, { label: "Thái Lan", bucket: 0 },
+            { label: "Pháp", bucket: 1 }, { label: "Anh", bucket: 1 },
+            { label: "Ai Cập", bucket: 2 }, { label: "Nam Phi", bucket: 2 },
+            { label: "Hoa Kỳ", bucket: 3 }, { label: "Bra-xin", bucket: 3 },
+            { label: "Ô-xtrây-li-a", bucket: 4 },
+          ] },
         { t: "choice", q: "Việt Nam thuộc châu lục nào?", options: ["Châu Á", "Châu Âu", "Châu Mỹ", "Châu Phi"], answer: 0 },
         { t: "choice", q: "Nước nào không giáp biển trong số dưới đây?", options: ["Lào", "Nhật Bản", "Anh", "Ô-xtrây-li-a"], answer: 0 },
         { t: "truefalse", q: "Sông Nile chảy qua Ai Cập là một trong những dòng sông dài nhất thế giới.", answer: true },
@@ -241,12 +255,12 @@ function topic2(kicker, title, body, facts) {
 }
 
 const c2 = {
-  id: "wd-l69-c1",
+  id: "wd-l6-c1",
   title: "Trái Đất & Bản đồ",
   icon: "book",
   lessons: [
     {
-      id: "wd-l69-c1-l1",
+      id: "wd-l6-c1-l1",
       title: "Trái Đất trong hệ Mặt Trời",
       goal: "Hình dạng, kích thước và các chuyển động của Trái Đất",
       teach: [
@@ -269,7 +283,7 @@ const c2 = {
       ],
     },
     {
-      id: "wd-l69-c1-l2",
+      id: "wd-l6-c1-l2",
       title: "Bản đồ và cách sử dụng",
       goal: "Tỉ lệ, kí hiệu và phương hướng trên bản đồ",
       teach: [
@@ -292,7 +306,7 @@ const c2 = {
       ],
     },
     {
-      id: "wd-l69-c1-l3",
+      id: "wd-l6-c1-l3",
       title: "Khí quyển, thuỷ quyển, đất & sinh vật",
       goal: "Các lớp bao quanh Trái Đất và vòng tuần hoàn nước",
       teach: [
@@ -314,7 +328,7 @@ const c2 = {
       ],
     },
     {
-      id: "wd-l69-c1-l4",
+      id: "wd-l6-c1-l4",
       title: "Ôn tập chương",
       checkpoint: true,
       goal: "Ôn lại Trái Đất, bản đồ và các thành phần tự nhiên",
@@ -325,18 +339,24 @@ const c2 = {
         { t: "truefalse", q: "Khí quyển là lớp không khí bao quanh Trái Đất.", answer: true },
         { t: "choice", q: "Đới thiên nhiên nào nằm gần hai cực Trái Đất?", options: ["Đới lạnh", "Đới nóng", "Đới ôn hoà", "Đới xích đạo"], answer: 0 },
         { t: "blank", q: "Tỉ lệ bản đồ 1:1.000.000 nghĩa là 1cm trên bản đồ bằng ___ km ngoài thực tế.", answer: "10", options: ["10", "1", "100", "1000"] },
+        { t: "drag", q: "Kéo mỗi thành phần vào đúng nhóm.",
+          buckets: ["Khí quyển", "Thuỷ quyển"],
+          items: [
+            { label: "Khí Nitơ", bucket: 0 }, { label: "Khí Ôxy", bucket: 0 }, { label: "Thời tiết", bucket: 0 },
+            { label: "Đại dương", bucket: 1 }, { label: "Sông, hồ", bucket: 1 }, { label: "Băng ở hai cực", bucket: 1 },
+          ] },
       ],
     },
   ],
 };
 
 const c3 = {
-  id: "wd-l69-c2",
+  id: "wd-l7-c1",
   title: "Các châu lục",
   icon: "book",
   lessons: [
     {
-      id: "wd-l69-c2-l1",
+      id: "wd-l7-c1-l1",
       title: "Châu Á & Châu Âu",
       goal: "Vị trí, tự nhiên và đặc điểm nổi bật hai châu lục",
       teach: [
@@ -356,7 +376,7 @@ const c3 = {
       ],
     },
     {
-      id: "wd-l69-c2-l2",
+      id: "wd-l7-c1-l2",
       title: "Châu Phi & Châu Mỹ",
       goal: "Vị trí, tự nhiên và đặc điểm nổi bật hai châu lục",
       teach: [
@@ -377,7 +397,7 @@ const c3 = {
       ],
     },
     {
-      id: "wd-l69-c2-l3",
+      id: "wd-l7-c1-l3",
       title: "Châu Đại Dương & Châu Nam Cực",
       goal: "Đặc điểm nổi bật hai châu lục còn lại",
       teach: [
@@ -396,7 +416,7 @@ const c3 = {
       ],
     },
     {
-      id: "wd-l69-c2-l4",
+      id: "wd-l7-c1-l4",
       title: "Ôn tập chương",
       checkpoint: true,
       goal: "Ôn lại đặc điểm nổi bật của 6 châu lục",
@@ -408,6 +428,320 @@ const c3 = {
         { t: "match", q: "Nối châu lục với đặc điểm nổi bật.",
           pairs: [["Châu Á", "Đỉnh núi cao nhất thế giới"], ["Châu Âu", "Nhiều bán đảo"], ["Châu Đại Dương", "Lục địa Australia"]] },
         { t: "truefalse", q: "Trái Đất có 6 châu lục.", answer: true },
+        { t: "drag", q: "Kéo mỗi đặc điểm vào đúng châu lục.",
+          buckets: ["Châu Á", "Châu Phi", "Châu Mỹ", "Châu Đại Dương"],
+          items: [
+            { label: "Đỉnh Everest", bucket: 0 }, { label: "Hoang mạc Sahara", bucket: 1 },
+            { label: "Rừng Amazon", bucket: 2 }, { label: "Dãy núi Andes", bucket: 2 },
+            { label: "Lục địa Australia", bucket: 3 },
+          ] },
+      ],
+    },
+  ],
+};
+
+// ===== Lớp 6, chương 2 — mảng còn thiếu của chương trình Địa lí 6 thật: cấu tạo Trái Đất,
+// nội - ngoại sinh, núi lửa - động đất, các dạng địa hình và khoáng sản.
+
+const c4 = {
+  id: "wd-l6-c2",
+  title: "Cấu tạo Trái Đất & Địa hình",
+  icon: "book",
+  lessons: [
+    {
+      id: "wd-l6-c2-l1",
+      title: "Cấu tạo bên trong Trái Đất",
+      goal: "Ba lớp của Trái Đất và các mảng kiến tạo",
+      teach: [
+        { t: "intro", title: "Trái Đất có mấy lớp?",
+          body: "Nếu cắt đôi Trái Đất, em sẽ thấy nó gồm 3 lớp giống như một quả trứng: vỏ ngoài mỏng, lớp giữa dày nhất, và nhân ở trong cùng.",
+          bullets: ["Vỏ Trái Đất: mỏng nhất, nơi con người sinh sống", "Lớp Manti (bao Manti): dày nhất, ở trạng thái quánh dẻo", "Nhân Trái Đất: trong cùng, gồm nhân ngoài lỏng và nhân trong rắn"] },
+        { t: "topic", kicker: "Vỏ Trái Đất", title: "Vỏ mỏng nhưng quan trọng nhất với con người",
+          body: "Vỏ Trái Đất là lớp mỏng nhất nhưng lại là nơi tồn tại toàn bộ núi, đồng bằng, đại dương và sự sống. Vỏ Trái Đất không liền một khối mà bị chia thành nhiều mảng kiến tạo lớn nhỏ.",
+          facts: [{ label: "Đặc điểm", value: "Mỏng nhất, ngoài cùng" }] },
+        { t: "topic", kicker: "Mảng kiến tạo", title: "Những mảng ghép khổng lồ luôn di chuyển",
+          body: "Vỏ Trái Đất gồm nhiều mảng kiến tạo lớn (như mảng Á-Âu, mảng Thái Bình Dương...) luôn di chuyển rất chậm. Nơi các mảng xô vào nhau hoặc tách xa nhau thường xảy ra động đất, núi lửa.",
+          facts: [{ label: "Ví dụ", value: "Mảng Á-Âu, Thái Bình Dương" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Trái Đất gồm mấy lớp chính?", options: ["3", "2", "5", "1"], answer: 0 },
+        { t: "choice", q: "Lớp nào của Trái Đất dày nhất?", options: ["Lớp Manti", "Vỏ Trái Đất", "Nhân trong", "Khí quyển"], answer: 0 },
+        { t: "truefalse", q: "Vỏ Trái Đất là một khối liền, không chia thành mảng.", answer: false },
+        { t: "choice", q: "Nơi các mảng kiến tạo xô vào nhau thường xảy ra hiện tượng gì?", options: ["Động đất, núi lửa", "Mưa đá", "Cầu vồng", "Sương mù"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l6-c2-l2",
+      title: "Núi lửa và động đất",
+      goal: "Quá trình nội sinh, ngoại sinh và hiện tượng tạo núi",
+      teach: [
+        { t: "topic", kicker: "Nội sinh & ngoại sinh", title: "Hai lực đối lập tạo nên bề mặt Trái Đất",
+          body: "Quá trình nội sinh (từ bên trong Trái Đất) làm gồ ghề thêm bề mặt như nâng cao địa hình, tạo núi. Quá trình ngoại sinh (gió, nước, nhiệt độ...) lại có xu hướng bào mòn, san bằng địa hình. Hai quá trình này diễn ra đồng thời, tạo nên các dạng địa hình đa dạng ngày nay.",
+          facts: [{ label: "Nội sinh", value: "Nâng cao địa hình" }, { label: "Ngoại sinh", value: "Bào mòn địa hình" }] },
+        { t: "culture", title: "Núi lửa phun trào",
+          body: "Núi lửa hình thành khi mắc-ma nóng chảy từ sâu trong lòng đất phun trào lên bề mặt. Dù nguy hiểm, đất quanh núi lửa sau khi nguội thường rất màu mỡ nên vẫn có người sinh sống gần đó." },
+        { t: "culture", title: "Động đất",
+          body: "Động đất là hiện tượng lớp vỏ Trái Đất rung chuyển đột ngột do các mảng kiến tạo di chuyển, va chạm với nhau. Động đất mạnh có thể gây thiệt hại lớn về nhà cửa và tính mạng con người." },
+      ],
+      quiz: [
+        { t: "choice", q: "Quá trình nào làm bề mặt Trái Đất được nâng cao, tạo núi?", options: ["Nội sinh", "Ngoại sinh", "Cả hai như nhau", "Không quá trình nào"], answer: 0 },
+        { t: "choice", q: "Núi lửa hình thành do đâu?", options: ["Mắc-ma phun trào từ lòng đất", "Gió thổi mạnh", "Mưa lớn", "Nước biển dâng"], answer: 0 },
+        { t: "truefalse", q: "Đất quanh núi lửa sau khi nguội thường rất màu mỡ.", answer: true },
+        { t: "choice", q: "Động đất xảy ra chủ yếu do đâu?", options: ["Các mảng kiến tạo va chạm, di chuyển", "Gió mùa", "Thuỷ triều", "Nhiệt độ giảm"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l6-c2-l3",
+      title: "Địa hình và khoáng sản",
+      goal: "Các dạng địa hình chính và khoáng sản trên Trái Đất",
+      teach: [
+        { t: "intro", title: "4 dạng địa hình chính",
+          body: "Bề mặt Trái Đất có 4 dạng địa hình chính, phân biệt chủ yếu theo độ cao và hình dạng.",
+          bullets: ["Núi: nhô cao rõ rệt, thường trên 500m", "Đồi: gò cao, thấp hơn núi, ít dốc", "Cao nguyên: bề mặt tương đối bằng phẳng, sườn dốc", "Đồng bằng: thấp, khá bằng phẳng, thường ven sông, ven biển"] },
+        { t: "culture", title: "Khoáng sản — kho báu trong lòng đất",
+          body: "Khoáng sản là những khoáng vật, đá có ích được con người khai thác sử dụng, gồm hai nhóm chính: khoáng sản kim loại (sắt, đồng, vàng...) dùng để chế tạo máy móc, và khoáng sản phi kim loại — nhiên liệu (than, dầu mỏ, khí đốt) và vật liệu xây dựng (đá vôi, cát, sét)." },
+      ],
+      quiz: [
+        { t: "choice", q: "Dạng địa hình nào có độ cao trên 500m, nhô lên rõ rệt?", options: ["Núi", "Đồng bằng", "Đồi", "Cao nguyên"], answer: 0 },
+        { t: "choice", q: "Cao nguyên có đặc điểm gì nổi bật?", options: ["Bề mặt bằng phẳng, sườn dốc", "Rất thấp, ngập nước quanh năm", "Toàn cát", "Không có thực vật"], answer: 0 },
+        { t: "drag", q: "Kéo mỗi khoáng sản vào đúng nhóm.",
+          buckets: ["Khoáng sản kim loại", "Khoáng sản phi kim loại"],
+          items: [
+            { label: "Sắt", bucket: 0 }, { label: "Vàng", bucket: 0 }, { label: "Đồng", bucket: 0 },
+            { label: "Than đá", bucket: 1 }, { label: "Dầu mỏ", bucket: 1 }, { label: "Đá vôi", bucket: 1 },
+          ] },
+        { t: "truefalse", q: "Đồng bằng là dạng địa hình thấp, khá bằng phẳng, thường ở ven sông hoặc ven biển.", answer: true },
+      ],
+    },
+    {
+      id: "wd-l6-c2-l4",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại cấu tạo Trái Đất, núi lửa - động đất, địa hình và khoáng sản",
+      quiz: [
+        { t: "choice", q: "Trái Đất gồm mấy lớp chính?", options: ["3", "2", "4", "5"], answer: 0 },
+        { t: "choice", q: "Động đất, núi lửa thường xảy ra ở đâu?", options: ["Nơi các mảng kiến tạo tiếp xúc nhau", "Giữa các đại dương yên tĩnh", "Vùng cực", "Sa mạc"], answer: 0 },
+        { t: "choice", q: "Dạng địa hình nào thấp và khá bằng phẳng, thuận lợi cho nông nghiệp?", options: ["Đồng bằng", "Núi", "Cao nguyên", "Đồi"], answer: 0 },
+        { t: "truefalse", q: "Quá trình ngoại sinh có xu hướng bào mòn, san bằng địa hình.", answer: true },
+        { t: "match", q: "Nối khái niệm với đặc điểm.",
+          pairs: [["Nội sinh", "Nâng cao địa hình"], ["Ngoại sinh", "Bào mòn địa hình"], ["Núi lửa", "Mắc-ma phun trào"]] },
+      ],
+    },
+  ],
+};
+
+// ===== Lớp 10 — theo mạch phần "Địa lí kinh tế - xã hội" của Địa lí 10: dân số, đô thị hoá,
+// và các ngành kinh tế (nông - lâm - thuỷ sản, công nghiệp, dịch vụ).
+
+const c5 = {
+  id: "wd-l10-c1",
+  title: "Dân số, đô thị hoá & các ngành kinh tế",
+  icon: "book",
+  lessons: [
+    {
+      id: "wd-l10-c1-l1",
+      title: "Dân số và đô thị hoá thế giới",
+      goal: "Quy mô, cơ cấu dân số và quá trình đô thị hoá",
+      teach: [
+        { t: "topic", kicker: "Dân số", title: "Hơn 8 tỉ người trên Trái Đất",
+          body: "Dân số thế giới hiện đã vượt mốc 8 tỉ người, tăng nhanh trong thế kỷ 20-21 nhờ y tế phát triển. Tốc độ tăng dân số khác nhau rõ rệt giữa các nước phát triển (tăng chậm) và đang phát triển (tăng nhanh hơn).",
+          facts: [{ label: "Dân số hiện nay", value: "Hơn 8 tỉ người" }] },
+        { t: "topic", kicker: "Cơ cấu dân số", title: "Cơ cấu theo tuổi và giới tính",
+          body: "Cơ cấu dân số theo tuổi cho biết tỉ lệ trẻ em, người trong độ tuổi lao động và người cao tuổi — quyết định lực lượng lao động của một quốc gia. Các nước phát triển thường có dân số già hơn nước đang phát triển.",
+          facts: [{ label: "3 nhóm tuổi", value: "Trẻ em, lao động, cao tuổi" }] },
+        { t: "culture", title: "Đô thị hoá toàn cầu",
+          body: "Đô thị hoá là quá trình tăng nhanh tỉ lệ dân số sống ở thành thị, kèm theo mở rộng quy mô các đô thị. Hiện hơn một nửa dân số thế giới sống ở thành thị. Đô thị hoá mang lại nhiều cơ hội việc làm nhưng cũng gây áp lực về nhà ở, giao thông, môi trường." },
+      ],
+      quiz: [
+        { t: "choice", q: "Dân số thế giới hiện nay khoảng bao nhiêu?", options: ["Hơn 8 tỉ người", "2 tỉ người", "20 tỉ người", "500 triệu người"], answer: 0 },
+        { t: "choice", q: "Nhóm nước nào thường có dân số già hơn?", options: ["Nước phát triển", "Nước đang phát triển", "Cả hai như nhau", "Không nước nào"], answer: 0 },
+        { t: "truefalse", q: "Đô thị hoá là quá trình tăng tỉ lệ dân số sống ở thành thị.", answer: true },
+        { t: "choice", q: "Đô thị hoá nhanh có thể gây áp lực gì?", options: ["Nhà ở, giao thông, môi trường", "Không có tác động gì", "Giảm việc làm", "Tăng diện tích rừng"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l10-c1-l2",
+      title: "Nông nghiệp, lâm nghiệp & thuỷ sản",
+      goal: "Vai trò và các nhân tố ảnh hưởng tới sản xuất",
+      teach: [
+        { t: "topic", kicker: "Nông nghiệp", title: "Ngành cung cấp lương thực cho nhân loại",
+          body: "Nông nghiệp cung cấp lương thực, thực phẩm cho con người và nguyên liệu cho công nghiệp chế biến. Sự phát triển nông nghiệp phụ thuộc nhiều vào điều kiện tự nhiên (đất, khí hậu, nước) và các tiến bộ khoa học kỹ thuật.",
+          facts: [{ label: "Vai trò", value: "Cung cấp lương thực, nguyên liệu" }] },
+        { t: "topic", kicker: "Lâm nghiệp & thuỷ sản", title: "Rừng và biển — nguồn tài nguyên quý giá",
+          body: "Lâm nghiệp cung cấp gỗ và các lâm sản, đồng thời giữ vai trò quan trọng bảo vệ môi trường, chống xói mòn. Thuỷ sản (đánh bắt và nuôi trồng) cung cấp nguồn thực phẩm giàu dinh dưỡng và là ngành xuất khẩu quan trọng của nhiều quốc gia ven biển.",
+          facts: [{ label: "Lâm nghiệp", value: "Gỗ, bảo vệ môi trường" }, { label: "Thuỷ sản", value: "Đánh bắt & nuôi trồng" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Nông nghiệp có vai trò chủ yếu gì?", options: ["Cung cấp lương thực, thực phẩm", "Sản xuất ô tô", "Khai thác dầu khí", "Xây dựng nhà cao tầng"], answer: 0 },
+        { t: "choice", q: "Sự phát triển nông nghiệp phụ thuộc nhiều vào yếu tố tự nhiên nào?", options: ["Đất, khí hậu, nước", "Chỉ có nhiệt độ", "Chỉ có gió", "Không phụ thuộc gì"], answer: 0 },
+        { t: "truefalse", q: "Lâm nghiệp chỉ có vai trò cung cấp gỗ, không liên quan tới môi trường.", answer: false },
+        { t: "choice", q: "Thuỷ sản gồm những hoạt động nào?", options: ["Đánh bắt và nuôi trồng", "Chỉ đánh bắt", "Chỉ nuôi trồng", "Trồng lúa"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l10-c1-l3",
+      title: "Công nghiệp & dịch vụ",
+      goal: "Vai trò, cơ cấu ngành công nghiệp và dịch vụ",
+      teach: [
+        { t: "topic", kicker: "Công nghiệp", title: "Ngành tạo ra tư liệu sản xuất",
+          body: "Công nghiệp là ngành tạo ra khối lượng của cải vật chất lớn, đóng vai trò chủ đạo trong nền kinh tế hiện đại. Cơ cấu ngành công nghiệp rất đa dạng: khai khoáng, năng lượng, luyện kim, cơ khí, chế biến, điện tử...",
+          facts: [{ label: "Vai trò", value: "Tạo tư liệu sản xuất" }] },
+        { t: "topic", kicker: "Dịch vụ", title: "Ngành chiếm tỉ trọng ngày càng lớn",
+          body: "Dịch vụ gồm thương mại, giao thông vận tải, du lịch, tài chính – ngân hàng, giáo dục, y tế... Ở các nước phát triển, dịch vụ thường chiếm tỉ trọng lớn nhất trong cơ cấu kinh tế (GDP).",
+          facts: [{ label: "Gồm", value: "Thương mại, du lịch, tài chính..." }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Ngành nào tạo ra khối lượng của cải vật chất lớn cho xã hội hiện đại?", options: ["Công nghiệp", "Chỉ nông nghiệp", "Chỉ dịch vụ", "Không ngành nào"], answer: 0 },
+        { t: "choice", q: "Ở các nước phát triển, ngành nào thường chiếm tỉ trọng GDP lớn nhất?", options: ["Dịch vụ", "Nông nghiệp", "Lâm nghiệp", "Khai khoáng"], answer: 0 },
+        { t: "match", q: "Nối ngành với ví dụ.", pairs: [["Công nghiệp", "Luyện kim, cơ khí"], ["Dịch vụ", "Du lịch, ngân hàng"]] },
+      ],
+    },
+    {
+      id: "wd-l10-c1-l4",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại dân số, đô thị hoá và các ngành kinh tế",
+      quiz: [
+        { t: "choice", q: "Dân số thế giới hiện nay khoảng bao nhiêu?", options: ["Hơn 8 tỉ người", "2 tỉ người", "1 tỉ người", "50 tỉ người"], answer: 0 },
+        { t: "choice", q: "Đô thị hoá là gì?", options: ["Tăng tỉ lệ dân số sống ở thành thị", "Giảm dân số", "Trồng thêm rừng", "Xây thêm đập thuỷ điện"], answer: 0 },
+        { t: "choice", q: "Ngành nào cung cấp lương thực, thực phẩm chủ yếu?", options: ["Nông nghiệp", "Công nghiệp", "Dịch vụ", "Khai khoáng"], answer: 0 },
+        { t: "truefalse", q: "Ở các nước phát triển, dịch vụ thường chiếm tỉ trọng GDP lớn nhất.", answer: true },
+        { t: "drag", q: "Kéo mỗi hoạt động vào đúng ngành kinh tế.",
+          buckets: ["Nông – lâm – thuỷ sản", "Công nghiệp", "Dịch vụ"],
+          items: [
+            { label: "Trồng lúa", bucket: 0 }, { label: "Nuôi tôm", bucket: 0 },
+            { label: "Luyện kim", bucket: 1 }, { label: "Chế biến thực phẩm", bucket: 1 },
+            { label: "Du lịch", bucket: 2 }, { label: "Ngân hàng", bucket: 2 },
+          ] },
+      ],
+    },
+  ],
+};
+
+// ===== Lớp 11 — theo mạch phần "Một số khu vực, quốc gia" của Địa lí 11: Hoa Kỳ, Liên minh
+// châu Âu (đại diện Đức), Liên bang Nga, Nhật Bản, Trung Quốc, khu vực Đông Nam Á.
+
+function place11(id, name, capital, note) {
+  return { t: "place", id, title: name, subtitle: `${note} · Thủ đô ${capital}`,
+    body: `${name} thuộc ${note.toLowerCase()}, có thủ đô là ${capital}.`,
+    facts: [{ label: "Thủ đô", value: capital }, { label: "Vị trí", value: note }] };
+}
+function topic11(title, body, facts) {
+  return { t: "topic", kicker: "Tự nhiên & kinh tế", title, body, facts };
+}
+
+const c6 = {
+  id: "wd-l11-c1",
+  title: "Khu vực & cường quốc tiêu biểu",
+  icon: "book",
+  lessons: [
+    {
+      id: "wd-l11-c1-l1",
+      title: "Hoa Kỳ",
+      goal: "Vị trí, tự nhiên và nền kinh tế hàng đầu thế giới",
+      teach: [
+        place11("us", "Hoa Kỳ", "Oa-sinh-tơn", "Bắc Mỹ"),
+        topic11("Tự nhiên, kinh tế Hoa Kỳ",
+          "Lãnh thổ rộng lớn, địa hình đa dạng: đồng bằng trung tâm màu mỡ, núi Rocky ở phía Tây, núi Appalachian ở phía Đông. Là nền kinh tế lớn nhất thế giới, dẫn đầu về công nghệ, tài chính và đổi mới sáng tạo.",
+          [{ label: "Địa hình", value: "Đồng bằng, núi Rocky" }, { label: "Kinh tế", value: "Lớn nhất thế giới" }]),
+        culture("Văn hoá Hoa Kỳ",
+          "Là đất nước đa văn hoá, nơi hội tụ người nhập cư từ khắp thế giới. Hollywood, thung lũng Silicon và các trường đại học hàng đầu là những biểu tượng nổi bật."),
+      ],
+      quiz: [
+        { t: "choice", q: "Hoa Kỳ nằm ở châu lục nào?", options: ["Bắc Mỹ", "Nam Mỹ", "Châu Âu", "Châu Á"], answer: 0 },
+        { t: "mapclick", q: "Hãy bấm vào Hoa Kỳ trên bản đồ.", targetType: "country", targetId: "us" },
+        { t: "choice", q: "Hoa Kỳ được đánh giá là nền kinh tế như thế nào trên thế giới?", options: ["Lớn nhất thế giới", "Nhỏ nhất thế giới", "Chỉ phát triển nông nghiệp", "Không có công nghiệp"], answer: 0 },
+        { t: "truefalse", q: "Hoa Kỳ là đất nước đa văn hoá, có nhiều người nhập cư.", answer: true },
+      ],
+    },
+    {
+      id: "wd-l11-c1-l2",
+      title: "Liên minh châu Âu & Cộng hoà Liên bang Đức",
+      goal: "EU và quốc gia đại diện tiêu biểu",
+      teach: [
+        { t: "intro", title: "Liên minh châu Âu (EU)",
+          body: "EU là tổ chức liên kết kinh tế – chính trị của nhiều quốc gia châu Âu, cho phép hàng hoá, dịch vụ, vốn và con người di chuyển tự do giữa các nước thành viên. Đây là một trong những trung tâm kinh tế lớn nhất thế giới.",
+          bullets: ["Gồm nhiều quốc gia châu Âu liên kết chặt chẽ", "Có đồng tiền chung Euro ở nhiều nước thành viên", "Tự do đi lại, buôn bán giữa các nước thành viên"] },
+        place11("de", "Đức", "Béc-lin", "Trung Âu, thành viên EU"),
+        topic11("Tự nhiên, kinh tế Đức",
+          "Đức là nền kinh tế lớn nhất Liên minh châu Âu, nổi bật với công nghiệp ô tô, cơ khí chế tạo và xuất khẩu công nghệ cao hàng đầu thế giới.",
+          [{ label: "Vai trò trong EU", value: "Nền kinh tế lớn nhất" }, { label: "Mạnh về", value: "Ô tô, cơ khí" }]),
+      ],
+      quiz: [
+        { t: "choice", q: "EU là tổ chức liên kết của các quốc gia thuộc châu lục nào?", options: ["Châu Âu", "Châu Á", "Châu Phi", "Châu Mỹ"], answer: 0 },
+        { t: "choice", q: "Đồng tiền chung của nhiều nước EU là gì?", options: ["Euro", "Đô la", "Yên", "Nhân dân tệ"], answer: 0 },
+        { t: "mapclick", q: "Hãy bấm vào Đức trên bản đồ.", targetType: "country", targetId: "de" },
+        { t: "choice", q: "Đức nổi bật với ngành công nghiệp nào?", options: ["Ô tô, cơ khí", "Trồng lúa", "Đánh bắt cá", "Khai thác vàng"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l11-c1-l3",
+      title: "Liên bang Nga",
+      goal: "Quốc gia rộng lớn nhất thế giới",
+      teach: [
+        place11("ru", "Liên bang Nga", "Mát-xcơ-va", "Trải dài Đông Âu và Bắc Á"),
+        topic11("Tự nhiên, kinh tế Nga",
+          "Nga là quốc gia có diện tích lớn nhất thế giới, trải dài qua 11 múi giờ, từ đồng bằng Đông Âu tới vùng Xi-bia rộng lớn giàu tài nguyên rừng, khoáng sản, dầu khí. Kinh tế mạnh về khai thác và xuất khẩu năng lượng (dầu mỏ, khí đốt).",
+          [{ label: "Diện tích", value: "Lớn nhất thế giới" }, { label: "Kinh tế", value: "Dầu mỏ, khí đốt" }]),
+        culture("Văn hoá Nga",
+          "Nổi tiếng với nền văn học, âm nhạc cổ điển (Tchaikovsky) và ba-lê. Điện Kremlin và Quảng trường Đỏ ở Mát-xcơ-va là biểu tượng nổi tiếng."),
+      ],
+      quiz: [
+        { t: "choice", q: "Quốc gia nào có diện tích lớn nhất thế giới?", options: ["Liên bang Nga", "Trung Quốc", "Hoa Kỳ", "Canada"], answer: 0 },
+        { t: "choice", q: "Kinh tế Nga mạnh nhất ở lĩnh vực nào?", options: ["Dầu mỏ, khí đốt", "Trồng cà phê", "Du lịch biển nhiệt đới", "Đánh bắt cá ngừ"], answer: 0 },
+        { t: "truefalse", q: "Lãnh thổ Nga trải dài qua nhiều múi giờ.", answer: true },
+        { t: "choice", q: "Quảng trường nổi tiếng ở Mát-xcơ-va là gì?", options: ["Quảng trường Đỏ", "Quảng trường Thời Đại", "Quảng trường Trafalgar", "Quảng trường Thiên An Môn"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l11-c1-l4",
+      title: "Nhật Bản & Trung Quốc",
+      goal: "Hai cường quốc kinh tế hàng đầu châu Á",
+      teach: [
+        topic11("Nhật Bản — cường quốc công nghệ",
+          "Nhật Bản gần như không có tài nguyên khoáng sản nhưng vẫn trở thành cường quốc kinh tế nhờ đầu tư mạnh vào khoa học công nghệ, giáo dục và nguồn nhân lực chất lượng cao. Nổi bật ở ngành ô tô, robot, điện tử.",
+          [{ label: "Bí quyết", value: "Công nghệ, con người" }, { label: "Mạnh về", value: "Ô tô, điện tử, robot" }]),
+        topic11("Trung Quốc — nền kinh tế quy mô lớn",
+          "Trung Quốc là quốc gia đông dân và có nền kinh tế quy mô rất lớn, phát triển nhanh chóng từ cải cách mở cửa. Mạnh về sản xuất công nghiệp quy mô lớn, xuất khẩu hàng hoá đi khắp thế giới.",
+          [{ label: "Đặc điểm", value: "Đông dân, tăng trưởng nhanh" }, { label: "Mạnh về", value: "Sản xuất công nghiệp" }]),
+      ],
+      quiz: [
+        { t: "choice", q: "Nhật Bản trở thành cường quốc kinh tế nhờ đâu dù ít tài nguyên?", options: ["Công nghệ và nguồn nhân lực", "Nhiều dầu mỏ", "Đất đai rộng lớn", "Khí hậu ôn hoà"], answer: 0 },
+        { t: "mapclick", q: "Hãy bấm vào Nhật Bản trên bản đồ.", targetType: "country", targetId: "jp" },
+        { t: "mapclick", q: "Hãy bấm vào Trung Quốc trên bản đồ.", targetType: "country", targetId: "cn" },
+        { t: "truefalse", q: "Trung Quốc là quốc gia đông dân với nền kinh tế quy mô rất lớn.", answer: true },
+      ],
+    },
+    {
+      id: "wd-l11-c1-l5",
+      title: "Khu vực Đông Nam Á",
+      goal: "Vị trí, tự nhiên và hợp tác khu vực ASEAN",
+      teach: [
+        { t: "intro", title: "Cầu nối giữa hai đại dương",
+          body: "Đông Nam Á nằm ở vị trí cầu nối giữa châu Á và châu Đại Dương, giữa Thái Bình Dương và Ấn Độ Dương — vị trí địa lí – chiến lược rất quan trọng cho giao thương hàng hải quốc tế.",
+          bullets: ["Gồm phần lục địa (bán đảo Trung Ấn) và phần hải đảo", "Khí hậu nhiệt đới gió mùa và xích đạo", "Việt Nam là một thành viên của khu vực này"] },
+        { t: "culture", title: "ASEAN — mái nhà chung khu vực",
+          body: "Hiệp hội các quốc gia Đông Nam Á (ASEAN) là tổ chức hợp tác kinh tế, chính trị giữa các nước trong khu vực, trong đó có Việt Nam, nhằm thúc đẩy hoà bình, ổn định và phát triển kinh tế chung." },
+      ],
+      quiz: [
+        { t: "choice", q: "Đông Nam Á nằm giữa hai đại dương nào?", options: ["Thái Bình Dương và Ấn Độ Dương", "Đại Tây Dương và Bắc Băng Dương", "Chỉ có Thái Bình Dương", "Chỉ có Ấn Độ Dương"], answer: 0 },
+        { t: "choice", q: "Tổ chức hợp tác khu vực Đông Nam Á tên là gì?", options: ["ASEAN", "EU", "NATO", "OPEC"], answer: 0 },
+        { t: "truefalse", q: "Việt Nam là một thành viên của ASEAN.", answer: true },
+        { t: "choice", q: "Đông Nam Á gồm những bộ phận nào?", options: ["Phần lục địa và phần hải đảo", "Chỉ có phần lục địa", "Chỉ có phần hải đảo", "Không có đảo nào"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l11-c1-l6",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại các cường quốc và khu vực tiêu biểu",
+      quiz: [
+        { t: "choice", q: "Quốc gia nào có nền kinh tế lớn nhất thế giới?", options: ["Hoa Kỳ", "Lào", "Campuchia", "Nam Phi"], answer: 0 },
+        { t: "choice", q: "Quốc gia nào có diện tích lớn nhất thế giới?", options: ["Liên bang Nga", "Trung Quốc", "Đức", "Nhật Bản"], answer: 0 },
+        { t: "choice", q: "Việt Nam là thành viên của tổ chức khu vực nào?", options: ["ASEAN", "EU", "NATO", "Không tổ chức nào"], answer: 0 },
+        { t: "match", q: "Nối quốc gia với đặc điểm nổi bật.",
+          pairs: [["Nhật Bản", "Cường quốc công nghệ dù ít tài nguyên"], ["Đức", "Nền kinh tế lớn nhất EU"], ["Nga", "Diện tích lớn nhất thế giới"]] },
+        { t: "truefalse", q: "EU cho phép hàng hoá và con người di chuyển tự do giữa các nước thành viên.", answer: true },
       ],
     },
   ],
@@ -415,5 +749,14 @@ const c3 = {
 
 export const WORLD_COURSE = {
   subject: "world",
-  levels: { l45: { chapters: [c1] }, l69: { chapters: [c2, c3] }, l1012: { chapters: [] } },
+  levels: {
+    l45: { chapters: [c1] },
+    l6:  { chapters: [c2, c4] },
+    l7:  { chapters: [c3] },
+    l8:  { chapters: [] },
+    l9:  { chapters: [] },
+    l10: { chapters: [c5] },
+    l11: { chapters: [c6] },
+    l12: { chapters: [] },
+  },
 };

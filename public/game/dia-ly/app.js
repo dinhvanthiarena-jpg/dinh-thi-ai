@@ -182,9 +182,66 @@ window.addEventListener("DOMContentLoaded", () => {
   document.body.addEventListener("click", onClick);
   document.body.addEventListener("submit", onSubmit);
   document.body.addEventListener("input", onInput);
+  initDragHandlers();
   render();
   registerSW();
 });
+
+/* ---------- 14b. KÉO THẢ (dạng câu hỏi drag) ---------- */
+let dragState = null;
+function initDragHandlers() {
+  document.body.addEventListener("pointerdown", (e) => {
+    const chip = e.target.closest(".drag-chip");
+    if (!chip || chip.classList.contains("locked")) return;
+    const rect = chip.getBoundingClientRect();
+    dragState = { chip, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top };
+    chip.setPointerCapture(e.pointerId);
+    chip.classList.add("dragging");
+    chip.style.width = rect.width + "px";
+    document.body.appendChild(chip);
+    chip.style.position = "fixed";
+    chip.style.left = rect.left + "px";
+    chip.style.top = rect.top + "px";
+  });
+  document.body.addEventListener("pointermove", (e) => {
+    if (!dragState) return;
+    dragState.chip.style.left = e.clientX - dragState.offsetX + "px";
+    dragState.chip.style.top = e.clientY - dragState.offsetY + "px";
+    document.querySelectorAll(".drag-bucket").forEach((b) => b.classList.remove("hover"));
+    document.elementFromPoint(e.clientX, e.clientY)?.closest(".drag-bucket")?.classList.add("hover");
+  });
+  document.body.addEventListener("pointerup", (e) => {
+    if (!dragState) return;
+    const { chip } = dragState;
+    dragState = null;
+    chip.classList.remove("dragging");
+    chip.style.position = ""; chip.style.left = ""; chip.style.top = ""; chip.style.width = "";
+    document.querySelectorAll(".drag-bucket").forEach((b) => b.classList.remove("hover"));
+    const bucketEl = document.elementFromPoint(e.clientX, e.clientY)?.closest(".drag-bucket");
+    if (bucketEl) handleDragDrop(chip, bucketEl);
+    else document.getElementById("drag-pool")?.appendChild(chip);
+  });
+}
+function handleDragDrop(chip, bucketEl) {
+  const step = LESSON?.queue[LESSON.pos];
+  if (!step || step.item.t !== "drag" || LESSON.answered) { document.getElementById("drag-pool")?.appendChild(chip); return; }
+  const item = step.item;
+  const itemIdx = Number(chip.dataset.item);
+  const bucketIdx = Number(bucketEl.dataset.bucket);
+  const correct = item.items[itemIdx].bucket === bucketIdx;
+  if (correct) {
+    bucketEl.querySelector("[data-bucket-items]").appendChild(chip);
+    chip.classList.add("locked", "ok");
+    LESSON.dragPlaced = (LESSON.dragPlaced || 0) + 1;
+    if (LESSON.dragPlaced === item.items.length) afterAnswer(true, null);
+  } else {
+    chip.classList.add("bad");
+    setTimeout(() => chip.classList.remove("bad"), 400);
+    document.getElementById("drag-pool")?.appendChild(chip);
+    loseHeart();
+    if (S.hearts <= 0) render();
+  }
+}
 
 function applyTheme() {
   document.documentElement.setAttribute("data-theme", S.theme);
@@ -462,6 +519,7 @@ function renderQuiz(step) {
   else if (item.t === "mapclick") wrap.innerHTML = header + renderMapClick(item);
   else if (item.t === "order") wrap.innerHTML = header + renderOrder(item);
   else if (item.t === "truefalse") wrap.innerHTML = header + renderTrueFalse(item);
+  else if (item.t === "drag") { LESSON.dragPlaced = 0; wrap.innerHTML = header + renderDrag(item); }
   wrap.appendChild(el(`<div class="qfoot" id="qfoot"></div>`));
   return wrap;
 }
@@ -511,6 +569,18 @@ function renderTrueFalse(item) {
     <button class="btn tf-btn btn-block" data-action="answer-tf" data-v="true">Đúng</button>
     <button class="btn tf-btn btn-block" data-action="answer-tf" data-v="false">Sai</button>
   </div>`;
+}
+function renderDrag(item) {
+  const buckets = item.buckets.map((b, i) => `
+    <div class="drag-bucket" data-bucket="${i}">
+      <b>${esc(b)}</b>
+      <div class="drag-bucket-items" data-bucket-items="${i}"></div>
+    </div>`).join("");
+  const pool = shuffle(item.items.map((it, i) => ({ ...it, i })));
+  const chips = pool.map((it) => `<div class="drag-chip" data-item="${it.i}">${esc(it.label)}</div>`).join("");
+  return `
+    <div class="drag-buckets">${buckets}</div>
+    <div class="drag-pool" id="drag-pool">${chips}</div>`;
 }
 function renderMapClick(item) {
   const subj = SUBJECTS[S.subject];
@@ -845,8 +915,15 @@ function onInput(e) {
 
 /* ---------- 15. PWA ---------- */
 function registerSW() {
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").catch(() => {});
-  }
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+  // Bản mới (CACHE đổi số trong sw.js) tự kích hoạt và tự tải lại trang một lần —
+  // máy đã cài PWA không cần thầy/học sinh phải xoá cài lại hay bấm gì cả.
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloaded) return;
+    reloaded = true;
+    location.reload();
+  });
 }
 if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = () => {};

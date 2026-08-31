@@ -6,9 +6,14 @@
 // để vừa nhiều kiến thức vừa đúng bản chất môn học.
 
 export const VN_LEVELS = [
-  { id: "l45",   label: "Lớp 4–5",   sub: "Làm quen",     ready: true  },
-  { id: "l69",   label: "Lớp 6–9",   sub: "Trung học CS", ready: true  },
-  { id: "l1012", label: "Lớp 10–12", sub: "Trung học PT", ready: false },
+  { id: "l45", label: "Lớp 4–5",  sub: "Làm quen",       ready: true  },
+  { id: "l6",  label: "Lớp 6",    sub: "Địa lí 6",        ready: false },
+  { id: "l7",  label: "Lớp 7",    sub: "Địa lí 7",        ready: false },
+  { id: "l8",  label: "Lớp 8",    sub: "Tự nhiên VN",     ready: true  },
+  { id: "l9",  label: "Lớp 9",    sub: "Dân cư & kinh tế",ready: true  },
+  { id: "l10", label: "Lớp 10",   sub: "Địa lí 10",       ready: false },
+  { id: "l11", label: "Lớp 11",   sub: "Địa lí 11",       ready: false },
+  { id: "l12", label: "Lớp 12",   sub: "VN chuyên sâu",   ready: true  },
 ];
 
 function place(id, title, subtitle, body, facts) {
@@ -202,6 +207,13 @@ const c1 = {
         { t: "mapclick", q: "Bấm vào Cần Thơ.", targetType: "province", targetId: "can-tho" },
         { t: "match", q: "Nối thành phố với miền của nó.",
           pairs: [["Hà Nội", "Miền Bắc"], ["Huế", "Miền Trung"], ["Cần Thơ", "Miền Nam"]] },
+        { t: "drag", q: "Kéo mỗi thành phố vào đúng miền.",
+          buckets: ["Miền Bắc", "Miền Trung", "Miền Nam"],
+          items: [
+            { label: "Hà Nội", bucket: 0 }, { label: "Hải Phòng", bucket: 0 },
+            { label: "Đà Nẵng", bucket: 1 }, { label: "Huế", bucket: 1 },
+            { label: "TP. Hồ Chí Minh", bucket: 2 }, { label: "Cần Thơ", bucket: 2 },
+          ] },
         { t: "choice", q: "Thành phố nào từng là kinh đô triều Nguyễn?", options: ["Huế", "Hải Phòng", "Cần Thơ", "TP.HCM"], answer: 0 },
         { t: "choice", q: "Thành phố nào đông dân nhất Việt Nam?", options: ["TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Huế"], answer: 0 },
         { t: "order", q: "Sắp xếp 3 thành phố sau theo diện tích tăng dần.", items: ["Hà Nội", "Cần Thơ", "Đà Nẵng"] },
@@ -219,12 +231,12 @@ const c1 = {
 // nguyên văn từ bất kỳ trang giáo án nào.
 
 const c2 = {
-  id: "vn-l69-c1",
+  id: "vn-l8-c1",
   title: "Tự nhiên Việt Nam",
   icon: "pin",
   lessons: [
     {
-      id: "vn-l69-c1-l1",
+      id: "vn-l8-c1-l1",
       title: "Vị trí & phạm vi lãnh thổ",
       goal: "Vị trí địa lí và ý nghĩa của nó với tự nhiên, kinh tế",
       teach: [
@@ -249,7 +261,7 @@ const c2 = {
       ],
     },
     {
-      id: "vn-l69-c1-l2",
+      id: "vn-l8-c1-l2",
       title: "Địa hình Việt Nam",
       goal: "Đặc điểm chung và các khu vực địa hình",
       teach: [
@@ -273,7 +285,7 @@ const c2 = {
       ],
     },
     {
-      id: "vn-l69-c1-l3",
+      id: "vn-l8-c1-l3",
       title: "Khí hậu, sông ngòi & biển đảo",
       goal: "Nhiệt đới ẩm gió mùa, mạng lưới sông và Biển Đông",
       teach: [
@@ -296,7 +308,7 @@ const c2 = {
       ],
     },
     {
-      id: "vn-l69-c1-l4",
+      id: "vn-l8-c1-l4",
       title: "Ôn tập chương",
       checkpoint: true,
       goal: "Ôn lại vị trí, địa hình, khí hậu, sông ngòi và biển đảo Việt Nam",
@@ -309,18 +321,25 @@ const c2 = {
           pairs: [["Fansipan", "Vùng núi Tây Bắc"], ["Cao nguyên badan", "Trường Sơn Nam"], ["Quần đảo Hoàng Sa", "Đà Nẵng"]] },
         { t: "choice", q: "Sông ngòi Việt Nam có chế độ nước như thế nào?", options: ["Theo mùa", "Không đổi quanh năm", "Chỉ có nước vào mùa đông", "Không có lũ"], answer: 0 },
         { t: "order", q: "Sắp xếp theo diện tích tăng dần.", items: ["Đồng bằng ven biển miền Trung", "Đồng bằng sông Hồng", "Đồng bằng sông Cửu Long"] },
+        { t: "drag", q: "Kéo mỗi địa danh vào đúng miền.",
+          buckets: ["Miền Bắc", "Miền Trung", "Miền Nam"],
+          items: [
+            { label: "Sông Hồng", bucket: 0 }, { label: "Fansipan", bucket: 0 },
+            { label: "Sông Hương", bucket: 1 }, { label: "Quần đảo Hoàng Sa", bucket: 1 },
+            { label: "Sông Hậu", bucket: 2 }, { label: "Đồng bằng sông Cửu Long", bucket: 2 },
+          ] },
       ],
     },
   ],
 };
 
 const c3 = {
-  id: "vn-l69-c2",
+  id: "vn-l9-c1",
   title: "Dân cư & Kinh tế Việt Nam",
   icon: "pin",
   lessons: [
     {
-      id: "vn-l69-c2-l1",
+      id: "vn-l9-c1-l1",
       title: "Dân cư Việt Nam",
       goal: "Số dân, phân bố và các dân tộc",
       teach: [
@@ -342,7 +361,7 @@ const c3 = {
       ],
     },
     {
-      id: "vn-l69-c2-l2",
+      id: "vn-l9-c1-l2",
       title: "Các ngành kinh tế",
       goal: "Nông nghiệp, công nghiệp và dịch vụ",
       teach: [
@@ -365,7 +384,7 @@ const c3 = {
       ],
     },
     {
-      id: "vn-l69-c2-l3",
+      id: "vn-l9-c1-l3",
       title: "Các vùng kinh tế – xã hội",
       goal: "6 vùng kinh tế của Việt Nam",
       teach: [
@@ -389,7 +408,7 @@ const c3 = {
       ],
     },
     {
-      id: "vn-l69-c2-l4",
+      id: "vn-l9-c1-l4",
       title: "Ôn tập chương",
       checkpoint: true,
       goal: "Ôn lại dân cư, kinh tế và các vùng kinh tế Việt Nam",
@@ -401,6 +420,104 @@ const c3 = {
         { t: "match", q: "Nối vùng với thế mạnh.",
           pairs: [["Tây Nguyên", "Cà phê, cao su"], ["Đông Nam Bộ", "Công nghiệp năng động nhất"], ["Đồng bằng sông Hồng", "Vùng kinh tế trọng điểm phía Bắc"]] },
         { t: "choice", q: "Dân tộc nào chiếm đa số dân cư Việt Nam?", options: ["Kinh", "Tày", "Thái", "Khơ-me"], answer: 0 },
+        { t: "drag", q: "Kéo mỗi vùng kinh tế vào đúng miền.",
+          buckets: ["Miền Bắc", "Miền Trung", "Miền Nam"],
+          items: [
+            { label: "Trung du miền núi Bắc Bộ", bucket: 0 }, { label: "Đồng bằng sông Hồng", bucket: 0 },
+            { label: "Bắc Trung Bộ và DH miền Trung", bucket: 1 }, { label: "Tây Nguyên", bucket: 1 },
+            { label: "Đông Nam Bộ", bucket: 2 }, { label: "Đồng bằng sông Cửu Long", bucket: 2 },
+          ] },
+      ],
+    },
+  ],
+};
+
+// ===== Lớp 12 — theo mạch phần "Địa lí tự nhiên" (thiên nhiên phân hoá, sử dụng tài nguyên)
+// và "Địa lí các vùng kinh tế" của Địa lí 12: các vùng kinh tế trọng điểm.
+
+const c4 = {
+  id: "vn-l12-c1",
+  title: "Thiên nhiên phân hoá & Vùng kinh tế trọng điểm",
+  icon: "pin",
+  lessons: [
+    {
+      id: "vn-l12-c1-l1",
+      title: "Thiên nhiên phân hoá đa dạng",
+      goal: "Sự khác biệt tự nhiên theo Bắc – Nam, Đông – Tây và theo độ cao",
+      teach: [
+        { t: "intro", title: "Vì sao thiên nhiên Việt Nam không giống nhau khắp nơi?",
+          body: "Do lãnh thổ trải dài trên nhiều vĩ độ và có địa hình phức tạp, thiên nhiên Việt Nam phân hoá rất đa dạng theo nhiều chiều khác nhau, không nơi nào giống hệt nơi nào.",
+          bullets: ["Phân hoá Bắc – Nam: miền Bắc có mùa đông lạnh, miền Nam nóng quanh năm", "Phân hoá Đông – Tây: đồng bằng, trung du, miền núi khác biệt rõ rệt", "Phân hoá theo độ cao: càng lên cao khí hậu càng mát, xuất hiện đai cận nhiệt, ôn đới trên núi cao"] },
+        { t: "topic", kicker: "Phân hoá Bắc – Nam", title: "Ranh giới là dãy Bạch Mã",
+          body: "Dãy núi Bạch Mã (Thừa Thiên Huế cũ) được xem là ranh giới khí hậu quan trọng: phía Bắc chịu ảnh hưởng gió mùa Đông Bắc rõ rệt có mùa đông lạnh, phía Nam gió mùa Đông Bắc suy yếu, khí hậu nóng quanh năm.",
+          facts: [{ label: "Ranh giới", value: "Dãy Bạch Mã" }] },
+        { t: "topic", kicker: "Phân hoá theo độ cao", title: "Càng lên cao càng mát",
+          body: "Ở vùng núi cao như Hoàng Liên Sơn, khí hậu thay đổi rõ rệt theo độ cao: chân núi nhiệt đới, lên cao dần chuyển sang cận nhiệt rồi ôn đới núi cao — vì vậy Sa Pa, Đà Lạt có khí hậu mát mẻ quanh năm dù nằm trong vùng nhiệt đới.",
+          facts: [{ label: "Ví dụ", value: "Sa Pa, Đà Lạt mát quanh năm" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Dãy núi nào được xem là ranh giới khí hậu Bắc – Nam của Việt Nam?", options: ["Bạch Mã", "Hoàng Liên Sơn", "Trường Sơn Bắc", "Tam Đảo"], answer: 0 },
+        { t: "choice", q: "Vì sao Sa Pa, Đà Lạt mát mẻ quanh năm dù ở vùng nhiệt đới?", options: ["Vì nằm ở địa hình núi cao", "Vì gần biển", "Vì có nhiều hồ", "Vì nhiều gió mùa Đông Bắc"], answer: 0 },
+        { t: "truefalse", q: "Thiên nhiên Việt Nam phân hoá đa dạng theo cả Bắc – Nam, Đông – Tây và độ cao.", answer: true },
+        { t: "choice", q: "Phía Nam dãy Bạch Mã có đặc điểm khí hậu gì?", options: ["Nóng quanh năm, ít chịu ảnh hưởng gió mùa Đông Bắc", "Có mùa đông lạnh rõ rệt", "Băng tuyết quanh năm", "Khô hạn quanh năm"], answer: 0 },
+      ],
+    },
+    {
+      id: "vn-l12-c1-l2",
+      title: "Sử dụng hợp lí tài nguyên & bảo vệ môi trường",
+      goal: "Vấn đề khai thác tài nguyên thiên nhiên bền vững",
+      teach: [
+        { t: "topic", kicker: "Tài nguyên đất & rừng", title: "Khai thác đi đôi với bảo vệ",
+          body: "Đất và rừng là hai tài nguyên quan trọng nhưng đang chịu áp lực suy giảm do khai thác quá mức, chuyển đổi mục đích sử dụng. Trồng rừng, phủ xanh đất trống đồi trọc là giải pháp quan trọng để phục hồi tài nguyên.",
+          facts: [{ label: "Thách thức", value: "Suy giảm diện tích rừng" }, { label: "Giải pháp", value: "Trồng rừng, phủ xanh" }] },
+        { t: "topic", kicker: "Tài nguyên nước & biển", title: "Bảo vệ nguồn nước, khai thác biển bền vững",
+          body: "Ô nhiễm nguồn nước và khai thác hải sản quá mức đang là vấn đề đáng lo ngại. Phát triển kinh tế biển gắn với bảo vệ môi trường biển, hạn chế đánh bắt gần bờ, đẩy mạnh đánh bắt xa bờ và nuôi trồng bền vững.",
+          facts: [{ label: "Vấn đề", value: "Ô nhiễm nước, đánh bắt quá mức" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Giải pháp nào giúp phục hồi tài nguyên rừng đã suy giảm?", options: ["Trồng rừng, phủ xanh đất trống đồi trọc", "Chặt thêm rừng", "Đốt rừng làm rẫy", "Không cần giải pháp gì"], answer: 0 },
+        { t: "truefalse", q: "Khai thác hải sản quá mức gần bờ là vấn đề đáng lo ngại hiện nay.", answer: true },
+        { t: "choice", q: "Phát triển kinh tế biển bền vững cần đi kèm với điều gì?", options: ["Bảo vệ môi trường biển", "Khai thác không giới hạn", "Bỏ qua ô nhiễm", "Ngừng đánh bắt hoàn toàn"], answer: 0 },
+      ],
+    },
+    {
+      id: "vn-l12-c1-l3",
+      title: "Các vùng kinh tế trọng điểm",
+      goal: "Ba vùng kinh tế trọng điểm dẫn dắt tăng trưởng cả nước",
+      teach: [
+        { t: "intro", title: "Đầu tàu kinh tế của cả nước",
+          body: "Vùng kinh tế trọng điểm là khu vực hội tụ đầy đủ điều kiện thuận lợi, có tốc độ tăng trưởng kinh tế nhanh, đóng góp lớn vào GDP cả nước, giữ vai trò đầu tàu lôi kéo các vùng khác cùng phát triển.",
+          bullets: ["Vùng kinh tế trọng điểm Bắc Bộ (quanh Hà Nội, Hải Phòng, Quảng Ninh)", "Vùng kinh tế trọng điểm miền Trung (quanh Đà Nẵng, Huế)", "Vùng kinh tế trọng điểm phía Nam (quanh TP.HCM — lớn và năng động nhất)"] },
+        { t: "topic", kicker: "Trọng điểm phía Nam", title: "Vùng có quy mô kinh tế lớn nhất cả nước",
+          body: "Vùng kinh tế trọng điểm phía Nam, hạt nhân là TP. Hồ Chí Minh, đóng góp tỉ trọng GDP lớn nhất trong ba vùng trọng điểm, mạnh về công nghiệp, dịch vụ và thu hút đầu tư nước ngoài.",
+          facts: [{ label: "Hạt nhân", value: "TP. Hồ Chí Minh" }, { label: "Đặc điểm", value: "Quy mô lớn nhất" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Việt Nam hiện có mấy vùng kinh tế trọng điểm?", options: ["3", "6", "63", "1"], answer: 0 },
+        { t: "choice", q: "Vùng kinh tế trọng điểm phía Nam có hạt nhân là thành phố nào?", options: ["TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ"], answer: 0 },
+        { t: "match", q: "Nối vùng kinh tế trọng điểm với thành phố hạt nhân.",
+          pairs: [["Trọng điểm Bắc Bộ", "Hà Nội"], ["Trọng điểm miền Trung", "Đà Nẵng"], ["Trọng điểm phía Nam", "TP. Hồ Chí Minh"]] },
+        { t: "truefalse", q: "Vùng kinh tế trọng điểm phía Nam có quy mô kinh tế lớn nhất trong ba vùng.", answer: true },
+      ],
+    },
+    {
+      id: "vn-l12-c1-l4",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại thiên nhiên phân hoá và các vùng kinh tế trọng điểm",
+      quiz: [
+        { t: "choice", q: "Dãy núi nào là ranh giới khí hậu Bắc – Nam?", options: ["Bạch Mã", "Hoàng Liên Sơn", "Trường Sơn", "Tam Đảo"], answer: 0 },
+        { t: "choice", q: "Việt Nam có mấy vùng kinh tế trọng điểm?", options: ["3", "6", "34", "63"], answer: 0 },
+        { t: "choice", q: "Vùng kinh tế trọng điểm phía Nam có hạt nhân là đâu?", options: ["TP. Hồ Chí Minh", "Hà Nội", "Cần Thơ", "Huế"], answer: 0 },
+        { t: "truefalse", q: "Càng lên núi cao, khí hậu càng mát mẻ hơn.", answer: true },
+        { t: "choice", q: "Giải pháp nào giúp phục hồi tài nguyên rừng?", options: ["Trồng rừng, phủ xanh đất trống", "Khai thác thêm", "Đốt rừng", "Không làm gì"], answer: 0 },
+        { t: "drag", q: "Kéo mỗi thành phố vào đúng vùng kinh tế trọng điểm.",
+          buckets: ["Trọng điểm Bắc Bộ", "Trọng điểm miền Trung", "Trọng điểm phía Nam"],
+          items: [
+            { label: "Hà Nội", bucket: 0 }, { label: "Hải Phòng", bucket: 0 },
+            { label: "Đà Nẵng", bucket: 1 }, { label: "Huế", bucket: 1 },
+            { label: "TP. Hồ Chí Minh", bucket: 2 }, { label: "Cần Thơ", bucket: 2 },
+          ] },
       ],
     },
   ],
@@ -408,5 +525,14 @@ const c3 = {
 
 export const VN_COURSE = {
   subject: "vn",
-  levels: { l45: { chapters: [c1] }, l69: { chapters: [c2, c3] }, l1012: { chapters: [] } },
+  levels: {
+    l45: { chapters: [c1] },
+    l6:  { chapters: [] },
+    l7:  { chapters: [] },
+    l8:  { chapters: [c2] },
+    l9:  { chapters: [c3] },
+    l10: { chapters: [] },
+    l11: { chapters: [] },
+    l12: { chapters: [c4] },
+  },
 };
