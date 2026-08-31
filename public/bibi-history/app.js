@@ -373,8 +373,9 @@ function openLesson(id){
 function closeLesson(){ $("#lessonOverlay").hidden = true; LP=null; TABS.find(t=>t.id===S.tab).render(); }
 
 function kindLabel(slide){
-  return {intro:"Mở đầu", fact:"Kiến thức", marker:"Biển sử liệu", heritage:"Góc di sản", "quiz-mc":"Câu hỏi", "quiz-fill":"Điền vào chỗ trống"}[slide.type] || "";
+  return {intro:"Mở đầu", fact:"Kiến thức", marker:"Biển sử liệu", heritage:"Góc di sản", "quiz-mc":"Câu hỏi", "quiz-fill":"Điền vào chỗ trống", "quiz-match":"Kéo thả ghép đôi"}[slide.type] || "";
 }
+function shuffleArr(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function renderHearts(){
   let h="";
   for(let i=0;i<5;i++) h += i<LP.hearts ? ICON.heart : ICON.heart.replace('<svg ','<svg class="lost" ');
@@ -418,6 +419,16 @@ function renderSlide(){
       <div class="blank-sentence">${sentenceHtml}</div>
       <div class="wordbank">${slide.bank.map((w,i)=>`<button class="chip" data-w="${i}">${w}</button>`).join("")}</div>`;
     footer = `<button class="btn-primary" id="checkBtn" disabled>Kiểm tra</button>`;
+  } else if(slide.type==="quiz-match"){
+    const leftOrder = shuffleArr(slide.pairs.map((_,i)=>i));
+    const rightOrder = shuffleArr(slide.pairs.map((_,i)=>i));
+    body = `<h3 style="font-size:1.05rem; margin-bottom:2px; text-align:center;">${slide.instruction || "Kéo thả để nối đúng cặp"}</h3>
+      <p class="match-hint">Giữ và kéo thẻ bên trái sang đúng ô mô tả bên phải</p>
+      <div class="match-wrap">
+        <div class="match-col" id="matchSource">${leftOrder.map(i=>`<div class="match-chip" data-key="${i}">${slide.pairs[i].left}</div>`).join("")}</div>
+        <div class="match-col" id="matchTarget">${rightOrder.map(i=>`<div class="match-slot" data-key="${i}">${slide.pairs[i].right}</div>`).join("")}</div>
+      </div>`;
+    footer = `<button class="btn-primary" id="nextBtn" disabled>Tiếp theo</button>`;
   }
 
   $("#lessonOverlay").innerHTML = `
@@ -437,7 +448,58 @@ function renderSlide(){
 
   if(slide.type==="quiz-mc") wireQuizMC(slide);
   else if(slide.type==="quiz-fill") wireQuizFill(slide);
-  else $("#nextBtn").addEventListener("click", advance);
+  else {
+    $("#nextBtn").addEventListener("click", advance);
+    if(slide.type==="quiz-match") wireQuizMatch(slide);
+  }
+}
+
+function wireQuizMatch(slide){
+  const total = slide.pairs.length;
+  let placed = 0;
+  const nextBtn = $("#nextBtn");
+  document.querySelectorAll(".match-chip").forEach(chip=>{
+    chip.addEventListener("pointerdown", e=>{
+      if(chip.classList.contains("placed")) return;
+      chip.setPointerCapture(e.pointerId);
+      const rect = chip.getBoundingClientRect();
+      const offX = e.clientX - rect.left, offY = e.clientY - rect.top;
+      chip.classList.add("dragging");
+      chip.style.width = rect.width + "px";
+      chip.style.left = rect.left + "px";
+      chip.style.top = rect.top + "px";
+      chip.style.pointerEvents = "none"; // để elementFromPoint thấy được ô thả bên dưới, không bị chính thẻ đang kéo che mất
+
+      function move(ev){
+        chip.style.left = (ev.clientX - offX) + "px";
+        chip.style.top = (ev.clientY - offY) + "px";
+        document.querySelectorAll(".match-slot").forEach(s=>s.classList.remove("over"));
+        const under = document.elementFromPoint(ev.clientX, ev.clientY);
+        const slot = under && under.closest(".match-slot");
+        if(slot && !slot.classList.contains("filled")) slot.classList.add("over");
+      }
+      function up(ev){
+        chip.removeEventListener("pointermove", move);
+        chip.removeEventListener("pointerup", up);
+        document.querySelectorAll(".match-slot").forEach(s=>s.classList.remove("over"));
+        const under = document.elementFromPoint(ev.clientX, ev.clientY);
+        const slot = under && under.closest(".match-slot");
+        chip.classList.remove("dragging");
+        chip.style.left = ""; chip.style.top = ""; chip.style.width = ""; chip.style.pointerEvents = "";
+        if(slot && !slot.classList.contains("filled") && slot.getAttribute("data-key")===chip.getAttribute("data-key")){
+          slot.classList.add("filled");
+          chip.classList.add("placed");
+          placed++;
+          if(placed===total){ LP.xpGain += 10; nextBtn.disabled = false; }
+        } else {
+          chip.classList.add("shake");
+          setTimeout(()=>chip.classList.remove("shake"), 400);
+        }
+      }
+      chip.addEventListener("pointermove", move);
+      chip.addEventListener("pointerup", up);
+    });
+  });
 }
 
 function advance(){

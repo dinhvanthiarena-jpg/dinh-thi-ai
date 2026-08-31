@@ -28,7 +28,7 @@ const GRADES = [
       { title:"6 chủ đề theo vùng miền đất nước", scope:"vn", nodes:[
         {id:"g4-0-0", title:"Địa phương em"},
         {id:"g4-0-1", title:"Trung du và miền núi Bắc Bộ"},
-        {id:"g4-0-2", title:"Đồng bằng Bắc Bộ — Văn Lang, Âu Lạc"},
+        {id:"g4-0-2", title:"Đồng bằng Bắc Bộ — Văn Lang, Âu Lạc", authored:true},
         {id:"g4-0-3", title:"Duyên hải miền Trung — Chăm-pa, cố đô Huế"},
         {id:"g4-0-4", title:"Tây Nguyên"},
         {id:"g4-0-5", title:"Nam Bộ"},
@@ -44,7 +44,7 @@ const GRADES = [
         {id:"g5-0-3", title:"Dân cư và dân tộc ở Việt Nam"},
       ]},
       { title:"Những quốc gia đầu tiên trên lãnh thổ Việt Nam", scope:"vn", nodes:[
-        {id:"g5-1-0", title:"Nhà nước Văn Lang, Nhà nước Âu Lạc"},
+        {id:"g5-1-0", title:"Nhà nước Văn Lang, Nhà nước Âu Lạc", authored:true},
         {id:"g5-1-1", title:"Vương quốc Phù Nam"},
         {id:"g5-1-2", title:"Vương quốc Chăm-pa"},
         {id:"g5-1-3", title:"Đấu tranh giành độc lập thời kì Bắc thuộc"},
@@ -111,7 +111,7 @@ const GRADES = [
         {id:"g7-3-1", title:"Đại Cồ Việt thời Đinh và Tiền Lê (968–1009)"},
       ]},
       { title:"Đại Việt thời Lý – Trần – Hồ (1009–1407)", scope:"vn", nodes:[
-        {id:"g7-4-0", title:"Nhà Lý (1009–1225)"},
+        {id:"g7-4-0", title:"Nhà Lý (1009–1225)", authored:true},
         {id:"g7-4-1", title:"Kháng chiến chống Tống (1075–1077)"},
         {id:"g7-4-2", title:"Đại Việt thời Trần (1226–1400)"},
         {id:"g7-4-3", title:"Ba lần kháng chiến chống Mông – Nguyên"},
@@ -128,7 +128,7 @@ const GRADES = [
     chapters:[
       { title:"Cách mạng tư sản & sự xác lập CNTB", scope:"tg", nodes:[
         {id:"g8-0-0", title:"Cách mạng tư sản Anh & 13 thuộc địa Bắc Mỹ"},
-        {id:"g8-0-1", title:"Cách mạng tư sản Pháp cuối TK XVIII"},
+        {id:"g8-0-1", title:"Cách mạng tư sản Pháp cuối TK XVIII", authored:true},
       ]},
       { title:"Chủ nghĩa đế quốc & phong trào công nhân", scope:"tg", nodes:[
         {id:"g8-1-0", title:"Sự hình thành CNĐQ ở Âu – Mỹ"},
@@ -162,7 +162,7 @@ const GRADES = [
       ]},
       { title:"Việt Nam (1918–1945)", scope:"vn", nodes:[
         {id:"g9-3-0", title:"Phong trào dân tộc dân chủ (1918–1930)"},
-        {id:"g9-3-1", title:"Nguyễn Ái Quốc & thành lập Đảng Cộng sản Việt Nam"},
+        {id:"g9-3-1", title:"Nguyễn Ái Quốc & thành lập Đảng Cộng sản Việt Nam", authored:true},
         {id:"g9-3-2", title:"Phong trào cách mạng (1930–1939)"},
       ]},
       { title:"Cách mạng khoa học – kĩ thuật & toàn cầu hoá", scope:"both", nodes:[
@@ -196,7 +196,7 @@ const GRADES = [
       ]},
       { title:"Văn minh Việt Nam (trước 1858) & cộng đồng dân tộc", scope:"vn", nodes:[
         {id:"g10-4-0", title:"Các nền văn minh cổ trên đất nước Việt Nam"},
-        {id:"g10-4-1", title:"Văn minh Đại Việt"},
+        {id:"g10-4-1", title:"Văn minh Đại Việt", authored:true},
         {id:"g10-4-2", title:"Đời sống cộng đồng các dân tộc Việt Nam"},
       ]},
     ]},
@@ -219,7 +219,7 @@ const GRADES = [
       ]},
       { title:"Các cuộc cải cách lớn trong lịch sử Việt Nam", scope:"vn", nodes:[
         {id:"g11-3-0", title:"Cải cách của Hồ Quý Ly & triều Hồ (đầu TK XV)"},
-        {id:"g11-3-1", title:"Cải cách của Lê Thánh Tông (TK XV)"},
+        {id:"g11-3-1", title:"Cải cách của Lê Thánh Tông (TK XV)", authored:true},
         {id:"g11-3-2", title:"Cải cách của Minh Mạng (nửa đầu TK XIX)"},
       ]},
       { title:"Làng xã Việt Nam & Biển Đông", scope:"vn", nodes:[
@@ -237,7 +237,7 @@ const GRADES = [
         {id:"g12-0-2", title:"Cộng đồng ASEAN: từ ý tưởng đến hiện thực"},
       ]},
       { title:"CMT8 1945, kháng chiến & bảo vệ Tổ quốc", scope:"vn", nodes:[
-        {id:"g12-1-0", title:"Cách mạng tháng Tám năm 1945"},
+        {id:"g12-1-0", title:"Cách mạng tháng Tám năm 1945", authored:true},
         {id:"g12-1-1", title:"Kháng chiến chống thực dân Pháp (1945–1954)"},
         {id:"g12-1-2", title:"Kháng chiến chống Mỹ, cứu nước (1954–1975)"},
         {id:"g12-1-3", title:"Đấu tranh bảo vệ Tổ quốc từ sau 4/1975 đến nay"},

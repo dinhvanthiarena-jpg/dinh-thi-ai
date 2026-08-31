@@ -105,10 +105,10 @@ app.use(methodOverride('_method'));
 // middleware below for the same issue on dynamic routes) and browsers can
 // keep serving an old cached copy to phones that already installed the PWA,
 // so a fix never reaches them until they uninstall/reinstall.
-// Same applies to /english-air (the English-learning PWA), so both app shells
-// are matched by one pattern here.
+// Same applies to /english-air (the English-learning PWA) and /bibi-history
+// (the history-learning PWA), so all app shells are matched by one pattern here.
 const PWA_SHELL_FILES =
-  /\/(game|english-air)\/(index\.html|app\.js|style\.css|sw\.js|course(-[ab]\d)?\.js|manifest\.(json|webmanifest))$/;
+  /\/(game|english-air|bibi-history)\/(index\.html|app\.js|style\.css|sw\.js|grades-data\.js|course(-[ab]\d|-lop\d+)?\.js|manifest\.(json|webmanifest))$/;
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, filePath) => {
     if (PWA_SHELL_FILES.test(filePath.replace(/\\/g, '/'))) {

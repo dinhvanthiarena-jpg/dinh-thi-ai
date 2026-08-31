@@ -122,6 +122,11 @@ Object.assign(window.LESSONS, {
     {type:"fact", icon:"crown", meta:"Nhân vật · Hùng Vương", title:"Nhà nước Văn Lang", text:"Vua Hùng lập ra nước Văn Lang — nhà nước đầu tiên của người Việt, kinh đô ở Phong Châu (nay thuộc Phú Thọ). Vua chia đất nước làm 15 bộ; đứng đầu mỗi bộ là Lạc tướng, giúp việc vua ở trung ương có các Lạc hầu."},
     {type:"fact", icon:"pyramid", meta:"Sự kiện · An Dương Vương", title:"Nước Âu Lạc và thành Cổ Loa", text:"Năm 208 TCN, Thục Phán hợp nhất bộ lạc Âu Việt và Lạc Việt, lập nước Âu Lạc, xưng là An Dương Vương, đóng đô ở Cổ Loa (nay thuộc Đông Anh, Hà Nội) — một thành có cấu trúc ba vòng hình xoáy trôn ốc rất độc đáo thời cổ đại."},
     {type:"heritage", icon:"drum", title:"Giỗ Tổ Hùng Vương", text:"\"Dù ai đi ngược về xuôi / Nhớ ngày giỗ Tổ mùng mười tháng ba.\" Mỗi năm vào 10/3 âm lịch, người Việt khắp nơi hướng về Đền Hùng (Phú Thọ) tưởng nhớ công lao dựng nước của các Vua Hùng — Tín ngưỡng thờ cúng Hùng Vương đã được UNESCO công nhận là Di sản văn hoá phi vật thể đại diện của nhân loại."},
+    {type:"quiz-match", instruction:"Nối nhân vật với vai trò của họ", pairs:[
+      {left:"Hùng Vương", right:"Vua nước Văn Lang"},
+      {left:"An Dương Vương", right:"Vua nước Âu Lạc"},
+      {left:"Lạc tướng", right:"Đứng đầu một bộ của Văn Lang"},
+    ]},
     {type:"quiz-mc", q:"Kinh đô của nước Văn Lang đặt ở đâu?", options:["Phong Châu","Cổ Loa","Thăng Long","Hoa Lư"], correct:0},
     {type:"quiz-fill", sentence:["Thục Phán hợp nhất Âu Việt và Lạc Việt, lập nước ",", đóng đô ở thành ","."], blanks:["Âu Lạc","Cổ Loa"], bank:["Âu Lạc","Cổ Loa","Văn Lang","Phong Châu"]},
   ]},

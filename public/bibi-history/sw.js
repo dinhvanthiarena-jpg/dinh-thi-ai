@@ -3,7 +3,7 @@
    Toàn bộ app chạy offline sau lần mở đầu tiên.
    Đổi CACHE khi sửa file để buộc tải lại bản mới.
    ============================================================ */
-const CACHE = "bibi-history-v1";
+const CACHE = "bibi-history-v2";
 
 const SHELL = [
   "./",
@@ -11,7 +11,15 @@ const SHELL = [
   "./style.css",
   "./app.js",
   "./grades-data.js",
+  "./course-lop4.js",
+  "./course-lop5.js",
   "./course-lop6.js",
+  "./course-lop7.js",
+  "./course-lop8.js",
+  "./course-lop9.js",
+  "./course-lop10.js",
+  "./course-lop11.js",
+  "./course-lop12.js",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
