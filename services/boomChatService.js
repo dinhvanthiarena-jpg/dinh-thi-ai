@@ -170,6 +170,22 @@ Nếu bạn học nêu một con số KHÁC ${verifiedAnswer}, hoặc không nê
 chỉ dùng đúng con số ${verifiedAnswer} này làm chuẩn.` : ''}`;
 }
 
+// Phần "luật chơi" (mọi thứ TRƯỚC mục CHỐT CHO LƯỢT NÀY) giống hệt nhau ở mọi
+// lượt trong cùng một cuộc gọi — chỉ phần CHỐT (ngôn ngữ ép buộc, đáp án đã
+// kiểm chứng) đổi theo từng lượt. Tách ra để đánh dấu cache_control: phần lặp
+// lại chỉ bị tính ~10% giá token đầu vào từ lượt thứ 2 trở đi trong cùng cuộc
+// gọi, thay vì tính đủ giá mỗi lượt như trước — không đổi một chữ nào trong
+// nội dung prompt, chỉ đổi cách đóng gói khi gửi lên Anthropic.
+function toCacheableSystem(fullPrompt) {
+  const marker = '\n\n════ CHỐT CHO LƯỢT NÀY';
+  const idx = fullPrompt.indexOf(marker);
+  if (idx === -1) return fullPrompt;
+  return [
+    { type: 'text', text: fullPrompt.slice(0, idx), cache_control: { type: 'ephemeral' } },
+    { type: 'text', text: fullPrompt.slice(idx) },
+  ];
+}
+
 /** Cắt gọn lịch sử hội thoại trước khi gửi lên API. */
 function trimHistory(history) {
   if (!Array.isArray(history)) return [];
@@ -256,7 +272,7 @@ async function reply({ history, grade, pendingAnswer }) {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      system: buildSystemPrompt(grade, forced, verifiedAnswer),
+      system: toCacheableSystem(buildSystemPrompt(grade, forced, verifiedAnswer)),
       messages,
     }),
   });
