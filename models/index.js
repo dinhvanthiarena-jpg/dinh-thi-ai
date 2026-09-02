@@ -17,6 +17,8 @@ const ProOrder = require('./ProOrder');
 const MonlTienDo = require('./MonlTienDo');
 const PageView = require('./PageView');
 const AffiliateClick = require('./AffiliateClick');
+const BattlePlayer = require('./BattlePlayer');
+const BattleMatch = require('./BattleMatch');
 
 Course.hasMany(Lesson, { foreignKey: 'CourseId', onDelete: 'CASCADE' });
 Lesson.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
@@ -67,4 +69,6 @@ module.exports = {
   MonlTienDo,
   PageView,
   AffiliateClick,
+  BattlePlayer,
+  BattleMatch,
 };

@@ -112,8 +112,8 @@ function load() {
   // lần thôi — sau đó ai tự chọn giọng nào là giữ nguyên giọng ấy.
   // Đặt lại giọng tiếng Anh về Daniel — bình thường. Để số ở đây để sau này
   // muốn áp lại một lần nữa thì chỉ việc tăng số lên.
-  if ((s.giongChot || 0) < 3) {
-    s.giongChot = 3;
+  if ((s.giongChot || 0) < 4) {
+    s.giongChot = 4;
     s.kidVoice = false;
     if (s.giong && s.giong.en) delete s.giong.en;
   }
@@ -253,11 +253,12 @@ function luaChonGiong(goc) {
 const GIONG_NU = /female|linh|hoaimy|serena|kate|sonia|libby|hazel|samantha|victoria|karen|moira|fiona|tessa|zira|susan|catherine|amy|emma|joanna|salli/i;
 /* Giọng ưu tiên khi người dùng chưa tự chọn. Thầy chốt tiếng Anh dùng Daniel
    (giọng nam Anh Quốc) — nghe đằm và rõ phụ âm cuối hơn mấy giọng nữ máy. */
-const GIONG_CHOT = { en: /\bdaniel\b/i };
-/* Tiếng Anh đã chốt Daniel — giọng NAM. Nếu tiếng Việt lại lấy giọng nữ thì
-   thành hai người thay nhau nói, không còn ra một nhân vật nữa. Nên máy nào có
-   giọng Việt nam thì lấy giọng nam. Máy chỉ có mỗi giọng nữ (iPhone chỉ có
-   Linh) thì đành chịu, vẫn hơn là đọc sai tiếng. */
+/* Thầy chốt giọng tiếng Anh là Moira. Moira là giọng NỮ, mã en-IE (Ireland)
+   chứ không phải en-GB — nên chỗ tìm giọng phải nhận cả tiếng Anh của nước
+   khác, không được bó cứng vào en-GB. */
+const GIONG_CHOT = { en: /\bmoira\b/i };
+/* Tiếng Anh chốt Moira — giọng nữ. Tiếng Việt cũng lấy giọng nữ (Linh trên
+   iPhone), nghe ra cùng một người chứ không phải hai người thay nhau nói. */
 /* Apple cài sẵn cả một họ giọng "vui nhộn" — Rocko, Sandy, Shelley, Grandma,
    Grandpa… Chúng nằm chung danh sách với giọng đọc thật nean máy dễ vớ phải.
    Để dạy học thì không dùng được: nghe như nhân vật hoạt hình, sai cả trọng âm. */
@@ -265,7 +266,6 @@ const GIONG_TRO = /\b(rocko|sandy|shelley|grandma|grandpa|flo|eddy|reed|bubbles|
 /** Bỏ giọng vui nhộn ra. Hết sạch thì đành giữ nguyên, còn hơn không có gì. */
 const locTro = ds => { const t = ds.filter(v => !GIONG_TRO.test(v.name)); return t.length ? t : ds; };
 
-const GIONG_NAM = /\b(male|an|nam|minh)\b|standard-(b|d)|wavenet-(b|d)/i;
 
 function voiceFor(tag) {
   const muon = chuanTag(tag);
@@ -289,10 +289,6 @@ function voiceFor(tag) {
   }
   // Không có giọng đã chốt thì vẫn phải tránh họ giọng vui nhộn.
   const maThat = locTro(dungMa), gocThat = locTro(pool);
-  if (goc === "vi") {
-    const nam = maThat.find(v => GIONG_NAM.test(v.name)) || gocThat.find(v => GIONG_NAM.test(v.name));
-    if (nam) return nam;
-  }
   const nu = ds => ds.find(v => GIONG_NU.test(v.name));
   // Khớp đúng mã và là giọng nữ là tốt nhất; rồi tới khớp đúng mã; rồi giọng nữ
   // cùng gốc; cuối cùng lấy tạm cái gì có.
@@ -4433,7 +4429,9 @@ function veDongGiong(goc) {
   // Ghi rõ giọng nước nào: "Daniel · Anh" khác hẳn "Samantha · Mỹ", nhìn là biết
   // ngay máy có đúng giọng bản ngữ mình muốn hay chỉ có giọng thay thế.
   o.textContent = tenGiong(v) + " · " + nuocCuaGiong(v.lang) + (ch.uri && kieu ? " — " + kieu.ten : "");
-  o.classList.toggle("thieu", goc === "en" && chuanTag(v.lang) !== "en-gb");
+  // Moira là en-IE, Daniel là en-GB, Samantha là en-US — đều là tiếng Anh thật.
+  // Chỉ báo thiếu khi máy KHÔNG có giọng tiếng Anh nào cả.
+  o.classList.toggle("thieu", goc === "en" && !chuanTag(v.lang).startsWith("en"));
 }
 
 /** Đổi mã ngôn ngữ thành tên nước cho dễ đọc. */
