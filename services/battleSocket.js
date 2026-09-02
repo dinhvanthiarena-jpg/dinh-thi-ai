@@ -244,8 +244,9 @@ module.exports = function attachBattleSocket(io) {
         if (typeof ack === 'function') ack({ ok: false });
         return;
       }
-      const correctAnswer = state.problems[player.index].answer;
-      const isCorrect = Number(payload?.value) === correctAnswer;
+      const currentProblem = state.problems[player.index];
+      if (!currentProblem) { if (typeof ack === 'function') ack({ ok: false }); return; }
+      const isCorrect = Number(payload?.value) === currentProblem.answer;
       if (isCorrect) player.score += 1;
       player.index += 1;
 
