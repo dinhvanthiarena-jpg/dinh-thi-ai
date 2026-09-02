@@ -1099,10 +1099,17 @@ const TEACH = {
       if (g.vi) ex.append(el("small", null, g.vi));
       const loa = el("span", "grow-loa"); loa.append(icon("i-sound", "ic ic-sm"));
       row.append(el("div", "gform", g.label), ex, loa);
-      row.addEventListener("click", () => docLanLuot([
-        { text: g.en, lang: "en-GB" },
-        g.vi ? { text: g.vi, lang: "vi-VN" } : null,
-      ].filter(Boolean)));
+      // KHÔNG tin tên trường g.en/g.vi — đo từ "Excuse me" phát hiện đúng
+      // 84/289 hàng kiểu [nhãn, ghi chú Việt, ví dụ Anh] thì grammarRow() gán
+      // NGƯỢC: g.en lại là ghi chú tiếng Việt, g.vi lại là câu ví dụ tiếng Anh — đọc
+      // đúng thành sai giọng hoàn toàn. Giữ nguyên chỗ hiển thị (b/small không
+      // đổi), chỉ sai khi đọc to. Giờ tự dò tiếng theo nội dung thật, và theo đúng
+      // yêu cầu của thầy — phần giảng giải này chỉ đọc tiếng Anh, bỏ tiếng Việt.
+      row.addEventListener("click", () => docLanLuot(
+        [g.en, g.vi].filter(Boolean)
+          .map(t => ({ text: t, lang: tiengCua(t) }))
+          .filter(k => k.lang !== "vi-VN")
+      ));
       // Hàng là nút nghe, nên nút micro phải nằm ngoài hàng chứ không lồng vào
       // trong — nút trong nút thì trình duyệt không cho.
       const boc = el("div", "grow-boc");
