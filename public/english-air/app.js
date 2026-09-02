@@ -1124,21 +1124,14 @@ const TEACH = {
       tip.addEventListener("click", () => docLanLuot(chiAnh(catTieng(boDanhDau(d.tip)))));
       st.append(tip);
     }
-    // Vào slide là giảng luôn. Thầy dặn: bỏ tiếng Việt đi, chỉ đọc
-    // tiếng Anh trong đó thôi — phần giảng giải đỏc bằng mắt, không đọc to.
-    docLanLuot(chiAnh([
-      ...catTieng(d.title),
-      ...catTieng(boDanhDau(d.body)),
-    ]));
+    // Thầy dặn bỏ luôn: không tự đọc khi vừa mở màn hình nữa, chỉ đọc
+    // khi tự tay bấm "Nghe lại" (nút đó nằm trong signpost()) — đọc giảng giải
+    // bằng mắt là đủ.
   },
 
   culture(d, st) {
     showMascot(false); setKicker("Góc văn hoá");
     st.append(signpost(d.title, d.body, "i-globe"));
-    docLanLuot(chiAnh([
-      ...catTieng(d.title),
-      ...catTieng(boDanhDau(d.body)),
-    ]));
   },
 
   dialogue(d, st) {
