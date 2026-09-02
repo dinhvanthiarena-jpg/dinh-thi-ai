@@ -2666,7 +2666,38 @@ button:focus-visible,
 }
 .battle-side { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 70px; }
 .battle-side-opp { align-items: flex-end; }
+.battle-avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.05rem;
+  color: #fff;
+  box-shadow: var(--sh-1);
+  margin-bottom: 2px;
+}
+.battle-online-dot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--ok);
+  border: 2px solid var(--bg);
+  animation: battle-online-pulse 1.6s ease-in-out infinite;
+}
+@keyframes battle-online-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
+  50% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
+}
 .battle-name { font-family: var(--font-heading); font-weight: 700; font-size: 0.78rem; color: var(--muted-fg); }
+.battle-rank { font-family: var(--font-heading); font-weight: 700; font-size: 0.65rem; color: var(--amber); background: var(--amber-soft); border-radius: var(--rf); padding: 1px 8px; }
 .battle-score { font-family: var(--font-heading); font-weight: 900; font-size: 1.6rem; color: var(--fg); }
 .battle-timer {
   font-family: var(--font-heading);
@@ -2694,24 +2725,34 @@ button:focus-visible,
 .battle-progress-theirs .battle-progress-fill { background: var(--heart); }
 
 .battle-result-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
-  padding: 60px 20px;
+  padding: 40px 20px;
   text-align: center;
   box-sizing: border-box;
+  gap: 4px;
 }
 .battle-result-title {
   font-family: var(--font-heading);
   font-weight: 900;
   font-size: 2.2rem;
-  margin: 0 0 10px;
+  margin: 0 0 14px;
   color: var(--ok-ink);
 }
 .battle-result-title.lose { color: var(--bad-ink); }
 .battle-result-title.draw { color: var(--amber); }
-.battle-result-scores { font-family: var(--font-heading); font-weight: 800; font-size: 1.1rem; color: var(--fg); margin: 0 0 18px; }
-.battle-result-rewards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
+.battle-result-players { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 18px; }
+.battle-result-player { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 90px; }
+.battle-result-player .battle-avatar { width: 54px; height: 54px; font-size: 1.3rem; }
+.battle-result-player .battle-score { font-size: 1.5rem; }
+.battle-result-vs { font-family: var(--font-heading); font-weight: 800; font-size: 1.1rem; color: var(--muted-fg); }
+.battle-result-rewards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 22px; }
 .battle-result-rewards span {
   font-family: var(--font-heading);
   font-weight: 800;
@@ -2722,7 +2763,7 @@ button:focus-visible,
   border-radius: var(--rf);
   box-shadow: var(--sh-1);
 }
-.battle-result-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.battle-result-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 20px; }
 .battle-result-actions .btn-xl { width: 100%; max-width: 280px; }
 
 /* ==== Responsive ==== */

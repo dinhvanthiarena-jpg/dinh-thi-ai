@@ -88,21 +88,28 @@ module.exports = function attachBattleSocket(io) {
     const state = { matchId, mode, grade, problems, startedAt, players, timer: null, ended: false };
     matches.set(matchId, state);
 
+    // Hạng (tier) của từng người để hiển thị bên cạnh avatar/tên trên màn
+    // đấu — lấy 1 lần cho cả trận thay vì mỗi client tự query riêng.
+    const tierRecords = await BattlePlayer.findAll({ where: { installId: entries.map((e) => e.installId) } });
+    const tierMap = {};
+    tierRecords.forEach((r) => { tierMap[r.installId] = r.tier || 0; });
+    const withTier = (x) => ({ displayName: x.displayName, installId: x.installId, tier: tierMap[x.installId] || 0, tierName: TIER_NAMES[tierMap[x.installId] || 0] });
+
     const publicProblems = problems.map((p) => ({ text: p.text, choices: p.choices }));
     entries.forEach((e) => {
       const socket = io.sockets.sockets.get(e.socketId);
       if (!socket) return;
       socket.join(matchId);
       socket.data.matchId = matchId;
-      const teammates = entries.filter((x) => x.team === e.team && x.installId !== e.installId).map((x) => x.displayName);
-      const opponents = entries.filter((x) => x.team !== e.team).map((x) => x.displayName);
+      const teammates = entries.filter((x) => x.team === e.team && x.installId !== e.installId).map(withTier);
+      const opponents = entries.filter((x) => x.team !== e.team).map(withTier);
       socket.emit('match:found', {
         matchId,
         mode,
         grade,
         problems: publicProblems,
         durationMs: MATCH_DURATION_MS,
-        me: { displayName: e.displayName, team: e.team },
+        me: { ...withTier(e), team: e.team },
         teammates,
         opponents,
       });

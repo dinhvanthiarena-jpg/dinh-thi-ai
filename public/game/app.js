@@ -1945,9 +1945,33 @@
   const battleOppScoreEl = $('battleOppScore');
   const battleMeNameEl = $('battleMeName');
   const battleOppNameEl = $('battleOppName');
+  const battleMeRankEl = $('battleMeRank');
+  const battleOppRankEl = $('battleOppRank');
+  const battleMeAvatarInitial = $('battleMeAvatarInitial');
+  const battleOppAvatarInitial = $('battleOppAvatarInitial');
+  const battleMeAvatar = $('battleMeAvatar');
+  const battleOppAvatar = $('battleOppAvatar');
   const battleTimerEl = $('battleTimer');
   const battleMeFillEl = $('battleMeFill');
   const battleOppFillEl = $('battleOppFill');
+
+  // Avatar chữ cái đầu + màu theo hash — không có ảnh đại diện thật (không
+  // yêu cầu tài khoản/ảnh cho trẻ nhỏ), nhưng vẫn phân biệt được 2 người
+  // chơi kể cả khi cả hai đều để tên mặc định "Bạn chơi" giống hệt nhau.
+  const BATTLE_AVATAR_COLORS = ['var(--heart)', 'var(--flame)', 'var(--amber-fill)', 'var(--ok)', 'var(--g2)', 'var(--g3)', 'var(--g6)', 'var(--g7)', 'var(--g8)', 'var(--g9)'];
+  // Cùng thứ tự với BATTLE_AVATAR_COLORS ở trên, dạng mã hex — canvas (dùng
+  // để vẽ ảnh chia sẻ kết quả) không đọc được biến CSS var(--x).
+  const BATTLE_AVATAR_COLORS_HEX = ['#FB7185', '#FF9A4D', '#F59E0B', '#22C55E', '#3B82F6', '#A855F7', '#14B8A6', '#6366F1', '#EC4899', '#84CC16'];
+  function battleAvatarColorIndex(seed) {
+    let h = 0;
+    const s = seed || 'x';
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h % BATTLE_AVATAR_COLORS.length;
+  }
+  function battleSetAvatar(avatarEl, initialEl, seed, letter) {
+    initialEl.textContent = (letter || '?').trim().charAt(0).toUpperCase() || '?';
+    avatarEl.style.background = BATTLE_AVATAR_COLORS[battleAvatarColorIndex(seed || letter)];
+  }
 
   let battleSocket = null;
   let battleMode = '1v1';
@@ -1956,6 +1980,7 @@
   let battleRoomCode = null;
   let battleMyTeam = 0;
   let battleCurrentMatch = null; // { matchId, problems, index, timerId }
+  let battleMatchMeta = null; // { mode, meName, meSeed, meLetter, meTierName, oppName, oppSeed, oppLetter, oppTierName }
 
   battleNameInput.value = localStorage.getItem('tvc_playerName') || '';
 
@@ -2119,13 +2144,32 @@
     battleRoomCode = null;
     battleMyTeam = data.me.team;
     battleCurrentMatch = { matchId: data.matchId, problems: data.problems, index: 0, timerId: null };
+    // Lưu lại tên/avatar/hạng để dùng lại ở màn kết quả — gói tin match:end
+    // lúc trận kết thúc không có tên người chơi, chỉ có điểm số.
     if (data.mode === '2v2') {
-      battleMeNameEl.textContent = 'Đội bạn' + (data.teammates && data.teammates[0] ? ' + ' + data.teammates[0] : '');
-      battleOppNameEl.textContent = 'Đội đối thủ' + (data.opponents && data.opponents.length ? ': ' + data.opponents.join(', ') : '');
+      battleMatchMeta = {
+        mode: '2v2',
+        meName: 'Đội bạn' + (data.teammates && data.teammates[0] ? ' + ' + data.teammates[0].displayName : ''),
+        meSeed: 'team-me', meLetter: 'Đ', meTierName: null,
+        oppName: 'Đội đối thủ' + (data.opponents && data.opponents.length ? ': ' + data.opponents.map((o) => o.displayName).join(', ') : ''),
+        oppSeed: 'team-opp', oppLetter: 'Đ', oppTierName: null,
+      };
     } else {
-      battleMeNameEl.textContent = data.me.displayName;
-      battleOppNameEl.textContent = (data.opponents && data.opponents[0]) || 'Đối thủ';
+      const opp = (data.opponents && data.opponents[0]) || { displayName: 'Đối thủ', tierName: null, installId: 'opp' };
+      battleMatchMeta = {
+        mode: '1v1',
+        meName: data.me.displayName, meSeed: data.me.installId, meLetter: data.me.displayName, meTierName: data.me.tierName || null,
+        oppName: opp.displayName, oppSeed: opp.installId, oppLetter: opp.displayName, oppTierName: opp.tierName || null,
+      };
     }
+    battleMeNameEl.textContent = battleMatchMeta.meName;
+    battleOppNameEl.textContent = battleMatchMeta.oppName;
+    battleSetAvatar(battleMeAvatar, battleMeAvatarInitial, battleMatchMeta.meSeed, battleMatchMeta.meLetter);
+    battleSetAvatar(battleOppAvatar, battleOppAvatarInitial, battleMatchMeta.oppSeed, battleMatchMeta.oppLetter);
+    battleMeRankEl.hidden = !battleMatchMeta.meTierName;
+    battleMeRankEl.textContent = battleMatchMeta.meTierName || '';
+    battleOppRankEl.hidden = !battleMatchMeta.oppTierName;
+    battleOppRankEl.textContent = battleMatchMeta.oppTierName || '';
     battleMeScoreEl.textContent = '0';
     battleOppScoreEl.textContent = '0';
     battleMeFillEl.style.width = '0%';
@@ -2191,6 +2235,15 @@
     }
   }
 
+  const battleResultMeName = $('battleResultMeName');
+  const battleResultOppName = $('battleResultOppName');
+  const battleResultMeScore = $('battleResultMeScore');
+  const battleResultOppScore = $('battleResultOppScore');
+  const battleResultMeAvatar = $('battleResultMeAvatar');
+  const battleResultMeAvatarInitial = $('battleResultMeAvatarInitial');
+  const battleResultOppAvatar = $('battleResultOppAvatar');
+  const battleResultOppAvatarInitial = $('battleResultOppAvatarInitial');
+
   function battleOnMatchEnd(data) {
     const m = battleCurrentMatch;
     if (m && m.timerId) clearInterval(m.timerId);
@@ -2200,7 +2253,15 @@
     if (data.outcome === 'win') { titleEl.textContent = 'Thắng rồi! 🎉'; sfx.win(); }
     else if (data.outcome === 'lose') { titleEl.textContent = 'Thua rồi, cố lên nhé!'; titleEl.classList.add('lose'); }
     else { titleEl.textContent = 'Hòa!'; titleEl.classList.add('draw'); }
-    $('battleResultScores').textContent = `Bạn ${data.myScore} — ${data.opponentScore} Đối thủ`;
+
+    const meta = battleMatchMeta || { meName: 'Bạn', meSeed: 'me', meLetter: 'B', oppName: 'Đối thủ', oppSeed: 'opp', oppLetter: 'Đ' };
+    battleResultMeName.textContent = meta.meName;
+    battleResultOppName.textContent = meta.oppName;
+    battleResultMeScore.textContent = String(data.myScore);
+    battleResultOppScore.textContent = String(data.opponentScore);
+    battleSetAvatar(battleResultMeAvatar, battleResultMeAvatarInitial, meta.meSeed, meta.meLetter);
+    battleSetAvatar(battleResultOppAvatar, battleResultOppAvatarInitial, meta.oppSeed, meta.oppLetter);
+
     const rewardsEl = $('battleResultRewards');
     rewardsEl.innerHTML = '';
     const chip = (text) => { const s = document.createElement('span'); s.textContent = text; rewardsEl.appendChild(s); };
@@ -3269,6 +3330,117 @@
     // works fine here since there's no native app to hijack the link.
     const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
     window.location.href = fbShareUrl;
+  });
+
+  // Ảnh "khoe" kết quả Thách Đấu — cùng cách làm với buildResultShareImage
+  // ở trên (chơi thường), vẽ avatar+tên+điểm 2 bên thay vì sao/chuỗi.
+  function buildBattleResultShareImage() {
+    const width = 720, height = 720;
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+    bgGrad.addColorStop(0, '#1B0B33');
+    bgGrad.addColorStop(0.5, '#2A1350');
+    bgGrad.addColorStop(1, '#3A1A66');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, width, height);
+    for (let i = 0; i < 50; i++) {
+      ctx.fillStyle = `rgba(255,255,255,${0.15 + Math.random() * 0.5})`;
+      ctx.beginPath();
+      ctx.arc(Math.random() * width, Math.random() * height, Math.random() * 1.4 + 0.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.textAlign = 'center';
+    ctx.font = '900 30px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#FFD98F';
+    ctx.fillText('THÁCH ĐẤU · MON-MATHS', width / 2, 80);
+
+    const titleEl = $('battleResultTitle');
+    ctx.font = '900 52px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = titleEl.classList.contains('lose') ? '#FB7185' : titleEl.classList.contains('draw') ? '#FBBF24' : '#4ADE80';
+    ctx.fillText(titleEl.textContent, width / 2, 160);
+
+    const meta = battleMatchMeta || { meName: 'Bạn', meSeed: 'me', meLetter: 'B', oppName: 'Đối thủ', oppSeed: 'opp', oppLetter: 'Đ' };
+    const drawAvatar = (cx, cy, r, seed, letter) => {
+      ctx.beginPath();
+      ctx.fillStyle = BATTLE_AVATAR_COLORS_HEX[battleAvatarColorIndex(seed || letter)];
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.font = `900 ${Math.round(r * 0.9)}px "Segoe UI", system-ui, sans-serif`;
+      ctx.fillStyle = '#fff';
+      ctx.textBaseline = 'middle';
+      ctx.fillText((letter || '?').trim().charAt(0).toUpperCase() || '?', cx, cy + 2);
+      ctx.textBaseline = 'alphabetic';
+    };
+    const leftX = width / 2 - 150, rightX = width / 2 + 150, avatarY = 300, r = 58;
+    drawAvatar(leftX, avatarY, r, meta.meSeed, meta.meLetter);
+    drawAvatar(rightX, avatarY, r, meta.oppSeed, meta.oppLetter);
+
+    ctx.font = '700 22px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    const truncName = (s) => (s.length > 16 ? s.slice(0, 15) + '…' : s);
+    ctx.fillText(truncName(meta.meName), leftX, avatarY + 92);
+    ctx.fillText(truncName(meta.oppName), rightX, avatarY + 92);
+
+    ctx.font = '900 60px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.fillText(battleResultMeScore.textContent, leftX, avatarY + 160);
+    ctx.fillText(battleResultOppScore.textContent, rightX, avatarY + 160);
+
+    ctx.font = '900 34px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillText('—', width / 2, avatarY + 150);
+
+    const rewardChips = [...$('battleResultRewards').children].map((c) => c.textContent);
+    if (rewardChips.length) {
+      ctx.font = '700 24px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = '#FFD98F';
+      ctx.fillText(rewardChips.join('   ·   '), width / 2, avatarY + 230);
+    }
+
+    ctx.font = '700 20px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fillText('Chơi tại 3dvietpro.com/game', width / 2, height - 40);
+
+    return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+  }
+
+  $('btnBattleShareFacebook').addEventListener('click', async () => {
+    sfx.click();
+    if (window.electronAPI) {
+      const el = $('battleResultCapture');
+      const r = el.getBoundingClientRect();
+      openBrowserPicker(
+        { urlKind: 'facebook-home' },
+        'Chọn trình duyệt để mở Facebook. Ảnh kết quả sẽ tự copy sẵn — thầy chỉ cần bấm vào khung viết bài rồi nhấn Ctrl+V để dán ảnh vào nhé!',
+        { x: r.x, y: r.y, width: r.width, height: r.height }
+      );
+      return;
+    }
+    const shareText = `Con vừa đấu ${battleResultMeScore.textContent} — ${battleResultOppScore.textContent} trong Thách Đấu Mon-Maths! Cùng đấu thử nhé!`;
+    const shareUrl = window.location.origin + window.location.pathname;
+
+    let imageFile = null;
+    try {
+      const blob = await buildBattleResultShareImage();
+      if (blob) imageFile = new File([blob], 'ket-qua-thach-dau.png', { type: 'image/png' });
+    } catch (e) { /* canvas unavailable — fall back to text-only share */ }
+
+    if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+      try {
+        await navigator.share({ files: [imageFile], title: 'Mon-Maths', text: shareText });
+      } catch (e) { /* user cancelled */ }
+      return;
+    }
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Mon-Maths', text: shareText, url: shareUrl }); } catch (e) { /* user cancelled */ }
+      return;
+    }
+    const fbShareUrl2 = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+    window.location.href = fbShareUrl2;
   });
 
   $('btnResultHome').addEventListener('click', () => { sfx.click(); showScreen('home'); });

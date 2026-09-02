@@ -501,12 +501,22 @@
   <section id="screen-battle-live" class="screen">
     <div class="battle-live-hud">
       <div class="battle-side battle-side-me">
+        <div class="battle-avatar" id="battleMeAvatar" aria-hidden="true">
+          <span class="battle-avatar-initial" id="battleMeAvatarInitial">B</span>
+          <span class="battle-online-dot" title="Đang online"></span>
+        </div>
         <span class="battle-name" id="battleMeName">Bạn</span>
+        <span class="battle-rank" id="battleMeRank" hidden></span>
         <span class="battle-score" id="battleMeScore">0</span>
       </div>
       <div class="battle-timer" id="battleTimer">90</div>
       <div class="battle-side battle-side-opp">
+        <div class="battle-avatar" id="battleOppAvatar" aria-hidden="true">
+          <span class="battle-avatar-initial" id="battleOppAvatarInitial">Đ</span>
+          <span class="battle-online-dot" title="Đang online"></span>
+        </div>
         <span class="battle-name" id="battleOppName">Đối thủ</span>
+        <span class="battle-rank" id="battleOppRank" hidden></span>
         <span class="battle-score" id="battleOppScore">0</span>
       </div>
     </div>
@@ -524,10 +534,26 @@
 
   <!-- SCREEN: THÁCH ĐẤU — kết quả -->
   <section id="screen-battle-result" class="screen">
-    <div class="battle-result-wrap">
+    <div class="battle-result-wrap" id="battleResultCapture">
       <h1 class="battle-result-title" id="battleResultTitle">Thắng!</h1>
-      <p class="battle-result-scores" id="battleResultScores"></p>
+      <div class="battle-result-players">
+        <div class="battle-result-player">
+          <div class="battle-avatar" id="battleResultMeAvatar" aria-hidden="true"><span class="battle-avatar-initial" id="battleResultMeAvatarInitial">B</span></div>
+          <span class="battle-name" id="battleResultMeName">Bạn</span>
+          <span class="battle-score" id="battleResultMeScore">0</span>
+        </div>
+        <span class="battle-result-vs">—</span>
+        <div class="battle-result-player">
+          <div class="battle-avatar" id="battleResultOppAvatar" aria-hidden="true"><span class="battle-avatar-initial" id="battleResultOppAvatarInitial">Đ</span></div>
+          <span class="battle-name" id="battleResultOppName">Đối thủ</span>
+          <span class="battle-score" id="battleResultOppScore">0</span>
+        </div>
+      </div>
       <div class="battle-result-rewards" id="battleResultRewards"></div>
+      <button class="contact-fb-btn share-fb-btn" id="btnBattleShareFacebook">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>
+        Chụp ảnh & chia sẻ kết quả
+      </button>
       <div class="battle-result-actions">
         <button class="btn btn-primary btn-xl" id="btnBattlePlayAgain">Chơi lại</button>
         <button class="btn btn-text" id="btnBattleResultHome">Về trang chủ</button>
