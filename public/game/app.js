@@ -553,6 +553,7 @@
   const $ = (id) => document.getElementById(id);
   const screens = {
     license: $('screen-license'), home: $('screen-home'), setup: $('screen-setup'), game: $('screen-game'), result: $('screen-result'), homework: $('screen-homework'), gifted: $('screen-gifted'), call: $('screen-call'), squad: $('screen-squad'),
+    battleSetup: $('screen-battle-setup'), battleLive: $('screen-battle-live'), battleResult: $('screen-battle-result'),
   };
   function showScreen(name) {
     Object.values(screens).forEach(s => s.classList.remove('active'));
@@ -1551,6 +1552,192 @@
     if (giftedCurrentGrade !== null) giftedShowGradePicker();
     else showScreen('home');
   });
+
+  /* ================= THÁCH ĐẤU (đấu trường 1v1 thời gian thực) =================
+   * Ghép cặp + tính điểm hoàn toàn ở server (services/battleSocket.js bên
+   * dinh-thi-ai) qua Socket.IO — client ở đây chỉ hiển thị và gửi lựa chọn,
+   * không tự chấm điểm, không biết đáp án đúng trước khi bấm. Xem
+   * services/battleProblemService.js cho việc sinh đề (lớp 1-9). */
+  const battleNameInput = $('battleNameInput');
+  const battleGradeRowTH = $('battleGradeRowTH');
+  const battleGradeRowTHCS = $('battleGradeRowTHCS');
+  const btnBattleFind = $('btnBattleFind');
+  const battleSetupWrap = $('battleSetupWrap');
+  const battleQueueWrap = $('battleQueueWrap');
+  const btnBattleCancelQueue = $('btnBattleCancelQueue');
+  const battleQuestionText = $('battleQuestionText');
+  const battleAnswersGrid = $('battleAnswersGrid');
+  const battleMeScoreEl = $('battleMeScore');
+  const battleOppScoreEl = $('battleOppScore');
+  const battleMeNameEl = $('battleMeName');
+  const battleOppNameEl = $('battleOppName');
+  const battleTimerEl = $('battleTimer');
+  const battleMeFillEl = $('battleMeFill');
+  const battleOppFillEl = $('battleOppFill');
+
+  let battleSocket = null;
+  let battleSelectedGrade = null;
+  let battleInQueue = false;
+  let battleCurrentMatch = null; // { matchId, problems, index, myScore, timerId }
+
+  battleNameInput.value = localStorage.getItem('tvc_playerName') || '';
+
+  function battleGetSocket() {
+    if (battleSocket) return battleSocket;
+    if (typeof io !== 'function') return null;
+    battleSocket = io({ path: '/socket.io/' });
+    battleSocket.on('match:found', battleOnMatchFound);
+    battleSocket.on('match:opponentProgress', battleOnOpponentProgress);
+    battleSocket.on('match:end', battleOnMatchEnd);
+    return battleSocket;
+  }
+
+  function battleSelectGrade(grade, btn) {
+    battleSelectedGrade = grade;
+    [...battleGradeRowTH.children, ...battleGradeRowTHCS.children].forEach((c) => c.classList.remove('selected'));
+    btn.classList.add('selected');
+    btnBattleFind.disabled = false;
+  }
+  battleGradeRowTH.addEventListener('click', (e) => {
+    const btn = e.target.closest('.grade-card');
+    if (!btn) return;
+    sfx.click();
+    battleSelectGrade(parseInt(btn.dataset.grade, 10), btn);
+  });
+  battleGradeRowTHCS.addEventListener('click', (e) => {
+    const btn = e.target.closest('.grade-card');
+    if (!btn) return;
+    sfx.click();
+    battleSelectGrade(parseInt(btn.dataset.grade, 10), btn);
+  });
+
+  function battleShowSetup() {
+    battleSelectedGrade = null;
+    btnBattleFind.disabled = true;
+    battleSetupWrap.hidden = false;
+    battleQueueWrap.hidden = true;
+    [...battleGradeRowTH.children, ...battleGradeRowTHCS.children].forEach((c) => c.classList.remove('selected'));
+  }
+  $('btnBattle').addEventListener('click', () => { sfx.click(); battleShowSetup(); showScreen('battleSetup'); });
+  $('btnBattleBack').addEventListener('click', () => { sfx.click(); battleLeaveQueue(); showScreen('home'); });
+
+  function battleLeaveQueue() {
+    if (battleInQueue && battleSocket) battleSocket.emit('queue:leave');
+    battleInQueue = false;
+  }
+  btnBattleCancelQueue.addEventListener('click', () => {
+    sfx.click();
+    battleLeaveQueue();
+    battleQueueWrap.hidden = true;
+    battleSetupWrap.hidden = false;
+  });
+
+  btnBattleFind.addEventListener('click', () => {
+    if (!battleSelectedGrade) return;
+    sfx.click();
+    const name = (battleNameInput.value || '').trim().slice(0, 24) || 'Bạn chơi';
+    localStorage.setItem('tvc_playerName', name);
+    const socket = battleGetSocket();
+    if (!socket) return; // trình duyệt chặn được socket.io.js — hiếm, im lặng bỏ qua
+    battleSetupWrap.hidden = true;
+    battleQueueWrap.hidden = false;
+    battleInQueue = true;
+    socket.emit('queue:join', { installId: webGetInstallId(), displayName: name, grade: battleSelectedGrade }, (ack) => {
+      if (!ack || !ack.ok) {
+        battleInQueue = false;
+        battleSetupWrap.hidden = false;
+        battleQueueWrap.hidden = true;
+      }
+    });
+  });
+
+  function battleOnMatchFound(data) {
+    battleInQueue = false;
+    battleCurrentMatch = { matchId: data.matchId, problems: data.problems, index: 0, myScore: 0, timerId: null };
+    battleMeNameEl.textContent = data.me.displayName;
+    battleOppNameEl.textContent = data.opponent.displayName;
+    battleMeScoreEl.textContent = '0';
+    battleOppScoreEl.textContent = '0';
+    battleMeFillEl.style.width = '0%';
+    battleOppFillEl.style.width = '0%';
+    showScreen('battleLive');
+    battleStartTimer(data.durationMs);
+    battleRenderQuestion();
+  }
+
+  function battleStartTimer(durationMs) {
+    const endsAt = Date.now() + durationMs;
+    const m = battleCurrentMatch;
+    clearInterval(m.timerId);
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+      battleTimerEl.textContent = left;
+      if (left <= 0) clearInterval(m.timerId);
+    };
+    tick();
+    m.timerId = setInterval(tick, 250);
+  }
+
+  function battleRenderQuestion() {
+    const m = battleCurrentMatch;
+    if (!m || m.index >= m.problems.length) return;
+    const p = m.problems[m.index];
+    battleQuestionText.textContent = p.text;
+    battleAnswersGrid.innerHTML = '';
+    p.choices.forEach((choice, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'answer-btn reveal';
+      btn.style.animationDelay = (i * 60) + 'ms';
+      btn.textContent = fmtNum(choice);
+      btn.addEventListener('click', () => battleSubmitAnswer(choice, btn));
+      battleAnswersGrid.appendChild(btn);
+    });
+  }
+
+  function battleSubmitAnswer(value, btn) {
+    const m = battleCurrentMatch;
+    if (!m || !battleSocket) return;
+    [...battleAnswersGrid.children].forEach((b) => { b.disabled = true; });
+    battleSocket.emit('answer:submit', { index: m.index, value }, (ack) => {
+      if (!ack || !ack.ok) { [...battleAnswersGrid.children].forEach((b) => { b.disabled = false; }); return; }
+      btn.classList.add(ack.correct ? 'correct' : 'wrong');
+      sfx[ack.correct ? 'correct' : 'wrong']();
+      m.myScore = ack.myScore;
+      battleMeScoreEl.textContent = m.myScore;
+      m.index = ack.nextIndex;
+      battleMeFillEl.style.width = Math.min(100, Math.round((m.index / m.problems.length) * 100)) + '%';
+      setTimeout(battleRenderQuestion, ack.correct ? 450 : 850);
+    });
+  }
+
+  function battleOnOpponentProgress(data) {
+    battleOppScoreEl.textContent = data.score;
+    if (battleCurrentMatch) {
+      battleOppFillEl.style.width = Math.min(100, Math.round((data.index / battleCurrentMatch.problems.length) * 100)) + '%';
+    }
+  }
+
+  function battleOnMatchEnd(data) {
+    const m = battleCurrentMatch;
+    if (m && m.timerId) clearInterval(m.timerId);
+    battleCurrentMatch = null;
+    const titleEl = $('battleResultTitle');
+    titleEl.className = 'battle-result-title';
+    if (data.outcome === 'win') { titleEl.textContent = 'Thắng rồi! 🎉'; sfx.win(); }
+    else if (data.outcome === 'lose') { titleEl.textContent = 'Thua rồi, cố lên nhé!'; titleEl.classList.add('lose'); }
+    else { titleEl.textContent = 'Hòa!'; titleEl.classList.add('draw'); }
+    $('battleResultScores').textContent = `Bạn ${data.myScore} — ${data.opponentScore} Đối thủ`;
+    const rewardsEl = $('battleResultRewards');
+    rewardsEl.innerHTML = '';
+    const chip = (text) => { const s = document.createElement('span'); s.textContent = text; rewardsEl.appendChild(s); };
+    if (data.rankDelta != null) chip((data.rankDelta >= 0 ? '+' : '') + data.rankDelta + ' điểm rank');
+    if (data.coinsDelta != null) chip('+' + data.coinsDelta + ' Xu Mon');
+    if (data.tierName) chip('Bậc: ' + data.tierName);
+    showScreen('battleResult');
+  }
+
+  $('btnBattlePlayAgain').addEventListener('click', () => { sfx.click(); battleShowSetup(); showScreen('battleSetup'); });
+  $('btnBattleResultHome').addEventListener('click', () => { sfx.click(); showScreen('home'); });
 
   /* ================= SETUP ================= */
   const gradeRow = $('gradeRow');

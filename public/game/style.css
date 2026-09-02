@@ -77,6 +77,11 @@
   --g3: #A855F7;
   --g4: #F0555A;
   --g5: #F59E0B;
+  /* Grade colors (6-9, THCS) — tiếp tục dải màu trên, không đụng g1-g5 */
+  --g6: #14B8A6;
+  --g7: #6366F1;
+  --g8: #EC4899;
+  --g9: #84CC16;
 
   --sh-1: 0 1px 2px rgba(0,0,0,.5);
   --sh-2: 0 4px 14px rgba(0,0,0,.55);
@@ -357,6 +362,9 @@ button:focus-visible,
   background: var(--card);
   color: var(--brand-ink);
   box-shadow: inset 0 0 0 2px var(--brand-soft), var(--sh-1);
+}
+.btn-battle {
+  background: linear-gradient(135deg, var(--flame), var(--heart));
 }
 
 /* Icon-only homework/call buttons */
@@ -856,6 +864,10 @@ button:focus-visible,
 .grade-card[data-grade="3"] { background: var(--g3); }
 .grade-card[data-grade="4"] { background: var(--g4); }
 .grade-card[data-grade="5"] { background: var(--g5); }
+.grade-card[data-grade="6"] { background: var(--g6); }
+.grade-card[data-grade="7"] { background: var(--g7); }
+.grade-card[data-grade="8"] { background: var(--g8); }
+.grade-card[data-grade="9"] { background: var(--g9); }
 .grade-card.selected {
   box-shadow: 0 0 0 3px var(--card), 0 0 0 6px currentColor;
 }
@@ -2529,9 +2541,123 @@ button:focus-visible,
   70% { box-shadow: 0 0 0 20px rgba(240,85,90,0); }
 }
 
+/* ==== Thách Đấu (đấu trường 1v1/2v2) ==== */
+.grade-row-4 { grid-template-columns: repeat(4, 1fr); }
+.battle-grade-group-label {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: var(--muted-fg);
+  margin: 18px 0 8px;
+  text-align: left;
+}
+.battle-setup-wrap {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.battle-name-input { width: 100%; margin-bottom: 20px; text-transform: none; letter-spacing: normal; font-size: 1rem; }
+.battle-setup-wrap .btn-start,
+.battle-setup-wrap #btnBattleFind { width: 100%; margin-top: 26px; }
+.battle-queue-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px 20px;
+  text-align: center;
+}
+.battle-queue-spinner {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 5px solid var(--muted);
+  border-top-color: var(--heart);
+  animation: battle-spin 0.9s linear infinite;
+}
+@keyframes battle-spin { to { transform: rotate(360deg); } }
+.battle-queue-text { font-family: var(--font-heading); font-weight: 700; color: var(--muted-fg); }
+
+.battle-live-hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  /* Cùng công thức chừa chỗ cho nút cài đặt/âm thanh cố định góc trên phải
+     đã dùng ở .game-hud — không thì tên/điểm đối thủ bị nút đè lên. */
+  padding: calc(18px + env(safe-area-inset-top, 0px)) calc(140px + env(safe-area-inset-right, 0px)) 0 calc(20px + env(safe-area-inset-left, 0px));
+}
+.battle-side { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 70px; }
+.battle-side-opp { align-items: flex-end; }
+.battle-name { font-family: var(--font-heading); font-weight: 700; font-size: 0.78rem; color: var(--muted-fg); }
+.battle-score { font-family: var(--font-heading); font-weight: 900; font-size: 1.6rem; color: var(--fg); }
+.battle-timer {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.3rem;
+  color: var(--heart);
+  background: var(--card);
+  border-radius: var(--rf);
+  padding: 6px 16px;
+  box-shadow: var(--sh-1);
+}
+.battle-progress-row {
+  width: 100%;
+  max-width: 480px;
+  margin: 10px auto 0;
+  padding: 0 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.battle-progress-bar { height: 8px; border-radius: var(--rf); background: var(--muted); overflow: hidden; }
+.battle-progress-fill { height: 100%; border-radius: var(--rf); width: 0%; transition: width 200ms ease-out; }
+.battle-progress-mine .battle-progress-fill { background: var(--ok); }
+.battle-progress-theirs .battle-progress-fill { background: var(--heart); }
+
+.battle-result-wrap {
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 60px 20px;
+  text-align: center;
+  box-sizing: border-box;
+}
+.battle-result-title {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 2.2rem;
+  margin: 0 0 10px;
+  color: var(--ok-ink);
+}
+.battle-result-title.lose { color: var(--bad-ink); }
+.battle-result-title.draw { color: var(--amber); }
+.battle-result-scores { font-family: var(--font-heading); font-weight: 800; font-size: 1.1rem; color: var(--fg); margin: 0 0 18px; }
+.battle-result-rewards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
+.battle-result-rewards span {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.9rem;
+  background: var(--card);
+  color: var(--brand-ink);
+  padding: 8px 16px;
+  border-radius: var(--rf);
+  box-shadow: var(--sh-1);
+}
+.battle-result-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.battle-result-actions .btn-xl { width: 100%; max-width: 280px; }
+
 /* ==== Responsive ==== */
 @media (max-width: 700px) {
   .grade-row { grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .grade-row-4 { grid-template-columns: repeat(4, 1fr); }
   .op-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .grade-card, .op-card { padding: 10px 4px; font-size: 0.75rem; }
   .grade-num { width: 34px; height: 34px; font-size: 1.05rem; }

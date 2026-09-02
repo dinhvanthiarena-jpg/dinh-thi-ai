@@ -98,6 +98,10 @@
           <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3zm0 12.5L4.24 9 12 4.5 19.76 9 12 15.5zM5 13.18v4.5L12 21l7-3.32v-4.5L12 17l-7-3.82z"/></svg>
           Ôn học sinh giỏi
         </button>
+        <button class="btn btn-battle btn-xl" id="btnBattle" aria-label="Thách Đấu">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+          Thách Đấu
+        </button>
       </div>
       <div class="home-secondary-actions">
         <button class="btn-homework-icon" id="btnOpenHomework" aria-label="Chụp bài tập, AI giảng bài">
@@ -237,12 +241,6 @@
             <span class="mode-icon"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path fill="currentColor" d="M15 1H9v2h6zm-4 13h2V8h-2zm8.03-6.61l1.42-1.42a12.7 12.7 0 0 0-1.41-1.41l-1.42 1.42A9 9 0 1 0 20.94 12H23a11 11 0 1 1-3.97-8.61zM12 20a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/></svg></span>
             <span class="mode-title">Thử thách</span>
             <span class="mode-desc">Trả lời thật nhanh trong 60 giây</span>
-          </button>
-          <button class="mode-card mode-card-soon" type="button" disabled aria-disabled="true">
-            <span class="mode-icon"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path fill="currentColor" d="M5 4h14v2h-2v1a5 5 0 0 1-4 4.9V15h3v2H8v-2h3v-3.1A5 5 0 0 1 7 7V6H5V4zm2 2v1a3 3 0 0 0 2 2.83V6H7zm8 0h-2v2.83A3 3 0 0 0 15 7V6z"/></svg></span>
-            <span class="mode-title">Giải đấu</span>
-            <span class="mode-desc">Thi đấu với người chơi khác</span>
-            <span class="soon-badge">Sắp ra mắt</span>
           </button>
         </div>
       </div>
@@ -433,6 +431,83 @@
         </div>
       </div>
       <div class="gifted-problem-list" id="giftedProblemList" hidden></div>
+    </div>
+  </section>
+
+  <!-- SCREEN: THÁCH ĐẤU — chọn lớp / tìm đối thủ -->
+  <section id="screen-battle-setup" class="screen">
+    <div class="topbar">
+      <button class="icon-btn" id="btnBattleBack" aria-label="Quay lại">
+        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/></svg>
+      </button>
+      <h2 class="topbar-title">Thách Đấu</h2>
+      <div style="width:44px"></div>
+    </div>
+
+    <div class="battle-setup-wrap" id="battleSetupWrap">
+      <p class="setup-label">Tên của con là gì?</p>
+      <input type="text" id="battleNameInput" class="license-input battle-name-input" maxlength="24" placeholder="Nhập tên để đối thủ biết nhé" autocomplete="off" spellcheck="false" />
+      <p class="setup-label">Con học lớp mấy?</p>
+      <p class="battle-grade-group-label">Tiểu học</p>
+      <div class="grade-row" id="battleGradeRowTH">
+        <button class="grade-card" data-grade="1"><span class="grade-num">1</span><span>Lớp 1</span></button>
+        <button class="grade-card" data-grade="2"><span class="grade-num">2</span><span>Lớp 2</span></button>
+        <button class="grade-card" data-grade="3"><span class="grade-num">3</span><span>Lớp 3</span></button>
+        <button class="grade-card" data-grade="4"><span class="grade-num">4</span><span>Lớp 4</span></button>
+        <button class="grade-card" data-grade="5"><span class="grade-num">5</span><span>Lớp 5</span></button>
+      </div>
+      <p class="battle-grade-group-label">THCS</p>
+      <div class="grade-row grade-row-4" id="battleGradeRowTHCS">
+        <button class="grade-card" data-grade="6"><span class="grade-num">6</span><span>Lớp 6</span></button>
+        <button class="grade-card" data-grade="7"><span class="grade-num">7</span><span>Lớp 7</span></button>
+        <button class="grade-card" data-grade="8"><span class="grade-num">8</span><span>Lớp 8</span></button>
+        <button class="grade-card" data-grade="9"><span class="grade-num">9</span><span>Lớp 9</span></button>
+      </div>
+      <button class="btn btn-primary btn-xl" id="btnBattleFind" disabled>Tìm đối thủ</button>
+    </div>
+
+    <div class="battle-queue-wrap" id="battleQueueWrap" hidden>
+      <div class="battle-queue-spinner" aria-hidden="true"></div>
+      <p class="battle-queue-text">Đang tìm đối thủ cùng lớp...</p>
+      <button class="btn btn-text" id="btnBattleCancelQueue">Hủy tìm</button>
+    </div>
+  </section>
+
+  <!-- SCREEN: THÁCH ĐẤU — trận đấu trực tiếp -->
+  <section id="screen-battle-live" class="screen">
+    <div class="battle-live-hud">
+      <div class="battle-side battle-side-me">
+        <span class="battle-name" id="battleMeName">Bạn</span>
+        <span class="battle-score" id="battleMeScore">0</span>
+      </div>
+      <div class="battle-timer" id="battleTimer">90</div>
+      <div class="battle-side battle-side-opp">
+        <span class="battle-name" id="battleOppName">Đối thủ</span>
+        <span class="battle-score" id="battleOppScore">0</span>
+      </div>
+    </div>
+    <div class="battle-progress-row">
+      <div class="battle-progress-bar battle-progress-mine"><div class="battle-progress-fill" id="battleMeFill"></div></div>
+      <div class="battle-progress-bar battle-progress-theirs"><div class="battle-progress-fill" id="battleOppFill"></div></div>
+    </div>
+    <div class="game-stage">
+      <div class="question-card" id="battleQuestionCard">
+        <div class="question-text" id="battleQuestionText">…</div>
+      </div>
+      <div class="answers-grid" id="battleAnswersGrid"></div>
+    </div>
+  </section>
+
+  <!-- SCREEN: THÁCH ĐẤU — kết quả -->
+  <section id="screen-battle-result" class="screen">
+    <div class="battle-result-wrap">
+      <h1 class="battle-result-title" id="battleResultTitle">Thắng!</h1>
+      <p class="battle-result-scores" id="battleResultScores"></p>
+      <div class="battle-result-rewards" id="battleResultRewards"></div>
+      <div class="battle-result-actions">
+        <button class="btn btn-primary btn-xl" id="btnBattlePlayAgain">Chơi lại</button>
+        <button class="btn btn-text" id="btnBattleResultHome">Về trang chủ</button>
+      </div>
     </div>
   </section>
 
@@ -639,6 +714,7 @@
 
   <div id="confettiLayer" aria-hidden="true"></div>
 
+  <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
