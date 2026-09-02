@@ -15,11 +15,12 @@ function genByGradeOp(grade, op) {
   let a, b, ans, decimal = false;
   switch (grade) {
     // ---- Lớp 1-5: ported verbatim from web/app.js genByGradeOp ----
+    // Chương trình GDPT 2018: lớp 1 chưa học nhân/chia — oneProblem() bên
+    // dưới chỉ chọn op trong {add, sub} cho lớp 1 nên nhánh mul/div ở đây
+    // không còn được gọi tới, nhưng vẫn bỏ hẳn cho khớp với client.
     case 1:
       if (op === 'add') { a = randInt(1, 19); b = randInt(1, 20 - a); ans = a + b; }
-      else if (op === 'sub') { a = randInt(1, 20); b = randInt(1, a); ans = a - b; }
-      else if (op === 'mul') { a = randInt(1, 5); b = randInt(1, 5); ans = a * b; }
-      else { const d = randInt(1, 5), q = randInt(1, 5); a = d * q; b = d; ans = q; }
+      else { a = randInt(1, 20); b = randInt(1, a); ans = a - b; }
       break;
     case 2:
       if (op === 'add') { a = randInt(1, 99); b = randInt(1, 100 - a); ans = a + b; }
@@ -134,7 +135,9 @@ function fmtNum(n) {
  * numeric value (server keeps it, only sent back for grading, never to the
  * client ahead of a submission). */
 function oneProblem(grade) {
-  const op = OPS[randInt(0, OPS.length - 1)];
+  // Lớp 1 chưa học nhân/chia (GDPT 2018) — chỉ random giữa cộng/trừ.
+  const opsPool = grade === 1 ? ['add', 'sub'] : OPS;
+  const op = opsPool[randInt(0, opsPool.length - 1)];
   const q = genByGradeOp(grade, op);
   let text;
   if (grade === 8 && (op === 'add' || op === 'sub')) {

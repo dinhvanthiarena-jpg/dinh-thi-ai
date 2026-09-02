@@ -307,10 +307,11 @@
       case 1:
         // Neither operand is ever 0 for +/− (randInt starts at 1, not 0) —
         // "5 + 0" or "5 − 0" is trivial and not worth a practice slot.
+        // Chương trình GDPT 2018: lớp 1 CHƯA học nhân/chia — chỉ cộng trừ
+        // không nhớ trong phạm vi 10/20/100. UI (opRow) cũng ẩn 2 dạng này
+        // khi chọn lớp 1, nên nhánh mul/div ở đây không còn cần nữa.
         if (op === 'add') { a = randInt(1, 19); b = randInt(1, 20 - a); ans = a + b; }
-        else if (op === 'sub') { a = randInt(1, 20); b = randInt(1, a); ans = a - b; }
-        else if (op === 'mul') { a = randInt(1, 5); b = randInt(1, 5); ans = a * b; }
-        else { const d = randInt(1, 5), q = randInt(1, 5); a = d * q; b = d; ans = q; }
+        else { a = randInt(1, 20); b = randInt(1, a); ans = a - b; }
         break;
       case 2:
         if (op === 'add') { a = randInt(1, 99); b = randInt(1, 100 - a); ans = a + b; }
@@ -413,7 +414,7 @@
       return generateIconAlgebraQuestion(grade);
     }
 
-    const op = opChoice === 'mix' ? pick(['add', 'sub', 'mul', 'div']) : opChoice;
+    const op = opChoice === 'mix' ? pick(grade === 1 ? ['add', 'sub'] : ['add', 'sub', 'mul', 'div']) : opChoice;
     const { a, b, ans, decimal } = genByGradeOp(grade, op);
     const distractors = makeDistractors(ans, decimal, grade >= 6);
     const choices = [ans, ...distractors].sort(() => Math.random() - 0.5);
@@ -2279,6 +2280,8 @@
   const gradeRowTHCS = $('gradeRowTHCS');
   const opRow = $('opRow');
   const opWordCard = opRow.querySelector('[data-op="word"]');
+  const opMulCard = opRow.querySelector('[data-op="mul"]');
+  const opDivCard = opRow.querySelector('[data-op="div"]');
   const modeRow = $('modeRow');
   const bestBox = $('bestScoreBox');
   const btnStart = $('btnStartGame');
@@ -2354,6 +2357,15 @@
     [...gradeRow.children, ...gradeRowTHCS.children].forEach(c => c.classList.remove('selected'));
     btn.classList.add('selected');
     state.grade = parseInt(btn.dataset.grade, 10);
+    // Chương trình GDPT 2018: lớp 1 chưa học nhân/chia — ẩn 2 dạng này khi
+    // chọn lớp 1, hiện lại cho lớp 2 trở lên.
+    const isGrade1 = state.grade === 1;
+    opMulCard.hidden = isGrade1;
+    opDivCard.hidden = isGrade1;
+    if (isGrade1 && (state.op === 'mul' || state.op === 'div')) {
+      state.op = null;
+      [...opRow.children].forEach((c) => c.classList.remove('selected'));
+    }
     refreshBestBox();
   }
   gradeRow.addEventListener('click', onGradeCardClick);
