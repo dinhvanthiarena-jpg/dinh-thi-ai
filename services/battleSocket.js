@@ -1,12 +1,12 @@
-// Thach Dau (Mon-Maths 1v1 realtime battle) — Socket.IO event wiring.
-//
-// Scope note: this implements 1v1 only (Phase 1 of the approved plan).
-// 2v2 room-code play is Phase 2, not built yet — deliberately, to ship a
-// solid working 1v1 loop first rather than two half-finished modes.
+// Thach Dau (Mon-Maths realtime battle) — Socket.IO event wiring.
+// Unified match engine for BOTH modes: 1v1 (team size 1) and 2v2 (team
+// size 2, room-code based). A "match" is always team-vs-team internally;
+// 1v1 is just the team-size-1 special case, so winner/scoring logic is
+// shared instead of duplicated.
 //
 // State is kept in plain in-memory Maps (single Node process, no horizontal
 // scaling yet — see plan doc for when that becomes necessary). Restarting
-// the server drops any in-progress matches/queue, which is an acceptable
+// the server drops any in-progress matches/queue/rooms, an acceptable
 // trade-off for a casual kids' game, not a payments system.
 const crypto = require('crypto');
 const { generateBattleSet } = require('./battleProblemService');
@@ -14,7 +14,9 @@ const { BattlePlayer, BattleMatch } = require('../models');
 
 const MATCH_DURATION_MS = 90 * 1000;
 const PROBLEMS_PER_MATCH = 30; // generous — time runs out before this does
-const GRADE_WAIT_EXPAND_MS = 8000; // widen to ±1 grade if queue is thin this long
+const GRADE_WAIT_EXPAND_MS = 8000; // widen to ±1 grade if 1v1 queue is thin
+const ROOM_SIZE_2V2 = 4;
+const ROOM_STALE_MS = 20 * 60 * 1000; // abandoned rooms cleaned up after 20 min
 
 const TIER_NAMES = ['Đồng', 'Bạc', 'Vàng', 'Bạch Kim', 'Kim Cương'];
 const POINTS_PER_TIER = 100;
@@ -36,11 +38,26 @@ async function getOrCreatePlayer(installId, displayName, grade) {
   return player;
 }
 
+function makeRoomCode(existing) {
+  let code;
+  do { code = String(Math.floor(1000 + Math.random() * 9000)); } while (existing.has(code));
+  return code;
+}
+
 module.exports = function attachBattleSocket(io) {
   // 1v1 FIFO queue, per grade: { socketId, installId, displayName, grade, queuedAt }
   const queue1v1 = [];
+  // 2v2 rooms waiting to fill: code -> { grade, hostInstallId, members: [...], createdAt }
+  const rooms = new Map();
   // Active matches: matchId -> match state
   const matches = new Map();
+
+  setInterval(() => {
+    const now = Date.now();
+    for (const [code, room] of rooms) {
+      if (now - room.createdAt > ROOM_STALE_MS) rooms.delete(code);
+    }
+  }, 5 * 60 * 1000).unref?.();
 
   function findOpponentIndex(grade, now, installId) {
     // Same grade first; after GRADE_WAIT_EXPAND_MS, also accept ±1. Never
@@ -59,43 +76,45 @@ module.exports = function attachBattleSocket(io) {
     return -1;
   }
 
-  async function startMatch(playerA, playerB) {
+  /** entries: [{socketId, installId, displayName, team}], team is 0 or 1.
+   * Works for both 1v1 (2 entries, team 0 and 1, one each) and 2v2 (4
+   * entries, two per team). */
+  async function startMatch(mode, grade, entries) {
     const matchId = crypto.randomUUID();
-    const grade = playerA.grade; // queue only pairs same/adjacent grade; use the earlier waiter's grade
     const problems = generateBattleSet(grade, PROBLEMS_PER_MATCH);
     const startedAt = new Date();
-    const state = {
-      matchId,
-      grade,
-      problems, // full set WITH answers, server-only
-      startedAt,
-      endsAt: Date.now() + MATCH_DURATION_MS,
-      players: {
-        [playerA.installId]: { ...playerA, index: 0, score: 0 },
-        [playerB.installId]: { ...playerB, index: 0, score: 0 },
-      },
-      timer: null,
-    };
+    const players = {};
+    entries.forEach((e) => { players[e.installId] = { ...e, index: 0, score: 0 }; });
+    const state = { matchId, mode, grade, problems, startedAt, players, timer: null, ended: false };
     matches.set(matchId, state);
 
     const publicProblems = problems.map((p) => ({ text: p.text, choices: p.choices }));
-    [playerA, playerB].forEach((p, i) => {
-      const opponent = i === 0 ? playerB : playerA;
-      const socket = io.sockets.sockets.get(p.socketId);
+    entries.forEach((e) => {
+      const socket = io.sockets.sockets.get(e.socketId);
       if (!socket) return;
       socket.join(matchId);
       socket.data.matchId = matchId;
+      const teammates = entries.filter((x) => x.team === e.team && x.installId !== e.installId).map((x) => x.displayName);
+      const opponents = entries.filter((x) => x.team !== e.team).map((x) => x.displayName);
       socket.emit('match:found', {
         matchId,
+        mode,
         grade,
         problems: publicProblems,
         durationMs: MATCH_DURATION_MS,
-        me: { displayName: p.displayName },
-        opponent: { displayName: opponent.displayName },
+        me: { displayName: e.displayName, team: e.team },
+        teammates,
+        opponents,
       });
     });
 
     state.timer = setTimeout(() => endMatch(matchId, 'timeout'), MATCH_DURATION_MS + 500);
+  }
+
+  function teamTotals(state) {
+    const totals = { 0: 0, 1: 0 };
+    Object.values(state.players).forEach((p) => { totals[p.team] = (totals[p.team] || 0) + p.score; });
+    return totals;
   }
 
   async function endMatch(matchId, reason) {
@@ -105,27 +124,26 @@ module.exports = function attachBattleSocket(io) {
     if (state.timer) clearTimeout(state.timer);
 
     const entries = Object.values(state.players);
-    // Phòng thủ: nếu vì lý do gì đó trận chỉ còn đúng 1 người (ví dụ dữ
-    // liệu hỏng, hoặc match tự ghép trùng installId lọt qua được) thì dừng
-    // sạch ở đây thay vì crash lúc so p1/p2.score — trận này coi như huỷ,
-    // không tính thắng/thua/rank.
-    if (entries.length < 2) {
+    // Phòng thủ: trận hợp lệ luôn có đúng 2 đội, mỗi đội ít nhất 1 người —
+    // nếu vì lý do gì đó không đủ (dữ liệu hỏng, ghép trùng installId lọt
+    // qua được...) thì dừng sạch, không crash lúc tính đội thắng.
+    const teamIds = [...new Set(entries.map((p) => p.team))];
+    if (entries.length < 2 || teamIds.length < 2) {
       matches.delete(matchId);
-      const only = entries[0];
-      if (only) {
-        const socket = io.sockets.sockets.get(only.socketId);
-        if (socket) socket.emit('match:end', { reason: 'invalid', myScore: only.score, opponentScore: 0, outcome: 'draw', rankDelta: 0, coinsDelta: 0, newTier: null, tierName: null });
-      }
+      entries.forEach((p) => {
+        const socket = io.sockets.sockets.get(p.socketId);
+        if (socket) socket.emit('match:end', { reason: 'invalid', myScore: p.score, opponentScore: 0, outcome: 'draw', rankDelta: 0, coinsDelta: 0, newTier: null, tierName: null });
+      });
       return;
     }
-    const [p1, p2] = entries;
-    let winnerInstallId = null;
-    if (p1.score !== p2.score) winnerInstallId = p1.score > p2.score ? p1.installId : p2.installId;
+    const totals = teamTotals(state);
+    let winnerTeam = null;
+    if (totals[0] !== totals[1]) winnerTeam = totals[0] > totals[1] ? 0 : 1;
 
     const results = {};
     for (const p of entries) {
-      const isWinner = winnerInstallId === p.installId;
-      const isDraw = winnerInstallId === null;
+      const isWinner = winnerTeam === p.team;
+      const isDraw = winnerTeam === null;
       const rankDelta = isDraw ? 10 : isWinner ? 20 : 5;
       const coinsDelta = isDraw ? 5 : isWinner ? 10 : 2;
       try {
@@ -149,10 +167,10 @@ module.exports = function attachBattleSocket(io) {
 
     try {
       await BattleMatch.create({
-        mode: '1v1',
+        mode: state.mode,
         grade: state.grade,
-        players: entries.map((p) => ({ installId: p.installId, displayName: p.displayName, team: 0, score: p.score })),
-        winnerTeam: winnerInstallId === null ? null : (winnerInstallId === p1.installId ? 0 : 1),
+        players: entries.map((p) => ({ installId: p.installId, displayName: p.displayName, team: p.team, score: p.score })),
+        winnerTeam,
         startedAt: state.startedAt,
         endedAt: new Date(),
       });
@@ -161,15 +179,14 @@ module.exports = function attachBattleSocket(io) {
     }
 
     for (const p of entries) {
-      const opponent = entries.find((x) => x.installId !== p.installId);
       const socket = io.sockets.sockets.get(p.socketId);
       if (!socket) continue;
       const r = results[p.installId] || {};
       socket.emit('match:end', {
         reason,
-        myScore: p.score,
-        opponentScore: opponent.score,
-        outcome: winnerInstallId === null ? 'draw' : (winnerInstallId === p.installId ? 'win' : 'lose'),
+        myScore: totals[p.team],
+        opponentScore: totals[p.team === 0 ? 1 : 0],
+        outcome: winnerTeam === null ? 'draw' : (winnerTeam === p.team ? 'win' : 'lose'),
         rankDelta: r.rankDelta,
         coinsDelta: r.coinsDelta,
         newTier: r.newTier,
@@ -186,6 +203,7 @@ module.exports = function attachBattleSocket(io) {
       if (typeof ack === 'function') ack(reply); else socket.emit('pong:echo', reply);
     });
 
+    // ---- 1v1 ghép ngẫu nhiên (hàng đợi) ----
     socket.on('queue:join', async (payload, ack) => {
       try {
         const installId = typeof payload?.installId === 'string' ? payload.installId.slice(0, 100) : null;
@@ -195,7 +213,6 @@ module.exports = function attachBattleSocket(io) {
           if (typeof ack === 'function') ack({ ok: false, message: 'Thiếu thông tin người chơi.' });
           return;
         }
-        // Không cho 1 socket vào hàng đợi 2 lần.
         const already = queue1v1.some((w) => w.socketId === socket.id);
         if (already) { if (typeof ack === 'function') ack({ ok: true }); return; }
 
@@ -215,10 +232,10 @@ module.exports = function attachBattleSocket(io) {
         }
         const opponentWaiter = queue1v1.splice(oppIdx, 1)[0];
         if (typeof ack === 'function') ack({ ok: true, waiting: false });
-        await startMatch(
-          { socketId: opponentWaiter.socketId, installId: opponentWaiter.installId, displayName: opponentWaiter.displayName, grade: opponentWaiter.grade },
-          { socketId: socket.id, installId, displayName: player.displayName, grade }
-        );
+        await startMatch('1v1', grade, [
+          { socketId: opponentWaiter.socketId, installId: opponentWaiter.installId, displayName: opponentWaiter.displayName, team: 0 },
+          { socketId: socket.id, installId, displayName: player.displayName, team: 1 },
+        ]);
       } catch (e) {
         console.error('[battle] queue:join loi', e.message);
         if (typeof ack === 'function') ack({ ok: false, message: 'Có lỗi khi ghép cặp, thử lại nhé.' });
@@ -230,6 +247,88 @@ module.exports = function attachBattleSocket(io) {
       if (idx !== -1) queue1v1.splice(idx, 1);
     });
 
+    // ---- 2v2 theo phòng (mã 4 số) ----
+    function broadcastRoom(code) {
+      const room = rooms.get(code);
+      if (!room) return;
+      io.to('room:' + code).emit('room:update', {
+        code,
+        grade: room.grade,
+        members: room.members.map((m) => ({ displayName: m.displayName, team: m.team })),
+        capacity: ROOM_SIZE_2V2,
+      });
+    }
+
+    socket.on('room:create', async (payload, ack) => {
+      try {
+        const installId = typeof payload?.installId === 'string' ? payload.installId.slice(0, 100) : null;
+        const displayName = typeof payload?.displayName === 'string' ? payload.displayName.trim().slice(0, 24) || 'Bạn chơi' : 'Bạn chơi';
+        const grade = Number.isInteger(payload?.grade) && payload.grade >= 1 && payload.grade <= 9 ? payload.grade : null;
+        if (!installId || !grade) { if (typeof ack === 'function') ack({ ok: false, message: 'Thiếu thông tin người chơi.' }); return; }
+        const player = await getOrCreatePlayer(installId, displayName, grade);
+        const code = makeRoomCode(rooms);
+        rooms.set(code, {
+          grade,
+          hostInstallId: installId,
+          members: [{ socketId: socket.id, installId, displayName: player.displayName, team: 0 }],
+          createdAt: Date.now(),
+        });
+        socket.data.installId = installId;
+        socket.data.roomCode = code;
+        socket.join('room:' + code);
+        if (typeof ack === 'function') ack({ ok: true, code, grade });
+        broadcastRoom(code);
+      } catch (e) {
+        console.error('[battle] room:create loi', e.message);
+        if (typeof ack === 'function') ack({ ok: false, message: 'Không tạo được phòng, thử lại nhé.' });
+      }
+    });
+
+    socket.on('room:join', async (payload, ack) => {
+      try {
+        const installId = typeof payload?.installId === 'string' ? payload.installId.slice(0, 100) : null;
+        const displayName = typeof payload?.displayName === 'string' ? payload.displayName.trim().slice(0, 24) || 'Bạn chơi' : 'Bạn chơi';
+        const code = typeof payload?.code === 'string' ? payload.code.trim().slice(0, 8) : null;
+        if (!installId || !code) { if (typeof ack === 'function') ack({ ok: false, message: 'Thiếu mã phòng.' }); return; }
+        const room = rooms.get(code);
+        if (!room) { if (typeof ack === 'function') ack({ ok: false, message: 'Không tìm thấy phòng này.' }); return; }
+        if (room.members.some((m) => m.installId === installId)) { if (typeof ack === 'function') ack({ ok: false, message: 'Bạn đã ở trong phòng này rồi.' }); return; }
+        if (room.members.length >= ROOM_SIZE_2V2) { if (typeof ack === 'function') ack({ ok: false, message: 'Phòng đã đủ người.' }); return; }
+
+        const player = await getOrCreatePlayer(installId, displayName, room.grade);
+        const team = room.members.length % 2; // 0,1,0,1 theo thứ tự vào — xem giải thích ở đầu file
+        room.members.push({ socketId: socket.id, installId, displayName: player.displayName, team });
+        socket.data.installId = installId;
+        socket.data.roomCode = code;
+        socket.join('room:' + code);
+        if (typeof ack === 'function') ack({ ok: true, code, grade: room.grade, team });
+        broadcastRoom(code);
+
+        if (room.members.length >= ROOM_SIZE_2V2) {
+          const entries = room.members.map((m) => ({ socketId: m.socketId, installId: m.installId, displayName: m.displayName, team: m.team }));
+          rooms.delete(code);
+          await startMatch('2v2', room.grade, entries);
+        }
+      } catch (e) {
+        console.error('[battle] room:join loi', e.message);
+        if (typeof ack === 'function') ack({ ok: false, message: 'Không vào được phòng, thử lại nhé.' });
+      }
+    });
+
+    socket.on('room:leave', () => {
+      const code = socket.data.roomCode;
+      if (!code) return;
+      const room = rooms.get(code);
+      if (room) {
+        room.members = room.members.filter((m) => m.socketId !== socket.id);
+        if (!room.members.length) rooms.delete(code);
+        else broadcastRoom(code);
+      }
+      socket.leave('room:' + code);
+      socket.data.roomCode = null;
+    });
+
+    // ---- Trong trận (chung cho 1v1 và 2v2) ----
     socket.on('answer:submit', (payload, ack) => {
       const matchId = socket.data.matchId;
       const state = matchId && matches.get(matchId);
@@ -250,15 +349,17 @@ module.exports = function attachBattleSocket(io) {
       if (isCorrect) player.score += 1;
       player.index += 1;
 
-      if (typeof ack === 'function') ack({ ok: true, correct: isCorrect, nextIndex: player.index, myScore: player.score });
+      if (typeof ack === 'function') ack({ ok: true, correct: isCorrect, nextIndex: player.index, myScore: player.score, myTeam: player.team });
 
-      // Bắn qua room thay vì socketId cache từ lúc bắt đầu trận — nếu kết
-      // nối long-polling của đối thủ phải tái lập (rớt rồi nối lại) giữa
-      // chừng, socketId cũ trong state.players không còn map tới ai cả và
-      // gửi thẳng theo id sẽ IM LẶNG THẤT BẠI (không lỗi, không cập nhật
-      // điểm bên kia) — đã thấy đúng lỗi này khi test 2 trình duyệt thật.
-      // Room thì Socket.IO tự theo dõi thành viên hiện tại.
-      socket.broadcast.to(matchId).emit('match:opponentProgress', { score: player.score, index: player.index });
+      // Bắn TỔNG ĐIỂM 2 ĐỘI qua room thay vì socketId cache từ lúc bắt đầu
+      // trận — nếu kết nối long-polling của ai đó phải tái lập giữa chừng,
+      // socketId cũ không còn map tới ai cả và gửi thẳng theo id sẽ IM LẶNG
+      // THẤT BẠI (không lỗi, không cập nhật điểm bên kia) — đã thấy đúng lỗi
+      // này khi test 2 trình duyệt thật. Room thì Socket.IO tự theo dõi
+      // thành viên hiện tại. Bắn tổng đội (không phải điểm riêng người vừa
+      // trả lời) để 2v2 luôn hiển thị đúng, và dùng chung code cho cả 1v1.
+      const totals = teamTotals(state);
+      io.to(matchId).emit('match:teamsProgress', { totals, byTeam: player.team, doneIndex: player.index });
 
       if (player.index >= state.problems.length) {
         const allDone = Object.values(state.players).every((p) => p.index >= state.problems.length);
@@ -269,11 +370,23 @@ module.exports = function attachBattleSocket(io) {
     socket.on('disconnect', () => {
       const idx = queue1v1.findIndex((w) => w.socketId === socket.id);
       if (idx !== -1) queue1v1.splice(idx, 1);
+
+      const roomCode = socket.data.roomCode;
+      if (roomCode) {
+        const room = rooms.get(roomCode);
+        if (room) {
+          room.members = room.members.filter((m) => m.socketId !== socket.id);
+          if (!room.members.length) rooms.delete(roomCode);
+          else broadcastRoom(roomCode);
+        }
+      }
+
       const matchId = socket.data.matchId;
       if (matchId && matches.has(matchId)) {
-        // Đối thủ mất kết nối giữa trận — kết thúc luôn, người còn lại
-        // (nếu còn) vẫn được xử lý thắng theo điểm hiện có.
-        endMatch(matchId, 'opponent_disconnected');
+        // Có người mất kết nối giữa trận — kết thúc luôn theo điểm hiện có
+        // (không giữ những người còn lại chờ mãi một người sẽ không quay
+        // lại được — trận in-memory nên không có gì để "khôi phục" cả).
+        endMatch(matchId, 'player_disconnected');
       }
     });
   });

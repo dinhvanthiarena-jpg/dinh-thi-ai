@@ -447,6 +447,11 @@
     <div class="battle-setup-wrap" id="battleSetupWrap">
       <p class="setup-label">Tên của con là gì?</p>
       <input type="text" id="battleNameInput" class="license-input battle-name-input" maxlength="24" placeholder="Nhập tên để đối thủ biết nhé" autocomplete="off" spellcheck="false" />
+      <p class="setup-label">Đấu kiểu gì?</p>
+      <div class="battle-mode-tabs" id="battleModeTabs">
+        <button class="battle-mode-tab selected" type="button" data-mode="1v1">1 vs 1<br /><small>Ghép ngẫu nhiên</small></button>
+        <button class="battle-mode-tab" type="button" data-mode="2v2">2 vs 2<br /><small>Đấu theo đội, mời bạn</small></button>
+      </div>
       <p class="setup-label">Con học lớp mấy?</p>
       <p class="battle-grade-group-label">Tiểu học</p>
       <div class="grade-row" id="battleGradeRowTH">
@@ -464,11 +469,25 @@
         <button class="grade-card" data-grade="9"><span class="grade-num">9</span><span>Lớp 9</span></button>
       </div>
       <button class="btn btn-primary btn-xl" id="btnBattleFind" disabled>Tìm đối thủ</button>
+
+      <div class="battle-2v2-choice" id="battle2v2Choice" hidden>
+        <button class="btn btn-primary btn-xl" id="btnBattleCreateRoom" disabled>Tạo phòng mới</button>
+        <p class="battle-or-divider">hoặc</p>
+        <div class="battle-join-row">
+          <input type="text" id="battleRoomCodeInput" class="license-input battle-room-code-input" maxlength="4" inputmode="numeric" placeholder="Mã phòng" autocomplete="off" />
+          <button class="btn btn-secondary" id="btnBattleJoinRoom" disabled>Vào phòng</button>
+        </div>
+      </div>
     </div>
 
     <div class="battle-queue-wrap" id="battleQueueWrap" hidden>
       <div class="battle-queue-spinner" aria-hidden="true"></div>
-      <p class="battle-queue-text">Đang tìm đối thủ cùng lớp...</p>
+      <p class="battle-queue-text" id="battleQueueText">Đang tìm đối thủ cùng lớp...</p>
+      <div class="battle-room-code-display" id="battleRoomCodeDisplay" hidden>
+        <span class="battle-room-code-label">Mã phòng — gửi cho bạn bè</span>
+        <span class="battle-room-code-value" id="battleRoomCodeValue">0000</span>
+      </div>
+      <div class="battle-room-members" id="battleRoomMembers" hidden></div>
       <button class="btn btn-text" id="btnBattleCancelQueue">Hủy tìm</button>
     </div>
   </section>

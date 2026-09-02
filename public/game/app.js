@@ -1553,17 +1553,28 @@
     else showScreen('home');
   });
 
-  /* ================= THÁCH ĐẤU (đấu trường 1v1 thời gian thực) =================
+  /* ================= THÁCH ĐẤU (đấu trường 1v1 / 2v2 thời gian thực) =============
    * Ghép cặp + tính điểm hoàn toàn ở server (services/battleSocket.js bên
    * dinh-thi-ai) qua Socket.IO — client ở đây chỉ hiển thị và gửi lựa chọn,
    * không tự chấm điểm, không biết đáp án đúng trước khi bấm. Xem
-   * services/battleProblemService.js cho việc sinh đề (lớp 1-9). */
+   * services/battleProblemService.js cho việc sinh đề (lớp 1-9). 1v1 ghép
+   * ngẫu nhiên qua hàng đợi; 2v2 theo phòng (mã 4 số, mời bạn bè) — cả hai
+   * dùng chung một "trận đấu theo đội" ở server (1v1 = đội 1 người). */
   const battleNameInput = $('battleNameInput');
+  const battleModeTabs = $('battleModeTabs');
   const battleGradeRowTH = $('battleGradeRowTH');
   const battleGradeRowTHCS = $('battleGradeRowTHCS');
   const btnBattleFind = $('btnBattleFind');
+  const battle2v2Choice = $('battle2v2Choice');
+  const btnBattleCreateRoom = $('btnBattleCreateRoom');
+  const battleRoomCodeInput = $('battleRoomCodeInput');
+  const btnBattleJoinRoom = $('btnBattleJoinRoom');
   const battleSetupWrap = $('battleSetupWrap');
   const battleQueueWrap = $('battleQueueWrap');
+  const battleQueueText = $('battleQueueText');
+  const battleRoomCodeDisplay = $('battleRoomCodeDisplay');
+  const battleRoomCodeValue = $('battleRoomCodeValue');
+  const battleRoomMembers = $('battleRoomMembers');
   const btnBattleCancelQueue = $('btnBattleCancelQueue');
   const battleQuestionText = $('battleQuestionText');
   const battleAnswersGrid = $('battleAnswersGrid');
@@ -1576,9 +1587,12 @@
   const battleOppFillEl = $('battleOppFill');
 
   let battleSocket = null;
+  let battleMode = '1v1';
   let battleSelectedGrade = null;
   let battleInQueue = false;
-  let battleCurrentMatch = null; // { matchId, problems, index, myScore, timerId }
+  let battleRoomCode = null;
+  let battleMyTeam = 0;
+  let battleCurrentMatch = null; // { matchId, problems, index, timerId }
 
   battleNameInput.value = localStorage.getItem('tvc_playerName') || '';
 
@@ -1587,16 +1601,29 @@
     if (typeof io !== 'function') return null;
     battleSocket = io({ path: '/socket.io/' });
     battleSocket.on('match:found', battleOnMatchFound);
-    battleSocket.on('match:opponentProgress', battleOnOpponentProgress);
+    battleSocket.on('match:teamsProgress', battleOnTeamsProgress);
     battleSocket.on('match:end', battleOnMatchEnd);
+    battleSocket.on('room:update', battleOnRoomUpdate);
     return battleSocket;
   }
+
+  battleModeTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.battle-mode-tab');
+    if (!btn) return;
+    sfx.click();
+    battleMode = btn.dataset.mode;
+    [...battleModeTabs.children].forEach((c) => c.classList.remove('selected'));
+    btn.classList.add('selected');
+    btnBattleFind.hidden = battleMode !== '1v1';
+    battle2v2Choice.hidden = battleMode !== '2v2';
+  });
 
   function battleSelectGrade(grade, btn) {
     battleSelectedGrade = grade;
     [...battleGradeRowTH.children, ...battleGradeRowTHCS.children].forEach((c) => c.classList.remove('selected'));
     btn.classList.add('selected');
     btnBattleFind.disabled = false;
+    btnBattleCreateRoom.disabled = false;
   }
   battleGradeRowTH.addEventListener('click', (e) => {
     const btn = e.target.closest('.grade-card');
@@ -1610,12 +1637,21 @@
     sfx.click();
     battleSelectGrade(parseInt(btn.dataset.grade, 10), btn);
   });
+  battleRoomCodeInput.addEventListener('input', () => {
+    battleRoomCodeInput.value = battleRoomCodeInput.value.replace(/\D/g, '').slice(0, 4);
+    btnBattleJoinRoom.disabled = battleRoomCodeInput.value.length !== 4;
+  });
 
   function battleShowSetup() {
     battleSelectedGrade = null;
     btnBattleFind.disabled = true;
+    btnBattleCreateRoom.disabled = true;
+    btnBattleJoinRoom.disabled = true;
+    battleRoomCodeInput.value = '';
     battleSetupWrap.hidden = false;
     battleQueueWrap.hidden = true;
+    battleRoomCodeDisplay.hidden = true;
+    battleRoomMembers.hidden = true;
     [...battleGradeRowTH.children, ...battleGradeRowTHCS.children].forEach((c) => c.classList.remove('selected'));
   }
   $('btnBattle').addEventListener('click', () => { sfx.click(); battleShowSetup(); showScreen('battleSetup'); });
@@ -1623,7 +1659,9 @@
 
   function battleLeaveQueue() {
     if (battleInQueue && battleSocket) battleSocket.emit('queue:leave');
+    if (battleRoomCode && battleSocket) battleSocket.emit('room:leave');
     battleInQueue = false;
+    battleRoomCode = null;
   }
   btnBattleCancelQueue.addEventListener('click', () => {
     sfx.click();
@@ -1632,30 +1670,95 @@
     battleSetupWrap.hidden = false;
   });
 
+  function battleReadName() {
+    const name = (battleNameInput.value || '').trim().slice(0, 24) || 'Bạn chơi';
+    localStorage.setItem('tvc_playerName', name);
+    return name;
+  }
+
   btnBattleFind.addEventListener('click', () => {
     if (!battleSelectedGrade) return;
     sfx.click();
-    const name = (battleNameInput.value || '').trim().slice(0, 24) || 'Bạn chơi';
-    localStorage.setItem('tvc_playerName', name);
+    const name = battleReadName();
     const socket = battleGetSocket();
     if (!socket) return; // trình duyệt chặn được socket.io.js — hiếm, im lặng bỏ qua
     battleSetupWrap.hidden = true;
     battleQueueWrap.hidden = false;
+    battleQueueText.textContent = 'Đang tìm đối thủ cùng lớp...';
     battleInQueue = true;
     socket.emit('queue:join', { installId: webGetInstallId(), displayName: name, grade: battleSelectedGrade }, (ack) => {
-      if (!ack || !ack.ok) {
-        battleInQueue = false;
-        battleSetupWrap.hidden = false;
-        battleQueueWrap.hidden = true;
-      }
+      if (!ack || !ack.ok) { battleInQueue = false; battleShowSetup(); }
     });
   });
 
+  btnBattleCreateRoom.addEventListener('click', () => {
+    if (!battleSelectedGrade) return;
+    sfx.click();
+    const name = battleReadName();
+    const socket = battleGetSocket();
+    if (!socket) return;
+    battleSetupWrap.hidden = true;
+    battleQueueWrap.hidden = false;
+    battleQueueText.textContent = 'Đang tạo phòng...';
+    socket.emit('room:create', { installId: webGetInstallId(), displayName: name, grade: battleSelectedGrade }, (ack) => {
+      if (!ack || !ack.ok) { battleShowSetup(); return; }
+      battleRoomCode = ack.code;
+      battleRoomCodeDisplay.hidden = false;
+      battleRoomCodeValue.textContent = ack.code;
+      battleRoomMembers.hidden = false;
+      battleQueueText.textContent = 'Gửi mã này cho 3 bạn để cùng đấu 2v2 nhé!';
+    });
+  });
+
+  btnBattleJoinRoom.addEventListener('click', () => {
+    const code = battleRoomCodeInput.value;
+    if (code.length !== 4) return;
+    sfx.click();
+    const name = battleReadName();
+    const socket = battleGetSocket();
+    if (!socket) return;
+    battleSetupWrap.hidden = true;
+    battleQueueWrap.hidden = false;
+    battleQueueText.textContent = 'Đang vào phòng...';
+    socket.emit('room:join', { installId: webGetInstallId(), displayName: name, code }, (ack) => {
+      if (!ack || !ack.ok) { battleShowSetup(); return; }
+      battleRoomCode = ack.code;
+      battleRoomCodeDisplay.hidden = false;
+      battleRoomCodeValue.textContent = ack.code;
+      battleRoomMembers.hidden = false;
+    });
+  });
+
+  function battleOnRoomUpdate(data) {
+    battleRoomCodeValue.textContent = data.code;
+    battleRoomMembers.innerHTML = '';
+    data.members.forEach((m) => {
+      const row = document.createElement('div');
+      row.className = 'battle-room-member';
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = m.displayName;
+      const tagSpan = document.createElement('span');
+      tagSpan.className = 'team-tag t' + m.team;
+      tagSpan.textContent = 'Đội ' + (m.team + 1);
+      row.appendChild(nameSpan);
+      row.appendChild(tagSpan);
+      battleRoomMembers.appendChild(row);
+    });
+    battleQueueText.textContent = `Đang đợi bạn bè... (${data.members.length}/${data.capacity})`;
+  }
+
   function battleOnMatchFound(data) {
     battleInQueue = false;
-    battleCurrentMatch = { matchId: data.matchId, problems: data.problems, index: 0, myScore: 0, timerId: null };
-    battleMeNameEl.textContent = data.me.displayName;
-    battleOppNameEl.textContent = data.opponent.displayName;
+    battleRoomCode = null;
+    battleMyTeam = data.me.team;
+    battleCurrentMatch = { matchId: data.matchId, problems: data.problems, index: 0, timerId: null };
+    if (data.mode === '2v2') {
+      battleMeNameEl.textContent = 'Đội bạn' + (data.teammates && data.teammates[0] ? ' + ' + data.teammates[0] : '');
+      battleOppNameEl.textContent = 'Đội đối thủ' + (data.opponents && data.opponents.length ? ': ' + data.opponents.join(', ') : '');
+    } else {
+      battleMeNameEl.textContent = data.me.displayName;
+      battleOppNameEl.textContent = (data.opponents && data.opponents[0]) || 'Đối thủ';
+    }
     battleMeScoreEl.textContent = '0';
     battleOppScoreEl.textContent = '0';
     battleMeFillEl.style.width = '0%';
@@ -1702,18 +1805,22 @@
       if (!ack || !ack.ok) { [...battleAnswersGrid.children].forEach((b) => { b.disabled = false; }); return; }
       btn.classList.add(ack.correct ? 'correct' : 'wrong');
       sfx[ack.correct ? 'correct' : 'wrong']();
-      m.myScore = ack.myScore;
-      battleMeScoreEl.textContent = m.myScore;
       m.index = ack.nextIndex;
-      battleMeFillEl.style.width = Math.min(100, Math.round((m.index / m.problems.length) * 100)) + '%';
+      // Điểm hiển thị (kể cả của chính mình) lấy từ match:teamsProgress —
+      // đó mới là tổng điểm CẢ ĐỘI (2v2 có 2 người cùng ghi điểm), ack ở
+      // đây chỉ dùng để biết đúng/sai và chuyển câu tiếp theo.
       setTimeout(battleRenderQuestion, ack.correct ? 450 : 850);
     });
   }
 
-  function battleOnOpponentProgress(data) {
-    battleOppScoreEl.textContent = data.score;
+  function battleOnTeamsProgress(data) {
+    const otherTeam = battleMyTeam === 0 ? 1 : 0;
+    battleMeScoreEl.textContent = data.totals[battleMyTeam] || 0;
+    battleOppScoreEl.textContent = data.totals[otherTeam] || 0;
     if (battleCurrentMatch) {
-      battleOppFillEl.style.width = Math.min(100, Math.round((data.index / battleCurrentMatch.problems.length) * 100)) + '%';
+      const pct = Math.min(100, Math.round((data.doneIndex / battleCurrentMatch.problems.length) * 100));
+      if (data.byTeam === battleMyTeam) battleMeFillEl.style.width = pct + '%';
+      else battleOppFillEl.style.width = pct + '%';
     }
   }
 

@@ -2559,6 +2559,61 @@ button:focus-visible,
   box-sizing: border-box;
 }
 .battle-name-input { width: 100%; margin-bottom: 20px; text-transform: none; letter-spacing: normal; font-size: 1rem; }
+.battle-mode-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+.battle-mode-tab {
+  border: none;
+  border-radius: var(--r2);
+  background: var(--card);
+  color: var(--muted-fg);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1rem;
+  padding: 12px 8px;
+  box-shadow: inset 0 0 0 2px var(--line);
+  line-height: 1.5;
+}
+.battle-mode-tab small { font-weight: 700; font-size: 0.7rem; opacity: 0.85; }
+.battle-mode-tab.selected { color: #fff; background: linear-gradient(135deg, var(--flame), var(--heart)); box-shadow: var(--sh-1); }
+.battle-2v2-choice { margin-top: 26px; }
+.battle-2v2-choice .btn-xl { width: 100%; }
+.battle-or-divider { text-align: center; font-family: var(--font-heading); font-weight: 700; color: var(--muted-fg); margin: 14px 0; }
+.battle-join-row { display: flex; gap: 10px; align-items: center; }
+.battle-room-code-input {
+  flex: 1;
+  text-align: center;
+  font-size: 1.3rem;
+  letter-spacing: 4px;
+  margin-bottom: 0;
+  text-transform: none;
+}
+.battle-room-code-display { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 6px 0; }
+.battle-room-code-label { font-family: var(--font-heading); font-weight: 700; font-size: 0.8rem; color: var(--muted-fg); }
+.battle-room-code-value {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 2.4rem;
+  letter-spacing: 8px;
+  color: var(--brand-ink);
+  background: var(--card);
+  border-radius: var(--r2);
+  padding: 8px 22px;
+  box-shadow: var(--sh-1);
+}
+.battle-room-members { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 320px; margin: 10px 0; }
+.battle-room-member {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card);
+  border-radius: var(--rf);
+  padding: 8px 16px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.battle-room-member .team-tag { font-size: 0.7rem; padding: 3px 10px; border-radius: var(--rf); color: #fff; }
+.battle-room-member .team-tag.t0 { background: var(--ok); }
+.battle-room-member .team-tag.t1 { background: var(--heart); }
 .battle-setup-wrap .btn-start,
 .battle-setup-wrap #btnBattleFind { width: 100%; margin-top: 26px; }
 .battle-queue-wrap {
