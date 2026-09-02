@@ -29,7 +29,7 @@ const GRADES = [
         {id:"g4-0-0", title:"Địa phương em"},
         {id:"g4-0-1", title:"Trung du và miền núi Bắc Bộ"},
         {id:"g4-0-2", title:"Đồng bằng Bắc Bộ — Văn Lang, Âu Lạc", authored:true},
-        {id:"g4-0-3", title:"Duyên hải miền Trung — Chăm-pa, cố đô Huế"},
+        {id:"g4-0-3", title:"Duyên hải miền Trung — Chăm-pa, cố đô Huế", authored:true},
         {id:"g4-0-4", title:"Tây Nguyên"},
         {id:"g4-0-5", title:"Nam Bộ"},
       ]},
@@ -46,7 +46,7 @@ const GRADES = [
       { title:"Những quốc gia đầu tiên trên lãnh thổ Việt Nam", scope:"vn", nodes:[
         {id:"g5-1-0", title:"Nhà nước Văn Lang, Nhà nước Âu Lạc", authored:true},
         {id:"g5-1-1", title:"Vương quốc Phù Nam"},
-        {id:"g5-1-2", title:"Vương quốc Chăm-pa"},
+        {id:"g5-1-2", title:"Vương quốc Chăm-pa", authored:true},
         {id:"g5-1-3", title:"Đấu tranh giành độc lập thời kì Bắc thuộc"},
         {id:"g5-1-4", title:"Ôn tập", review:true},
       ]},
@@ -107,19 +107,19 @@ const GRADES = [
         {id:"g7-2-2", title:"Vương quốc Campuchia"},
       ]},
       { title:"Ngô – Đinh – Tiền Lê (939–1009)", scope:"vn", nodes:[
-        {id:"g7-3-0", title:"Đất nước buổi đầu độc lập (939–967)"},
-        {id:"g7-3-1", title:"Đại Cồ Việt thời Đinh và Tiền Lê (968–1009)"},
+        {id:"g7-3-0", title:"Đất nước buổi đầu độc lập (939–967)", authored:true},
+        {id:"g7-3-1", title:"Đại Cồ Việt thời Đinh và Tiền Lê (968–1009)", authored:true},
       ]},
       { title:"Đại Việt thời Lý – Trần – Hồ (1009–1407)", scope:"vn", nodes:[
         {id:"g7-4-0", title:"Nhà Lý (1009–1225)", authored:true},
-        {id:"g7-4-1", title:"Kháng chiến chống Tống (1075–1077)"},
-        {id:"g7-4-2", title:"Đại Việt thời Trần (1226–1400)"},
-        {id:"g7-4-3", title:"Ba lần kháng chiến chống Mông – Nguyên"},
+        {id:"g7-4-1", title:"Kháng chiến chống Tống (1075–1077)", authored:true},
+        {id:"g7-4-2", title:"Đại Việt thời Trần (1226–1400)", authored:true},
+        {id:"g7-4-3", title:"Ba lần kháng chiến chống Mông – Nguyên", authored:true},
         {id:"g7-4-4", title:"Nước Đại Ngu thời Hồ (1400–1407)"},
       ]},
       { title:"Khởi nghĩa Lam Sơn & Đại Việt thời Lê sơ (1418–1527)", scope:"vn", nodes:[
-        {id:"g7-5-0", title:"Khởi nghĩa Lam Sơn"},
-        {id:"g7-5-1", title:"Đại Việt thời Lê sơ"},
+        {id:"g7-5-0", title:"Khởi nghĩa Lam Sơn", authored:true},
+        {id:"g7-5-1", title:"Đại Việt thời Lê sơ", authored:true},
         {id:"g7-5-2", title:"Chăm-pa & vùng đất Nam Bộ (TK X–XVI)"},
       ]},
     ]},
@@ -127,7 +127,7 @@ const GRADES = [
     note:"Cận đại thế giới (cách mạng tư sản, CNTB, cách mạng công nghiệp) đan xen Việt Nam TK XIX – đầu XX.",
     chapters:[
       { title:"Cách mạng tư sản & sự xác lập CNTB", scope:"tg", nodes:[
-        {id:"g8-0-0", title:"Cách mạng tư sản Anh & 13 thuộc địa Bắc Mỹ"},
+        {id:"g8-0-0", title:"Cách mạng tư sản Anh & 13 thuộc địa Bắc Mỹ", authored:true},
         {id:"g8-0-1", title:"Cách mạng tư sản Pháp cuối TK XVIII", authored:true},
       ]},
       { title:"Chủ nghĩa đế quốc & phong trào công nhân", scope:"tg", nodes:[
@@ -161,7 +161,7 @@ const GRADES = [
         {id:"g9-2-0", title:"Nguyên nhân, diễn biến chính, kết cục"},
       ]},
       { title:"Việt Nam (1918–1945)", scope:"vn", nodes:[
-        {id:"g9-3-0", title:"Phong trào dân tộc dân chủ (1918–1930)"},
+        {id:"g9-3-0", title:"Phong trào dân tộc dân chủ (1918–1930)", authored:true},
         {id:"g9-3-1", title:"Nguyễn Ái Quốc & thành lập Đảng Cộng sản Việt Nam", authored:true},
         {id:"g9-3-2", title:"Phong trào cách mạng (1930–1939)"},
       ]},
@@ -238,9 +238,9 @@ const GRADES = [
       ]},
       { title:"CMT8 1945, kháng chiến & bảo vệ Tổ quốc", scope:"vn", nodes:[
         {id:"g12-1-0", title:"Cách mạng tháng Tám năm 1945", authored:true},
-        {id:"g12-1-1", title:"Kháng chiến chống thực dân Pháp (1945–1954)"},
-        {id:"g12-1-2", title:"Kháng chiến chống Mỹ, cứu nước (1954–1975)"},
-        {id:"g12-1-3", title:"Đấu tranh bảo vệ Tổ quốc từ sau 4/1975 đến nay"},
+        {id:"g12-1-1", title:"Kháng chiến chống thực dân Pháp (1945–1954)", authored:true},
+        {id:"g12-1-2", title:"Kháng chiến chống Mỹ, cứu nước (1954–1975)", authored:true},
+        {id:"g12-1-3", title:"Đấu tranh bảo vệ Tổ quốc từ sau 4/1975 đến nay", authored:true},
       ]},
       { title:"Công cuộc Đổi mới ở Việt Nam", scope:"vn", nodes:[
         {id:"g12-2-0", title:"Khái quát công cuộc Đổi mới từ năm 1986"},

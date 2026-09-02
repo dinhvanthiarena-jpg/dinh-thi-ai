@@ -21,5 +21,12 @@ Object.assign(window.LESSONS, {
     {type:"quiz-mc", q:"Thành Cổ Loa là kinh đô của nhà nước nào?", options:["Âu Lạc","Văn Lang","Đại Việt","Chăm-pa"], correct:0},
   ]},
 
+  "g4-0-3": { title:"Duyên hải miền Trung — Chăm-pa, cố đô Huế", slides:[
+    {type:"intro", text:"Miền Trung nước ta có những di sản rất đặc biệt — từ đền tháp cổ Chăm-pa đến kinh thành của các vị vua triều Nguyễn. Cùng BiBi khám phá nhé!"},
+    {type:"fact", icon:"temple", meta:"Di sản Chăm-pa", title:"Đền tháp của người Chăm", text:"Người Chăm-pa xưa sống ở vùng duyên hải miền Trung, để lại nhiều đền tháp bằng gạch nung độc đáo, tiêu biểu nhất là khu đền tháp Mỹ Sơn (Quảng Nam)."},
+    {type:"heritage", icon:"crown", title:"Cố đô Huế", text:"Huế từng là kinh đô của nước ta dưới triều Nguyễn — triều đại phong kiến cuối cùng của Việt Nam. Quần thể di tích Cố đô Huế (Kinh thành, các lăng tẩm...) ngày nay là Di sản văn hoá thế giới."},
+    {type:"quiz-mc", q:"Huế từng là kinh đô của triều đại nào?", options:["Triều Nguyễn","Triều Lý","Triều Trần","Triều Lê sơ"], correct:0},
+  ]},
+
 });
 })();

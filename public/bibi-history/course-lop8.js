@@ -19,5 +19,13 @@ Object.assign(window.LESSONS, {
     {type:"quiz-fill", sentence:["Tuyên ngôn Nhân quyền và Dân quyền năm 1789 nêu cao khẩu hiệu \"Tự do — ","— ","\"."], blanks:["Bình đẳng","Bác ái"], bank:["Bình đẳng","Bác ái","Độc lập","Hạnh phúc"]},
   ]},
 
+  "g8-0-0": { title:"Cách mạng tư sản Anh & 13 thuộc địa Bắc Mỹ", slides:[
+    {type:"intro", text:"Trước cả Cách mạng Pháp, hai cuộc cách mạng khác đã mở đầu thời đại của các cuộc cách mạng tư sản. Cùng BiBi tìm hiểu nước Anh và 13 thuộc địa Bắc Mỹ nhé."},
+    {type:"fact", icon:"crown", meta:"Cách mạng tư sản Anh (1642–1688)", title:"Từ nội chiến đến quân chủ lập hiến", text:"Mâu thuẫn giữa vua Sác-lơ I với Quốc hội dẫn đến nội chiến. Sau khi xử tử nhà vua (1649) và trải qua giai đoạn cộng hoà, năm 1688 nước Anh xác lập chế độ quân chủ lập hiến — vua vẫn tồn tại nhưng quyền lực thực sự thuộc về Quốc hội."},
+    {type:"fact", icon:"scroll", meta:"13 thuộc địa Bắc Mỹ (1775–1783)", title:"Tuyên ngôn Độc lập (4/7/1776)", text:"Bất bình với chính sách thuế khoá hà khắc của chính quốc Anh, 13 thuộc địa ở Bắc Mỹ nổi dậy đấu tranh. Ngày 4/7/1776, bản Tuyên ngôn Độc lập ra đời, khai sinh Hợp chúng quốc Hoa Kỳ, do Gioóc-giơ Oa-sinh-tơn làm tổng chỉ huy quân đội."},
+    {type:"marker", tag:"Biển sử liệu", text:["Cả hai cuộc cách mạng đều lật đổ hoặc hạn chế chế độ chuyên chế, mở đường cho quan hệ sản xuất tư bản chủ nghĩa phát triển.", "Đây được coi là những cuộc cách mạng tư sản đầu tiên thời cận đại, mở đầu cho một loạt cách mạng tư sản khác ở châu Âu và châu Mỹ sau này."]},
+    {type:"quiz-mc", q:"Bản Tuyên ngôn Độc lập của Hợp chúng quốc Hoa Kỳ ra đời vào năm nào?", options:["1776","1789","1688","1649"], correct:0},
+  ]},
+
 });
 })();

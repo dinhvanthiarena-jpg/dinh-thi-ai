@@ -23,5 +23,13 @@ Object.assign(window.LESSONS, {
     ]},
   ]},
 
+  "g9-3-0": { title:"Phong trào dân tộc dân chủ (1918–1930)", slides:[
+    {type:"intro", text:"Trước khi Đảng Cộng sản Việt Nam ra đời, người Việt Nam yêu nước đã thử nhiều con đường cứu nước khác nhau. Cùng BiBi tìm hiểu giai đoạn bản lề này."},
+    {type:"fact", icon:"group", meta:"Khuynh hướng dân chủ tư sản", title:"Việt Nam Quốc dân đảng", text:"Năm 1927, Việt Nam Quốc dân đảng ra đời, đại diện cho khuynh hướng dân chủ tư sản. Tổ chức này phát động khởi nghĩa Yên Bái (1930) nhưng nhanh chóng thất bại, cho thấy con đường cứu nước theo khuynh hướng này không phù hợp."},
+    {type:"fact", icon:"axe", meta:"Khuynh hướng vô sản", title:"Phong trào công nhân chuyển biến", text:"Cùng thời gian, phong trào công nhân ngày càng phát triển theo hướng tự giác, tiêu biểu là cuộc bãi công Ba Son (1925) do Tôn Đức Thắng lãnh đạo — thợ máy Sài Gòn bãi công ngăn tàu Pháp chở lính sang đàn áp cách mạng Trung Quốc."},
+    {type:"marker", tag:"Biển sử liệu", text:["Sự thất bại của khởi nghĩa Yên Bái và sự lớn mạnh của phong trào công nhân theo khuynh hướng vô sản đã cho thấy: chỉ có con đường cách mạng vô sản mới có thể đưa sự nghiệp giải phóng dân tộc đến thắng lợi.", "Đây chính là bối cảnh trực tiếp dẫn tới sự ra đời của Đảng Cộng sản Việt Nam năm 1930."]},
+    {type:"quiz-mc", q:"Cuộc bãi công nào đánh dấu bước chuyển của phong trào công nhân sang đấu tranh tự giác?", options:["Bãi công Ba Son (1925)","Khởi nghĩa Yên Bái (1930)","Khởi nghĩa Bắc Sơn (1940)","Xô viết Nghệ – Tĩnh (1930)"], correct:0},
+  ]},
+
 });
 })();

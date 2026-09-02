@@ -18,5 +18,12 @@ Object.assign(window.LESSONS, {
     {type:"quiz-fill", sentence:["Vua Hùng chia nước Văn Lang thành ","bộ, đóng đô ở ","."], blanks:["15","Phong Châu"], bank:["15","Phong Châu","10","Cổ Loa"]},
   ]},
 
+  "g5-1-2": { title:"Vương quốc Chăm-pa", slides:[
+    {type:"intro", text:"Ở miền Trung nước ta ngày nay, từng có một vương quốc cổ với những ngôi tháp gạch rất đẹp. Cùng BiBi tìm hiểu Chăm-pa nhé."},
+    {type:"fact", icon:"crown", meta:"Ra đời", title:"Vương quốc Chăm-pa hình thành", text:"Vương quốc Chăm-pa ra đời từ khoảng thế kỉ II, trên dải đất miền Trung Việt Nam ngày nay."},
+    {type:"heritage", icon:"temple", title:"Đền tháp Mỹ Sơn", text:"Người Chăm-pa theo Hin-đu giáo và xây dựng nhiều đền tháp bằng gạch nung rất độc đáo, tiêu biểu nhất là khu di tích Mỹ Sơn (Quảng Nam) — nay là Di sản văn hoá thế giới."},
+    {type:"quiz-mc", q:"Khu di tích đền tháp nổi tiếng của người Chăm-pa nằm ở tỉnh nào?", options:["Quảng Nam (Mỹ Sơn)","Phú Thọ","Hà Nội","Ninh Bình"], correct:0},
+  ]},
+
 });
 })();
