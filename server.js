@@ -38,6 +38,7 @@ const chatRoutes = require('./routes/chat');
 const webhookRoutes = require('./routes/webhook');
 const telegramRoutes = require('./routes/telegram');
 const gameApiRoutes = require('./routes/gameApi');
+const battleApiRoutes = require('./routes/battleApi');
 const englishAirApiRoutes = require('./routes/englishAirApi');
 const proRoutes = require('./routes/pro');
 
@@ -187,6 +188,7 @@ app.use('/kho-tai-nguyen', toolRoutes);
 app.use('/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/game', gameApiRoutes);
+app.use('/api/battle', battleApiRoutes);
 app.use('/api/english-air', englishAirApiRoutes);
 app.use('/pro', proRoutes);
 // Mounted as /fb-events rather than /webhook: hosting's security layer
