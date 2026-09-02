@@ -555,6 +555,62 @@ function nhieuKhacHinh(dung, kho, n, tron) {
   return ra;
 }
 
+/* ═══════════ LUYỆN HỘI THOẠI NGOAI TUYẾN ═══════════
+   "Luyện hội thoại trong bài" từng gọi thẳng qua máy chủ giống hệt chế độ tự
+   do — không mạng là hỏng y hệt nhau, trái với đúng cái lời hứa "chạy được cả khi
+   không có mạng" hiện ngay trên màn hình. Giờ dùng hẳn câu đã đóng gói sẵn trong từng
+   bài học (l.sentences) — không gọi mạng, chấm điểm phát âm cũng đã chạy ngay trên máy
+   (hàm similar()) từ trước rồi, chỉ có phần lấy câu kế tiếp là đang phải chờ máy chủ. */
+function offlineTeachSentences() {
+  const list = lessonsOf(level());
+  // Ưu tiên câu trong những bài đã học xong — đúng thứ học trò đã biết.
+  let bai = list.filter(l => S.done[l.id] && l.sentences && l.sentences.length);
+  if (!bai.length) bai = list.filter(l => l.sentences && l.sentences.length);
+  if (!bai.length) {
+    bai = COURSE.levels.flatMap(x => x.units).flatMap(u => u.lessons)
+      .filter(l => l.sentences && l.sentences.length);
+  }
+  return bai.flatMap(l => l.sentences);
+}
+/* MON.L nói toàn tiếng Anh trong chế độ này (C.lang cố định "en") — giữ nguyên
+   một thứ tiếng trong cùng một câu nói, đừng chẩy tiếng Việt vào kẻo đọc sai giọng. */
+const TEACH_MO_DAU = ["Let's start! Listen and repeat.", "Ready? Here's your first sentence.",
+  "Let's practice speaking together."];
+const TEACH_KHEN = ["Great! Now try this one.", "Nice! Here's the next one.",
+  "Well done! Let's continue."];
+const TEACH_SUA = ["Good try! Listen again and repeat.", "Almost! Let's try once more.",
+  "Close! Say it again with me."];
+const TEACH_HET = "That's all the sentences for today. Great job! See you next time.";
+
+/** Nhắt tay vấn đề: không gọi mạng, lấy câu kế trong hàng đợi đã xáo sẵn. */
+function teachOffline(first, okVuaRoi) {
+  C.busy = false;
+  $("#btnMic").disabled = !SR;
+  if (first) {
+    C.teachQueue = sample(offlineTeachSentences(), 8);
+    C.teachIdx = 0;
+  }
+  const cau = C.teachQueue[C.teachIdx++];
+  if (!cau) {
+    C.target = null;
+    $("#callTask").hidden = true;
+    monSays(TEACH_HET, "Hết câu trong bài rồi! Giỏi lắm, hẹn luyện tiếp lần sau nhé.", () => {
+      if (!C.listening) setState("Tới lượt bạn");
+    });
+    return;
+  }
+  C.target = { en: cau.en, vi: cau.vi || "" };
+  C.asked++;
+  $("#callTarget").textContent = cau.en;
+  $("#callTargetVi").textContent = S.showVi ? (cau.vi || "") : "";
+  $("#callTask").hidden = false;
+  const dau = first ? sample(TEACH_MO_DAU, 1)[0]
+    : sample(okVuaRoi ? TEACH_KHEN : TEACH_SUA, 1)[0];
+  monSays(dau + " " + cau.en, cau.vi || "", () => {
+    if (!C.listening) setState("Tới lượt bạn");
+  });
+}
+
 function currentLessonId() {
   const list = lessonsOf(level());
   return (list.find(l => !S.done[l.id]) || list[list.length - 1]).id;
@@ -2966,7 +3022,9 @@ function startCall(mode) {
   $("#callTimer").textContent = "00:00";
 
   setState("Đang kết nối…");
-  askTutor(true);
+  // "teach" giờ chạy hẳn ở máy, không gọi mạng nữa — đúng như lời hứa trên màn hình.
+  if (mode === "teach") teachOffline(true);
+  else askTutor(true);
 }
 function endCall(finished) {
   stopListening();
@@ -3119,7 +3177,7 @@ function heardReply(text, score) {
     content: text + (coDoc ? ` [Họ đang đọc câu gợi ý "${C.target.en}" — máy nghe khớp ${pct}%]` : ""),
   });
   $("#callTask").hidden = true;
-  askTutor(false);
+  teachOffline(false, ok);
 }
 
 /* ----- micro ----- */
