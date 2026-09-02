@@ -234,11 +234,13 @@ module.exports = function attachBattleSocket(io) {
 
       if (typeof ack === 'function') ack({ ok: true, correct: isCorrect, nextIndex: player.index, myScore: player.score });
 
-      const opponent = Object.values(state.players).find((p) => p.installId !== installId);
-      if (opponent) {
-        const oppSocket = io.sockets.sockets.get(opponent.socketId);
-        if (oppSocket) oppSocket.emit('match:opponentProgress', { score: player.score, index: player.index });
-      }
+      // Bắn qua room thay vì socketId cache từ lúc bắt đầu trận — nếu kết
+      // nối long-polling của đối thủ phải tái lập (rớt rồi nối lại) giữa
+      // chừng, socketId cũ trong state.players không còn map tới ai cả và
+      // gửi thẳng theo id sẽ IM LẶNG THẤT BẠI (không lỗi, không cập nhật
+      // điểm bên kia) — đã thấy đúng lỗi này khi test 2 trình duyệt thật.
+      // Room thì Socket.IO tự theo dõi thành viên hiện tại.
+      socket.broadcast.to(matchId).emit('match:opponentProgress', { score: player.score, index: player.index });
 
       if (player.index >= state.problems.length) {
         const allDone = Object.values(state.players).every((p) => p.index >= state.problems.length);
