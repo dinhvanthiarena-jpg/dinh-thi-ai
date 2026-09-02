@@ -42,15 +42,19 @@ module.exports = function attachBattleSocket(io) {
   // Active matches: matchId -> match state
   const matches = new Map();
 
-  function findOpponentIndex(grade, now) {
-    // Same grade first; after GRADE_WAIT_EXPAND_MS, also accept ±1.
+  function findOpponentIndex(grade, now, installId) {
+    // Same grade first; after GRADE_WAIT_EXPAND_MS, also accept ±1. Never
+    // match a waiter against their own installId — cùng 1 máy/trình duyệt
+    // mở 2 tab test (hoặc lỡ bấm tìm 2 lần) sẽ ghép với chính mình, khiến
+    // state.players chỉ còn 1 khoá (2 lần gán cùng installId đè lên nhau)
+    // và endMatch() crash lúc so sánh điểm — thấy lỗi này thật khi test.
     for (let i = 0; i < queue1v1.length; i++) {
-      if (queue1v1[i].grade === grade) return i;
+      if (queue1v1[i].grade === grade && queue1v1[i].installId !== installId) return i;
     }
     for (let i = 0; i < queue1v1.length; i++) {
       const w = queue1v1[i];
       const waited = now - w.queuedAt;
-      if (Math.abs(w.grade - grade) === 1 && waited > GRADE_WAIT_EXPAND_MS) return i;
+      if (Math.abs(w.grade - grade) === 1 && waited > GRADE_WAIT_EXPAND_MS && w.installId !== installId) return i;
     }
     return -1;
   }
@@ -101,6 +105,19 @@ module.exports = function attachBattleSocket(io) {
     if (state.timer) clearTimeout(state.timer);
 
     const entries = Object.values(state.players);
+    // Phòng thủ: nếu vì lý do gì đó trận chỉ còn đúng 1 người (ví dụ dữ
+    // liệu hỏng, hoặc match tự ghép trùng installId lọt qua được) thì dừng
+    // sạch ở đây thay vì crash lúc so p1/p2.score — trận này coi như huỷ,
+    // không tính thắng/thua/rank.
+    if (entries.length < 2) {
+      matches.delete(matchId);
+      const only = entries[0];
+      if (only) {
+        const socket = io.sockets.sockets.get(only.socketId);
+        if (socket) socket.emit('match:end', { reason: 'invalid', myScore: only.score, opponentScore: 0, outcome: 'draw', rankDelta: 0, coinsDelta: 0, newTier: null, tierName: null });
+      }
+      return;
+    }
     const [p1, p2] = entries;
     let winnerInstallId = null;
     if (p1.score !== p2.score) winnerInstallId = p1.score > p2.score ? p1.installId : p2.installId;
@@ -190,7 +207,7 @@ module.exports = function attachBattleSocket(io) {
         // test 2 trình duyệt thật — điểm số đứng yên dù bấm đúng đáp án).
         socket.data.installId = installId;
         const now = Date.now();
-        const oppIdx = findOpponentIndex(grade, now);
+        const oppIdx = findOpponentIndex(grade, now, installId);
         if (oppIdx === -1) {
           queue1v1.push({ socketId: socket.id, installId, displayName: player.displayName, grade, queuedAt: now });
           if (typeof ack === 'function') ack({ ok: true, waiting: true });
