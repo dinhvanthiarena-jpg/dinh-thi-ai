@@ -2,6 +2,7 @@ const GameInstall = require('../models/GameInstall');
 const PushSubscription = require('../models/PushSubscription');
 const homeworkHelperService = require('../services/homeworkHelperService');
 const boomChatService = require('../services/boomChatService');
+const tk = require('../services/taiKhoanAppService');
 
 // Called by the desktop game on every launch. Upserts by installId so the
 // same machine always updates one row instead of creating duplicates.
@@ -109,6 +110,46 @@ exports.pushUnsubscribe = async (req, res) => {
   }
   await PushSubscription.destroy({ where: { endpoint: endpoint.trim() } });
   res.json({ ok: true });
+};
+
+/* ===== Tài khoản (đăng ký / đăng nhập bằng số điện thoại) =====
+ * Cùng cơ chế và cùng bảng users với English Air (taiKhoanAppService) —
+ * dùng chung cookie `token` do middleware/auth.js đọc, không cần hệ thống
+ * tài khoản riêng cho từng app. */
+exports.toi = async (req, res) => {
+  if (!req.user) return res.json({ dangNhap: false });
+  res.json({ dangNhap: true, ...tk.goiVe(req.user) });
+};
+
+exports.dangKy = async (req, res) => {
+  try {
+    if (req.user) return res.json({ dangNhap: true, ...tk.goiVe(req.user) });
+    const { ten, sdt, matKhau } = req.body || {};
+    const kq = await tk.dangKySdt({ ten, sdt, matKhau });
+    if (kq.loi) return res.status(400).json({ error: kq.loi });
+    tk.datCookie(res, kq.user);
+    res.json({ dangNhap: true, ...tk.goiVe(kq.user) });
+  } catch (e) {
+    console.error('[game/dang-ky]', e.message);
+    res.status(500).json({ error: 'Có lỗi ở máy chủ, bạn thử lại nhé.' });
+  }
+};
+
+exports.dangNhap = async (req, res) => {
+  try {
+    const kq = await tk.dangNhapSdt(req.body || {});
+    if (kq.loi) return res.status(400).json({ error: kq.loi });
+    tk.datCookie(res, kq.user);
+    res.json({ dangNhap: true, ...tk.goiVe(kq.user) });
+  } catch (e) {
+    console.error('[game/dang-nhap]', e.message);
+    res.status(500).json({ error: 'Có lỗi ở máy chủ, bạn thử lại nhé.' });
+  }
+};
+
+exports.thoat = async (req, res) => {
+  res.clearCookie('token');
+  res.json({ dangNhap: false });
 };
 
 // One turn of the "Gọi Mon.L" free-conversation call screen.

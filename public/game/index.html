@@ -749,6 +749,14 @@
       <label class="settings-label" for="teacherNameInput">Tên giáo viên</label>
       <input type="text" id="teacherNameInput" class="license-input settings-name-input" maxlength="60" autocomplete="off" placeholder="Thầy/Cô ..." />
 
+      <div class="settings-notif-row" id="settingsAccountRow" hidden>
+        <div>
+          <p class="settings-label" style="margin:0" id="tkTen">Chưa có tài khoản</p>
+          <p class="settings-desc" id="tkSdt" style="margin:2px 0 0;">Đăng ký để giữ bậc thi đấu trên mọi máy</p>
+        </div>
+        <button class="btn btn-secondary btn-lg" id="btnThoat">Đăng ký</button>
+      </div>
+
       <div class="settings-notif-row" id="settingsNotifRow" hidden>
         <div>
           <p class="settings-label" style="margin:0">Thông báo cập nhật</p>
@@ -759,6 +767,27 @@
 
       <button class="btn btn-primary btn-xl" id="btnSaveSettings">Lưu thay đổi</button>
       <p class="settings-saved-msg" id="settingsSavedMsg" hidden>Đã lưu!</p>
+    </div>
+  </div>
+
+  <!-- CỬA VÀO: ĐĂNG KÝ / ĐĂNG NHẬP (chỉ bản web — bản desktop dùng mã kích hoạt riêng) -->
+  <div class="modal-overlay" id="cong" hidden role="dialog" aria-modal="true" aria-labelledby="congTitle">
+    <div class="modal-box">
+      <h2 id="congTitle">Chào bạn, đây là Mon-Maths</h2>
+      <p class="settings-desc" id="congSub">Đăng ký để giữ điểm và bậc thi đấu của con trên mọi máy.</p>
+      <form id="congForm" novalidate>
+        <label class="settings-label" id="oTen" for="fTen">Tên của con</label>
+        <input type="text" id="fTen" class="license-input settings-name-input" autocomplete="name" maxlength="60" placeholder="Ví dụ: Bin" />
+        <label class="settings-label" for="fSdt">Số điện thoại (của bố/mẹ hoặc thầy/cô)</label>
+        <input type="tel" id="fSdt" class="license-input settings-name-input" autocomplete="tel" inputmode="numeric" maxlength="15" placeholder="0912345678" />
+        <label class="settings-label" for="fMk">Mật khẩu</label>
+        <input type="password" id="fMk" class="license-input settings-name-input" autocomplete="new-password" maxlength="72" placeholder="Ít nhất 6 ký tự" />
+        <p class="license-error" id="congLoi" hidden></p>
+        <button class="btn btn-primary btn-xl" id="congGui" type="submit">Đăng ký</button>
+      </form>
+      <button class="btn btn-text btn-block" id="congDoi" type="button">Đã có tài khoản? Đăng nhập</button>
+      <button class="btn btn-text btn-block" id="congXemThu" type="button">Chơi thử trước, đăng ký sau</button>
+      <p class="settings-desc" id="congFine" style="margin-top:14px; font-size:0.8rem;">Chỉ giữ tên và số điện thoại để nhận ra con, không dùng vào việc gì khác.</p>
     </div>
   </div>
 

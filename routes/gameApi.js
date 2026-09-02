@@ -26,11 +26,21 @@ const pushLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 30 });
 // conversation, capped well below what would meaningfully burn tokens.
 const boomChatLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 40 });
 
+// Đăng nhập sai thì chặn dần lại, để không ai ngồi dò mật khẩu của người
+// khác — cùng ngưỡng với /api/english-air/dang-nhap.
+const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 8 });
+
 router.post('/ping', pingLimiter, gameApiController.ping);
 router.post('/homework-help', homeworkLimiter, homeworkUpload.single('image'), gameApiController.homeworkHelp);
 router.get('/vapid-public-key', gameApiController.vapidPublicKey);
 router.post('/push-subscribe', pushLimiter, gameApiController.pushSubscribe);
 router.post('/push-unsubscribe', pushLimiter, gameApiController.pushUnsubscribe);
 router.post('/boom-chat', boomChatLimiter, gameApiController.boomChat);
+
+// Tài khoản (đăng ký / đăng nhập bằng số điện thoại) — port từ English Air.
+router.get('/toi', gameApiController.toi);
+router.post('/dang-ky', gameApiController.dangKy);
+router.post('/dang-nhap', loginLimiter, gameApiController.dangNhap);
+router.post('/thoat', gameApiController.thoat);
 
 module.exports = router;

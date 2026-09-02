@@ -3496,6 +3496,166 @@
   });
   setMascot($('mascotLicense'), 'sad');
 
+  /* ================= TÀI KHOẢN (đăng ký / đăng nhập) =================
+     Chỉ áp dụng cho bản web — bản desktop dùng mã kích hoạt riêng qua
+     electronAPI, không đi qua cookie phiên của web. App và trang web cùng
+     tên miền nên dùng chung một phiên: gọi kèm credentials là cookie đăng
+     nhập tự đi theo, client không phải giữ mật khẩu hay token nào (port từ
+     English Air — cùng API tài khoản, cùng bảng users). */
+  let webCheckAccountGate = () => {};
+  if (IS_WEB) {
+    const TK_URL = '../api/game';
+    const TK = { toi: null, kieu: 'dangKy' };
+    const congModal = $('cong');
+    const congForm = $('congForm');
+    const congTitle = $('congTitle');
+    const congSub = $('congSub');
+    const oTen = $('oTen');
+    const fTen = $('fTen');
+    const fSdt = $('fSdt');
+    const fMk = $('fMk');
+    const congLoi = $('congLoi');
+    const congGui = $('congGui');
+    const congDoi = $('congDoi');
+    const congXemThu = $('congXemThu');
+    const settingsAccountRow = $('settingsAccountRow');
+    const tkTen = $('tkTen');
+    const tkSdt = $('tkSdt');
+    const btnThoat = $('btnThoat');
+
+    const dangKyDangMo = () => TK.kieu === 'dangKy';
+
+    function loiCong(msg) {
+      congLoi.textContent = msg || '';
+      congLoi.hidden = !msg;
+    }
+
+    function veCong() {
+      const dk = dangKyDangMo();
+      congTitle.textContent = dk ? 'Chào bạn, đây là Mon-Maths' : 'Chào bạn quay lại';
+      congSub.textContent = dk
+        ? 'Đăng ký để giữ điểm và bậc thi đấu của con trên mọi máy.'
+        : 'Nhập số điện thoại và mật khẩu để chơi tiếp.';
+      oTen.hidden = !dk;
+      fTen.required = dk;
+      fMk.autocomplete = dk ? 'new-password' : 'current-password';
+      fMk.placeholder = dk ? 'Ít nhất 6 ký tự' : 'Mật khẩu của bạn';
+      congGui.textContent = dk ? 'Đăng ký' : 'Đăng nhập';
+      congDoi.textContent = dk ? 'Đã có tài khoản? Đăng nhập' : 'Chưa có tài khoản? Đăng ký';
+      loiCong('');
+    }
+
+    function moCong() {
+      congModal.hidden = false;
+      veCong();
+      setTimeout(() => (dangKyDangMo() ? fTen : fSdt).focus(), 80);
+    }
+    function dongCong() { congModal.hidden = true; }
+
+    async function hoiTaiKhoan() {
+      try {
+        const r = await fetch(TK_URL + '/toi', { credentials: 'same-origin' });
+        TK.toi = await r.json();
+      } catch (e) {
+        // Mất mạng thì đừng chặn — cho vào chơi, tiến độ vẫn ở trên máy.
+        TK.toi = { dangNhap: false, ngoaiTuyen: true };
+      }
+      return TK.toi;
+    }
+
+    function veTheTaiKhoan() {
+      if (!settingsAccountRow) return;
+      settingsAccountRow.hidden = false;
+      const t = TK.toi;
+      if (!t || !t.dangNhap) {
+        tkTen.textContent = 'Chưa có tài khoản';
+        tkSdt.textContent = 'Đăng ký để giữ bậc thi đấu trên mọi máy';
+        btnThoat.textContent = 'Đăng ký';
+        return;
+      }
+      tkTen.textContent = t.ten || 'Tài khoản của bạn';
+      tkSdt.textContent = t.sdt || '';
+      btnThoat.textContent = 'Đăng xuất';
+    }
+
+    congXemThu.addEventListener('click', () => {
+      sfx.click();
+      localStorage.setItem('tvc_xemThu', '1');
+      dongCong();
+    });
+
+    congDoi.addEventListener('click', () => {
+      sfx.click();
+      TK.kieu = dangKyDangMo() ? 'dangNhap' : 'dangKy';
+      veCong();
+      (dangKyDangMo() ? fTen : fSdt).focus();
+    });
+
+    fSdt.addEventListener('input', () => {
+      const v = fSdt.value.replace(/[^0-9+ ]/g, '');
+      if (v !== fSdt.value) fSdt.value = v;
+    });
+
+    function neuThieu(el, msg) { el.focus(); loiCong(msg); }
+
+    congForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (congGui.disabled) return;
+      const dk = dangKyDangMo();
+      const ten = fTen.value.trim();
+      const sdt = fSdt.value.trim();
+      const mk = fMk.value;
+      if (dk && !ten) return neuThieu(fTen, 'Con tên là gì nhỉ?');
+      if (!sdt) return neuThieu(fSdt, 'Con nhập số điện thoại nhé.');
+      if (!mk) return neuThieu(fMk, 'Con nhập mật khẩu nhé.');
+      if (dk && mk.length < 6) return neuThieu(fMk, 'Mật khẩu cần ít nhất 6 ký tự.');
+
+      congGui.disabled = true;
+      congGui.textContent = dk ? 'Đang tạo tài khoản…' : 'Đang vào…';
+      loiCong('');
+      try {
+        const r = await fetch(TK_URL + (dk ? '/dang-ky' : '/dang-nhap'), {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ ten, sdt, matKhau: mk }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) { loiCong(j.error || 'Chưa xong được, con thử lại nhé.'); return; }
+        TK.toi = j;
+        fMk.value = '';
+        dongCong();
+        veTheTaiKhoan();
+        sfx.correct();
+      } catch (e) {
+        loiCong('Không nối được máy chủ. Con kiểm tra mạng rồi thử lại nhé.');
+      } finally {
+        congGui.disabled = false;
+        congGui.textContent = dangKyDangMo() ? 'Đăng ký' : 'Đăng nhập';
+      }
+    });
+
+    btnThoat.addEventListener('click', async () => {
+      sfx.click();
+      if (!TK.toi || !TK.toi.dangNhap) { TK.kieu = 'dangKy'; moCong(); return; }
+      if (!window.confirm('Đăng xuất khỏi tài khoản này? Điểm và bậc thi đấu đã lưu vẫn còn khi con đăng nhập lại.')) return;
+      try { await fetch(TK_URL + '/thoat', { method: 'POST', credentials: 'same-origin' }); } catch (e) { /* mất mạng thì thôi, cookie tự hết hạn sau */ }
+      TK.toi = { dangNhap: false };
+      TK.kieu = 'dangNhap';
+      veTheTaiKhoan();
+      moCong();
+    });
+
+    // Chưa đăng nhập thì chặn ở cửa; mất mạng hoặc đã bấm "chơi thử" thì
+    // cho vào để không kẹt người chơi ngay từ đầu.
+    webCheckAccountGate = async function webCheckAccountGate() {
+      const t = await hoiTaiKhoan();
+      veTheTaiKhoan();
+      if (t.dangNhap || t.ngoaiTuyen || localStorage.getItem('tvc_xemThu') === '1') return;
+      moCong();
+    };
+  }
+
   /* ================= TEACHER SETTINGS ================= */
   const settingsModal = $('settingsModal');
   const settingsAvatarPreview = $('settingsAvatarPreview');
@@ -4800,6 +4960,7 @@
     if (IS_WEB) webSendPing();
     applyRandomTheme();
     showScreen('home');
+    if (IS_WEB) webCheckAccountGate();
     if (IS_WEB && 'serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
