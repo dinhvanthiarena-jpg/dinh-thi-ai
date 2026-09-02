@@ -3505,7 +3505,7 @@
   let webCheckAccountGate = () => {};
   if (IS_WEB) {
     const TK_URL = '../api/game';
-    const TK = { toi: null, kieu: 'dangKy' };
+    const TK = { toi: null, kieu: 'dangKy', otpToken: null, otpEmail: '' };
     const congModal = $('cong');
     const congForm = $('congForm');
     const congTitle = $('congTitle');
@@ -3513,11 +3513,21 @@
     const oTen = $('oTen');
     const fTen = $('fTen');
     const fSdt = $('fSdt');
+    const oEmail = $('oEmail');
+    const fEmail = $('fEmail');
     const fMk = $('fMk');
     const congLoi = $('congLoi');
     const congGui = $('congGui');
     const congDoi = $('congDoi');
     const congXemThu = $('congXemThu');
+    const congChanDuoi = $('congChanDuoi');
+    const congOtpForm = $('congOtpForm');
+    const congOtpSub = $('congOtpSub');
+    const fMa = $('fMa');
+    const congOtpLoi = $('congOtpLoi');
+    const congOtpXacNhan = $('congOtpXacNhan');
+    const congOtpGuiLai = $('congOtpGuiLai');
+    const congOtpQuayLai = $('congOtpQuayLai');
     const settingsAccountRow = $('settingsAccountRow');
     const tkTen = $('tkTen');
     const tkSdt = $('tkSdt');
@@ -3529,6 +3539,10 @@
       congLoi.textContent = msg || '';
       congLoi.hidden = !msg;
     }
+    function loiOtp(msg) {
+      congOtpLoi.textContent = msg || '';
+      congOtpLoi.hidden = !msg;
+    }
 
     function veCong() {
       const dk = dangKyDangMo();
@@ -3538,6 +3552,8 @@
         : 'Nhập số điện thoại và mật khẩu để chơi tiếp.';
       oTen.hidden = !dk;
       fTen.required = dk;
+      oEmail.hidden = !dk;
+      fEmail.required = dk;
       fMk.autocomplete = dk ? 'new-password' : 'current-password';
       fMk.placeholder = dk ? 'Ít nhất 6 ký tự' : 'Mật khẩu của bạn';
       congGui.textContent = dk ? 'Đăng ký' : 'Đăng nhập';
@@ -3545,9 +3561,27 @@
       loiCong('');
     }
 
+    // Bước 1 (tên/sđt/email/mật khẩu, hoặc sđt/mật khẩu nếu đăng nhập).
+    function moBuoc1() {
+      congOtpForm.hidden = true;
+      congForm.hidden = false;
+      congChanDuoi.hidden = false;
+      veCong();
+    }
+    // Bước 2 (nhập mã OTP vừa gửi qua email) — chỉ khi đăng ký.
+    function moBuocOtp(email) {
+      congForm.hidden = true;
+      congChanDuoi.hidden = true;
+      congOtpForm.hidden = false;
+      congOtpSub.textContent = `Nhập mã 6 số vừa gửi tới ${email}.`;
+      loiOtp('');
+      fMa.value = '';
+      setTimeout(() => fMa.focus(), 80);
+    }
+
     function moCong() {
       congModal.hidden = false;
-      veCong();
+      moBuoc1();
       setTimeout(() => (dangKyDangMo() ? fTen : fSdt).focus(), 80);
     }
     function dongCong() { congModal.hidden = true; }
@@ -3578,6 +3612,14 @@
       btnThoat.textContent = 'Đăng xuất';
     }
 
+    function xongDangNhap(j) {
+      TK.toi = j;
+      fMk.value = '';
+      dongCong();
+      veTheTaiKhoan();
+      sfx.correct();
+    }
+
     congXemThu.addEventListener('click', () => {
       sfx.click();
       localStorage.setItem('tvc_xemThu', '1');
@@ -3595,38 +3637,50 @@
       const v = fSdt.value.replace(/[^0-9+ ]/g, '');
       if (v !== fSdt.value) fSdt.value = v;
     });
+    fMa.addEventListener('input', () => {
+      const v = fMa.value.replace(/[^0-9]/g, '').slice(0, 6);
+      if (v !== fMa.value) fMa.value = v;
+    });
 
     function neuThieu(el, msg) { el.focus(); loiCong(msg); }
 
+    // Đăng ký giờ qua 2 bước — bấm "Đăng ký" chỉ gửi mã OTP tới email, chưa
+    // tạo tài khoản thật; tài khoản chỉ được tạo sau khi xác nhận đúng mã ở
+    // congOtpForm bên dưới. Đăng nhập (tài khoản đã có sẵn) thì vẫn 1 bước
+    // như cũ, không cần OTP.
     congForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (congGui.disabled) return;
       const dk = dangKyDangMo();
       const ten = fTen.value.trim();
       const sdt = fSdt.value.trim();
+      const email = fEmail.value.trim();
       const mk = fMk.value;
       if (dk && !ten) return neuThieu(fTen, 'Con tên là gì nhỉ?');
       if (!sdt) return neuThieu(fSdt, 'Con nhập số điện thoại nhé.');
+      if (dk && !email) return neuThieu(fEmail, 'Con nhập email để nhận mã xác nhận nhé.');
       if (!mk) return neuThieu(fMk, 'Con nhập mật khẩu nhé.');
       if (dk && mk.length < 6) return neuThieu(fMk, 'Mật khẩu cần ít nhất 6 ký tự.');
 
       congGui.disabled = true;
-      congGui.textContent = dk ? 'Đang tạo tài khoản…' : 'Đang vào…';
+      congGui.textContent = dk ? 'Đang gửi mã…' : 'Đang vào…';
       loiCong('');
       try {
-        const r = await fetch(TK_URL + (dk ? '/dang-ky' : '/dang-nhap'), {
+        const r = await fetch(TK_URL + (dk ? '/dang-ky-yeu-cau' : '/dang-nhap'), {
           method: 'POST',
           credentials: 'same-origin',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ ten, sdt, matKhau: mk }),
+          body: JSON.stringify(dk ? { ten, sdt, matKhau: mk, email } : { sdt, matKhau: mk }),
         });
         const j = await r.json().catch(() => ({}));
         if (!r.ok) { loiCong(j.error || 'Chưa xong được, con thử lại nhé.'); return; }
-        TK.toi = j;
-        fMk.value = '';
-        dongCong();
-        veTheTaiKhoan();
-        sfx.correct();
+        if (dk) {
+          TK.otpToken = j.token;
+          TK.otpEmail = j.email || email;
+          moBuocOtp(TK.otpEmail);
+        } else {
+          xongDangNhap(j);
+        }
       } catch (e) {
         loiCong('Không nối được máy chủ. Con kiểm tra mạng rồi thử lại nhé.');
       } finally {
@@ -3634,6 +3688,56 @@
         congGui.textContent = dangKyDangMo() ? 'Đăng ký' : 'Đăng nhập';
       }
     });
+
+    congOtpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (congOtpXacNhan.disabled) return;
+      const code = fMa.value.trim();
+      if (code.length !== 6) return loiOtp('Mã gồm 6 chữ số, con kiểm tra lại nhé.');
+
+      congOtpXacNhan.disabled = true;
+      congOtpXacNhan.textContent = 'Đang xác nhận…';
+      loiOtp('');
+      try {
+        const r = await fetch(TK_URL + '/dang-ky-xac-nhan', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ token: TK.otpToken, code }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) { loiOtp(j.error || 'Chưa xong được, con thử lại nhé.'); return; }
+        xongDangNhap(j);
+      } catch (e) {
+        loiOtp('Không nối được máy chủ. Con kiểm tra mạng rồi thử lại nhé.');
+      } finally {
+        congOtpXacNhan.disabled = false;
+        congOtpXacNhan.textContent = 'Xác nhận';
+      }
+    });
+
+    congOtpGuiLai.addEventListener('click', async () => {
+      sfx.click();
+      if (congOtpGuiLai.disabled) return;
+      congOtpGuiLai.disabled = true;
+      loiOtp('');
+      try {
+        const r = await fetch(TK_URL + '/dang-ky-gui-lai', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ token: TK.otpToken }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) loiOtp(j.error || 'Chưa gửi lại được, con thử lại nhé.');
+      } catch (e) {
+        loiOtp('Không nối được máy chủ.');
+      } finally {
+        setTimeout(() => { congOtpGuiLai.disabled = false; }, 3000);
+      }
+    });
+
+    congOtpQuayLai.addEventListener('click', () => { sfx.click(); moBuoc1(); });
 
     btnThoat.addEventListener('click', async () => {
       sfx.click();

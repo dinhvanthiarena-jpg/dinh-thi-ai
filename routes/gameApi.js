@@ -30,6 +30,10 @@ const boomChatLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 40 });
 // khác — cùng ngưỡng với /api/english-air/dang-nhap.
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 8 });
 
+// Mỗi lần yêu cầu mã là 1 email gửi đi thật — giới hạn để không ai lợi
+// dụng ô đăng ký để spam email người khác.
+const otpRequestLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5 });
+
 router.post('/ping', pingLimiter, gameApiController.ping);
 router.post('/homework-help', homeworkLimiter, homeworkUpload.single('image'), gameApiController.homeworkHelp);
 router.get('/vapid-public-key', gameApiController.vapidPublicKey);
@@ -38,8 +42,12 @@ router.post('/push-unsubscribe', pushLimiter, gameApiController.pushUnsubscribe)
 router.post('/boom-chat', boomChatLimiter, gameApiController.boomChat);
 
 // Tài khoản (đăng ký / đăng nhập bằng số điện thoại) — port từ English Air.
+// Đăng ký giờ qua 2 bước, xác nhận bằng mã OTP gửi email trước khi tạo
+// tài khoản thật (yêu-cầu -> gửi lại nếu cần -> xác-nhận).
 router.get('/toi', gameApiController.toi);
-router.post('/dang-ky', gameApiController.dangKy);
+router.post('/dang-ky-yeu-cau', otpRequestLimiter, gameApiController.dangKyYeuCau);
+router.post('/dang-ky-gui-lai', otpRequestLimiter, gameApiController.dangKyGuiLai);
+router.post('/dang-ky-xac-nhan', loginLimiter, gameApiController.dangKyXacNhan);
 router.post('/dang-nhap', loginLimiter, gameApiController.dangNhap);
 router.post('/thoat', gameApiController.thoat);
 

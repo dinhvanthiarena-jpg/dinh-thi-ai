@@ -3,6 +3,7 @@ const PushSubscription = require('../models/PushSubscription');
 const homeworkHelperService = require('../services/homeworkHelperService');
 const boomChatService = require('../services/boomChatService');
 const tk = require('../services/taiKhoanAppService');
+const otp = require('../services/otpDangKyService');
 
 // Called by the desktop game on every launch. Upserts by installId so the
 // same machine always updates one row instead of creating duplicates.
@@ -121,16 +122,43 @@ exports.toi = async (req, res) => {
   res.json({ dangNhap: true, ...tk.goiVe(req.user) });
 };
 
-exports.dangKy = async (req, res) => {
+// Đăng ký 2 bước, xác nhận bằng mã OTP gửi qua email trước khi tạo tài
+// khoản thật — bước 1 chỉ giữ tạm dữ liệu, chưa ghi vào bảng users.
+exports.dangKyYeuCau = async (req, res) => {
   try {
     if (req.user) return res.json({ dangNhap: true, ...tk.goiVe(req.user) });
-    const { ten, sdt, matKhau } = req.body || {};
-    const kq = await tk.dangKySdt({ ten, sdt, matKhau });
+    const { ten, sdt, matKhau, email } = req.body || {};
+    const kq = await otp.yeuCauDangKy({ ten, sdt, matKhau, email });
+    if (kq.loi) return res.status(400).json({ error: kq.loi });
+    res.json({ ok: true, token: kq.token, email: kq.email });
+  } catch (e) {
+    console.error('[game/dang-ky-yeu-cau]', e.message);
+    res.status(500).json({ error: 'Có lỗi ở máy chủ, bạn thử lại nhé.' });
+  }
+};
+
+exports.dangKyGuiLai = async (req, res) => {
+  try {
+    const { token } = req.body || {};
+    const kq = await otp.guiLai(token);
+    if (kq.loi) return res.status(400).json({ error: kq.loi });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('[game/dang-ky-gui-lai]', e.message);
+    res.status(500).json({ error: 'Có lỗi ở máy chủ, bạn thử lại nhé.' });
+  }
+};
+
+exports.dangKyXacNhan = async (req, res) => {
+  try {
+    if (req.user) return res.json({ dangNhap: true, ...tk.goiVe(req.user) });
+    const { token, code } = req.body || {};
+    const kq = await otp.xacNhanDangKy({ token, code });
     if (kq.loi) return res.status(400).json({ error: kq.loi });
     tk.datCookie(res, kq.user);
     res.json({ dangNhap: true, ...tk.goiVe(kq.user) });
   } catch (e) {
-    console.error('[game/dang-ky]', e.message);
+    console.error('[game/dang-ky-xac-nhan]', e.message);
     res.status(500).json({ error: 'Có lỗi ở máy chủ, bạn thử lại nhé.' });
   }
 };
