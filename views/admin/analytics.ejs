@@ -53,6 +53,29 @@
     </div>
   </div>
 
+  <div class="card p-6">
+    <h2 class="text-lg font-bold text-ink mb-1">Lượt xem bài viết — theo nguồn truy cập</h2>
+    <p class="text-xs text-muted mb-4">30 ngày gần nhất — Google, Facebook, quảng cáo, hay trực tiếp</p>
+    <% if (!viewsBySource.length) { %>
+      <p class="py-6 text-center text-sm text-muted">Chưa có dữ liệu.</p>
+    <% } else { %>
+      <div class="space-y-3">
+        <% viewsBySource.forEach(function(row) { %>
+          <% const pct = viewsBySourceTotal ? Math.round((row.total / viewsBySourceTotal) * 100) : 0; %>
+          <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+              <span class="text-ink font-medium"><%= row.source %></span>
+              <span class="text-muted"><%= row.total %> lượt (<%= pct %>%)</span>
+            </div>
+            <div class="h-2 rounded-full bg-primary-50 overflow-hidden">
+              <div class="h-full rounded-full bg-primary-600" style="width: <%= pct %>%"></div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+
   <div class="grid sm:grid-cols-2 gap-6">
     <div class="card p-6">
       <h2 class="text-lg font-bold text-ink mb-1">Lượt bấm link Shopee — theo ngày</h2>

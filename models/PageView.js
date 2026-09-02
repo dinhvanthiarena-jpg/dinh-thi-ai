@@ -9,6 +9,7 @@ const PageView = sequelize.define(
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     path: { type: DataTypes.STRING, allowNull: false },
     postSlug: { type: DataTypes.STRING, allowNull: true },
+    source: { type: DataTypes.STRING, allowNull: true },
   },
   {
     tableName: 'page_views',

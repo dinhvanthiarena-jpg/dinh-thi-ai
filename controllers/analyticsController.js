@@ -25,18 +25,33 @@ async function groupByMonth(table, months) {
   return rows;
 }
 
+async function groupBySource(table, days) {
+  const [rows] = await sequelize.query(
+    `SELECT COALESCE(source, 'Trực tiếp / Không xác định') AS source, COUNT(*) AS total
+     FROM ${table}
+     WHERE createdAt >= (NOW() - INTERVAL ${days} DAY)
+     GROUP BY COALESCE(source, 'Trực tiếp / Không xác định')
+     ORDER BY total DESC`
+  );
+  return rows;
+}
+
 exports.dashboard = async (req, res) => {
   const [
     viewsByDay,
     viewsByMonth,
     clicksByDay,
     clicksByMonth,
+    viewsBySource,
   ] = await Promise.all([
     groupByDay('page_views', 30),
     groupByMonth('page_views', 12),
     groupByDay('affiliate_clicks', 30),
     groupByMonth('affiliate_clicks', 12),
+    groupBySource('page_views', 30),
   ]);
+
+  const viewsBySourceTotal = viewsBySource.reduce((sum, row) => sum + Number(row.total), 0);
 
   res.render('admin/analytics', {
     title: 'Thống kê lượt xem & lượt bấm',
@@ -44,5 +59,7 @@ exports.dashboard = async (req, res) => {
     viewsByMonth,
     clicksByDay,
     clicksByMonth,
+    viewsBySource,
+    viewsBySourceTotal,
   });
 };
