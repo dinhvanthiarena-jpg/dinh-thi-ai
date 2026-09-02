@@ -2999,9 +2999,12 @@ function startCall(mode) {
   $("#callHeard").hidden = true;
   $("#callChoices").hidden = true;
   $("#callTask").hidden = true;
-  // Nói chuyện tự do thì LUÔN để sẵn ô gõ chữ: micro trên iPhone hay hỏng,
-  // không có đường nào khác thì người học ngồi im không đáp lại được.
-  $("#callType").hidden = mode === "free" ? false : !!SR;
+  // Nói chuyện tự do thì LUÔN để sẵn ô gõ chữ. Các chế độ còn lại thì chỉ ẩn ô gõ khi
+  // SR CÓ THẬT — nhưng trên iPhone mở từ màn hình chính, `SR` vẫn tồn tại (đối tượng có
+  // thật) nhưng KHÔNG CHẠY được — đây chính là chỗ thầy báo "bấm mic không ghi được và
+  // không có phản hồi": ô gõ bị ẩn đi vì code tưởng có SR là mic chạy được, người học không
+  // còn đường nào khác để trả lời, phải chờ tới 60 giây mới thấy gì.
+  $("#callType").hidden = (mode === "free" || isIosStandalone()) ? false : !!SR;
   $("#btnMic").disabled = !SR;
   $("#callYou").hidden = true;
   $("#call").classList.remove("show-log");
