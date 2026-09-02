@@ -308,10 +308,53 @@ const c2 = {
       ],
     },
     {
+      id: "vn-l8-c1-l3b",
+      title: "Khoáng sản Việt Nam",
+      goal: "Các loại khoáng sản chính và sự phân bố",
+      teach: [
+        { t: "intro", title: "Việt Nam có nhiều loại khoáng sản",
+          body: "Nhờ lịch sử địa chất lâu dài và phức tạp, Việt Nam có nguồn khoáng sản khá phong phú về chủng loại, tuy phần lớn có trữ lượng vừa và nhỏ. Một số khoáng sản có trữ lượng lớn, mang tầm cỡ khu vực và thế giới.",
+          bullets: ["Than đá: tập trung nhiều nhất ở Quảng Ninh", "Dầu khí: chủ yếu ở thềm lục địa phía Nam", "Bô-xít: trữ lượng lớn ở Tây Nguyên", "Sắt, apatit, đá vôi: phân bố ở nhiều tỉnh miền núi phía Bắc"] },
+        { t: "topic", kicker: "Nhiên liệu", title: "Than đá & dầu khí — nguồn năng lượng chủ lực",
+          body: "Quảng Ninh là vùng than đá lớn nhất cả nước, khai thác từ hơn 100 năm nay. Dầu khí được khai thác chủ yếu ở thềm lục địa phía Nam, đóng góp quan trọng cho ngân sách và xuất khẩu.",
+          facts: [{ label: "Than đá", value: "Quảng Ninh" }, { label: "Dầu khí", value: "Thềm lục địa phía Nam" }] },
+        { t: "topic", kicker: "Kim loại", title: "Bô-xít Tây Nguyên",
+          body: "Tây Nguyên có trữ lượng bô-xít (nguyên liệu sản xuất nhôm) vào loại lớn hàng đầu thế giới, hình thành từ quá trình phong hoá đá badan trong điều kiện khí hậu nhiệt đới ẩm.",
+          facts: [{ label: "Bô-xít", value: "Tây Nguyên, trữ lượng lớn" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Vùng than đá lớn nhất Việt Nam ở đâu?", options: ["Quảng Ninh", "Tây Nguyên", "Cà Mau", "Lâm Đồng"], answer: 0 },
+        { t: "choice", q: "Dầu khí Việt Nam khai thác chủ yếu ở đâu?", options: ["Thềm lục địa phía Nam", "Miền núi phía Bắc", "Tây Nguyên", "Đồng bằng sông Hồng"], answer: 0 },
+        { t: "choice", q: "Bô-xít — nguyên liệu sản xuất nhôm — tập trung nhiều nhất ở đâu?", options: ["Tây Nguyên", "Quảng Ninh", "Đồng bằng sông Cửu Long", "Hải Phòng"], answer: 0 },
+        { t: "truefalse", q: "Việt Nam có nguồn khoáng sản khá phong phú về chủng loại.", answer: true },
+        { t: "drag", q: "Kéo mỗi khoáng sản vào đúng vùng khai thác chính.",
+          buckets: ["Quảng Ninh", "Tây Nguyên", "Thềm lục địa phía Nam"],
+          items: [{ label: "Than đá", bucket: 0 }, { label: "Bô-xít", bucket: 1 }, { label: "Dầu khí", bucket: 2 }] },
+      ],
+    },
+    {
+      id: "vn-l8-c1-l3c",
+      title: "Thổ nhưỡng & sinh vật Việt Nam",
+      goal: "Đặc điểm đất và sinh vật nhiệt đới",
+      teach: [
+        { t: "topic", kicker: "Thổ nhưỡng", title: "Đất feralit chiếm phần lớn diện tích",
+          body: "Trong điều kiện khí hậu nhiệt đới ẩm, đất feralit (đất đỏ vàng) hình thành phổ biến ở vùng đồi núi, khá nghèo dinh dưỡng nhưng thích hợp trồng cây công nghiệp lâu năm. Đất phù sa màu mỡ hơn nhiều, tập trung ở các đồng bằng, thích hợp trồng lúa nước.",
+          facts: [{ label: "Đất đồi núi", value: "Feralit (đỏ vàng)" }, { label: "Đất đồng bằng", value: "Phù sa màu mỡ" }] },
+        { t: "culture", title: "Sinh vật nhiệt đới phong phú",
+          body: "Việt Nam có hệ sinh vật nhiệt đới rất đa dạng, nhiều loài đặc hữu quý hiếm. Rừng nhiệt đới gió mùa là kiểu rừng phổ biến nhất, tuy diện tích rừng tự nhiên đã suy giảm nhiều do khai thác, cần được bảo vệ và phục hồi." },
+      ],
+      quiz: [
+        { t: "choice", q: "Loại đất phổ biến nhất ở vùng đồi núi Việt Nam là gì?", options: ["Đất feralit (đỏ vàng)", "Đất phù sa", "Đất cát", "Đất mặn"], answer: 0 },
+        { t: "choice", q: "Đất phù sa màu mỡ tập trung chủ yếu ở đâu?", options: ["Các đồng bằng", "Vùng núi cao", "Cao nguyên", "Ven biển miền Trung"], answer: 0 },
+        { t: "truefalse", q: "Việt Nam có hệ sinh vật nhiệt đới rất đa dạng, nhiều loài đặc hữu.", answer: true },
+        { t: "choice", q: "Kiểu rừng phổ biến nhất ở Việt Nam là gì?", options: ["Rừng nhiệt đới gió mùa", "Rừng lá kim ôn đới", "Rừng ngập mặn duy nhất", "Không có rừng"], answer: 0 },
+      ],
+    },
+    {
       id: "vn-l8-c1-l4",
       title: "Ôn tập chương",
       checkpoint: true,
-      goal: "Ôn lại vị trí, địa hình, khí hậu, sông ngòi và biển đảo Việt Nam",
+      goal: "Ôn lại vị trí, địa hình, khí hậu, sông ngòi, khoáng sản và sinh vật Việt Nam",
       quiz: [
         { t: "choice", q: "Việt Nam nằm trong đới khí hậu nào?", options: ["Nhiệt đới", "Ôn đới", "Hàn đới", "Cận nhiệt"], answer: 0 },
         { t: "choice", q: "Địa hình Việt Nam chủ yếu là gì?", options: ["Đồi núi thấp", "Núi cao", "Cao nguyên đá vôi", "Đồng bằng"], answer: 0 },
@@ -328,6 +371,8 @@ const c2 = {
             { label: "Sông Hương", bucket: 1 }, { label: "Quần đảo Hoàng Sa", bucket: 1 },
             { label: "Sông Hậu", bucket: 2 }, { label: "Đồng bằng sông Cửu Long", bucket: 2 },
           ] },
+        { t: "choice", q: "Vùng than đá lớn nhất Việt Nam ở đâu?", options: ["Quảng Ninh", "Tây Nguyên", "Cà Mau", "Điện Biên"], answer: 0 },
+        { t: "choice", q: "Loại đất phổ biến ở vùng đồi núi Việt Nam là gì?", options: ["Đất feralit", "Đất phù sa", "Đất cát trắng", "Đất than bùn"], answer: 0 },
       ],
     },
   ],
@@ -571,6 +616,24 @@ const c5 = {
       ],
     },
     {
+      id: "vn-l6-c1-l2b",
+      title: "Tỉ lệ và kí hiệu trên bản đồ Việt Nam",
+      goal: "Áp dụng kỹ năng tỉ lệ, kí hiệu vào bản đồ nước mình",
+      teach: [
+        { t: "topic", kicker: "Tỉ lệ bản đồ", title: "Đo khoảng cách thật từ bản đồ Việt Nam",
+          body: "Trên bản đồ tỉ lệ 1:10.000.000 (1cm = 100km), khoảng cách từ Hà Nội tới TP. Hồ Chí Minh đo được khoảng 14cm trên bản đồ — tức khoảng 1.400km ngoài thực tế, đúng với chiều dài đất nước theo hướng Bắc – Nam.",
+          facts: [{ label: "Hà Nội – TP.HCM", value: "~1.400 km theo đường chim bay" }] },
+        { t: "topic", kicker: "Kí hiệu bản đồ", title: "Mỗi kí hiệu kể một câu chuyện",
+          body: "Trên bản đồ Việt Nam, kí hiệu ngôi sao thường là Thủ đô Hà Nội, chấm tròn đậm là các thành phố lớn, đường màu xanh là sông, vùng màu xanh dương là biển. Biết đọc kí hiệu giúp em hiểu bản đồ nhanh hơn nhiều lần.",
+          facts: [{ label: "Ngôi sao", value: "Thủ đô Hà Nội" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Trên bản đồ tỉ lệ 1:10.000.000, 1cm tương ứng bao nhiêu km ngoài thực tế?", options: ["100 km", "10 km", "1.000 km", "1 km"], answer: 0 },
+        { t: "choice", q: "Trên bản đồ Việt Nam, kí hiệu ngôi sao thường chỉ điều gì?", options: ["Thủ đô Hà Nội", "Một ngọn núi", "Một con sông", "Một sân bay"], answer: 0 },
+        { t: "truefalse", q: "Khoảng cách Hà Nội – TP. Hồ Chí Minh theo đường chim bay khoảng 1.400km.", answer: true },
+      ],
+    },
+    {
       id: "vn-l6-c1-l3",
       title: "Ôn tập chương",
       checkpoint: true,
@@ -625,6 +688,24 @@ const c6 = {
       ],
     },
     {
+      id: "vn-l7-c1-l2b",
+      title: "Việt Nam so với các nước châu Á",
+      goal: "So sánh diện tích, dân số Việt Nam với một số nước châu Á",
+      teach: [
+        { t: "topic", kicker: "So sánh diện tích", title: "Việt Nam ở mức trung bình về diện tích",
+          body: "Việt Nam có diện tích khoảng 331.000 km² — nhỏ hơn nhiều so với Trung Quốc hay Ấn Độ (mỗi nước rộng gần 30 lần Việt Nam), nhưng lớn hơn nhiều nước láng giềng như Lào hay Campuchia.",
+          facts: [{ label: "Diện tích VN", value: "~331.000 km²" }] },
+        { t: "topic", kicker: "So sánh dân số", title: "Việt Nam đông dân trong khu vực",
+          body: "Với hơn 100 triệu dân, Việt Nam là một trong những nước đông dân nhất Đông Nam Á, chỉ sau Indonesia và Philippines, nhiều hơn hẳn Lào, Campuchia hay Singapore.",
+          facts: [{ label: "Dân số VN", value: "Hơn 100 triệu người" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Diện tích Việt Nam khoảng bao nhiêu km²?", options: ["331.000 km²", "3.310 km²", "3.310.000 km²", "33.100 km²"], answer: 0 },
+        { t: "choice", q: "Việt Nam đông dân thứ mấy Đông Nam Á?", options: ["Thứ 3, sau Indonesia và Philippines", "Đông dân nhất", "Ít dân nhất", "Thứ 10"], answer: 0 },
+        { t: "truefalse", q: "Việt Nam có diện tích nhỏ hơn nhiều so với Trung Quốc.", answer: true },
+      ],
+    },
+    {
       id: "vn-l7-c1-l3",
       title: "Ôn tập chương",
       checkpoint: true,
@@ -671,6 +752,22 @@ const c7 = {
       ],
     },
     {
+      id: "vn-l10-c1-l2b",
+      title: "Đô thị hoá ở Việt Nam",
+      goal: "Quá trình đô thị hoá và các đô thị lớn",
+      teach: [
+        { t: "topic", kicker: "Đô thị hoá", title: "Tốc độ đô thị hoá đang tăng nhanh",
+          body: "Tỉ lệ dân số đô thị của Việt Nam đang tăng nhanh qua từng năm nhưng vẫn thấp hơn nhiều nước trong khu vực. Hà Nội và TP. Hồ Chí Minh là hai đô thị đặc biệt, tập trung dân cư và hoạt động kinh tế lớn nhất cả nước.",
+          facts: [{ label: "Đô thị đặc biệt", value: "Hà Nội, TP. Hồ Chí Minh" }] },
+        { t: "culture", title: "Cơ hội và áp lực",
+          body: "Đô thị hoá mang lại việc làm, thu nhập tốt hơn cho người dân, nhưng cũng gây áp lực lớn về nhà ở, giao thông, hạ tầng và môi trường tại các thành phố lớn." },
+      ],
+      quiz: [
+        { t: "choice", q: "Hai đô thị đặc biệt của Việt Nam là gì?", options: ["Hà Nội và TP. Hồ Chí Minh", "Huế và Cần Thơ", "Hải Phòng và Đà Nẵng", "Không có đô thị đặc biệt"], answer: 0 },
+        { t: "truefalse", q: "Đô thị hoá nhanh có thể gây áp lực về nhà ở, giao thông.", answer: true },
+      ],
+    },
+    {
       id: "vn-l10-c1-l3",
       title: "Ôn tập chương",
       checkpoint: true,
@@ -713,6 +810,20 @@ const c8 = {
       quiz: [
         { t: "choice", q: "Đâu là một trong những đối tác thương mại lớn của Việt Nam?", options: ["Hoa Kỳ", "Nam Cực", "Không quốc gia nào", "Mặt Trăng"], answer: 0 },
         { t: "truefalse", q: "Việt Nam là một điểm đến sản xuất quan trọng trong chuỗi cung ứng toàn cầu.", answer: true },
+      ],
+    },
+    {
+      id: "vn-l11-c1-l2b",
+      title: "Việt Nam thu hút đầu tư nước ngoài",
+      goal: "Vai trò của vốn đầu tư trực tiếp nước ngoài (FDI)",
+      teach: [
+        { t: "topic", kicker: "Đầu tư nước ngoài", title: "FDI — động lực quan trọng của kinh tế Việt Nam",
+          body: "Vốn đầu tư trực tiếp nước ngoài (FDI) đổ vào Việt Nam ngày càng nhiều, tập trung chủ yếu ở các khu công nghiệp thuộc Đông Nam Bộ và Đồng bằng sông Hồng, giúp tạo việc làm, chuyển giao công nghệ và thúc đẩy xuất khẩu.",
+          facts: [{ label: "FDI viết tắt", value: "Đầu tư trực tiếp nước ngoài" }, { label: "Tập trung", value: "Đông Nam Bộ, ĐB sông Hồng" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "FDI là viết tắt của gì?", options: ["Đầu tư trực tiếp nước ngoài", "Đầu tư trong nước", "Đầu tư chứng khoán", "Đầu tư công"], answer: 0 },
+        { t: "choice", q: "FDI vào Việt Nam tập trung nhiều nhất ở đâu?", options: ["Đông Nam Bộ, ĐB sông Hồng", "Tây Bắc", "Tây Nguyên", "Vùng núi phía Bắc"], answer: 0 },
       ],
     },
     {

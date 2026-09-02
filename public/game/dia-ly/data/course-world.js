@@ -440,6 +440,66 @@ const c3 = {
   ],
 };
 
+// ===== Lớp 7, chương 2 — đào sâu thêm dân cư và kinh tế từng châu lục, đúng mạch SGK thật
+// (mỗi châu có riêng phần tự nhiên, dân cư-xã hội, kinh tế — chương 1 mới dừng ở tự nhiên).
+
+const c3b = {
+  id: "wd-l7-c2",
+  title: "Dân cư & kinh tế các châu lục",
+  icon: "book",
+  lessons: [
+    {
+      id: "wd-l7-c2-l1",
+      title: "Dân cư, kinh tế châu Á & châu Âu",
+      goal: "So sánh dân cư và trình độ phát triển hai châu lục",
+      teach: [
+        { t: "topic", kicker: "Dân cư châu Á", title: "Đông dân nhất, phân bố không đều",
+          body: "Châu Á chiếm hơn một nửa dân số thế giới nhưng phân bố rất không đều: đông đúc ở các đồng bằng châu thổ ven biển (Đông Á, Nam Á, Đông Nam Á), thưa thớt ở vùng núi cao, hoang mạc nội địa (Trung Á, Tây Á).",
+          facts: [{ label: "Đặc điểm", value: "Đông dân, phân bố không đều" }] },
+        { t: "topic", kicker: "Kinh tế châu Âu", title: "Trình độ phát triển cao, đồng đều",
+          body: "Phần lớn các nước châu Âu có trình độ phát triển kinh tế cao, chất lượng cuộc sống tốt. Nhiều nước liên kết chặt chẽ trong Liên minh châu Âu (EU), tạo thành một trong những trung tâm kinh tế lớn nhất thế giới.",
+          facts: [{ label: "Đặc điểm", value: "Phát triển cao, liên kết chặt (EU)" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Dân cư châu Á tập trung đông nhất ở khu vực nào?", options: ["Đồng bằng châu thổ ven biển", "Hoang mạc nội địa", "Núi cao", "Vùng cực"], answer: 0 },
+        { t: "choice", q: "Châu Âu có tổ chức liên kết kinh tế nổi tiếng nào?", options: ["EU", "ASEAN", "OPEC", "NATO"], answer: 0 },
+        { t: "truefalse", q: "Châu Á chiếm hơn một nửa dân số thế giới.", answer: true },
+      ],
+    },
+    {
+      id: "wd-l7-c2-l2",
+      title: "Dân cư, kinh tế châu Phi & châu Mỹ",
+      goal: "Thách thức và tiềm năng phát triển hai châu lục",
+      teach: [
+        { t: "topic", kicker: "Châu Phi", title: "Dân số tăng nhanh, kinh tế còn khó khăn",
+          body: "Châu Phi có tốc độ tăng dân số nhanh nhất thế giới, dân số trẻ. Kinh tế nhiều nước còn dựa chủ yếu vào nông nghiệp và khai thác khoáng sản thô, thu nhập bình quân đầu người còn thấp so với các châu lục khác.",
+          facts: [{ label: "Dân số", value: "Tăng nhanh nhất thế giới" }] },
+        { t: "topic", kicker: "Châu Mỹ", title: "Phát triển không đồng đều Bắc – Nam",
+          body: "Bắc Mỹ (Hoa Kỳ, Canada) có nền kinh tế rất phát triển, trong khi phần lớn các nước Nam Mỹ và Trung Mỹ vẫn đang phát triển, kinh tế dựa nhiều vào nông sản và khoáng sản xuất khẩu.",
+          facts: [{ label: "Đặc điểm", value: "Bắc Mỹ phát triển hơn Nam Mỹ" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Châu lục nào có tốc độ tăng dân số nhanh nhất thế giới?", options: ["Châu Phi", "Châu Âu", "Châu Đại Dương", "Châu Nam Cực"], answer: 0 },
+        { t: "truefalse", q: "Bắc Mỹ có nền kinh tế phát triển hơn phần lớn Nam Mỹ.", answer: true },
+        { t: "choice", q: "Kinh tế nhiều nước châu Phi dựa chủ yếu vào đâu?", options: ["Nông nghiệp, khai khoáng", "Công nghệ cao", "Tài chính - ngân hàng", "Du lịch vũ trụ"], answer: 0 },
+      ],
+    },
+    {
+      id: "wd-l7-c2-l3",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại dân cư và kinh tế các châu lục",
+      quiz: [
+        { t: "choice", q: "Châu lục nào đông dân nhất thế giới?", options: ["Châu Á", "Châu Âu", "Châu Phi", "Châu Đại Dương"], answer: 0 },
+        { t: "choice", q: "Châu lục nào có tốc độ tăng dân số nhanh nhất?", options: ["Châu Phi", "Châu Âu", "Châu Á", "Châu Nam Cực"], answer: 0 },
+        { t: "truefalse", q: "Châu Âu có nhiều nước trình độ phát triển kinh tế cao.", answer: true },
+        { t: "match", q: "Nối châu lục với đặc điểm dân cư - kinh tế.",
+          pairs: [["Châu Á", "Đông dân nhất"], ["Châu Phi", "Tăng dân số nhanh nhất"], ["Châu Âu", "Phát triển cao, có EU"]] },
+      ],
+    },
+  ],
+};
+
 // ===== Lớp 6, chương 2 — mảng còn thiếu của chương trình Địa lí 6 thật: cấu tạo Trái Đất,
 // nội - ngoại sinh, núi lửa - động đất, các dạng địa hình và khoáng sản.
 
@@ -794,6 +854,20 @@ const c7 = {
       ],
     },
     {
+      id: "wd-l8-c1-l2b",
+      title: "Sông ngòi châu Á",
+      goal: "Các hệ thống sông lớn và vai trò với đời sống con người",
+      teach: [
+        { t: "topic", kicker: "Sông lớn", title: "Những dòng sông nuôi dưỡng nền văn minh",
+          body: "Châu Á có nhiều hệ thống sông lớn bậc nhất thế giới: sông Trường Giang và Hoàng Hà ở Trung Quốc, sông Hằng ở Ấn Độ, sông Mê Kông chảy qua nhiều nước Đông Nam Á trong đó có Việt Nam. Đây đều là những cái nôi của các nền văn minh cổ đại.",
+          facts: [{ label: "Sông dài nhất châu Á", value: "Trường Giang" }, { label: "Chảy qua Việt Nam", value: "Sông Mê Kông" }] },
+      ],
+      quiz: [
+        { t: "choice", q: "Sông nào chảy qua nhiều nước Đông Nam Á, trong đó có Việt Nam?", options: ["Sông Mê Kông", "Sông Nile", "Sông Amazon", "Sông Volga"], answer: 0 },
+        { t: "truefalse", q: "Sông Hằng là một trong những hệ thống sông lớn của châu Á.", answer: true },
+      ],
+    },
+    {
       id: "wd-l8-c1-l3",
       title: "Ôn tập chương",
       checkpoint: true,
@@ -842,6 +916,19 @@ const c8 = {
         { t: "choice", q: "Quốc gia châu Á nào nổi bật về công nghệ, có thu nhập cao dù diện tích nhỏ?", options: ["Hàn Quốc", "Lào", "Mông Cổ", "Nê-pan"], answer: 0 },
         { t: "mapclick", q: "Hãy bấm vào Trung Quốc trên bản đồ.", targetType: "country", targetId: "cn" },
         { t: "truefalse", q: "Nhật Bản nằm trong nhóm các nền kinh tế lớn nhất thế giới.", answer: true },
+      ],
+    },
+    {
+      id: "wd-l9-c1-l2b",
+      title: "Đô thị hoá châu Á",
+      goal: "Các siêu đô thị đông dân nhất châu lục",
+      teach: [
+        { t: "culture", title: "Nơi tập trung nhiều siêu đô thị nhất thế giới",
+          body: "Châu Á có nhiều siêu đô thị (trên 10 triệu dân) nhất thế giới như Tokyo, Thượng Hải, Bắc Kinh, Jakarta, Manila — phản ánh tốc độ đô thị hoá và tăng dân số rất nhanh ở khu vực Đông Á và Đông Nam Á." },
+      ],
+      quiz: [
+        { t: "choice", q: "Siêu đô thị là gì?", options: ["Đô thị có trên 10 triệu dân", "Đô thị có dưới 1.000 dân", "Một loại bản đồ", "Một dãy núi"], answer: 0 },
+        { t: "truefalse", q: "Tokyo là một trong những siêu đô thị lớn của châu Á.", answer: true },
       ],
     },
     {
@@ -899,6 +986,20 @@ const c9 = {
       ],
     },
     {
+      id: "wd-l12-c1-l2b",
+      title: "Phát triển bền vững",
+      goal: "Cân bằng giữa phát triển kinh tế và bảo vệ môi trường",
+      teach: [
+        { t: "intro", title: "Phát triển cho hôm nay, không quên ngày mai",
+          body: "Phát triển bền vững là cách phát triển đáp ứng nhu cầu hiện tại mà không làm tổn hại tới khả năng đáp ứng nhu cầu của các thế hệ tương lai — cân bằng giữa ba mặt: kinh tế, xã hội và môi trường.",
+          bullets: ["Kinh tế: tăng trưởng nhưng tiết kiệm tài nguyên", "Xã hội: đảm bảo công bằng, chất lượng sống", "Môi trường: bảo vệ, không khai thác cạn kiệt"] },
+      ],
+      quiz: [
+        { t: "choice", q: "Phát triển bền vững cân bằng giữa mấy mặt?", options: ["3 (kinh tế, xã hội, môi trường)", "1", "5", "10"], answer: 0 },
+        { t: "truefalse", q: "Phát triển bền vững nghĩa là chỉ chú trọng tăng trưởng kinh tế, bỏ qua môi trường.", answer: false },
+      ],
+    },
+    {
       id: "wd-l12-c1-l3",
       title: "Ôn tập chương",
       checkpoint: true,
@@ -917,7 +1018,7 @@ export const WORLD_COURSE = {
   levels: {
     l45: { chapters: [c1] },
     l6:  { chapters: [c2, c4] },
-    l7:  { chapters: [c3] },
+    l7:  { chapters: [c3, c3b] },
     l8:  { chapters: [c7] },
     l9:  { chapters: [c8] },
     l10: { chapters: [c5] },

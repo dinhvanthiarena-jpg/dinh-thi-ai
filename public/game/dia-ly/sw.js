@@ -1,4 +1,4 @@
-const CACHE = "boomgeog-v6";
+const CACHE = "boomgeog-v7";
 const ASSETS = [
   "./", "./index.html", "./style.css", "./app.js",
   "./data/course-vn.js", "./data/course-world.js", "./data/vn-map.js", "./data/world-map.js",
