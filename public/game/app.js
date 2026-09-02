@@ -206,8 +206,10 @@
   const OP_SYMBOL = { add: '+', sub: '−', mul: '×', div: '÷' };
 
   function fmtNum(n) {
-    if (Number.isInteger(n)) return n.toString();
-    return n.toFixed(1).replace('.', ',');
+    const s = Number.isInteger(n) ? n.toString() : n.toFixed(1).replace('.', ',');
+    // Dấu trừ chuẩn kiểu chữ (U+2212) cho số âm (lớp 6-9), khớp với
+    // OP_SYMBOL.sub — lớp 1-5 không bao giờ ra số âm nên không đổi gì.
+    return s.startsWith('-') ? '−' + s.slice(1) : s;
   }
 
   /* ================= VISUAL QUESTION FORMATS =================
@@ -328,7 +330,7 @@
         else if (op === 'mul') { a = randInt(11, 99); b = randInt(2, 12); ans = a * b; }
         else { const d = randInt(2, 12), q = randInt(5, 50); a = d * q; b = d; ans = q; }
         break;
-      default: // grade 5
+      case 5:
         if (op === 'add') {
           if (Math.random() < 0.5) {
             a = randInt(1, 999) / 10; b = randInt(1, 999) / 10;
@@ -345,11 +347,41 @@
         } else if (op === 'mul') { a = randInt(12, 99); b = randInt(2, 12); ans = a * b; }
         else { const d = randInt(2, 12), q = randInt(10, 99); a = d * q; b = d; ans = q; }
         break;
+      // ---- Lớp 6-9 (THCS): làm quen số âm, số thập phân, phạm vi rộng dần ----
+      case 6:
+        if (op === 'add') { a = randInt(-50, 50); b = randInt(-50, 50); ans = a + b; }
+        else if (op === 'sub') { a = randInt(-50, 50); b = randInt(-50, 50); ans = a - b; }
+        else if (op === 'mul') { a = randInt(-12, 12); b = randInt(-12, 12); ans = a * b; }
+        else { const d = randInt(2, 12) * (Math.random() < 0.5 ? -1 : 1), q = randInt(2, 12); a = d * q; b = d; ans = q; }
+        break;
+      case 7:
+        if (op === 'add' || op === 'sub') {
+          a = Math.round(randInt(-999, 999) / 10 * 10) / 10;
+          b = Math.round(randInt(-999, 999) / 10 * 10) / 10;
+          ans = Math.round((op === 'add' ? a + b : a - b) * 10) / 10;
+          decimal = true;
+        } else if (op === 'mul') { a = randInt(-15, 15); b = randInt(-15, 15); ans = a * b; }
+        else { const d = randInt(2, 15) * (Math.random() < 0.5 ? -1 : 1), q = randInt(2, 15); a = d * q; b = d; ans = q; }
+        break;
+      case 8:
+        if (op === 'add' || op === 'sub') { a = randInt(-200, 200); b = randInt(-200, 200); ans = op === 'add' ? a + b : a - b; }
+        else if (op === 'mul') { a = randInt(-25, 25); b = randInt(-25, 25); ans = a * b; }
+        else { const d = randInt(2, 20) * (Math.random() < 0.5 ? -1 : 1), q = randInt(2, 20); a = d * q; b = d; ans = q; }
+        break;
+      default: // grade 9
+        if (op === 'add' || op === 'sub') {
+          a = Math.round(randInt(-9999, 9999) / 10 * 10) / 10;
+          b = Math.round(randInt(-9999, 9999) / 10 * 10) / 10;
+          ans = Math.round((op === 'add' ? a + b : a - b) * 10) / 10;
+          decimal = true;
+        } else if (op === 'mul') { a = randInt(-30, 30); b = randInt(-30, 30); ans = a * b; }
+        else { const d = randInt(2, 25) * (Math.random() < 0.5 ? -1 : 1), q = randInt(2, 25); a = d * q; b = d; ans = q; }
+        break;
     }
     return { a, b, ans, op, decimal };
   }
 
-  function makeDistractors(correct, decimal) {
+  function makeDistractors(correct, decimal, allowNegative) {
     const used = new Set([correct]);
     const out = [];
     let guard = 0;
@@ -359,13 +391,13 @@
       if (decimal) {
         const delta = Math.round((Math.random() * 2 + 0.1) * 10) / 10 * (Math.random() < 0.5 ? -1 : 1);
         val = Math.round((correct + delta) * 10) / 10;
-        if (val < 0) val = Math.round((Math.abs(correct) + Math.random() * 3 + 0.1) * 10) / 10;
+        if (val < 0 && !allowNegative) val = Math.round((Math.abs(correct) + Math.random() * 3 + 0.1) * 10) / 10;
       } else {
         const magnitude = Math.max(2, Math.abs(correct));
         const maxDelta = Math.max(2, Math.round(magnitude * 0.3));
         const delta = randInt(1, maxDelta) * (Math.random() < 0.5 ? -1 : 1);
         val = correct + delta;
-        if (val < 0) val = correct + Math.abs(delta) + 1;
+        if (val < 0 && !allowNegative) val = correct + Math.abs(delta) + 1;
       }
       if (!used.has(val)) { used.add(val); out.push(val); }
     }
@@ -383,7 +415,7 @@
 
     const op = opChoice === 'mix' ? pick(['add', 'sub', 'mul', 'div']) : opChoice;
     const { a, b, ans, decimal } = genByGradeOp(grade, op);
-    const distractors = makeDistractors(ans, decimal);
+    const distractors = makeDistractors(ans, decimal, grade >= 6);
     const choices = [ans, ...distractors].sort(() => Math.random() - 0.5);
     const dragMode = Math.random() < 0.35;
 
@@ -392,6 +424,9 @@
     // glance (mirrors how grade-1 textbooks teach counting → arithmetic).
     const iconEligible = (op === 'add' || op === 'sub') && !decimal && a >= 1 && a <= 9 && b >= 1 && b <= 9;
     const useIcons = iconEligible && Math.random() < 0.4;
+    // Số âm ở toán hạng thứ hai (lớp 6-9) được ngoặc lại — "5 − -3" đọc rất
+    // rối, "5 − (−3)" đúng chuẩn cách viết toán.
+    const bStr = b < 0 ? `(${fmtNum(b)})` : fmtNum(b);
 
     let exprHtml, eqSym;
     if (useIcons) {
@@ -399,14 +434,14 @@
       exprHtml = `<span class="icon-eq">${iconGroupHtml(icon, a)}<span class="op-sym">${OP_SYMBOL[op]}</span>${iconGroupHtml(icon, b)}<span class="op-sym">=</span></span>`;
       eqSym = '';
     } else {
-      exprHtml = `${fmtNum(a)} ${OP_SYMBOL[op]} ${fmtNum(b)}`;
+      exprHtml = `${fmtNum(a)} ${OP_SYMBOL[op]} ${bStr}`;
       eqSym = ' = ';
     }
     const displayHtml = `${exprHtml}${eqSym}${dragMode ? dropSlotHtml() : '?'}`;
 
     return {
       kind: useIcons ? 'icon-count' : 'arithmetic',
-      text: `${fmtNum(a)} ${OP_SYMBOL[op]} ${fmtNum(b)}`,
+      text: `${fmtNum(a)} ${OP_SYMBOL[op]} ${bStr}`,
       displayHtml,
       answer: ans,
       choices,
@@ -599,15 +634,6 @@
   $('btnPlay').addEventListener('click', () => { sfx.click(); showScreen('setup'); });
   $('btnGifted').addEventListener('click', () => { sfx.click(); showScreen('gifted'); giftedShowGradePicker(); });
   setMascot($('mascotHome'), 'happy');
-
-  $('btnContactFB').addEventListener('click', () => {
-    sfx.click();
-    if (window.electronAPI) window.electronAPI.openExternalLink('facebook');
-  });
-  $('btnContactWeb').addEventListener('click', () => {
-    sfx.click();
-    if (window.electronAPI) window.electronAPI.openExternalLink('website');
-  });
 
   /* ================= ÔN HỌC SINH GIỎI ================= */
   // Curated advanced/enrichment problems per grade, ordered easy → hard —
@@ -1902,6 +1928,7 @@
   const battleGradeRowTHCS = $('battleGradeRowTHCS');
   const btnBattleFind = $('btnBattleFind');
   const battle2v2Choice = $('battle2v2Choice');
+  const battleRoomDivider = $('battleRoomDivider');
   const btnBattleCreateRoom = $('btnBattleCreateRoom');
   const battleRoomCodeInput = $('battleRoomCodeInput');
   const btnBattleJoinRoom = $('btnBattleJoinRoom');
@@ -1951,7 +1978,11 @@
     [...battleModeTabs.children].forEach((c) => c.classList.remove('selected'));
     btn.classList.add('selected');
     btnBattleFind.hidden = battleMode !== '1v1';
-    battle2v2Choice.hidden = battleMode !== '2v2';
+    // Phòng theo mã dùng được cho CẢ 1v1 lẫn 2v2 (bạn ngồi cạnh nhau tự
+    // ghép, không cần ghép ngẫu nhiên) — battle2v2Choice luôn hiện; chỉ ẩn
+    // dòng chữ "hoặc..." ở 2v2 vì lúc đó không có nút "Tìm đối thủ" ở trên
+    // để chữ "hoặc" có nghĩa.
+    battleRoomDivider.hidden = battleMode !== '1v1';
   });
 
   function battleSelectGrade(grade, btn) {
@@ -2036,13 +2067,13 @@
     battleSetupWrap.hidden = true;
     battleQueueWrap.hidden = false;
     battleQueueText.textContent = 'Đang tạo phòng...';
-    socket.emit('room:create', { installId: webGetInstallId(), displayName: name, grade: battleSelectedGrade }, (ack) => {
+    socket.emit('room:create', { installId: webGetInstallId(), displayName: name, grade: battleSelectedGrade, mode: battleMode }, (ack) => {
       if (!ack || !ack.ok) { battleShowSetup(); return; }
       battleRoomCode = ack.code;
       battleRoomCodeDisplay.hidden = false;
       battleRoomCodeValue.textContent = ack.code;
       battleRoomMembers.hidden = false;
-      battleQueueText.textContent = 'Gửi mã này cho 3 bạn để cùng đấu 2v2 nhé!';
+      battleQueueText.textContent = battleMode === '1v1' ? 'Gửi mã này cho 1 bạn để đấu 1v1 nhé!' : 'Gửi mã này cho 3 bạn để cùng đấu 2v2 nhé!';
     });
   });
 
@@ -2184,10 +2215,44 @@
 
   /* ================= SETUP ================= */
   const gradeRow = $('gradeRow');
+  const gradeRowTHCS = $('gradeRowTHCS');
   const opRow = $('opRow');
+  const opWordCard = opRow.querySelector('[data-op="word"]');
   const modeRow = $('modeRow');
   const bestBox = $('bestScoreBox');
   const btnStart = $('btnStartGame');
+
+  /* Cấp 1 (lớp 1-5) / Cấp 2 (lớp 6-9) — lọc lớp + dạng bài hiển thị ở màn
+     hình "Bắt đầu chơi" theo cấp học đang chọn ở màn hình chính. Toán đố
+     (word) chưa có ngân hàng đề cho lớp 6-9 nên ẩn dạng này ở Cấp 2 để
+     tránh chọn nhầm vào dạng chưa có nội dung. */
+  const levelToggle = $('levelToggle');
+  let schoolLevel = localStorage.getItem('tvc_schoolLevel') === '2' ? '2' : '1';
+
+  function applySchoolLevel() {
+    [...levelToggle.children].forEach((b) => b.classList.toggle('selected', b.dataset.level === schoolLevel));
+    gradeRow.hidden = schoolLevel === '2';
+    gradeRowTHCS.hidden = schoolLevel === '1';
+    opWordCard.hidden = schoolLevel === '2';
+    if (state.grade && ((schoolLevel === '1' && state.grade > 5) || (schoolLevel === '2' && state.grade <= 5))) {
+      state.grade = null;
+      [...gradeRow.children, ...gradeRowTHCS.children].forEach((c) => c.classList.remove('selected'));
+    }
+    if (schoolLevel === '2' && state.op === 'word') {
+      state.op = null;
+      [...opRow.children].forEach((c) => c.classList.remove('selected'));
+    }
+    refreshBestBox();
+  }
+
+  levelToggle.addEventListener('click', (e) => {
+    const btn = e.target.closest('.level-btn');
+    if (!btn || btn.dataset.level === schoolLevel) return;
+    sfx.click();
+    schoolLevel = btn.dataset.level;
+    localStorage.setItem('tvc_schoolLevel', schoolLevel);
+    applySchoolLevel();
+  });
 
   function renderStars(container, count) {
     container.innerHTML = '';
@@ -2221,15 +2286,19 @@
     }
   }
 
-  gradeRow.addEventListener('click', (e) => {
+  function onGradeCardClick(e) {
     const btn = e.target.closest('.grade-card');
     if (!btn) return;
     sfx.click();
-    [...gradeRow.children].forEach(c => c.classList.remove('selected'));
+    [...gradeRow.children, ...gradeRowTHCS.children].forEach(c => c.classList.remove('selected'));
     btn.classList.add('selected');
     state.grade = parseInt(btn.dataset.grade, 10);
     refreshBestBox();
-  });
+  }
+  gradeRow.addEventListener('click', onGradeCardClick);
+  gradeRowTHCS.addEventListener('click', onGradeCardClick);
+
+  applySchoolLevel();
 
   opRow.addEventListener('click', (e) => {
     const btn = e.target.closest('.op-card');

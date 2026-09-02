@@ -15,7 +15,7 @@ const { BattlePlayer, BattleMatch } = require('../models');
 const MATCH_DURATION_MS = 90 * 1000;
 const PROBLEMS_PER_MATCH = 30; // generous — time runs out before this does
 const GRADE_WAIT_EXPAND_MS = 8000; // widen to ±1 grade if 1v1 queue is thin
-const ROOM_SIZE_2V2 = 4;
+const ROOM_CAPACITY = { '1v1': 2, '2v2': 4 }; // theo mã: 1v1 = 2 người, 2v2 = 4 người
 const ROOM_STALE_MS = 20 * 60 * 1000; // abandoned rooms cleaned up after 20 min
 
 const TIER_NAMES = ['Đồng', 'Bạc', 'Vàng', 'Bạch Kim', 'Kim Cương'];
@@ -247,7 +247,7 @@ module.exports = function attachBattleSocket(io) {
       if (idx !== -1) queue1v1.splice(idx, 1);
     });
 
-    // ---- 2v2 theo phòng (mã 4 số) ----
+    // ---- Theo mã phòng (1v1 = 2 người, 2v2 = 4 người) ----
     function broadcastRoom(code) {
       const room = rooms.get(code);
       if (!room) return;
@@ -255,7 +255,7 @@ module.exports = function attachBattleSocket(io) {
         code,
         grade: room.grade,
         members: room.members.map((m) => ({ displayName: m.displayName, team: m.team })),
-        capacity: ROOM_SIZE_2V2,
+        capacity: room.capacity,
       });
     }
 
@@ -264,11 +264,14 @@ module.exports = function attachBattleSocket(io) {
         const installId = typeof payload?.installId === 'string' ? payload.installId.slice(0, 100) : null;
         const displayName = typeof payload?.displayName === 'string' ? payload.displayName.trim().slice(0, 24) || 'Bạn chơi' : 'Bạn chơi';
         const grade = Number.isInteger(payload?.grade) && payload.grade >= 1 && payload.grade <= 9 ? payload.grade : null;
+        const mode = payload?.mode === '1v1' ? '1v1' : '2v2';
         if (!installId || !grade) { if (typeof ack === 'function') ack({ ok: false, message: 'Thiếu thông tin người chơi.' }); return; }
         const player = await getOrCreatePlayer(installId, displayName, grade);
         const code = makeRoomCode(rooms);
         rooms.set(code, {
           grade,
+          mode,
+          capacity: ROOM_CAPACITY[mode],
           hostInstallId: installId,
           members: [{ socketId: socket.id, installId, displayName: player.displayName, team: 0 }],
           createdAt: Date.now(),
@@ -293,7 +296,7 @@ module.exports = function attachBattleSocket(io) {
         const room = rooms.get(code);
         if (!room) { if (typeof ack === 'function') ack({ ok: false, message: 'Không tìm thấy phòng này.' }); return; }
         if (room.members.some((m) => m.installId === installId)) { if (typeof ack === 'function') ack({ ok: false, message: 'Bạn đã ở trong phòng này rồi.' }); return; }
-        if (room.members.length >= ROOM_SIZE_2V2) { if (typeof ack === 'function') ack({ ok: false, message: 'Phòng đã đủ người.' }); return; }
+        if (room.members.length >= room.capacity) { if (typeof ack === 'function') ack({ ok: false, message: 'Phòng đã đủ người.' }); return; }
 
         const player = await getOrCreatePlayer(installId, displayName, room.grade);
         const team = room.members.length % 2; // 0,1,0,1 theo thứ tự vào — xem giải thích ở đầu file
@@ -304,10 +307,10 @@ module.exports = function attachBattleSocket(io) {
         if (typeof ack === 'function') ack({ ok: true, code, grade: room.grade, team });
         broadcastRoom(code);
 
-        if (room.members.length >= ROOM_SIZE_2V2) {
+        if (room.members.length >= room.capacity) {
           const entries = room.members.map((m) => ({ socketId: m.socketId, installId: m.installId, displayName: m.displayName, team: m.team }));
           rooms.delete(code);
-          await startMatch('2v2', room.grade, entries);
+          await startMatch(room.mode, room.grade, entries);
         }
       } catch (e) {
         console.error('[battle] room:join loi', e.message);
