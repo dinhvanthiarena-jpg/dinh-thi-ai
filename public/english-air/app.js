@@ -301,6 +301,99 @@ function voiceFor(tag) {
 
 
 if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+/* ═══════════ ĐỌC ĐÚNG TIẾNG ═══════════
+   Lời giảng là tiếng Việt nhưng hay chèn từ tiếng Anh vào giữa: "Good night là
+   chúc ngủ ngon", "Đếm được thì many, không đếm được thì much". Đọc cả câu bằng
+   một giọng là sai một nửa.
+
+   Đoán theo từng chữ thì KHÔNG được: tôi đã đo cả 553 câu giảng — chữ không dấu
+   hay gặp nhất lại là tiếng Việt (anh, cho, hai, khi, trong, sau, theo, ba, xin,
+   ra, nghe…), mà cụm hai chữ cũng vậy ("theo sau", "sao cho", "ngon khi").
+
+   Tín hiệu chắc chắn là chính KHO TỪ VỰNG của khoá: chữ tiếng Anh trong lời
+   giảng bao giờ cũng là từ đang dạy. Đo lại thì đúng thế — 51 từ vựng xuất hiện
+   trong câu tiếng Việt đều là từ tiếng Anh thật (from, many, enough, night,
+   sorry, please, yesterday, sure…), không có từ Việt nào lọt vào.
+
+   Nên: khớp đúng từ trong kho thì đọc giọng Anh, còn lại giọng Việt. */
+/* Kho từ vựng của khoá chưa đủ: "Good night" thì bắt được "night" nhưng "Good"
+   rơi lại bên tiếng Việt, nghe rất kỳ. Nên thêm một danh sách từ tiếng Anh
+   thông dụng hay xuất hiện trong lời giảng dạy tiếng.
+   ĐÃ LOẠI ba từ trùng với chữ Việt không dấu: "may" (máy/may), "can" (cần/can),
+   "ten" (tên) — giữ lại là đọc sai chữ Việt thành tiếng Anh. */
+const TU_ANH_THEM = ("good morning afternoon evening night hello goodbye bye " +
+  "please thank thanks sorry excuse very much many more most little few some " +
+  "any every each here there this that these those what where when why how " +
+  "who which and but because with without about after before during while " +
+  "have has had does did done doesn didn don isn aren wasn weren was were " +
+  "being been will would shall should could might must going like likes " +
+  "liked want wants need needs make makes made say says said tell tells told " +
+  "ask asks asked answer answers yes not never always often sometimes " +
+  "usually already yet still too also only just even really quite enough " +
+  "almost one two three four five six seven eight nine plural singular noun " +
+  "verb adjective adverb subject object present past future simple " +
+  "continuous perfect question negative positive countable uncountable mine " +
+  "yours hers ours theirs myself yourself").split(" ");
+
+let TU_ANH = null;
+function khoTuAnh() {
+  if (TU_ANH) return TU_ANH;
+  const t = new Set();
+  ALL_WORDS.forEach(w => { if (w && w.en) t.add(String(w.en).trim().toLowerCase()); });
+  COURSE.levels.forEach(lv => lv.units.forEach(u => u.lessons.forEach(l => {
+    (l.sentences || []).forEach(c => { if (c && c.en) t.add(String(c.en).trim().toLowerCase()); });
+  })));
+  // Từ một chữ ngắn quá thì bỏ: "a", "an", "in" lẫn vào câu Việt là hỏng.
+  TU_ANH_THEM.forEach(x => t.add(x));
+  TU_ANH = [...t].filter(x => x.includes(" ") || x.length >= 3)
+                 .sort((a, b) => b.length - a.length);
+  return TU_ANH;
+}
+
+/** Cắt một câu thành các khúc theo thứ tiếng, để mỗi khúc đọc đúng giọng của nó. */
+function catTieng(text) {
+  const s = String(text || "").trim();
+  if (!s) return [];
+  // Không có dấu tiếng Việt nào thì cả câu là tiếng Anh, khỏi cắt.
+  if (!DAU_VIET.test(s)) return [{ text: s, lang: tiengCua(s) }];
+
+  const kho = khoTuAnh();
+  const nhan = new Array(s.length).fill(0);   // 1 = thuộc một từ tiếng Anh
+  const chuCai = c => /[0-9A-Za-z']/.test(c);
+  kho.forEach(tu => {
+    let i = 0;
+    for (;;) {
+      const k = s.toLowerCase().indexOf(tu, i);
+      if (k < 0) break;
+      i = k + 1;
+      // Phải đứng riêng thành từ, không phải nằm lẫn trong chữ khác.
+      const truoc = k > 0 ? s[k - 1] : " ";
+      const sau = k + tu.length < s.length ? s[k + tu.length] : " ";
+      if (chuCai(truoc) || chuCai(sau)) continue;
+      for (let j = k; j < k + tu.length; j++) nhan[j] = 1;
+    }
+  });
+  if (!nhan.includes(1)) return [{ text: s, lang: "vi-VN" }];
+
+  const khuc = [];
+  let dau = 0;
+  for (let i = 1; i <= s.length; i++) {
+    if (i === s.length || nhan[i] !== nhan[dau]) {
+      const doan = s.slice(dau, i).trim();
+      if (doan) khuc.push({ text: doan, lang: nhan[dau] ? "en-GB" : "vi-VN" });
+      dau = i;
+    }
+  }
+  // Gộp hai khúc liền nhau cùng tiếng cho đỡ ngắt vụn.
+  const gon = [];
+  khuc.forEach(k => {
+    const cuoi = gon[gon.length - 1];
+    if (cuoi && cuoi.lang === k.lang) cuoi.text += " " + k.text;
+    else gon.push({ ...k });
+  });
+  return gon;
+}
+
 /* Chữ nước nào phải đọc bằng giọng nước đó. Trước đây mọi thứ đều đặt en-US,
    nên "quả táo" bị đọc bằng giọng Anh nghe méo hết cả. */
 const DAU_VIET = /[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụỳýỷỹỵ]/i;
@@ -966,8 +1059,8 @@ const TEACH = {
       st.append(ul);
     }
     docLanLuot([
-      { text: d.title, lang: tiengCua(d.title) },
-      { text: boDanhDau(d.body), lang: "vi-VN" },
+      ...catTieng(d.title),
+      ...catTieng(boDanhDau(d.body)),
     ]);
   },
   vocab(d, st) { vocabSlide(d, st, "Từ mới"); },
@@ -1003,13 +1096,13 @@ const TEACH = {
       const tip = el("button", "tip"); tip.type = "button";
       tip.setAttribute("aria-label", "Nghe mẹo: " + boDanhDau(d.tip));
       tip.append(icon("i-bulb", "ic ic-sm"), el("span", null, d.tip));
-      tip.addEventListener("click", () => speak(boDanhDau(d.tip), false, "vi-VN"));
+      tip.addEventListener("click", () => docLanLuot(catTieng(boDanhDau(d.tip))));
       st.append(tip);
     }
     // Vào slide là giảng luôn bằng tiếng, khỏi phải bấm.
     docLanLuot([
-      { text: d.title, lang: tiengCua(d.title) },
-      { text: boDanhDau(d.body), lang: "vi-VN" },
+      ...catTieng(d.title),
+      ...catTieng(boDanhDau(d.body)),
     ]);
   },
 
@@ -1017,8 +1110,8 @@ const TEACH = {
     showMascot(false); setKicker("Góc văn hoá");
     st.append(signpost(d.title, d.body, "i-globe"));
     docLanLuot([
-      { text: d.title, lang: tiengCua(d.title) },
-      { text: boDanhDau(d.body), lang: "vi-VN" },
+      ...catTieng(d.title),
+      ...catTieng(boDanhDau(d.body)),
     ]);
   },
 
@@ -1058,8 +1151,8 @@ function signpost(title, body, ic) {
   ngheLai.type = "button";
   ngheLai.append(icon("i-sound", "ic ic-sm"), el("span", null, "Nghe lại"));
   ngheLai.addEventListener("click", () => docLanLuot([
-    { text: title, lang: tiengCua(title) },
-    { text: boDanhDau(body), lang: "vi-VN" },
+    ...catTieng(title),
+    ...catTieng(boDanhDau(body)),
   ]));
   card.append(ngheLai);
   // ON-Language tự giơ tấm bảng lên, thay cho hai cại cột vẽ bằng CSS trước đây.
