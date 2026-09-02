@@ -995,7 +995,8 @@ const CANH = [
   ["right", "arrowright"],
   ["vietnam|vietnamese|country|nation|flag|culture|tradition", "village"],
   ["teacher|student|school|class|classroom|lesson|homework|exam|test", "school"],
-  ["book|read|reading|library|pen|pencil|write|writing|note|study|studies|learn|english|language|word", "work"],
+  ["book|read|reading|library", "book"],
+  ["pen|pencil|write|writing|note|study|studies|learn|english|language|word", "work"],
   ["family|mother|father|mum|mom|dad|parents|sister|brother|son|daughter|baby|child|children|wife|husband", "family"],
   ["friend|friends|classmate|neighbour|neighbor|together|everyone|people", "friend"],
   ["coffee|tea|cafe|café|milk|juice|cup", "coffee"],
@@ -1008,7 +1009,11 @@ const CANH = [
   ["happy|glad|great|fun|funny|love|like|good|beautiful|smile|laugh|enjoy", "happy"],
   ["tired|sleepy|exhausted|sad", "tired"],
   ["doctor|hospital|nurse|medicine|health|headache|fever|patient|clinic", "doctor"],
-  ["turn|corner|way|direction|near|far|straight|address|here|there", "car"],
+  /* "here"/"there" CỐ Ý bỏ ra khỏi nhóm này — hai từ này xuất hiện trong vô số
+     câu "there is/are..." chẳng liên quan gì đến đường xá, mà lại cướp ưu
+     tiên trước cả những từ khoá đúng chủ đề câu (nhà, ảnh, năm tháng, khách…).
+     Ví dụ "There are many old houses" từng bị ra nhầm cảnh xe hơi. */
+  ["turn|corner|way|direction|near|far|straight|address", "car"],
   ["one|two|three|four|five|six|seven|eight|nine|ten|twenty|hundred|number|count", "clock"],
   ["morning|afternoon|today|tomorrow|yesterday|day|week|weekend|month|year|season|spring|autumn", "sun"],
   ["money|price|cost|buy|bought|pay|cheap|expensive|dong|dollar", "money"],
@@ -1039,7 +1044,7 @@ const CANH = [
   ["hotel|guest|reserve|check in|room service", "house"],
   ["university|college|campus|lecture|classmate", "school"],
   ["grandmother|grandfather|grandma|grandpa|childhood|relative", "family"],
-  ["photo|picture|camera|souvenir|album", "phone"],
+  ["photo|picture|camera|album", "phone"],
   ["toy", "toy"],
   ["story|cartoon|film|movie|cinema", "book"],
   ["salary|career|hobby|interview|profession", "work"],
