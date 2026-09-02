@@ -991,8 +991,12 @@ const CANH = [
   ["bus|bus stop|bus station", "bus"],
   ["station|train|railway|platform|ticket", "station"],
   ["map", "map"],
-  ["left", "arrowleft"],
-  ["right", "arrowright"],
+  /* Chỉ bắt "left/right" khi ĐÚNG là chỉ hướng (turn left, on the right...).
+     "right" còn có nghĩa "đúng" (That's right! / Maybe you are right) — nếu
+     bắt cả chữ "right" trần thì câu nói về sự đúng/sai lại bị vẽ nhầm mũi tên
+     chỉ hướng. Bắt hẹp lại còn hơn vẽ sai. */
+  ["turn left|on the left|to the left|left turn", "arrowleft"],
+  ["turn right|on the right|to the right|right turn", "arrowright"],
   ["vietnam|vietnamese|country|nation|flag|culture|tradition", "village"],
   ["teacher|student|school|class|classroom|lesson|homework|exam|test", "school"],
   ["book|read|reading|library", "book"],
@@ -1018,7 +1022,6 @@ const CANH = [
      tiên trước cả những từ khoá đúng chủ đề câu (nhà, ảnh, năm tháng, khách…).
      Ví dụ "There are many old houses" từng bị ra nhầm cảnh xe hơi. */
   ["turn|corner|way|direction|near|far|straight|address", "car"],
-  ["one|two|three|four|five|six|seven|eight|nine|ten|twenty|hundred|number|count", "clock"],
   ["morning|afternoon|today|tomorrow|yesterday|day|week|weekend|month|year|season|spring|autumn", "sun"],
   ["money|price|cost|buy|bought|pay|cheap|expensive|dong|dollar", "money"],
   ["market|shop|store|supermarket|sell|shopping|menu|order|waiter|bill|table", "market"],
@@ -1066,6 +1069,13 @@ const CANH = [
   ["swim|swimming pool|seaside|shore", "fish"],
   ["clean|wash|washing|tidy|laundry|housework", "house"],
   ["watch tv|television|screen|channel", "phone"],
+  /* Số đếm trần (one/two/three...) đẩy XUỐNG GẦN CUỐI: đây là những từ cực kỳ
+     thông dụng, xuất hiện trong hầu như mọi câu về giá tiền, tuổi tác, thời
+     gian... Để ở trên thì nó cướp mất ảnh đúng — vd "It is two hundred
+     thousand dong" (câu về TIỀN) từng ra nhầm ảnh đồng hồ chỉ vì có chữ "two"
+     đứng trước cả khi tới được từ "dong". Để cuối thì nó chỉ còn vẽ khi
+     không còn từ khoá nào khác cụ thể hơn khớp trước. */
+  ["one|two|three|four|five|six|seven|eight|nine|ten|twenty|hundred|number|count", "clock"],
   ["man|boy|he|his|sir|mr", "man"],
   ["woman|girl|she|her|lady|ms|mrs", "woman"],
   /* Nhóm chào hỏi/cảm ơn xếp CUỐI CÙNG: đây là cụm rất hay xen vào giữa câu
