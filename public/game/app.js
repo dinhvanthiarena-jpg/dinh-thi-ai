@@ -1279,10 +1279,340 @@
         solution: 'Tổng hai vận tốc: 50 + 40 = 90 (km/giờ). Thời gian hai xe gặp nhau: 180 : 90 = <strong>2 giờ</strong>.',
       },
     ],
+    // ---- THCS (lớp 6-9) — thêm mới, không đụng vào kho lớp 1-5 ở trên ----
+    6: [
+      {
+        level: 'Cơ bản',
+        text: 'Tính: (−15) + 8',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phép cộng hai <strong>số nguyên</strong>: −15 (số âm) và 8 (số dương).' },
+          { t: 'Kiến thức cần dùng', b: 'Cộng hai số nguyên khác dấu: lấy <strong>số lớn hơn (về giá trị tuyệt đối) trừ số nhỏ hơn</strong>, rồi giữ dấu của số có giá trị tuyệt đối lớn hơn.<br><br>Ví dụ dễ hơn: (−5) + 3 — vì |−5| = 5 lớn hơn |3| = 3, lấy 5 − 3 = 2, giữ dấu âm, kết quả là −2.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: So sánh |−15| = 15 và |8| = 8 — 15 lớn hơn.<br><br>Bước 2: Lấy 15 − 8 = 7.<br><br>Bước 3: Giữ dấu của số có giá trị tuyệt đối lớn hơn (−15 âm), nên kết quả mang dấu âm.' },
+        ],
+        solution: '(−15) + 8 = <strong>−7</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Tính: 24 : (−6)',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phép chia một số dương (24) cho một số âm (−6).' },
+          { t: 'Kiến thức cần dùng', b: 'Chia hai số nguyên <strong>khác dấu</strong>: lấy giá trị tuyệt đối chia cho nhau, kết quả mang <strong>dấu âm</strong>.<br><br>Ví dụ dễ hơn: 10 : (−2) = −5 (10:2=5, khác dấu nên kết quả âm).' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Chia giá trị tuyệt đối: 24 : 6 = 4.<br><br>Bước 2: Vì 24 dương và −6 âm (khác dấu), kết quả mang dấu âm.' },
+        ],
+        solution: '24 : (−6) = <strong>−4</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tìm x, biết: x − 12 = −20',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phép trừ: x − 12 = −20. Đề hỏi: x bằng bao nhiêu?' },
+          { t: 'Kiến thức cần dùng', b: 'Muốn tìm số bị trừ (x), lấy <strong>hiệu cộng với số trừ</strong>: x = hiệu + 12.<br><br>Ví dụ dễ hơn: x − 5 = −3 thì x = −3 + 5 = 2.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Chuyển −12 sang vế phải thành +12: x = −20 + 12.<br><br>Bước 2: Cộng hai số nguyên khác dấu như bài trước.' },
+        ],
+        solution: 'x = −20 + 12 = <strong>−8</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một cửa hàng có 40kg gạo, đã bán 25% số gạo đó. Hỏi cửa hàng đã bán bao nhiêu ki-lô-gam gạo?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: tổng có <strong>40kg gạo</strong>, đã bán <strong>25%</strong> số đó.<br><br>Đề hỏi: số ki-lô-gam đã bán.' },
+          { t: 'Kiến thức cần dùng', b: 'Muốn tính a% của một số, đổi a% thành phân số (a/100) rồi <strong>nhân</strong> với số đó.<br><br>Ví dụ dễ hơn: 10% của 50 là 50 × 10/100 = 5.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Đổi 25% thành phân số: 25/100.<br><br>Bước 2: Lấy 40 × 25/100 = 40 × 0,25.' },
+        ],
+        solution: '40 × 25% = 40 × 0,25 = <strong>10kg</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'So sánh hai số nguyên −3 và −8. Số nào lớn hơn?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hai số nguyên âm: −3 và −8. Đề hỏi: số nào lớn hơn?' },
+          { t: 'Kiến thức cần dùng', b: 'Trên trục số, số nào nằm <strong>bên phải</strong> thì lớn hơn. Với hai số âm, số nào có giá trị tuyệt đối <strong>nhỏ hơn</strong> thì lớn hơn (gần 0 hơn).<br><br>Ví dụ dễ hơn: −2 lớn hơn −5, vì −2 gần 0 hơn.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: So sánh giá trị tuyệt đối: |−3| = 3, |−8| = 8.<br><br>Bước 2: 3 nhỏ hơn 8, nên −3 gần 0 hơn, tức là −3 lớn hơn −8.' },
+        ],
+        solution: 'Vì |−3| < |−8| nên <strong>−3</strong> lớn hơn −8.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một hình chữ nhật có chiều dài 12cm, chiều rộng 7cm. Tính chu vi hình đó.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hình chữ nhật: chiều dài 12cm, chiều rộng 7cm. Đề hỏi chu vi.' },
+          { t: 'Kiến thức cần dùng', b: 'Công thức chu vi hình chữ nhật: <strong>(chiều dài + chiều rộng) × 2</strong>.<br><br>Ví dụ dễ hơn: hình chữ nhật dài 5cm rộng 3cm có chu vi (5+3)×2=16cm.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Cộng chiều dài và chiều rộng: 12 + 7.<br><br>Bước 2: Nhân kết quả với 2.' },
+        ],
+        solution: 'Chu vi = (12 + 7) × 2 = <strong>38cm</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Nhiệt độ buổi sáng là −3°C, đến trưa tăng thêm 8°C. Hỏi nhiệt độ buổi trưa là bao nhiêu?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: nhiệt độ sáng là <strong>−3°C</strong>, <strong>tăng thêm</strong> 8°C vào trưa.<br><br>Đề hỏi: nhiệt độ buổi trưa.' },
+          { t: 'Kiến thức cần dùng', b: '"Tăng thêm" nghĩa là <strong>cộng</strong> vào. Cộng số nguyên âm với số nguyên dương làm như các bài trước: so giá trị tuyệt đối.<br><br>Ví dụ dễ hơn: −2°C tăng thêm 5°C thành −2+5=3°C.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Viết phép cộng: −3 + 8.<br><br>Bước 2: |8| = 8 lớn hơn |−3| = 3, lấy 8 − 3 = 5, mang dấu dương (vì 8 dương lớn hơn).' },
+        ],
+        solution: '−3 + 8 = <strong>5°C</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tính: (−7) × (−5)',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phép nhân hai số nguyên <strong>cùng âm</strong>: −7 và −5.' },
+          { t: 'Kiến thức cần dùng', b: 'Nhân hai số nguyên <strong>cùng dấu</strong> (cùng âm hoặc cùng dương) cho kết quả <strong>dương</strong>. Nhân khác dấu cho kết quả âm.<br><br>Ví dụ dễ hơn: (−2) × (−3) = 6 (cùng âm, kết quả dương).' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Nhân giá trị tuyệt đối: 7 × 5 = 35.<br><br>Bước 2: Hai số cùng dấu âm nên kết quả mang dấu dương.' },
+        ],
+        solution: '(−7) × (−5) = <strong>35</strong>.',
+      },
+    ],
+    7: [
+      {
+        level: 'Cơ bản',
+        text: 'Tính: −3/4 + 1/2 (viết kết quả dưới dạng số thập phân)',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phép cộng hai phân số khác mẫu số: −3/4 và 1/2, yêu cầu đổi kết quả ra số thập phân.' },
+          { t: 'Kiến thức cần dùng', b: 'Muốn cộng hai phân số khác mẫu, phải <strong>quy đồng mẫu số</strong> trước, rồi cộng như phân số cùng mẫu. Sau đó đổi phân số ra thập phân bằng cách lấy tử chia mẫu.<br><br>Ví dụ dễ hơn: 1/2 + 1/4 = 2/4 + 1/4 = 3/4 = 0,75 (3 chia 4).' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Quy đồng: 1/2 = 2/4.<br><br>Bước 2: Cộng: −3/4 + 2/4 = −1/4.<br><br>Bước 3: Đổi −1/4 ra thập phân: −1 : 4 = −0,25.' },
+        ],
+        solution: '−3/4 + 2/4 = −1/4 = <strong>−0,25</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tìm x trong tỉ lệ thức: x/4 = 15/20',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho một <strong>tỉ lệ thức</strong> (hai tỉ số bằng nhau): x/4 = 15/20. Đề hỏi x.' },
+          { t: 'Kiến thức cần dùng', b: 'Trong tỉ lệ thức a/b = c/d, ta có <strong>tích chéo bằng nhau</strong>: a × d = b × c.<br><br>Ví dụ dễ hơn: x/3 = 6/9, tích chéo x × 9 = 3 × 6 = 18, nên x = 18:9 = 2.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tích chéo: x × 20 = 4 × 15.<br><br>Bước 2: Tính vế phải: 4 × 15 = 60.<br><br>Bước 3: Tìm x: x = 60 : 20.' },
+        ],
+        solution: 'x × 20 = 60, nên x = 60 : 20 = <strong>3</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một tam giác có hai góc lần lượt là 50° và 70°. Tính góc còn lại.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho tam giác có hai góc: 50° và 70°. Đề hỏi góc thứ ba.' },
+          { t: 'Kiến thức cần dùng', b: '<strong>Tổng ba góc trong một tam giác luôn bằng 180°</strong>.<br><br>Ví dụ dễ hơn: tam giác có hai góc 60° và 60° thì góc còn lại là 180−60−60=60°.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Cộng hai góc đã biết: 50 + 70.<br><br>Bước 2: Lấy 180 trừ đi tổng đó.' },
+        ],
+        solution: 'Góc còn lại = 180 − (50 + 70) = 180 − 120 = <strong>60°</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Hai đại lượng x và y tỉ lệ thuận, biết x = 3 thì y = 12. Hỏi khi x = 7 thì y bằng bao nhiêu?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho x, y <strong>tỉ lệ thuận</strong> (y = k × x), biết một cặp giá trị (x=3, y=12). Đề hỏi y khi x=7.' },
+          { t: 'Kiến thức cần dùng', b: 'Tìm hệ số tỉ lệ k = y : x trước, rồi dùng công thức y = k × x cho giá trị mới.<br><br>Ví dụ dễ hơn: x=2,y=6 thì k=3; khi x=5, y=3×5=15.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tìm k = 12 : 3 = 4.<br><br>Bước 2: Tính y mới = k × 7 = 4 × 7.' },
+        ],
+        solution: 'k = 12:3 = 4. Khi x=7: y = 4 × 7 = <strong>28</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Tính: (−2/3) × (3/5)',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phép nhân hai phân số: −2/3 và 3/5.' },
+          { t: 'Kiến thức cần dùng', b: 'Nhân hai phân số: lấy <strong>tử nhân tử, mẫu nhân mẫu</strong>, sau đó rút gọn nếu được.<br><br>Ví dụ dễ hơn: 1/2 × 2/3 = 2/6 = 1/3.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Nhân tử: (−2) × 3 = −6. Nhân mẫu: 3 × 5 = 15.<br><br>Bước 2: Rút gọn −6/15 (chia cả hai cho 3).' },
+        ],
+        solution: '(−2×3)/(3×5) = −6/15 = <strong>−2/5</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Ba lớp 7A, 7B, 7C có số học sinh tỉ lệ với 3:4:5, tổng số học sinh ba lớp là 120. Tính số học sinh lớp 7A.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho tỉ lệ số học sinh 3 lớp là <strong>3:4:5</strong>, tổng cộng <strong>120</strong> học sinh. Đề hỏi số học sinh lớp 7A (phần ứng với số 3).' },
+          { t: 'Kiến thức cần dùng', b: 'Chia tổng theo tỉ lệ: cộng các phần tỉ lệ lại để ra <strong>tổng số phần</strong>, rồi lấy tổng chia cho số phần để ra giá trị 1 phần.<br><br>Ví dụ dễ hơn: chia 60 theo tỉ lệ 1:2, tổng phần=3, 1 phần=20, phần đầu=20, phần sau=40.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tổng số phần: 3+4+5=12.<br><br>Bước 2: Giá trị 1 phần: 120:12=10.<br><br>Bước 3: Lớp 7A có 3 phần: 3×10.' },
+        ],
+        solution: 'Tổng phần = 12, 1 phần = 120:12 = 10. Lớp 7A = 3 × 10 = <strong>30 học sinh</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Tìm giá trị tuyệt đối của −9/2 (viết kết quả dưới dạng số thập phân)',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề hỏi giá trị tuyệt đối của phân số âm −9/2, yêu cầu viết kết quả dưới dạng số thập phân.' },
+          { t: 'Kiến thức cần dùng', b: 'Giá trị tuyệt đối của một số là <strong>khoảng cách từ số đó tới 0</strong>, luôn không âm — bỏ dấu âm đi (nếu có). Sau đó đổi phân số ra thập phân bằng cách lấy tử chia mẫu.<br><br>Ví dụ dễ hơn: |−5| = 5. Còn 9/2 = 9 : 2 = 4,5.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Bỏ dấu âm trước phân số: 9/2.<br><br>Bước 2: Đổi ra thập phân: 9 : 2 = 4,5.' },
+        ],
+        solution: '|−9/2| = 9/2 = <strong>4,5</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Cho tam giác ABC cân tại A (AB = AC), biết góc A = 40°. Tính góc B.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho tam giác <strong>cân tại A</strong> (AB=AC), góc A = 40°. Đề hỏi góc B.' },
+          { t: 'Kiến thức cần dùng', b: 'Tam giác cân có <strong>hai góc đáy bằng nhau</strong> (ở đây là góc B và góc C). Kết hợp với tổng ba góc = 180° để tìm góc đáy.<br><br>Ví dụ dễ hơn: tam giác cân có góc đỉnh 60° thì hai góc đáy bằng nhau và bằng (180−60):2=60° (tam giác đều).' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tổng hai góc đáy: 180 − 40 = 140.<br><br>Bước 2: Vì hai góc đáy bằng nhau, chia đôi: 140 : 2.' },
+        ],
+        solution: 'Tổng hai góc đáy = 180−40 = 140°. Góc B = 140 : 2 = <strong>70°</strong>.',
+      },
+    ],
+    8: [
+      {
+        level: 'Cơ bản',
+        text: 'Giải phương trình: 3x + 5 = 20',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phương trình bậc nhất một ẩn: 3x + 5 = 20. Đề hỏi x.' },
+          { t: 'Kiến thức cần dùng', b: 'Chuyển các số hạng không chứa x sang vế phải (đổi dấu), rồi chia để tìm x.<br><br>Ví dụ dễ hơn: 2x+3=11 → 2x=11−3=8 → x=4.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Chuyển 5 sang vế phải: 3x = 20 − 5.<br><br>Bước 2: Tính vế phải: 3x = 15.<br><br>Bước 3: Chia hai vế cho 3: x = 15 : 3.' },
+        ],
+        solution: '3x = 20−5 = 15. x = 15:3 = <strong>5</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tính nhanh 99² bằng cách dùng hằng đẳng thức (a−b)².',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề yêu cầu tính 99² (99 nhân 99) một cách nhanh, dùng hằng đẳng thức thay vì nhân tay.' },
+          { t: 'Kiến thức cần dùng', b: 'Viết 99 = 100 − 1, dùng hằng đẳng thức <strong>(a−b)² = a² − 2ab + b²</strong> với a=100, b=1.<br><br>Ví dụ dễ hơn: 9² = (10−1)² = 100−20+1=81.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: 99² = (100−1)² = 100² − 2×100×1 + 1².<br><br>Bước 2: Tính từng phần: 10000 − 200 + 1.' },
+        ],
+        solution: '99² = 10000 − 200 + 1 = <strong>9801</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một tam giác vuông có hai cạnh góc vuông là 6cm và 8cm. Tính cạnh huyền.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho tam giác vuông, hai cạnh góc vuông là 6cm và 8cm. Đề hỏi cạnh huyền (cạnh dài nhất, đối diện góc vuông).' },
+          { t: 'Kiến thức cần dùng', b: '<strong>Định lý Pytago</strong>: bình phương cạnh huyền bằng tổng bình phương hai cạnh góc vuông.<br><br>Ví dụ dễ hơn: cạnh góc vuông 3cm, 4cm thì cạnh huyền = √(9+16)=√25=5cm.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính bình phương từng cạnh: 6²=36, 8²=64.<br><br>Bước 2: Cộng lại: 36+64=100.<br><br>Bước 3: Lấy căn bậc hai của 100.' },
+        ],
+        solution: 'Cạnh huyền = √(6²+8²) = √100 = <strong>10cm</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Giải phương trình: 2(x − 3) = x + 4',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phương trình có dấu ngoặc: 2(x−3) = x+4. Đề hỏi x.' },
+          { t: 'Kiến thức cần dùng', b: 'Phá ngoặc trước (nhân phân phối), rồi chuyển các số hạng chứa x về một vế, số không chứa x về vế kia.<br><br>Ví dụ dễ hơn: 2(x+1)=x+5 → 2x+2=x+5 → 2x−x=5−2 → x=3.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Phá ngoặc vế trái: 2x − 6 = x + 4.<br><br>Bước 2: Chuyển x sang trái, số sang phải: 2x − x = 4 + 6.<br><br>Bước 3: Tính: x = 10.' },
+        ],
+        solution: '2x−6=x+4 → 2x−x=4+6 → x=<strong>10</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một hình thoi có hai đường chéo dài 6cm và 8cm. Tính diện tích.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hình thoi có hai đường chéo 6cm và 8cm. Đề hỏi diện tích.' },
+          { t: 'Kiến thức cần dùng', b: 'Diện tích hình thoi = <strong>(tích hai đường chéo) : 2</strong>.<br><br>Ví dụ dễ hơn: hình thoi có 2 đường chéo 4cm, 5cm thì diện tích = (4×5):2=10cm².' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Nhân hai đường chéo: 6×8=48.<br><br>Bước 2: Chia cho 2.' },
+        ],
+        solution: 'Diện tích = (6×8):2 = 48:2 = <strong>24cm²</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Phân tích đa thức thành nhân tử: x² − 9. Kết quả có dạng (x−a)(x+a), tìm a.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho đa thức x²−9, yêu cầu phân tích thành tích (x−a)(x+a) và tìm a.' },
+          { t: 'Kiến thức cần dùng', b: 'Hằng đẳng thức <strong>hiệu hai bình phương</strong>: A² − B² = (A−B)(A+B). Ở đây x² là A², 9 = 3² là B².<br><br>Ví dụ dễ hơn: x²−16 = (x−4)(x+4), vì 16=4².' },
+          { t: 'Hướng làm bài này', b: 'Nhận ra 9 = 3², nên x²−9 = (x−3)(x+3), so với dạng (x−a)(x+a) thì a=3.' },
+        ],
+        solution: 'x²−9 = (x−3)(x+3), vậy a = <strong>3</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Tính diện tích hình thang có đáy lớn 10cm, đáy nhỏ 6cm, chiều cao 5cm.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hình thang: đáy lớn 10cm, đáy nhỏ 6cm, chiều cao 5cm. Đề hỏi diện tích.' },
+          { t: 'Kiến thức cần dùng', b: 'Diện tích hình thang = <strong>(đáy lớn + đáy nhỏ) × chiều cao : 2</strong>.<br><br>Ví dụ dễ hơn: đáy lớn 8, đáy nhỏ 4, cao 3 thì diện tích=(8+4)×3:2=18.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Cộng hai đáy: 10+6=16.<br><br>Bước 2: Nhân với chiều cao: 16×5=80.<br><br>Bước 3: Chia cho 2.' },
+        ],
+        solution: 'Diện tích = (10+6)×5:2 = 80:2 = <strong>40cm²</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tìm x, biết x² = 49 và x là số dương.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho x²=49, x là số dương. Đề hỏi x.' },
+          { t: 'Kiến thức cần dùng', b: 'x² = 49 nghĩa là x là <strong>căn bậc hai</strong> của 49. Vì đề yêu cầu x dương, chỉ lấy nghiệm dương.<br><br>Ví dụ dễ hơn: x²=16, x dương thì x=4 (vì 4×4=16).' },
+          { t: 'Hướng làm bài này', b: 'Tìm số dương mà bình phương lên bằng 49 — thử 7: 7×7=49, đúng.' },
+        ],
+        solution: 'Vì 7×7=49, nên x = <strong>7</strong>.',
+      },
+    ],
+    9: [
+      {
+        level: 'Cơ bản',
+        text: 'Tính: √16 + √9',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho tổng hai căn bậc hai: √16 và √9.' },
+          { t: 'Kiến thức cần dùng', b: 'Tính từng căn bậc hai trước (tìm số mà bình phương lên bằng số dưới dấu căn), rồi mới cộng.<br><br>Ví dụ dễ hơn: √4 + √1 = 2 + 1 = 3.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: √16 = 4 (vì 4×4=16). √9 = 3 (vì 3×3=9).<br><br>Bước 2: Cộng: 4 + 3.' },
+        ],
+        solution: '√16 + √9 = 4 + 3 = <strong>7</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Giải phương trình bậc hai: x² − 5x + 6 = 0. Nghiệm nhỏ hơn là bao nhiêu?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phương trình bậc hai x²−5x+6=0, có hai nghiệm. Đề hỏi nghiệm nhỏ hơn.' },
+          { t: 'Kiến thức cần dùng', b: 'Có thể phân tích thành nhân tử: tìm hai số có <strong>tích bằng 6, tổng bằng 5</strong> (đó là 2 và 3), viết thành (x−2)(x−3)=0.<br><br>Ví dụ dễ hơn: x²−3x+2=0, tìm hai số tích=2 tổng=3 là 1 và 2, phương trình thành (x−1)(x−2)=0, nghiệm x=1 hoặc x=2.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tìm hai số có tích=6, tổng=5 — đó là 2 và 3.<br><br>Bước 2: Viết x²−5x+6=(x−2)(x−3)=0, nên x=2 hoặc x=3.<br><br>Bước 3: Nghiệm nhỏ hơn là 2.' },
+        ],
+        solution: 'x²−5x+6=(x−2)(x−3)=0, nghiệm là x=2 hoặc x=3. Nghiệm nhỏ hơn là <strong>2</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Tính: √81 − √16',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hiệu hai căn bậc hai: √81 và √16.' },
+          { t: 'Kiến thức cần dùng', b: 'Tính từng căn bậc hai trước rồi mới trừ — không được trừ trước rồi mới lấy căn.<br><br>Ví dụ dễ hơn: √25 − √4 = 5 − 2 = 3.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: √81 = 9 (vì 9×9=81). √16 = 4 (vì 4×4=16).<br><br>Bước 2: Trừ: 9 − 4.' },
+        ],
+        solution: '√81 − √16 = 9 − 4 = <strong>5</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Giải hệ phương trình: x + y = 7 và x − y = 1. Tìm x.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hệ hai phương trình bậc nhất hai ẩn x, y. Đề hỏi x.' },
+          { t: 'Kiến thức cần dùng', b: '<strong>Cộng đại số</strong>: cộng vế với vế hai phương trình để triệt tiêu y (vì +y và −y cộng lại bằng 0), ra phương trình chỉ còn x.<br><br>Ví dụ dễ hơn: x+y=5, x−y=1 → cộng lại: 2x=6 → x=3.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Cộng hai phương trình: (x+y)+(x−y) = 7+1.<br><br>Bước 2: Rút gọn vế trái: 2x = 8.<br><br>Bước 3: Tìm x = 8:2.' },
+        ],
+        solution: '2x = 7+1 = 8, nên x = 8:2 = <strong>4</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một tam giác vuông có góc nhọn 30°, cạnh huyền dài 10cm. Tính cạnh đối diện góc 30° (biết sin 30° = 1/2).',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho tam giác vuông có góc nhọn 30°, cạnh huyền 10cm, và cho biết sin 30° = 1/2. Đề hỏi cạnh đối diện góc 30°.' },
+          { t: 'Kiến thức cần dùng', b: 'Trong tam giác vuông: <strong>sin(góc) = cạnh đối : cạnh huyền</strong>. Suy ra cạnh đối = sin(góc) × cạnh huyền.<br><br>Ví dụ dễ hơn: góc 30°, cạnh huyền 6cm thì cạnh đối = 1/2 × 6 = 3cm.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Áp dụng công thức: cạnh đối = sin 30° × cạnh huyền.<br><br>Bước 2: Thay số: 1/2 × 10.' },
+        ],
+        solution: 'Cạnh đối = 1/2 × 10 = <strong>5cm</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Cho phương trình x² − 7x + 10 = 0. Tính tổng hai nghiệm bằng định lý Vi-ét.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phương trình bậc hai x²−7x+10=0, yêu cầu tính tổng hai nghiệm bằng Vi-ét (không cần giải ra từng nghiệm).' },
+          { t: 'Kiến thức cần dùng', b: '<strong>Định lý Vi-ét</strong>: với phương trình ax²+bx+c=0 (a≠0), tổng hai nghiệm = −b/a.<br><br>Ví dụ dễ hơn: x²−4x+3=0 có a=1,b=−4, tổng hai nghiệm = −(−4)/1=4.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định a=1, b=−7 trong phương trình.<br><br>Bước 2: Tính tổng = −b/a = −(−7)/1.' },
+        ],
+        solution: 'Tổng hai nghiệm = −b/a = −(−7)/1 = <strong>7</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Tính giá trị hàm số y = 2x² tại x = 3.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hàm số y=2x², yêu cầu tính y khi x=3 (thay số vào công thức).' },
+          { t: 'Kiến thức cần dùng', b: 'Thay giá trị x vào công thức, tính theo đúng thứ tự: <strong>bình phương trước, nhân sau</strong>.<br><br>Ví dụ dễ hơn: y=3x² tại x=2: y=3×2²=3×4=12.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính x²=3²=9.<br><br>Bước 2: Nhân với 2: y=2×9.' },
+        ],
+        solution: 'y = 2 × 3² = 2 × 9 = <strong>18</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một đường tròn có bán kính 5cm. Tính chu vi đường tròn đó (lấy π ≈ 3,14).',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho đường tròn bán kính 5cm, π≈3,14. Đề hỏi chu vi.' },
+          { t: 'Kiến thức cần dùng', b: 'Công thức chu vi đường tròn: <strong>C = 2 × π × bán kính</strong>.<br><br>Ví dụ dễ hơn: bán kính 2cm thì chu vi = 2×3,14×2=12,56cm.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Nhân 2 × 3,14 = 6,28.<br><br>Bước 2: Nhân tiếp với bán kính: 6,28 × 5.' },
+        ],
+        solution: 'C = 2 × 3,14 × 5 = <strong>31,4cm</strong>.',
+      },
+    ],
   };
 
   const giftedGradePicker = $('giftedGradePicker');
   const giftedGradeRow = $('giftedGradeRow');
+  const giftedGradeRowTHCS = $('giftedGradeRowTHCS');
   const giftedProblemList = $('giftedProblemList');
   let giftedCurrentGrade = null;
 
@@ -1541,6 +1871,12 @@
   }
 
   giftedGradeRow.addEventListener('click', (e) => {
+    const btn = e.target.closest('.grade-card');
+    if (!btn) return;
+    sfx.click();
+    giftedRenderProblems(parseInt(btn.dataset.grade, 10));
+  });
+  giftedGradeRowTHCS.addEventListener('click', (e) => {
     const btn = e.target.closest('.grade-card');
     if (!btn) return;
     sfx.click();
