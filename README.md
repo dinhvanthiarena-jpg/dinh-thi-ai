@@ -185,6 +185,23 @@ Tài khoản `ADMIN_EMAIL` (đã seed sẵn quyền `role='admin'`) có thể v�
 email/SĐT của họ; nếu họ chưa có tài khoản, điền thêm họ tên + mật khẩu để tạo
 mới ngay tại đó.
 
+**Cài lên màn hình chính điện thoại (PWA):** module này khai báo sẵn
+`manifest.webmanifest` + service worker (`public/mun-cui-app/`) nên cài được
+như một app thật, không cần lên App Store/CH Play:
+
+- **Android (Chrome):** đăng nhập rồi mở `/mun-cui` → menu ⋮ góc trên phải →
+  **"Cài đặt ứng dụng"** / **"Thêm vào Màn hình chính"**.
+- **iPhone (Safari):** mở `/mun-cui` → nút Chia sẻ (hình vuông mũi tên lên) →
+  **"Thêm vào Màn hình chính"**. (Safari không tự hiện gợi ý cài như Chrome,
+  phải làm thao tác này thủ công.)
+
+Sau khi cài, app mở toàn màn hình (không thanh địa chỉ trình duyệt) với icon
+và tên riêng. Vì đây là app hiển thị số liệu tài chính theo phiên đăng nhập
+của từng người, service worker **chỉ** cache icon/manifest/CSS-JS dùng
+chung — không cache bất kỳ trang dữ liệu nào, nên luôn cần mạng để xem số
+liệu mới nhất và không có rủi ro lộ dữ liệu giữa các tài khoản dùng chung
+máy. Mất mạng sẽ hiện trang thông báo thay vì một trang dữ liệu cũ/sai.
+
 ## 7. Checklist trước khi ra mắt
 
 - [ ] Đổi `JWT_SECRET`, `SESSION_SECRET`, mật khẩu admin sang giá trị ngẫu nhiên mạnh

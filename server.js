@@ -107,14 +107,28 @@ app.use(methodOverride('_method'));
 // middleware below for the same issue on dynamic routes) and browsers can
 // keep serving an old cached copy to phones that already installed the PWA,
 // so a fix never reaches them until they uninstall/reinstall.
-// Same applies to /english-air (the English-learning PWA) and /bibi-history
-// (the history-learning PWA), so all app shells are matched by one pattern here.
+// Same applies to /english-air (the English-learning PWA), /bibi-history
+// (the history-learning PWA), and /mun-cui-app (the shell for the sawdust &
+// firewood yard management PWA — its sw.js/manifest/icons are the only
+// pieces served as plain static files; the actual app pages are
+// server-rendered per session under /mun-cui, kept in a differently-named
+// static folder so express.static's directory-redirect behavior never
+// shadows the /mun-cui router), so all app shells are matched by one
+// pattern here.
 const PWA_SHELL_FILES =
-  /\/(game|english-air|bibi-history)\/(index\.html|app\.js|style\.css|sw\.js|grades-data\.js|course(-[ab]\d|-lop\d+)?\.js|manifest\.(json|webmanifest))$/;
+  /\/(game|english-air|bibi-history|mun-cui-app)\/(index\.html|app\.js|style\.css|sw\.js|grades-data\.js|course(-[ab]\d|-lop\d+)?\.js|manifest\.(json|webmanifest))$/;
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, filePath) => {
-    if (PWA_SHELL_FILES.test(filePath.replace(/\\/g, '/'))) {
+    const normalized = filePath.replace(/\\/g, '/');
+    if (PWA_SHELL_FILES.test(normalized)) {
       res.set('Cache-Control', 'no-store');
+    }
+    // mun-cui-app/sw.js lives outside the /mun-cui/ path it needs to control
+    // (that path is the server-rendered app, not a static folder) — this
+    // header is how a service worker is allowed to claim a wider scope than
+    // the directory its own script file sits in.
+    if (normalized.endsWith('/mun-cui-app/sw.js')) {
+      res.set('Service-Worker-Allowed', '/mun-cui/');
     }
   },
 }));

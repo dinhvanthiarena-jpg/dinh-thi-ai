@@ -1,0 +1,20 @@
+{
+  "name": "Mùn Cưa & Củi — Quản lý xưởng",
+  "short_name": "Mùn & Củi",
+  "description": "Quản lý chuyến mua mùn cưa, kho ủ, công nhật, mua bán củi và báo cáo thu chi của xưởng.",
+  "lang": "vi",
+  "dir": "ltr",
+  "start_url": "/mun-cui/",
+  "scope": "/mun-cui/",
+  "display": "standalone",
+  "display_override": ["standalone"],
+  "orientation": "portrait-primary",
+  "background_color": "#FAF5FF",
+  "theme_color": "#3B2412",
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "/mun-cui-app/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/mun-cui-app/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/mun-cui-app/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
