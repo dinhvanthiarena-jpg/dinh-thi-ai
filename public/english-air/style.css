@@ -759,8 +759,9 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .pic:active:not([disabled]) { transform: scale(.98); }
 /* Chữ tiếng Anh dưới mỗi ô chỉ hiện SAU KHI chấm. Hiện sẵn thì bài chọn ảnh
    thành bài dò chữ: câu hỏi là chữ gì, tìm ô ghi đúng chữ đó là xong. */
-.pic-an > span { visibility: hidden; }
-.stage.da-cham .pic-an > span { visibility: visible; }
+/* Thầy yêu cầu: chữ tiếng Anh dưới thẻ ảnh phải LUÔN hiện ra để chọn,
+   không ẩn đi chờ chấm xong nữa. */
+.pic-an > span { visibility: visible; }
 .pic.sel { box-shadow: inset 0 0 0 3px var(--brand), var(--sh-1); background: var(--brand-soft); }
 .pic.ok  { box-shadow: inset 0 0 0 3px var(--ok), var(--sh-1); background: var(--ok-soft); }
 .pic.bad { box-shadow: inset 0 0 0 3px var(--bad), var(--sh-1); background: var(--bad-soft); }

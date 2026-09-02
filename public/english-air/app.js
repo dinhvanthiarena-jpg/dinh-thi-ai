@@ -534,6 +534,9 @@ const unitWords = u => u.lessons.flatMap(lessonWords);
 const unitSentences = u => u.lessons.flatMap(l => l.sentences || []);
 const ALL_WORDS = COURSE.levels.flatMap(lv => lv.units.flatMap(unitWords));
 const SINGLE = ALL_WORDS.filter(w => !w.en.includes(" "));
+// Cau/cum nhieu chu - dung rieng lam kho luoi bay cho cau hoi dang cum,
+// khong de tu don lac vao chung voi dap an la ca mot cau.
+const PHRASES = ALL_WORDS.filter(w => w.en.includes(" "));
 /* Kho từ dùng cho bài chọn ảnh: chỉ những từ thật sự vẽ được.
    TÍNH MUỘN, không tính ngay lúc nạp: hàm dò cảnh khai báo mãi phía dưới, gọi
    lên là cả app chết ngay từ dòng đầu. Tính một lần rồi giữ lại. */
@@ -813,7 +816,12 @@ function buildPractice(words, sentences, max) {
     const kinds = w.en.includes(" ") ? ["choice", "reverse", "listen"] : ["choice", "listen", "reverse", "type"];
     const type = kinds[i % kinds.length];
     if (type === "type") { q.push({ type: "type", word: w }); return; }
-    q.push({ type, word: w, opts: shuffle([w, ...sample(ALL_WORDS.filter(x => x.en !== w.en), 3)]) });
+    // Luoi bay phai CUNG KIEU voi dap an dung: cum thi lay cum, tu don thi lay
+    // tu don - khong thi ra cau hoi vo ly nhu dap an la ca cau ma 3 luoi bay
+    // chi la mot tu roi rac khong lien quan.
+    const kho = w.en.includes(" ") ? PHRASES : SINGLE;
+    const nguon = kho.filter(x => x.en !== w.en).length >= 3 ? kho : ALL_WORDS;
+    q.push({ type, word: w, opts: shuffle([w, ...sample(nguon.filter(x => x.en !== w.en), 3)]) });
   });
 
   (sentences || []).forEach(s => {
@@ -976,8 +984,15 @@ function khungAnh(w) {
    hiện trong câu: một cảnh phủ được hàng chục câu. Xếp từ cụ thể lên trước từ
    chung, vì "coffee shop" phải ra quán cà phê chứ không ra cái cửa hàng. */
 const CANH = [
-  ["hello|hi|goodbye|bye|welcome|greet|nice to meet|name|introduce|excuse me", "hello"],
-  ["thank|thanks|please|help|helping|kind|sure|of course", "friend"],
+  /* Danh từ CỤ THỂ được xếp lên đầu và có hình RIÊNG, không dùng chung một
+     cảnh "car" cho cả xe hơi/xe buýt/nhà ga/bản đồ nữa — thầy đã chỉ ra ảnh
+     bị lẫn lộn giữa các nội dung khác nhau. "left"/"right" cũng tách hai mũi
+     tên riêng, không dùng chung một hình xe. */
+  ["bus|bus stop|bus station", "bus"],
+  ["station|train|railway|platform|ticket", "station"],
+  ["map", "map"],
+  ["left", "arrowleft"],
+  ["right", "arrowright"],
   ["vietnam|vietnamese|country|nation|flag|culture|tradition", "village"],
   ["teacher|student|school|class|classroom|lesson|homework|exam|test", "school"],
   ["book|read|reading|library|pen|pencil|write|writing|note|study|studies|learn|english|language|word", "work"],
@@ -993,7 +1008,7 @@ const CANH = [
   ["happy|glad|great|fun|funny|love|like|good|beautiful|smile|laugh|enjoy", "happy"],
   ["tired|sleepy|exhausted|sad", "tired"],
   ["doctor|hospital|nurse|medicine|health|headache|fever|patient|clinic", "doctor"],
-  ["left|right|turn|corner|way|direction|map|near|far|straight|address|here|there", "car"],
+  ["turn|corner|way|direction|near|far|straight|address|here|there", "car"],
   ["one|two|three|four|five|six|seven|eight|nine|ten|twenty|hundred|number|count", "clock"],
   ["morning|afternoon|today|tomorrow|yesterday|day|week|weekend|month|year|season|spring|autumn", "sun"],
   ["money|price|cost|buy|bought|pay|cheap|expensive|dong|dollar", "money"],
@@ -1004,7 +1019,7 @@ const CANH = [
   ["city|hanoi|saigon|town|street|building|traffic|downtown", "city"],
   ["village|countryside|farm|field", "village"],
   ["house|home|room|live|living|lived|apartment|kitchen|door|window", "house"],
-  ["car|drive|driving|bus|taxi|motorbike|bike|road|ride", "car"],
+  ["car|drive|driving|taxi|motorbike|bike|road|ride", "car"],
   ["plane|airport|fly|flight|travel|trip|holiday|vacation|visit|tourist|country", "plane"],
   ["sun|sunny|hot|summer|warm|weather|sky|morning|afternoon", "sun"],
   ["rain|rainy|wet|cold|winter|storm|cloud", "rain"],
@@ -1021,7 +1036,6 @@ const CANH = [
      ảnh sai còn tệ hơn không có ảnh. Nên từ trừu tượng (fine, quite, enough,
      probably, same, different…) cố ý KHÔNG gán hình nào cả. */
   ["hotel|guest|reserve|check in|room service", "house"],
-  ["station|train|railway|platform|ticket", "car"],
   ["university|college|campus|lecture|classmate", "school"],
   ["grandmother|grandfather|grandma|grandpa|childhood|relative", "family"],
   ["photo|picture|camera|souvenir|album", "phone"],
@@ -1043,6 +1057,11 @@ const CANH = [
   ["watch tv|television|screen|channel", "phone"],
   ["man|boy|he|his|sir|mr", "man"],
   ["woman|girl|she|her|lady|ms|mrs", "woman"],
+  /* Nhóm chào hỏi/cảm ơn xếp CUỐI CÙNG: đây là cụm rất hay xen vào giữa câu
+     dài ("Excuse me, where is the station?"), nếu để lên đầu nó sẽ thắng
+     trước cả những từ chỉ ĐÚNG nội dung chính của câu (nhà ga, bản đồ...). */
+  ["hello|hi|goodbye|bye|welcome|greet|nice to meet|name|introduce|excuse me", "hello"],
+  ["thank|thanks|please|help|helping|kind|sure|of course", "friend"],
 ];
 // Ranh gioi tu phai la HAI dau gach cheo trong nguon: mot cai thi JS doc thanh
 // ky tu backspace va regex khong bao gio khop.
