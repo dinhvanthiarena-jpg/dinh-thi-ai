@@ -183,11 +183,16 @@ module.exports = function attachBattleSocket(io) {
         if (already) { if (typeof ack === 'function') ack({ ok: true }); return; }
 
         const player = await getOrCreatePlayer(installId, displayName, grade);
+        // Phải gán TRƯỚC khi rẽ nhánh chờ/ghép ngay — người bấm "Tìm đối thủ"
+        // khi đã có sẵn người chờ sẽ đi thẳng vào startMatch() bên dưới, nếu
+        // chỉ gán ở nhánh chờ thì socket này thiếu installId, mọi lần nộp
+        // đáp án answer:submit sau đó bị âm thầm từ chối (đã xảy ra thật khi
+        // test 2 trình duyệt thật — điểm số đứng yên dù bấm đúng đáp án).
+        socket.data.installId = installId;
         const now = Date.now();
         const oppIdx = findOpponentIndex(grade, now);
         if (oppIdx === -1) {
           queue1v1.push({ socketId: socket.id, installId, displayName: player.displayName, grade, queuedAt: now });
-          socket.data.installId = installId;
           if (typeof ack === 'function') ack({ ok: true, waiting: true });
           return;
         }
