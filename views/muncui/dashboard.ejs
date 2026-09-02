@@ -1,0 +1,89 @@
+<% function vnd(n) { return Math.round(n || 0).toLocaleString('vi-VN') + 'đ'; } %>
+<% function qty(n) { return (n || 0).toLocaleString('vi-VN'); } %>
+<% const unitLabel = { khoi: 'khối', bao: 'bao', tan: 'tấn' }; %>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div class="card p-5">
+    <p class="text-sm text-muted">Chuyến mua mùn hôm nay</p>
+    <p class="text-2xl font-bold text-ink mt-1"><%= tripsToday.length %></p>
+  </div>
+  <div class="card p-5">
+    <p class="text-sm text-muted">Tiền công hôm nay</p>
+    <p class="text-2xl font-bold text-ink mt-1"><%= vnd(laborTodayTotal) %></p>
+    <p class="text-xs text-muted mt-1"><%= laborToday.length %> lượt công</p>
+  </div>
+  <div class="card p-5">
+    <p class="text-sm text-muted">Xưởng xẻ / Xe đang hoạt động</p>
+    <p class="text-2xl font-bold text-ink mt-1"><%= sawmillCount %> / <%= vehicleCount %></p>
+  </div>
+  <div class="card p-5 bg-gradient-to-br from-amber-500 to-orange-600 text-white border-0">
+    <p class="text-sm text-white/80">Lợi nhuận tháng này</p>
+    <p class="text-2xl font-bold mt-1"><%= vnd(month.profit) %></p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="card p-6 lg:col-span-2">
+    <h2 class="font-semibold text-ink mb-4">Tổng hợp tháng này</h2>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <p class="text-muted mb-2">Chi phí</p>
+        <ul class="space-y-1.5">
+          <li class="flex justify-between"><span>Mua mùn</span><span class="font-medium"><%= vnd(month.sawdustCost) %></span></li>
+          <li class="flex justify-between"><span>Mua củi</span><span class="font-medium"><%= vnd(month.firewoodCost) %></span></li>
+          <li class="flex justify-between"><span>Công nhật</span><span class="font-medium"><%= vnd(month.laborCost) %></span></li>
+          <li class="flex justify-between"><span>Chi phí khác</span><span class="font-medium"><%= vnd(month.otherCost) %></span></li>
+          <li class="flex justify-between border-t border-primary-100 pt-1.5 mt-1.5"><span class="font-semibold">Tổng chi</span><span class="font-semibold text-danger"><%= vnd(month.totalCost) %></span></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-muted mb-2">Doanh thu</p>
+        <ul class="space-y-1.5">
+          <li class="flex justify-between"><span>Bán mùn</span><span class="font-medium"><%= vnd(month.sawdustRevenue) %></span></li>
+          <li class="flex justify-between"><span>Bán củi</span><span class="font-medium"><%= vnd(month.firewoodRevenue) %></span></li>
+          <li class="flex justify-between border-t border-primary-100 pt-1.5 mt-1.5"><span class="font-semibold">Tổng thu</span><span class="font-semibold text-success"><%= vnd(month.totalRevenue) %></span></li>
+        </ul>
+      </div>
+    </div>
+    <a href="/mun-cui/bao-cao" class="btn-outline mt-5 inline-flex">Xem báo cáo chi tiết theo ngày &rarr;</a>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-4">Tồn kho mùn</h2>
+    <% if (!sawdustStock.length) { %>
+      <p class="text-sm text-muted">Chưa có lô mùn nào tập kết.</p>
+    <% } %>
+    <ul class="space-y-3">
+      <% sawdustStock.forEach(function(s) { %>
+        <li class="text-sm">
+          <p class="font-medium text-ink">Đơn vị: <%= unitLabel[s.unit] || s.unit %></p>
+          <p class="text-muted">Đang ủ: <%= qty(s.dang_u) %> · Đã ủ xong: <%= qty(s.da_u_xong) %></p>
+        </li>
+      <% }); %>
+    </ul>
+    <a href="/mun-cui/kho-mun" class="btn-outline mt-4 inline-flex w-full justify-center">Quản lý kho mùn</a>
+  </div>
+</div>
+
+<div class="card p-6 mt-6">
+  <h2 class="font-semibold text-ink mb-4">Chuyến mua mùn hôm nay</h2>
+  <% if (!tripsToday.length) { %>
+    <p class="text-sm text-muted">Chưa có chuyến nào hôm nay.</p>
+  <% } else { %>
+    <table class="w-full text-sm">
+      <thead class="text-left text-muted">
+        <tr><th class="py-2">Xưởng xẻ</th><th class="py-2">Xe</th><th class="py-2 text-right">Khối lượng</th><th class="py-2 text-right">Chi phí</th></tr>
+      </thead>
+      <tbody class="divide-y divide-primary-50">
+        <% tripsToday.forEach(function(t) { %>
+          <tr>
+            <td class="py-2"><%= t.sawmill ? t.sawmill.name : '—' %></td>
+            <td class="py-2"><%= t.vehicle ? t.vehicle.name : '—' %></td>
+            <td class="py-2 text-right"><%= qty(t.quantity) %> <%= unitLabel[t.unit] || t.unit %></td>
+            <td class="py-2 text-right"><%= vnd(t.totalCost) %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } %>
+</div>

@@ -20,6 +20,9 @@
           <% if (currentUser.role === 'admin') { %>
             <a href="/admin" class="btn-ghost">Quản trị</a>
           <% } %>
+          <% if (currentUser.role === 'admin' || currentUser.sawdustRole) { %>
+            <a href="/mun-cui" class="btn-ghost">Mùn cưa &amp; Củi</a>
+          <% } %>
           <a href="/dashboard" class="btn-ghost">Khu vực học tập</a>
           <form action="/auth/logout" method="POST">
             <button type="submit" class="btn-outline">Đăng xuất</button>
@@ -50,6 +53,9 @@
         <% if (typeof currentUser !== 'undefined' && currentUser) { %>
           <% if (currentUser.role === 'admin') { %>
             <a href="/admin" class="btn-ghost w-full">Quản trị</a>
+          <% } %>
+          <% if (currentUser.role === 'admin' || currentUser.sawdustRole) { %>
+            <a href="/mun-cui" class="btn-ghost w-full">Mùn cưa &amp; Củi</a>
           <% } %>
           <a href="/dashboard" class="btn-ghost w-full">Khu vực học tập</a>
           <form action="/auth/logout" method="POST">

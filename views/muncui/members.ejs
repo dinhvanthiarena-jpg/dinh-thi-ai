@@ -1,0 +1,93 @@
+<% const roleLabel = { owner: 'Chủ xưởng / Ban quản trị', manager: 'Quản lý', staff: 'Nhân viên' }; %>
+
+<div class="card p-6 mb-6">
+  <h2 class="font-semibold text-ink mb-2">Cấp quyền cho thành viên</h2>
+  <p class="text-xs text-muted mb-4">Nhập email hoặc số điện thoại. Nếu tài khoản đã đăng ký sẵn thì chỉ cần gán vai trò; nếu chưa có, điền thêm họ tên và mật khẩu để tạo tài khoản mới luôn.</p>
+  <form method="POST" action="/mun-cui/thanh-vien" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div>
+      <label class="label">Email hoặc SĐT *</label>
+      <input class="input" type="text" name="email" placeholder="email@example.com hoặc 0912345678" required />
+      <input type="hidden" name="phone" />
+    </div>
+    <div>
+      <label class="label">Họ tên (nếu tạo mới)</label>
+      <input class="input" type="text" name="name" />
+    </div>
+    <div>
+      <label class="label">Mật khẩu (nếu tạo mới)</label>
+      <input class="input" type="text" name="password" placeholder="Tối thiểu 6 ký tự" />
+    </div>
+    <div class="sm:col-span-2">
+      <label class="label">Vai trò *</label>
+      <select class="input" name="sawdustRole" required>
+        <option value="staff">Nhân viên — chỉ nhập liệu</option>
+        <option value="manager">Quản lý — nhập liệu + sửa/xóa + xem báo cáo</option>
+        <option value="owner">Chủ xưởng / Ban quản trị — toàn quyền, quản lý thành viên</option>
+      </select>
+    </div>
+    <div class="flex items-end">
+      <button type="submit" class="btn-primary w-full">Cấp quyền</button>
+    </div>
+  </form>
+</div>
+
+<div class="card overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-primary-50 text-ink">
+      <tr>
+        <th class="text-left px-5 py-3 font-semibold">Họ tên</th>
+        <th class="text-left px-5 py-3 font-semibold">Email / SĐT</th>
+        <th class="text-left px-5 py-3 font-semibold">Vai trò</th>
+        <th class="text-right px-5 py-3 font-semibold">Hành động</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-primary-50">
+      <% members.forEach(function(m) { %>
+        <tr>
+          <td class="px-5 py-3 text-ink font-medium"><%= m.name %></td>
+          <td class="px-5 py-3 text-muted"><%= m.email || m.phone || '—' %></td>
+          <td class="px-5 py-3">
+            <% if (m.role === 'admin') { %>
+              <span class="badge bg-primary-50 text-primary-700">Quản trị viên site (toàn quyền)</span>
+            <% } else { %>
+              <form action="/mun-cui/thanh-vien/<%= m._id %>" method="POST" class="inline-flex items-center gap-2">
+                <select name="sawdustRole" class="input py-1.5 text-xs" onchange="this.form.submit()">
+                  <option value="staff" <%= m.sawdustRole === 'staff' ? 'selected' : '' %>>Nhân viên</option>
+                  <option value="manager" <%= m.sawdustRole === 'manager' ? 'selected' : '' %>>Quản lý</option>
+                  <option value="owner" <%= m.sawdustRole === 'owner' ? 'selected' : '' %>>Chủ xưởng / BQT</option>
+                </select>
+              </form>
+            <% } %>
+          </td>
+          <td class="px-5 py-3 text-right">
+            <% if (m.role !== 'admin') { %>
+              <form action="/mun-cui/thanh-vien/<%= m._id %>/delete" method="POST" class="inline" onsubmit="return confirm('Gỡ quyền truy cập của thành viên này?');">
+                <button type="submit" class="text-danger hover:underline cursor-pointer">Gỡ quyền</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!members.length) { %>
+        <tr><td colspan="4" class="px-5 py-8 text-center text-muted">Chưa có thành viên nào.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // Cho phép gõ SĐT thay vì email trong cùng một ô, tách sang ô ẩn "phone"
+  // để controller nhận diện đúng loại định danh khi submit.
+  (function () {
+    var form = document.querySelector('form[action="/mun-cui/thanh-vien"]');
+    if (!form) return;
+    form.addEventListener('submit', function () {
+      var input = form.querySelector('input[name="email"]');
+      var hiddenPhone = form.querySelector('input[name="phone"]');
+      if (input && hiddenPhone && input.value && !input.value.includes('@')) {
+        hiddenPhone.value = input.value;
+        input.value = '';
+      }
+    });
+  })();
+</script>

@@ -1,0 +1,77 @@
+<% const isManager = currentUser && (currentUser.role === 'admin' || currentUser.sawdustRole === 'owner' || currentUser.sawdustRole === 'manager'); %>
+<% const e = editing || {}; %>
+<% const typeLabel = { mun: 'Xe chở mùn', cui: 'Xe chở củi', ca_hai: 'Cả hai' }; %>
+
+<% if (isManager) { %>
+<div class="card p-6 mb-6">
+  <h2 class="font-semibold text-ink mb-4"><%= editing ? 'Sửa xe' : 'Thêm xe mới' %></h2>
+  <form method="POST" action="<%= editing ? '/mun-cui/xe/' + editing._id : '/mun-cui/xe' %>" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="label">Tên xe *</label>
+      <input class="input" type="text" name="name" value="<%= e.name || '' %>" required />
+    </div>
+    <div>
+      <label class="label">Biển số</label>
+      <input class="input" type="text" name="plateNumber" value="<%= e.plateNumber || '' %>" />
+    </div>
+    <div>
+      <label class="label">Loại xe</label>
+      <select class="input" name="type">
+        <option value="ca_hai" <%= e.type === 'ca_hai' || !e.type ? 'selected' : '' %>>Cả hai</option>
+        <option value="mun" <%= e.type === 'mun' ? 'selected' : '' %>>Xe chở mùn</option>
+        <option value="cui" <%= e.type === 'cui' ? 'selected' : '' %>>Xe chở củi</option>
+      </select>
+    </div>
+    <div>
+      <label class="label">Ghi chú</label>
+      <input class="input" type="text" name="note" value="<%= e.note || '' %>" />
+    </div>
+    <% if (editing) { %>
+      <label class="flex items-center gap-2 text-sm text-ink">
+        <input type="checkbox" name="isActive" <%= e.isActive ? 'checked' : '' %> /> Đang hoạt động
+      </label>
+    <% } %>
+    <div class="sm:col-span-2 flex gap-3">
+      <button type="submit" class="btn-primary"><%= editing ? 'Lưu thay đổi' : 'Thêm xe' %></button>
+      <% if (editing) { %><a href="/mun-cui/xe" class="btn-ghost">Hủy</a><% } %>
+    </div>
+  </form>
+</div>
+<% } %>
+
+<div class="card overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-primary-50 text-ink">
+      <tr>
+        <th class="text-left px-5 py-3 font-semibold">Tên xe</th>
+        <th class="text-left px-5 py-3 font-semibold">Biển số</th>
+        <th class="text-left px-5 py-3 font-semibold">Loại</th>
+        <th class="text-center px-5 py-3 font-semibold">Trạng thái</th>
+        <% if (isManager) { %><th class="text-right px-5 py-3 font-semibold">Hành động</th><% } %>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-primary-50">
+      <% vehicles.forEach(function(v) { %>
+        <tr>
+          <td class="px-5 py-3 text-ink font-medium"><%= v.name %></td>
+          <td class="px-5 py-3 text-muted"><%= v.plateNumber %></td>
+          <td class="px-5 py-3 text-muted"><%= typeLabel[v.type] || v.type %></td>
+          <td class="px-5 py-3 text-center">
+            <span class="badge <%= v.isActive ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600' %>"><%= v.isActive ? 'Hoạt động' : 'Ngừng' %></span>
+          </td>
+          <% if (isManager) { %>
+          <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
+            <a href="/mun-cui/xe?edit=<%= v._id %>" class="text-primary-700 hover:underline">Sửa</a>
+            <form action="/mun-cui/xe/<%= v._id %>/delete" method="POST" class="inline" onsubmit="return confirm('Xóa xe này?');">
+              <button type="submit" class="text-danger hover:underline cursor-pointer">Xóa</button>
+            </form>
+          </td>
+          <% } %>
+        </tr>
+      <% }); %>
+      <% if (!vehicles.length) { %>
+        <tr><td colspan="5" class="px-5 py-8 text-center text-muted">Chưa có xe nào.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

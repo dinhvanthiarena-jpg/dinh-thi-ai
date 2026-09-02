@@ -1,0 +1,51 @@
+<% function vnd(n) { return Math.round(n || 0).toLocaleString('vi-VN') + 'đ'; } %>
+
+<div class="card p-6 mb-6">
+  <form method="GET" class="flex flex-wrap items-end gap-4">
+    <div>
+      <label class="label">Từ ngày</label>
+      <input class="input" type="date" name="from" value="<%= from %>" />
+    </div>
+    <div>
+      <label class="label">Đến ngày</label>
+      <input class="input" type="date" name="to" value="<%= to %>" />
+    </div>
+    <button type="submit" class="btn-primary">Xem báo cáo</button>
+  </form>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+  <div class="card p-5">
+    <p class="text-sm text-muted">Tổng chi phí</p>
+    <p class="text-2xl font-bold text-danger mt-1"><%= vnd(stats.totalCost) %></p>
+  </div>
+  <div class="card p-5">
+    <p class="text-sm text-muted">Tổng doanh thu</p>
+    <p class="text-2xl font-bold text-success mt-1"><%= vnd(stats.totalRevenue) %></p>
+  </div>
+  <div class="card p-5 bg-gradient-to-br from-amber-500 to-orange-600 text-white border-0">
+    <p class="text-sm text-white/80">Lợi nhuận</p>
+    <p class="text-2xl font-bold mt-1"><%= vnd(stats.profit) %></p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-4">Chi phí</h2>
+    <ul class="space-y-2 text-sm">
+      <li class="flex justify-between"><span>Mua mùn (<%= stats.tripCount %> chuyến, <%= stats.sawdustQuantity.toLocaleString('vi-VN') %> đơn vị)</span><span class="font-medium"><%= vnd(stats.sawdustCost) %></span></li>
+      <li class="flex justify-between"><span>Mua củi (<%= stats.firewoodQuantity.toLocaleString('vi-VN') %> đơn vị)</span><span class="font-medium"><%= vnd(stats.firewoodCost) %></span></li>
+      <li class="flex justify-between"><span>Công nhật (<%= stats.laborDays %> lượt công)</span><span class="font-medium"><%= vnd(stats.laborCost) %></span></li>
+      <li class="flex justify-between"><span>Chi phí khác</span><span class="font-medium"><%= vnd(stats.otherCost) %></span></li>
+      <li class="flex justify-between border-t border-primary-100 pt-2 mt-2"><span class="font-semibold">Tổng</span><span class="font-semibold text-danger"><%= vnd(stats.totalCost) %></span></li>
+    </ul>
+  </div>
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-4">Doanh thu</h2>
+    <ul class="space-y-2 text-sm">
+      <li class="flex justify-between"><span>Bán mùn</span><span class="font-medium"><%= vnd(stats.sawdustRevenue) %></span></li>
+      <li class="flex justify-between"><span>Bán củi</span><span class="font-medium"><%= vnd(stats.firewoodRevenue) %></span></li>
+      <li class="flex justify-between border-t border-primary-100 pt-2 mt-2"><span class="font-semibold">Tổng</span><span class="font-semibold text-success"><%= vnd(stats.totalRevenue) %></span></li>
+    </ul>
+  </div>
+</div>

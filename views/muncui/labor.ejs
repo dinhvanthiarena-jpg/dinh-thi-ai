@@ -1,0 +1,96 @@
+<% const isManager = currentUser && (currentUser.role === 'admin' || currentUser.sawdustRole === 'owner' || currentUser.sawdustRole === 'manager'); %>
+<% const e = editing || {}; %>
+<% const taskLabel = { mua_mun: 'Đi mua mùn', boc_xep: 'Bốc xếp', dao_u: 'Đảo ủ mùn', boc_cui: 'Bốc củi', khac: 'Khác' }; %>
+
+<div class="card p-6 mb-6">
+  <h2 class="font-semibold text-ink mb-4"><%= editing ? 'Sửa công nhật' : 'Ghi công nhật' %></h2>
+  <form method="POST" action="<%= editing ? '/mun-cui/cong-nhat/' + editing._id : '/mun-cui/cong-nhat' %>" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+    <div>
+      <label class="label">Ngày *</label>
+      <input class="input" type="date" name="date" value="<%= e.date || today %>" required />
+    </div>
+    <div>
+      <label class="label">Nhân công *</label>
+      <select class="input" name="WorkerId" required>
+        <option value="">-- Chọn nhân công --</option>
+        <% workers.forEach(function(w) { %>
+          <option value="<%= w._id %>" data-wage="<%= w.defaultDailyWage %>" <%= e.WorkerId == w._id ? 'selected' : '' %>><%= w.name %></option>
+        <% }); %>
+      </select>
+    </div>
+    <div>
+      <label class="label">Công việc</label>
+      <select class="input" name="task">
+        <% Object.keys(taskLabel).forEach(function(k) { %>
+          <option value="<%= k %>" <%= (e.task || 'khac') === k ? 'selected' : '' %>><%= taskLabel[k] %></option>
+        <% }); %>
+      </select>
+    </div>
+    <div>
+      <label class="label">Tiền công ngày (đ)</label>
+      <input class="input" id="wageInput" type="number" step="1000" min="0" name="wage" value="<%= e.wage || '' %>" placeholder="Để trống = lấy công mặc định" />
+    </div>
+    <div class="sm:col-span-4">
+      <label class="label">Ghi chú</label>
+      <input class="input" type="text" name="note" value="<%= e.note || '' %>" />
+    </div>
+    <div class="sm:col-span-4 flex gap-3">
+      <button type="submit" class="btn-primary"><%= editing ? 'Lưu thay đổi' : 'Ghi công nhật' %></button>
+      <% if (editing) { %><a href="/mun-cui/cong-nhat" class="btn-ghost">Hủy</a><% } %>
+    </div>
+  </form>
+</div>
+
+<div class="card p-6 overflow-x-auto">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="font-semibold text-ink">Danh sách công nhật (200 gần nhất)</h2>
+    <p class="text-sm text-muted">Tổng: <span class="font-semibold text-ink"><%= Math.round(totalWage).toLocaleString('vi-VN') %>đ</span></p>
+  </div>
+  <table class="w-full text-sm">
+    <thead class="bg-primary-50 text-ink">
+      <tr>
+        <th class="text-left px-5 py-3 font-semibold whitespace-nowrap">Ngày</th>
+        <th class="text-left px-5 py-3 font-semibold">Nhân công</th>
+        <th class="text-left px-5 py-3 font-semibold">Công việc</th>
+        <th class="text-right px-5 py-3 font-semibold">Tiền công</th>
+        <th class="text-right px-5 py-3 font-semibold">Hành động</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-primary-50">
+      <% logs.forEach(function(l) { %>
+        <tr>
+          <td class="px-5 py-3 text-ink whitespace-nowrap"><%= l.date %></td>
+          <td class="px-5 py-3 text-ink font-medium"><%= l.worker ? l.worker.name : '—' %></td>
+          <td class="px-5 py-3 text-muted"><%= taskLabel[l.task] || l.task %></td>
+          <td class="px-5 py-3 text-right text-ink"><%= Math.round(l.wage).toLocaleString('vi-VN') %>đ</td>
+          <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
+            <a href="/mun-cui/cong-nhat?edit=<%= l._id %>" class="text-primary-700 hover:underline">Sửa</a>
+            <% if (isManager) { %>
+              <form action="/mun-cui/cong-nhat/<%= l._id %>/delete" method="POST" class="inline" onsubmit="return confirm('Xóa công nhật này?');">
+                <button type="submit" class="text-danger hover:underline cursor-pointer">Xóa</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!logs.length) { %>
+        <tr><td colspan="5" class="px-5 py-8 text-center text-muted">Chưa có công nhật nào.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  // Tự điền tiền công mặc định của nhân công khi chọn, nếu ô tiền công đang trống.
+  (function () {
+    var select = document.querySelector('select[name="WorkerId"]');
+    var wageInput = document.getElementById('wageInput');
+    if (!select || !wageInput) return;
+    select.addEventListener('change', function () {
+      if (wageInput.value) return;
+      var opt = select.options[select.selectedIndex];
+      var wage = opt ? opt.getAttribute('data-wage') : '';
+      if (wage && wage !== '0') wageInput.value = wage;
+    });
+  })();
+</script>

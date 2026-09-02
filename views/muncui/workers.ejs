@@ -1,0 +1,72 @@
+<% const isManager = currentUser && (currentUser.role === 'admin' || currentUser.sawdustRole === 'owner' || currentUser.sawdustRole === 'manager'); %>
+<% const e = editing || {}; %>
+
+<% if (isManager) { %>
+<div class="card p-6 mb-6">
+  <h2 class="font-semibold text-ink mb-4"><%= editing ? 'Sửa nhân công' : 'Thêm nhân công mới' %></h2>
+  <form method="POST" action="<%= editing ? '/mun-cui/nhan-cong/' + editing._id : '/mun-cui/nhan-cong' %>" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="label">Họ tên *</label>
+      <input class="input" type="text" name="name" value="<%= e.name || '' %>" required />
+    </div>
+    <div>
+      <label class="label">Số điện thoại</label>
+      <input class="input" type="text" name="phone" value="<%= e.phone || '' %>" />
+    </div>
+    <div>
+      <label class="label">Tiền công/ngày mặc định (đ)</label>
+      <input class="input" type="number" step="1000" min="0" name="defaultDailyWage" value="<%= e.defaultDailyWage || '' %>" />
+    </div>
+    <div>
+      <label class="label">Ghi chú</label>
+      <input class="input" type="text" name="note" value="<%= e.note || '' %>" />
+    </div>
+    <% if (editing) { %>
+      <label class="flex items-center gap-2 text-sm text-ink">
+        <input type="checkbox" name="isActive" <%= e.isActive ? 'checked' : '' %> /> Đang làm việc
+      </label>
+    <% } %>
+    <div class="sm:col-span-2 flex gap-3">
+      <button type="submit" class="btn-primary"><%= editing ? 'Lưu thay đổi' : 'Thêm nhân công' %></button>
+      <% if (editing) { %><a href="/mun-cui/nhan-cong" class="btn-ghost">Hủy</a><% } %>
+    </div>
+  </form>
+</div>
+<% } %>
+
+<div class="card overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-primary-50 text-ink">
+      <tr>
+        <th class="text-left px-5 py-3 font-semibold">Họ tên</th>
+        <th class="text-left px-5 py-3 font-semibold">Điện thoại</th>
+        <th class="text-right px-5 py-3 font-semibold">Công/ngày mặc định</th>
+        <th class="text-center px-5 py-3 font-semibold">Trạng thái</th>
+        <% if (isManager) { %><th class="text-right px-5 py-3 font-semibold">Hành động</th><% } %>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-primary-50">
+      <% workers.forEach(function(w) { %>
+        <tr>
+          <td class="px-5 py-3 text-ink font-medium"><%= w.name %></td>
+          <td class="px-5 py-3 text-muted"><%= w.phone %></td>
+          <td class="px-5 py-3 text-right text-muted"><%= (w.defaultDailyWage || 0).toLocaleString('vi-VN') %>đ</td>
+          <td class="px-5 py-3 text-center">
+            <span class="badge <%= w.isActive ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600' %>"><%= w.isActive ? 'Đang làm' : 'Nghỉ' %></span>
+          </td>
+          <% if (isManager) { %>
+          <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
+            <a href="/mun-cui/nhan-cong?edit=<%= w._id %>" class="text-primary-700 hover:underline">Sửa</a>
+            <form action="/mun-cui/nhan-cong/<%= w._id %>/delete" method="POST" class="inline" onsubmit="return confirm('Xóa nhân công này?');">
+              <button type="submit" class="text-danger hover:underline cursor-pointer">Xóa</button>
+            </form>
+          </td>
+          <% } %>
+        </tr>
+      <% }); %>
+      <% if (!workers.length) { %>
+        <tr><td colspan="5" class="px-5 py-8 text-center text-muted">Chưa có nhân công nào.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

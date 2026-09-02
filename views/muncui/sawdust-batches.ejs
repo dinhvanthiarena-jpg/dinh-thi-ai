@@ -1,0 +1,99 @@
+<% const isManager = currentUser && (currentUser.role === 'admin' || currentUser.sawdustRole === 'owner' || currentUser.sawdustRole === 'manager'); %>
+<% const e = editing || {}; %>
+<% const unitLabel = { khoi: 'khối', bao: 'bao', tan: 'tấn' }; %>
+<% const statusLabel = { dang_u: 'Đang ủ', da_u_xong: 'Đã ủ xong', da_xuat_het: 'Đã xuất hết' }; %>
+<% const statusBadge = { dang_u: 'bg-amber-50 text-amber-700', da_u_xong: 'bg-green-50 text-green-700', da_xuat_het: 'bg-slate-100 text-slate-600' }; %>
+
+<% if (summary.length) { %>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+  <% summary.forEach(function(s) { %>
+    <div class="card p-5">
+      <p class="text-sm text-muted">Tồn kho — đơn vị <%= unitLabel[s.unit] || s.unit %></p>
+      <p class="text-lg font-bold text-ink mt-1">Đang ủ: <%= s.dang_u.toLocaleString('vi-VN') %></p>
+      <p class="text-lg font-bold text-success">Đã ủ xong: <%= s.da_u_xong.toLocaleString('vi-VN') %></p>
+    </div>
+  <% }); %>
+</div>
+<% } %>
+
+<div class="card p-6 mb-6">
+  <h2 class="font-semibold text-ink mb-2"><%= editing ? 'Sửa lô mùn' : 'Thêm lô mùn tập kết thủ công' %></h2>
+  <p class="text-xs text-muted mb-4">Lưu ý: mỗi chuyến mua mùn ở trang "Chuyến mua mùn" đã tự động tạo một lô ở đây — chỉ cần thêm thủ công khi nhập kho không qua một chuyến xe cụ thể.</p>
+  <form method="POST" action="<%= editing ? '/mun-cui/kho-mun/' + editing._id : '/mun-cui/kho-mun' %>" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+    <div>
+      <label class="label">Ngày nhập *</label>
+      <input class="input" type="date" name="intakeDate" value="<%= e.intakeDate || today %>" required />
+    </div>
+    <div>
+      <label class="label">Khối lượng *</label>
+      <input class="input" type="number" step="0.01" min="0" name="quantity" value="<%= e.quantity || '' %>" required />
+    </div>
+    <div>
+      <label class="label">Đơn vị</label>
+      <select class="input" name="unit">
+        <option value="khoi" <%= (e.unit || 'khoi') === 'khoi' ? 'selected' : '' %>>Khối (m³)</option>
+        <option value="bao" <%= e.unit === 'bao' ? 'selected' : '' %>>Bao</option>
+        <option value="tan" <%= e.unit === 'tan' ? 'selected' : '' %>>Tấn</option>
+      </select>
+    </div>
+    <% if (editing) { %>
+    <div>
+      <label class="label">Trạng thái</label>
+      <select class="input" name="status">
+        <option value="dang_u" <%= e.status === 'dang_u' ? 'selected' : '' %>>Đang ủ</option>
+        <option value="da_u_xong" <%= e.status === 'da_u_xong' ? 'selected' : '' %>>Đã ủ xong</option>
+        <option value="da_xuat_het" <%= e.status === 'da_xuat_het' ? 'selected' : '' %>>Đã xuất hết</option>
+      </select>
+    </div>
+    <div>
+      <label class="label">Ngày ủ xong</label>
+      <input class="input" type="date" name="readyDate" value="<%= e.readyDate || '' %>" />
+    </div>
+    <% } %>
+    <div class="sm:col-span-4">
+      <label class="label">Ghi chú</label>
+      <input class="input" type="text" name="note" value="<%= e.note || '' %>" />
+    </div>
+    <div class="sm:col-span-4 flex gap-3">
+      <button type="submit" class="btn-primary"><%= editing ? 'Lưu thay đổi' : 'Thêm lô mùn' %></button>
+      <% if (editing) { %><a href="/mun-cui/kho-mun" class="btn-ghost">Hủy</a><% } %>
+    </div>
+  </form>
+</div>
+
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="bg-primary-50 text-ink">
+      <tr>
+        <th class="text-left px-5 py-3 font-semibold whitespace-nowrap">Ngày nhập</th>
+        <th class="text-left px-5 py-3 font-semibold">Nguồn</th>
+        <th class="text-right px-5 py-3 font-semibold">Khối lượng</th>
+        <th class="text-center px-5 py-3 font-semibold">Trạng thái</th>
+        <th class="text-left px-5 py-3 font-semibold">Ngày ủ xong</th>
+        <th class="text-right px-5 py-3 font-semibold">Hành động</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-primary-50">
+      <% batches.forEach(function(b) { %>
+        <tr>
+          <td class="px-5 py-3 text-ink whitespace-nowrap"><%= b.intakeDate %></td>
+          <td class="px-5 py-3 text-muted"><%= b.trip && b.trip.sawmill ? b.trip.sawmill.name : 'Nhập thủ công' %></td>
+          <td class="px-5 py-3 text-right text-ink"><%= b.quantity.toLocaleString('vi-VN') %> <%= unitLabel[b.unit] || b.unit %></td>
+          <td class="px-5 py-3 text-center"><span class="badge <%= statusBadge[b.status] %>"><%= statusLabel[b.status] %></span></td>
+          <td class="px-5 py-3 text-muted"><%= b.readyDate || '—' %></td>
+          <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
+            <a href="/mun-cui/kho-mun?edit=<%= b._id %>" class="text-primary-700 hover:underline">Sửa</a>
+            <% if (isManager) { %>
+              <form action="/mun-cui/kho-mun/<%= b._id %>/delete" method="POST" class="inline" onsubmit="return confirm('Xóa lô mùn này?');">
+                <button type="submit" class="text-danger hover:underline cursor-pointer">Xóa</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!batches.length) { %>
+        <tr><td colspan="6" class="px-5 py-8 text-center text-muted">Chưa có lô mùn nào.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,95 @@
+<% const isManager = currentUser && (currentUser.role === 'admin' || currentUser.sawdustRole === 'owner' || currentUser.sawdustRole === 'manager'); %>
+<% const e = editing || {}; %>
+<% const unitLabel = { ster: 'ster', khoi: 'khối', tan: 'tấn' }; %>
+
+<div class="card p-6 mb-6">
+  <h2 class="font-semibold text-ink mb-4"><%= editing ? 'Sửa đơn mua củi' : 'Ghi nhận mua củi' %></h2>
+  <form method="POST" action="<%= editing ? '/mun-cui/mua-cui/' + editing._id : '/mun-cui/mua-cui' %>" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+    <div>
+      <label class="label">Ngày *</label>
+      <input class="input" type="date" name="date" value="<%= e.date || today %>" required />
+    </div>
+    <div>
+      <label class="label">Nơi mua *</label>
+      <input class="input" type="text" name="sourceName" value="<%= e.sourceName || '' %>" required />
+    </div>
+    <div>
+      <label class="label">Số điện thoại</label>
+      <input class="input" type="text" name="sourcePhone" value="<%= e.sourcePhone || '' %>" />
+    </div>
+    <div>
+      <label class="label">Xe chở</label>
+      <select class="input" name="VehicleId">
+        <option value="">-- Không rõ --</option>
+        <% vehicles.forEach(function(v) { %>
+          <option value="<%= v._id %>" <%= e.VehicleId == v._id ? 'selected' : '' %>><%= v.name %></option>
+        <% }); %>
+      </select>
+    </div>
+    <div>
+      <label class="label">Khối lượng *</label>
+      <input class="input" type="number" step="0.01" min="0" name="quantity" value="<%= e.quantity || '' %>" required />
+    </div>
+    <div>
+      <label class="label">Đơn vị</label>
+      <select class="input" name="unit">
+        <option value="ster" <%= (e.unit || 'ster') === 'ster' ? 'selected' : '' %>>Ster</option>
+        <option value="khoi" <%= e.unit === 'khoi' ? 'selected' : '' %>>Khối (m³)</option>
+        <option value="tan" <%= e.unit === 'tan' ? 'selected' : '' %>>Tấn</option>
+      </select>
+    </div>
+    <div>
+      <label class="label">Đơn giá mua (đ)</label>
+      <input class="input" type="number" step="100" min="0" name="unitPrice" value="<%= e.unitPrice || '' %>" />
+    </div>
+    <div class="sm:col-span-4">
+      <label class="label">Ghi chú</label>
+      <input class="input" type="text" name="note" value="<%= e.note || '' %>" />
+    </div>
+    <div class="sm:col-span-4 flex gap-3">
+      <button type="submit" class="btn-primary"><%= editing ? 'Lưu thay đổi' : 'Ghi nhận mua củi' %></button>
+      <% if (editing) { %><a href="/mun-cui/mua-cui" class="btn-ghost">Hủy</a><% } %>
+    </div>
+  </form>
+</div>
+
+<div class="card p-6 overflow-x-auto">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="font-semibold text-ink">Danh sách mua củi (200 gần nhất)</h2>
+    <p class="text-sm text-muted">Tổng chi phí: <span class="font-semibold text-danger"><%= Math.round(totalCost).toLocaleString('vi-VN') %>đ</span></p>
+  </div>
+  <table class="w-full text-sm">
+    <thead class="bg-primary-50 text-ink">
+      <tr>
+        <th class="text-left px-5 py-3 font-semibold whitespace-nowrap">Ngày</th>
+        <th class="text-left px-5 py-3 font-semibold">Nơi mua</th>
+        <th class="text-left px-5 py-3 font-semibold">Xe</th>
+        <th class="text-right px-5 py-3 font-semibold">Khối lượng</th>
+        <th class="text-right px-5 py-3 font-semibold">Chi phí</th>
+        <th class="text-right px-5 py-3 font-semibold">Hành động</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-primary-50">
+      <% purchases.forEach(function(p) { %>
+        <tr>
+          <td class="px-5 py-3 text-ink whitespace-nowrap"><%= p.date %></td>
+          <td class="px-5 py-3 text-ink font-medium"><%= p.sourceName %></td>
+          <td class="px-5 py-3 text-muted"><%= p.vehicle ? p.vehicle.name : '—' %></td>
+          <td class="px-5 py-3 text-right text-ink"><%= p.quantity.toLocaleString('vi-VN') %> <%= unitLabel[p.unit] || p.unit %></td>
+          <td class="px-5 py-3 text-right text-danger font-medium"><%= Math.round(p.totalCost).toLocaleString('vi-VN') %>đ</td>
+          <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
+            <a href="/mun-cui/mua-cui?edit=<%= p._id %>" class="text-primary-700 hover:underline">Sửa</a>
+            <% if (isManager) { %>
+              <form action="/mun-cui/mua-cui/<%= p._id %>/delete" method="POST" class="inline" onsubmit="return confirm('Xóa đơn mua củi này?');">
+                <button type="submit" class="text-danger hover:underline cursor-pointer">Xóa</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!purchases.length) { %>
+        <tr><td colspan="6" class="px-5 py-8 text-center text-muted">Chưa có đơn mua củi nào.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

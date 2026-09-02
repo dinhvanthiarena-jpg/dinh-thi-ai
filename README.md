@@ -149,7 +149,43 @@ npm run build:css
 # rồi bấm Restart trong Setup Node.js App
 ```
 
-## 6. Checklist trước khi ra mắt
+## 6. Module "Quản lý Mùn cưa & Củi" (`/mun-cui`)
+
+Module quản lý hoạt động của xưởng mùn cưa/củi: xe hàng ngày đi mua mùn cưa tại các
+xưởng xẻ, mang về xưởng tập kết để ủ, nhân công tính lương theo ngày, và mảng
+kinh doanh củi (mua vào rồi bán lại cho công ty). Dùng chung hệ thống đăng nhập
+của site (email/SĐT + mật khẩu) nhưng có phân quyền riêng.
+
+**Cấu trúc chức năng:**
+- **Chuyến mua mùn** — ghi nhận từng chuyến xe đi mua mùn (xưởng xẻ, xe, tài xế,
+  khối lượng, đơn giá, chi phí xăng dầu...). Mỗi chuyến tự động tạo một **lô mùn**
+  tương ứng bên Kho mùn.
+- **Kho mùn (tập kết & ủ)** — theo dõi từng lô mùn theo trạng thái *Đang ủ* /
+  *Đã ủ xong* / *Đã xuất hết*, xem tồn kho theo đơn vị (khối/bao/tấn).
+- **Bán mùn** — ghi nhận đơn bán mùn đã ủ cho khách.
+- **Mua củi** / **Bán củi cho công ty** — theo dõi việc mua củi rồi bán lại cho
+  công ty, tính lãi riêng biệt với mảng mùn.
+- **Công nhật** — bảng công nhân công tính theo ngày (không theo tháng), gắn với
+  từng công việc (đi mua mùn, bốc xếp, đảo ủ, bốc củi...).
+- **Chi phí khác** — xăng dầu, sửa xe, thuê bãi... không gắn với một chuyến/lô cụ thể.
+- **Danh mục** — Xưởng xẻ, Xe, Nhân công dùng chung cho các form nhập liệu.
+- **Báo cáo thu chi** — tổng hợp chi phí/doanh thu/lợi nhuận theo khoảng ngày tùy chọn.
+- **Thành viên Ban quản trị** — cấp/gỡ quyền truy cập module cho từng tài khoản.
+
+**Phân quyền (`sawdustRole` trên bảng `users`):**
+| Vai trò | Quyền hạn |
+| --- | --- |
+| Quản trị viên site (`role='admin'`) | Toàn quyền module này, tương đương *Chủ xưởng*, không cần cấu hình thêm |
+| `owner` — Chủ xưởng/Ban quản trị | Toàn quyền + cấp/gỡ quyền thành viên |
+| `manager` — Quản lý | Nhập liệu + sửa/xóa mọi mục + xem báo cáo |
+| `staff` — Nhân viên | Chỉ nhập liệu (chuyến mua mùn, công nhật, bán hàng...), không xóa được, không xem báo cáo tổng, không quản lý danh mục |
+
+Tài khoản `ADMIN_EMAIL` (đã seed sẵn quyền `role='admin'`) có thể vào thẳng
+`/mun-cui/thanh-vien` để cấp quyền cho các thành viên còn lại — chỉ cần nhập
+email/SĐT của họ; nếu họ chưa có tài khoản, điền thêm họ tên + mật khẩu để tạo
+mới ngay tại đó.
+
+## 7. Checklist trước khi ra mắt
 
 - [ ] Đổi `JWT_SECRET`, `SESSION_SECRET`, mật khẩu admin sang giá trị ngẫu nhiên mạnh
 - [ ] Trỏ domain thật, bật HTTPS (Let's Encrypt/Certbot)

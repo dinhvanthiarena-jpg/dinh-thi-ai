@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | Quản lý Mùn cưa &amp; Củi</title>
+  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/css/output.css" />
+</head>
+<body class="min-h-screen bg-surface">
+  <% const isOwner = currentUser && (currentUser.role === 'admin' || currentUser.sawdustRole === 'owner'); %>
+  <% const isManager = currentUser && (currentUser.role === 'admin' || currentUser.sawdustRole === 'owner' || currentUser.sawdustRole === 'manager'); %>
+  <% function navClass(path, exact) {
+       const active = exact ? currentPath === path : (currentPath && currentPath.startsWith(path));
+       return 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ' + (active ? 'bg-white/10 text-white' : 'text-amber-100/80 hover:bg-white/5');
+     } %>
+  <div class="flex min-h-screen">
+    <aside class="hidden lg:flex w-64 flex-col bg-[#3B2412] text-white flex-shrink-0">
+      <div class="h-16 flex items-center gap-2 px-6 border-b border-white/10">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white font-bold text-sm">MC</span>
+        <span class="font-bold leading-tight">Mùn cưa &amp; Củi</span>
+      </div>
+      <nav class="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+        <a href="/mun-cui" class="<%= navClass('/mun-cui', true) %>">Tổng quan</a>
+        <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-amber-200/50">Mùn cưa</p>
+        <a href="/mun-cui/chuyen-mua-mun" class="<%= navClass('/mun-cui/chuyen-mua-mun') %>">Chuyến mua mùn</a>
+        <a href="/mun-cui/kho-mun" class="<%= navClass('/mun-cui/kho-mun') %>">Kho mùn (tập kết &amp; ủ)</a>
+        <a href="/mun-cui/ban-mun" class="<%= navClass('/mun-cui/ban-mun') %>">Bán mùn</a>
+        <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-amber-200/50">Củi</p>
+        <a href="/mun-cui/mua-cui" class="<%= navClass('/mun-cui/mua-cui') %>">Mua củi</a>
+        <a href="/mun-cui/ban-cui" class="<%= navClass('/mun-cui/ban-cui') %>">Bán củi cho công ty</a>
+        <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-amber-200/50">Nhân sự &amp; chi phí</p>
+        <a href="/mun-cui/cong-nhat" class="<%= navClass('/mun-cui/cong-nhat') %>">Công nhật</a>
+        <a href="/mun-cui/chi-phi" class="<%= navClass('/mun-cui/chi-phi') %>">Chi phí khác</a>
+        <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-amber-200/50">Danh mục</p>
+        <a href="/mun-cui/xuong-xe" class="<%= navClass('/mun-cui/xuong-xe') %>">Xưởng xẻ</a>
+        <a href="/mun-cui/xe" class="<%= navClass('/mun-cui/xe') %>">Xe</a>
+        <a href="/mun-cui/nhan-cong" class="<%= navClass('/mun-cui/nhan-cong') %>">Nhân công</a>
+        <% if (isManager) { %>
+          <p class="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-amber-200/50">Quản trị</p>
+          <a href="/mun-cui/bao-cao" class="<%= navClass('/mun-cui/bao-cao') %>">Báo cáo thu chi</a>
+        <% } %>
+        <% if (isOwner) { %>
+          <a href="/mun-cui/thanh-vien" class="<%= navClass('/mun-cui/thanh-vien') %>">Thành viên ban quản trị</a>
+        <% } %>
+      </nav>
+      <div class="p-4 border-t border-white/10 space-y-2">
+        <a href="/" class="block text-sm text-amber-100/80 hover:text-white">&larr; Về trang chủ</a>
+        <form action="/auth/logout" method="POST">
+          <button type="submit" class="text-sm text-amber-100/80 hover:text-white cursor-pointer">Đăng xuất</button>
+        </form>
+      </div>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+      <header class="h-16 bg-white border-b border-amber-100 flex items-center justify-between px-4 sm:px-8">
+        <h1 class="font-semibold text-ink"><%= title %></h1>
+        <span class="text-sm text-muted"><%= currentUser ? currentUser.name : '' %></span>
+      </header>
+      <main class="p-4 sm:p-8">
+        <%- include('../partials/flash') %>
+        <%- body %>
+      </main>
+    </div>
+  </div>
+  <script src="/js/main.js" defer></script>
+</body>
+</html>

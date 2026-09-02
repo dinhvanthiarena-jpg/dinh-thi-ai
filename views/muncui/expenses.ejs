@@ -1,0 +1,72 @@
+<% const isManager = currentUser && (currentUser.role === 'admin' || currentUser.sawdustRole === 'owner' || currentUser.sawdustRole === 'manager'); %>
+<% const e = editing || {}; %>
+<% const categoryLabel = { xang_dau: 'Xăng dầu', sua_xe: 'Sửa xe', thue_bai: 'Thuê bãi', khac: 'Khác' }; %>
+
+<div class="card p-6 mb-6">
+  <h2 class="font-semibold text-ink mb-4"><%= editing ? 'Sửa chi phí' : 'Ghi nhận chi phí khác' %></h2>
+  <form method="POST" action="<%= editing ? '/mun-cui/chi-phi/' + editing._id : '/mun-cui/chi-phi' %>" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+    <div>
+      <label class="label">Ngày *</label>
+      <input class="input" type="date" name="date" value="<%= e.date || today %>" required />
+    </div>
+    <div>
+      <label class="label">Loại chi phí</label>
+      <select class="input" name="category">
+        <% Object.keys(categoryLabel).forEach(function(k) { %>
+          <option value="<%= k %>" <%= (e.category || 'khac') === k ? 'selected' : '' %>><%= categoryLabel[k] %></option>
+        <% }); %>
+      </select>
+    </div>
+    <div>
+      <label class="label">Số tiền (đ) *</label>
+      <input class="input" type="number" step="1000" min="0" name="amount" value="<%= e.amount || '' %>" required />
+    </div>
+    <div>
+      <label class="label">Ghi chú</label>
+      <input class="input" type="text" name="note" value="<%= e.note || '' %>" />
+    </div>
+    <div class="sm:col-span-4 flex gap-3">
+      <button type="submit" class="btn-primary"><%= editing ? 'Lưu thay đổi' : 'Ghi nhận chi phí' %></button>
+      <% if (editing) { %><a href="/mun-cui/chi-phi" class="btn-ghost">Hủy</a><% } %>
+    </div>
+  </form>
+</div>
+
+<div class="card p-6 overflow-x-auto">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="font-semibold text-ink">Danh sách chi phí (200 gần nhất)</h2>
+    <p class="text-sm text-muted">Tổng: <span class="font-semibold text-danger"><%= Math.round(total).toLocaleString('vi-VN') %>đ</span></p>
+  </div>
+  <table class="w-full text-sm">
+    <thead class="bg-primary-50 text-ink">
+      <tr>
+        <th class="text-left px-5 py-3 font-semibold whitespace-nowrap">Ngày</th>
+        <th class="text-left px-5 py-3 font-semibold">Loại</th>
+        <th class="text-left px-5 py-3 font-semibold">Ghi chú</th>
+        <th class="text-right px-5 py-3 font-semibold">Số tiền</th>
+        <th class="text-right px-5 py-3 font-semibold">Hành động</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-primary-50">
+      <% expenses.forEach(function(x) { %>
+        <tr>
+          <td class="px-5 py-3 text-ink whitespace-nowrap"><%= x.date %></td>
+          <td class="px-5 py-3 text-ink"><%= categoryLabel[x.category] || x.category %></td>
+          <td class="px-5 py-3 text-muted"><%= x.note %></td>
+          <td class="px-5 py-3 text-right text-danger font-medium"><%= Math.round(x.amount).toLocaleString('vi-VN') %>đ</td>
+          <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
+            <a href="/mun-cui/chi-phi?edit=<%= x._id %>" class="text-primary-700 hover:underline">Sửa</a>
+            <% if (isManager) { %>
+              <form action="/mun-cui/chi-phi/<%= x._id %>/delete" method="POST" class="inline" onsubmit="return confirm('Xóa chi phí này?');">
+                <button type="submit" class="text-danger hover:underline cursor-pointer">Xóa</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (!expenses.length) { %>
+        <tr><td colspan="5" class="px-5 py-8 text-center text-muted">Chưa có chi phí nào.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

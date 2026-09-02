@@ -19,6 +19,16 @@ const PageView = require('./PageView');
 const AffiliateClick = require('./AffiliateClick');
 const BattlePlayer = require('./BattlePlayer');
 const BattleMatch = require('./BattleMatch');
+const Sawmill = require('./Sawmill');
+const Vehicle = require('./Vehicle');
+const Worker = require('./Worker');
+const PurchaseTrip = require('./PurchaseTrip');
+const LaborLog = require('./LaborLog');
+const SawdustBatch = require('./SawdustBatch');
+const SawdustSale = require('./SawdustSale');
+const FirewoodPurchase = require('./FirewoodPurchase');
+const FirewoodSale = require('./FirewoodSale');
+const Expense = require('./Expense');
 
 Course.hasMany(Lesson, { foreignKey: 'CourseId', onDelete: 'CASCADE' });
 Lesson.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
@@ -49,6 +59,49 @@ Review.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
 User.hasMany(BlogPost, { foreignKey: 'AuthorId', as: 'posts' });
 BlogPost.belongsTo(User, { foreignKey: 'AuthorId', as: 'author' });
 
+// --- Mùn cưa & Củi ---
+Sawmill.hasMany(PurchaseTrip, { foreignKey: 'SawmillId', onDelete: 'RESTRICT' });
+PurchaseTrip.belongsTo(Sawmill, { foreignKey: 'SawmillId', as: 'sawmill' });
+
+Vehicle.hasMany(PurchaseTrip, { foreignKey: 'VehicleId', onDelete: 'SET NULL' });
+PurchaseTrip.belongsTo(Vehicle, { foreignKey: 'VehicleId', as: 'vehicle' });
+
+Worker.hasMany(PurchaseTrip, { foreignKey: 'DriverId', onDelete: 'SET NULL' });
+PurchaseTrip.belongsTo(Worker, { foreignKey: 'DriverId', as: 'driver' });
+
+User.hasMany(PurchaseTrip, { foreignKey: 'CreatedById', onDelete: 'SET NULL' });
+PurchaseTrip.belongsTo(User, { foreignKey: 'CreatedById', as: 'createdBy' });
+
+PurchaseTrip.hasOne(SawdustBatch, { foreignKey: 'PurchaseTripId', onDelete: 'SET NULL' });
+SawdustBatch.belongsTo(PurchaseTrip, { foreignKey: 'PurchaseTripId', as: 'trip' });
+
+Worker.hasMany(LaborLog, { foreignKey: 'WorkerId', onDelete: 'CASCADE' });
+LaborLog.belongsTo(Worker, { foreignKey: 'WorkerId', as: 'worker' });
+
+PurchaseTrip.hasMany(LaborLog, { foreignKey: 'PurchaseTripId', onDelete: 'SET NULL' });
+LaborLog.belongsTo(PurchaseTrip, { foreignKey: 'PurchaseTripId', as: 'trip' });
+
+User.hasMany(LaborLog, { foreignKey: 'CreatedById', onDelete: 'SET NULL' });
+LaborLog.belongsTo(User, { foreignKey: 'CreatedById', as: 'createdBy' });
+
+User.hasMany(SawdustBatch, { foreignKey: 'CreatedById', onDelete: 'SET NULL' });
+SawdustBatch.belongsTo(User, { foreignKey: 'CreatedById', as: 'createdBy' });
+
+User.hasMany(SawdustSale, { foreignKey: 'CreatedById', onDelete: 'SET NULL' });
+SawdustSale.belongsTo(User, { foreignKey: 'CreatedById', as: 'createdBy' });
+
+Vehicle.hasMany(FirewoodPurchase, { foreignKey: 'VehicleId', onDelete: 'SET NULL' });
+FirewoodPurchase.belongsTo(Vehicle, { foreignKey: 'VehicleId', as: 'vehicle' });
+
+User.hasMany(FirewoodPurchase, { foreignKey: 'CreatedById', onDelete: 'SET NULL' });
+FirewoodPurchase.belongsTo(User, { foreignKey: 'CreatedById', as: 'createdBy' });
+
+User.hasMany(FirewoodSale, { foreignKey: 'CreatedById', onDelete: 'SET NULL' });
+FirewoodSale.belongsTo(User, { foreignKey: 'CreatedById', as: 'createdBy' });
+
+User.hasMany(Expense, { foreignKey: 'CreatedById', onDelete: 'SET NULL' });
+Expense.belongsTo(User, { foreignKey: 'CreatedById', as: 'createdBy' });
+
 module.exports = {
   User,
   Course,
@@ -71,4 +124,14 @@ module.exports = {
   AffiliateClick,
   BattlePlayer,
   BattleMatch,
+  Sawmill,
+  Vehicle,
+  Worker,
+  PurchaseTrip,
+  LaborLog,
+  SawdustBatch,
+  SawdustSale,
+  FirewoodPurchase,
+  FirewoodSale,
+  Expense,
 };

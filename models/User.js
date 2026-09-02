@@ -24,6 +24,11 @@ const User = sequelize.define(
     familyOwner: { type: DataTypes.BOOLEAN, defaultValue: false },
     // Dùng thử 7 ngày, mỗi tài khoản chỉ một lần.
     trialUsed: { type: DataTypes.BOOLEAN, defaultValue: false },
+    // Quyền trong module "Quản lý Mùn cưa & Củi" (/mun-cui), tách biệt với
+    // role ở trên (role dùng cho toàn site/LMS). NULL = không được vào module
+    // này. Site admin (role='admin') luôn có toàn quyền module này bất kể
+    // giá trị cột này, xem middleware requireSawdust*.
+    sawdustRole: { type: DataTypes.ENUM('owner', 'manager', 'staff'), allowNull: true },
   },
   {
     tableName: 'users',
