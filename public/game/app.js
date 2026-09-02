@@ -709,6 +709,46 @@
         ],
         solution: 'Số cần tìm là: 15 − 1 = 14. Số liền trước của 14 là: 14 − 1 = <strong>13</strong>.',
       },
+      {
+        level: 'Cơ bản',
+        text: 'Hộp đồ chơi của Na có 6 hình vuông và 5 hình tam giác. Hỏi số hình vuông nhiều hơn số hình tam giác mấy hình?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: hộp có <strong>6 hình vuông</strong> và <strong>5 hình tam giác</strong>.<br><br>Đề hỏi: hình vuông <strong>nhiều hơn</strong> hình tam giác bao nhiêu hình?' },
+          { t: 'Kiến thức cần dùng', b: 'Muốn biết một nhóm nhiều hơn nhóm kia bao nhiêu, con lấy <strong>số nhiều trừ số ít</strong>.<br><br>Ví dụ dễ hơn: có 5 quả cam, 3 quả chuối thì cam nhiều hơn chuối 5 − 3 = 2 quả.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định số nào lớn hơn — ở đây là 6 hình vuông.<br><br>Bước 2: Lấy 6 <strong>trừ</strong> 5.<br><br>Bước 3: Viết kèm chữ "hình" vào đáp số cho rõ nghĩa.' },
+        ],
+        solution: 'Số hình vuông nhiều hơn số hình tam giác là: 6 − 5 = <strong>1 hình</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một sợi dây dài 25cm, cắt bớt đi 8cm. Hỏi sợi dây còn lại dài bao nhiêu xăng-ti-mét?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: sợi dây dài <strong>25cm</strong>, bị <strong>cắt bớt 8cm</strong>.<br><br>Đề hỏi: phần dây <strong>còn lại</strong> dài bao nhiêu cm?' },
+          { t: 'Kiến thức cần dùng', b: '"Cắt bớt" nghĩa là <strong>bớt đi, mất đi</strong> một phần — dùng phép <strong>trừ</strong>.<br><br>Ví dụ dễ hơn: băng giấy dài 10cm, cắt bớt 3cm thì còn 10 − 3 = 7cm.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Lấy độ dài ban đầu của sợi dây (25cm).<br><br>Bước 2: <strong>Trừ</strong> đi phần đã cắt (8cm).<br><br>Bước 3: Nhớ viết đơn vị "cm" vào đáp số.' },
+        ],
+        solution: 'Sợi dây còn lại dài: 25 − 8 = <strong>17cm</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Kim ngắn của đồng hồ chỉ đúng vào số 3, kim dài chỉ đúng vào số 12. Hỏi lúc đó là mấy giờ?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: <strong>kim ngắn</strong> chỉ số 3, <strong>kim dài</strong> chỉ số 12.<br><br>Đề hỏi: lúc đó là mấy giờ?' },
+          { t: 'Kiến thức cần dùng', b: 'Trên đồng hồ, <strong>kim ngắn chỉ giờ</strong>, kim dài chỉ phút. Khi kim dài chỉ đúng số 12, đó là lúc <strong>đúng giờ</strong> (không lẻ phút) — giờ chính là số mà kim ngắn đang chỉ tới.<br><br>Ví dụ dễ hơn: kim ngắn chỉ số 7, kim dài chỉ số 12 thì lúc đó là 7 giờ đúng.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Kiểm tra kim dài có đang chỉ đúng số 12 không — có, nên đây là giờ đúng, không có phút lẻ.<br><br>Bước 2: Đọc số mà kim ngắn đang chỉ tới, đó chính là số giờ.' },
+        ],
+        solution: 'Kim dài chỉ đúng số 12 nên là giờ đúng. Kim ngắn chỉ số 3, vậy lúc đó là <strong>3 giờ</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tìm số lớn nhất có 2 chữ số, biết chữ số hàng chục lớn hơn chữ số hàng đơn vị 3 đơn vị.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Số cần tìm có <strong>2 chữ số</strong>: một chữ số hàng chục và một chữ số hàng đơn vị.<br><br>Điều kiện: chữ số hàng chục <strong>hơn</strong> chữ số hàng đơn vị <strong>3 đơn vị</strong>. Đề hỏi số <strong>lớn nhất</strong> thoả điều kiện đó.' },
+          { t: 'Kiến thức cần dùng', b: 'Số có 2 chữ số càng <strong>lớn</strong> khi chữ số hàng chục càng lớn. Chữ số hàng chục lớn nhất có thể là <strong>9</strong> (từ 1 đến 9).<br><br>Ví dụ dễ hơn: trong các số có chữ số hàng chục là 9, số 9__ luôn lớn hơn số 8__, nên cứ ưu tiên hàng chục lớn nhất trước.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Chọn chữ số hàng chục lớn nhất có thể, thử với 9.<br><br>Bước 2: Tính chữ số hàng đơn vị = chữ số hàng chục − 3 = 9 − 3 = 6.<br><br>Bước 3: Ghép hai chữ số lại theo đúng thứ tự hàng chục rồi hàng đơn vị.' },
+        ],
+        solution: 'Chọn chữ số hàng chục lớn nhất là 9, thì chữ số hàng đơn vị là 9 − 3 = 6. Số cần tìm là <strong>96</strong>.',
+      },
     ],
     2: [
       {
@@ -800,6 +840,46 @@
           { t: 'Hướng làm bài này', b: 'Bước 1: Tính hiệu số bi giữa An và Bình: 14 − 8.<br><br>Bước 2: Lấy hiệu đó chia 2, ra số viên An cần cho.<br><br>Bước 3: Thử lại: An cho xong còn bao nhiêu, Bình nhận xong có bao nhiêu — hai số đó phải bằng nhau.' },
         ],
         solution: 'Hiệu số bi là: 14 − 8 = 6 (viên). An phải cho Bình: 6 : 2 = <strong>3 viên bi</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Mỗi hộp có 4 cái bánh. Hỏi 5 hộp như thế có tất cả bao nhiêu cái bánh?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: mỗi hộp có <strong>4 cái bánh</strong>, có tất cả <strong>5 hộp</strong> giống nhau.<br><br>Đề hỏi: tổng số bánh của cả 5 hộp.' },
+          { t: 'Kiến thức cần dùng', b: 'Khi có <strong>nhiều nhóm giống nhau</strong>, mỗi nhóm cùng một số lượng, muốn tìm tổng thì dùng <strong>phép nhân</strong>: số mỗi nhóm × số nhóm.<br><br>Ví dụ dễ hơn: mỗi túi có 3 quả táo, 4 túi như vậy có 3 × 4 = 12 quả táo.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định số bánh trong mỗi hộp (4) và số hộp (5).<br><br>Bước 2: Lấy 4 <strong>nhân</strong> 5.<br><br>Bước 3: Có thể thử lại bằng cách cộng liên tiếp: 4 + 4 + 4 + 4 + 4.' },
+        ],
+        solution: 'Số bánh có tất cả là: 4 × 5 = <strong>20 cái bánh</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một hình tam giác có ba cạnh dài lần lượt là 5cm, 6cm và 7cm. Tính chu vi hình tam giác đó.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho độ dài <strong>ba cạnh</strong> của hình tam giác: 5cm, 6cm, 7cm.<br><br>Đề hỏi: <strong>chu vi</strong> của hình tam giác đó.' },
+          { t: 'Kiến thức cần dùng', b: '<strong>Chu vi</strong> của một hình là tổng độ dài tất cả các cạnh của hình đó. Với tam giác, chu vi = cạnh 1 + cạnh 2 + cạnh 3.<br><br>Ví dụ dễ hơn: tam giác có 3 cạnh đều 4cm thì chu vi là 4 + 4 + 4 = 12cm.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Viết phép cộng ba cạnh: 5 + 6 + 7.<br><br>Bước 2: Cộng lần lượt từ trái sang phải cho chắc, không nhầm số.<br><br>Bước 3: Nhớ viết đơn vị "cm" vào đáp số.' },
+        ],
+        solution: 'Chu vi hình tam giác là: 5 + 6 + 7 = <strong>18cm</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một sợi dây dài 2m 30cm. Hỏi sợi dây đó dài bao nhiêu xăng-ti-mét?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho độ dài sợi dây gồm <strong>hai đơn vị khác nhau</strong>: 2 mét và 30 xăng-ti-mét.<br><br>Đề hỏi: đổi toàn bộ độ dài đó sang <strong>một đơn vị duy nhất</strong> là cm.' },
+          { t: 'Kiến thức cần dùng', b: 'Cần nhớ: <strong>1m = 100cm</strong>. Muốn đổi mét sang xăng-ti-mét, lấy số mét nhân với 100, rồi cộng thêm phần cm đã có sẵn.<br><br>Ví dụ dễ hơn: 1m 20cm = 100cm + 20cm = 120cm.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Đổi 2m sang cm: 2 × 100 = 200cm.<br><br>Bước 2: Cộng thêm 30cm đã có: 200 + 30.<br><br>Bước 3: Viết kết quả kèm đơn vị "cm".' },
+        ],
+        solution: '2m = 200cm. Sợi dây dài: 200 + 30 = <strong>230cm</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một bộ phim bắt đầu chiếu lúc 7 giờ tối và chiếu trong 2 giờ. Hỏi phim kết thúc lúc mấy giờ?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: phim <strong>bắt đầu</strong> lúc 7 giờ tối, <strong>chiếu trong</strong> 2 giờ.<br><br>Đề hỏi: phim <strong>kết thúc</strong> lúc mấy giờ?' },
+          { t: 'Kiến thức cần dùng', b: 'Muốn tìm giờ kết thúc, lấy <strong>giờ bắt đầu cộng với thời gian đã trôi qua</strong>.<br><br>Ví dụ dễ hơn: tiết học bắt đầu lúc 8 giờ, học trong 1 giờ thì kết thúc lúc 8 + 1 = 9 giờ.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Lấy giờ bắt đầu (7 giờ).<br><br>Bước 2: <strong>Cộng</strong> với số giờ chiếu phim (2 giờ).<br><br>Bước 3: Đọc kết quả kèm buổi trong ngày (ở đây vẫn là buổi tối).' },
+        ],
+        solution: 'Phim kết thúc lúc: 7 + 2 = <strong>9 giờ tối</strong>.',
       },
     ],
     3: [
@@ -893,6 +973,46 @@
         ],
         solution: 'Chu vi mảnh vườn là: 9 × 4 = <strong>36m</strong>.',
       },
+      {
+        level: 'Cơ bản',
+        text: 'Một hình chữ nhật có chiều dài 8cm, chiều rộng 5cm. Tính diện tích hình đó.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hình chữ nhật có <strong>chiều dài 8cm</strong>, <strong>chiều rộng 5cm</strong>.<br><br>Đề hỏi: <strong>diện tích</strong> của hình đó.' },
+          { t: 'Kiến thức cần dùng', b: 'Công thức tính diện tích hình chữ nhật: <strong>diện tích = chiều dài × chiều rộng</strong>.<br><br>Chú ý: diện tích khác chu vi — chu vi là cộng các cạnh, còn diện tích là nhân hai cạnh với nhau.<br><br>Ví dụ dễ hơn: hình chữ nhật dài 6cm, rộng 3cm có diện tích 6 × 3 = 18cm².' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định chiều dài (8cm) và chiều rộng (5cm).<br><br>Bước 2: Lấy hai số đó <strong>nhân</strong> với nhau.<br><br>Bước 3: Viết đơn vị diện tích là "cm²" (xăng-ti-mét vuông), không phải "cm".' },
+        ],
+        solution: 'Diện tích hình chữ nhật là: 8 × 5 = <strong>40cm²</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Một chiếc bánh được chia đều thành 4 phần bằng nhau. Lan ăn 1 phần. Hỏi Lan đã ăn bao nhiêu phần của chiếc bánh?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: chiếc bánh chia thành <strong>4 phần bằng nhau</strong>, Lan ăn <strong>1 phần</strong> trong số đó.<br><br>Đề hỏi: Lan đã ăn bao nhiêu <strong>phần</strong> của cả chiếc bánh (viết dưới dạng phân số)?' },
+          { t: 'Kiến thức cần dùng', b: 'Khi một vật được chia đều thành nhiều phần bằng nhau, mỗi phần được viết là một <strong>phân số</strong>: số phần lấy ra là <strong>tử số</strong> (viết trên), tổng số phần chia được là <strong>mẫu số</strong> (viết dưới).<br><br>Ví dụ dễ hơn: chia quả cam thành 3 phần bằng nhau, ăn 1 phần thì đã ăn 1/3 quả cam.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định tổng số phần chia được — ở đây là 4, đó là mẫu số.<br><br>Bước 2: Xác định số phần Lan đã ăn — ở đây là 1, đó là tử số.<br><br>Bước 3: Viết thành phân số: tử số trên, mẫu số dưới.' },
+        ],
+        solution: 'Lan đã ăn <strong>1/4</strong> chiếc bánh.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một tháng có 30 ngày, ngày 1 của tháng là thứ Ba. Hỏi ngày 10 của tháng đó là thứ mấy?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: <strong>ngày 1</strong> là <strong>thứ Ba</strong>.<br><br>Đề hỏi: <strong>ngày 10</strong> là thứ mấy?' },
+          { t: 'Kiến thức cần dùng', b: 'Một tuần có <strong>7 ngày</strong>, cứ sau 7 ngày thì quay lại đúng thứ cũ. Muốn biết ngày sau cách ngày đầu bao xa, lấy hiệu hai số ngày, rồi đếm tiếp từng ngày trong tuần từ thứ đã biết.<br><br>Ví dụ dễ hơn: ngày 1 là thứ Hai thì ngày 3 (cách 2 ngày) là thứ Tư (đếm: thứ Hai → thứ Ba → thứ Tư).' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính số ngày cách nhau giữa ngày 10 và ngày 1: 10 − 1 = 9 ngày.<br><br>Bước 2: Vì 1 tuần có 7 ngày, 9 ngày là 1 tuần (7 ngày, quay lại thứ Ba) rồi thêm 2 ngày nữa.<br><br>Bước 3: Từ thứ Ba, đếm thêm 2 ngày: thứ Ba → thứ Tư → thứ Năm.' },
+        ],
+        solution: '9 ngày = 1 tuần (7 ngày) + 2 ngày. Sau 1 tuần vẫn là thứ Ba, đếm thêm 2 ngày nữa là thứ Tư rồi thứ Năm. Vậy ngày 10 là <strong>thứ Năm</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Nam có 2 tờ 10 000 đồng và 3 tờ 5 000 đồng. Hỏi Nam có tất cả bao nhiêu tiền?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: Nam có <strong>2 tờ 10 000 đồng</strong> và <strong>3 tờ 5 000 đồng</strong>.<br><br>Đề hỏi: tổng số tiền Nam có.' },
+          { t: 'Kiến thức cần dùng', b: 'Muốn tính tổng tiền gồm nhiều loại tờ tiền, tính <strong>số tiền của từng loại</strong> (lấy mệnh giá nhân số tờ) rồi <strong>cộng lại</strong>.<br><br>Ví dụ dễ hơn: có 2 tờ 2 000 đồng thì được 2 × 2 000 = 4 000 đồng.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính tiền từ tờ 10 000 đồng: 2 × 10 000.<br><br>Bước 2: Tính tiền từ tờ 5 000 đồng: 3 × 5 000.<br><br>Bước 3: <strong>Cộng</strong> hai kết quả lại để ra tổng số tiền.' },
+        ],
+        solution: 'Tiền tờ 10 000: 2 × 10 000 = 20 000 đồng. Tiền tờ 5 000: 3 × 5 000 = 15 000 đồng. Tổng cộng: 20 000 + 15 000 = <strong>35 000 đồng</strong>.',
+      },
     ],
     4: [
       {
@@ -985,6 +1105,46 @@
         ],
         solution: 'Số khoảng cách trên đường là: 100 : 10 = 10 (khoảng). Vì trồng cả hai đầu nên số cây trồng được là: 10 + 1 = <strong>11 cây</strong>.',
       },
+      {
+        level: 'Cơ bản',
+        text: 'So sánh hai phân số 3/5 và 2/5. Phân số nào lớn hơn?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hai phân số <strong>3/5</strong> và <strong>2/5</strong> — hai phân số này có <strong>mẫu số giống nhau</strong> (đều là 5).<br><br>Đề hỏi: phân số nào lớn hơn?' },
+          { t: 'Kiến thức cần dùng', b: 'Khi hai phân số có <strong>cùng mẫu số</strong>, phân số nào có <strong>tử số lớn hơn</strong> thì phân số đó lớn hơn.<br><br>Ví dụ dễ hơn: so sánh 4/7 và 2/7 — cùng mẫu 7, mà 4 > 2 nên 4/7 > 2/7.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Kiểm tra hai phân số có cùng mẫu số không — ở đây cùng là 5.<br><br>Bước 2: So sánh hai tử số 3 và 2.<br><br>Bước 3: Phân số có tử số lớn hơn là phân số lớn hơn.' },
+        ],
+        solution: 'Hai phân số cùng mẫu số 5, mà 3 > 2 nên <strong>3/5 lớn hơn 2/5</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Tính: 2/7 + 3/7',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phép cộng hai phân số <strong>2/7</strong> và <strong>3/7</strong> — hai phân số này <strong>cùng mẫu số</strong> (đều là 7).' },
+          { t: 'Kiến thức cần dùng', b: 'Muốn cộng hai phân số <strong>cùng mẫu số</strong>, ta <strong>cộng hai tử số với nhau</strong> và <strong>giữ nguyên mẫu số</strong>.<br><br>Ví dụ dễ hơn: 1/6 + 2/6 = (1+2)/6 = 3/6.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Kiểm tra hai phân số có cùng mẫu số không — cùng là 7, làm được ngay.<br><br>Bước 2: Cộng hai tử số: 2 + 3.<br><br>Bước 3: Giữ nguyên mẫu số 7, viết kết quả thành phân số mới.' },
+        ],
+        solution: '2/7 + 3/7 = (2 + 3)/7 = <strong>5/7</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một hình bình hành có độ dài đáy 12cm, chiều cao 6cm. Tính diện tích hình bình hành đó.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hình bình hành có <strong>đáy 12cm</strong>, <strong>chiều cao 6cm</strong>.<br><br>Đề hỏi: <strong>diện tích</strong> hình bình hành đó.' },
+          { t: 'Kiến thức cần dùng', b: 'Công thức tính diện tích hình bình hành: <strong>diện tích = độ dài đáy × chiều cao</strong>.<br><br>Ví dụ dễ hơn: hình bình hành có đáy 5cm, cao 4cm thì diện tích là 5 × 4 = 20cm².' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Xác định độ dài đáy (12cm) và chiều cao (6cm).<br><br>Bước 2: Lấy hai số đó <strong>nhân</strong> với nhau.<br><br>Bước 3: Viết đơn vị "cm²" vào đáp số.' },
+        ],
+        solution: 'Diện tích hình bình hành là: 12 × 6 = <strong>72cm²</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Tổng của hai số là 63. Số thứ nhất gấp đôi số thứ hai. Tìm hai số đó.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: <strong>tổng</strong> hai số là 63; số thứ nhất <strong>gấp đôi</strong> (gấp 2 lần) số thứ hai.<br><br>Đề hỏi: tìm cả hai số.' },
+          { t: 'Kiến thức cần dùng', b: 'Đây là dạng <strong>tổng và tỉ</strong>: nếu số thứ nhất gấp đôi số thứ hai, coi số thứ hai là <strong>1 phần</strong> thì số thứ nhất là <strong>2 phần</strong>, tổng cộng có <strong>3 phần bằng nhau</strong>.<br><br>Ví dụ dễ hơn: tổng hai số là 30, số lớn gấp đôi số bé — coi số bé 1 phần, số lớn 2 phần, tổng 3 phần = 30, mỗi phần = 10, số bé = 10, số lớn = 20.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Coi số thứ hai là 1 phần, số thứ nhất là 2 phần — tổng số phần là 1 + 2 = 3 phần.<br><br>Bước 2: Lấy tổng 63 <strong>chia</strong> cho 3 phần để tìm giá trị 1 phần (số thứ hai).<br><br>Bước 3: Lấy số thứ hai <strong>nhân đôi</strong> để ra số thứ nhất.' },
+        ],
+        solution: 'Tổng số phần: 1 + 2 = 3 phần. Giá trị 1 phần: 63 : 3 = 21. Số thứ hai là <strong>21</strong>, số thứ nhất là: 21 × 2 = <strong>42</strong>.',
+      },
     ],
     5: [
       {
@@ -1076,6 +1236,46 @@
           { t: 'Hướng làm bài này', b: 'Bước 1: Lấy đáy <strong>nhân</strong> với chiều cao: 12 × 8.<br><br>Bước 2: Lấy kết quả đó <strong>chia cho 2</strong> (đừng quên bước chia 2 — đây là bẫy hay mắc nhất).<br><br>Bước 3: Viết đơn vị "cm²" vào đáp số.' },
         ],
         solution: 'Diện tích hình tam giác là: (12 × 8) : 2 = <strong>48cm²</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Tính: 45,8 − 12,35',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phép trừ hai <strong>số thập phân</strong>: 45,8 và 12,35 — hai số này có <strong>số chữ số sau dấu phẩy khác nhau</strong> (45,8 có 1 chữ số, 12,35 có 2 chữ số).' },
+          { t: 'Kiến thức cần dùng', b: 'Muốn trừ hai số thập phân, viết chúng <strong>thẳng hàng theo dấu phẩy</strong> — nếu số nào ít chữ số thập phân hơn thì coi như có thêm chữ số 0 ở cuối cho đủ hàng.<br><br>Ví dụ dễ hơn: 7,4 = 7,40, nên 7,4 − 2,15 tính như 7,40 − 2,15.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Viết 45,8 thành 45,80 để đủ 2 chữ số thập phân như 12,35.<br><br>Bước 2: Đặt tính thẳng hàng theo dấu phẩy rồi trừ như số tự nhiên, từ phải sang trái.<br><br>Bước 3: Đặt dấu phẩy ở kết quả đúng thẳng cột với dấu phẩy hai số đã trừ.' },
+        ],
+        solution: '45,8 − 12,35 = 45,80 − 12,35 = <strong>33,45</strong>.',
+      },
+      {
+        level: 'Cơ bản',
+        text: 'Tính: 3,5 × 4',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho phép nhân một <strong>số thập phân</strong> (3,5) với một <strong>số tự nhiên</strong> (4).' },
+          { t: 'Kiến thức cần dùng', b: 'Muốn nhân số thập phân với số tự nhiên, cứ <strong>nhân như số tự nhiên bình thường</strong> (tạm bỏ dấu phẩy), sau đó đếm số chữ số sau dấu phẩy ở số thập phân ban đầu rồi đặt dấu phẩy vào kết quả sao cho đủ số chữ số đó.<br><br>Ví dụ dễ hơn: 2,3 × 3 — nhân 23 × 3 = 69, số 2,3 có 1 chữ số sau dấu phẩy nên kết quả là 6,9.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tạm coi 3,5 là 35, nhân bình thường: 35 × 4.<br><br>Bước 2: Đếm số chữ số thập phân ở 3,5 — có 1 chữ số (là số 5).<br><br>Bước 3: Đặt dấu phẩy vào kết quả sao cho có đúng 1 chữ số sau dấu phẩy.' },
+        ],
+        solution: '35 × 4 = 140. Vì 3,5 có 1 chữ số thập phân nên kết quả là <strong>14,0</strong>, tức <strong>14</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Một hình hộp chữ nhật có chiều dài 8cm, chiều rộng 5cm, chiều cao 4cm. Tính thể tích hình hộp chữ nhật đó.',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho hình hộp chữ nhật có <strong>chiều dài 8cm</strong>, <strong>chiều rộng 5cm</strong>, <strong>chiều cao 4cm</strong>.<br><br>Đề hỏi: <strong>thể tích</strong> hình hộp chữ nhật đó.' },
+          { t: 'Kiến thức cần dùng', b: 'Công thức tính thể tích hình hộp chữ nhật: <strong>thể tích = chiều dài × chiều rộng × chiều cao</strong>.<br><br>Ví dụ dễ hơn: hình hộp dài 2cm, rộng 3cm, cao 4cm có thể tích 2×3×4=24cm³.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Nhân chiều dài với chiều rộng trước: 8 × 5.<br><br>Bước 2: Lấy kết quả đó <strong>nhân tiếp</strong> với chiều cao (4).<br><br>Bước 3: Viết đơn vị thể tích là "cm³" (xăng-ti-mét khối), khác với đơn vị diện tích "cm²".' },
+        ],
+        solution: 'Thể tích hình hộp chữ nhật là: 8 × 5 × 4 = <strong>160cm³</strong>.',
+      },
+      {
+        level: 'Nâng cao',
+        text: 'Hai ô tô xuất phát cùng lúc từ hai điểm A và B cách nhau 180km, đi ngược chiều nhau để gặp nhau. Vận tốc ô tô thứ nhất là 50km/giờ, vận tốc ô tô thứ hai là 40km/giờ. Hỏi sau bao lâu hai ô tô gặp nhau?',
+        teach: [
+          { t: 'Đọc kỹ đề', b: 'Đề cho: quãng đường AB dài <strong>180km</strong>; hai xe xuất phát <strong>cùng lúc</strong>, đi <strong>ngược chiều</strong> (tiến lại gần nhau); vận tốc lần lượt là <strong>50km/giờ</strong> và <strong>40km/giờ</strong>.<br><br>Đề hỏi: sau bao lâu hai xe gặp nhau?' },
+          { t: 'Kiến thức cần dùng', b: 'Khi hai xe đi <strong>ngược chiều</strong> để gặp nhau, khoảng cách giữa chúng giảm dần với tốc độ bằng <strong>tổng hai vận tốc</strong> cộng lại. Thời gian gặp nhau = quãng đường ban đầu : tổng hai vận tốc.<br><br>Ví dụ dễ hơn: hai xe cách nhau 100km, đi ngược chiều với vận tốc 30km/giờ và 20km/giờ, tổng vận tốc là 50km/giờ, gặp nhau sau 100:50=2 giờ.' },
+          { t: 'Hướng làm bài này', b: 'Bước 1: Tính tổng hai vận tốc: 50 + 40.<br><br>Bước 2: Lấy quãng đường AB (180km) <strong>chia</strong> cho tổng vận tốc vừa tìm được.<br><br>Bước 3: Viết đơn vị "giờ" vào đáp số.' },
+        ],
+        solution: 'Tổng hai vận tốc: 50 + 40 = 90 (km/giờ). Thời gian hai xe gặp nhau: 180 : 90 = <strong>2 giờ</strong>.',
       },
     ],
   };
