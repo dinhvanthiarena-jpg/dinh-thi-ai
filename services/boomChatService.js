@@ -59,6 +59,30 @@ tam giác, hình thang. Thể tích hình hộp chữ nhật, hình lập phươ
 chuyển động đều cơ bản (vận tốc = quãng đường ÷ thời gian, và ngược lại).
 Toán tỉ lệ thuận, tỉ lệ nghịch. Giải toán lời văn nhiều bước, có thể dùng
 sơ đồ đoạn thẳng hoặc tỉ số.`,
+  // ---- THCS (lớp 6-9) — thêm mới, không đụng vào nội dung tiểu học ở trên ----
+  6: `Số nguyên (âm, dương): cộng trừ nhân chia, so sánh trên trục số. Ôn
+và mở rộng phân số, số thập phân. Tỉ số, tỉ số phần trăm. Điểm, đường
+thẳng, đoạn thẳng, tia, góc — nhận biết và đo góc. Chu vi, diện tích hình
+chữ nhật, hình vuông, hình thoi, hình bình hành, hình thang (công thức cơ
+bản). Làm quen biểu đồ tranh, biểu đồ cột, biểu đồ cột kép.`,
+  7: `Số hữu tỉ: cộng trừ nhân chia, giá trị tuyệt đối. Số thực, làm quen
+căn bậc hai của số không âm. Tỉ lệ thức, tính chất dãy tỉ số bằng nhau,
+đại lượng tỉ lệ thuận/tỉ lệ nghịch. Biểu thức đại số, đơn thức và đa thức
+một biến (cộng, trừ đơn giản). Hai đường thẳng song song, quan hệ vuông
+góc. Tổng ba góc một tam giác, hai tam giác bằng nhau. Thu thập, phân
+loại, biểu diễn dữ liệu; biến cố và xác suất trong các trò chơi đơn giản.`,
+  8: `Nhân, chia đa thức; bảy hằng đẳng thức đáng nhớ; phân tích đa thức
+thành nhân tử. Phân thức đại số: rút gọn, cộng trừ nhân chia. Phương
+trình bậc nhất một ẩn — đưa được về dạng ax + b = 0. Hàm số bậc nhất
+y = ax + b và đồ thị (đường thẳng). Tứ giác: hình thang, hình bình hành,
+hình chữ nhật, hình thoi, hình vuông — tính chất và dấu hiệu nhận biết.
+Định lý Pytago. Diện tích đa giác. Làm quen tam giác đồng dạng.`,
+  9: `Căn bậc hai, căn bậc ba và các phép biến đổi biểu thức chứa căn.
+Hàm số y = ax² (a≠0) và đồ thị; phương trình bậc hai một ẩn, công thức
+nghiệm, hệ thức Vi-ét. Hệ hai phương trình bậc nhất hai ẩn — giải bằng
+thế hoặc cộng đại số. Hệ thức lượng trong tam giác vuông (tỉ số lượng
+giác cơ bản). Đường tròn: vị trí tương đối, góc với đường tròn, tứ giác
+nội tiếp. Ôn tổng hợp hướng tới kỳ thi tuyển sinh lớp 10.`,
 };
 function curriculumFor(grade) {
   if (grade && CURRICULUM[grade]) return `\n═══ TRỌNG TÂM CHƯƠNG TRÌNH LỚP ${grade} (bám sát, đừng đố ngoài phạm vi này) ═══\n${CURRICULUM[grade]}\n`;
@@ -67,12 +91,21 @@ function curriculumFor(grade) {
 lời nhanh/chậm, đúng/sai ra sao.\n`;
 }
 
+// "tiểu học" hay "THCS" tuỳ lớp — dùng để không gọi sai cấp học trong lời
+// giới thiệu nhân vật (trước đây hard-code "tiểu học", giờ lớp 6-9 cũng
+// dùng chung Mon.L nên phải phân biệt).
+function schoolLevelWord(grade) {
+  if (!grade) return 'tiểu học/THCS';
+  return grade >= 6 ? 'THCS' : 'tiểu học';
+}
+
 function buildSystemPrompt(grade, forced, verifiedAnswer) {
-  const gradeLine = grade ? `lớp ${grade}` : 'chưa rõ lớp mấy, cứ nói chuyện phù hợp học sinh tiểu học nói chung';
-  return `Bạn là Mon.L — một con quái vật lông tím đội mũ bảo hộ, tinh nghịch nhưng cực mê toán, đang "gọi điện" vừa trò chuyện vừa DẠY TOÁN cho một học sinh tiểu học Việt Nam (${gradeLine}) trong app học toán "Toán Vui Cấp 1". Tên bạn luôn viết nguyên là "Mon.L" — không dịch, không phiên âm, không viết hoa hết hay viết thường hết.
+  const level = schoolLevelWord(grade);
+  const gradeLine = grade ? `lớp ${grade}` : `chưa rõ lớp mấy, cứ nói chuyện phù hợp học sinh ${level} nói chung`;
+  return `Bạn là Mon.L — một con quái vật lông tím đội mũ bảo hộ, tinh nghịch nhưng cực mê toán, đang "gọi điện" vừa trò chuyện vừa DẠY TOÁN cho một học sinh ${level} Việt Nam (${gradeLine}) trong app học toán "Toán Vui Cấp 1". Tên bạn luôn viết nguyên là "Mon.L" — không dịch, không phiên âm, không viết hoa hết hay viết thường hết.${grade >= 8 ? '\nBạn học đã lớn hơn (THCS, có thể là tuổi teen) — vẫn giữ tính cách vui vẻ mê toán, nhưng bớt kiểu nựng nịu trẻ con đi, nói chuyện ngang hàng, tôn trọng hơn.' : ''}
 
 ════ BẠN LÀ MỘT GIÁO VIÊN TOÁN THẬT GIỎI, ĐỘI LỐT QUÁI VẬT VUI TÍNH ════
-Bạn không chỉ là bạn chơi cùng — bạn thực sự giỏi toán tiểu học và biết cách
+Bạn không chỉ là bạn chơi cùng — bạn thực sự giỏi toán ${level} và biết cách
 dạy hay, kiểu giáo viên giỏi nhất mà đứa trẻ nào cũng thích học cùng: kiên
 nhẫn, dễ hiểu, không bao giờ làm bạn học thấy dốt hay sợ sai.
 - Xưng "tớ", gọi bạn học là "cậu" (hoặc gọi đúng tên nếu bạn ấy đã nói tên mình).
@@ -106,7 +139,7 @@ nhẫn, dễ hiểu, không bao giờ làm bạn học thấy dốt hay sợ sai
 4. BẠN HỌC LÀM ĐÚNG (theo đúng SỰ THẬT ĐÃ KIỂM CHỨNG ở mục 0): khen CỤ THỂ bạn ấy vừa
    làm đúng ở đâu/vì sao đúng (không chỉ "giỏi quá" chung chung), rồi nâng
    độ khó lên một chút cho lượt sau.
-5. GIẢI THÍCH "TẠI SAO", không chỉ đưa công thức suông — trẻ tiểu học nhớ
+5. GIẢI THÍCH "TẠI SAO", không chỉ đưa công thức suông — bạn học nhớ
    lâu hơn khi hiểu vì sao, không phải học vẹt.
 6. XEN KẼ TRÒ CHUYỆN ĐỜI THƯỜNG: không phải lượt nào cũng phải là bài
    toán — thỉnh thoảng hỏi thăm, trêu đùa, rồi lồng bài học vào tự nhiên,
