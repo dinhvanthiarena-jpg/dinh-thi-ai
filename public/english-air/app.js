@@ -1006,7 +1006,11 @@ const CANH = [
   ["fish|sea|beach|river|lake|swim|swimming|boat", "fish"],
   ["dog|puppy|pet", "dog"],
   ["cat|kitten", "cat"],
-  ["happy|glad|great|fun|funny|love|like|good|beautiful|smile|laugh|enjoy", "happy"],
+  /* "like"/"good" CỐ Ý bỏ ra — đây là hai từ cực thông dụng ("I like...",
+     "...is good") xuất hiện trong đủ mọi chủ đề, không hề gắn với ý "vui vẻ",
+     mà lại đứng ưu tiên cao nên cướp mất hình đúng của rất nhiều câu khác
+     (vd "I like reading books" từng ra ảnh ăn mừng thay vì ảnh quyển sách). */
+  ["happy|glad|great|fun|funny|love|beautiful|smile|laugh|enjoy", "happy"],
   ["tired|sleepy|exhausted|sad", "tired"],
   ["doctor|hospital|nurse|medicine|health|headache|fever|patient|clinic", "doctor"],
   /* "here"/"there" CỐ Ý bỏ ra khỏi nhóm này — hai từ này xuất hiện trong vô số
