@@ -207,9 +207,24 @@ const PORT = process.env.PORT || 3000;
 // late (or more than once, e.g. if Passenger spawns a fresh process per
 // request while still waiting on that promise) throws "listen() was called
 // more than once", which used to get mis-logged here as a DB error.
-app.listen(PORT, () => {
+const httpServer = app.listen(PORT, () => {
   console.log(`[server] Dinh Thi Ai dang chay tai http://localhost:${PORT}`);
 });
+
+// Thach Dau (Mon-Maths 1v1/2v2 battle) realtime layer. Socket.IO attaches to
+// the ALREADY-listening httpServer above (no extra listen() call, so this is
+// safe under the Passenger-hijack constraint documented above). Chosen over
+// raw `ws` specifically because Socket.IO auto-falls-back to HTTP
+// long-polling if this shared LiteSpeed/Passenger hosting doesn't proxy the
+// WebSocket upgrade correctly — unverified on this host as of first setup,
+// see PHASE0-WS-CHECK.md for the smoke test used to confirm it.
+const { Server: SocketIOServer } = require('socket.io');
+const io = new SocketIOServer(httpServer, {
+  path: '/socket.io/',
+  cors: false,
+  transports: ['websocket', 'polling'],
+});
+require('./services/battleSocket')(io);
 
 connectDB()
   .then(() => {
