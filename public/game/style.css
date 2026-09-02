@@ -2752,6 +2752,8 @@ button:focus-visible,
 .battle-result-player .battle-avatar { width: 54px; height: 54px; font-size: 1.3rem; }
 .battle-result-player .battle-score { font-size: 1.5rem; }
 .battle-result-vs { font-family: var(--font-heading); font-weight: 800; font-size: 1.1rem; color: var(--muted-fg); }
+.battle-account { font-family: var(--font-heading); font-weight: 600; font-size: 0.68rem; color: var(--muted-fg); }
+.battle-result-thanhtich { font-family: var(--font-heading); font-weight: 700; font-size: 0.85rem; color: var(--muted-fg); margin: -8px 0 20px; }
 .battle-result-rewards { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 22px; }
 .battle-result-rewards span {
   font-family: var(--font-heading);

@@ -164,7 +164,13 @@ module.exports = function attachBattleSocket(io) {
             wins: record.wins + (isWinner ? 1 : 0),
             losses: record.losses + (!isWinner && !isDraw ? 1 : 0),
           });
-          results[p.installId] = { rankDelta, coinsDelta, newTier: record.tier, newRankPoints: record.rankPoints };
+          // Tổng luỹ kế (không phải riêng trận này) — màn kết quả hiện "thành
+          // tích" tổng để phụ huynh/thầy cô thấy tiến bộ lâu dài, không chỉ
+          // điểm/thưởng của 1 trận.
+          results[p.installId] = {
+            rankDelta, coinsDelta, newTier: record.tier, newRankPoints: record.rankPoints,
+            wins: record.wins, losses: record.losses, coins: record.coins,
+          };
         }
       } catch (e) {
         console.error('[battle] cap nhat BattlePlayer that bai', e.message);
@@ -198,6 +204,9 @@ module.exports = function attachBattleSocket(io) {
         coinsDelta: r.coinsDelta,
         newTier: r.newTier,
         tierName: r.newTier != null ? TIER_NAMES[r.newTier] : null,
+        wins: r.wins ?? null,
+        losses: r.losses ?? null,
+        coins: r.coins ?? null,
       });
       socket.leave(matchId);
     }

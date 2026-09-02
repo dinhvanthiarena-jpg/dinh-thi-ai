@@ -49,6 +49,11 @@
   /* ================= MASCOT & TEACHER SETTINGS ================= */
   let teacherName = 'Thầy Đinh Thi Ai';
   let avatarDataUrl = null;
+  // Trạng thái đăng nhập (đọc từ TK.toi mỗi lần đổi, xem veTheTaiKhoan()) —
+  // để phần Thách Đấu (ở đoạn code khác, ngoài phạm vi biến TK) hiện được
+  // tên tài khoản thật ở màn kết quả mà không cần lồng toàn bộ code trận
+  // đấu vào trong khối if(IS_WEB).
+  let webAccountInfo = null;
 
   // Web build (no Electron main process): persist settings in localStorage
   // and send the same install ping the desktop app sends, via fetch.
@@ -1969,7 +1974,15 @@
     for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
     return h % BATTLE_AVATAR_COLORS.length;
   }
-  function battleSetAvatar(avatarEl, initialEl, seed, letter) {
+  function battleSetAvatar(avatarEl, initialEl, seed, letter, photoUrl) {
+    // Có ảnh đại diện thật (đặt ở "Tuỳ chỉnh giáo viên") thì dùng luôn thay
+    // vì chữ cái đầu — chỉ áp dụng được cho "mình" vì mình mới biết ảnh của
+    // máy mình, không biết ảnh của đối thủ.
+    if (photoUrl) {
+      avatarEl.style.background = `center/cover no-repeat url("${photoUrl}")`;
+      initialEl.textContent = '';
+      return;
+    }
     initialEl.textContent = (letter || '?').trim().charAt(0).toUpperCase() || '?';
     avatarEl.style.background = BATTLE_AVATAR_COLORS[battleAvatarColorIndex(seed || letter)];
   }
@@ -2036,6 +2049,11 @@
   });
 
   function battleShowSetup() {
+    // Đã đăng nhập mà ô tên còn trống thì điền sẵn tên tài khoản thật —
+    // không ghi đè nếu con đã tự gõ tên khác (chỉ điền khi đang trống).
+    if (webAccountInfo && webAccountInfo.dangNhap && webAccountInfo.ten && !battleNameInput.value.trim()) {
+      battleNameInput.value = webAccountInfo.ten;
+    }
     battleSelectedGrade = null;
     btnBattleFind.disabled = true;
     btnBattleCreateRoom.disabled = true;
@@ -2151,7 +2169,7 @@
       battleMatchMeta = {
         mode: '2v2',
         meName: 'Đội bạn' + (data.teammates && data.teammates[0] ? ' + ' + data.teammates[0].displayName : ''),
-        meSeed: 'team-me', meLetter: 'Đ', meTierName: null,
+        meSeed: 'team-me', meLetter: 'Đ', meTierName: null, mePhoto: null,
         oppName: 'Đội đối thủ' + (data.opponents && data.opponents.length ? ': ' + data.opponents.map((o) => o.displayName).join(', ') : ''),
         oppSeed: 'team-opp', oppLetter: 'Đ', oppTierName: null,
       };
@@ -2159,13 +2177,15 @@
       const opp = (data.opponents && data.opponents[0]) || { displayName: 'Đối thủ', tierName: null, installId: 'opp' };
       battleMatchMeta = {
         mode: '1v1',
-        meName: data.me.displayName, meSeed: data.me.installId, meLetter: data.me.displayName, meTierName: data.me.tierName || null,
+        // Ảnh đại diện thật (đặt ở "Tuỳ chỉnh giáo viên") chỉ có cho "mình" —
+        // không biết ảnh của đối thủ nên phía đối thủ luôn dùng chữ cái đầu.
+        meName: data.me.displayName, meSeed: data.me.installId, meLetter: data.me.displayName, meTierName: data.me.tierName || null, mePhoto: avatarDataUrl || null,
         oppName: opp.displayName, oppSeed: opp.installId, oppLetter: opp.displayName, oppTierName: opp.tierName || null,
       };
     }
     battleMeNameEl.textContent = battleMatchMeta.meName;
     battleOppNameEl.textContent = battleMatchMeta.oppName;
-    battleSetAvatar(battleMeAvatar, battleMeAvatarInitial, battleMatchMeta.meSeed, battleMatchMeta.meLetter);
+    battleSetAvatar(battleMeAvatar, battleMeAvatarInitial, battleMatchMeta.meSeed, battleMatchMeta.meLetter, battleMatchMeta.mePhoto);
     battleSetAvatar(battleOppAvatar, battleOppAvatarInitial, battleMatchMeta.oppSeed, battleMatchMeta.oppLetter);
     battleMeRankEl.hidden = !battleMatchMeta.meTierName;
     battleMeRankEl.textContent = battleMatchMeta.meTierName || '';
@@ -2238,12 +2258,16 @@
 
   const battleResultMeName = $('battleResultMeName');
   const battleResultOppName = $('battleResultOppName');
+  const battleResultMeAccount = $('battleResultMeAccount');
+  const battleResultMeRank = $('battleResultMeRank');
+  const battleResultOppRank = $('battleResultOppRank');
   const battleResultMeScore = $('battleResultMeScore');
   const battleResultOppScore = $('battleResultOppScore');
   const battleResultMeAvatar = $('battleResultMeAvatar');
   const battleResultMeAvatarInitial = $('battleResultMeAvatarInitial');
   const battleResultOppAvatar = $('battleResultOppAvatar');
   const battleResultOppAvatarInitial = $('battleResultOppAvatarInitial');
+  const battleResultThanhTich = $('battleResultThanhTich');
 
   function battleOnMatchEnd(data) {
     const m = battleCurrentMatch;
@@ -2255,13 +2279,30 @@
     else if (data.outcome === 'lose') { titleEl.textContent = 'Thua rồi, cố lên nhé!'; titleEl.classList.add('lose'); }
     else { titleEl.textContent = 'Hòa!'; titleEl.classList.add('draw'); }
 
-    const meta = battleMatchMeta || { meName: 'Bạn', meSeed: 'me', meLetter: 'B', oppName: 'Đối thủ', oppSeed: 'opp', oppLetter: 'Đ' };
+    const meta = battleMatchMeta || { meName: 'Bạn', meSeed: 'me', meLetter: 'B', meTierName: null, mePhoto: null, oppName: 'Đối thủ', oppSeed: 'opp', oppLetter: 'Đ', oppTierName: null };
     battleResultMeName.textContent = meta.meName;
     battleResultOppName.textContent = meta.oppName;
     battleResultMeScore.textContent = String(data.myScore);
     battleResultOppScore.textContent = String(data.opponentScore);
-    battleSetAvatar(battleResultMeAvatar, battleResultMeAvatarInitial, meta.meSeed, meta.meLetter);
+    battleSetAvatar(battleResultMeAvatar, battleResultMeAvatarInitial, meta.meSeed, meta.meLetter, meta.mePhoto);
     battleSetAvatar(battleResultOppAvatar, battleResultOppAvatarInitial, meta.oppSeed, meta.oppLetter);
+
+    // Hạng hiện tại (sau trận, nếu server trả về) cho cả 2 bên — bên "mình"
+    // ưu tiên hạng mới nhất (newTier) thay vì hạng lúc bắt đầu trận.
+    const meRankNow = data.tierName || meta.meTierName;
+    battleResultMeRank.hidden = !meRankNow;
+    battleResultMeRank.textContent = meRankNow || '';
+    battleResultOppRank.hidden = !meta.oppTierName;
+    battleResultOppRank.textContent = meta.oppTierName || '';
+
+    // Tên tài khoản thật (nếu đã đăng nhập) — hiện thêm dưới tên chơi để
+    // phụ huynh/thầy cô biết đúng là con nào, không chỉ tên tự đặt trong ô.
+    if (webAccountInfo && webAccountInfo.dangNhap) {
+      battleResultMeAccount.hidden = false;
+      battleResultMeAccount.textContent = 'Tài khoản: ' + (webAccountInfo.sdt || webAccountInfo.ten || '');
+    } else {
+      battleResultMeAccount.hidden = true;
+    }
 
     const rewardsEl = $('battleResultRewards');
     rewardsEl.innerHTML = '';
@@ -2269,6 +2310,15 @@
     if (data.rankDelta != null) chip((data.rankDelta >= 0 ? '+' : '') + data.rankDelta + ' điểm rank');
     if (data.coinsDelta != null) chip('+' + data.coinsDelta + ' Xu Mon');
     if (data.tierName) chip('Bậc: ' + data.tierName);
+
+    // Thành tích luỹ kế (tổng số trận, không phải riêng trận này).
+    if (data.wins != null && data.losses != null) {
+      battleResultThanhTich.hidden = false;
+      battleResultThanhTich.textContent = `🏆 Thành tích: ${data.wins} thắng · ${data.losses} thua${data.coins != null ? ` · ${data.coins} Xu Mon` : ''}`;
+    } else {
+      battleResultThanhTich.hidden = true;
+    }
+
     showScreen('battleResult');
   }
 
@@ -3598,6 +3648,7 @@
     }
 
     function veTheTaiKhoan() {
+      webAccountInfo = TK.toi;
       if (!settingsAccountRow) return;
       settingsAccountRow.hidden = false;
       const t = TK.toi;
