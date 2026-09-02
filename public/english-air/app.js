@@ -350,8 +350,26 @@ function khoTuAnh() {
 function catTieng(text) {
   const s = String(text || "").trim();
   if (!s) return [];
-  // Không có dấu tiếng Việt nào thì cả câu là tiếng Anh, khỏi cắt.
-  if (!DAU_VIET.test(s)) return [{ text: s, lang: tiengCua(s) }];
+  if (!DAU_VIET.test(s)) {
+    // Không có dấu tiếng Việt KHÔNG có nghĩa cả câu là tiếng Anh — "Sorry hay
+    // Excuse me?" không dấu nào nhưng "hay" (nghĩa "hoặc") vẫn là tiếng Việt. Đã
+    // dò khắp 284 tiêu đề bài học: chỉ đúng chữ "hay" lặp lại nhiều lần kiểu
+    // này ("X hay Y?"), nên tách riêng nó, phần còn lại vẫn coi là tiếng Anh như cũ.
+    const HAY = /\bhay\b/i;
+    if (HAY.test(s)) {
+      const ra = []; let con = s, m;
+      while ((m = HAY.exec(con))) {
+        const truoc = con.slice(0, m.index).trim();
+        if (truoc) ra.push({ text: truoc, lang: "en-GB" });
+        ra.push({ text: m[0], lang: "vi-VN" });
+        con = con.slice(m.index + m[0].length);
+        HAY.lastIndex = 0;
+      }
+      if (con.trim()) ra.push({ text: con.trim(), lang: "en-GB" });
+      return ra;
+    }
+    return [{ text: s, lang: tiengCua(s) }];
+  }
 
   const kho = khoTuAnh();
   const nhan = new Array(s.length).fill(0);   // 1 = thuộc một từ tiếng Anh
@@ -1034,6 +1052,10 @@ function anhChoTu(w) {
   return hinh ? khungAnh({ pic: hinh }) : null;
 }
 
+/** Loc mot chuoi khuc catTieng, chi giu lai phan tieng Anh — dung cho nhung
+    cho thay bao "bo tieng Viet di, chi doc tieng Anh thoi". */
+const chiAnh = khuc => (khuc || []).filter(k => k && k.lang !== "vi-VN");
+
 /* ---------- 9. Slide dạy ---------- */
 const TEACH = {
   intro(d, st) {
@@ -1092,23 +1114,24 @@ const TEACH = {
       const tip = el("button", "tip"); tip.type = "button";
       tip.setAttribute("aria-label", "Nghe mẹo: " + boDanhDau(d.tip));
       tip.append(icon("i-bulb", "ic ic-sm"), el("span", null, d.tip));
-      tip.addEventListener("click", () => docLanLuot(catTieng(boDanhDau(d.tip))));
+      tip.addEventListener("click", () => docLanLuot(chiAnh(catTieng(boDanhDau(d.tip)))));
       st.append(tip);
     }
-    // Vào slide là giảng luôn bằng tiếng, khỏi phải bấm.
-    docLanLuot([
+    // Vào slide là giảng luôn. Thầy dặn: bỏ tiếng Việt đi, chỉ đọc
+    // tiếng Anh trong đó thôi — phần giảng giải đỏc bằng mắt, không đọc to.
+    docLanLuot(chiAnh([
       ...catTieng(d.title),
       ...catTieng(boDanhDau(d.body)),
-    ]);
+    ]));
   },
 
   culture(d, st) {
     showMascot(false); setKicker("Góc văn hoá");
     st.append(signpost(d.title, d.body, "i-globe"));
-    docLanLuot([
+    docLanLuot(chiAnh([
       ...catTieng(d.title),
       ...catTieng(boDanhDau(d.body)),
-    ]);
+    ]));
   },
 
   dialogue(d, st) {
@@ -1141,15 +1164,15 @@ function signpost(title, body, ic) {
   const badge = el("div", "sign-badge"); badge.append(icon(ic, "ic"));
   card.append(badge, el("div", "sign-word", title));
   card.append(markup(el("div", "sign-body"), body));
-  // Phần giải thích phải nghe được, không bắt người ta chỉ đọc chữ. Đọc bằng
-  // giọng Việt vì đây là lời giảng, không phải mẫu câu tiếng Anh.
+  // Nut "Nghe lại" chỉ đọc PHẦN TIẾNG ANH nằm trong tiêu đề và lời giảng —
+  // phần tiếng Việt đọc bằng mắt là đủ, không cần đọc to.
   const ngheLai = el("button", "sign-nghe");
   ngheLai.type = "button";
   ngheLai.append(icon("i-sound", "ic ic-sm"), el("span", null, "Nghe lại"));
-  ngheLai.addEventListener("click", () => docLanLuot([
+  ngheLai.addEventListener("click", () => docLanLuot(chiAnh([
     ...catTieng(title),
     ...catTieng(boDanhDau(body)),
-  ]));
+  ])));
   card.append(ngheLai);
   // ON-Language tự giơ tấm bảng lên, thay cho hai cại cột vẽ bằng CSS trước đây.
   const mon = el("img", "sign-mon");
