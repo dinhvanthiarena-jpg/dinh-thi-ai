@@ -431,7 +431,22 @@ const SINGLE = ALL_WORDS.filter(w => !w.en.includes(" "));
    TÍNH MUỘN, không tính ngay lúc nạp: hàm dò cảnh khai báo mãi phía dưới, gọi
    lên là cả app chết ngay từ dòng đầu. Tính một lần rồi giữ lại. */
 let PICS_KHO = null;
-const picsKho = () => (PICS_KHO || (PICS_KHO = ALL_WORDS.filter(veDuoc)));
+const picsKho = () => (PICS_KHO || (PICS_KHO = SINGLE.filter(veDuoc)));
+/** Chọn n từ làm đáp án nhiễu, MỖI TỪ MỘT HÌNH KHÁC NHAU và khác hình của từ
+    đang hỏi. Không đủ thì trả về ít hơn — thà ba ô mà chọn được còn hơn bốn ô
+    mà hai ô giống hệt nhau. */
+function nhieuKhacHinh(dung, kho, n, tron) {
+  const daCo = new Set([tenHinh(dung)]);
+  const ra = [];
+  for (const w of (tron || shuffle)(kho)) {
+    if (w.en === dung.en) continue;
+    const h = tenHinh(w);
+    if (!h || daCo.has(h)) continue;
+    daCo.add(h); ra.push(w);
+    if (ra.length >= n) break;
+  }
+  return ra;
+}
 
 function currentLessonId() {
   const list = lessonsOf(level());
@@ -621,8 +636,9 @@ function buildPractice(words, sentences, max) {
 
   let picTurn = 0, tfTurn = 0;
   shuffle(pool).forEach((w, i) => {
-    if (veDuoc(w) && picsKho().length >= 4 && picTurn++ % 2 === 0) {
-      q.push({ type: "picture", word: w, opts: shuffle([w, ...sample(picsKho().filter(x => x.en !== w.en), 3)]) });
+    if (veDuoc(w) && !w.en.includes(" ") && picsKho().length >= 4 && picTurn++ % 2 === 0) {
+      const nhieu = nhieuKhacHinh(w, picsKho(), 3);
+      if (nhieu.length >= 2) q.push({ type: "picture", word: w, opts: shuffle([w, ...nhieu]) });
       return;
     }
     if (tfTurn++ % 3 === 2) {                        // cứ ba từ lại một câu đúng/sai
@@ -755,7 +771,7 @@ function renderSlide() {
   P.answered = false; P.correct = false; P.picked = null; P.hintUsed = false;
   $("#feedback").hidden = true;
   $(".p-foot").className = "p-foot";
-  const stage = $("#stage"); stage.textContent = "";
+  const stage = $("#stage"); stage.textContent = ""; stage.classList.remove("da-cham");
   $(".p-body").scrollTo?.({ top: 0 });
 
   const s = P.slides[P.i]; P.cur = s;
@@ -904,6 +920,17 @@ function hinhOChon(w) {
     return sv;
   }
   if (document.getElementById("p-" + c)) return pic(c);
+  return null;
+}
+/** Tên hình của một từ. Hai từ cùng tên hình là hai ô GIỐNG HỆT nhau — người
+    học nhìn ảnh không thể nào chọn đúng, nên phải loại bớt trước khi ra đề. */
+function tenHinh(w) {
+  if (!w) return null;
+  if (w.pic && document.getElementById("p-" + w.pic)) return "p-" + w.pic;
+  const c = w.pic || hinhChoChu(w.en);
+  if (!c) return null;
+  if (document.getElementById("s-" + c)) return "s-" + c;
+  if (document.getElementById("p-" + c)) return "p-" + c;
   return null;
 }
 /** Từ này có vẽ được không — dùng để lọc trước khi ra đề. */
@@ -1405,10 +1432,14 @@ const DRILL = {
 
   picture(d, st) {
     showMascot(true); setKicker("Chọn hình ảnh đúng");
-    st.append(el("p", "ask", d.word.en));
+    // HỎI BẰNG NGHĨA TIẾNG VIỆT. Trước đây hỏi bằng chính chữ tiếng Anh, mà mỗi
+    // ô lại ghi sẵn chữ tiếng Anh bên dưới — người học chỉ việc dò chữ giống
+    // nhau là xong, không cần nhìn hình, không học được gì.
+    st.append(el("p", "ask", d.word.vi || d.word.en));
     const grid = el("div", "pics");
     d.opts.filter(veDuoc).forEach(w => {
-      const b = el("button", "pic"); b.type = "button"; b.dataset.en = w.en;
+      const b = el("button", "pic pic-an"); b.type = "button"; b.dataset.en = w.en;
+      // Chữ tiếng Anh giấu đi cho tới lúc chấm — chấm xong mới hiện ra để học.
       b.append(hinhOChon(w), el("span", null, w.en));
       b.addEventListener("click", () => {
         if (P.answered) return;
@@ -2066,6 +2097,9 @@ function nextPressed() {
   P.answered = true; P.attempts++;
   P.correct = !!P.picked.ok;
   const st = $("#stage");
+  // Chấm xong mới cho hiện chữ tiếng Anh dưới các ô ảnh — để học, chứ không
+  // phải để dò đáp án.
+  st.classList.add("da-cham");
 
   if (d.type === "ghepChu") {
     const dung = [...d.word.en.toUpperCase()];
@@ -4100,12 +4134,14 @@ function deHomNay(mucMa) {
       }
     }
     if (kieu === "picture") {
-      const coAnh = kho.filter(veDuoc);
+      const coAnh = kho.filter(x => veDuoc(x) && !x.en.includes(" "));
       if (coAnh.length >= 4) {
         const w2 = coAnh[i % coAnh.length];
-        const khac = tronTheoHat(coAnh.filter(x => x.en !== w2.en), r).slice(0, 3);
-        q.push({ type: "picture", word: w2, opts: tronTheoHat([w2].concat(khac), r) });
-        continue;
+        const khac = nhieuKhacHinh(w2, coAnh, 3, ds => tronTheoHat(ds, r));
+        if (khac.length >= 2) {
+          q.push({ type: "picture", word: w2, opts: tronTheoHat([w2].concat(khac), r) });
+          continue;
+        }
       }
     }
     if (kieu === "ghepChu") {
