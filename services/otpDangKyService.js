@@ -54,7 +54,7 @@ async function guiEmailOtp(email, ma) {
   const t = layTransporter();
   if (!t) throw Object.assign(new Error('Chưa cấu hình gửi email'), { code: 'NO_SMTP' });
   await t.sendMail({
-    from: `"Mon.L" <${process.env.SMTP_USER}>`,
+    from: `"Mon-Maths" <${process.env.SMTP_USER}>`,
     to: email,
     subject: `Mã xác nhận đăng ký: ${ma}`,
     text: `Mã xác nhận đăng ký tài khoản của con là: ${ma}\nMã có hiệu lực trong 10 phút. Nếu không phải con yêu cầu, hãy bỏ qua email này.`,
