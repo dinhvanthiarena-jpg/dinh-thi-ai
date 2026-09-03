@@ -991,6 +991,7 @@ function startLesson(id, opts = {}) {
   P.teachN = teach.length;
   P.i = 0; P.wrong = 0; P.attempts = 0;
   P.startedAt = Date.now(); P.lessonId = id || null; P.mode = opts.mode || "lesson";
+  stkDung = 0;
 
   $("#player").hidden = false;
   document.body.style.overflow = "hidden";
@@ -2419,6 +2420,8 @@ function nextPressed() {
     docLanLuot(khucDoc);
     feedback(true, praise(), d.word ? `${d.word.en} — ${d.word.vi}` : (d.sent ? d.sent.en : ""), khucDoc);
     if (P.laThi) P.laThi.dung += 1;
+    stkDung += 1;
+    if (stkDung % STK_MOI === 0) banSticker();
   } else {
     P.wrong++;
     // Đang thi thì không trừ tim: hết tim giữa đề là phải bỏ dở, vô lý.
@@ -2435,6 +2438,56 @@ function nextPressed() {
   }
   setBtn("Tiếp theo", P.correct ? "btn-ok" : "btn-danger", true);
 }
+/* ---------- Sticker ăn mừng ----------
+   Cứ 2 câu đúng thì bắn ra một sticker nổ tung toé. Ảnh để 224px, nén webp
+   khoảng 10KB mỗi cái — bật lên phải nhẹ, không được làm khựng máy yếu.
+   Đếm theo TỔNG số câu đúng trong bài chứ không phải đúng liên tiếp: sai một
+   câu mà mất luôn phần thưởng đang dồn thì nản. */
+const STK_SO = 8;                 // assets/sticker/s1..s8.webp
+const STK_MOI = 2;                // cứ 2 câu đúng thì một cái
+let stkDung = 0;                  // đã đúng bao nhiêu câu (trong lượt học này)
+let stkDo = [];                   // rổ đã trộn, bốc hết mới trộn lại
+let stkHen = null;
+
+/** Bốc sticker sao cho không lặp lại liên tiếp cùng một cái. */
+function stkTiep() {
+  if (!stkDo.length) stkDo = shuffle([...Array(STK_SO).keys()].map(i => i + 1));
+  return stkDo.pop();
+}
+
+function banSticker() {
+  const box = $("#stkView");
+  if (!box) return;
+  clearTimeout(stkHen);
+  box.textContent = "";
+  box.hidden = false;
+
+  const im = el("img", "stk-anh");
+  im.src = "assets/sticker/s" + stkTiep() + ".webp";
+  im.alt = "";
+  im.decoding = "async";
+  // Thiếu file thì dẹp luôn cả khung, đừng để một ô vỡ giữa màn hình.
+  im.addEventListener("error", () => { box.hidden = true; box.textContent = ""; });
+  box.append(im);
+
+  // Mảnh giấy bắn ra tứ phía. Máy đang bật "giảm chuyển động" thì bỏ, chỉ hiện
+  // ảnh rồi tắt — người chóng mặt vì chuyển động không chịu nổi kiểu nổ này.
+  if (!S.motion) {
+    for (let i = 0; i < 14; i++) {
+      const m = el("i", "stk-manh");
+      const goc = (Math.PI * 2 * i) / 14 + Math.random() * .4;
+      const xa = 90 + Math.random() * 70;
+      m.style.setProperty("--x", Math.cos(goc) * xa + "px");
+      m.style.setProperty("--y", Math.sin(goc) * xa + "px");
+      m.style.setProperty("--do", (Math.random() * 60 - 30) + "deg");
+      m.style.animationDelay = (Math.random() * 60) + "ms";
+      box.append(m);
+    }
+  }
+  rung([12, 40, 12]);
+  stkHen = setTimeout(() => { box.hidden = true; box.textContent = ""; }, S.motion ? 900 : 1250);
+}
+
 const PRAISE = ["Chính xác", "Tuyệt vời", "Giỏi lắm", "Đúng rồi", "Xuất sắc"];
 const praise = () => PRAISE[Math.floor(Math.random() * PRAISE.length)];
 function answerOf(d) {
