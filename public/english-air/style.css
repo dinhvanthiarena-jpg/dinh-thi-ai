@@ -2009,3 +2009,14 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 /* Máy bật giảm chuyển động: chỉ hiện ra rồi mờ đi, không nảy không nổ. */
 :root[data-motion="reduce"] .stk-anh { animation: stk-hien .3s ease both; }
 @keyframes stk-hien { from { opacity: 0; } to { opacity: 1; } }
+
+/* Sai: ảnh buồn rơi xuống rồi lắc nhẹ — buồn thiu chứ không nảy tưng bừng
+   như lúc khen. Không có mảnh giấy nổ. */
+.stk.buon .stk-anh { animation: stk-buon .5s cubic-bezier(.2, .9, .3, 1) both; }
+@keyframes stk-buon {
+  0%   { transform: translateY(-26px) scale(.86) rotate(0); opacity: 0; }
+  60%  { transform: translateY(0) scale(1) rotate(-3deg); opacity: 1; }
+  80%  { transform: translateY(0) scale(1) rotate(3deg); }
+  100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
+}
+:root[data-motion="reduce"] .stk.buon .stk-anh { animation: stk-hien .3s ease both; }

@@ -2424,6 +2424,7 @@ function nextPressed() {
     if (stkDung % STK_MOI === 0) banSticker();
   } else {
     P.wrong++;
+    banSticker(true);
     // Đang thi thì không trừ tim: hết tim giữa đề là phải bỏ dở, vô lý.
     if (!P.laThi) S.hearts = clamp(S.hearts - 1, 0, TIM_TOI_DA);
     // Vừa sứt quả đầu từ lúc đầy thì mới bắt đầu tính giờ hồi.
@@ -2438,6 +2439,45 @@ function nextPressed() {
   }
   setBtn("Tiếp theo", P.correct ? "btn-ok" : "btn-danger", true);
 }
+/* ---------- Tiếng khen / tiếng tiếc ----------
+   Tự sinh bằng WebAudio chứ không tải file nhạc: nhẹ tuyệt đối, không có mạng
+   vẫn kêu. Máy bật "giảm chuyển động" không được xem hiệu ứng nổ thì càng cần
+   nghe thấy, nên tiếng vẫn kêu bình thường ở mọi máy. */
+let acx = null;
+function boTiengs() {
+  // Trình duyệt chặn tạo tiếng trước khi người dùng chạm màn hình, nên tạo
+  // muộn — lúc này người học vừa bấm "Kiểm tra" nên chắc chắn đã chạm rồi.
+  if (acx) return acx;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  try { acx = new AC(); } catch { return null; }
+  return acx;
+}
+
+/** Chơi một chuỗi nốt. not = [[tần số Hz, giây bắt đầu, giây ngân]] */
+function chuoiNot(nots, kieu = "triangle", to = .16) {
+  if (!S.sound) return;
+  const a = boTiengs();
+  if (!a) return;
+  if (a.state === "suspended") a.resume().catch(() => {});
+  const t0 = a.currentTime + .01;
+  nots.forEach(([hz, batDau, ngan]) => {
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = kieu; o.frequency.value = hz;
+    // Lên xuống mượt, không cắt cụt — cắt đột ngột nghe thành tiếng "bụp".
+    g.gain.setValueAtTime(0, t0 + batDau);
+    g.gain.linearRampToValueAtTime(to, t0 + batDau + .02);
+    g.gain.exponentialRampToValueAtTime(.0001, t0 + batDau + ngan);
+    o.connect(g); g.connect(a.destination);
+    o.start(t0 + batDau); o.stop(t0 + batDau + ngan + .02);
+  });
+}
+
+/** Đúng: ba nốt đi lên, nghe là biết được khen. */
+const keuVui = () => chuoiNot([[523.3, 0, .16], [659.3, .09, .16], [784, .18, .30]], "triangle", .15);
+/** Sai: hai nốt đi xuống, nhẹ thôi — tiếc chứ không phải mắng. */
+const keuTiec = () => chuoiNot([[392, 0, .20], [294.7, .13, .34]], "sine", .12);
+
 /* ---------- Sticker ăn mừng ----------
    Cứ 2 câu đúng thì bắn ra một sticker nổ tung toé. Ảnh để 224px, nén webp
    khoảng 10KB mỗi cái — bật lên phải nhẹ, không được làm khựng máy yếu.
@@ -2455,24 +2495,29 @@ function stkTiep() {
   return stkDo.pop();
 }
 
-function banSticker() {
+function banSticker(buon) {
   const box = $("#stkView");
   if (!box) return;
   clearTimeout(stkHen);
   box.textContent = "";
   box.hidden = false;
+  box.classList.toggle("buon", !!buon);
 
   const im = el("img", "stk-anh");
-  im.src = "assets/sticker/s" + stkTiep() + ".webp";
+  im.src = buon ? "assets/sticker/b1.webp" : "assets/sticker/s" + stkTiep() + ".webp";
   im.alt = "";
   im.decoding = "async";
   // Thiếu file thì dẹp luôn cả khung, đừng để một ô vỡ giữa màn hình.
   im.addEventListener("error", () => { box.hidden = true; box.textContent = ""; });
   box.append(im);
 
-  // Mảnh giấy bắn ra tứ phía. Máy đang bật "giảm chuyển động" thì bỏ, chỉ hiện
-  // ảnh rồi tắt — người chóng mặt vì chuyển động không chịu nổi kiểu nổ này.
-  if (!S.motion) {
+  // Tiếng kêu — cái này KHÔNG phụ thuộc "giảm chuyển động": máy nào tắt hiệu
+  // ứng nổ thì càng phải nghe thấy mới biết mình vừa đúng hay sai.
+  buon ? keuTiec() : keuVui();
+
+  // Mảnh giấy bắn ra tứ phía, chỉ dành cho lúc ĐÚNG. Sai mà cũng nổ tung toé
+  // thì thành trêu người học. Máy bật "giảm chuyển động" cũng bỏ luôn phần nổ.
+  if (!S.motion && !buon) {
     for (let i = 0; i < 14; i++) {
       const m = el("i", "stk-manh");
       const goc = (Math.PI * 2 * i) / 14 + Math.random() * .4;
@@ -2484,8 +2529,9 @@ function banSticker() {
       box.append(m);
     }
   }
-  rung([12, 40, 12]);
-  stkHen = setTimeout(() => { box.hidden = true; box.textContent = ""; }, S.motion ? 900 : 1250);
+  rung(buon ? 60 : [12, 40, 12]);
+  stkHen = setTimeout(() => { box.hidden = true; box.textContent = ""; },
+                      buon ? 1050 : (S.motion ? 900 : 1250));
 }
 
 const PRAISE = ["Chính xác", "Tuyệt vời", "Giỏi lắm", "Đúng rồi", "Xuất sắc"];
