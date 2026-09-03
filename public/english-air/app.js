@@ -2447,13 +2447,46 @@ function nextPressed() {
    nghe thấy, nên tiếng vẫn kêu bình thường ở mọi máy. */
 let acx = null;
 function boTiengs() {
-  // Trình duyệt chặn tạo tiếng trước khi người dùng chạm màn hình, nên tạo
-  // muộn — lúc này người học vừa bấm "Kiểm tra" nên chắc chắn đã chạm rồi.
   if (acx) return acx;
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return null;
   try { acx = new AC(); } catch { return null; }
   return acx;
+}
+
+/* Bộ tiếng vừa tạo ra là đang NGỦ (suspended) — trình duyệt nào cũng vậy, phải
+   có cú chạm của người dùng mới đánh thức được. Trước đây gọi resume() rồi hẹn
+   nốt ngay, mà resume() chưa chạy xong nên currentTime vẫn đứng yên: các nốt bị
+   hẹn vào mốc ĐÃ TRÔI QUA và không kêu gì cả. Nay đánh thức ngay từ cú chạm
+   ĐẦU TIÊN vào màn hình, tới lúc cần kêu thì nó chạy sẵn rồi. */
+let tiengDaThuc = false;
+function danhThucTieng() {
+  if (tiengDaThuc) return;
+  const a = boTiengs();
+  if (!a) return;
+  tiengDaThuc = true;
+  a.resume().catch(() => {});
+  // Phát một mẩu im lặng: vài trình duyệt chỉ chịu mở loa sau khi đã thực sự
+  // phát ra cái gì đó trong đúng cú chạm của người dùng.
+  try {
+    const b = a.createBuffer(1, 1, a.sampleRate);
+    const src = a.createBufferSource();
+    src.buffer = b; src.connect(a.destination); src.start(0);
+  } catch { /* máy không cho thì thôi */ }
+}
+["pointerdown", "touchstart", "keydown"].forEach(ev =>
+  window.addEventListener(ev, danhThucTieng, { once: false, passive: true }));
+
+/** Chắc chắn bộ tiếng đã dậy rồi mới trả về, để nốt không bị hẹn vào quá khứ. */
+function tiengSanSang() {
+  const a = boTiengs();
+  if (!a) return null;
+  if (a.state === "suspended") {
+    a.resume().catch(() => {});
+    // Vẫn chưa dậy kịp thì bỏ lượt này, còn hơn hẹn bừa rồi im ru.
+    if (a.state === "suspended") return null;
+  }
+  return a;
 }
 
 /* Mọi tiếng đều đi qua MỘT đường chung rồi mới ra loa: to nhỏ chỉnh một chỗ,
@@ -2475,9 +2508,8 @@ function ra(a) {
 /** Chơi một chuỗi nốt. not = [[tần số Hz, giây bắt đầu, giây ngân]] */
 function chuoiNot(nots, kieu = "triangle", to = .16) {
   if (!S.sound) return;
-  const a = boTiengs();
+  const a = tiengSanSang();
   if (!a) return;
-  if (a.state === "suspended") a.resume().catch(() => {});
   const t0 = a.currentTime + .01;
   nots.forEach(([hz, batDau, ngan]) => {
     const o = a.createOscillator(), g = a.createGain();
@@ -2566,9 +2598,8 @@ function tiengLapLanh(a, t0) {
     ảnh hiện ra, để tiếng và hình cùng nổ một lượt. */
 function keuThuong() {
   if (!S.sound) return;
-  const a = boTiengs();
+  const a = tiengSanSang();
   if (!a) return;
-  if (a.state === "suspended") a.resume().catch(() => {});
   const t0 = a.currentTime + .02;
   tiengKen(a, t0);
   tiengVoTay(a, t0);
@@ -2579,9 +2610,8 @@ function keuThuong() {
     trắng chứ nốt nhạc không ra tiếng nổ được. */
 function keuNo(tre = 0) {
   if (!S.sound) return;
-  const a = boTiengs();
+  const a = tiengSanSang();
   if (!a) return;
-  if (a.state === "suspended") a.resume().catch(() => {});
   const t = a.currentTime + .01 + tre;
   // Cú bụp: nốt trầm tụt nhanh xuống.
   const o = a.createOscillator(), g = a.createGain();
@@ -5010,6 +5040,17 @@ $$("[data-goal]").forEach(b => b.addEventListener("click", () => {
   S.goal = +b.dataset.goal; save(); renderProfile(); toast("Mục tiêu: " + S.goal + " XP mỗi ngày");
 }));
 $("#optSound").addEventListener("change", e => { S.sound = e.target.checked; save(); });
+// Nút nghe thử: bấm một cái là biết ngay máy có kêu được không, khỏi phải học
+// ba câu mới thử được tiếng thưởng.
+$("#btnThuTieng").addEventListener("click", () => {
+  danhThucTieng();
+  if (!S.sound) return toast("Đang tắt Phát âm tự động — bật lên rồi thử lại nhé.");
+  const a = tiengSanSang();
+  if (!a) return toast("Máy chưa cho phát tiếng. Chạm vào màn hình một cái rồi bấm lại.");
+  keuThuong();
+  for (let i = 0; i < 4; i++) keuNo(i * .3);
+  toast("Đang phát thử. Không nghe thấy gì thì kiểm tra nút gạt im lặng và mức âm lượng của máy.");
+});
 $("#optMotion").addEventListener("change", e => { S.motion = e.target.checked; save(); applyTheme(); });
 $("#optVi").addEventListener("change", e => { S.showVi = e.target.checked; save(); });
 $("#optKid").addEventListener("change", e => { S.kidVoice = e.target.checked; save(); });
