@@ -2618,20 +2618,26 @@ function tiengLapLanh(a, t0) {
    Đường này không dính lỗi lịch hẹn của WebAudio (bộ tiếng đang ngủ thì nốt bị
    hẹn vào quá khứ nên im ru), lại dễ kiểm tra hơn nhiều. File hỏng hoặc máy
    chặn thì mới rơi về tiếng tự tổng hợp. */
-let amHong = false;
 let dangPhatFile = false;      // file nhạc đã có sẵn tiếng pháo nổ trong đó
 function phatFileThuong() {
   if (!S.sound) return false;
   const el2 = $("#amThuong");
-  if (!el2 || amHong) return false;
+  if (!el2) return false;
+  // PHẢI cắt giọng đọc trước. Lúc trả lời đúng, app đang đọc đáp án bằng
+  // speechSynthesis; trên iPhone cái đó chiếm phiên âm thanh nên thẻ <audio>
+  // gọi play() vẫn chạy mà KHÔNG ra tiếng. Đây đúng là chỗ thầy gặp: bấm nút
+  // nghe thử trong Cài đặt thì kêu (lúc đó không có gì đang đọc), còn trong
+  // bài thì im. Tới đây trẻ đã nghe đáp án xong rồi nên cắt là hợp lý.
+  try { window.speechSynthesis && speechSynthesis.cancel(); } catch { /* bỏ qua */ }
   try {
     el2.currentTime = 0;
     const p = el2.play();
     dangPhatFile = true;
-    // play() trả về lời hứa; máy chặn thì bắt lấy rồi quay sang tiếng tổng hợp.
-    if (p && p.catch) p.catch(() => { amHong = true; dangPhatFile = false; keuThuong(); });
+    // Máy chặn lần này thì lần này dùng tiếng tổng hợp — KHÔNG đánh dấu hỏng
+    // vĩnh viễn như trước, vì chỉ cần một lần vướng là mất file cả buổi học.
+    if (p && p.catch) p.catch(() => { dangPhatFile = false; keuThuong(); });
     return true;
-  } catch { amHong = true; return false; }
+  } catch { return false; }
 }
 
 /** Cả màn trao thưởng: kèn + vỗ tay + lấp lánh chồng lên nhau. Gọi đúng lúc
