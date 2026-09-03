@@ -1949,6 +1949,10 @@
         <span>Số điện thoại</span>
         <input type="tel" id="fSdt" autocomplete="tel" inputmode="numeric" maxlength="15" placeholder="0912345678" />
       </label>
+      <label class="cong-o" id="oEmail">
+        <span>Email (để nhận mã xác nhận)</span>
+        <input type="email" id="fEmail" autocomplete="email" maxlength="120" placeholder="email@vidu.com" />
+      </label>
       <label class="cong-o">
         <span>Mật khẩu</span>
         <input type="password" id="fMk" autocomplete="new-password" maxlength="72" placeholder="Ít nhất 6 ký tự" />
@@ -1957,9 +1961,25 @@
       <button class="pro-cta" id="congGui" type="submit">Đăng ký</button>
     </form>
 
-    <button class="btn btn-text btn-block mt" id="congDoi" type="button">Đã có tài khoản? Đăng nhập</button>
-    <button class="btn btn-text btn-block" id="congXemThu" type="button">Xem thử trước, đăng ký sau</button>
-    <p class="cong-fine">Tớ chỉ giữ tên và số điện thoại để nhận ra bạn, không dùng vào việc gì khác.</p>
+    <form id="congOtpForm" novalidate hidden>
+      <p class="cong-sub" id="congOtpSub">Nhập mã 6 số vừa gửi tới email của bạn.</p>
+      <label class="cong-o">
+        <span>Mã xác nhận</span>
+        <input type="text" id="fMa" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code" />
+      </label>
+      <p class="cong-loi" id="congOtpLoi" hidden role="alert"></p>
+      <button class="pro-cta" id="congOtpXacNhan" type="submit">Xác nhận</button>
+      <div class="cong-otp-actions">
+        <button class="btn btn-text" id="congOtpGuiLai" type="button">Gửi lại mã</button>
+        <button class="btn btn-text" id="congOtpQuayLai" type="button">← Quay lại</button>
+      </div>
+    </form>
+
+    <div id="congChanDuoi">
+      <button class="btn btn-text btn-block mt" id="congDoi" type="button">Đã có tài khoản? Đăng nhập</button>
+      <button class="btn btn-text btn-block" id="congXemThu" type="button">Xem thử trước, đăng ký sau</button>
+      <p class="cong-fine">Tớ chỉ giữ tên, số điện thoại và email để nhận ra bạn, không dùng vào việc gì khác.</p>
+    </div>
   </div>
 </div>
 

@@ -5,8 +5,9 @@
  * tài khoản thật), gửi mã 6 số qua email.
  * Bước 2 (xacNhanDangKy): đúng mã mới thật sự tạo tài khoản trong bảng users.
  *
- * Hiện chỉ dùng cho Mon-Maths (/api/game). Dùng chung services/taiKhoanAppService.js
- * cho phần kiểm tra số điện thoại/mật khẩu và tạo cookie đăng nhập.
+ * Dùng chung cho cả Mon-Maths (/api/game) và English Air (/api/english-air) —
+ * cùng bảng users, cùng services/taiKhoanAppService.js cho phần kiểm tra số
+ * điện thoại/mật khẩu và tạo cookie đăng nhập.
  */
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');

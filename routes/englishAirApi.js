@@ -2,6 +2,7 @@ const express = require('express');
 const tutor = require('../services/englishAirTutorService');
 const pro = require('../services/proService');
 const tk = require('../services/taiKhoanAppService');
+const otp = require('../services/otpDangKyService');
 const tienDo = require('../services/tienDoMonlService');
 
 const router = express.Router();
@@ -79,6 +80,25 @@ setInterval(() => {
   for (const [k, r] of doSai) if (now - r.tu > DO_MS) doSai.delete(k);
 }, DO_MS).unref?.();
 
+// Mỗi lần yêu cầu mã OTP là 1 email gửi đi thật — giới hạn để không ai lợi
+// dụng ô đăng ký để spam email người khác.
+const OTP_XIN_TOI_DA = 5;
+const xinOtp = new Map();
+function otpBiChan(khoa) {
+  const r = xinOtp.get(khoa);
+  if (!r || Date.now() - r.tu > DO_MS) return false;
+  return r.n >= OTP_XIN_TOI_DA;
+}
+function ghiXinOtp(khoa) {
+  const r = xinOtp.get(khoa);
+  if (!r || Date.now() - r.tu > DO_MS) xinOtp.set(khoa, { tu: Date.now(), n: 1 });
+  else r.n += 1;
+}
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, r] of xinOtp) if (now - r.tu > DO_MS) xinOtp.delete(k);
+}, DO_MS).unref?.();
+
 const ipCua = req => req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip || 'unknown';
 
 /** Bọc handler bất đồng bộ: lỗi nào cũng phải ra một câu trả lời, đừng treo. */
@@ -106,10 +126,29 @@ router.post('/google', express.json(), an(async (req, res) => {
   res.json({ dangNhap: true, moi: kq.moi, ...tk.goiVe(kq.user) });
 }));
 
-router.post('/dang-ky', express.json(), an(async (req, res) => {
+// Đăng ký 2 bước, xác nhận bằng mã OTP gửi qua email trước khi tạo tài
+// khoản thật — cùng dịch vụ dùng chung với Mon-Maths (/api/game).
+router.post('/dang-ky-yeu-cau', express.json(), an(async (req, res) => {
   if (req.user) return res.json({ dangNhap: true, ...tk.goiVe(req.user) });
-  const { ten, sdt, matKhau } = req.body || {};
-  const kq = await tk.dangKySdt({ ten, sdt, matKhau });
+  const khoa = ipCua(req);
+  if (otpBiChan(khoa)) return res.status(429).json({ error: 'Bạn yêu cầu mã nhiều lần quá, chờ ít phút rồi thử lại nhé.' });
+  const { ten, sdt, matKhau, email } = req.body || {};
+  const kq = await otp.yeuCauDangKy({ ten, sdt, matKhau, email });
+  if (kq.loi) return res.status(400).json({ error: kq.loi });
+  ghiXinOtp(khoa);
+  res.json({ ok: true, token: kq.token, email: kq.email });
+}));
+
+router.post('/dang-ky-gui-lai', express.json(), an(async (req, res) => {
+  const kq = await otp.guiLai((req.body || {}).token);
+  if (kq.loi) return res.status(400).json({ error: kq.loi });
+  res.json({ ok: true });
+}));
+
+router.post('/dang-ky-xac-nhan', express.json(), an(async (req, res) => {
+  if (req.user) return res.json({ dangNhap: true, ...tk.goiVe(req.user) });
+  const { token, code } = req.body || {};
+  const kq = await otp.xacNhanDangKy({ token, code });
   if (kq.loi) return res.status(400).json({ error: kq.loi });
   tk.datCookie(res, kq.user);
   res.json({ dangNhap: true, ...tk.goiVe(kq.user) });

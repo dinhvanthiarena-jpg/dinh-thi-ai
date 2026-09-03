@@ -558,11 +558,27 @@ const lessonsOf = lv => lv.units.flatMap(u => u.lessons.map(l => ({ ...l, unit: 
 function lessonWords(l) {
   if (!l.teach) return [];
   return l.teach.filter(s => s.t === "vocab" || s.t === "phrase")
-    .map(s => ({ en: s.en, vi: s.vi, pos: s.pos, ipa: s.ipa, pic: s.pic, note: s.note, ex: s.ex }));
+    .map(s => ({ en: s.en, vi: s.vi, pos: s.pos, ipa: s.ipa, pic: s.pic, note: s.note, ex: s.ex,
+                 cefr: s.cefr, lop: s.lop }));
 }
 const unitWords = u => u.lessons.flatMap(lessonWords);
 const unitSentences = u => u.lessons.flatMap(l => l.sentences || []);
-const ALL_WORDS = COURSE.levels.flatMap(lv => lv.units.flatMap(unitWords));
+
+/* Mỗi từ mang HAI nhãn: bậc CEFR (chuẩn châu Âu) và lớp tương đương của
+   chương trình phổ thông Việt Nam — thầy đã chốt là cần cả hai, để phụ huynh
+   nhìn biết con mình đang học ngang lớp mấy, còn người lớn thì nhìn bậc CEFR.
+   Suy ra từ trình độ chứa từ đó, khỏi phải chép tay vào hàng trăm dòng dữ liệu.
+   Mốc lớp bám theo chương trình GDPT 2018. */
+const NHAN_BAC = {
+  a1: { cefr: "A1", lop: "Lớp 3–5" },
+  a2: { cefr: "A2", lop: "Lớp 6–7" },
+  b1: { cefr: "B1", lop: "Lớp 8–9" },
+};
+const ALL_WORDS = COURSE.levels.flatMap(lv => {
+  const n = NHAN_BAC[lv.id] || { cefr: (lv.code || "").toUpperCase(), lop: "" };
+  // Từ nào tự khai nhãn riêng thì tôn trọng, không thì lấy nhãn của trình độ.
+  return lv.units.flatMap(unitWords).map(w => ({ ...w, cefr: w.cefr || n.cefr, lop: w.lop || n.lop }));
+});
 const SINGLE = ALL_WORDS.filter(w => !w.en.includes(" "));
 // Cau/cum nhieu chu - dung rieng lam kho luoi bay cho cau hoi dang cum,
 // khong de tu don lac vao chung voi dap an la ca mot cau.
@@ -1666,6 +1682,14 @@ function vocabSlide(d, st, label) {
   const card = el("div", "vcard");
   if (d.pic) { const p = el("div", "vcard-pic"); p.append(pic(d.pic)); card.append(p); }
   card.append(el("div", "vcard-en", d.en));
+  // Nhãn bậc trên thẻ từ: học tới đâu biết mình đang ở mức nào.
+  const wBac = ALL_WORDS.find(x => x.en === d.en);
+  if (wBac && (wBac.cefr || wBac.lop)) {
+    const hang = el("div", "vcard-bac");
+    if (wBac.cefr) hang.append(el("span", "w-bac", wBac.cefr));
+    if (wBac.lop) hang.append(el("span", "w-lop", wBac.lop));
+    card.append(hang);
+  }
   if (d.ipa) card.append(el("div", "vcard-ipa", d.ipa));
   const say = el("button", "vcard-say"); say.type = "button";
   say.setAttribute("aria-label", "Nghe phát âm: " + d.en);
@@ -3204,6 +3228,9 @@ function renderWords() {
     const box = el("div");
     box.append(el("div", "w-en", w.en), el("div", "w-vi", w.vi));
     if (w.pos) box.append(el("span", "w-pos", w.pos));
+    // Hai nhãn bậc: CEFR cho người lớn, lớp học cho phụ huynh dễ hình dung.
+    if (w.cefr) box.append(el("span", "w-bac", w.cefr));
+    if (w.lop) box.append(el("span", "w-lop", w.lop));
     const pips = el("div", "w-pips");
     pips.setAttribute("aria-label", `Độ nhớ ${S.srs[w.en].box} trên 5`);
     for (let i = 0; i < 5; i++) pips.append(el("i", "pip" + (i < S.srs[w.en].box ? " on" : "")));
@@ -4635,6 +4662,8 @@ function veCong() {
     : "Nhập số điện thoại và mật khẩu để học tiếp.";
   $("#oTen").hidden = !dangKy;
   $("#fTen").required = dangKy;
+  $("#oEmail").hidden = !dangKy;
+  $("#fEmail").required = dangKy;
   $("#fMk").autocomplete = dangKy ? "new-password" : "current-password";
   $("#fMk").placeholder = dangKy ? "Ít nhất 6 ký tự" : "Mật khẩu của bạn";
   $("#congGui").textContent = dangKy ? "Đăng ký" : "Đăng nhập";
@@ -4647,11 +4676,34 @@ function loiCong(msg) {
   o.textContent = msg || "";
   o.hidden = !msg;
 }
+function loiOtp(msg) {
+  const o = $("#congOtpLoi");
+  o.textContent = msg || "";
+  o.hidden = !msg;
+}
+
+// Bước 1 (tên/sđt/email/mật khẩu, hoặc sđt/mật khẩu nếu đăng nhập).
+function moBuoc1() {
+  $("#congOtpForm").hidden = true;
+  $("#congForm").hidden = false;
+  $("#congChanDuoi").hidden = false;
+  veCong();
+}
+// Bước 2 (nhập mã OTP vừa gửi qua email) — chỉ khi đăng ký.
+function moBuocOtp(email) {
+  $("#congForm").hidden = true;
+  $("#congChanDuoi").hidden = true;
+  $("#congOtpForm").hidden = false;
+  $("#congOtpSub").textContent = `Nhập mã 6 số vừa gửi tới ${email}.`;
+  loiOtp("");
+  $("#fMa").value = "";
+  setTimeout(() => $("#fMa").focus(), 80);
+}
 
 function moCong() {
   $("#cong").hidden = false;
   document.body.style.overflow = "hidden";
-  veCong();
+  moBuoc1();
   batGoogle();
   setTimeout(() => $(dangKyDangMo() ? "#fTen" : "#fSdt").focus(), 80);
 }
@@ -4678,6 +4730,12 @@ $("#congDoi").addEventListener("click", () => {
   $(dangKyDangMo() ? "#fTen" : "#fSdt").focus();
 });
 
+let OTP_TOKEN = null;
+
+// Đăng ký giờ qua 2 bước — bấm "Đăng ký" chỉ gửi mã OTP tới email, chưa tạo
+// tài khoản thật; tài khoản chỉ được tạo sau khi xác nhận đúng mã ở
+// #congOtpForm bên dưới. Đăng nhập (tài khoản đã có sẵn) thì vẫn 1 bước như
+// cũ, không cần OTP.
 $("#congForm").addEventListener("submit", async ev => {
   ev.preventDefault();
   const nut = $("#congGui");
@@ -4686,38 +4744,37 @@ $("#congForm").addEventListener("submit", async ev => {
   const dangKy = dangKyDangMo();
   const ten = $("#fTen").value.trim();
   const sdt = $("#fSdt").value.trim();
+  const email = $("#fEmail").value.trim();
   const mk = $("#fMk").value;
 
   // Bắt lỗi ngay tại chỗ trước khi phiền tới máy chủ.
   if (dangKy && !ten) return neuThieu("#fTen", "Bạn tên là gì nhỉ?");
   if (!sdt) return neuThieu("#fSdt", "Bạn nhập số điện thoại nhé.");
+  if (dangKy && !email) return neuThieu("#fEmail", "Bạn nhập email để nhận mã xác nhận nhé.");
   if (!mk) return neuThieu("#fMk", "Bạn nhập mật khẩu nhé.");
   if (dangKy && mk.length < 6) return neuThieu("#fMk", "Mật khẩu cần ít nhất 6 ký tự.");
 
   $$(".cong-o").forEach(o => o.classList.remove("sai"));
   nut.disabled = true;
-  nut.textContent = dangKy ? "Đang tạo tài khoản…" : "Đang vào…";
+  nut.textContent = dangKy ? "Đang gửi mã…" : "Đang vào…";
   loiCong("");
 
   try {
-    const r = await fetch(TK_URL + (dangKy ? "/dang-ky" : "/dang-nhap"), {
+    const r = await fetch(TK_URL + (dangKy ? "/dang-ky-yeu-cau" : "/dang-nhap"), {
       method: "POST",
       credentials: "same-origin",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ten, sdt, matKhau: mk }),
+      body: JSON.stringify(dangKy ? { ten, sdt, matKhau: mk, email } : { sdt, matKhau: mk }),
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) { loiCong(j.error || "Chưa xong được, bạn thử lại nhé."); return; }
 
-    TK.toi = j;
-    $("#fMk").value = "";
-    // Lần đầu đăng ký thì lấy luôn tên đó làm tên hiển thị trong app.
-    if (j.ten && !S.ten) { S.ten = j.ten; save(); veTen(); }
-    dongCong();
-    toast(dangKy ? `Chào ${j.ten}, bắt đầu thôi!` : `Chào bạn quay lại, ${j.ten}!`);
-    veTheTaiKhoan();
-    veThePro();
-    keoVe();
+    if (dangKy) {
+      OTP_TOKEN = j.token;
+      moBuocOtp(j.email || email);
+    } else {
+      xongDangNhap(j);
+    }
   } catch {
     loiCong("Không nối được máy chủ. Bạn kiểm tra mạng rồi thử lại nhé.");
   } finally {
@@ -4725,6 +4782,69 @@ $("#congForm").addEventListener("submit", async ev => {
     veCongNut();
   }
 });
+
+$("#congOtpForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const nut = $("#congOtpXacNhan");
+  if (nut.disabled) return;
+  const code = $("#fMa").value.trim();
+  if (code.length !== 6) { loiOtp("Mã gồm 6 chữ số, bạn kiểm tra lại nhé."); return; }
+
+  nut.disabled = true;
+  nut.textContent = "Đang xác nhận…";
+  loiOtp("");
+  try {
+    const r = await fetch(TK_URL + "/dang-ky-xac-nhan", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: OTP_TOKEN, code }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { loiOtp(j.error || "Chưa xong được, bạn thử lại nhé."); return; }
+    xongDangNhap(j);
+  } catch {
+    loiOtp("Không nối được máy chủ. Bạn kiểm tra mạng rồi thử lại nhé.");
+  } finally {
+    nut.disabled = false;
+    nut.textContent = "Xác nhận";
+  }
+});
+
+$("#congOtpGuiLai").addEventListener("click", async () => {
+  const nut = $("#congOtpGuiLai");
+  if (nut.disabled) return;
+  nut.disabled = true;
+  loiOtp("");
+  try {
+    const r = await fetch(TK_URL + "/dang-ky-gui-lai", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: OTP_TOKEN }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) loiOtp(j.error || "Chưa gửi lại được, bạn thử lại nhé.");
+  } catch {
+    loiOtp("Không nối được máy chủ.");
+  } finally {
+    setTimeout(() => { nut.disabled = false; }, 3000);
+  }
+});
+
+$("#congOtpQuayLai").addEventListener("click", () => moBuoc1());
+
+function xongDangNhap(j) {
+  TK.toi = j;
+  $("#fMk").value = "";
+  // Lần đầu đăng ký thì lấy luôn tên đó làm tên hiển thị trong app.
+  if (j.ten && !S.ten) { S.ten = j.ten; save(); veTen(); }
+  dongCong();
+  toast(dangKyDangMo() ? `Chào ${j.ten}, bắt đầu thôi!` : `Chào bạn quay lại, ${j.ten}!`);
+  veTheTaiKhoan();
+  veThePro();
+  keoVe();
+}
 
 function veCongNut() {
   $("#congGui").textContent = dangKyDangMo() ? "Đăng ký" : "Đăng nhập";
@@ -4740,6 +4860,10 @@ function neuThieu(sel, msg) {
 // Số điện thoại chỉ gồm chữ số và dấu cộng — chặn ngay lúc gõ cho đỡ sai.
 $("#fSdt").addEventListener("input", ev => {
   const v = ev.target.value.replace(/[^0-9+ ]/g, "");
+  if (v !== ev.target.value) ev.target.value = v;
+});
+$("#fMa").addEventListener("input", ev => {
+  const v = ev.target.value.replace(/[^0-9]/g, "").slice(0, 6);
   if (v !== ev.target.value) ev.target.value = v;
 });
 

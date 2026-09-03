@@ -1328,7 +1328,10 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .cong-loi[hidden] { display: none; }
 .cong-fine { margin-top: var(--s4); font-size: .78rem; line-height: 1.5;
   color: var(--muted-fg); text-align: center; }
-#congGui[disabled] { opacity: .6; }
+#congGui[disabled], #congOtpXacNhan[disabled] { opacity: .6; }
+
+#congOtpForm { margin-top: var(--s5); display: flex; flex-direction: column; gap: var(--s3); }
+.cong-otp-actions { display: flex; justify-content: space-between; margin-top: var(--s1); }
 
 /* ---------- 15g. KHUNG ẢNH MINH HOẠ TRONG BÀI ---------- */
 /* Đặt giữa câu hỏi và phần trả lời, đúng chỗ mắt nhìn tới trước khi đọc chữ.
@@ -2046,3 +2049,15 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 /* Chuyển hiệu ứng "đang nói" sang chính tấm ảnh, để bấm nghe vẫn thấy nó động. */
 .call-preview:has(.cp-mon.talking) .cp-room { animation: monTalk 1.25s ease-in-out infinite; }
 :root[data-motion="reduce"] .call-preview:has(.cp-mon.talking) .cp-room { animation: none; }
+
+/* Hai nhãn bậc của mỗi từ: CEFR (chuẩn châu Âu) và lớp tương đương của chương
+   trình phổ thông. Thầy chốt phải có cả hai — người lớn nhìn CEFR, phụ huynh
+   nhìn lớp thì biết ngay con mình đang học ngang lớp mấy. */
+.w-bac, .w-lop {
+  display: inline-block; margin: 4px 6px 0 0; padding: 2px 8px;
+  border-radius: var(--rf); font-size: .7rem; font-weight: 900; letter-spacing: .02em;
+}
+.w-bac { background: color-mix(in srgb, var(--brand) 20%, transparent); color: var(--brand-ink); }
+.w-lop { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+.vcard-bac { display: flex; justify-content: center; gap: 6px; margin-top: 2px; }
+.vcard-bac .w-bac, .vcard-bac .w-lop { margin: 0; }
