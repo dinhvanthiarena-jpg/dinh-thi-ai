@@ -336,7 +336,106 @@ const B1 = {
       { id: "b1u2c", title: "Ôn tập chương 2", checkpoint: true,
         goal: "Kiểm tra lại toàn bộ từ và mẫu câu của chương." }
     ]
-  }
+  },
 
-  ]
+  {
+    id: "b1u3", title: "Sức khoẻ, Môi trường & Công nghệ",
+    goal: "Mở rộng vốn từ bậc trung: y tế, môi trường, công nghệ và tiền bạc.",
+    lessons: [
+      {
+        id: "b1u3l1", title: "Sức khoẻ & Bệnh viện",
+        goal: "10 từ đi khám bệnh.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Đi khám ở nước ngoài, hay đọc đơn thuốc tiếng Anh — mấy từ này cứu bạn.", bullets: ["10 từ y tế thiết yếu", "Tả triệu chứng cho bác sĩ", "Cấu trúc I have + bệnh"] },
+          { t: "vocab", en: "symptom", vi: "triệu chứng", pos: "Danh từ", ipa: "/ˈsɪmptəm/", note: "Cái mình cảm thấy: sốt, ho, đau.", ex: { en: "What are your symptoms?", vi: "Bạn có triệu chứng gì?" } },
+          { t: "vocab", en: "cough", vi: "ho", pos: "Danh từ", ipa: "/kɔːf/", note: "Viết ough nhưng đọc là ọp. Bẫy phát âm kinh điển.", ex: { en: "I have a bad cough.", vi: "Tôi ho nặng." } },
+          { t: "vocab", en: "pain", vi: "cơn đau", pos: "Danh từ", ipa: "/peɪn/", note: "Đau ở đâu: a pain in my back.", ex: { en: "I have a pain in my back.", vi: "Tôi bị đau lưng." } },
+          { t: "vocab", en: "injury", vi: "chấn thương", pos: "Danh từ", ipa: "/ˈɪndʒəri/", note: "Do tai nạn, va đập. Động từ là injure.", ex: { en: "He has a leg injury.", vi: "Anh ấy bị chấn thương chân." } },
+          { t: "vocab", en: "treatment", vi: "cách điều trị", pos: "Danh từ", ipa: "/ˈtriːtmənt/", note: "Từ treat (điều trị) + ment.", ex: { en: "The treatment takes a month.", vi: "Việc điều trị mất một tháng." } },
+          { t: "vocab", en: "prescription", vi: "đơn thuốc", pos: "Danh từ", ipa: "/prɪˈskrɪpʃn/", note: "Giấy bác sĩ kê để ra hiệu thuốc mua.", ex: { en: "The doctor wrote a prescription.", vi: "Bác sĩ đã kê đơn." } },
+          { t: "vocab", en: "pharmacy", vi: "hiệu thuốc", pos: "Danh từ", ipa: "/ˈfɑːrməsi/", note: "Anh cũng gọi là chemist.", ex: { en: "The pharmacy is next door.", vi: "Hiệu thuốc ở ngay bên cạnh." } },
+          { t: "vocab", en: "appointment", vi: "lịch hẹn", pos: "Danh từ", ipa: "/əˈpɔɪntmənt/", note: "Đặt lịch khám: make an appointment.", ex: { en: "I made an appointment.", vi: "Tôi đã đặt lịch hẹn." } },
+          { t: "vocab", en: "recover", vi: "hồi phục", pos: "Động từ", ipa: "/rɪˈkʌvər/", note: "Khỏi bệnh: recover FROM an illness.", ex: { en: "She recovered quickly.", vi: "Cô ấy hồi phục nhanh." } },
+          { t: "vocab", en: "healthy", vi: "khoẻ mạnh", pos: "Tính từ", ipa: "/ˈhelθi/", note: "Ăn uống lành mạnh là a healthy diet.", ex: { en: "Eat healthy food.", vi: "Hãy ăn đồ lành mạnh." } },
+        ],
+        sentences: [
+          { en: "What are your symptoms", vi: "Bạn có triệu chứng gì" },
+          { en: "I have a pain in my back", vi: "Tôi bị đau lưng" },
+          { en: "I made an appointment", vi: "Tôi đã đặt lịch hẹn" },
+          { en: "The pharmacy is next door", vi: "Hiệu thuốc ở ngay bên cạnh" },
+        ]
+      },
+      {
+        id: "b1u3l2", title: "Môi trường",
+        goal: "10 từ về môi trường và khí hậu.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Chủ đề này ra thi rất nhiều, mà cũng là chuyện cả thế giới đang bàn.", bullets: ["10 từ môi trường", "Nói về nguyên nhân và hậu quả", "Từ ghép: air pollution"] },
+          { t: "vocab", en: "environment", vi: "môi trường", pos: "Danh từ", ipa: "/ɪnˈvaɪrənmənt/", note: "Hầu như luôn đi với the: the environment.", ex: { en: "We must protect the environment.", vi: "Chúng ta phải bảo vệ môi trường." } },
+          { t: "vocab", en: "pollution", vi: "ô nhiễm", pos: "Danh từ", ipa: "/pəˈluːʃn/", note: "Ô nhiễm không khí là air pollution.", ex: { en: "Air pollution is a big problem.", vi: "Ô nhiễm không khí là vấn đề lớn." } },
+          { t: "vocab", en: "rubbish", vi: "rác thải", pos: "Danh từ", ipa: "/ˈrʌbɪʃ/", note: "Không đếm được. Mỹ dùng trash.", ex: { en: "Do not throw rubbish here.", vi: "Đừng vứt rác ở đây." } },
+          { t: "vocab", en: "recycle", vi: "tái chế", pos: "Động từ", ipa: "/ˌriːˈsaɪkl/", note: "re (lại) + cycle (vòng). Danh từ là recycling.", ex: { en: "We recycle paper and glass.", vi: "Chúng tôi tái chế giấy và thuỷ tinh." } },
+          { t: "vocab", en: "protect", vi: "bảo vệ", pos: "Động từ", ipa: "/prəˈtekt/", note: "Bảo vệ khỏi cái gì: protect FROM.", ex: { en: "We protect the forest.", vi: "Chúng tôi bảo vệ rừng." } },
+          { t: "vocab", en: "forest", vi: "rừng", pos: "Danh từ", ipa: "/ˈfɔːrɪst/", note: "Phá rừng là deforestation.", ex: { en: "The forest is very old.", vi: "Khu rừng rất lâu đời." } },
+          { t: "vocab", en: "climate", vi: "khí hậu", pos: "Danh từ", ipa: "/ˈklaɪmət/", note: "Khác weather: climate là cả vùng, cả năm.", ex: { en: "Climate change affects us all.", vi: "Biến đổi khí hậu ảnh hưởng tất cả." } },
+          { t: "vocab", en: "energy", vi: "năng lượng", pos: "Danh từ", ipa: "/ˈenərdʒi/", note: "Năng lượng sạch là clean energy.", ex: { en: "We need clean energy.", vi: "Chúng ta cần năng lượng sạch." } },
+          { t: "vocab", en: "waste", vi: "lãng phí", pos: "Động từ", ipa: "/weɪst/", note: "Vừa là lãng phí vừa là chất thải.", ex: { en: "Do not waste water.", vi: "Đừng lãng phí nước." } },
+          { t: "vocab", en: "plastic", vi: "nhựa", pos: "Danh từ", ipa: "/ˈplæstɪk/", note: "Túi ni lông là a plastic bag.", ex: { en: "Plastic bags harm the sea.", vi: "Túi ni lông hại biển." } },
+        ],
+        sentences: [
+          { en: "We must protect the environment", vi: "Chúng ta phải bảo vệ môi trường" },
+          { en: "Air pollution is a big problem", vi: "Ô nhiễm không khí là vấn đề lớn" },
+          { en: "Do not waste water", vi: "Đừng lãng phí nước" },
+          { en: "We recycle paper and glass", vi: "Chúng tôi tái chế giấy và thuỷ tinh" },
+        ]
+      },
+      {
+        id: "b1u3l3", title: "Công nghệ",
+        goal: "10 từ công nghệ dùng hằng ngày.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Điện thoại, mạng, ứng dụng — mấy từ này đọc gặp mỗi ngày mà nhiều người vẫn đoán nghĩa.", bullets: ["10 từ công nghệ", "Động từ máy tính: download, upload", "Nói về thói quen dùng mạng"] },
+          { t: "vocab", en: "device", vi: "thiết bị", pos: "Danh từ", ipa: "/dɪˈvaɪs/", note: "Chỉ chung điện thoại, máy tính bảng, laptop.", ex: { en: "This device is very fast.", vi: "Thiết bị này rất nhanh." } },
+          { t: "vocab", en: "screen", vi: "màn hình", pos: "Danh từ", ipa: "/skriːn/", note: "Thời gian dùng màn hình là screen time.", ex: { en: "The screen is too bright.", vi: "Màn hình sáng quá." } },
+          { t: "vocab", en: "password", vi: "mật khẩu", pos: "Danh từ", ipa: "/ˈpæswɜːrd/", note: "Ghép pass + word.", ex: { en: "I forgot my password.", vi: "Tôi quên mật khẩu." } },
+          { t: "vocab", en: "download", vi: "tải xuống", pos: "Động từ", ipa: "/ˌdaʊnˈloʊd/", note: "Ngược lại là upload (tải lên).", ex: { en: "Download the app first.", vi: "Tải ứng dụng về trước đã." } },
+          { t: "vocab", en: "update", vi: "cập nhật", pos: "Động từ", ipa: "/ˌʌpˈdeɪt/", note: "Vừa là động từ vừa là danh từ.", ex: { en: "Please update the app.", vi: "Hãy cập nhật ứng dụng." } },
+          { t: "vocab", en: "battery", vi: "pin", pos: "Danh từ", ipa: "/ˈbætəri/", note: "Hết pin là the battery is dead.", ex: { en: "My battery is low.", vi: "Máy tôi sắp hết pin." } },
+          { t: "vocab", en: "charge", vi: "sạc", pos: "Động từ", ipa: "/tʃɑːrdʒ/", note: "Cũng có nghĩa tính phí.", ex: { en: "I need to charge my phone.", vi: "Tôi cần sạc điện thoại." } },
+          { t: "vocab", en: "network", vi: "mạng", pos: "Danh từ", ipa: "/ˈnetwɜːrk/", note: "Mạng xã hội là a social network.", ex: { en: "The network is slow today.", vi: "Hôm nay mạng chậm." } },
+          { t: "vocab", en: "account", vi: "tài khoản", pos: "Danh từ", ipa: "/əˈkaʊnt/", note: "Tài khoản mạng lẫn tài khoản ngân hàng.", ex: { en: "Create an account first.", vi: "Tạo tài khoản trước đã." } },
+          { t: "vocab", en: "message", vi: "tin nhắn", pos: "Danh từ", ipa: "/ˈmesɪdʒ/", note: "Nhắn tin là send a message.", ex: { en: "I sent you a message.", vi: "Tôi đã nhắn tin cho bạn." } },
+        ],
+        sentences: [
+          { en: "I forgot my password", vi: "Tôi quên mật khẩu" },
+          { en: "My battery is low", vi: "Máy tôi sắp hết pin" },
+          { en: "The network is slow today", vi: "Hôm nay mạng chậm" },
+          { en: "I sent you a message", vi: "Tôi đã nhắn tin cho bạn" },
+        ]
+      },
+      {
+        id: "b1u3l4", title: "Tiền bạc & Ngân hàng",
+        goal: "10 từ về tiền và giao dịch.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Rút tiền, chuyển khoản, hỏi giá — đi đâu cũng cần.", bullets: ["10 từ tiền bạc, ngân hàng", "Nói về chi tiêu, tiết kiệm", "Lịch sự khi hỏi giá"] },
+          { t: "vocab", en: "bank", vi: "ngân hàng", pos: "Danh từ", ipa: "/bæŋk/", note: "Cũng có nghĩa bờ sông.", ex: { en: "The bank opens at eight.", vi: "Ngân hàng mở cửa lúc tám giờ." } },
+          { t: "vocab", en: "cash", vi: "tiền mặt", pos: "Danh từ", ipa: "/kæʃ/", note: "Trả tiền mặt là pay in cash.", ex: { en: "I pay in cash.", vi: "Tôi trả tiền mặt." } },
+          { t: "vocab", en: "card", vi: "thẻ", pos: "Danh từ", ipa: "/kɑːrd/", note: "Thẻ ngân hàng, thẻ tín dụng là a credit card.", ex: { en: "Can I pay by card?", vi: "Tôi trả bằng thẻ được không?" } },
+          { t: "vocab", en: "save", vi: "tiết kiệm", pos: "Động từ", ipa: "/seɪv/", note: "Cũng có nghĩa cứu, và lưu tệp.", ex: { en: "I save money every month.", vi: "Tháng nào tôi cũng tiết kiệm." } },
+          { t: "vocab", en: "spend", vi: "tiêu tiền", pos: "Động từ", ipa: "/spend/", note: "Tiêu vào việc gì: spend money ON something.", ex: { en: "I spend too much on food.", vi: "Tôi tiêu quá nhiều vào ăn uống." } },
+          { t: "vocab", en: "borrow", vi: "mượn, vay", pos: "Động từ", ipa: "/ˈbɑːroʊ/", note: "Borrow là mình lấy về; lend là mình cho mượn.", ex: { en: "Can I borrow some money?", vi: "Cho tôi vay ít tiền được không?" } },
+          { t: "vocab", en: "lend", vi: "cho vay", pos: "Động từ", ipa: "/lend/", note: "Ngược với borrow. Rất hay nhầm hai từ này.", ex: { en: "He lent me his book.", vi: "Anh ấy cho tôi mượn sách." } },
+          { t: "vocab", en: "account", vi: "tài khoản", pos: "Danh từ", ipa: "/əˈkaʊnt/", note: "Mở tài khoản là open an account.", ex: { en: "I opened a bank account.", vi: "Tôi đã mở tài khoản ngân hàng." } },
+          { t: "vocab", en: "discount", vi: "giảm giá", pos: "Danh từ", ipa: "/ˈdɪskaʊnt/", note: "Xin giảm giá: Can I have a discount?", ex: { en: "Is there a discount?", vi: "Có giảm giá không ạ?" } },
+          { t: "vocab", en: "receipt", vi: "hoá đơn", pos: "Danh từ", ipa: "/rɪˈsiːt/", note: "Chữ p CÂM. Đọc là ri-XÍT.", ex: { en: "Can I have the receipt?", vi: "Cho tôi xin hoá đơn." } },
+        ],
+        sentences: [
+          { en: "Can I pay by card", vi: "Tôi trả bằng thẻ được không" },
+          { en: "I save money every month", vi: "Tháng nào tôi cũng tiết kiệm" },
+          { en: "Is there a discount", vi: "Có giảm giá không" },
+          { en: "Can I have the receipt", vi: "Cho tôi xin hoá đơn" },
+        ]
+      },
+      { id: "b1u3cp", title: "Ôn tập chương 3", checkpoint: true },
+    ]
+  },
+]
 };

@@ -685,7 +685,106 @@ const A2 = {
       { id: "a2u4c", title: "Ôn tập chương 4", checkpoint: true,
         goal: "Kiểm tra lại toàn bộ từ và mẫu câu của chương." }
     ]
-  }
+  },
 
-  ]
+  {
+    id: "a2u5", title: "Thời tiết, Cảm xúc & Nghề nghiệp",
+    goal: "Mở rộng vốn từ: thời tiết, cảm xúc, nghề nghiệp và việc nhà.",
+    lessons: [
+      {
+        id: "a2u5l1", title: "Thời tiết bốn mùa",
+        goal: "10 từ tả thời tiết và mùa.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Người Anh mở đầu câu chuyện bằng thời tiết. Biết mấy từ này là bắt chuyện được với ai cũng được.", bullets: ["10 từ thời tiết", "Cấu trúc It is + tính từ", "Hỏi thời tiết cho tự nhiên"] },
+          { t: "vocab", en: "weather", vi: "thời tiết", pos: "Danh từ", ipa: "/ˈweðər/", note: "KHÔNG đếm được. Hỏi: How is the weather?", ex: { en: "How is the weather today?", vi: "Hôm nay thời tiết thế nào?" } },
+          { t: "vocab", en: "hot", vi: "nóng", pos: "Tính từ", ipa: "/hɑːt/", note: "Nóng ẩm kiểu Việt Nam là hot and humid.", ex: { en: "It is very hot today.", vi: "Hôm nay nóng lắm." } },
+          { t: "vocab", en: "cold", vi: "lạnh", pos: "Tính từ", ipa: "/koʊld/", note: "Cũng có nghĩa cảm lạnh: I have a cold.", ex: { en: "It is cold in December.", vi: "Tháng Mười Hai trời lạnh." } },
+          { t: "vocab", en: "cool", vi: "mát mẻ", pos: "Tính từ", ipa: "/kuːl/", note: "Còn nghĩa lóng là ngầu, hay.", ex: { en: "The weather is cool.", vi: "Trời mát mẻ." } },
+          { t: "vocab", en: "wet", vi: "ẩm ướt", pos: "Tính từ", ipa: "/wet/", note: "Mùa mưa là the wet season.", ex: { en: "My shoes are wet.", vi: "Giày tôi ướt rồi." } },
+          { t: "vocab", en: "dry", vi: "khô ráo", pos: "Tính từ", ipa: "/draɪ/", note: "Mùa khô là the dry season.", ex: { en: "The dry season is long.", vi: "Mùa khô kéo dài." } },
+          { t: "vocab", en: "cloud", vi: "đám mây", pos: "Danh từ", ipa: "/klaʊd/", note: "Nhiều mây là cloudy.", ex: { en: "There are many clouds.", vi: "Trời nhiều mây." } },
+          { t: "vocab", en: "spring", vi: "mùa xuân", pos: "Danh từ", ipa: "/sprɪŋ/", note: "Còn nghĩa lò xo và mùa xuân.", ex: { en: "Spring is warm.", vi: "Mùa xuân ấm áp." } },
+          { t: "vocab", en: "summer", vi: "mùa hè", pos: "Danh từ", ipa: "/ˈsʌmər/", note: "Nghỉ hè là summer holiday.", ex: { en: "I swim in summer.", vi: "Mùa hè tôi đi bơi." } },
+          { t: "vocab", en: "winter", vi: "mùa đông", pos: "Danh từ", ipa: "/ˈwɪntər/", note: "Áo khoác mùa đông là a winter coat.", ex: { en: "Winter in Hanoi is cold.", vi: "Mùa đông Hà Nội lạnh." } },
+        ],
+        sentences: [
+          { en: "How is the weather today", vi: "Hôm nay thời tiết thế nào" },
+          { en: "It is very hot today", vi: "Hôm nay nóng lắm" },
+          { en: "Winter in Hanoi is cold", vi: "Mùa đông Hà Nội lạnh" },
+          { en: "I swim in summer", vi: "Mùa hè tôi đi bơi" },
+        ]
+      },
+      {
+        id: "a2u5l2", title: "Cảm xúc & Tính cách",
+        goal: "10 từ tả cảm xúc và tính cách.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Nói được mình đang thấy thế nào, và tả được người khác — đây là phần làm câu chuyện có hồn.", bullets: ["10 từ cảm xúc, tính cách", "I feel + tính từ", "Tả người: He is…"] },
+          { t: "vocab", en: "angry", vi: "tức giận", pos: "Tính từ", ipa: "/ˈæŋɡri/", note: "Giận ai đó: angry WITH someone.", ex: { en: "Do not be angry.", vi: "Đừng giận mà." } },
+          { t: "vocab", en: "worried", vi: "lo lắng", pos: "Tính từ", ipa: "/ˈwɜːrid/", note: "Lo về việc gì: worried ABOUT something.", ex: { en: "I am worried about the exam.", vi: "Tôi lo về kỳ thi." } },
+          { t: "vocab", en: "bored", vi: "chán", pos: "Tính từ", ipa: "/bɔːrd/", note: "Bored là mình thấy chán; boring là thứ đó gây chán.", ex: { en: "I am bored at home.", vi: "Ở nhà tôi thấy chán." } },
+          { t: "vocab", en: "excited", vi: "hào hứng", pos: "Tính từ", ipa: "/ɪkˈsaɪtɪd/", note: "Háo hức về việc gì: excited ABOUT.", ex: { en: "I am excited about the trip.", vi: "Tôi háo hức về chuyến đi." } },
+          { t: "vocab", en: "nervous", vi: "hồi hộp", pos: "Tính từ", ipa: "/ˈnɜːrvəs/", note: "Trước khi thi hay phỏng vấn hay dùng.", ex: { en: "I feel nervous before the test.", vi: "Trước khi thi tôi hồi hộp." } },
+          { t: "vocab", en: "proud", vi: "tự hào", pos: "Tính từ", ipa: "/praʊd/", note: "Tự hào về ai: proud OF someone.", ex: { en: "I am proud of my son.", vi: "Tôi tự hào về con trai." } },
+          { t: "vocab", en: "honest", vi: "trung thực", pos: "Tính từ", ipa: "/ˈɑːnɪst/", note: "Chữ h CÂM, đọc là ó-nịt.", ex: { en: "She is an honest person.", vi: "Cô ấy là người trung thực." } },
+          { t: "vocab", en: "lazy", vi: "lười biếng", pos: "Tính từ", ipa: "/ˈleɪzi/", note: "Trái nghĩa là hard-working.", ex: { en: "Do not be lazy.", vi: "Đừng lười." } },
+          { t: "vocab", en: "generous", vi: "rộng lượng", pos: "Tính từ", ipa: "/ˈdʒenərəs/", note: "Người hay cho đi, hào phóng.", ex: { en: "My grandmother is generous.", vi: "Bà tôi rất rộng lượng." } },
+          { t: "vocab", en: "patient", vi: "kiên nhẫn", pos: "Tính từ", ipa: "/ˈpeɪʃnt/", note: "Cũng là danh từ: bệnh nhân.", ex: { en: "A teacher must be patient.", vi: "Giáo viên phải kiên nhẫn." } },
+        ],
+        sentences: [
+          { en: "Do not be angry", vi: "Đừng giận" },
+          { en: "I am worried about the exam", vi: "Tôi lo về kỳ thi" },
+          { en: "I am proud of my son", vi: "Tôi tự hào về con trai" },
+          { en: "A teacher must be patient", vi: "Giáo viên phải kiên nhẫn" },
+        ]
+      },
+      {
+        id: "a2u5l3", title: "Nghề nghiệp",
+        goal: "10 nghề hay gặp và cách hỏi nghề.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Gặp người mới thế nào cũng hỏi nhau làm nghề gì. Đây là phần không thể thiếu.", bullets: ["10 nghề nghiệp", "Hỏi nghề: What do you do?", "Mạo từ a/an trước tên nghề"] },
+          { t: "vocab", en: "engineer", vi: "kỹ sư", pos: "Danh từ", ipa: "/ˌendʒɪˈnɪr/", note: "Trọng âm rơi vào cuối: en-gi-NIA.", ex: { en: "My brother is an engineer.", vi: "Anh tôi là kỹ sư." } },
+          { t: "vocab", en: "nurse", vi: "y tá", pos: "Danh từ", ipa: "/nɜːrs/", note: "Bác sĩ là doctor, y tá là nurse.", ex: { en: "She works as a nurse.", vi: "Cô ấy làm y tá." } },
+          { t: "vocab", en: "driver", vi: "tài xế", pos: "Danh từ", ipa: "/ˈdraɪvər/", note: "Từ drive + er. Nhiều nghề thêm er như thế.", ex: { en: "He is a bus driver.", vi: "Anh ấy là tài xế xe buýt." } },
+          { t: "vocab", en: "cook", vi: "đầu bếp", pos: "Danh từ", ipa: "/kʊk/", note: "Vừa là nấu ăn vừa là người nấu. Bếp trưởng là chef.", ex: { en: "My mother is a good cook.", vi: "Mẹ tôi nấu ăn giỏi." } },
+          { t: "vocab", en: "waiter", vi: "phục vụ bàn", pos: "Danh từ", ipa: "/ˈweɪtər/", note: "Nữ gọi là waitress.", ex: { en: "The waiter is friendly.", vi: "Anh phục vụ thân thiện." } },
+          { t: "vocab", en: "seller", vi: "người bán hàng", pos: "Danh từ", ipa: "/ˈselər/", note: "Người bán ở chợ. Nhân viên bán hàng là a shop assistant.", ex: { en: "The seller is very kind.", vi: "Người bán hàng rất tử tế." } },
+          { t: "vocab", en: "soldier", vi: "bộ đội", pos: "Danh từ", ipa: "/ˈsoʊldʒər/", note: "Chữ d đọc thành âm j: sâu-jờ.", ex: { en: "My grandfather was a soldier.", vi: "Ông tôi từng là bộ đội." } },
+          { t: "vocab", en: "singer", vi: "ca sĩ", pos: "Danh từ", ipa: "/ˈsɪŋər/", note: "Từ sing + er.", ex: { en: "She wants to be a singer.", vi: "Cô ấy muốn làm ca sĩ." } },
+          { t: "vocab", en: "artist", vi: "hoạ sĩ", pos: "Danh từ", ipa: "/ˈɑːrtɪst/", note: "Nói chung là người làm nghệ thuật.", ex: { en: "He is a famous artist.", vi: "Ông ấy là hoạ sĩ nổi tiếng." } },
+          { t: "vocab", en: "job", vi: "công việc", pos: "Danh từ", ipa: "/dʒɑːb/", note: "Job đếm được, work thì không.", ex: { en: "I have a new job.", vi: "Tôi có công việc mới." } },
+        ],
+        sentences: [
+          { en: "My brother is an engineer", vi: "Anh tôi là kỹ sư" },
+          { en: "She works as a nurse", vi: "Cô ấy làm y tá" },
+          { en: "What do you do", vi: "Bạn làm nghề gì" },
+          { en: "I have a new job", vi: "Tôi có công việc mới" },
+        ]
+      },
+      {
+        id: "a2u5l4", title: "Việc nhà hằng ngày",
+        goal: "10 việc nhà và cách nói thói quen.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Kể một ngày của mình, hay phân công việc nhà — đều cần mấy động từ này.", bullets: ["10 việc nhà thường ngày", "Thì hiện tại đơn cho thói quen", "Trạng từ tần suất: always, often…"] },
+          { t: "vocab", en: "cook", vi: "nấu ăn", pos: "Động từ", ipa: "/kʊk/", note: "Nấu cơm là cook rice.", ex: { en: "I cook dinner every day.", vi: "Tôi nấu bữa tối mỗi ngày." } },
+          { t: "vocab", en: "wash", vi: "rửa, giặt", pos: "Động từ", ipa: "/wɑːʃ/", note: "Rửa bát: wash the dishes. Giặt đồ: wash clothes.", ex: { en: "I wash the dishes.", vi: "Tôi rửa bát." } },
+          { t: "vocab", en: "sweep", vi: "quét", pos: "Động từ", ipa: "/swiːp/", note: "Quét nhà là sweep the floor.", ex: { en: "She sweeps the floor.", vi: "Chị ấy quét nhà." } },
+          { t: "vocab", en: "iron", vi: "là quần áo", pos: "Động từ", ipa: "/ˈaɪərn/", note: "Chữ r gần như câm, đọc ai-ợn. Cũng là sắt.", ex: { en: "I iron my shirt.", vi: "Tôi là áo sơ mi." } },
+          { t: "vocab", en: "water", vi: "tưới cây", pos: "Động từ", ipa: "/ˈwɔːtər/", note: "Vừa là nước vừa là tưới.", ex: { en: "I water the flowers.", vi: "Tôi tưới hoa." } },
+          { t: "vocab", en: "feed", vi: "cho ăn", pos: "Động từ", ipa: "/fiːd/", note: "Cho vật nuôi ăn. Quá khứ là fed.", ex: { en: "I feed the dog.", vi: "Tôi cho chó ăn." } },
+          { t: "vocab", en: "tidy", vi: "dọn dẹp", pos: "Động từ", ipa: "/ˈtaɪdi/", note: "Vừa là tính từ gọn gàng vừa là động từ dọn.", ex: { en: "Tidy your room.", vi: "Dọn phòng đi con." } },
+          { t: "vocab", en: "repair", vi: "sửa chữa", pos: "Động từ", ipa: "/rɪˈper/", note: "Đồng nghĩa với fix, trang trọng hơn.", ex: { en: "My father repairs the bike.", vi: "Bố tôi sửa xe đạp." } },
+          { t: "vocab", en: "shopping", vi: "đi chợ, mua sắm", pos: "Danh từ", ipa: "/ˈʃɑːpɪŋ/", note: "Đi chợ là go shopping, luôn có ing.", ex: { en: "I go shopping on Sunday.", vi: "Chủ nhật tôi đi chợ." } },
+          { t: "vocab", en: "rubbish", vi: "rác", pos: "Danh từ", ipa: "/ˈrʌbɪʃ/", note: "Anh dùng rubbish, Mỹ dùng garbage/trash.", ex: { en: "Take out the rubbish.", vi: "Đổ rác đi con." } },
+        ],
+        sentences: [
+          { en: "I cook dinner every day", vi: "Tôi nấu bữa tối mỗi ngày" },
+          { en: "She sweeps the floor", vi: "Chị ấy quét nhà" },
+          { en: "I go shopping on Sunday", vi: "Chủ nhật tôi đi chợ" },
+          { en: "Take out the rubbish", vi: "Đổ rác đi" },
+        ]
+      },
+      { id: "a2u5cp", title: "Ôn tập chương 5", checkpoint: true },
+    ]
+  },
+]
 };

@@ -999,7 +999,106 @@ const A1 = {
       { id: "a1u6c", title: "Ôn tập chương 6", checkpoint: true,
         goal: "Kiểm tra lại toàn bộ từ và mẫu câu của chương." }
     ]
-  }
+  },
 
-  ]
+  {
+    id: "a1u7", title: "Cơ thể, Màu sắc & Con vật",
+    goal: "Mở rộng vốn từ nền: cơ thể, màu sắc, lớp học và con vật.",
+    lessons: [
+      {
+        id: "a1u7l1", title: "Cơ thể của tôi",
+        goal: "10 bộ phận cơ thể hay dùng nhất.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Đi khám bệnh, tả người, hay chỉ là kêu đau — đều cần mấy từ này.", bullets: ["10 bộ phận cơ thể", "Cách nói bị đau ở đâu", "Số nhiều bất quy tắc: foot → feet"] },
+          { t: "vocab", en: "head", vi: "đầu", pos: "Danh từ", ipa: "/hed/", note: "Đau đầu là headache, ghép head + ache.", ex: { en: "My head hurts.", vi: "Tôi đau đầu." } },
+          { t: "vocab", en: "face", vi: "khuôn mặt", pos: "Danh từ", ipa: "/feɪs/", note: "Cũng là động từ: đối mặt với việc gì.", ex: { en: "She has a kind face.", vi: "Cô ấy có khuôn mặt hiền." } },
+          { t: "vocab", en: "eye", vi: "mắt", pos: "Danh từ", ipa: "/aɪ/", note: "Hai mắt là eyes. Đọc giống chữ I.", ex: { en: "He has big eyes.", vi: "Cậu ấy có đôi mắt to." } },
+          { t: "vocab", en: "ear", vi: "tai", pos: "Danh từ", ipa: "/ɪr/", note: "Đừng nhầm với year (năm) — ear không có âm y đầu.", ex: { en: "My ear hurts.", vi: "Tôi đau tai." } },
+          { t: "vocab", en: "nose", vi: "mũi", pos: "Danh từ", ipa: "/noʊz/", note: "Sổ mũi là a runny nose.", ex: { en: "I have a runny nose.", vi: "Tôi bị sổ mũi." } },
+          { t: "vocab", en: "mouth", vi: "miệng", pos: "Danh từ", ipa: "/maʊθ/", note: "Âm cuối th đặt lưỡi giữa hai hàm răng.", ex: { en: "Open your mouth.", vi: "Há miệng ra nào." } },
+          { t: "vocab", en: "hand", vi: "bàn tay", pos: "Danh từ", ipa: "/hænd/", note: "Bắt tay là shake hands, luôn số nhiều.", ex: { en: "Wash your hands.", vi: "Rửa tay đi con." } },
+          { t: "vocab", en: "arm", vi: "cánh tay", pos: "Danh từ", ipa: "/ɑːrm/", note: "Khác hand: arm là cả cánh tay, hand chỉ bàn tay.", ex: { en: "My arm is tired.", vi: "Cánh tay tôi mỏi." } },
+          { t: "vocab", en: "foot", vi: "bàn chân", pos: "Danh từ", ipa: "/fʊt/", note: "Số nhiều là FEET, không phải foots.", ex: { en: "My foot hurts.", vi: "Tôi đau chân." } },
+          { t: "vocab", en: "tooth", vi: "răng", pos: "Danh từ", ipa: "/tuːθ/", note: "Số nhiều là TEETH. Đánh răng là brush your teeth.", ex: { en: "Brush your teeth.", vi: "Đánh răng đi con." } },
+        ],
+        sentences: [
+          { en: "My head hurts", vi: "Tôi đau đầu" },
+          { en: "Wash your hands", vi: "Rửa tay đi" },
+          { en: "She has big eyes", vi: "Cô ấy có đôi mắt to" },
+          { en: "Brush your teeth", vi: "Đánh răng đi" },
+        ]
+      },
+      {
+        id: "a1u7l2", title: "Màu sắc",
+        goal: "10 màu cơ bản và cách tả đồ vật.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Màu sắc dùng mọi lúc: mua đồ, tả người, chỉ đường. Trong tiếng Anh màu đứng TRƯỚC danh từ.", bullets: ["10 màu cơ bản", "Màu đứng trước danh từ", "Hỏi màu: What colour is it?"] },
+          { t: "vocab", en: "red", vi: "màu đỏ", pos: "Tính từ", ipa: "/red/", note: "Đứng trước danh từ: a red bag, không nói a bag red.", ex: { en: "I want a red bag.", vi: "Tôi muốn một cái túi đỏ." } },
+          { t: "vocab", en: "blue", vi: "màu xanh dương", pos: "Tính từ", ipa: "/bluː/", note: "Xanh nước biển, xanh da trời.", ex: { en: "The sky is blue.", vi: "Bầu trời màu xanh." } },
+          { t: "vocab", en: "green", vi: "màu xanh lá", pos: "Tính từ", ipa: "/ɡriːn/", note: "Tiếng Việt gọi chung là xanh, tiếng Anh tách hẳn blue và green.", ex: { en: "The tree is green.", vi: "Cái cây màu xanh lá." } },
+          { t: "vocab", en: "yellow", vi: "màu vàng", pos: "Tính từ", ipa: "/ˈjeloʊ/", note: "Đọc là I-e-lâu, có âm y đầu.", ex: { en: "I like the yellow one.", vi: "Tôi thích cái màu vàng." } },
+          { t: "vocab", en: "black", vi: "màu đen", pos: "Tính từ", ipa: "/blæk/", note: "Cà phê đen là black coffee.", ex: { en: "He wears a black shirt.", vi: "Anh ấy mặc áo đen." } },
+          { t: "vocab", en: "white", vi: "màu trắng", pos: "Tính từ", ipa: "/waɪt/", note: "Áo sơ mi trắng đi học là a white shirt.", ex: { en: "I need a white shirt.", vi: "Tôi cần một cái áo trắng." } },
+          { t: "vocab", en: "brown", vi: "màu nâu", pos: "Tính từ", ipa: "/braʊn/", note: "Bánh mì đen gọi là brown bread.", ex: { en: "She has brown hair.", vi: "Cô ấy tóc nâu." } },
+          { t: "vocab", en: "pink", vi: "màu hồng", pos: "Tính từ", ipa: "/pɪŋk/", note: "Âm cuối ng, không phải n.", ex: { en: "My sister likes pink.", vi: "Em gái tôi thích màu hồng." } },
+          { t: "vocab", en: "orange", vi: "màu cam", pos: "Tính từ", ipa: "/ˈɔːrɪndʒ/", note: "Vừa là quả cam vừa là màu cam.", ex: { en: "The bag is orange.", vi: "Cái túi màu cam." } },
+          { t: "vocab", en: "colour", vi: "màu sắc", pos: "Danh từ", ipa: "/ˈkʌlər/", note: "Anh viết colour, Mỹ viết color. Đọc như nhau.", ex: { en: "What colour do you want?", vi: "Bạn muốn màu gì?" } },
+        ],
+        sentences: [
+          { en: "I want a red bag", vi: "Tôi muốn một cái túi đỏ" },
+          { en: "The sky is blue", vi: "Bầu trời màu xanh" },
+          { en: "She has brown hair", vi: "Cô ấy tóc nâu" },
+          { en: "What colour is it", vi: "Cái đó màu gì" },
+        ]
+      },
+      {
+        id: "a1u7l3", title: "Trong lớp học",
+        goal: "10 đồ dùng học tập quen thuộc.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Mấy từ này con nhìn thấy mỗi ngày ở lớp, học xong dùng được ngay.", bullets: ["10 đồ dùng học tập", "Câu xin phép trong lớp", "Mượn đồ: Can I borrow…?"] },
+          { t: "vocab", en: "pen", vi: "bút mực", pos: "Danh từ", ipa: "/pen/", note: "Bút chì là pencil, khác hẳn.", ex: { en: "Can I borrow your pen?", vi: "Cho tôi mượn bút được không?" } },
+          { t: "vocab", en: "pencil", vi: "bút chì", pos: "Danh từ", ipa: "/ˈpensl/", note: "Hộp bút là a pencil case.", ex: { en: "I need a pencil.", vi: "Tôi cần một cái bút chì." } },
+          { t: "vocab", en: "notebook", vi: "quyển vở", pos: "Danh từ", ipa: "/ˈnoʊtbʊk/", note: "Ghép note + book. Cũng có nghĩa máy tính xách tay.", ex: { en: "Open your notebook.", vi: "Mở vở ra nào." } },
+          { t: "vocab", en: "ruler", vi: "thước kẻ", pos: "Danh từ", ipa: "/ˈruːlər/", note: "Từ rule (quy tắc, kẻ đường thẳng).", ex: { en: "Where is my ruler?", vi: "Thước của tôi đâu rồi?" } },
+          { t: "vocab", en: "eraser", vi: "cục tẩy", pos: "Danh từ", ipa: "/ɪˈreɪsər/", note: "Anh gọi là rubber, Mỹ gọi eraser.", ex: { en: "May I use your eraser?", vi: "Cho tôi dùng tẩy nhé?" } },
+          { t: "vocab", en: "bag", vi: "cặp sách", pos: "Danh từ", ipa: "/bæɡ/", pic: "bag", note: "Cặp đeo vai là a school bag.", ex: { en: "My bag is heavy.", vi: "Cặp tôi nặng quá." } },
+          { t: "vocab", en: "desk", vi: "bàn học", pos: "Danh từ", ipa: "/desk/", note: "Bàn ăn là table, bàn học/bàn làm việc là desk.", ex: { en: "Sit at your desk.", vi: "Ngồi vào bàn đi." } },
+          { t: "vocab", en: "chair", vi: "cái ghế", pos: "Danh từ", ipa: "/tʃer/", note: "Âm đầu ch như trong chair, cheese.", ex: { en: "This chair is broken.", vi: "Cái ghế này hỏng rồi." } },
+          { t: "vocab", en: "board", vi: "bảng", pos: "Danh từ", ipa: "/bɔːrd/", note: "Bảng đen là blackboard, bảng trắng là whiteboard.", ex: { en: "Look at the board.", vi: "Nhìn lên bảng nào." } },
+          { t: "vocab", en: "homework", vi: "bài tập về nhà", pos: "Danh từ", ipa: "/ˈhoʊmwɜːrk/", note: "KHÔNG đếm được: không nói homeworks.", ex: { en: "I do my homework at night.", vi: "Tôi làm bài tập buổi tối." } },
+        ],
+        sentences: [
+          { en: "Can I borrow your pen", vi: "Cho tôi mượn bút được không" },
+          { en: "Open your notebook", vi: "Mở vở ra" },
+          { en: "My bag is heavy", vi: "Cặp tôi nặng quá" },
+          { en: "Look at the board", vi: "Nhìn lên bảng" },
+        ]
+      },
+      {
+        id: "a1u7l4", title: "Con vật quanh ta",
+        goal: "10 con vật hay gặp nhất.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Trẻ con học tiếng Anh thường bắt đầu từ con vật. Người lớn cũng cần khi kể chuyện, tả cảnh.", bullets: ["10 con vật quen thuộc", "Số nhiều bất quy tắc: mouse → mice", "Nuôi con gì: I have a…"] },
+          { t: "vocab", en: "bird", vi: "con chim", pos: "Danh từ", ipa: "/bɜːrd/", note: "Âm ir đọc dài như trong girl, shirt.", ex: { en: "A bird is singing.", vi: "Một con chim đang hót." } },
+          { t: "vocab", en: "chicken", vi: "con gà", pos: "Danh từ", ipa: "/ˈtʃɪkɪn/", note: "Vừa là con gà vừa là thịt gà.", ex: { en: "We have three chickens.", vi: "Nhà tôi nuôi ba con gà." } },
+          { t: "vocab", en: "duck", vi: "con vịt", pos: "Danh từ", ipa: "/dʌk/", note: "Cũng là động từ: cúi né.", ex: { en: "The duck is in the pond.", vi: "Con vịt ở dưới ao." } },
+          { t: "vocab", en: "pig", vi: "con lợn", pos: "Danh từ", ipa: "/pɪɡ/", note: "Thịt lợn là pork, không phải pig meat.", ex: { en: "The pig is very big.", vi: "Con lợn to lắm." } },
+          { t: "vocab", en: "cow", vi: "con bò", pos: "Danh từ", ipa: "/kaʊ/", note: "Sữa bò là cow's milk. Thịt bò là beef.", ex: { en: "The cow gives milk.", vi: "Con bò cho sữa." } },
+          { t: "vocab", en: "buffalo", vi: "con trâu", pos: "Danh từ", ipa: "/ˈbʌfəloʊ/", note: "Con vật gắn với đồng ruộng Việt Nam.", ex: { en: "The buffalo is in the field.", vi: "Con trâu ở ngoài đồng." } },
+          { t: "vocab", en: "mouse", vi: "con chuột", pos: "Danh từ", ipa: "/maʊs/", note: "Số nhiều là MICE. Cũng là con chuột máy tính.", ex: { en: "There is a mouse.", vi: "Có một con chuột." } },
+          { t: "vocab", en: "bee", vi: "con ong", pos: "Danh từ", ipa: "/biː/", note: "Mật ong là honey.", ex: { en: "A bee is on the flower.", vi: "Con ong đậu trên bông hoa." } },
+          { t: "vocab", en: "butterfly", vi: "con bướm", pos: "Danh từ", ipa: "/ˈbʌtərflaɪ/", note: "Ghép butter + fly, nghĩa đen là bơ bay.", ex: { en: "The butterfly is beautiful.", vi: "Con bướm đẹp quá." } },
+          { t: "vocab", en: "elephant", vi: "con voi", pos: "Danh từ", ipa: "/ˈelɪfənt/", note: "Ph đọc thành f: e-li-phần.", ex: { en: "The elephant is very big.", vi: "Con voi rất to." } },
+        ],
+        sentences: [
+          { en: "A bird is singing", vi: "Một con chim đang hót" },
+          { en: "The buffalo is in the field", vi: "Con trâu ở ngoài đồng" },
+          { en: "We have three chickens", vi: "Nhà tôi nuôi ba con gà" },
+          { en: "The elephant is very big", vi: "Con voi rất to" },
+        ]
+      },
+      { id: "a1u7cp", title: "Ôn tập chương 7", checkpoint: true },
+    ]
+  },
+]
 };
