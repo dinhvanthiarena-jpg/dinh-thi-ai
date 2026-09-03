@@ -2037,3 +2037,12 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   50%      { transform: translateY(4px); }
 }
 :root[data-motion="reduce"] .tai-mui { animation: none; }
+
+/* Màn Gọi trước đây chồng thêm một hình nhân vật lên tấm ảnh, mà thẻ Pro ngay
+   phía trên cũng dùng đúng hình đó — nhìn ra hai chỗ trùng nhau. Ảnh mới đã có
+   sẵn nhân vật rồi nên giấu lớp chồng đi. KHÔNG xoá hẳn thẻ: code phần "Bấm để
+   nghe" còn bám vào nó, xoá là vỡ. */
+.cp-mon { display: none; }
+/* Chuyển hiệu ứng "đang nói" sang chính tấm ảnh, để bấm nghe vẫn thấy nó động. */
+.call-preview:has(.cp-mon.talking) .cp-room { animation: monTalk 1.25s ease-in-out infinite; }
+:root[data-motion="reduce"] .call-preview:has(.cp-mon.talking) .cp-room { animation: none; }
