@@ -2431,7 +2431,10 @@ function nextPressed() {
     stkDung += 1;
   } else {
     P.wrong++;
-    banSticker(true);
+    // Sai thì chỉ kêu một tiếng tiếc thôi. Trước có hiện ảnh nhân vật buồn,
+    // nhưng nó nổi giữa màn che mất các ô chữ, không làm bài được — thầy bảo bỏ.
+    keuTiec();
+    rung(60);
     // Đang thi thì không trừ tim: hết tim giữa đề là phải bỏ dở, vô lý.
     if (!P.laThi) S.hearts = clamp(S.hearts - 1, 0, TIM_TOI_DA);
     // Vừa sứt quả đầu từ lúc đầy thì mới bắt đầu tính giờ hồi.
@@ -2684,8 +2687,7 @@ const keuTiec = () => chuoiNot([[392, 0, .20], [294.7, .13, .34]], "sine", .045)
 const STK_SO = 8;                 // assets/sticker/s1..s8.webp
 const STK_MOI = 3;                // cứ 3 câu đúng thì mở trang thưởng
 let stkDung = 0;                  // đã đúng bao nhiêu câu (trong lượt học này)
-let stkDo = [];                   // rổ đã trộn, bốc hết mới trộn lại
-let stkHen = null;
+let stkDo = [];                   // rổ ảnh thưởng đã trộn, bốc hết mới trộn lại
 
 /** Bốc sticker sao cho không lặp lại liên tiếp cùng một cái. */
 function stkTiep() {
@@ -2806,45 +2808,6 @@ function banPhao() {
   phaoRaf = requestAnimationFrame(ve);
   // Trang đóng sớm thì dọn hết hẹn giờ, đừng để pháo nổ khi đã sang câu khác.
   $("#btnThuongTiep").addEventListener("click", () => hen.forEach(clearTimeout), { once: true });
-}
-
-function banSticker(buon) {
-  const box = $("#stkView");
-  if (!box) return;
-  clearTimeout(stkHen);
-  box.textContent = "";
-  box.hidden = false;
-  box.classList.toggle("buon", !!buon);
-
-  const im = el("img", "stk-anh");
-  im.src = buon ? "assets/sticker/b1.webp" : "assets/sticker/s" + stkTiep() + ".webp";
-  im.alt = "";
-  im.decoding = "async";
-  // Thiếu file thì dẹp luôn cả khung, đừng để một ô vỡ giữa màn hình.
-  im.addEventListener("error", () => { box.hidden = true; box.textContent = ""; });
-  box.append(im);
-
-  // Tiếng kêu — cái này KHÔNG phụ thuộc "giảm chuyển động": máy nào tắt hiệu
-  // ứng nổ thì càng phải nghe thấy mới biết mình vừa đúng hay sai.
-  buon ? keuTiec() : keuVui();
-
-  // Mảnh giấy bắn ra tứ phía, chỉ dành cho lúc ĐÚNG. Sai mà cũng nổ tung toé
-  // thì thành trêu người học. Máy bật "giảm chuyển động" cũng bỏ luôn phần nổ.
-  if (!S.motion && !buon) {
-    for (let i = 0; i < 14; i++) {
-      const m = el("i", "stk-manh");
-      const goc = (Math.PI * 2 * i) / 14 + Math.random() * .4;
-      const xa = 90 + Math.random() * 70;
-      m.style.setProperty("--x", Math.cos(goc) * xa + "px");
-      m.style.setProperty("--y", Math.sin(goc) * xa + "px");
-      m.style.setProperty("--do", (Math.random() * 60 - 30) + "deg");
-      m.style.animationDelay = (Math.random() * 60) + "ms";
-      box.append(m);
-    }
-  }
-  rung(buon ? 60 : [12, 40, 12]);
-  stkHen = setTimeout(() => { box.hidden = true; box.textContent = ""; },
-                      buon ? 1050 : (S.motion ? 900 : 1250));
 }
 
 const PRAISE = ["Chính xác", "Tuyệt vời", "Giỏi lắm", "Đúng rồi", "Xuất sắc"];

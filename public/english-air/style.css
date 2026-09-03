@@ -1977,54 +1977,6 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .tuan-o.nay .tuan-lua { box-shadow: 0 0 0 2px var(--flame); }
 
 
-/* ---------- Sticker ăn mừng (cứ 2 câu đúng thì nổ ra một cái) ---------- */
-.stk {
-  position: fixed; inset: 0; z-index: 90;
-  display: grid; place-items: center;
-  pointer-events: none;                 /* chỉ để ngắm, không chặn bấm tiếp */
-}
-.stk-anh {
-  width: min(46vw, 190px); height: auto; display: block;
-  border-radius: var(--r4);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, .5);
-  animation: stk-no .62s cubic-bezier(.18, 1.5, .42, 1) both;
-}
-@keyframes stk-no {
-  0%   { transform: scale(.2) rotate(-16deg); opacity: 0; }
-  55%  { transform: scale(1.12) rotate(4deg); opacity: 1; }
-  75%  { transform: scale(.97) rotate(-2deg); }
-  100% { transform: scale(1) rotate(0); opacity: 1; }
-}
-/* Mảnh giấy bắn ra tứ phía rồi rơi xuống. */
-.stk-manh {
-  position: absolute; width: 10px; height: 14px; border-radius: 3px;
-  background: var(--brand);
-  animation: stk-ban .95s cubic-bezier(.15, .8, .3, 1) both;
-}
-.stk-manh:nth-child(3n)   { background: var(--flame); }
-.stk-manh:nth-child(3n+1) { background: var(--amber); }
-.stk-manh:nth-child(4n)   { background: var(--ok); width: 8px; height: 8px; border-radius: 50%; }
-@keyframes stk-ban {
-  0%   { transform: translate(0, 0) rotate(0); opacity: 1; }
-  70%  { opacity: 1; }
-  100% { transform: translate(var(--x), calc(var(--y) + 40px)) rotate(var(--do)); opacity: 0; }
-}
-/* Máy bật giảm chuyển động: chỉ hiện ra rồi mờ đi, không nảy không nổ. */
-:root[data-motion="reduce"] .stk-anh { animation: stk-hien .3s ease both; }
-@keyframes stk-hien { from { opacity: 0; } to { opacity: 1; } }
-
-/* Sai: ảnh buồn rơi xuống rồi lắc nhẹ — buồn thiu chứ không nảy tưng bừng
-   như lúc khen. Không có mảnh giấy nổ. */
-.stk.buon .stk-anh { animation: stk-buon .5s cubic-bezier(.2, .9, .3, 1) both; }
-@keyframes stk-buon {
-  0%   { transform: translateY(-26px) scale(.86) rotate(0); opacity: 0; }
-  60%  { transform: translateY(0) scale(1) rotate(-3deg); opacity: 1; }
-  80%  { transform: translateY(0) scale(1) rotate(3deg); }
-  100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
-}
-:root[data-motion="reduce"] .stk.buon .stk-anh { animation: stk-hien .3s ease both; }
-
-
 /* ---------- Trang thưởng đầy màn hình (cứ 3 câu đúng) ---------- */
 .thuong {
   position: fixed; inset: 0; z-index: 95;
