@@ -767,26 +767,70 @@ function renderLearn() {
 
     const grid = el("div", "nodes");
     grid.id = "nodes-" + u.id;
-    u.lessons.forEach(l => {
-      const st = lessonState(l.id);
-      const cell = el("div", "node " + st + (l.checkpoint ? " check" : ""));
-      const b = el("button", "node-btn"); b.type = "button";
-      // Trước đây nút khoá bị disabled nên bấm vào không có gì xảy ra, người học
-      // tưởng app hỏng. Nay vẫn bấm được, bấm thì ON-Language nói cho biết vì sao.
-      b.setAttribute("aria-disabled", st === "locked" ? "true" : "false");
-      const noiTrangThai = { done: "đã hoàn thành", current: "bài hiện tại", open: "mở sẵn", locked: "chưa mở khoá" };
-      b.setAttribute("aria-label", `${l.title} — ${noiTrangThai[st]}`);
-      b.append(icon(st === "locked" ? "i-lock" : l.checkpoint ? "i-cap" : st === "done" ? "i-check" : "i-play"));
-      if (st === "current") b.append(ring(doneN / list.length));
-      b.addEventListener("click", () => (st === "locked" ? baoKhoa() : startLesson(l.id)));
-      cell.append(b, el("span", "node-label", l.title));
-      grid.append(cell);
+    // Không phải mốc nào cũng là một bài học giống hệt nhau: xen thêm mốc LUYỆN
+    // TỪ VỰNG và mốc GỌI VIDEO của chính chương này, để đi hết chương là được
+    // học đủ kiểu chứ không phải bấm mãi một loại.
+    xepMoc(u).forEach(m => {
+      if (m.loai === "bai") {
+        const l = m.bai;
+        const st = lessonState(l.id);
+        const cell = el("div", "node " + st + (l.checkpoint ? " check" : ""));
+        const b = el("button", "node-btn"); b.type = "button";
+        // Trước đây nút khoá bị disabled nên bấm vào không có gì xảy ra, người học
+        // tưởng app hỏng. Nay vẫn bấm được, bấm thì ON-Language nói cho biết vì sao.
+        b.setAttribute("aria-disabled", st === "locked" ? "true" : "false");
+        const noiTrangThai = { done: "đã hoàn thành", current: "bài hiện tại", open: "mở sẵn", locked: "chưa mở khoá" };
+        b.setAttribute("aria-label", `${l.title} — ${noiTrangThai[st]}`);
+        b.append(icon(st === "locked" ? "i-lock" : l.checkpoint ? "i-cap" : st === "done" ? "i-check" : "i-play"));
+        if (st === "current") b.append(ring(doneN / list.length));
+        b.addEventListener("click", () => (st === "locked" ? baoKhoa() : startLesson(l.id)));
+        cell.append(b, el("span", "node-label", l.title));
+        grid.append(cell);
+        return;
+      }
+      grid.append(mocPhu(m, u));
     });
     box.append(grid);
     root.append(box);
   });
   paintRail();
 }
+/* Thứ tự các mốc trong một chương. Chen mốc luyện từ vựng vào giữa chương và
+   mốc gọi video ngay trước bài ôn tập — học xong mấy bài đầu thì có từ để
+   luyện, học hết bài thì có cái để đem ra nói. */
+function xepMoc(u) {
+  const bai = u.lessons.filter(x => !x.checkpoint);
+  const cuoi = u.lessons.filter(x => x.checkpoint);
+  const ra = [];
+  bai.forEach((l, i) => {
+    ra.push({ loai: "bai", bai: l });
+    if (i === 1) ra.push({ loai: "tuvung" });          // sau bài thứ hai
+  });
+  cuoi.forEach(l => ra.push({ loai: "bai", bai: l }));
+  return ra;
+}
+
+/** Mốc luyện từ vựng của chương. Mở khoá sau khi học được 2 bài — chưa học chữ
+    nào mà đã bắt luyện thì chẳng có gì trong đầu để mà luyện. */
+function mocPhu(m, u) {
+  const bai = u.lessons.filter(x => !x.checkpoint);
+  const xong = bai.filter(x => S.done[x.id]).length;
+  const mo = S.moHet || xong >= 2;
+  const cell = el("div", "node phu tuvung " + (mo ? "open" : "locked"));
+  const b = el("button", "node-btn"); b.type = "button";
+  b.setAttribute("aria-disabled", mo ? "false" : "true");
+  b.setAttribute("aria-label", `Luyện từ vựng chương ${u.title} — ${mo ? "mở" : "chưa mở khoá"}`);
+  b.append(icon(mo ? "i-words" : "i-lock"));
+  b.addEventListener("click", () => {
+    if (!mo) return toast("Học xong 2 bài trong chương này là luyện từ vựng được.");
+    const tu = unitWords(u);
+    if (tu.length < 4) return toast("Chương này chưa đủ từ để luyện.");
+    startLesson(null, { words: tu, max: 10 });
+  });
+  cell.append(b, el("span", "node-label", "Luyện từ vựng"));
+  return cell;
+}
+
 /* Mỗi chương một hình cho dễ nhận ra ngay, khỏi phải đọc chữ.
    Chương lạ chưa có trong bảng thì lấy tạm quyển sách — thêm chương mới cũng
    không vỡ giao diện. */
@@ -811,10 +855,16 @@ const chuongMo = new Set();
 function ring(frac) {
   const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   s.setAttribute("viewBox", "0 0 100 100"); s.setAttribute("class", "node-ring"); s.setAttribute("aria-hidden", "true");
-  const C = 2 * Math.PI * 46;
+  // Nút mốc đã đổi sang vuông bo góc, nên vòng tiến độ cũng phải là KHUNG BO
+  // GÓC ôm sát nút — vẽ vòng tròn quanh nút vuông thì hai hình đá nhau.
+  const X = 4, W = 92, R = 33;                       // khung 92×92, bo 33 trong khung 100
+  // Chu vi khung bo góc = 4 cạnh thẳng + 4 góc tròn ghép lại thành một đường tròn.
+  const C = 4 * (W - 2 * R) + 2 * Math.PI * R;
   for (const cls of ["bgc", "fgc"]) {
-    const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    c.setAttribute("cx", 50); c.setAttribute("cy", 50); c.setAttribute("r", 46); c.setAttribute("class", cls);
+    const c = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    c.setAttribute("x", X); c.setAttribute("y", X);
+    c.setAttribute("width", W); c.setAttribute("height", W);
+    c.setAttribute("rx", R); c.setAttribute("ry", R); c.setAttribute("class", cls);
     if (cls === "fgc") { c.setAttribute("stroke-dasharray", C); c.setAttribute("stroke-dashoffset", C * (1 - clamp(frac, .04, 1))); }
     s.append(c);
   }

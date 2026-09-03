@@ -351,8 +351,10 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 }
 .node:nth-child(3n + 1)::before { display: none; }
 .node.done::before, .node.current::before { background: var(--brand-soft); }
+/* Nút mốc để VUÔNG BO GÓC MỀM (squircle) chứ không tròn — cho khác hẳn các app
+   khác, mà vẫn mềm mắt. Bo 30px trên nút 84px là vừa đủ mềm, chưa thành tròn. */
 .node-btn {
-  position: relative; z-index: 1; width: 84px; height: 84px; padding: 0; border-radius: var(--rf);
+  position: relative; z-index: 1; width: 84px; height: 84px; padding: 0; border-radius: 30px;
   display: grid; place-items: center;
   background: var(--muted); color: var(--muted-fg);
   transition: transform var(--t1) var(--e);
@@ -367,14 +369,19 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 /* Bài mở sẵn khi bật 'Mở hết bài học': bấm được nhưng không hô hào như bài hiện tại. */
 .node.open .node-btn { background: var(--brand-soft); color: var(--brand); }
 .node.open .node-label { color: var(--fg); }
+/* Hai mốc phụ (luyện từ vựng, gọi video) khác màu để nhìn phát biết ngay là
+   không phải một bài học thường. */
+.node.phu.tuvung.open .node-btn { background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber); }
+.node.phu.open .node-label { color: var(--fg); }
 .node-ring {
   position: absolute; top: -7px; left: -7px;
   width: calc(100% + 14px); height: calc(100% + 14px);
 }
-.node-ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+.node-ring rect { fill: none; stroke-width: 5; stroke-linecap: round; }
 .node-ring .bgc { stroke: var(--brand-soft); }
-.node-ring .fgc { stroke: var(--brand); transform: rotate(-90deg);
-  transform-origin: 50% 50%; transform-box: fill-box; }
+/* Khung bo góc đã bắt đầu vẽ từ cạnh TRÊN rồi chạy theo chiều kim đồng hồ,
+   nên không cần xoay -90deg như hồi còn là vòng tròn nữa. */
+.node-ring .fgc { stroke: var(--brand); }
 .node-label { font-size: .8rem; font-weight: 800; color: var(--muted-fg); line-height: 1.25; }
 .node.current .node-label { color: var(--brand-ink); }
 .node.done .node-label { color: var(--fg); }
