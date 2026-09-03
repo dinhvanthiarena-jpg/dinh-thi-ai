@@ -83,7 +83,7 @@ function markup(node, text) {
 const KEY = "englishair.v3";
 const DEFAULTS = {
   level: "a1",
-  xp: 0, hearts: 15, heartAt: Date.now(),
+  xp: 0, xu: 0, hearts: 15, heartAt: Date.now(),
   streak: 0, best: 0, lastDay: "", days: [],
   done: {}, srs: {},
   goal: 30, goalDay: "", todayXp: 0,
@@ -169,6 +169,35 @@ function markStudied() {
 }
 function addXp(n) { S.xp += n; S.todayXp += n; S.weekXp += n; save(); }
 
+/* Xu: kiếm được khi học xong bài, tiêu để đổ đầy tim. Có chỗ tiêu thật thì nó
+   mới là phần thưởng, chứ chỉ hiện một con số thì chẳng để làm gì. */
+const XU_MOI_BAI = 5;        // xong một bài
+const XU_KHONG_SAI = 5;      // thưởng thêm khi không sai câu nào
+const XU_DOI_TIM = 50;       // đổi đầy tim
+function addXu(n) { S.xu = (S.xu || 0) + n; save(); }
+
+/* Chuỗi ngày phải có ích thật chứ không chỉ để ngắm: giữ được chuỗi dài thì
+   mỗi bài học ăn thêm XP. */
+function nhanXp() { return S.streak >= 30 ? 3 : S.streak >= 7 ? 2 : 1; }
+
+/* Các cấp của chuỗi ngày — để người học có mốc mà nhắm tới. */
+const CAP_CHUOI = [
+  [0,   "Bắt đầu chuỗi"],
+  [3,   "Chuỗi Nhen Lửa"],
+  [7,   "Chuỗi Cháy Đều"],
+  [14,  "Chuỗi Rực Lửa"],
+  [30,  "Chuỗi Bão Lửa"],
+  [60,  "Chuỗi Không Ngừng"],
+  [100, "Chuỗi Huyền Thoại"],
+];
+function capChuoi(n) {
+  let cur = CAP_CHUOI[0], next = null;
+  for (const c of CAP_CHUOI) {
+    if (n >= c[0]) cur = c; else { next = c; break; }
+  }
+  return { ten: cur[1], toi: next };
+}
+
 /* ---------- 2. Giao diện chung ---------- */
 function applyTheme() {
   // Nền đậm là mặc định của thương hiệu; người học tự bật nền sáng thì mới đổi.
@@ -179,6 +208,7 @@ function paintStats() {
   regenHearts();
   $("#statStreak").textContent = S.streak;
   $("#statXp").textContent = S.xp >= 1000 ? (S.xp / 1000).toFixed(2) + "K" : S.xp;
+  $("#statXu").textContent = S.xu || 0;
   // Hết tim thì ô tim đổi thành đồng hồ đếm tới lượt hồi tiếp theo.
   if (S.hearts > 0) {
     $("#statHeart").textContent = S.hearts;
@@ -2407,9 +2437,16 @@ function finish() {
   const acc = clamp(Math.round(((tries - P.wrong) / tries) * 100), 0, 100);
   let xp = P.mode === "review" ? 8 : 12;
   if (P.wrong === 0) xp += 5;
+  const xu = XU_MOI_BAI + (P.wrong === 0 ? XU_KHONG_SAI : 0);
   const firstToday = S.lastDay !== today();
 
-  markStudied(); addXp(xp);
+  // Nhân bội tính SAU markStudied() — để con số nhân đúng bằng chuỗi ngày đang
+  // hiện trên màn hình. Tính trước thì có lúc màn hình ghi "chuỗi 30 ngày" mà
+  // chỉ nhân x2 (vì lúc tính chuỗi mới là 29), người học nhìn vào thấy sai.
+  markStudied();
+  const boi = nhanXp();
+  xp *= boi;
+  addXp(xp); addXu(xu);
   if (P.lessonId) {
     const prev = S.done[P.lessonId];
     S.done[P.lessonId] = { best: Math.max(acc, prev?.best || 0), tries: (prev?.tries || 0) + 1 };
@@ -2421,6 +2458,9 @@ function finish() {
   $("#resTime").textContent = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0");
   $("#resAcc").textContent = acc + "%";
   $("#resXp").textContent = xp;
+  $("#resXu").textContent = "+" + xu;
+  $("#resBoi").hidden = boi < 2;
+  $("#resBoi").textContent = boi < 2 ? "" : `Chuỗi ${S.streak} ngày đang nhân XP x${boi} cho bạn.`;
   $("#resSub").hidden = true;
   $("#resTitle").textContent = P.wrong === 0 ? "Chậm mà chắc, rất tuyệt!" : acc >= 80 ? "Làm tốt lắm, giữ nhịp nhé!" : "Xong rồi, cứ từ từ mà chắc!";
   $("#resNote").textContent = P.wrong === 0 ? "Không sai câu nào — thưởng thêm 5 XP." : "Ôn lại chương này sẽ chắc hơn.";
@@ -2443,11 +2483,39 @@ function openStreak() {
   $("#streakSub").textContent = S.streak >= (S.best || 0)
     ? "Đây là chuỗi dài nhất của bạn, đừng dừng lại."
     : `Chuỗi dài nhất của bạn là ${S.best} ngày.`;
+  const cap = capChuoi(S.streak);
+  $("#streakCap").textContent = cap.ten;
+  const con = cap.toi ? cap.toi[0] - S.streak : 0;
+  $("#streakToi").hidden = !cap.toi;
+  if (cap.toi) $("#streakToi").textContent = `Còn ${con} ngày nữa là lên ${cap.toi[1]}.`;
+  veTuan();
   renderCal();
   $("#streakView").hidden = false;
   document.body.style.overflow = "hidden";
   $("#btnStreakClose").focus();
 }
+/** Dải 7 ngày của TUẦN NÀY — nhìn phát biết tuần nay hụt hôm nào, đỡ phải
+    dò trong cả bảng lịch tháng. */
+function veTuan() {
+  const box = $("#tuanStrip"); box.textContent = "";
+  const t = new Date();
+  const thu2 = new Date(t); thu2.setDate(t.getDate() - ((t.getDay() + 6) % 7));
+  ["T2","T3","T4","T5","T6","T7","CN"].forEach((ten, i) => {
+    const d = new Date(thu2); d.setDate(thu2.getDate() + i);
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const on = S.days.includes(iso);
+    const homNay = d.toDateString() === t.toDateString();
+    const o = el("div", "tuan-o" + (on ? " on" : "") + (homNay ? " nay" : ""));
+    o.append(el("small", "", ten));
+    const v = el("span", "tuan-lua");
+    if (on) v.append(svgUse("p-flame", "0 0 100 120"));
+    else v.textContent = String(d.getDate());
+    o.append(v);
+    o.setAttribute("aria-label", `${ten}: ${on ? "đã học" : "chưa học"}`);
+    box.append(o);
+  });
+}
+
 function renderCal() {
   const y = calMonth.getFullYear(), m = calMonth.getMonth();
   const first = new Date(y, m, 1), days = new Date(y, m + 1, 0).getDate();
@@ -2481,6 +2549,20 @@ function dongStreak() {
 // nên có thêm một nút quay lại ngay dưới bảng.
 $$("#btnStreakClose, #btnStreakHome").forEach(b => b.addEventListener("click", dongStreak));
 $("#btnStreak").addEventListener("click", openStreak);
+$("#btnXu").addEventListener("click", () => {
+  const du = (S.xu || 0) >= XU_DOI_TIM;
+  openSheet({
+    title: `Bạn có ${S.xu || 0} xu`,
+    body: `Mỗi bài học xong được ${XU_MOI_BAI} xu, không sai câu nào được thêm ${XU_KHONG_SAI} xu. Đủ ${XU_DOI_TIM} xu thì đổi được một lần đầy tim.`,
+    yes: du ? `Đổi ${XU_DOI_TIM} xu lấy đầy tim` : "Đã hiểu",
+    no: du ? "Để sau" : "",
+    onYes() {
+      if (!du) return;
+      S.xu -= XU_DOI_TIM; S.hearts = TIM_TOI_DA; S.heartAt = Date.now(); save();
+      paintStats(); toast("Đã đầy tim, học tiếp thôi!");
+    }
+  });
+});
 
 /* ---------- 16. Thẻ ghi nhớ ---------- */
 const F = { q: [], i: 0, shown: false };
@@ -4698,9 +4780,23 @@ $("#sheetYes").addEventListener("click", () => { const f = sheetYes; closeSheet(
 function sheetNoHearts() {
   $("#player").hidden = true; document.body.style.overflow = "";
   const mins = clamp(Math.ceil((S.heartAt + HEART_MS - Date.now()) / 60000), 1, 30);
+  // Đủ xu thì cho đổi đầy tim luôn — đây chính là chỗ tiêu xu, nên phải mời
+  // ngay lúc người học đang cần, chứ giấu trong menu thì chẳng ai tìm ra.
+  if ((S.xu || 0) >= XU_DOI_TIM) {
+    openSheet({
+      title: "Bạn đã hết tim",
+      body: `Bạn đang có ${S.xu} xu. Đổi ${XU_DOI_TIM} xu để đầy lại ${TIM_TOI_DA} tim và học tiếp ngay, hoặc chờ tim tự hồi (quả tiếp theo sau khoảng ${mins} phút).`,
+      yes: `Đổi ${XU_DOI_TIM} xu lấy đầy tim`, no: "Để sau",
+      onYes() {
+        S.xu -= XU_DOI_TIM; S.hearts = TIM_TOI_DA; S.heartAt = Date.now(); save();
+        paintStats(); toast("Đã đầy tim, học tiếp thôi!");
+      }
+    });
+    return;
+  }
   openSheet({
     title: "Bạn đã hết tim",
-    body: `Tim tự hồi 1 quả mỗi 30 phút — quả tiếp theo sau khoảng ${mins} phút. Ôn tập bằng thẻ ghi nhớ vẫn học được ngay.`,
+    body: `Tim tự hồi 1 quả mỗi 30 phút — quả tiếp theo sau khoảng ${mins} phút. Học xong mỗi bài được ${XU_MOI_BAI} xu, đủ ${XU_DOI_TIM} xu là đổi được đầy tim. Ôn tập bằng thẻ ghi nhớ vẫn học được ngay.`,
     yes: "Ôn bằng thẻ ghi nhớ", no: "Để sau",
     onYes() { go("review"); startFlash(); }
   });

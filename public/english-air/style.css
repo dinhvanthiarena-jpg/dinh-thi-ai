@@ -173,6 +173,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .p-xp    { color: var(--xp); }
 .p-heart { color: var(--heart); } .p-heart .ic-sm { fill: var(--heart); stroke: none; }
 .p-heart.empty { color: var(--muted-fg); } .p-heart.empty .ic-sm { fill: none; stroke: currentColor; }
+.p-xu    { color: var(--amber); } .p-xu .ic-sm { fill: color-mix(in srgb, var(--amber) 20%, transparent); }
 .p-theme { color: var(--muted-fg); padding: 0 var(--s2); }
 .ic-sun { display: none; }
 :root[data-theme="dark"] .ic-moon { display: none; }
@@ -1720,7 +1721,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .res-lab .ic-sm { width: 15px; height: 15px; }
 .res-wide { background: var(--brand-soft); border-radius: var(--r3); padding: var(--s3); color: var(--brand-ink); margin-bottom: var(--s3); }
 .res-wide b { display: block; font-size: 1.5rem; font-weight: 900; margin-top: 2px; }
-.res-two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); margin-bottom: var(--s5); }
+.res-two { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); margin-bottom: var(--s5); }
 .res-acc { background: var(--amber-soft); color: var(--amber); border-radius: var(--r3); padding: var(--s3); }
 .res-xp { background: var(--ok-soft); color: var(--ok); border-radius: var(--r3); padding: var(--s3); }
 .res-two b { display: block; font-size: 1.4rem; font-weight: 900; margin-top: 2px; }
@@ -1943,3 +1944,24 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 @media (min-width: 560px) {
   .ban-anh { width: 116px; }
 }
+
+
+/* ---------- Xu, cấp chuỗi, dải tuần (thêm theo mẫu AirLearn) ---------- */
+.res-xu { background: color-mix(in srgb, var(--flame) 14%, transparent); color: var(--flame);
+  border-radius: var(--r3); padding: var(--s3); }
+.res-boi { margin: var(--s2) 0 0; text-align: center; font-weight: 800; color: var(--xp); }
+
+.streak-cap { margin: var(--s1) 0 0; text-align: center; font-size: 1.05rem;
+  font-weight: 900; color: var(--flame); }
+.streak-toi { margin: var(--s1) 0 0; text-align: center; font-weight: 700; color: var(--muted-fg); }
+
+.tuan { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: var(--s3);
+  padding: var(--s3) var(--s2); }
+.tuan-o { display: grid; justify-items: center; gap: 4px; }
+.tuan-o small { font-size: .7rem; font-weight: 800; color: var(--muted-fg); }
+.tuan-o.nay small { color: var(--flame); }
+.tuan-lua { display: grid; place-items: center; width: 34px; height: 34px; border-radius: var(--rf);
+  background: var(--muted); color: var(--muted-fg); font-size: .82rem; font-weight: 800; }
+.tuan-lua svg { width: 22px; height: 26px; }
+.tuan-o.on .tuan-lua { background: color-mix(in srgb, var(--flame) 16%, transparent); color: var(--flame); }
+.tuan-o.nay .tuan-lua { box-shadow: 0 0 0 2px var(--flame); }

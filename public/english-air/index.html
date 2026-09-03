@@ -53,6 +53,7 @@
     <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.2A8.2 8.2 0 0 1 9.8 4 8.5 8.5 0 1 0 20 14.2Z"/></symbol>
     <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.2 5.2l1.4 1.4M17.4 17.4l1.4 1.4M18.8 5.2l-1.4 1.4M6.6 17.4l-1.4 1.4"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+    <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".55"/><path d="M12 8.6v6.8M10.2 10.4h2.6a1.6 1.6 0 0 1 0 3.2h-2.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
     <symbol id="i-crown" viewBox="0 0 24 24"><path d="M4 18h16M4 18 3 7l5 4 4-6 4 6 5-4-1 11"/></symbol>
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20.5 12c0 4.1-3.8 7.5-8.5 7.5-1 0-2-.2-2.9-.5L4 20.5l1.4-4A7 7 0 0 1 3.5 12c0-4.1 3.8-7.5 8.5-7.5s8.5 3.4 8.5 7.5Z"/></symbol>
     <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.6 3.5 5.6 3.5 8.5s-1.1 5.9-3.5 8.5c-2.4-2.6-3.5-5.6-3.5-8.5S9.6 6.1 12 3.5Z"/></symbol>
@@ -1193,6 +1194,9 @@
         <button class="pill p-xp" id="btnXp" type="button" aria-label="Điểm kinh nghiệm">
           <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bolt"/></svg><b id="statXp">0</b>
         </button>
+        <button class="pill p-xu" id="btnXu" type="button" aria-label="Xu">
+          <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-coin"/></svg><b id="statXu">0</b>
+        </button>
         <button class="pill p-heart" id="btnHeart" type="button" aria-label="Số tim còn lại">
           <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-heart"/></svg><b id="statHeart">15</b>
         </button>
@@ -1644,7 +1648,9 @@
     <div class="res-two">
       <div class="res-acc"><span class="res-lab"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-target"/></svg> ĐỘ CHÍNH XÁC</span><b id="resAcc">0%</b></div>
       <div class="res-xp"><span class="res-lab"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bolt"/></svg> XP</span><b id="resXp">0</b></div>
+      <div class="res-xu"><span class="res-lab"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-coin"/></svg> XU</span><b id="resXu">0</b></div>
     </div>
+    <p class="res-boi" id="resBoi" hidden></p>
     <p class="res-note" id="resNote"></p>
     <button class="btn btn-primary btn-block" id="btnResDone" type="button">Tiếp tục</button>
   </div>
@@ -1658,7 +1664,10 @@
   <div class="streak-body">
     <div class="flame" data-mascot="head" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air-head"/></svg></div>
     <h2 id="streakTitle"><span id="streakNum">0</span> ngày liên tiếp</h2>
+    <p class="streak-cap" id="streakCap">Bắt đầu chuỗi</p>
     <p class="sub" id="streakSub">Đây là chuỗi dài nhất của bạn, đừng dừng lại.</p>
+    <p class="streak-toi" id="streakToi" hidden></p>
+    <div class="tuan card" id="tuanStrip" aria-label="Tuần này"></div>
     <div class="cal card">
       <div class="cal-head">
         <div><b id="calMonth">tháng 8 2026</b><small id="calCount">Đã học 0 trong 31 ngày</small></div>
