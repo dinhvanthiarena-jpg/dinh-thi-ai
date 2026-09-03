@@ -2020,3 +2020,42 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
 }
 :root[data-motion="reduce"] .stk.buon .stk-anh { animation: stk-hien .3s ease both; }
+
+
+/* ---------- Trang thưởng đầy màn hình (cứ 3 câu đúng) ---------- */
+.thuong {
+  position: fixed; inset: 0; z-index: 95;
+  display: grid; place-items: center;
+  background: radial-gradient(120% 90% at 50% 22%,
+              color-mix(in srgb, var(--brand) 30%, var(--bg)) 0%, var(--bg) 68%);
+  animation: thuong-vao .28s ease both;
+}
+@keyframes thuong-vao { from { opacity: 0; } to { opacity: 1; } }
+.thuong-phao { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.thuong-in {
+  position: relative; z-index: 1;
+  width: min(92vw, 420px); padding: var(--s4);
+  display: grid; justify-items: center; gap: var(--s3);
+  text-align: center;
+}
+.thuong-lab {
+  margin: 0; font-size: .74rem; font-weight: 900; letter-spacing: .16em;
+  color: var(--amber);
+}
+.thuong-in h2 { margin: 0; font-size: 1.7rem; font-weight: 900; }
+.thuong-anh {
+  width: min(64vw, 260px); height: auto; display: block;
+  border-radius: var(--r4);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, .55);
+  animation: thuong-no .66s cubic-bezier(.18, 1.5, .42, 1) both .06s;
+}
+@keyframes thuong-no {
+  0%   { transform: scale(.24) rotate(-14deg); opacity: 0; }
+  58%  { transform: scale(1.1) rotate(4deg); opacity: 1; }
+  78%  { transform: scale(.97) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.thuong-sub { margin: 0; color: var(--muted-fg); font-weight: 700; }
+.thuong-in .btn { margin-top: var(--s2); }
+:root[data-motion="reduce"] .thuong,
+:root[data-motion="reduce"] .thuong-anh { animation: thuong-vao .3s ease both; }

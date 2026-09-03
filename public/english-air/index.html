@@ -1659,6 +1659,18 @@
 <!-- ============ STICKER ĂN MỪNG (cứ 2 câu đúng thì nổ ra một cái) ============ -->
 <div class="stk" id="stkView" hidden aria-hidden="true"></div>
 
+<!-- ============ TRANG THƯỞNG: cứ 3 câu đúng thì mở ra một trang đầy màn ============ -->
+<div class="thuong" id="thuongView" hidden role="dialog" aria-modal="true" aria-labelledby="thuongTitle">
+  <canvas class="thuong-phao" id="thuongPhao" aria-hidden="true"></canvas>
+  <div class="thuong-in">
+    <p class="thuong-lab" id="thuongLab">PHẦN THƯỞNG</p>
+    <h2 id="thuongTitle">Giỏi quá!</h2>
+    <img class="thuong-anh" id="thuongAnh" alt="" decoding="async">
+    <p class="thuong-sub" id="thuongSub">Đúng 3 câu liền rồi đó.</p>
+    <button class="btn btn-primary btn-block" id="btnThuongTiep" type="button">Tiếp tục</button>
+  </div>
+</div>
+
 <!-- ================= CHUỖI NGÀY ================= -->
 <div class="streak" id="streakView" hidden role="dialog" aria-modal="true" aria-labelledby="streakTitle">
   <header class="p-bar">

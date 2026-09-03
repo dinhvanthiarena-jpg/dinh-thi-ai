@@ -2420,8 +2420,10 @@ function nextPressed() {
     docLanLuot(khucDoc);
     feedback(true, praise(), d.word ? `${d.word.en} — ${d.word.vi}` : (d.sent ? d.sent.en : ""), khucDoc);
     if (P.laThi) P.laThi.dung += 1;
+    // Câu nào đúng cũng kêu một tiếng khen ngắn. Đủ 3 câu mới mở trang thưởng
+    // pháo bông, nhưng hai câu trước đó cũng phải có cái gì đó cho biết là đúng.
+    keuVui();
     stkDung += 1;
-    if (stkDung % STK_MOI === 0) banSticker();
   } else {
     P.wrong++;
     banSticker(true);
@@ -2473,6 +2475,35 @@ function chuoiNot(nots, kieu = "triangle", to = .16) {
   });
 }
 
+/** Tiếng pháo nổ "độp": một cú bụp trầm rồi tiếng lẹt xẹt tắt dần. Dùng nhiễu
+    trắng chứ nốt nhạc không ra tiếng nổ được. */
+function keuNo(tre = 0) {
+  if (!S.sound) return;
+  const a = boTiengs();
+  if (!a) return;
+  if (a.state === "suspended") a.resume().catch(() => {});
+  const t = a.currentTime + .01 + tre;
+  // Cú bụp: nốt trầm tụt nhanh xuống.
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = "sine";
+  o.frequency.setValueAtTime(180, t);
+  o.frequency.exponentialRampToValueAtTime(46, t + .16);
+  g.gain.setValueAtTime(.22, t);
+  g.gain.exponentialRampToValueAtTime(.0001, t + .2);
+  o.connect(g); g.connect(a.destination);
+  o.start(t); o.stop(t + .22);
+  // Lẹt xẹt: nhiễu trắng tắt dần, cho ra tiếng tàn pháo.
+  const n = Math.floor(a.sampleRate * .3);
+  const buf = a.createBuffer(1, n, a.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6);
+  const src = a.createBufferSource(); src.buffer = buf;
+  const bp = a.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1900; bp.Q.value = .7;
+  const gn = a.createGain(); gn.gain.value = .1;
+  src.connect(bp); bp.connect(gn); gn.connect(a.destination);
+  src.start(t + .02);
+}
+
 /** Đúng: ba nốt đi lên, nghe là biết được khen. */
 const keuVui = () => chuoiNot([[523.3, 0, .16], [659.3, .09, .16], [784, .18, .30]], "triangle", .15);
 /** Sai: hai nốt đi xuống, nhẹ thôi — tiếc chứ không phải mắng. */
@@ -2484,7 +2515,7 @@ const keuTiec = () => chuoiNot([[392, 0, .20], [294.7, .13, .34]], "sine", .12);
    Đếm theo TỔNG số câu đúng trong bài chứ không phải đúng liên tiếp: sai một
    câu mà mất luôn phần thưởng đang dồn thì nản. */
 const STK_SO = 8;                 // assets/sticker/s1..s8.webp
-const STK_MOI = 2;                // cứ 2 câu đúng thì một cái
+const STK_MOI = 3;                // cứ 3 câu đúng thì mở trang thưởng
 let stkDung = 0;                  // đã đúng bao nhiêu câu (trong lượt học này)
 let stkDo = [];                   // rổ đã trộn, bốc hết mới trộn lại
 let stkHen = null;
@@ -2493,6 +2524,112 @@ let stkHen = null;
 function stkTiep() {
   if (!stkDo.length) stkDo = shuffle([...Array(STK_SO).keys()].map(i => i + 1));
   return stkDo.pop();
+}
+
+/* ---------- Trang thưởng đầy màn hình ----------
+   Thầy chốt: cứ 3 câu đúng thì mở hẳn một trang, pháo bông nổ độp độp, đứng đó
+   cho trẻ ngắm chứ đừng tự tắt, bấm "Tiếp tục" mới sang câu mới. */
+let thuongDangMo = false;
+let thuongSauKhiDong = null;
+let phaoRaf = 0;
+
+const KHEN_TO = ["Giỏi quá!", "Tuyệt vời!", "Cừ lắm!", "Xuất sắc!", "Đỉnh thật!"];
+
+function moThuong(xong) {
+  const v = $("#thuongView");
+  if (!v) { xong && xong(); return; }
+  thuongSauKhiDong = xong || null;
+  thuongDangMo = true;
+
+  $("#thuongTitle").textContent = KHEN_TO[Math.floor(Math.random() * KHEN_TO.length)];
+  $("#thuongSub").textContent = `Đúng ${STK_MOI} câu liền rồi đó. Nghỉ tay ngắm pháo một tí nào!`;
+  const im = $("#thuongAnh");
+  im.src = "assets/sticker/s" + stkTiep() + ".webp";
+  // Thiếu file thì giấu ảnh đi thôi, phần còn lại của trang vẫn dùng được.
+  im.hidden = false;
+  im.onerror = () => { im.hidden = true; };
+
+  v.hidden = false;
+  document.body.style.overflow = "hidden";
+  banPhao();
+  $("#btnThuongTiep").focus();
+}
+
+function dongThuong() {
+  const v = $("#thuongView");
+  v.hidden = true;
+  thuongDangMo = false;
+  document.body.style.overflow = "";
+  cancelAnimationFrame(phaoRaf);
+  const f = thuongSauKhiDong;
+  thuongSauKhiDong = null;
+  f && f();
+}
+$("#btnThuongTiep").addEventListener("click", dongThuong);
+
+/** Pháo bông vẽ trên canvas: từng chùm nổ ra rồi rơi xuống theo trọng lực.
+    Vẽ trên canvas chứ không dựng cả trăm thẻ DOM — máy yếu sẽ giật. */
+function banPhao() {
+  const cv = $("#thuongPhao");
+  const ctx = cv.getContext("2d");
+  const tl = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = cv.clientWidth * tl;
+  cv.height = cv.clientHeight * tl;
+  ctx.scale(tl, tl);
+  const W = cv.clientWidth, H = cv.clientHeight;
+
+  const MAU = ["#C084FC", "#FF9A4D", "#FBBF24", "#22C55E", "#F472B6", "#60A5FA"];
+  let hat = [];
+  let lanNo = 0;
+  const TONG_NO = 7;
+
+  function no(x, y) {
+    const mau = MAU[Math.floor(Math.random() * MAU.length)];
+    const n = 26 + Math.floor(Math.random() * 14);
+    for (let i = 0; i < n; i++) {
+      const g = (Math.PI * 2 * i) / n + Math.random() * .2;
+      const v = 1.6 + Math.random() * 2.6;
+      hat.push({ x, y, vx: Math.cos(g) * v, vy: Math.sin(g) * v, s: 1.6 + Math.random() * 2,
+                 mau: Math.random() < .25 ? "#fff" : mau, doi: 1 });
+    }
+    keuNo();
+  }
+
+  // Nổ chùm đầu ngay, các chùm sau lệch giờ nhau cho ra tiếng "độp... độp... độp".
+  const hen = [];
+  for (let i = 0; i < TONG_NO; i++) {
+    hen.push(setTimeout(() => {
+      no(W * (.18 + Math.random() * .64), H * (.16 + Math.random() * .42));
+      lanNo++;
+    }, i * (230 + Math.random() * 140)));
+  }
+
+  function ve() {
+    // Xoá mờ dần chứ không xoá sạch — để lại vệt đuôi cho ra dáng pháo.
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.fillStyle = "rgba(0,0,0,.18)";
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = "lighter";
+    hat.forEach(h => {
+      h.x += h.vx; h.y += h.vy;
+      h.vy += .045;                 // trọng lực
+      h.vx *= .99; h.vy *= .99;
+      h.doi -= .012;
+      if (h.doi <= 0) return;
+      ctx.globalAlpha = Math.max(0, h.doi);
+      ctx.fillStyle = h.mau;
+      ctx.beginPath(); ctx.arc(h.x, h.y, h.s, 0, Math.PI * 2); ctx.fill();
+    });
+    hat = hat.filter(h => h.doi > 0 && h.y < H + 20);
+    ctx.globalAlpha = 1;
+    // Bắn xong hết chùm mà hạt cũng tàn rồi thì thôi, khỏi quay vòng cho tốn pin.
+    if (lanNo < TONG_NO || hat.length) phaoRaf = requestAnimationFrame(ve);
+  }
+  cancelAnimationFrame(phaoRaf);
+  ctx.clearRect(0, 0, W, H);
+  phaoRaf = requestAnimationFrame(ve);
+  // Trang đóng sớm thì dọn hết hẹn giờ, đừng để pháo nổ khi đã sang câu khác.
+  $("#btnThuongTiep").addEventListener("click", () => hen.forEach(clearTimeout), { once: true });
 }
 
 function banSticker(buon) {
@@ -2558,6 +2695,16 @@ function feedback(ok, title, detail, doc) {
 }
 $("#fbSay").addEventListener("click", () => { if (fbDoc && fbDoc.length) docLanLuot(fbDoc); });
 function advance() {
+  // Đủ 3 câu đúng thì chen trang thưởng vào GIỮA hai câu: bấm "Tiếp theo" xong
+  // là pháo nổ, ngắm chán rồi bấm "Tiếp tục" mới sang câu mới. Chen ở đây chứ
+  // không chen lúc vừa chấm — chấm xong còn phải cho đọc lời giải đã.
+  if (stkDung > 0 && stkDung % STK_MOI === 0 && !thuongDangMo) {
+    stkDung = 0;                         // đã thưởng rồi thì đếm lại từ đầu
+    return moThuong(diTiep);
+  }
+  diTiep();
+}
+function diTiep() {
   if (!P.laThi && S.hearts <= 0 && P.i >= P.teachN) return sheetNoHearts();
   P.i++;
   if (P.i >= P.slides.length) return finish();
