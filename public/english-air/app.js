@@ -1112,12 +1112,14 @@ const CANH = [
   ["city|hanoi|saigon|town|street|building|traffic|downtown", "city"],
   ["village|countryside|farm|field", "village"],
   ["house|home|room|live|living|lived|apartment|kitchen|door|window", "house"],
-  ["car|drive|driving|taxi|motorbike|bike|road|ride", "car"],
+  ["bike|bicycle|cycling", "bike"],
+  ["car|drive|driving|taxi|motorbike|road|ride", "car"],
   ["plane|airport|fly|flight|travel|trip|holiday|vacation|visit|tourist|country", "plane"],
   ["sun|sunny|hot|summer|warm|weather|sky|morning|afternoon", "sun"],
   ["rain|rainy|wet|cold|winter|storm|cloud", "rain"],
   ["tree|park|garden|flower|green|nature|mountain", "tree"],
   ["bed|sleep|sleeping|slept|night|evening|tired at night|bedroom|dream", "bed"],
+  ["helmet", "helmet"],
   ["shirt|clothes|dress|wear|wearing|shoes|hat|jacket", "shirt"],
   ["ball|football|soccer|sport|play|playing|game|team|run|running", "ball"],
   ["music|song|sing|singing|listen to music|guitar|dance|dancing", "music"],
@@ -1136,7 +1138,7 @@ const CANH = [
   ["toy", "toy"],
   ["story|cartoon|film|movie|cinema", "book"],
   ["salary|career|hobby|interview|profession", "work"],
-  ["farmer|farming|harvest|crop|rice field", "village"],
+  ["farmer|farming|harvest|crop|rice field", "farmer"],
   ["driver|taxi driver|traffic light|parking", "car"],
   ["police|policeman|officer|uniform|station guard", "city"],
   ["carrot|potato|cabbage|salad bowl|greens", "apple"],
@@ -1144,7 +1146,7 @@ const CANH = [
   ["monday|tuesday|wednesday|thursday|friday|saturday|sunday|date|calendar", "clock"],
   ["sick|ill|hurt|pain|injury|rest at home", "doctor"],
   ["wind|windy|storm at sea|typhoon", "rain"],
-  ["walk|walking|step|footpath|pavement", "tree"],
+  ["walk|walking|step|footpath|pavement", "walk"],
   ["crowded|noisy|modern|downtown area|skyscraper", "city"],
   ["quiet|peaceful|ancient|old town|temple", "village"],
   ["swim|swimming pool|seaside|shore", "fish"],
@@ -2623,12 +2625,9 @@ function phatFileThuong() {
   if (!S.sound) return false;
   const el2 = $("#amThuong");
   if (!el2) return false;
-  // PHẢI cắt giọng đọc trước. Lúc trả lời đúng, app đang đọc đáp án bằng
-  // speechSynthesis; trên iPhone cái đó chiếm phiên âm thanh nên thẻ <audio>
-  // gọi play() vẫn chạy mà KHÔNG ra tiếng. Đây đúng là chỗ thầy gặp: bấm nút
-  // nghe thử trong Cài đặt thì kêu (lúc đó không có gì đang đọc), còn trong
-  // bài thì im. Tới đây trẻ đã nghe đáp án xong rồi nên cắt là hợp lý.
-  try { window.speechSynthesis && speechSynthesis.cancel(); } catch { /* bỏ qua */ }
+  // Tới đây giọng đọc đã dứt hẳn rồi (xem doiDocXong). KHÔNG cắt ngang nữa:
+  // thầy chỉ ra rằng phải để đọc xong thì âm mới lên — cắt ngang thì iPhone
+  // vẫn còn giữ phiên âm thanh một lúc, thẻ <audio> chạy mà không ra tiếng.
   try {
     el2.currentTime = 0;
     const p = el2.play();
@@ -2709,6 +2708,26 @@ let thuongSauKhiDong = null;
 let phaoRaf = 0;
 
 const KHEN_TO = ["Giỏi quá!", "Tuyệt vời!", "Cừ lắm!", "Xuất sắc!", "Đỉnh thật!"];
+
+/** Đợi cho giọng đọc dứt hẳn rồi mới làm tiếp. Thầy chỉ đúng chỗ: phải để đọc
+    xong thì tiếng thưởng mới lên được — iPhone chỉ cho một nguồn âm thanh chiếm
+    loa, đang đọc dở mà bật nhạc thì nhạc chạy câm.
+    Có chặn trên 6 giây: máy nào kẹt không báo đọc xong thì cũng phải đi tiếp,
+    không để trẻ ngồi chờ mãi. */
+function doiDocXong(xong) {
+  const ss = window.speechSynthesis;
+  if (!ss || !ss.speaking) return xong();
+  let dem = 0;
+  const hen = setInterval(() => {
+    dem += 1;
+    if (!ss.speaking || dem > 60) {          // 60 × 100ms = 6 giây
+      clearInterval(hen);
+      if (ss.speaking) { try { ss.cancel(); } catch { /* thôi */ } }
+      // Nhường thêm một nhịp cho máy trả lại loa rồi mới phát nhạc.
+      setTimeout(xong, 120);
+    }
+  }, 100);
+}
 
 function moThuong(xong) {
   const v = $("#thuongView");
@@ -2845,7 +2864,7 @@ function advance() {
   // không chen lúc vừa chấm — chấm xong còn phải cho đọc lời giải đã.
   if (stkDung > 0 && stkDung % STK_MOI === 0 && !thuongDangMo) {
     stkDung = 0;                         // đã thưởng rồi thì đếm lại từ đầu
-    return moThuong(diTiep);
+    return doiDocXong(() => moThuong(diTiep));
   }
   diTiep();
 }
