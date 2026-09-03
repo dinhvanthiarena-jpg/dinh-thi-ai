@@ -2478,6 +2478,18 @@ function danhThucTieng() {
     const src = a.createBufferSource();
     src.buffer = b; src.connect(a.destination); src.start(0);
   } catch { /* máy không cho thì thôi */ }
+  // Mồi luôn thẻ <audio>: phát rồi tắt ngay trong đúng cú chạm này, để lần sau
+  // gọi play() máy không chặn nữa. iPhone chỉ cho phát tiếng nếu đã được mồi
+  // trong một cú chạm thật của người dùng.
+  try {
+    const el2 = document.getElementById("amThuong");
+    if (el2) {
+      el2.muted = true;
+      const p = el2.play();
+      const tat = () => { el2.pause(); el2.currentTime = 0; el2.muted = false; };
+      p && p.then ? p.then(tat).catch(() => { el2.muted = false; }) : tat();
+    }
+  } catch { /* thôi vậy */ }
 }
 ["pointerdown", "touchstart", "keydown"].forEach(ev =>
   window.addEventListener(ev, danhThucTieng, { once: false, passive: true }));
@@ -2599,6 +2611,26 @@ function tiengLapLanh(a, t0) {
   }
 }
 
+/* Tiếng trao thưởng ƯU TIÊN phát từ FILE assets/thuong.mp3 qua thẻ <audio>.
+   Đường này không dính lỗi lịch hẹn của WebAudio (bộ tiếng đang ngủ thì nốt bị
+   hẹn vào quá khứ nên im ru), lại dễ kiểm tra hơn nhiều. File hỏng hoặc máy
+   chặn thì mới rơi về tiếng tự tổng hợp. */
+let amHong = false;
+let dangPhatFile = false;      // file nhạc đã có sẵn tiếng pháo nổ trong đó
+function phatFileThuong() {
+  if (!S.sound) return false;
+  const el2 = $("#amThuong");
+  if (!el2 || amHong) return false;
+  try {
+    el2.currentTime = 0;
+    const p = el2.play();
+    dangPhatFile = true;
+    // play() trả về lời hứa; máy chặn thì bắt lấy rồi quay sang tiếng tổng hợp.
+    if (p && p.catch) p.catch(() => { amHong = true; dangPhatFile = false; keuThuong(); });
+    return true;
+  } catch { amHong = true; return false; }
+}
+
 /** Cả màn trao thưởng: kèn + vỗ tay + lấp lánh chồng lên nhau. Gọi đúng lúc
     ảnh hiện ra, để tiếng và hình cùng nổ một lượt. */
 function keuThuong() {
@@ -2686,7 +2718,9 @@ function moThuong(xong) {
 
   v.hidden = false;
   document.body.style.overflow = "hidden";
-  keuThuong();          // tiếng reo mừng nổ cùng lúc ảnh hiện ra
+  // Tiếng reo mừng nổ cùng lúc ảnh hiện ra. File không phát được thì tự
+  // chuyển sang tiếng tổng hợp, không để im lặng.
+  if (!phatFileThuong()) keuThuong();
   banPhao();
   $("#btnThuongTiep").focus();
 }
@@ -2694,6 +2728,10 @@ function moThuong(xong) {
 function dongThuong() {
   const v = $("#thuongView");
   v.hidden = true;
+  // Tắt nhạc luôn: file dài 6 giây, không tắt thì nó kêu lấn sang câu sau,
+  // trẻ đang tập trung nghe câu mới lại bị pháo nổ bên tai.
+  try { const am = $("#amThuong"); am.pause(); am.currentTime = 0; } catch { /* thôi */ }
+  dangPhatFile = false;
   thuongDangMo = false;
   document.body.style.overflow = "";
   cancelAnimationFrame(phaoRaf);
@@ -2728,7 +2766,9 @@ function banPhao() {
       hat.push({ x, y, vx: Math.cos(g) * v, vy: Math.sin(g) * v, s: 1.6 + Math.random() * 2,
                  mau: Math.random() < .25 ? "#fff" : mau, doi: 1 });
     }
-    keuNo();
+    // File nhạc của thầy đã có sẵn tiếng pháo nổ; kêu thêm tiếng tổng hợp
+    // nữa là chồng chéo, mà file lại chuẩn hoá kịch trần nên dễ vỡ tiếng.
+    if (!dangPhatFile) keuNo();
   }
 
   // Nổ chùm đầu ngay, các chùm sau lệch giờ nhau cho ra tiếng "độp... độp... độp".
@@ -5052,9 +5092,11 @@ $("#btnThuTieng").addEventListener("click", () => {
   if (!S.sound) return toast("Đang tắt Phát âm tự động — bật lên rồi thử lại nhé.");
   const a = tiengSanSang();
   if (!a) return toast("Máy chưa cho phát tiếng. Chạm vào màn hình một cái rồi bấm lại.");
-  keuThuong();
-  for (let i = 0; i < 4; i++) keuNo(i * .3);
-  toast("Đang phát thử. Không nghe thấy gì thì kiểm tra nút gạt im lặng và mức âm lượng của máy.");
+  const bangFile = phatFileThuong();
+  if (!bangFile) keuThuong();
+  toast(bangFile
+    ? "Đang phát thử bằng file tiếng. Không nghe thấy gì thì kiểm tra nút gạt im lặng và âm lượng máy."
+    : "Đang phát thử bằng tiếng tự tạo. Không nghe thấy gì thì kiểm tra nút gạt im lặng và âm lượng máy.");
 });
 $("#optMotion").addEventListener("change", e => { S.motion = e.target.checked; save(); applyTheme(); });
 $("#optVi").addEventListener("change", e => { S.showVi = e.target.checked; save(); });
