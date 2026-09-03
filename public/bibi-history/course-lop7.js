@@ -82,5 +82,82 @@ Object.assign(window.LESSONS, {
     {type:"quiz-mc", q:"Bộ luật nổi tiếng được ban hành dưới thời vua Lê Thánh Tông là gì?", options:["Luật Hồng Đức","Hình thư","Hoàng Việt luật lệ","Luật Gia Long"], correct:0},
   ]},
 
+  "g7-0-0": { title:"Quá trình hình thành chế độ phong kiến Tây Âu", slides:[
+    {type:"intro", text:"Sau khi đế quốc Rô-ma sụp đổ, một trật tự xã hội hoàn toàn mới đã hình thành ở châu Âu. Cùng BiBi tìm hiểu xã hội phong kiến Tây Âu nhé."},
+    {type:"fact", icon:"sword", meta:"Bối cảnh", title:"Đế quốc Rô-ma sụp đổ (476)", text:"Năm 476, đế quốc Rô-ma bị các bộ tộc người Giéc-man xâm chiếm và sụp đổ. Trên lãnh thổ đó, người Giéc-man lập nên nhiều vương quốc mới, dần hình thành hai giai cấp cơ bản: lãnh chúa phong kiến và nông nô."},
+    {type:"fact", icon:"group", meta:"Đơn vị kinh tế – xã hội", title:"Lãnh địa phong kiến", text:"Mỗi lãnh chúa cai quản một vùng đất riêng gọi là lãnh địa — một đơn vị kinh tế, chính trị khép kín. Nông nô nhận ruộng đất của lãnh chúa để cày cấy và phải nộp tô rất nặng."},
+    {type:"marker", tag:"Biển sử liệu", text:["Từ khoảng thế kỉ XI, thủ công nghiệp và thương nghiệp phát triển, nhiều thành thị trung đại xuất hiện, dần thoát khỏi sự ràng buộc của lãnh địa.", "Thành thị trung đại trở thành nơi thúc đẩy kinh tế hàng hoá và mầm mống của quan hệ sản xuất mới sau này."]},
+    {type:"quiz-mc", q:"Hai giai cấp cơ bản của xã hội phong kiến Tây Âu là gì?", options:["Lãnh chúa phong kiến và nông nô","Quý tộc và nô lệ","Tăng lữ và nông dân","Tư sản và vô sản"], correct:0},
+  ]},
+
+  "g7-0-1": { title:"Phát kiến địa lí & chủ nghĩa tư bản Tây Âu", slides:[
+    {type:"intro", text:"Vì sao người châu Âu lại đổ xô đi tìm những con đường biển mới vào cuối thế kỉ XV? Cùng BiBi khám phá thời đại của các phát kiến địa lí."},
+    {type:"fact", icon:"globe", meta:"Những chuyến đi lịch sử", title:"Các cuộc phát kiến địa lí lớn", text:"Năm 1492, Cô-lôm-bô tìm ra châu Mỹ. Năm 1498, Va-xcô đơ Ga-ma tìm ra đường biển từ châu Âu vòng qua châu Phi sang Ấn Độ. Năm 1519–1522, đoàn thám hiểm của Ma-gien-lan thực hiện chuyến đi vòng quanh Trái Đất đầu tiên."},
+    {type:"fact", icon:"coins", meta:"Hệ quả", title:"Tích luỹ vốn cho chủ nghĩa tư bản", text:"Của cải cướp bóc được từ các vùng đất mới và việc buôn bán, kể cả buôn bán nô lệ, đã giúp giai cấp tư sản châu Âu tích luỹ số vốn ban đầu rất lớn, thúc đẩy quan hệ sản xuất tư bản chủ nghĩa hình thành ở Tây Âu."},
+    {type:"quiz-mc", q:"Ai là người thực hiện chuyến đi vòng quanh Trái Đất đầu tiên (1519–1522)?", options:["Ma-gien-lan","Cô-lôm-bô","Va-xcô đơ Ga-ma","Va-xcô Nu-nhết"], correct:0},
+  ]},
+
+  "g7-0-2": { title:"Văn hoá Phục hưng & cải cách tôn giáo", slides:[
+    {type:"intro", text:"Vì sao có một phong trào lại được gọi là \"Phục hưng\" — hồi sinh? Cùng BiBi tìm hiểu bước ngoặt tư tưởng lớn của châu Âu thời trung đại."},
+    {type:"fact", icon:"scroll", meta:"TK XIV – XVII", title:"Phong trào Văn hoá Phục hưng", text:"Giai cấp tư sản châu Âu khôi phục lại những giá trị tinh hoa của văn hoá Hy Lạp – La Mã cổ đại, đề cao giá trị và năng lực con người, phản đối tư tưởng khắc nghiệt và lạc hậu của Giáo hội. Tiêu biểu có Lê-ô-na đơ Vanh-xi (danh hoạ bức \"Mô-na Li-sa\") và văn hào Sếch-xpia."},
+    {type:"fact", icon:"scroll", meta:"Đầu TK XVI", title:"Cải cách tôn giáo", text:"Năm 1517, Mác-tin Lu-thơ khởi xướng phong trào cải cách tôn giáo ở Đức, phản đối những quy định lỗi thời, hà khắc của Giáo hội Thiên Chúa giáo, dẫn đến sự ra đời của đạo Tin Lành."},
+    {type:"quiz-mc", q:"Ai là hoạ sĩ vẽ bức tranh nổi tiếng \"Mô-na Li-sa\" thời Phục hưng?", options:["Lê-ô-na đơ Vanh-xi","Mác-tin Lu-thơ","Sếch-xpia","Cô-lôm-bô"], correct:0},
+  ]},
+
+  "g7-1-0": { title:"Trung Quốc (TK VII – giữa TK XIX)", slides:[
+    {type:"intro", text:"Sau nhà Tuỳ, Trung Quốc trải qua nhiều triều đại lớn, để lại những phát minh làm thay đổi cả thế giới. Cùng BiBi điểm qua giai đoạn này."},
+    {type:"fact", icon:"crown", meta:"Các triều đại nối tiếp", title:"Đường – Tống – Nguyên – Minh – Thanh", text:"Sau nhà Tuỳ, các triều Đường, Tống, Nguyên (do người Mông Cổ lập), Minh, Thanh lần lượt nối tiếp trị vì. Nhà Đường (618–907) là giai đoạn thịnh trị, lãnh thổ được mở rộng đáng kể."},
+    {type:"fact", icon:"scroll", meta:"Thành tựu", title:"Tứ đại phát minh", text:"Người Trung Quốc thời kì này hoàn thiện bốn phát minh lớn: kĩ thuật làm giấy, kĩ thuật in, la bàn và thuốc súng — có ảnh hưởng sâu rộng tới sự phát triển của cả thế giới."},
+    {type:"marker", tag:"Biển sử liệu", text:["Đến giữa thế kỉ XIX, chế độ phong kiến Mãn Thanh suy yếu, Trung Quốc dần trở thành đối tượng xâm lược của các nước tư bản phương Tây."]},
+    {type:"quiz-match", instruction:"Nối phát minh với vai trò của nó", pairs:[
+      {left:"La bàn", right:"Giúp xác định phương hướng khi đi biển"},
+      {left:"Kĩ thuật in", right:"Giúp nhân bản sách nhanh và nhiều hơn"},
+      {left:"Thuốc súng", right:"Dùng trong quân sự và pháo hoa"},
+    ]},
+  ]},
+
+  "g7-1-1": { title:"Ấn Độ (TK IV – giữa TK XIX)", slides:[
+    {type:"intro", text:"Đền Ta-giơ Ma-han nổi tiếng thế giới ra đời dưới triều đại nào của Ấn Độ? Cùng BiBi tìm hiểu Ấn Độ thời trung đại."},
+    {type:"fact", icon:"crown", meta:"TK IV – VI", title:"Vương triều Gúp-ta", text:"Vương triều Gúp-ta được coi là thời kì hoàng kim của văn hoá Ấn Độ cổ - trung đại, với nhiều thành tựu về tôn giáo, kiến trúc, điêu khắc và khoa học."},
+    {type:"fact", icon:"temple", meta:"XVI – giữa XIX", title:"Vương triều Mô-gôn", text:"Vương triều Mô-gôn là triều đại phong kiến cuối cùng ở Ấn Độ, để lại công trình kiến trúc nổi tiếng đền Ta-giơ Ma-han. Giữa thế kỉ XIX, Ấn Độ trở thành thuộc địa của thực dân Anh."},
+    {type:"quiz-mc", q:"Đền Ta-giơ Ma-han nổi tiếng của Ấn Độ được xây dựng dưới vương triều nào?", options:["Vương triều Mô-gôn","Vương triều Gúp-ta","Vương triều Đê-li","Vương triều Ma-ga-đa"], correct:0},
+  ]},
+
+  "g7-2-0": { title:"Các vương quốc phong kiến Đông Nam Á (nửa sau TK X – nửa đầu TK XVI)", slides:[
+    {type:"intro", text:"Đây được coi là thời kì phát triển thịnh vượng nhất của các vương quốc phong kiến Đông Nam Á. Cùng BiBi điểm qua bức tranh chung nhé."},
+    {type:"fact", icon:"crown", meta:"Các vương quốc tiêu biểu", title:"Thời kì thịnh vượng", text:"Giai đoạn này chứng kiến sự phát triển rực rỡ của Đại Việt, Chăm-pa, vương quốc Ăng-co (Cam-pu-chia), Mô-giô-pa-hít (In-đô-nê-xi-a), Su-khô-thai rồi A-út-thay-a (Thái Lan)..."},
+    {type:"fact", icon:"coins", meta:"Kinh tế", title:"Nông nghiệp kết hợp buôn bán biển", text:"Kinh tế nông nghiệp lúa nước kết hợp với thủ công nghiệp và buôn bán đường biển phát triển mạnh mẽ, đưa nhiều vương quốc Đông Nam Á trở thành các trung tâm thương mại sầm uất."},
+    {type:"quiz-mc", q:"Đây là thời kì như thế nào của các vương quốc phong kiến Đông Nam Á?", options:["Phát triển thịnh vượng nhất","Mới hình thành sơ khai","Suy yếu và tan rã","Bị đô hộ hoàn toàn"], correct:0},
+  ]},
+
+  "g7-2-1": { title:"Vương quốc Lào", slides:[
+    {type:"intro", text:"Vương quốc Lan Xang — \"đất nước Triệu Voi\" — đã từng thịnh vượng như thế nào? Cùng BiBi tìm hiểu nước Lào thời phong kiến."},
+    {type:"fact", icon:"crown", meta:"Thành lập (1353)", title:"Pha Ngừm lập vương quốc Lan Xang", text:"Năm 1353, Pha Ngừm thống nhất các mường Lào, lập nên vương quốc Lan Xang (nghĩa là \"Triệu Voi\"). Vương quốc phát triển thịnh vượng nhất vào các thế kỉ XV – XVII."},
+    {type:"marker", tag:"Biển sử liệu", text:["Từ thế kỉ XVIII, Lan Xang suy yếu dần do các cuộc tranh chấp nội bộ, sau đó bị chia cắt và trở thành thuộc địa của thực dân Pháp vào cuối thế kỉ XIX."]},
+    {type:"quiz-mc", q:"Ai là người lập ra vương quốc Lan Xang năm 1353?", options:["Pha Ngừm","Giay-a-vác-man II","Xu-ri-nhoa-vông","Chăn-thạ-vông"], correct:0},
+  ]},
+
+  "g7-2-2": { title:"Vương quốc Campuchia", slides:[
+    {type:"intro", text:"Ăng-co Vát — một trong những công trình tôn giáo lớn nhất thế giới — là di sản của vương quốc nào? Cùng BiBi tìm hiểu Campuchia thời Ăng-co."},
+    {type:"fact", icon:"crown", meta:"802–1431", title:"Thời kì Ăng-co huy hoàng", text:"Người Khơ-me lập nên vương quốc Ăng-co, phát triển hùng mạnh và để lại nền văn minh rực rỡ nhất trong lịch sử Campuchia."},
+    {type:"heritage", icon:"temple", title:"Quần thể đền Ăng-co Vát, Ăng-co Thom", text:"Đây là những công trình kiến trúc đền – núi đồ sộ, tinh xảo bậc nhất Đông Nam Á, thể hiện trình độ nghệ thuật và tôn giáo (Hin-đu giáo, sau đó Phật giáo) rất cao của người Khơ-me thời kì này."},
+    {type:"quiz-mc", q:"Quần thể đền nổi tiếng nào là di sản của vương quốc Ăng-co?", options:["Ăng-co Vát","Bô-rô-bu-đua","Mỹ Sơn","Ta-giơ Ma-han"], correct:0},
+  ]},
+
+  "g7-4-4": { title:"Nước Đại Ngu thời Hồ (1400–1407)", slides:[
+    {type:"intro", text:"Một triều đại chỉ tồn tại vỏn vẹn 7 năm nhưng để lại nhiều cải cách táo bạo. Cùng BiBi tìm hiểu nhà Hồ."},
+    {type:"fact", icon:"crown", meta:"Năm 1400", title:"Hồ Quý Ly lập nhà Hồ", text:"Năm 1400, Hồ Quý Ly phế truất vua Trần, lập ra nhà Hồ, đổi quốc hiệu nước ta thành Đại Ngu."},
+    {type:"fact", icon:"scroll", meta:"Cải cách", title:"Những cải cách táo bạo", text:"Hồ Quý Ly thực hiện nhiều cải cách: chính sách hạn điền, hạn nô (hạn chế ruộng đất và nô tì của quý tộc), phát hành tiền giấy thay tiền đồng — là những cải cách khá táo bạo so với đương thời."},
+    {type:"marker", tag:"Biển sử liệu", text:["Do chưa kịp phát huy hiệu quả và lòng dân chưa thuận, năm 1407 nhà Hồ nhanh chóng thất bại trước cuộc xâm lược của nhà Minh.", "Đất nước ta lại rơi vào ách đô hộ, dẫn tới cuộc khởi nghĩa Lam Sơn mà các em đã học."]},
+    {type:"quiz-mc", q:"Hồ Quý Ly đổi quốc hiệu nước ta thành gì?", options:["Đại Ngu","Đại Việt","Đại Cồ Việt","Vạn Xuân"], correct:0},
+  ]},
+
+  "g7-5-2": { title:"Chăm-pa & vùng đất Nam Bộ (TK X–XVI)", slides:[
+    {type:"intro", text:"Trong khi Đại Việt phát triển ở phía Bắc, Chăm-pa và vùng đất Nam Bộ trải qua những biến chuyển riêng. Cùng BiBi tìm hiểu nhé."},
+    {type:"fact", icon:"temple", meta:"Chăm-pa (TK X–XVI)", title:"Giao thoa và dần hội nhập", text:"Trong giai đoạn này, Chăm-pa tiếp tục phát triển nhưng cũng trải qua nhiều cuộc xung đột với Đại Việt. Qua thời gian, phần lớn lãnh thổ Chăm-pa dần được sáp nhập vào Đại Việt."},
+    {type:"fact", icon:"wave", meta:"Vùng đất Nam Bộ", title:"Vùng đất còn hoang sơ", text:"Sau khi vương quốc Phù Nam suy tàn, vùng đất Nam Bộ thời kì này dân cư còn thưa thớt, chủ yếu là những cư dân Chân Lạp. Việc khai phá quy mô lớn của người Việt chỉ thực sự diễn ra từ thế kỉ XVII trở đi."},
+    {type:"quiz-mc", q:"Trong giai đoạn TK X–XVI, phần lớn lãnh thổ Chăm-pa dần diễn biến ra sao?", options:["Dần được sáp nhập vào Đại Việt","Trở thành thuộc địa của nhà Minh","Sáp nhập vào Chân Lạp","Tách thành nhiều tiểu quốc độc lập"], correct:0},
+  ]},
+
 });
 })();
