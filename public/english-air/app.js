@@ -2700,7 +2700,7 @@ const keuTiec = () => chuoiNot([[392, 0, .20], [294.7, .13, .34]], "sine", .045)
    khoảng 10KB mỗi cái — bật lên phải nhẹ, không được làm khựng máy yếu.
    Đếm theo TỔNG số câu đúng trong bài chứ không phải đúng liên tiếp: sai một
    câu mà mất luôn phần thưởng đang dồn thì nản. */
-const STK_SO = 8;                 // assets/sticker/s1..s8.webp
+const STK_SO = 17;                // assets/sticker/s1..s17.webp
 const STK_MOI = 3;                // cứ 3 câu đúng thì mở trang thưởng
 let stkDung = 0;                  // đã đúng bao nhiêu câu (trong lượt học này)
 let stkDo = [];                   // rổ ảnh thưởng đã trộn, bốc hết mới trộn lại
@@ -2740,6 +2740,37 @@ function doiDocXong(xong) {
   }, 100);
 }
 
+let anhDangThuong = "";
+
+/** Tải ảnh thưởng về máy.
+    iPhone KHÔNG tải được bằng thẻ <a download> — nó chỉ mở ảnh ra tab khác.
+    Cách đúng trên iPhone là gọi bảng Chia sẻ của máy, trong đó có "Lưu ảnh".
+    Máy tính và Android thì <a download> chạy bình thường. */
+async function taiAnhThuong() {
+  if (!anhDangThuong) return;
+  const ten = "ON-Language-" + Date.now() + ".webp";
+  try {
+    const res = await fetch(anhDangThuong);
+    const blob = await res.blob();
+    const file = new File([blob], ten, { type: blob.type || "image/webp" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: "Ảnh thưởng ON-Language" });
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const a = el("a");
+    a.href = url; a.download = ten;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    toast("Đã tải ảnh về máy.");
+  } catch (e) {
+    // Người học bấm huỷ trong bảng chia sẻ thì không phải lỗi, đừng báo gì.
+    if (e && e.name === "AbortError") return;
+    toast("Chưa tải được ảnh. Bạn thử lại nhé.");
+  }
+}
+$("#btnTaiAnh").addEventListener("click", taiAnhThuong);
+
 function moThuong(xong) {
   const v = $("#thuongView");
   if (!v) { xong && xong(); return; }
@@ -2749,7 +2780,8 @@ function moThuong(xong) {
   $("#thuongTitle").textContent = KHEN_TO[Math.floor(Math.random() * KHEN_TO.length)];
   $("#thuongSub").textContent = `Đúng ${STK_MOI} câu liền rồi đó. Nghỉ tay ngắm pháo một tí nào!`;
   const im = $("#thuongAnh");
-  im.src = "assets/sticker/s" + stkTiep() + ".webp";
+  anhDangThuong = "assets/sticker/s" + stkTiep() + ".webp";
+  im.src = anhDangThuong;
   // Thiếu file thì giấu ảnh đi thôi, phần còn lại của trang vẫn dùng được.
   im.hidden = false;
   im.onerror = () => { im.hidden = true; };

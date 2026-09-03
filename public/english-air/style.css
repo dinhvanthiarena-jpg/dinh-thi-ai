@@ -2020,3 +2020,20 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   width: 100%; text-align: left; padding: 0; background: none;
   font-size: 1rem; font-weight: 700; color: var(--brand);
 }
+
+/* Nút tải ảnh thưởng — mũi tên nhún lên xuống liên tục cho người học để ý
+   mà bấm vào, chứ nút đứng im giữa màn pháo hoa thì chẳng ai nhìn thấy. */
+.thuong-tai {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  padding: var(--s2) var(--s4); border-radius: var(--rf);
+  background: color-mix(in srgb, var(--amber) 16%, transparent);
+  color: var(--amber); font-size: .95rem; font-weight: 800;
+}
+.thuong-tai:active { transform: scale(.96); }
+.tai-mui { display: grid; place-items: center; animation: tai-nhun 1.1s ease-in-out infinite; }
+.tai-mui .ic { width: 22px; height: 22px; }
+@keyframes tai-nhun {
+  0%, 100% { transform: translateY(-3px); }
+  50%      { transform: translateY(4px); }
+}
+:root[data-motion="reduce"] .tai-mui { animation: none; }
