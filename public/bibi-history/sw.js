@@ -3,7 +3,7 @@
    Toàn bộ app chạy offline sau lần mở đầu tiên.
    Đổi CACHE khi sửa file để buộc tải lại bản mới.
    ============================================================ */
-const CACHE = "bibi-history-v4";
+const CACHE = "bibi-history-v5";
 
 const SHELL = [
   "./",
