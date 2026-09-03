@@ -1013,10 +1013,128 @@ const c9 = {
   ],
 };
 
+// ===== Lớp 4-5, chương 2 — thêm 23 quốc gia nữa (23 + 15 nước ở chương 1 = 38 nước), phủ
+// rộng hơn khắp các châu lục để bớt "ít bài" — mỗi nước một thẻ gọn: thủ đô, châu lục.
+
+function pw(id, name, capital, continentLabel) {
+  return { t: "place", id, title: name, subtitle: `${continentLabel} · Thủ đô ${capital}`,
+    body: `${name} thuộc ${continentLabel.toLowerCase()}, có thủ đô là ${capital}.`,
+    facts: [{ label: "Thủ đô", value: capital }, { label: "Châu lục", value: continentLabel }] };
+}
+
+const c1c = {
+  id: "wd-l45-c2",
+  title: "38 quốc gia trên thế giới",
+  icon: "book",
+  lessons: [
+    {
+      id: "wd-l45-c2-l1",
+      title: "Thêm các nước châu Á",
+      goal: "Ấn Độ, In-đô-nê-xi-a, Phi-líp-pin, Ma-lai-xi-a, Xin-ga-po, Ả Rập Xê Út, Pa-ki-xtan",
+      teach: [
+        pw("in", "Ấn Độ", "Niu Đê-li", "Châu Á"),
+        pw("id", "In-đô-nê-xi-a", "Gia-các-ta", "Châu Á"),
+        pw("ph", "Phi-líp-pin", "Ma-ni-la", "Châu Á"),
+        pw("my", "Ma-lai-xi-a", "Cua-la Lăm-pơ", "Châu Á"),
+        pw("sg", "Xin-ga-po", "Xin-ga-po", "Châu Á"),
+        pw("sa", "Ả Rập Xê Út", "Ri-i-át", "Châu Á"),
+        pw("pk", "Pa-ki-xtan", "I-xla-ma-bát", "Châu Á"),
+      ],
+      quiz: [
+        { t: "mapclick", q: "Hãy bấm vào Ấn Độ trên bản đồ.", targetType: "country", targetId: "in" },
+        { t: "mapclick", q: "Hãy bấm vào In-đô-nê-xi-a trên bản đồ.", targetType: "country", targetId: "id" },
+        { t: "choice", q: "Thủ đô của Ấn Độ là gì?", options: ["Niu Đê-li", "Gia-các-ta", "Ma-ni-la", "Ri-i-át"], answer: 0 },
+        { t: "match", q: "Nối quốc gia với thủ đô.",
+          pairs: [["Xin-ga-po", "Xin-ga-po"], ["Ma-lai-xi-a", "Cua-la Lăm-pơ"], ["Pa-ki-xtan", "I-xla-ma-bát"]] },
+        { t: "truefalse", q: "Ấn Độ, In-đô-nê-xi-a, Phi-líp-pin đều thuộc châu Á.", answer: true },
+      ],
+    },
+    {
+      id: "wd-l45-c2-l2",
+      title: "Thêm các nước châu Âu",
+      goal: "Ý, Tây Ban Nha, Hà Lan, Thuỵ Điển, Thuỵ Sĩ, Bồ Đào Nha, Ba Lan, Hy Lạp",
+      teach: [
+        pw("it", "Ý", "Rô-ma", "Châu Âu"),
+        pw("es", "Tây Ban Nha", "Ma-đrít", "Châu Âu"),
+        pw("nl", "Hà Lan", "Am-xtéc-đam", "Châu Âu"),
+        pw("se", "Thuỵ Điển", "Xtốc-khôm", "Châu Âu"),
+        pw("ch", "Thuỵ Sĩ", "Béc-nơ", "Châu Âu"),
+        pw("pt", "Bồ Đào Nha", "Li-xbon", "Châu Âu"),
+        pw("pl", "Ba Lan", "Vác-sa-va", "Châu Âu"),
+        pw("gr", "Hy Lạp", "A-ten", "Châu Âu"),
+      ],
+      quiz: [
+        { t: "mapclick", q: "Hãy bấm vào Ý trên bản đồ.", targetType: "country", targetId: "it" },
+        { t: "mapclick", q: "Hãy bấm vào Tây Ban Nha trên bản đồ.", targetType: "country", targetId: "es" },
+        { t: "choice", q: "Thủ đô của Ý là gì?", options: ["Rô-ma", "Ma-đrít", "A-ten", "Béc-nơ"], answer: 0 },
+        { t: "match", q: "Nối quốc gia với thủ đô.",
+          pairs: [["Hà Lan", "Am-xtéc-đam"], ["Thuỵ Điển", "Xtốc-khôm"], ["Ba Lan", "Vác-sa-va"]] },
+        { t: "drag", q: "Kéo mỗi thủ đô vào đúng quốc gia.",
+          buckets: ["Bồ Đào Nha", "Hy Lạp", "Thuỵ Sĩ"],
+          items: [{ label: "Li-xbon", bucket: 0 }, { label: "A-ten", bucket: 1 }, { label: "Béc-nơ", bucket: 2 }] },
+      ],
+    },
+    {
+      id: "wd-l45-c2-l3",
+      title: "Thêm các nước châu Mỹ",
+      goal: "Ca-na-đa, Mê-hi-cô, Ác-hen-ti-na, Chi-lê",
+      teach: [
+        pw("ca", "Ca-na-đa", "Ốt-ta-oa", "Châu Mỹ"),
+        pw("mx", "Mê-hi-cô", "Mê-hi-cô City", "Châu Mỹ"),
+        pw("ar", "Ác-hen-ti-na", "Bu-ê-nốt Ai-rét", "Châu Mỹ"),
+        pw("cl", "Chi-lê", "Xan-ti-a-gô", "Châu Mỹ"),
+      ],
+      quiz: [
+        { t: "mapclick", q: "Hãy bấm vào Ca-na-đa trên bản đồ.", targetType: "country", targetId: "ca" },
+        { t: "mapclick", q: "Hãy bấm vào Ác-hen-ti-na trên bản đồ.", targetType: "country", targetId: "ar" },
+        { t: "choice", q: "Thủ đô của Ca-na-đa là gì?", options: ["Ốt-ta-oa", "Mê-hi-cô City", "Xan-ti-a-gô", "Bu-ê-nốt Ai-rét"], answer: 0 },
+        { t: "match", q: "Nối quốc gia với thủ đô.", pairs: [["Mê-hi-cô", "Mê-hi-cô City"], ["Chi-lê", "Xan-ti-a-gô"]] },
+      ],
+    },
+    {
+      id: "wd-l45-c2-l4",
+      title: "Thêm các nước châu Phi & Đại Dương",
+      goal: "Ni-giê-ri-a, Kê-ni-a, Ma-rốc, Niu Di-lân",
+      teach: [
+        pw("ng", "Ni-giê-ri-a", "A-bu-gia", "Châu Phi"),
+        pw("ke", "Kê-ni-a", "Nai-rô-bi", "Châu Phi"),
+        pw("ma", "Ma-rốc", "Ra-bát", "Châu Phi"),
+        pw("nz", "Niu Di-lân", "Well-ing-tơn", "Châu Đại Dương"),
+      ],
+      quiz: [
+        { t: "mapclick", q: "Hãy bấm vào Ni-giê-ri-a trên bản đồ.", targetType: "country", targetId: "ng" },
+        { t: "mapclick", q: "Hãy bấm vào Niu Di-lân trên bản đồ.", targetType: "country", targetId: "nz" },
+        { t: "choice", q: "Ni-giê-ri-a là quốc gia đông dân nhất châu lục nào?", options: ["Châu Phi", "Châu Á", "Châu Âu", "Châu Mỹ"], answer: 0 },
+        { t: "truefalse", q: "Niu Di-lân thuộc châu Đại Dương.", answer: true },
+      ],
+    },
+    {
+      id: "wd-l45-c2-l5",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại 23 quốc gia vừa học",
+      quiz: [
+        { t: "mapclick", q: "Bấm vào Ấn Độ.", targetType: "country", targetId: "in" },
+        { t: "mapclick", q: "Bấm vào Ý.", targetType: "country", targetId: "it" },
+        { t: "mapclick", q: "Bấm vào Ca-na-đa.", targetType: "country", targetId: "ca" },
+        { t: "mapclick", q: "Bấm vào Ma-rốc.", targetType: "country", targetId: "ma" },
+        { t: "drag", q: "Kéo mỗi quốc gia vào đúng châu lục.",
+          buckets: ["Châu Á", "Châu Âu", "Châu Mỹ", "Châu Phi"],
+          items: [
+            { label: "Xin-ga-po", bucket: 0 }, { label: "Pa-ki-xtan", bucket: 0 },
+            { label: "Hà Lan", bucket: 1 }, { label: "Hy Lạp", bucket: 1 },
+            { label: "Chi-lê", bucket: 2 }, { label: "Ni-giê-ri-a", bucket: 3 },
+          ] },
+        { t: "choice", q: "Thủ đô của Ấn Độ là gì?", options: ["Niu Đê-li", "Ma-ni-la", "Rô-ma", "Xtốc-khôm"], answer: 0 },
+      ],
+    },
+  ],
+};
+
 export const WORLD_COURSE = {
   subject: "world",
   levels: {
-    l45: { chapters: [c1] },
+    l45: { chapters: [c1, c1c] },
     l6:  { chapters: [c2, c4] },
     l7:  { chapters: [c3, c3b] },
     l8:  { chapters: [c7] },

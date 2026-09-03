@@ -839,10 +839,144 @@ const c8 = {
   ],
 };
 
+// ===== Lớp 4-5, chương 2 — 28 tỉnh, thành còn lại (cùng 6 thành phố đã học ở chương 1 là
+// đủ 34 đơn vị hành chính sau sáp nhập 2025). Số liệu diện tích, dân số, sáp nhập lấy đúng
+// từ dữ liệu bản đồ (Free-GIS-Data), không phải ước lượng.
+
+function p2(id, name, mien, dienTich, danSo, sapNhap) {
+  return { t: "place", id, title: name, subtitle: `${REGION_NAME[mien]}`,
+    body: `${name} là tỉnh thuộc ${REGION_NAME[mien].toLowerCase()}, được thành lập từ việc sáp nhập ${sapNhap} vào năm 2025.`,
+    facts: [{ label: "Miền", value: REGION_NAME[mien] }, { label: "Diện tích", value: `${dienTich.toLocaleString("vi-VN")} km²` }, { label: "Dân số", value: `~${(danSo / 1000000).toFixed(1)} triệu` }] };
+}
+const REGION_NAME = { bac: "Miền Bắc", trung: "Miền Trung", nam: "Miền Nam" };
+
+const c1b = {
+  id: "vn-l45-c2",
+  title: "34 tỉnh, thành Việt Nam",
+  icon: "pin",
+  lessons: [
+    {
+      id: "vn-l45-c2-l1",
+      title: "Miền Bắc (phần 1)",
+      goal: "Bắc Ninh, Cao Bằng, Hưng Yên, Lai Châu, Lào Cai, Lạng Sơn, Ninh Bình",
+      teach: [
+        p2("bac-ninh", "Bắc Ninh", "bac", 4718, 3619433, "Bắc Ninh, Bắc Giang"),
+        p2("cao-bang", "Cao Bằng", "bac", 6701, 573119, "Cao Bằng (giữ nguyên)"),
+        p2("hung-yen", "Hưng Yên", "bac", 2515, 3567943, "Hưng Yên, Thái Bình"),
+        p2("lai-chau", "Lai Châu", "bac", 9069, 512601, "Lai Châu (giữ nguyên)"),
+        p2("lao-cai", "Lào Cai", "bac", 13256, 1770645, "Lào Cai, Yên Bái"),
+        p2("lang-son", "Lạng Sơn", "bac", 8310, 881384, "Lạng Sơn (giữ nguyên)"),
+        p2("ninh-binh", "Ninh Bình", "bac", 3821, 4412264, "Hà Nam, Ninh Bình, Nam Định"),
+      ],
+      quiz: [
+        { t: "mapclick", q: "Hãy bấm vào Bắc Ninh trên bản đồ.", targetType: "province", targetId: "bac-ninh" },
+        { t: "mapclick", q: "Hãy bấm vào Lào Cai trên bản đồ.", targetType: "province", targetId: "lao-cai" },
+        { t: "choice", q: "Tỉnh nào được sáp nhập từ Hà Nam, Ninh Bình và Nam Định?", options: ["Ninh Bình", "Bắc Ninh", "Cao Bằng", "Lạng Sơn"], answer: 0 },
+        { t: "order", q: "Sắp xếp theo diện tích tăng dần.", items: ["Hưng Yên", "Bắc Ninh", "Lào Cai"] },
+        { t: "truefalse", q: "Cao Bằng và Lai Châu là hai tỉnh giữ nguyên địa giới, không sáp nhập năm 2025.", answer: true },
+      ],
+    },
+    {
+      id: "vn-l45-c2-l2",
+      title: "Miền Bắc (phần 2)",
+      goal: "Phú Thọ, Quảng Ninh, Sơn La, Thái Nguyên, Tuyên Quang, Điện Biên",
+      teach: [
+        p2("phu-tho", "Phú Thọ", "bac", 9362, 4022493, "Phú Thọ, Vĩnh Phúc, Hoà Bình"),
+        p2("quang-ninh", "Quảng Ninh", "bac", 6155, 1497447, "Quảng Ninh (giữ nguyên)"),
+        p2("son-la", "Sơn La", "bac", 14109, 1404587, "Sơn La (giữ nguyên)"),
+        p2("thai-nguyen", "Thái Nguyên", "bac", 8376, 1799489, "Thái Nguyên, Bắc Kạn"),
+        p2("tuyen-quang", "Tuyên Quang", "bac", 13796, 1865270, "Tuyên Quang, Hà Giang"),
+        p2("dien-bien", "Điện Biên", "bac", 9539, 673091, "Điện Biên (giữ nguyên)"),
+      ],
+      quiz: [
+        { t: "mapclick", q: "Hãy bấm vào Quảng Ninh trên bản đồ.", targetType: "province", targetId: "quang-ninh" },
+        { t: "mapclick", q: "Hãy bấm vào Điện Biên trên bản đồ.", targetType: "province", targetId: "dien-bien" },
+        { t: "choice", q: "Tỉnh nào được sáp nhập từ Phú Thọ, Vĩnh Phúc và Hoà Bình?", options: ["Phú Thọ", "Sơn La", "Tuyên Quang", "Thái Nguyên"], answer: 0 },
+        { t: "drag", q: "Kéo mỗi tỉnh vào đúng nhóm sáp nhập hay giữ nguyên năm 2025.",
+          buckets: ["Có sáp nhập", "Giữ nguyên"],
+          items: [{ label: "Phú Thọ", bucket: 0 }, { label: "Thái Nguyên", bucket: 0 }, { label: "Sơn La", bucket: 1 }, { label: "Điện Biên", bucket: 1 }] },
+      ],
+    },
+    {
+      id: "vn-l45-c2-l3",
+      title: "Miền Trung (phần 1)",
+      goal: "Gia Lai, Hà Tĩnh, Khánh Hoà, Lâm Đồng",
+      teach: [
+        p2("gia-lai", "Gia Lai", "trung", 21577, 3583691, "Gia Lai, Bình Định"),
+        p2("ha-tinh", "Hà Tĩnh", "trung", 5995, 1617938, "Hà Tĩnh (giữ nguyên)"),
+        p2("khanh-hoa", "Khánh Hoà", "trung", 8556, 2243553, "Khánh Hoà, Ninh Thuận"),
+        p2("lam-dong", "Lâm Đồng", "trung", 24244, 3872999, "Lâm Đồng, Đắk Nông, Bình Thuận"),
+      ],
+      quiz: [
+        { t: "mapclick", q: "Hãy bấm vào Gia Lai trên bản đồ.", targetType: "province", targetId: "gia-lai" },
+        { t: "mapclick", q: "Hãy bấm vào Lâm Đồng trên bản đồ.", targetType: "province", targetId: "lam-dong" },
+        { t: "choice", q: "Tỉnh nào được sáp nhập từ 3 tỉnh Lâm Đồng, Đắk Nông và Bình Thuận?", options: ["Lâm Đồng", "Gia Lai", "Khánh Hoà", "Hà Tĩnh"], answer: 0 },
+        { t: "order", q: "Sắp xếp theo diện tích tăng dần.", items: ["Hà Tĩnh", "Khánh Hoà", "Lâm Đồng"] },
+      ],
+    },
+    {
+      id: "vn-l45-c2-l4",
+      title: "Miền Trung (phần 2)",
+      goal: "Nghệ An, Quảng Ngãi, Quảng Trị, Thanh Hoá, Đắk Lắk",
+      teach: [
+        p2("nghe-an", "Nghệ An", "trung", 16487, 3831694, "Nghệ An (giữ nguyên)"),
+        p2("quang-ngai", "Quảng Ngãi", "trung", 14832, 2161735, "Quảng Ngãi, Kon Tum"),
+        p2("quang-tri", "Quảng Trị", "trung", 12700, 1870844, "Quảng Trị, Quảng Bình"),
+        p2("thanh-hoa", "Thanh Hoá", "trung", 11115, 4320947, "Thanh Hoá (giữ nguyên)"),
+        p2("dak-lak", "Đắk Lắk", "trung", 18096, 3346853, "Đắk Lắk, Phú Yên"),
+      ],
+      quiz: [
+        { t: "mapclick", q: "Hãy bấm vào Nghệ An trên bản đồ.", targetType: "province", targetId: "nghe-an" },
+        { t: "mapclick", q: "Hãy bấm vào Đắk Lắk trên bản đồ.", targetType: "province", targetId: "dak-lak" },
+        { t: "choice", q: "Tỉnh nào là tỉnh có diện tích lớn nhất trong 5 tỉnh vừa học?", options: ["Đắk Lắk", "Nghệ An", "Thanh Hoá", "Quảng Trị"], answer: 0 },
+        { t: "truefalse", q: "Quảng Trị được sáp nhập từ Quảng Trị và Quảng Bình.", answer: true },
+      ],
+    },
+    {
+      id: "vn-l45-c2-l5",
+      title: "Miền Nam (phần còn lại)",
+      goal: "An Giang, Cà Mau, Tây Ninh, Vĩnh Long, Đồng Nai",
+      teach: [
+        p2("an-giang", "An Giang", "nam", 9987, 4995214, "An Giang, Kiên Giang"),
+        p2("ca-mau", "Cà Mau", "nam", 6311, 1988464, "Cà Mau, Bạc Liêu"),
+        p2("tay-ninh", "Tây Ninh", "nam", 8537, 3254170, "Tây Ninh, Long An"),
+        p2("vinh-long", "Vĩnh Long", "nam", 6243, 4257581, "Vĩnh Long, Trà Vinh, Bến Tre"),
+        p2("dong-nai", "Đồng Nai", "nam", 12737, 4491408, "Đồng Nai, Bình Phước"),
+      ],
+      quiz: [
+        { t: "mapclick", q: "Hãy bấm vào An Giang trên bản đồ.", targetType: "province", targetId: "an-giang" },
+        { t: "mapclick", q: "Hãy bấm vào Cà Mau trên bản đồ.", targetType: "province", targetId: "ca-mau" },
+        { t: "choice", q: "Tỉnh nào được sáp nhập từ 3 tỉnh Vĩnh Long, Trà Vinh và Bến Tre?", options: ["Vĩnh Long", "An Giang", "Tây Ninh", "Cà Mau"], answer: 0 },
+        { t: "order", q: "Sắp xếp theo dân số tăng dần.", items: ["Cà Mau", "Tây Ninh", "An Giang"] },
+      ],
+    },
+    {
+      id: "vn-l45-c2-l6",
+      title: "Ôn tập chương",
+      checkpoint: true,
+      goal: "Ôn lại toàn bộ 34 tỉnh, thành Việt Nam",
+      quiz: [
+        { t: "mapclick", q: "Bấm vào Phú Thọ.", targetType: "province", targetId: "phu-tho" },
+        { t: "mapclick", q: "Bấm vào Khánh Hoà.", targetType: "province", targetId: "khanh-hoa" },
+        { t: "mapclick", q: "Bấm vào Đồng Nai.", targetType: "province", targetId: "dong-nai" },
+        { t: "choice", q: "Việt Nam có tất cả bao nhiêu tỉnh, thành sau sáp nhập 2025?", options: ["34", "63", "6", "28"], answer: 0 },
+        { t: "drag", q: "Kéo mỗi tỉnh vào đúng miền.",
+          buckets: ["Miền Bắc", "Miền Trung", "Miền Nam"],
+          items: [
+            { label: "Lào Cai", bucket: 0 }, { label: "Quảng Ninh", bucket: 0 },
+            { label: "Nghệ An", bucket: 1 }, { label: "Lâm Đồng", bucket: 1 },
+            { label: "An Giang", bucket: 2 }, { label: "Đồng Nai", bucket: 2 },
+          ] },
+        { t: "truefalse", q: "Một số tỉnh như Cao Bằng, Lai Châu, Sơn La giữ nguyên địa giới, không sáp nhập năm 2025.", answer: true },
+      ],
+    },
+  ],
+};
+
 export const VN_COURSE = {
   subject: "vn",
   levels: {
-    l45: { chapters: [c1] },
+    l45: { chapters: [c1, c1b] },
     l6:  { chapters: [c5] },
     l7:  { chapters: [c6] },
     l8:  { chapters: [c2] },
