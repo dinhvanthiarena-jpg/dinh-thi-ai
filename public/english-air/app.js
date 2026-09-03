@@ -2456,6 +2456,22 @@ function boTiengs() {
   return acx;
 }
 
+/* Mọi tiếng đều đi qua MỘT đường chung rồi mới ra loa: to nhỏ chỉnh một chỗ,
+   và có bộ nén chặn ở cuối nên nhiều tiếng chồng lên nhau cũng không vỡ.
+   Nối thẳng ra loa như trước thì mỗi chỗ một mức, đo ra tiếng quá nhỏ. */
+let busTieng = null;
+function ra(a) {
+  if (busTieng && busTieng.context === a) return busTieng;
+  const to = a.createGain();
+  to.gain.value = 5;                    // đo được đỉnh ~0.11, nhân 5 thành ~0.55
+  const nen = a.createDynamicsCompressor();
+  nen.threshold.value = -8; nen.knee.value = 6; nen.ratio.value = 9;
+  nen.attack.value = .003; nen.release.value = .2;
+  to.connect(nen); nen.connect(a.destination);
+  busTieng = to;
+  return to;
+}
+
 /** Chơi một chuỗi nốt. not = [[tần số Hz, giây bắt đầu, giây ngân]] */
 function chuoiNot(nots, kieu = "triangle", to = .16) {
   if (!S.sound) return;
@@ -2470,9 +2486,93 @@ function chuoiNot(nots, kieu = "triangle", to = .16) {
     g.gain.setValueAtTime(0, t0 + batDau);
     g.gain.linearRampToValueAtTime(to, t0 + batDau + .02);
     g.gain.exponentialRampToValueAtTime(.0001, t0 + batDau + ngan);
-    o.connect(g); g.connect(a.destination);
+    o.connect(g); g.connect(ra(a));
     o.start(t0 + batDau); o.stop(t0 + batDau + ngan + .02);
   });
+}
+
+/** Một tiếng vỗ tay: nhiễu trắng tắt rất nhanh, lọc cho nghe ra tiếng "bốp"
+    của bàn tay chứ không phải tiếng xì. */
+function motTiengVo(a, t, to) {
+  const n = Math.floor(a.sampleRate * .09);
+  const buf = a.createBuffer(1, n, a.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 5);
+  const src = a.createBufferSource(); src.buffer = buf;
+  const bp = a.createBiquadFilter(); bp.type = "bandpass";
+  bp.frequency.value = 1200 + Math.random() * 900; bp.Q.value = .9;
+  const g = a.createGain(); g.gain.value = to;
+  src.connect(bp); bp.connect(g); g.connect(ra(a));
+  src.start(t);
+}
+
+/** Cả tràng vỗ tay: rải khoảng 40 tiếng lệch nhau lộn xộn trong 1,6 giây —
+    đều tăm tắp thì nghe như máy gõ, phải lệch mới ra đám đông. */
+function tiengVoTay(a, t0) {
+  for (let i = 0; i < 42; i++) {
+    const t = t0 + .04 + Math.random() * 1.55;
+    motTiengVo(a, t, .028 + Math.random() * .05);
+  }
+}
+
+/** Kèn chúc mừng: bốn nốt đi lên rồi giữ một hợp âm. Đây là phần làm nên
+    cảm giác "được trao thưởng". */
+function tiengKen(a, t0) {
+  const len = [523.3, 659.3, 784, 1046.5];
+  len.forEach((hz, i) => {
+    // Hai bộ dao động lệch nhau vài Hz cho tiếng dày lên, nghe như kèn thật
+    // chứ không mỏng như tiếng máy tính.
+    [0, 3].forEach(lech => {
+      const o = a.createOscillator(), g = a.createGain();
+      o.type = "sawtooth"; o.frequency.value = hz + lech;
+      const t = t0 + i * .1;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(.055, t + .03);
+      g.gain.exponentialRampToValueAtTime(.0001, t + .34);
+      const lp = a.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 3200;
+      o.connect(lp); lp.connect(g); g.connect(ra(a));
+      o.start(t); o.stop(t + .36);
+    });
+  });
+  // Hợp âm giữ cuối câu kèn
+  [523.3, 659.3, 784].forEach(hz => {
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = "triangle"; o.frequency.value = hz;
+    const t = t0 + .42;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(.05, t + .04);
+    g.gain.exponentialRampToValueAtTime(.0001, t + .9);
+    o.connect(g); g.connect(ra(a));
+    o.start(t); o.stop(t + .92);
+  });
+}
+
+/** Tiếng lấp lánh rải rác cho có không khí hội hè. */
+function tiengLapLanh(a, t0) {
+  for (let i = 0; i < 9; i++) {
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = "sine";
+    o.frequency.value = 1500 + Math.random() * 1400;
+    const t = t0 + .3 + Math.random() * 1.3;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(.05, t + .015);
+    g.gain.exponentialRampToValueAtTime(.0001, t + .22);
+    o.connect(g); g.connect(ra(a));
+    o.start(t); o.stop(t + .24);
+  }
+}
+
+/** Cả màn trao thưởng: kèn + vỗ tay + lấp lánh chồng lên nhau. Gọi đúng lúc
+    ảnh hiện ra, để tiếng và hình cùng nổ một lượt. */
+function keuThuong() {
+  if (!S.sound) return;
+  const a = boTiengs();
+  if (!a) return;
+  if (a.state === "suspended") a.resume().catch(() => {});
+  const t0 = a.currentTime + .02;
+  tiengKen(a, t0);
+  tiengVoTay(a, t0);
+  tiengLapLanh(a, t0);
 }
 
 /** Tiếng pháo nổ "độp": một cú bụp trầm rồi tiếng lẹt xẹt tắt dần. Dùng nhiễu
@@ -2488,9 +2588,9 @@ function keuNo(tre = 0) {
   o.type = "sine";
   o.frequency.setValueAtTime(180, t);
   o.frequency.exponentialRampToValueAtTime(46, t + .16);
-  g.gain.setValueAtTime(.22, t);
+  g.gain.setValueAtTime(.14, t);
   g.gain.exponentialRampToValueAtTime(.0001, t + .2);
-  o.connect(g); g.connect(a.destination);
+  o.connect(g); g.connect(ra(a));
   o.start(t); o.stop(t + .22);
   // Lẹt xẹt: nhiễu trắng tắt dần, cho ra tiếng tàn pháo.
   const n = Math.floor(a.sampleRate * .3);
@@ -2499,15 +2599,15 @@ function keuNo(tre = 0) {
   for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.6);
   const src = a.createBufferSource(); src.buffer = buf;
   const bp = a.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1900; bp.Q.value = .7;
-  const gn = a.createGain(); gn.gain.value = .1;
-  src.connect(bp); bp.connect(gn); gn.connect(a.destination);
+  const gn = a.createGain(); gn.gain.value = .07;
+  src.connect(bp); bp.connect(gn); gn.connect(ra(a));
   src.start(t + .02);
 }
 
 /** Đúng: ba nốt đi lên, nghe là biết được khen. */
-const keuVui = () => chuoiNot([[523.3, 0, .16], [659.3, .09, .16], [784, .18, .30]], "triangle", .15);
+const keuVui = () => chuoiNot([[523.3, 0, .16], [659.3, .09, .16], [784, .18, .30]], "triangle", .05);
 /** Sai: hai nốt đi xuống, nhẹ thôi — tiếc chứ không phải mắng. */
-const keuTiec = () => chuoiNot([[392, 0, .20], [294.7, .13, .34]], "sine", .12);
+const keuTiec = () => chuoiNot([[392, 0, .20], [294.7, .13, .34]], "sine", .045);
 
 /* ---------- Sticker ăn mừng ----------
    Cứ 2 câu đúng thì bắn ra một sticker nổ tung toé. Ảnh để 224px, nén webp
@@ -2551,6 +2651,7 @@ function moThuong(xong) {
 
   v.hidden = false;
   document.body.style.overflow = "hidden";
+  keuThuong();          // tiếng reo mừng nổ cùng lúc ảnh hiện ra
   banPhao();
   $("#btnThuongTiep").focus();
 }
