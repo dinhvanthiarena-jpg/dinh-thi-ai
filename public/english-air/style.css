@@ -1350,8 +1350,11 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 
 /* Chặn theo chiều cao màn: ảnh 16/10 trên máy hẹp mà cao thì vẫn ngốn nửa màn,
    đẩy ô trống và ngân hàng từ xuống tận đáy. */
-.pic-hero { max-height: 30vh; }
-@media (max-width: 379px) { .pic-hero { aspect-ratio: 16 / 9; max-height: 26vh; } }
+.pic-hero { max-height: 22vh; }
+@media (max-width: 379px) { .pic-hero { aspect-ratio: 16 / 9; max-height: 19vh; } }
+/* Ảnh phải co lại được khi màn chật, không thì nó giữ nguyên cỡ và đẩy các thẻ
+   đáp án rơi khỏi màn hình. */
+.pic-hero { flex: 0 1 auto; min-height: 0; }
 
 /* Công tắc có thêm một dòng giải thích bên dưới */
 .switch small { display: block; font-size: .78rem; font-weight: 600;

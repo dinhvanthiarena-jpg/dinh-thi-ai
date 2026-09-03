@@ -1683,7 +1683,7 @@ function vocabSlide(d, st, label) {
 /* ---------- 10. Dạng bài luyện tập ---------- */
 const DRILL = {
   choice(d, st) {
-    showMascot(true); setKicker("Chọn nghĩa đúng");
+    setKicker("Chọn nghĩa đúng");
     const row = el("div", "say-row");
     const say = el("button", "say-btn"); say.type = "button";
     say.setAttribute("aria-label", "Nghe lại: " + d.word.en);
@@ -1692,15 +1692,20 @@ const DRILL = {
     row.append(say);
     st.append(el("p", "ask", d.word.en), row);
     const anh = anhChoTu(d.word);
+    // Có ảnh minh hoạ riêng rồi thì GIẤU mặt ON-Language đi: hai cái hình chồng
+    // nhau ăn hết chỗ, đẩy các thẻ đáp án rơi khỏi màn hình — đo trên máy hẹp
+    // thì thẻ cuối nằm dưới mép nhìn thấy tới 145px, trẻ tưởng bài bị lỗi.
+    showMascot(!anh);
     if (anh) st.append(anh);
     st.append(optList(d.opts, w => w.vi, d.word.en));
     speak(d.word.en);
   },
 
   reverse(d, st) {
-    showMascot(true); setKicker("Dịch sang tiếng Anh");
+    setKicker("Dịch sang tiếng Anh");
     st.append(cauHoiNgheDuoc("“" + d.word.vi + "”", "vi-VN", d.word.vi));
     const anh = anhChoTu(d.word);
+    showMascot(!anh);
     if (anh) st.append(anh);
     st.append(optList(d.opts, w => w.en, d.word.en));
   },
