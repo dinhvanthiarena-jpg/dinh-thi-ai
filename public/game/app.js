@@ -2179,7 +2179,7 @@
         mode: '1v1',
         // Ảnh đại diện thật (đặt ở "Tuỳ chỉnh giáo viên") chỉ có cho "mình" —
         // không biết ảnh của đối thủ nên phía đối thủ luôn dùng chữ cái đầu.
-        meName: data.me.displayName, meSeed: data.me.installId, meLetter: data.me.displayName, meTierName: data.me.tierName || null, mePhoto: avatarDataUrl || null,
+        meName: data.me.displayName, meSeed: data.me.installId, meLetter: data.me.displayName, meTierName: data.me.tierName || null, mePhoto: avatarDataUrl || 'assets/thay-avatar.png',
         oppName: opp.displayName, oppSeed: opp.installId, oppLetter: opp.displayName, oppTierName: opp.tierName || null,
       };
     }
