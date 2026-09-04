@@ -1100,5 +1100,59 @@ const A1 = {
       { id: "a1u7cp", title: "Ôn tập chương 7", checkpoint: true },
     ]
   },
+
+  {
+    id: "a1u8", title: "Nhà cửa & Lễ tết",
+    goal: "Đồ đạc trong nhà và những ngày lễ quan trọng trong năm.",
+    lessons: [
+      {
+        id: "a1u8l1", title: "Đồ đạc trong nhà",
+        goal: "10 món đồ nội thất quen thuộc.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Tả căn phòng của mình, hay hỏi thuê nhà — cần gọi tên được đồ đạc trong đó.", bullets: ["10 đồ nội thất", "Đồ vật ở phòng nào", "There is/are + đồ vật"] },
+          { t: "vocab", en: "sofa", vi: "ghế sô pha", pos: "Danh từ", ipa: "/ˈsoʊfə/", note: "Ghế dài ở phòng khách, còn gọi là a couch.", ex: { en: "We sit on the sofa.", vi: "Chúng tôi ngồi trên ghế sô pha." } },
+          { t: "vocab", en: "table", vi: "cái bàn", pos: "Danh từ", ipa: "/ˈteɪbl/", note: "Bàn ăn là a dining table, khác desk (bàn học/làm việc).", ex: { en: "Put the plates on the table.", vi: "Để đĩa lên bàn." } },
+          { t: "vocab", en: "bed", vi: "cái giường", pos: "Danh từ", ipa: "/bed/", pic: "bed", note: "Đi ngủ là go to bed.", ex: { en: "The bed is very soft.", vi: "Cái giường rất êm." } },
+          { t: "vocab", en: "fridge", vi: "tủ lạnh", pos: "Danh từ", ipa: "/frɪdʒ/", note: "Viết tắt của refrigerator, cách nói thông dụng hơn.", ex: { en: "Put the milk in the fridge.", vi: "Cất sữa vào tủ lạnh." } },
+          { t: "vocab", en: "television", vi: "tivi", pos: "Danh từ", ipa: "/ˈtelɪvɪʒn/", note: "Thường viết tắt là TV.", ex: { en: "We watch television at night.", vi: "Buổi tối chúng tôi xem tivi." } },
+          { t: "vocab", en: "lamp", vi: "cái đèn bàn", pos: "Danh từ", ipa: "/læmp/", note: "Đèn trần là a light, đèn để bàn/sàn là a lamp.", ex: { en: "Turn on the lamp.", vi: "Bật đèn lên." } },
+          { t: "vocab", en: "shelf", vi: "cái kệ", pos: "Danh từ", ipa: "/ʃelf/", note: "Số nhiều bất quy tắc: SHELVES.", ex: { en: "The books are on the shelf.", vi: "Sách để trên kệ." } },
+          { t: "vocab", en: "mirror", vi: "cái gương", pos: "Danh từ", ipa: "/ˈmɪrər/", note: "Soi gương là look in the mirror.", ex: { en: "She looks in the mirror.", vi: "Cô ấy soi gương." } },
+          { t: "vocab", en: "wardrobe", vi: "tủ quần áo", pos: "Danh từ", ipa: "/ˈwɔːrdroʊb/", note: "Mỹ hay gọi là a closet.", ex: { en: "My clothes are in the wardrobe.", vi: "Quần áo của tôi ở trong tủ." } },
+          { t: "vocab", en: "curtain", vi: "rèm cửa", pos: "Danh từ", ipa: "/ˈkɜːrtn/", note: "Kéo rèm là close/open the curtain.", ex: { en: "Close the curtain, please.", vi: "Kéo rèm lại giúp tôi." } },
+        ],
+        sentences: [
+          { en: "We sit on the sofa", vi: "Chúng tôi ngồi trên ghế sô pha" },
+          { en: "The bed is very soft", vi: "Cái giường rất êm" },
+          { en: "Put the milk in the fridge", vi: "Cất sữa vào tủ lạnh" },
+          { en: "Turn on the lamp", vi: "Bật đèn lên" },
+        ]
+      },
+      {
+        id: "a1u8l2", title: "Ngày lễ trong năm",
+        goal: "10 từ về lễ tết và ăn mừng.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Tết, Trung thu, Giáng sinh — nói về ngày lễ bằng tiếng Anh là chuyện rất hay gặp khi trò chuyện với người nước ngoài.", bullets: ["10 từ lễ tết", "Tên các dịp lễ phổ biến", "Chúc mừng: Happy + tên lễ"] },
+          { t: "vocab", en: "festival", vi: "lễ hội", pos: "Danh từ", ipa: "/ˈfestɪvl/", note: "Từ chung cho mọi lễ hội, không riêng dịp nào.", ex: { en: "Tet is a big festival.", vi: "Tết là một lễ hội lớn." } },
+          { t: "vocab", en: "celebrate", vi: "ăn mừng, tổ chức", pos: "Động từ", ipa: "/ˈselɪbreɪt/", note: "Ăn mừng dịp gì: celebrate + tên dịp lễ.", ex: { en: "We celebrate Tet with family.", vi: "Chúng tôi ăn Tết cùng gia đình." } },
+          { t: "vocab", en: "Tet holiday", vi: "Tết Nguyên Đán", pos: "Danh từ", ipa: "/tet ˈhɑːlədeɪ/", note: "Người nước ngoài hay gọi Tet hoặc Vietnamese New Year.", ex: { en: "Tet holiday is in January or February.", vi: "Tết rơi vào tháng Một hoặc tháng Hai." } },
+          { t: "vocab", en: "Christmas", vi: "Giáng sinh", pos: "Danh từ", ipa: "/ˈkrɪsməs/", note: "Luôn viết hoa chữ đầu. Ngày 25 tháng 12.", ex: { en: "Merry Christmas!", vi: "Giáng sinh vui vẻ!" } },
+          { t: "vocab", en: "New Year", vi: "Năm mới", pos: "Danh từ", ipa: "/nuː jɪr/", note: "Chúc mừng năm mới: Happy New Year.", ex: { en: "Happy New Year!", vi: "Chúc mừng năm mới!" } },
+          { t: "vocab", en: "Mid-Autumn Festival", vi: "Tết Trung thu", pos: "Danh từ", ipa: "/mɪd ˈɔːtəm ˈfestɪvl/", note: "Dịp trẻ em rước đèn, phá cỗ.", ex: { en: "Children love the Mid-Autumn Festival.", vi: "Trẻ em rất thích Tết Trung thu." } },
+          { t: "vocab", en: "firework", vi: "pháo hoa", pos: "Danh từ", ipa: "/ˈfaɪərwɜːrk/", note: "Thường dùng số nhiều: fireworks.", ex: { en: "We watch fireworks on New Year.", vi: "Chúng tôi xem pháo hoa đêm giao thừa." } },
+          { t: "vocab", en: "lucky money", vi: "lì xì", pos: "Danh từ", ipa: "/ˈlʌki ˈmʌni/", note: "Người nước ngoài gọi là lucky money hoặc red envelope.", ex: { en: "Children get lucky money at Tet.", vi: "Trẻ em được lì xì vào dịp Tết." } },
+          { t: "vocab", en: "decorate", vi: "trang trí", pos: "Động từ", ipa: "/ˈdekəreɪt/", note: "Trang trí nhà cửa: decorate the house.", ex: { en: "We decorate the house before Tet.", vi: "Chúng tôi trang trí nhà trước Tết." } },
+          { t: "vocab", en: "lantern", vi: "đèn lồng", pos: "Danh từ", ipa: "/ˈlæntərn/", note: "Trẻ em rước đèn lồng dịp Trung thu.", ex: { en: "Children carry lanterns at night.", vi: "Trẻ em rước đèn lồng vào buổi tối." } },
+        ],
+        sentences: [
+          { en: "Tet is a big festival", vi: "Tết là một lễ hội lớn" },
+          { en: "We celebrate Tet with family", vi: "Chúng tôi ăn Tết cùng gia đình" },
+          { en: "Happy New Year", vi: "Chúc mừng năm mới" },
+          { en: "Children get lucky money at Tet", vi: "Trẻ em được lì xì vào dịp Tết" },
+        ]
+      },
+      { id: "a1u8cp", title: "Ôn tập chương 8", checkpoint: true },
+    ]
+  },
 ]
 };

@@ -786,5 +786,59 @@ const A2 = {
       { id: "a2u5cp", title: "Ôn tập chương 5", checkpoint: true },
     ]
   },
+
+  {
+    id: "a2u6", title: "Giải trí & Trang phục",
+    goal: "Các hoạt động giải trí cụ thể và tên trang phục, phụ kiện thường dùng.",
+    lessons: [
+      {
+        id: "a2u6l1", title: "Giải trí lúc rảnh",
+        goal: "10 hoạt động giải trí cụ thể.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Kể chi tiết mình thích làm gì lúc rảnh — không chỉ nói chung chung 'có sở thích' mà nói được từng hoạt động.", bullets: ["10 hoạt động giải trí", "Động từ + V-ing sau like/enjoy", "Nhạc cụ: play + the + tên đàn"] },
+          { t: "vocab", en: "watch a movie", vi: "xem phim", pos: "Cụm động từ", ipa: "/wɑːtʃ ə ˈmuːvi/", note: "Xem phim ở rạp là watch a movie at the cinema.", ex: { en: "I like watching a movie at night.", vi: "Tôi thích xem phim buổi tối." } },
+          { t: "vocab", en: "cinema", vi: "rạp chiếu phim", pos: "Danh từ", ipa: "/ˈsɪnəmə/", note: "Mỹ hay gọi là the movies hoặc a movie theater.", ex: { en: "We went to the cinema.", vi: "Chúng tôi đã đi xem phim." } },
+          { t: "vocab", en: "read a book", vi: "đọc sách", pos: "Cụm động từ", ipa: "/riːd ə bʊk/", note: "Đọc truyện tranh là read a comic.", ex: { en: "She likes reading a book.", vi: "Cô ấy thích đọc sách." } },
+          { t: "vocab", en: "play chess", vi: "chơi cờ", pos: "Cụm động từ", ipa: "/pleɪ tʃes/", note: "Chơi thể thao dùng play, không cần the.", ex: { en: "My father plays chess every evening.", vi: "Bố tôi chơi cờ mỗi tối." } },
+          { t: "vocab", en: "play the guitar", vi: "chơi đàn ghi ta", pos: "Cụm động từ", ipa: "/pleɪ ðə ɡɪˈtɑːr/", note: "Chơi nhạc cụ luôn có THE ở giữa: play the piano.", ex: { en: "He plays the guitar very well.", vi: "Anh ấy chơi ghi ta rất hay." } },
+          { t: "vocab", en: "go dancing", vi: "đi khiêu vũ", pos: "Cụm động từ", ipa: "/ɡoʊ ˈdænsɪŋ/", note: "Mẫu go + V-ing dùng cho nhiều hoạt động: go swimming, go shopping.", ex: { en: "We go dancing on Saturday.", vi: "Thứ Bảy chúng tôi đi khiêu vũ." } },
+          { t: "vocab", en: "go swimming", vi: "đi bơi", pos: "Cụm động từ", ipa: "/ɡoʊ ˈswɪmɪŋ/", note: "Bể bơi là a swimming pool.", ex: { en: "I go swimming every summer.", vi: "Mùa hè nào tôi cũng đi bơi." } },
+          { t: "vocab", en: "take photos", vi: "chụp ảnh", pos: "Cụm động từ", ipa: "/teɪk ˈfoʊtoʊz/", note: "Người thích chụp ảnh là a photographer.", ex: { en: "She loves taking photos.", vi: "Cô ấy rất thích chụp ảnh." } },
+          { t: "vocab", en: "paint", vi: "vẽ tranh", pos: "Động từ", ipa: "/peɪnt/", note: "Vẽ bằng bút chì là draw, vẽ bằng màu là paint.", ex: { en: "My son likes to paint.", vi: "Con trai tôi thích vẽ tranh." } },
+          { t: "vocab", en: "go camping", vi: "đi cắm trại", pos: "Cụm động từ", ipa: "/ɡoʊ ˈkæmpɪŋ/", note: "Cắm trại thường đi cùng bạn bè, gia đình.", ex: { en: "We go camping in summer.", vi: "Mùa hè chúng tôi đi cắm trại." } },
+        ],
+        sentences: [
+          { en: "I like watching a movie at night", vi: "Tôi thích xem phim buổi tối" },
+          { en: "He plays the guitar very well", vi: "Anh ấy chơi ghi ta rất hay" },
+          { en: "I go swimming every summer", vi: "Mùa hè nào tôi cũng đi bơi" },
+          { en: "We go camping in summer", vi: "Mùa hè chúng tôi đi cắm trại" },
+        ]
+      },
+      {
+        id: "a2u6l2", title: "Trang phục & Phụ kiện",
+        goal: "10 từ quần áo và phụ kiện.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Đi mua đồ, tả trang phục ai đó đang mặc — mấy từ này dùng liên tục.", bullets: ["10 trang phục, phụ kiện", "Động từ wear và put on", "Hỏi cỡ: What size?"] },
+          { t: "vocab", en: "trousers", vi: "quần dài", pos: "Danh từ", ipa: "/ˈtraʊzərz/", note: "Luôn số nhiều, giống a pair of trousers. Mỹ gọi là pants.", ex: { en: "These trousers are too long.", vi: "Cái quần này dài quá." } },
+          { t: "vocab", en: "jeans", vi: "quần jean", pos: "Danh từ", ipa: "/dʒiːnz/", note: "Cũng luôn số nhiều: a pair of jeans.", ex: { en: "I am wearing blue jeans.", vi: "Tôi đang mặc quần jean xanh." } },
+          { t: "vocab", en: "dress", vi: "váy liền", pos: "Danh từ", ipa: "/dres/", note: "Cũng là động từ: mặc đồ.", ex: { en: "She is wearing a red dress.", vi: "Cô ấy mặc váy đỏ." } },
+          { t: "vocab", en: "skirt", vi: "chân váy", pos: "Danh từ", ipa: "/skɜːrt/", note: "Khác dress: skirt chỉ là phần dưới, không liền thân.", ex: { en: "The skirt is very short.", vi: "Cái chân váy ngắn quá." } },
+          { t: "vocab", en: "jacket", vi: "áo khoác", pos: "Danh từ", ipa: "/ˈdʒækɪt/", note: "Áo khoác nhẹ, mỏng hơn coat.", ex: { en: "Put on your jacket, it's cold.", vi: "Mặc áo khoác vào, trời lạnh đấy." } },
+          { t: "vocab", en: "coat", vi: "áo choàng dày", pos: "Danh từ", ipa: "/koʊt/", note: "Dày và dài hơn jacket, mặc mùa đông.", ex: { en: "She wears a warm coat in winter.", vi: "Mùa đông cô ấy mặc áo choàng ấm." } },
+          { t: "vocab", en: "shoes", vi: "giày", pos: "Danh từ", ipa: "/ʃuːz/", note: "Luôn số nhiều vì có hai chiếc: a pair of shoes.", ex: { en: "These shoes are new.", vi: "Đôi giày này mới." } },
+          { t: "vocab", en: "socks", vi: "tất, vớ", pos: "Danh từ", ipa: "/sɑːks/", note: "Cũng luôn số nhiều.", ex: { en: "My socks are wet.", vi: "Tất của tôi ướt rồi." } },
+          { t: "vocab", en: "hat", vi: "mũ", pos: "Danh từ", ipa: "/hæt/", note: "Mũ có vành. Mũ lưỡi trai là a cap.", ex: { en: "He wears a hat in the sun.", vi: "Anh ấy đội mũ khi ra nắng." } },
+          { t: "vocab", en: "glasses", vi: "kính mắt", pos: "Danh từ", ipa: "/ˈɡlæsɪz/", note: "Luôn số nhiều vì có hai mắt kính.", ex: { en: "I need my glasses to read.", vi: "Tôi cần đeo kính để đọc." } },
+        ],
+        sentences: [
+          { en: "These trousers are too long", vi: "Cái quần này dài quá" },
+          { en: "I am wearing blue jeans", vi: "Tôi đang mặc quần jean xanh" },
+          { en: "Put on your jacket, it's cold", vi: "Mặc áo khoác vào, trời lạnh đấy" },
+          { en: "I need my glasses to read", vi: "Tôi cần đeo kính để đọc" },
+        ]
+      },
+      { id: "a2u6cp", title: "Ôn tập chương 6", checkpoint: true },
+    ]
+  },
 ]
 };

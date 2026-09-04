@@ -437,5 +437,59 @@ const B1 = {
       { id: "b1u3cp", title: "Ôn tập chương 3", checkpoint: true },
     ]
   },
+
+  {
+    id: "b1u4", title: "Thiên nhiên & Giao thông",
+    goal: "Phong cảnh thiên nhiên và vốn từ đi lại, du lịch ở mức sâu hơn.",
+    lessons: [
+      {
+        id: "b1u4l1", title: "Phong cảnh thiên nhiên",
+        goal: "10 từ tả cảnh quan tự nhiên.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Tả một chuyến đi, một bức ảnh phong cảnh — cần vốn từ về núi non sông biển chứ không chỉ nói 'nature'.", bullets: ["10 từ phong cảnh", "Giới từ đi kèm: in the mountains, at the beach", "Tính từ tả cảnh: beautiful, peaceful"] },
+          { t: "vocab", en: "river", vi: "dòng sông", pos: "Danh từ", ipa: "/ˈrɪvər/", note: "Bờ sông là a riverbank.", ex: { en: "The river is very long.", vi: "Dòng sông rất dài." } },
+          { t: "vocab", en: "sea", vi: "biển", pos: "Danh từ", ipa: "/siː/", note: "Đại dương rộng lớn hơn là ocean.", ex: { en: "We swim in the sea.", vi: "Chúng tôi bơi ở biển." } },
+          { t: "vocab", en: "lake", vi: "hồ", pos: "Danh từ", ipa: "/leɪk/", note: "Hồ Gươm tiếng Anh là Hoan Kiem Lake.", ex: { en: "The lake is very calm.", vi: "Mặt hồ rất tĩnh lặng." } },
+          { t: "vocab", en: "sky", vi: "bầu trời", pos: "Danh từ", ipa: "/skaɪ/", note: "Trời quang là a clear sky.", ex: { en: "The sky is clear today.", vi: "Hôm nay trời quang." } },
+          { t: "vocab", en: "island", vi: "hòn đảo", pos: "Danh từ", ipa: "/ˈaɪlənd/", note: "Chữ s CÂM, đọc là AI-lần.", ex: { en: "Phu Quoc is a famous island.", vi: "Phú Quốc là hòn đảo nổi tiếng." } },
+          { t: "vocab", en: "valley", vi: "thung lũng", pos: "Danh từ", ipa: "/ˈvæli/", note: "Vùng đất thấp giữa hai dãy núi.", ex: { en: "The valley is full of flowers.", vi: "Thung lũng đầy hoa." } },
+          { t: "vocab", en: "waterfall", vi: "thác nước", pos: "Danh từ", ipa: "/ˈwɔːtərfɔːl/", note: "Ghép water + fall.", ex: { en: "The waterfall is beautiful.", vi: "Thác nước rất đẹp." } },
+          { t: "vocab", en: "cave", vi: "hang động", pos: "Danh từ", ipa: "/keɪv/", note: "Việt Nam có Sơn Đoòng, hang động lớn nhất thế giới.", ex: { en: "We explored a big cave.", vi: "Chúng tôi khám phá một hang động lớn." } },
+          { t: "vocab", en: "coast", vi: "bờ biển", pos: "Danh từ", ipa: "/koʊst/", note: "Vùng đất dọc theo biển.", ex: { en: "The coast is very long.", vi: "Bờ biển rất dài." } },
+          { t: "vocab", en: "peaceful", vi: "yên bình", pos: "Tính từ", ipa: "/ˈpiːsfl/", note: "Thường dùng tả phong cảnh làng quê, núi rừng.", ex: { en: "The countryside is peaceful.", vi: "Miền quê rất yên bình." } },
+        ],
+        sentences: [
+          { en: "The river is very long", vi: "Dòng sông rất dài" },
+          { en: "We swim in the sea", vi: "Chúng tôi bơi ở biển" },
+          { en: "Phu Quoc is a famous island", vi: "Phú Quốc là hòn đảo nổi tiếng" },
+          { en: "The countryside is peaceful", vi: "Miền quê rất yên bình" },
+        ]
+      },
+      {
+        id: "b1u4l2", title: "Đi lại & Du lịch",
+        goal: "10 từ về phương tiện và thủ tục đi lại.",
+        teach: [
+          { t: "intro", title: "Bài này bạn sẽ học gì?", body: "Ra sân bay, ra bến xe, đặt vé — vốn từ giao thông ở mức sâu hơn chỉ gọi tên xe cộ.", bullets: ["10 từ đi lại, du lịch", "Đặt vé: book a ticket", "Vé một chiều / khứ hồi"] },
+          { t: "vocab", en: "journey", vi: "hành trình", pos: "Danh từ", ipa: "/ˈdʒɜːrni/", note: "Chuyến đi dài, trang trọng hơn trip.", ex: { en: "It was a long journey.", vi: "Đó là một hành trình dài." } },
+          { t: "vocab", en: "passenger", vi: "hành khách", pos: "Danh từ", ipa: "/ˈpæsɪndʒər/", note: "Người đi trên xe/tàu/máy bay, không phải người lái.", ex: { en: "The bus was full of passengers.", vi: "Xe buýt đầy hành khách." } },
+          { t: "vocab", en: "luggage", vi: "hành lý", pos: "Danh từ", ipa: "/ˈlʌɡɪdʒ/", note: "KHÔNG đếm được, không nói luggages.", ex: { en: "My luggage is heavy.", vi: "Hành lý của tôi nặng." } },
+          { t: "vocab", en: "platform", vi: "sân ga", pos: "Danh từ", ipa: "/ˈplætfɔːrm/", note: "Nơi đứng chờ tàu ở nhà ga.", ex: { en: "The train is on platform 2.", vi: "Tàu ở sân ga số 2." } },
+          { t: "vocab", en: "motorbike", vi: "xe máy", pos: "Danh từ", ipa: "/ˈmoʊtərbaɪk/", note: "Mỹ hay gọi là motorcycle.", ex: { en: "I go to work by motorbike.", vi: "Tôi đi làm bằng xe máy." } },
+          { t: "vocab", en: "taxi", vi: "xe taxi", pos: "Danh từ", ipa: "/ˈtæksi/", note: "Gọi taxi là call a taxi.", ex: { en: "Let's take a taxi.", vi: "Mình bắt taxi đi." } },
+          { t: "vocab", en: "book a ticket", vi: "đặt vé", pos: "Cụm động từ", ipa: "/bʊk ə ˈtɪkɪt/", note: "Book ở đây là động từ đặt trước, không phải quyển sách.", ex: { en: "I booked a ticket online.", vi: "Tôi đã đặt vé qua mạng." } },
+          { t: "vocab", en: "one-way ticket", vi: "vé một chiều", pos: "Danh từ", ipa: "/wʌn weɪ ˈtɪkɪt/", note: "Ngược lại là a return ticket / round-trip ticket.", ex: { en: "I need a one-way ticket.", vi: "Tôi cần một vé một chiều." } },
+          { t: "vocab", en: "passport", vi: "hộ chiếu", pos: "Danh từ", ipa: "/ˈpæspɔːrt/", note: "Đi nước ngoài bắt buộc phải mang theo.", ex: { en: "Do not forget your passport.", vi: "Đừng quên mang hộ chiếu." } },
+          { t: "vocab", en: "depart", vi: "khởi hành", pos: "Động từ", ipa: "/dɪˈpɑːrt/", note: "Trang trọng hơn leave. Danh từ là departure.", ex: { en: "The train departs at nine.", vi: "Tàu khởi hành lúc chín giờ." } },
+        ],
+        sentences: [
+          { en: "It was a long journey", vi: "Đó là một hành trình dài" },
+          { en: "My luggage is heavy", vi: "Hành lý của tôi nặng" },
+          { en: "I booked a ticket online", vi: "Tôi đã đặt vé qua mạng" },
+          { en: "There was a two-hour delay", vi: "Chuyến đi bị chậm hai tiếng" },
+        ]
+      },
+      { id: "b1u4cp", title: "Ôn tập chương 4", checkpoint: true },
+    ]
+  },
 ]
 };
