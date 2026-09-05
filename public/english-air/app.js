@@ -2862,17 +2862,34 @@ function bienTheTen(k) {
   return [...ra].filter(Boolean);
 }
 
-/** Đoạn thu THẬT có sẵn, bà gọi đích danh rồi nói luôn cả bài. Hay nhất. */
-function timGiongTen(kho, k) {
-  for (const x of bienTheTen(k)) if (kho.ten[x]) return kho.ten[x];
-  return null;
+/** Khoá tra ĐÚNG DẤU: thường hoá, gộp khoảng trắng, giữ nguyên dấu. */
+function chuanTen(s) {
+  return (s || "").normalize("NFC").toLowerCase().trim().replace(/\s+/g, " ");
 }
 
-/** Câu gọi tên dựng lại theo đúng giọng bà, dành cho tên không có trong băng thu.
-    Chỉ gọi tên thôi, nói xong thì nối tiếp vào một đoạn thu thật. */
-function timGoiTen(kho, k) {
-  if (!kho.goi) return null;
-  for (const x of bienTheTen(k)) if (kho.goi[x]) return kho.goi[x];
+/** Người dùng có tự gõ không dấu không? Nếu có thì mới cho tra mờ. */
+function goKhongDau(s) {
+  const t = chuanTen(s);
+  return t === t.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d");
+}
+
+/* Tra tên theo ba nấc, nấc nào cũng ra tiếng:
+     1. ĐÚNG DẤU — chắc chắn đúng tên con. Tiếng Việt bỏ dấu thì Bông = Bống =
+        Bòng, gọi bé "Bông" mà phát clip "Bống" là gọi sai tên, nên nấc này
+        phải đứng trước.
+     2. BỎ DẤU — chỉ dùng khi chính người dùng gõ không dấu.
+     3. Không có gì thì máy đọc tên rồi nối đoạn thu thật. */
+function traTenKaka(kho, ten) {
+  const d = kho.dau && kho.dau[chuanTen(ten)];
+  if (d) return { file: d.file, ten: d.ten, that: !!d.that };
+  if (!goKhongDau(ten)) return null;
+  const k = khongDau(ten);
+  for (const x of bienTheTen(k)) {
+    if (kho.ten[x]) return { file: kho.ten[x].file, ten: kho.ten[x].ten, that: true };
+  }
+  for (const x of bienTheTen(k)) {
+    if (kho.goi && kho.goi[x]) return { file: kho.goi[x].file, ten: kho.goi[x].ten, that: false };
+  }
   return null;
 }
 
@@ -2900,13 +2917,13 @@ function goiYKaka() {
   if (!o || !g || !kakaKho) return;
   const k = khongDau(o.value);
   if (!k) { g.hidden = true; return; }
-  const co = timGiongTen(kakaKho, k) || timGoiTen(kakaKho, k);
+  const co = traTenKaka(kakaKho, o.value);
   g.hidden = false;
   // Vài tên trong kho lưu chữ thường (bóc từ tên file), viết hoa lại cho lịch sự.
   const hoa = s => (s || "").replace(/(^|\s)(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
   g.textContent = co
-    ? "Bà sẽ gọi đúng tên " + hoa(co.ten) + " bằng giọng của bà."
-    : "Tên này chưa có trong kho — bà vẫn gọi tên con rồi nói bằng giọng thật.";
+    ? "Có giọng bà gọi tên " + hoa(co.ten)
+    : "Tên mới — bà vẫn gọi tên con bằng giọng thật";
   g.classList.toggle("co", !!co);
 }
 
@@ -2937,7 +2954,6 @@ async function goiKaka() {
   const kho = await napKhoKaka();
   const ten = ($("#kakaTen").value || "").trim();
   if (!ten) { toast("Nhập tên con đã nhé."); return; }
-  const k = khongDau(ten);
 
   // Một đoạn tình huống đúng việc con đang chưa ngoan — luôn cần tới.
   const hop = kho.chung.filter(x => x.tinh_huong === kakaViecChon);
@@ -2949,27 +2965,36 @@ async function goiKaka() {
   //   1. băng thu thật đã gọi đích danh tên đó  → phát nguyên đoạn
   //   2. câu gọi tên dựng theo giọng bà         → gọi tên rồi nối đoạn tình huống
   //   3. chưa có gì                             → máy đọc tên rồi nối đoạn tình huống
-  const that = timGiongTen(kho, k);
-  const goi = that ? null : timGoiTen(kho, k);
-  let chuoi = [];
-  if (that) chuoi = [KAKA_THU + that.file];
-  else if (goi) chuoi = [KAKA_THU + goi.file, thUrl].filter(Boolean);
+  const co = traTenKaka(kho, ten);
+  let chuoi;
+  if (co && co.that) chuoi = [KAKA_THU + co.file];
+  else if (co) chuoi = [KAKA_THU + co.file, thUrl].filter(Boolean);
   else chuoi = [thUrl].filter(Boolean);
   if (!chuoi.length) { toast("Chưa có đoạn tiếng nào phù hợp."); return; }
 
   $("#kakaTenTo").textContent = ten;
-  $("#kakaViec").textContent = kakaViecChon || "";
+  const v = $("#kakaViec");
+  v.textContent = kakaViecChon || "";
+  v.hidden = !kakaViecChon;
   $("#kakaForm").hidden = true;
   $("#kakaDangGoi").hidden = false;
   kakaHienVideo(true);
+  kakaNoi(true);
 
-  const phat = () => phatChuoiKaka(chuoi, () => kakaHienVideo(false));
-  if (that || goi) {
+  const phat = () => phatChuoiKaka(chuoi, () => { kakaHienVideo(false); kakaNoi(false); });
+  if (co) {
     try { window.speechSynthesis && speechSynthesis.cancel(); } catch { /* thôi */ }
     phat();
   } else {
     docTenKaka(ten, phat);
   }
+}
+
+/** Bật/tắt sóng tiếng và dòng trạng thái cho bé biết bà đang nói hay đã xong. */
+function kakaNoi(dang) {
+  const s = $("#kakaSong"), t = $("#kakaTrangThai");
+  if (s) s.classList.toggle("noi", !!dang);
+  if (t) t.lastChild.textContent = dang ? "Bà đang nói…" : "Đã nói xong";
 }
 
 /** Ngắt mọi tiếng đang phát của màn này. */
@@ -3002,6 +3027,7 @@ function luiKaka() {
 
 function veFormKaka() {
   dungTiengKaka();
+  kakaNoi(false);
   kakaHienVideo(false);
   $("#kakaDangGoi").hidden = true;
   $("#kakaForm").hidden = false;
