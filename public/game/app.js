@@ -420,8 +420,12 @@
     }
 
     const op = opChoice === 'mix' ? pick(grade === 1 ? ['add', 'sub'] : ['add', 'sub', 'mul', 'div']) : opChoice;
-    const { a, b, ans, decimal } = genByGradeOp(grade, op);
-    const distractors = makeDistractors(ans, decimal, grade >= 6);
+    // Số trong đề theo "lớp hiệu lực" (lớp đã chọn + tier cá nhân hoá), còn
+    // việc mix có được trộn nhân/chia hay không vẫn theo ĐÚNG lớp đã chọn ở
+    // trên — không để tier phá vỡ đúng chương trình học.
+    const effGrade = mathEffectiveGrade(grade, opChoice);
+    const { a, b, ans, decimal } = genByGradeOp(effGrade, op);
+    const distractors = makeDistractors(ans, decimal, effGrade >= 6);
     const choices = [ans, ...distractors].sort(() => Math.random() - 0.5);
     const dragMode = Math.random() < 0.35;
 
@@ -2416,12 +2420,121 @@
       state.op = null;
       [...opRow.children].forEach((c) => c.classList.remove('selected'));
     }
+    state.mathCorrectStreak = 0;
+    state.mathWrongStreak = 0;
+    mathSyncTiersFromServer(state.grade);
     refreshBestBox();
   }
   gradeRow.addEventListener('click', onGradeCardClick);
   gradeRowTHCS.addEventListener('click', onGradeCardClick);
 
   applySchoolLevel();
+
+  /* ================= ĐỘ KHÓ CÁ NHÂN HOÁ (thích ứng theo trình độ) =================
+     Học sinh giỏi cứ mãi làm đề dễ ngang lớp mình chọn, học sinh yếu thì đề
+     quá sức — nên trong CÙNG một lớp đã chọn, mỗi tài khoản có một "tier"
+     riêng theo từng dạng toán: làm đúng liên tiếp thì tier tăng (đề tương
+     đương lớp cao hơn), sai liên tiếp thì tier giảm (đề tương đương lớp
+     thấp hơn). Tier lưu trên máy (localStorage) để dùng ngay không cần chờ
+     mạng, và đồng bộ lên tài khoản (nếu đã đăng nhập) để đổi máy vẫn giữ
+     đúng trình độ đã đạt, không phải học lại từ đầu.
+     Chỉ áp dụng cho SỐ trong đề (gọi genByGradeOp ở "lớp hiệu lực" khác lớp
+     đã chọn) — KHÔNG áp dụng cho việc "Hỗn hợp" có được trộn nhân/chia hay
+     không, để không phá đúng chương trình học (lớp 1 tuyệt đối không có
+     nhân/chia dù đang được đẩy tier cao). */
+  const MATH_SKILL_URL = '../api/game';
+  let mathSkillTiers = {};
+  let mathSkillSynced = {}; // đã đồng bộ (fetch) lớp nào từ server rồi, khỏi hỏi lại
+
+  function mathTierKey(grade, op) { return grade + '_' + op; }
+
+  function mathLoadTiersFromLocal() {
+    try {
+      const raw = localStorage.getItem('tvc_mathTiers');
+      mathSkillTiers = raw ? JSON.parse(raw) : {};
+    } catch (e) { mathSkillTiers = {}; }
+  }
+  mathLoadTiersFromLocal();
+
+  function mathSaveTiersToLocal() {
+    try { localStorage.setItem('tvc_mathTiers', JSON.stringify(mathSkillTiers)); } catch (e) { /* hết chỗ lưu thì thôi */ }
+  }
+
+  function mathGetTier(grade, op) { return mathSkillTiers[mathTierKey(grade, op)] || 0; }
+
+  function mathEffectiveGrade(grade, op) {
+    return Math.max(1, Math.min(9, grade + mathGetTier(grade, op)));
+  }
+
+  function mathSetTier(grade, op, tier) {
+    const clamped = Math.max(-2, Math.min(2, tier));
+    const key = mathTierKey(grade, op);
+    if (mathSkillTiers[key] === clamped) return;
+    mathSkillTiers[key] = clamped;
+    mathSaveTiersToLocal();
+    if (IS_WEB && webAccountInfo && webAccountInfo.dangNhap) {
+      fetch(MATH_SKILL_URL + '/skill', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ grade, op, tier: clamped }),
+      }).catch(() => { /* mất mạng thì thôi, máy vẫn nhớ trong localStorage */ });
+    }
+  }
+
+  // Kéo tier đã lưu trên tài khoản về máy khi chọn 1 lớp (đổi máy vẫn giữ
+  // đúng trình độ) — chỉ gọi 1 lần cho mỗi lớp mỗi phiên, không hỏi lại liên tục.
+  function mathSyncTiersFromServer(grade) {
+    if (!IS_WEB || !webAccountInfo || !webAccountInfo.dangNhap) return;
+    if (mathSkillSynced[grade]) return;
+    mathSkillSynced[grade] = true;
+    fetch(MATH_SKILL_URL + '/skill?grade=' + grade, { credentials: 'same-origin' })
+      .then((r) => r.json())
+      .then((j) => {
+        const tiers = j && j.tiers;
+        if (!tiers) return;
+        Object.keys(tiers).forEach((op) => { mathSkillTiers[mathTierKey(grade, op)] = tiers[op]; });
+        mathSaveTiersToLocal();
+      })
+      .catch(() => { /* mất mạng thì dùng tạm tier trên máy */ });
+  }
+
+  let mathLevelBadgeTimer = null;
+  function mathShowLevelBadge(text, up) {
+    const el = $('levelBadge');
+    if (!el) return;
+    $('levelBadgeText').textContent = text;
+    el.classList.toggle('len-up', up);
+    el.classList.toggle('len-down', !up);
+    el.hidden = false;
+    clearTimeout(mathLevelBadgeTimer);
+    mathLevelBadgeTimer = setTimeout(() => { el.hidden = true; }, 2200);
+  }
+
+  // Gọi sau mỗi câu trả lời (đúng/sai) trong "Bắt đầu chơi" — 4 câu đúng
+  // liên tiếp thì tăng 1 tier, 3 câu sai liên tiếp thì giảm 1 tier.
+  function mathAdjustTier(isCorrect) {
+    if (!state.grade || !state.op || state.op === 'word') return;
+    const grade = state.grade, op = state.op;
+    const cur = mathGetTier(grade, op);
+    if (isCorrect) {
+      state.mathCorrectStreak = (state.mathCorrectStreak || 0) + 1;
+      state.mathWrongStreak = 0;
+      if (state.mathCorrectStreak >= 4 && cur < 2) {
+        mathSetTier(grade, op, cur + 1);
+        state.mathCorrectStreak = 0;
+        mathShowLevelBadge('Giỏi quá, thử đề khó hơn nhé! 🚀', true);
+      }
+    } else {
+      state.mathWrongStreak = (state.mathWrongStreak || 0) + 1;
+      state.mathCorrectStreak = 0;
+      if (state.mathWrongStreak >= 3 && cur > -2) {
+        mathSetTier(grade, op, cur - 1);
+        state.mathWrongStreak = 0;
+        mathShowLevelBadge('Thử đề dễ hơn xíu nhé, cố lên! 💪', false);
+      }
+    }
+  }
 
   opRow.addEventListener('click', (e) => {
     const btn = e.target.closest('.op-card');
@@ -2430,6 +2543,8 @@
     [...opRow.children].forEach(c => c.classList.remove('selected'));
     btn.classList.add('selected');
     state.op = btn.dataset.op;
+    state.mathCorrectStreak = 0;
+    state.mathWrongStreak = 0;
     refreshBestBox();
   });
 
@@ -2857,6 +2972,7 @@
     activityStrip.hidden = true;
     state.answered++;
     const isCorrect = choice === state.current.answer;
+    mathAdjustTier(isCorrect);
     const skin = state.current.answerSkin || 'buttons';
     const isCustom = skin !== 'buttons'; // chips + balloons share div-based markup
     const selector = skin === 'balloons' ? '.balloon' : skin === 'chips' ? '.drag-chip' : null;

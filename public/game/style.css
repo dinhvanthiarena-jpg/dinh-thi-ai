@@ -1325,6 +1325,8 @@ button:focus-visible,
   box-shadow: var(--sh-1);
   animation: pop-in 250ms ease-out;
 }
+.level-badge.len-up { background: var(--ok); }
+.level-badge.len-down { background: var(--brand); }
 
 .question-card {
   background: var(--card);

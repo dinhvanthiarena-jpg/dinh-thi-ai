@@ -51,4 +51,8 @@ router.post('/dang-ky-xac-nhan', loginLimiter, gameApiController.dangKyXacNhan);
 router.post('/dang-nhap', loginLimiter, gameApiController.dangNhap);
 router.post('/thoat', gameApiController.thoat);
 
+// Độ khó cá nhân hoá theo tài khoản (lớp + dạng toán -> tier).
+router.get('/skill', gameApiController.getSkill);
+router.post('/skill', gameApiController.updateSkill);
+
 module.exports = router;

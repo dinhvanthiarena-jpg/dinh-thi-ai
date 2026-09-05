@@ -4,6 +4,7 @@ const homeworkHelperService = require('../services/homeworkHelperService');
 const boomChatService = require('../services/boomChatService');
 const tk = require('../services/taiKhoanAppService');
 const otp = require('../services/otpDangKyService');
+const MathSkill = require('../models/MathSkill');
 
 // Called by the desktop game on every launch. Upserts by installId so the
 // same machine always updates one row instead of creating duplicates.
@@ -178,6 +179,37 @@ exports.dangNhap = async (req, res) => {
 exports.thoat = async (req, res) => {
   res.clearCookie('token');
   res.json({ dangNhap: false });
+};
+
+/* ===== Độ khó cá nhân hoá (MathSkill) =====
+ * Chỉ cho tài khoản đã đăng nhập — khách vãng lai (chưa đăng ký) vẫn cá
+ * nhân hoá được nhưng chỉ lưu trên máy (localStorage), không đồng bộ.
+ * Việc tính tier (chuỗi đúng/sai) làm ở client; máy chủ chỉ giữ kết quả
+ * cuối để đổi máy không bị học lại từ đầu. */
+const OP_HOP_LE = ['add', 'sub', 'mul', 'div', 'mix'];
+
+exports.getSkill = async (req, res) => {
+  if (!req.user) return res.json({ tiers: {} });
+  const grade = parseInt(req.query.grade, 10);
+  if (!Number.isInteger(grade) || grade < 1 || grade > 9) return res.json({ tiers: {} });
+  const rows = await MathSkill.findAll({ where: { UserId: req.user.id, grade } });
+  const tiers = {};
+  rows.forEach((r) => { tiers[r.op] = r.tier; });
+  res.json({ tiers });
+};
+
+exports.updateSkill = async (req, res) => {
+  if (!req.user) return res.json({ ok: true });
+  const { grade, op, tier } = req.body || {};
+  if (!Number.isInteger(grade) || grade < 1 || grade > 9) return res.status(400).json({ ok: false });
+  if (!OP_HOP_LE.includes(op)) return res.status(400).json({ ok: false });
+  const t = Math.max(-2, Math.min(2, parseInt(tier, 10) || 0));
+  const [row] = await MathSkill.findOrCreate({
+    where: { UserId: req.user.id, grade, op },
+    defaults: { tier: t },
+  });
+  if (row.tier !== t) await row.update({ tier: t });
+  res.json({ ok: true });
 };
 
 // One turn of the "Gọi Mon.L" free-conversation call screen.

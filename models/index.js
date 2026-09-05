@@ -19,6 +19,7 @@ const PageView = require('./PageView');
 const AffiliateClick = require('./AffiliateClick');
 const BattlePlayer = require('./BattlePlayer');
 const BattleMatch = require('./BattleMatch');
+const MathSkill = require('./MathSkill');
 
 Course.hasMany(Lesson, { foreignKey: 'CourseId', onDelete: 'CASCADE' });
 Lesson.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
@@ -49,6 +50,9 @@ Review.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
 User.hasMany(BlogPost, { foreignKey: 'AuthorId', as: 'posts' });
 BlogPost.belongsTo(User, { foreignKey: 'AuthorId', as: 'author' });
 
+User.hasMany(MathSkill, { foreignKey: 'UserId', onDelete: 'CASCADE' });
+MathSkill.belongsTo(User, { foreignKey: 'UserId', as: 'user' });
+
 module.exports = {
   User,
   Course,
@@ -71,4 +75,5 @@ module.exports = {
   AffiliateClick,
   BattlePlayer,
   BattleMatch,
+  MathSkill,
 };
