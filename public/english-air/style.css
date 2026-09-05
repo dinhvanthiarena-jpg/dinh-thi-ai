@@ -2061,3 +2061,39 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .w-lop { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
 .vcard-bac { display: flex; justify-content: center; gap: 6px; margin-top: 2px; }
 .vcard-bac .w-bac, .vcard-bac .w-lop { margin: 0; }
+
+/* ---------- Gọi bà phù thuỷ Kaka ---------- */
+.btn-kaka { background: linear-gradient(100deg, #7C3AED, #DB2777); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); }
+.kaka { position: fixed; inset: 0; z-index: 96; background: #14081F; overflow: hidden; }
+/* Video phủ kín màn, chữ nằm đè lên trên. */
+.kaka-vid { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.kaka-mo { position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10,4,20,.55) 0%, rgba(10,4,20,.15) 35%, rgba(10,4,20,.85) 100%); }
+.kaka-bar { position: relative; z-index: 2; padding: var(--s3) var(--s4); }
+.kaka-form, .kaka-goi-man {
+  position: relative; z-index: 2; height: calc(100% - 72px);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  gap: var(--s2); padding: var(--s4) var(--s4) calc(var(--s5) + env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+.kaka-form h2 { margin: 0; font-size: 1.5rem; font-weight: 900; color: #fff; }
+.kaka-sub { margin: 0 0 var(--s2); color: #E9D5FF; font-weight: 600; }
+.kaka-lb { font-size: .82rem; font-weight: 900; color: #C4B5FD; letter-spacing: .04em; }
+.kaka-input {
+  width: 100%; padding: var(--s3) var(--s4); border-radius: var(--r3);
+  background: rgba(255,255,255,.12); color: #fff; font-size: 1.1rem; font-weight: 800;
+  border: 2px solid rgba(255,255,255,.22);
+}
+.kaka-input::placeholder { color: rgba(255,255,255,.5); font-weight: 600; }
+.kaka-goi { margin: 0; font-size: .86rem; font-weight: 700; color: #FBBF24; }
+.kaka-goi.co { color: #34D399; }
+.kaka-chips { display: flex; flex-wrap: wrap; gap: 6px; max-height: 34vh; overflow-y: auto; }
+.kaka-chips .chip { background: rgba(255,255,255,.12); color: #F5F3FF; }
+.kaka-chips .chip.on { background: var(--brand); color: #fff; }
+/* Màn đang gọi: tên con to giữa hình để bé nào chưa có giọng gọi tên vẫn thấy tên mình. */
+.kaka-goi-man { justify-content: space-between; }
+.kaka-ten-to { margin: 12vh 0 0; text-align: center; font-size: 2.6rem; font-weight: 900;
+  color: #fff; text-shadow: 0 4px 24px rgba(0,0,0,.8); }
+.kaka-viec { margin: 0; text-align: center; font-size: 1.05rem; font-weight: 700; color: #FBBF24;
+  text-shadow: 0 2px 12px rgba(0,0,0,.8); }

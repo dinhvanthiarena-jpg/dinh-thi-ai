@@ -2749,6 +2749,170 @@ function stkTiep() {
   return stkDo.pop();
 }
 
+/* ==================== GỌI BÀ PHÙ THUỶ KAKA ====================
+   Kho tiếng THẬT của bà phù thuỷ: 58 tên bé gọi đích danh + 40 đoạn theo
+   tình huống không nêu tên.
+   Thầy dặn: tên MỚI chưa có trong kho thì VẪN phải ra tiếng và đúng giọng
+   mẫu. Nên tên nào có sẵn thì gọi đích danh, tên mới thì lấy đoạn tình
+   huống chung — vẫn nguyên giọng thật của bà, chỉ không đọc tên, bù lại
+   tên con hiện to trên màn hình.
+   Kho KHÔNG nạp sẵn lúc mở app: 32MB mà tải hết thì ai cũng phải chờ. Chỉ
+   tải bảng tra (vài KB) khi bấm vào, rồi tải đúng một đoạn tiếng đang cần. */
+const KAKA_THU = "assets/kaka/";
+let kakaKho = null;          // bảng tra, tải một lần rồi giữ
+let kakaAm = null;           // thẻ tiếng đang phát
+let kakaVideoXong = false;
+
+/** Bỏ dấu, thường hoá — để "BÍN", "bin", "Bin" tra ra cùng một chỗ. */
+function khongDau(s) {
+  return (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d").replace(/Đ/g, "D")
+    .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+async function napKhoKaka() {
+  if (kakaKho) return kakaKho;
+  try {
+    const r = await fetch(KAKA_THU + "kho.json");
+    kakaKho = await r.json();
+  } catch { kakaKho = { ten: {}, chung: [] }; }
+  return kakaKho;
+}
+
+/** Hai đoạn video của bà: nói và ngồi chờ. Nạp muộn, chỉ khi mở màn này. */
+function napVideoKaka() {
+  if (kakaVideoXong) return;
+  kakaVideoXong = true;
+  [["#kakaVidNoi", "kaka-noi.mp4"], ["#kakaVidCho", "kaka-cho.mp4"]].forEach(([id, f]) => {
+    const v = $(id);
+    if (!v) return;
+    // Đặt bằng JS chứ không chỉ dựa vào thuộc tính trong HTML: có máy bỏ qua
+    // thuộc tính, mà video không tắt tiếng thì trình duyệt CHẶN tự chạy.
+    v.muted = true;
+    v.playsInline = true;
+    v.loop = true;
+    v.src = KAKA_THU + f;
+    v.load();
+  });
+}
+
+function kakaHienVideo(dangNoi) {
+  const n = $("#kakaVidNoi"), c = $("#kakaVidCho");
+  if (!n || !c) return;
+  const bat = dangNoi ? n : c, tat = dangNoi ? c : n;
+  tat.hidden = true; try { tat.pause(); } catch {}
+  bat.hidden = false;
+  bat.muted = true;                       // nhắc lại cho chắc, kẻo bị chặn
+  const chay = () => bat.play().catch(() => {});
+  chay();
+  // Máy chậm thì lần gọi đầu rơi vào lúc video chưa sẵn sàng, thử lại một nhịp.
+  setTimeout(() => { if (bat.paused && !bat.hidden) chay(); }, 300);
+}
+
+let kakaViecChon = "";
+async function moKaka() {
+  const v = $("#kakaView");
+  if (!v) return;
+  danhThucTieng();
+  const kho = await napKhoKaka();
+
+  // Dựng danh sách tình huống từ chính kho tiếng, không viết cứng trong code
+  const hop = $("#kakaChips");
+  if (hop && !hop.childElementCount) {
+    const ds = [...new Set(kho.chung.map(x => x.tinh_huong).filter(t => t && t !== "chung"))];
+    ds.sort((a, b) => a.localeCompare(b, "vi"));
+    kakaViecChon = ds[0] || "";
+    ds.forEach((t, i) => {
+      const b = el("button", "chip" + (i === 0 ? " on" : ""), t);
+      b.type = "button";
+      b.addEventListener("click", () => {
+        $$(".chip", hop).forEach(x => x.classList.remove("on"));
+        b.classList.add("on"); kakaViecChon = t;
+      });
+      hop.append(b);
+    });
+  }
+
+  // Gợi ý sẵn tên người học nếu đã đặt
+  const o = $("#kakaTen");
+  if (o && !o.value && S.ten) o.value = S.ten;
+  goiYKaka();
+
+  $("#kakaForm").hidden = false;
+  $("#kakaDangGoi").hidden = true;
+  v.hidden = false;
+  document.body.style.overflow = "hidden";
+  napVideoKaka();
+  kakaHienVideo(false);
+}
+
+/** Cho biết trước tên vừa gõ có sẵn giọng gọi đích danh hay chưa. */
+function goiYKaka() {
+  const o = $("#kakaTen"), g = $("#kakaGoiY");
+  if (!o || !g || !kakaKho) return;
+  const k = khongDau(o.value);
+  if (!k) { g.hidden = true; return; }
+  const co = kakaKho.ten[k];
+  g.hidden = false;
+  g.textContent = co
+    ? "Có sẵn giọng gọi đúng tên " + co.ten + "."
+    : "Tên này chưa có sẵn giọng gọi tên — bà vẫn nói chuyện bằng giọng thật nhé.";
+  g.classList.toggle("co", !!co);
+}
+
+async function goiKaka() {
+  const kho = await napKhoKaka();
+  const ten = ($("#kakaTen").value || "").trim();
+  if (!ten) { toast("Nhập tên con đã nhé."); return; }
+  const k = khongDau(ten);
+
+  // 1) Có sẵn giọng gọi đích danh thì dùng luôn.
+  let duong = kho.ten[k] ? KAKA_THU + kho.ten[k].file : "";
+  // 2) Chưa có thì lấy đoạn đúng tình huống; vẫn giọng thật của bà.
+  if (!duong) {
+    const hop = kho.chung.filter(x => x.tinh_huong === kakaViecChon);
+    const ds = hop.length ? hop : kho.chung;
+    if (ds.length) duong = KAKA_THU + ds[Math.floor(Math.random() * ds.length)].file;
+  }
+  if (!duong) { toast("Chưa có đoạn tiếng nào phù hợp."); return; }
+
+  $("#kakaTenTo").textContent = ten;
+  $("#kakaViec").textContent = kakaViecChon || "";
+  $("#kakaForm").hidden = true;
+  $("#kakaDangGoi").hidden = false;
+
+  // Giọng đọc của app đang nói thì cắt, không thì hai tiếng chồng nhau.
+  try { window.speechSynthesis && speechSynthesis.cancel(); } catch {}
+  if (kakaAm) { try { kakaAm.pause(); } catch {} }
+  kakaAm = new Audio(duong);
+  kakaAm.addEventListener("ended", () => kakaHienVideo(false));
+  kakaHienVideo(true);
+  kakaAm.play().catch(() => {
+    kakaHienVideo(false);
+    toast("Máy chưa cho phát tiếng. Chạm vào màn hình rồi bấm lại nhé.");
+  });
+}
+
+function dongKaka() {
+  const v = $("#kakaView");
+  if (!v) return;
+  if (kakaAm) { try { kakaAm.pause(); kakaAm.currentTime = 0; } catch {} }
+  [$("#kakaVidNoi"), $("#kakaVidCho")].forEach(x => { if (x) { try { x.pause(); } catch {} x.hidden = true; } });
+  v.hidden = true;
+  document.body.style.overflow = "";
+}
+
+$("#btnMoKaka").addEventListener("click", moKaka);
+$("#btnKakaDong").addEventListener("click", dongKaka);
+$("#btnKakaGoi").addEventListener("click", goiKaka);
+$("#btnKakaThoi").addEventListener("click", () => {
+  if (kakaAm) { try { kakaAm.pause(); kakaAm.currentTime = 0; } catch {} }
+  kakaHienVideo(false);
+  $("#kakaDangGoi").hidden = true;
+  $("#kakaForm").hidden = false;
+});
+$("#kakaTen").addEventListener("input", goiYKaka);
+
 /* ---------- Trang thưởng đầy màn hình ----------
    Thầy chốt: cứ 3 câu đúng thì mở hẳn một trang, pháo bông nổ độp độp, đứng đó
    cho trẻ ngắm chứ đừng tự tắt, bấm "Tiếp tục" mới sang câu mới. */

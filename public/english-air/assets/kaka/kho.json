@@ -1,0 +1,500 @@
+{
+ "ten": {
+  "an": {
+   "ten": "An",
+   "file": "ten-an.mp3",
+   "tinh_huong": []
+  },
+  "na": {
+   "ten": "Na",
+   "file": "ten-na.mp3",
+   "tinh_huong": []
+  },
+  "sua": {
+   "ten": "Sữa",
+   "file": "ten-sua.mp3",
+   "tinh_huong": []
+  },
+  "vy": {
+   "ten": "Vy",
+   "file": "ten-vy.mp3",
+   "tinh_huong": []
+  },
+  "soc": {
+   "ten": "Sóc",
+   "file": "ten-soc.mp3",
+   "tinh_huong": []
+  },
+  "bo": {
+   "ten": "Bơ",
+   "file": "ten-bo.mp3",
+   "tinh_huong": []
+  },
+  "ben": {
+   "ten": "Ben",
+   "file": "ten-ben.mp3",
+   "tinh_huong": [
+    "xem điện thoại"
+   ]
+  },
+  "bill": {
+   "ten": "Bill",
+   "file": "ten-bill.mp3",
+   "tinh_huong": [
+    "không ăn cơm"
+   ]
+  },
+  "gao": {
+   "ten": "Gạo",
+   "file": "ten-gao.mp3",
+   "tinh_huong": [
+    "không ăn cơm"
+   ]
+  },
+  "bao": {
+   "ten": "Bảo",
+   "file": "ten-bao.mp3",
+   "tinh_huong": []
+  },
+  "coca": {
+   "ten": "coca",
+   "file": "ten-coca.mp3",
+   "tinh_huong": [
+    "khóc nhè"
+   ]
+  },
+  "sau": {
+   "ten": "Sâu",
+   "file": "ten-sau.mp3",
+   "tinh_huong": []
+  },
+  "dung": {
+   "ten": "Dũng",
+   "file": "ten-dung.mp3",
+   "tinh_huong": []
+  },
+  "tram": {
+   "ten": "Trâm",
+   "file": "ten-tram.mp3",
+   "tinh_huong": []
+  },
+  "tiger": {
+   "ten": "Tiger",
+   "file": "ten-tiger.mp3",
+   "tinh_huong": []
+  },
+  "cherry": {
+   "ten": "Cherry",
+   "file": "ten-cherry.mp3",
+   "tinh_huong": []
+  },
+  "nhim": {
+   "ten": "Nhím",
+   "file": "ten-nhim.mp3",
+   "tinh_huong": []
+  },
+  "boy": {
+   "ten": "Boy",
+   "file": "ten-boy.mp3",
+   "tinh_huong": [
+    "khóc nhè"
+   ]
+  },
+  "my": {
+   "ten": "My",
+   "file": "ten-my.mp3",
+   "tinh_huong": []
+  },
+  "ngan": {
+   "ten": "Ngân",
+   "file": "ten-ngan.mp3",
+   "tinh_huong": []
+  },
+  "xoai": {
+   "ten": "Xoài",
+   "file": "ten-xoai.mp3",
+   "tinh_huong": []
+  },
+  "nhu": {
+   "ten": "Như",
+   "file": "ten-nhu.mp3",
+   "tinh_huong": []
+  },
+  "cuong": {
+   "ten": "Cường",
+   "file": "ten-cuong.mp3",
+   "tinh_huong": []
+  },
+  "tit": {
+   "ten": "Tít",
+   "file": "ten-tit.mp3",
+   "tinh_huong": []
+  },
+  "cam": {
+   "ten": "Cam",
+   "file": "ten-cam.mp3",
+   "tinh_huong": []
+  },
+  "mai": {
+   "ten": "Mai",
+   "file": "ten-mai.mp3",
+   "tinh_huong": []
+  },
+  "bun": {
+   "ten": "Bun",
+   "file": "ten-bun.mp3",
+   "tinh_huong": []
+  },
+  "nam": {
+   "ten": "Nam",
+   "file": "ten-nam.mp3",
+   "tinh_huong": [
+    "xem điện thoại"
+   ]
+  },
+  "curin": {
+   "ten": "curin",
+   "file": "ten-curin.mp3",
+   "tinh_huong": []
+  },
+  "tram-anh": {
+   "ten": "Trâm Anh",
+   "file": "ten-tram-anh.mp3",
+   "tinh_huong": []
+  },
+  "thao": {
+   "ten": "Thảo",
+   "file": "ten-thao.mp3",
+   "tinh_huong": []
+  },
+  "quynh": {
+   "ten": "Quỳnh",
+   "file": "ten-quynh.mp3",
+   "tinh_huong": []
+  },
+  "nhi": {
+   "ten": "Nhi",
+   "file": "ten-nhi.mp3",
+   "tinh_huong": []
+  },
+  "bao-anh": {
+   "ten": "Bảo Anh",
+   "file": "ten-bao-anh.mp3",
+   "tinh_huong": []
+  },
+  "com": {
+   "ten": "Cốm",
+   "file": "ten-com.mp3",
+   "tinh_huong": []
+  },
+  "tu": {
+   "ten": "Tú",
+   "file": "ten-tu.mp3",
+   "tinh_huong": []
+  },
+  "ty": {
+   "ten": "Tý",
+   "file": "ten-ty.mp3",
+   "tinh_huong": []
+  },
+  "khoai-tay": {
+   "ten": "Khoai tây",
+   "file": "ten-khoai-tay.mp3",
+   "tinh_huong": []
+  },
+  "linh": {
+   "ten": "Linh",
+   "file": "ten-linh.mp3",
+   "tinh_huong": []
+  },
+  "dau": {
+   "ten": "Đậu",
+   "file": "ten-dau.mp3",
+   "tinh_huong": []
+  },
+  "boi": {
+   "ten": "Bối",
+   "file": "ten-boi.mp3",
+   "tinh_huong": [
+    "lỳ, không vâng lời"
+   ]
+  },
+  "long": {
+   "ten": "Long",
+   "file": "ten-long.mp3",
+   "tinh_huong": []
+  },
+  "vinh": {
+   "ten": "Vinh",
+   "file": "ten-vinh.mp3",
+   "tinh_huong": []
+  },
+  "vu": {
+   "ten": "Vũ",
+   "file": "ten-vu.mp3",
+   "tinh_huong": []
+  },
+  "hang": {
+   "ten": "Hằng",
+   "file": "ten-hang.mp3",
+   "tinh_huong": []
+  },
+  "tuan": {
+   "ten": "Tuấn",
+   "file": "ten-tuan.mp3",
+   "tinh_huong": []
+  },
+  "an-nhien": {
+   "ten": "An Nhiên",
+   "file": "ten-an-nhien.mp3",
+   "tinh_huong": []
+  },
+  "phong": {
+   "ten": "Phong",
+   "file": "ten-phong.mp3",
+   "tinh_huong": []
+  },
+  "tien": {
+   "ten": "Tiến",
+   "file": "ten-tien.mp3",
+   "tinh_huong": []
+  },
+  "chun": {
+   "ten": "Chun",
+   "file": "ten-chun.mp3",
+   "tinh_huong": []
+  },
+  "bi": {
+   "ten": "Bi",
+   "file": "ten-bi.mp3",
+   "tinh_huong": []
+  },
+  "suka": {
+   "ten": "Suka",
+   "file": "ten-suka.mp3",
+   "tinh_huong": [
+    "không ăn cơm",
+    "khóc nhè"
+   ]
+  },
+  "ca": {
+   "ten": "Cá",
+   "file": "ten-ca.mp3",
+   "tinh_huong": [
+    "lỳ, không vâng lời"
+   ]
+  },
+  "teo": {
+   "ten": "Tèo",
+   "file": "ten-teo.mp3",
+   "tinh_huong": []
+  },
+  "vit": {
+   "ten": "Vịt",
+   "file": "ten-vit.mp3",
+   "tinh_huong": []
+  },
+  "huy": {
+   "ten": "Huy",
+   "file": "ten-huy.mp3",
+   "tinh_huong": []
+  },
+  "banh-bao": {
+   "ten": "Bánh bao",
+   "file": "ten-banh-bao.mp3",
+   "tinh_huong": []
+  },
+  "tommy": {
+   "ten": "Tommy",
+   "file": "ten-tommy.mp3",
+   "tinh_huong": []
+  },
+  "ken": {
+   "ten": "Ken",
+   "file": "ten-ken.mp3",
+   "tinh_huong": []
+  },
+  "thanh": {
+   "ten": "Thanh",
+   "file": "ten-thanh.mp3",
+   "tinh_huong": []
+  },
+  "gau": {
+   "ten": "Gấu",
+   "file": "ten-gau.mp3",
+   "tinh_huong": []
+  },
+  "oc": {
+   "ten": "ốc",
+   "file": "ten-oc.mp3",
+   "tinh_huong": []
+  },
+  "muoi": {
+   "ten": "Muối",
+   "file": "ten-muoi.mp3",
+   "tinh_huong": []
+  }
+ },
+ "chung": [
+  {
+   "tinh_huong": "chơi game",
+   "file": "th-choi-game-1.mp3"
+  },
+  {
+   "tinh_huong": "lỳ, không vâng lời",
+   "file": "th-ly-khong-vang-loi-1.mp3"
+  },
+  {
+   "tinh_huong": "lỳ, không vâng lời",
+   "file": "th-ly-khong-vang-loi-2.mp3"
+  },
+  {
+   "tinh_huong": "khóc nhè",
+   "file": "th-khoc-nhe-1.mp3"
+  },
+  {
+   "tinh_huong": "không chịu đi tắm",
+   "file": "th-khong-chiu-di-tam-1.mp3"
+  },
+  {
+   "tinh_huong": "không ăn cơm",
+   "file": "th-khong-an-com-1.mp3"
+  },
+  {
+   "tinh_huong": "không ăn tối",
+   "file": "th-khong-an-toi-1.mp3"
+  },
+  {
+   "tinh_huong": "ngậm cơm, ăn chậm",
+   "file": "th-ngam-com-an-cham-1.mp3"
+  },
+  {
+   "tinh_huong": "không ngủ trưa",
+   "file": "th-khong-ngu-trua-1.mp3"
+  },
+  {
+   "tinh_huong": "không rửa tay",
+   "file": "th-khong-rua-tay-1.mp3"
+  },
+  {
+   "tinh_huong": "khóc nhè",
+   "file": "th-khoc-nhe-2.mp3"
+  },
+  {
+   "tinh_huong": "không học bài",
+   "file": "th-khong-hoc-bai-1.mp3"
+  },
+  {
+   "tinh_huong": "chung",
+   "file": "th-chung-1.mp3"
+  },
+  {
+   "tinh_huong": "chung",
+   "file": "th-chung-2.mp3"
+  },
+  {
+   "tinh_huong": "không đánh răng",
+   "file": "th-khong-danh-rang-1.mp3"
+  },
+  {
+   "tinh_huong": "không dậy đi học",
+   "file": "th-khong-day-di-hoc-1.mp3"
+  },
+  {
+   "tinh_huong": "lỳ, không vâng lời",
+   "file": "th-ly-khong-vang-loi-3.mp3"
+  },
+  {
+   "tinh_huong": "chung",
+   "file": "th-chung-3.mp3"
+  },
+  {
+   "tinh_huong": "xem tivi nhiều",
+   "file": "th-xem-tivi-nhieu-1.mp3"
+  },
+  {
+   "tinh_huong": "nói tục, nói bậy",
+   "file": "th-noi-tuc-noi-bay-1.mp3"
+  },
+  {
+   "tinh_huong": "không chịu đi ngủ",
+   "file": "th-khong-chiu-di-ngu-1.mp3"
+  },
+  {
+   "tinh_huong": "xem điện thoại",
+   "file": "th-xem-dien-thoai-1.mp3"
+  },
+  {
+   "tinh_huong": "không chịu đi ngủ",
+   "file": "th-khong-chiu-di-ngu-2.mp3"
+  },
+  {
+   "tinh_huong": "khóc nhè",
+   "file": "th-khoc-nhe-3.mp3"
+  },
+  {
+   "tinh_huong": "không chịu đi ngủ",
+   "file": "th-khong-chiu-di-ngu-3.mp3"
+  },
+  {
+   "tinh_huong": "giành đồ chơi",
+   "file": "th-gianh-do-choi-1.mp3"
+  },
+  {
+   "tinh_huong": "giành đồ chơi",
+   "file": "th-gianh-do-choi-2.mp3"
+  },
+  {
+   "tinh_huong": "không uống sữa",
+   "file": "th-khong-uong-sua-1.mp3"
+  },
+  {
+   "tinh_huong": "không học bài",
+   "file": "th-khong-hoc-bai-2.mp3"
+  },
+  {
+   "tinh_huong": "không ăn cơm",
+   "file": "th-khong-an-com-2.mp3"
+  },
+  {
+   "tinh_huong": "không học bài",
+   "file": "th-khong-hoc-bai-3.mp3"
+  },
+  {
+   "tinh_huong": "nói tục, nói bậy",
+   "file": "th-noi-tuc-noi-bay-2.mp3"
+  },
+  {
+   "tinh_huong": "nói tục, nói bậy",
+   "file": "th-noi-tuc-noi-bay-3.mp3"
+  },
+  {
+   "tinh_huong": "không làm bài tập",
+   "file": "th-khong-lam-bai-tap-1.mp3"
+  },
+  {
+   "tinh_huong": "không ăn cơm",
+   "file": "th-khong-an-com-3.mp3"
+  },
+  {
+   "tinh_huong": "nói dối",
+   "file": "th-noi-doi-1.mp3"
+  },
+  {
+   "tinh_huong": "xem tivi nhiều",
+   "file": "th-xem-tivi-nhieu-2.mp3"
+  },
+  {
+   "tinh_huong": "xem điện thoại",
+   "file": "th-xem-dien-thoai-2.mp3"
+  },
+  {
+   "tinh_huong": "đòi mua đồ chơi",
+   "file": "th-doi-mua-do-choi-1.mp3"
+  },
+  {
+   "tinh_huong": "xem điện thoại",
+   "file": "th-xem-dien-thoai-3.mp3"
+  }
+ ]
+}
