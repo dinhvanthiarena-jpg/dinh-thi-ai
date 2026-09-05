@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= typeof title !== 'undefined' ? title + ' | ' + appName : appName %></title>
   <% const metaDesc = typeof description !== 'undefined' && description ? description : 'Đinh Thi Ai - Nền tảng đào tạo AI, đào tạo ứng dụng AI cho người đi làm, từ chuyên gia thực chiến.'; %>
-  <% const rawImage = typeof ogImage !== 'undefined' && ogImage ? ogImage : '/images/hero-illustration.svg'; %>
+  <% const rawImage = typeof ogImage !== 'undefined' && ogImage ? ogImage : '/images/og-cover.png'; %>
   <% const metaImage = /^https?:\/\//.test(rawImage) ? rawImage : `${appUrl}${rawImage}`; %>
   <% const pageUrl = typeof canonicalUrl !== 'undefined' ? canonicalUrl : ''; %>
   <meta name="description" content="<%= metaDesc %>" />
@@ -23,6 +23,7 @@
   <meta name="twitter:image" content="<%= metaImage %>" />
 
   <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
   <link rel="stylesheet" href="/css/output.css" />
 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4780520729439921"
