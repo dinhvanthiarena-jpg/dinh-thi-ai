@@ -2862,10 +2862,36 @@ function bienTheTen(k) {
   return [...ra].filter(Boolean);
 }
 
-/** Trả về bản ghi giọng gọi đích danh nếu kho có, không thì null. */
+/** Đoạn thu THẬT có sẵn, bà gọi đích danh rồi nói luôn cả bài. Hay nhất. */
 function timGiongTen(kho, k) {
   for (const x of bienTheTen(k)) if (kho.ten[x]) return kho.ten[x];
   return null;
+}
+
+/** Câu gọi tên dựng lại theo đúng giọng bà, dành cho tên không có trong băng thu.
+    Chỉ gọi tên thôi, nói xong thì nối tiếp vào một đoạn thu thật. */
+function timGoiTen(kho, k) {
+  if (!kho.goi) return null;
+  for (const x of bienTheTen(k)) if (kho.goi[x]) return kho.goi[x];
+  return null;
+}
+
+/** Phát lần lượt nhiều đoạn tiếng, hết đoạn này sang đoạn kia. */
+function phatChuoiKaka(ds, xong) {
+  let i = 0;
+  const tiep = () => {
+    if (i >= ds.length) { if (xong) xong(); return; }
+    const u = ds[i++];
+    if (kakaAm) { try { kakaAm.pause(); } catch { /* thôi */ } }
+    kakaAm = new Audio(u);
+    kakaAm.addEventListener("ended", tiep);
+    kakaAm.addEventListener("error", tiep);
+    kakaAm.play().catch(() => {
+      kakaHienVideo(false);
+      toast("Máy chưa cho phát tiếng. Chạm vào màn hình rồi bấm lại nhé.");
+    });
+  };
+  tiep();
 }
 
 /** Cho biết trước tên vừa gõ có sẵn giọng gọi đích danh hay chưa. */
@@ -2874,12 +2900,12 @@ function goiYKaka() {
   if (!o || !g || !kakaKho) return;
   const k = khongDau(o.value);
   if (!k) { g.hidden = true; return; }
-  const co = timGiongTen(kakaKho, k);
+  const co = timGiongTen(kakaKho, k) || timGoiTen(kakaKho, k);
   g.hidden = false;
   // Vài tên trong kho lưu chữ thường (bóc từ tên file), viết hoa lại cho lịch sự.
   const hoa = s => (s || "").replace(/(^|\s)(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
   g.textContent = co
-    ? "Có sẵn giọng bà gọi đúng tên " + hoa(co.ten) + "."
+    ? "Bà sẽ gọi đúng tên " + hoa(co.ten) + " bằng giọng của bà."
     : "Tên này chưa có trong kho — bà vẫn gọi tên con rồi nói bằng giọng thật.";
   g.classList.toggle("co", !!co);
 }
@@ -2913,17 +2939,23 @@ async function goiKaka() {
   if (!ten) { toast("Nhập tên con đã nhé."); return; }
   const k = khongDau(ten);
 
-  // 1) Có sẵn giọng gọi đích danh thì dùng luôn — hay nhất, đúng giọng bà.
-  const hs = timGiongTen(kho, k);
-  let duong = hs ? KAKA_THU + hs.file : "";
-  const phaiDocTen = !hs;
-  // 2) Chưa có thì lấy đoạn đúng tình huống; vẫn giọng thật của bà.
-  if (!duong) {
-    const hop = kho.chung.filter(x => x.tinh_huong === kakaViecChon);
-    const ds = hop.length ? hop : kho.chung;
-    if (ds.length) duong = KAKA_THU + ds[Math.floor(Math.random() * ds.length)].file;
-  }
-  if (!duong) { toast("Chưa có đoạn tiếng nào phù hợp."); return; }
+  // Một đoạn tình huống đúng việc con đang chưa ngoan — luôn cần tới.
+  const hop = kho.chung.filter(x => x.tinh_huong === kakaViecChon);
+  const dsTh = hop.length ? hop : kho.chung;
+  const thUrl = dsTh.length
+    ? KAKA_THU + dsTh[Math.floor(Math.random() * dsTh.length)].file : "";
+
+  // Ba mức, mức nào cũng ra tiếng — thầy dặn tên nào cũng phải gọi được:
+  //   1. băng thu thật đã gọi đích danh tên đó  → phát nguyên đoạn
+  //   2. câu gọi tên dựng theo giọng bà         → gọi tên rồi nối đoạn tình huống
+  //   3. chưa có gì                             → máy đọc tên rồi nối đoạn tình huống
+  const that = timGiongTen(kho, k);
+  const goi = that ? null : timGoiTen(kho, k);
+  let chuoi = [];
+  if (that) chuoi = [KAKA_THU + that.file];
+  else if (goi) chuoi = [KAKA_THU + goi.file, thUrl].filter(Boolean);
+  else chuoi = [thUrl].filter(Boolean);
+  if (!chuoi.length) { toast("Chưa có đoạn tiếng nào phù hợp."); return; }
 
   $("#kakaTenTo").textContent = ten;
   $("#kakaViec").textContent = kakaViecChon || "";
@@ -2931,17 +2963,13 @@ async function goiKaka() {
   $("#kakaDangGoi").hidden = false;
   kakaHienVideo(true);
 
-  const phat = () => {
-    if (kakaAm) { try { kakaAm.pause(); } catch { /* thôi */ } }
-    kakaAm = new Audio(duong);
-    kakaAm.addEventListener("ended", () => kakaHienVideo(false));
-    kakaAm.play().catch(() => {
-      kakaHienVideo(false);
-      toast("Máy chưa cho phát tiếng. Chạm vào màn hình rồi bấm lại nhé.");
-    });
-  };
-  if (phaiDocTen) docTenKaka(ten, phat);
-  else { try { window.speechSynthesis && speechSynthesis.cancel(); } catch { /* thôi */ } phat(); }
+  const phat = () => phatChuoiKaka(chuoi, () => kakaHienVideo(false));
+  if (that || goi) {
+    try { window.speechSynthesis && speechSynthesis.cancel(); } catch { /* thôi */ }
+    phat();
+  } else {
+    docTenKaka(ten, phat);
+  }
 }
 
 /** Ngắt mọi tiếng đang phát của màn này. */
