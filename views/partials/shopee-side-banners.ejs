@@ -8,7 +8,7 @@
   function renderSideRail(id, side, picks) {
 %>
 <% if (picks.length) { %>
-<div id="<%= id %>" class="hidden 2xl:block fixed <%= side %>-3 top-1/2 -translate-y-1/2 z-30 w-[132px]">
+<div id="<%= id %>" class="hidden 2xl:block fixed <%= side === 'left' ? 'left-3' : 'right-3' %> top-1/2 -translate-y-1/2 z-30 w-[132px]">
   <div class="relative rounded-2xl bg-white shadow-lg border border-orange-100 overflow-hidden">
     <button type="button" onclick="document.getElementById('<%= id %>').style.display='none'" aria-label="Đóng" class="absolute top-1 right-1 z-10 h-5 w-5 rounded-full bg-black/40 text-white text-xs leading-5 text-center hover:bg-black/60">&times;</button>
     <div class="bg-orange-500 text-white text-[11px] font-bold text-center py-1.5">Ưu đãi Shopee</div>
