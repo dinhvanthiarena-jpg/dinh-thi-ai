@@ -31,4 +31,34 @@ module.exports = [
     image: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lz8ifai545e5ff',
     url: 'https://s.shopee.vn/2qU7IYHWA4',
   },
+  {
+    name: 'Thùng 48 Hộp sữa dinh dưỡng Vinamilk ADM có đường 180ml',
+    price: '348.432₫',
+    image: 'https://down-vn.img.susercontent.com/file/vn-11134207-7ra0g-m8udpq0dqo90ce',
+    url: 'https://s.shopee.vn/4AziEZ0AjH',
+  },
+  {
+    name: 'Thùng 48 Hộp Sữa Tươi Tiệt Trùng Vinamilk Green Farm ít đường 180ml',
+    price: 'Giá tốt - xem trên Shopee',
+    image: 'https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mr8pkgyn3v9g57',
+    url: 'https://s.shopee.vn/112gSkCE9g',
+  },
+  {
+    name: 'Thùng Thức uống sữa Socola lúa mạch Vinamilk Susu 24 túi 110ml',
+    price: 'Giá tốt - xem trên Shopee',
+    image: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lwxy20f6xvx794',
+    url: 'https://s.shopee.vn/1BM6f3Baoj',
+  },
+  {
+    name: 'Sữa dinh dưỡng Socola Vinamilk ADM - Thùng 48 hộp 180ml',
+    price: 'Giá tốt - xem trên Shopee',
+    image: 'https://down-vn.img.susercontent.com/file/vn-11134207-7ra0g-m8udr88mcd539e',
+    url: 'https://s.shopee.vn/gPq48DUpe',
+  },
+  {
+    name: 'Nước giặt Ariel cửa trên hương nước hoa Downy 4.1kg',
+    price: 'Giá tốt - xem trên Shopee',
+    image: 'https://down-vn.img.susercontent.com/file/sg-11134201-825aa-msjq2pyvgf7m78',
+    url: 'https://s.shopee.vn/qjGGRCrUh',
+  },
 ];
