@@ -1,0 +1,41 @@
+<%
+  const sidePicks = typeof shopeePicks !== 'undefined' && shopeePicks.length ? shopeePicks : [];
+  const leftPick = sidePicks[0];
+  const rightPick = sidePicks[1];
+  function sideBannerUrl(p) {
+    return '/go/shopee?url=' + encodeURIComponent(p.url) + '&name=' + encodeURIComponent(p.name);
+  }
+%>
+<% if (leftPick) { %>
+<div id="shopee-side-left" class="hidden 2xl:block fixed left-3 top-1/2 -translate-y-1/2 z-30 w-[132px]">
+  <div class="relative rounded-2xl bg-white shadow-lg border border-orange-100 overflow-hidden">
+    <button type="button" onclick="document.getElementById('shopee-side-left').style.display='none'" aria-label="Đóng" class="absolute top-1 right-1 z-10 h-5 w-5 rounded-full bg-black/30 text-white text-xs leading-5 text-center hover:bg-black/50">&times;</button>
+    <a href="<%= sideBannerUrl(leftPick) %>" class="block" referrerpolicy="no-referrer">
+      <div class="bg-orange-500 text-white text-[11px] font-bold text-center py-1.5">Ưu đãi Shopee</div>
+      <img src="<%= leftPick.image %>" alt="<%= leftPick.name %>" referrerpolicy="no-referrer" class="w-full aspect-square object-cover" loading="lazy" />
+      <div class="p-2">
+        <p class="text-[11px] text-ink leading-snug line-clamp-2"><%= leftPick.name %></p>
+        <p class="text-[12px] font-bold text-orange-600 mt-1"><%= leftPick.price %></p>
+        <span class="mt-1.5 block text-center text-[11px] font-semibold text-white bg-orange-500 rounded-full py-1">Mua ngay</span>
+      </div>
+    </a>
+  </div>
+</div>
+<% } %>
+
+<% if (rightPick) { %>
+<div id="shopee-side-right" class="hidden 2xl:block fixed right-3 top-1/2 -translate-y-1/2 z-30 w-[132px]">
+  <div class="relative rounded-2xl bg-white shadow-lg border border-orange-100 overflow-hidden">
+    <button type="button" onclick="document.getElementById('shopee-side-right').style.display='none'" aria-label="Đóng" class="absolute top-1 right-1 z-10 h-5 w-5 rounded-full bg-black/30 text-white text-xs leading-5 text-center hover:bg-black/50">&times;</button>
+    <a href="<%= sideBannerUrl(rightPick) %>" class="block" referrerpolicy="no-referrer">
+      <div class="bg-orange-500 text-white text-[11px] font-bold text-center py-1.5">Ưu đãi Shopee</div>
+      <img src="<%= rightPick.image %>" alt="<%= rightPick.name %>" referrerpolicy="no-referrer" class="w-full aspect-square object-cover" loading="lazy" />
+      <div class="p-2">
+        <p class="text-[11px] text-ink leading-snug line-clamp-2"><%= rightPick.name %></p>
+        <p class="text-[12px] font-bold text-orange-600 mt-1"><%= rightPick.price %></p>
+        <span class="mt-1.5 block text-center text-[11px] font-semibold text-white bg-orange-500 rounded-full py-1">Mua ngay</span>
+      </div>
+    </a>
+  </div>
+</div>
+<% } %>
