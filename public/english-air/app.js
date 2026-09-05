@@ -2810,10 +2810,13 @@ function kakaHienVideo(dangNoi) {
 }
 
 let kakaViecChon = "";
+let kakaDaDay = false;          // đã chèn một nấc lịch sử cho màn này chưa
 async function moKaka() {
   const v = $("#kakaView");
   if (!v) return;
   danhThucTieng();
+  // Chèn một nấc lịch sử để nút Back của máy đóng màn này, không thoát app.
+  if (!kakaDaDay) { try { history.pushState({ kaka: 1 }, ""); kakaDaDay = true; } catch { /* thôi */ } }
   const kho = await napKhoKaka();
 
   // Dựng danh sách tình huống từ chính kho tiếng, không viết cứng trong code
@@ -2846,18 +2849,62 @@ async function moKaka() {
   kakaHienVideo(false);
 }
 
+/* ---- Tra tên: khớp thẳng, rồi mới tới mấy cách viết khác của cùng một tên ----
+   "Tý" và "Tí", "Bíu" và "Biu", "Kem" và "Ken" là hai cách viết quen thuộc của
+   cùng một tên gọi ở nhà. Chỉ gom mấy chỗ chắc chắn, KHÔNG gom bừa: gọi nhầm tên
+   con còn tệ hơn là không gọi tên. */
+function bienTheTen(k) {
+  const ra = new Set([k]);
+  ra.add(k.replace(/y/g, "i"));
+  ra.add(k.replace(/i/g, "y"));
+  ra.add(k.replace(/(.)\1+/g, "$1"));      // "bii" → "bi"
+  ra.add(k.replace(/^be-/, ""));           // "be-bi" → "bi"
+  return [...ra].filter(Boolean);
+}
+
+/** Trả về bản ghi giọng gọi đích danh nếu kho có, không thì null. */
+function timGiongTen(kho, k) {
+  for (const x of bienTheTen(k)) if (kho.ten[x]) return kho.ten[x];
+  return null;
+}
+
 /** Cho biết trước tên vừa gõ có sẵn giọng gọi đích danh hay chưa. */
 function goiYKaka() {
   const o = $("#kakaTen"), g = $("#kakaGoiY");
   if (!o || !g || !kakaKho) return;
   const k = khongDau(o.value);
   if (!k) { g.hidden = true; return; }
-  const co = kakaKho.ten[k];
+  const co = timGiongTen(kakaKho, k);
   g.hidden = false;
+  // Vài tên trong kho lưu chữ thường (bóc từ tên file), viết hoa lại cho lịch sự.
+  const hoa = s => (s || "").replace(/(^|\s)(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
   g.textContent = co
-    ? "Có sẵn giọng gọi đúng tên " + co.ten + "."
-    : "Tên này chưa có sẵn giọng gọi tên — bà vẫn nói chuyện bằng giọng thật nhé.";
+    ? "Có sẵn giọng bà gọi đúng tên " + hoa(co.ten) + "."
+    : "Tên này chưa có trong kho — bà vẫn gọi tên con rồi nói bằng giọng thật.";
   g.classList.toggle("co", !!co);
+}
+
+/* ---- Gọi tên con lên thành tiếng ----
+   Thầy dặn: gõ tên bạn nào cũng phải nói được. Kho tiếng thật chỉ có sẵn một số
+   tên, nên tên lạ thì máy đọc tên con trước (hạ giọng, đọc chậm cho ra chất bà
+   phù thuỷ), xong mới nối vào đoạn tiếng thật của bà. Không bao giờ để im lặng.
+   Phải đọc XONG rồi mới phát tiếng: iPhone đang đọc thì thẻ <audio> bị câm. */
+function docTenKaka(ten, xong) {
+  const ss = window.speechSynthesis;
+  if (!ss) return xong();
+  try {
+    ss.cancel();
+    const u = new SpeechSynthesisUtterance(ten + " ơi! Bà phù thuỷ Kaka đây!");
+    const vi = (ss.getVoices() || []).find(v => /^vi/i.test(v.lang || ""));
+    if (vi) { u.voice = vi; u.lang = vi.lang; } else { u.lang = "vi-VN"; }
+    u.pitch = 0.6;                       // trầm xuống cho giống bà phù thuỷ
+    u.rate = 0.85;
+    u.onend = () => doiDocXong(xong);
+    u.onerror = () => xong();
+    ss.speak(u);
+    // Có máy nuốt luôn onend, chặn sẵn để không đứng im mãi.
+    setTimeout(() => { if (!ss.speaking) xong(); }, 4000);
+  } catch { xong(); }
 }
 
 async function goiKaka() {
@@ -2866,8 +2913,10 @@ async function goiKaka() {
   if (!ten) { toast("Nhập tên con đã nhé."); return; }
   const k = khongDau(ten);
 
-  // 1) Có sẵn giọng gọi đích danh thì dùng luôn.
-  let duong = kho.ten[k] ? KAKA_THU + kho.ten[k].file : "";
+  // 1) Có sẵn giọng gọi đích danh thì dùng luôn — hay nhất, đúng giọng bà.
+  const hs = timGiongTen(kho, k);
+  let duong = hs ? KAKA_THU + hs.file : "";
+  const phaiDocTen = !hs;
   // 2) Chưa có thì lấy đoạn đúng tình huống; vẫn giọng thật của bà.
   if (!duong) {
     const hop = kho.chung.filter(x => x.tinh_huong === kakaViecChon);
@@ -2880,38 +2929,73 @@ async function goiKaka() {
   $("#kakaViec").textContent = kakaViecChon || "";
   $("#kakaForm").hidden = true;
   $("#kakaDangGoi").hidden = false;
-
-  // Giọng đọc của app đang nói thì cắt, không thì hai tiếng chồng nhau.
-  try { window.speechSynthesis && speechSynthesis.cancel(); } catch {}
-  if (kakaAm) { try { kakaAm.pause(); } catch {} }
-  kakaAm = new Audio(duong);
-  kakaAm.addEventListener("ended", () => kakaHienVideo(false));
   kakaHienVideo(true);
-  kakaAm.play().catch(() => {
-    kakaHienVideo(false);
-    toast("Máy chưa cho phát tiếng. Chạm vào màn hình rồi bấm lại nhé.");
-  });
+
+  const phat = () => {
+    if (kakaAm) { try { kakaAm.pause(); } catch { /* thôi */ } }
+    kakaAm = new Audio(duong);
+    kakaAm.addEventListener("ended", () => kakaHienVideo(false));
+    kakaAm.play().catch(() => {
+      kakaHienVideo(false);
+      toast("Máy chưa cho phát tiếng. Chạm vào màn hình rồi bấm lại nhé.");
+    });
+  };
+  if (phaiDocTen) docTenKaka(ten, phat);
+  else { try { window.speechSynthesis && speechSynthesis.cancel(); } catch { /* thôi */ } phat(); }
 }
 
-function dongKaka() {
+/** Ngắt mọi tiếng đang phát của màn này. */
+function dungTiengKaka() {
+  if (kakaAm) { try { kakaAm.pause(); kakaAm.currentTime = 0; } catch { /* thôi */ } }
+  try { window.speechSynthesis && speechSynthesis.cancel(); } catch { /* thôi */ }
+}
+
+/** Dọn màn hình, không đụng vào lịch sử trình duyệt. */
+function dongKakaMan() {
   const v = $("#kakaView");
   if (!v) return;
-  if (kakaAm) { try { kakaAm.pause(); kakaAm.currentTime = 0; } catch {} }
-  [$("#kakaVidNoi"), $("#kakaVidCho")].forEach(x => { if (x) { try { x.pause(); } catch {} x.hidden = true; } });
+  dungTiengKaka();
+  [$("#kakaVidNoi"), $("#kakaVidCho")].forEach(x => { if (x) { try { x.pause(); } catch { /* thôi */ } x.hidden = true; } });
   v.hidden = true;
   document.body.style.overflow = "";
 }
 
-$("#btnMoKaka").addEventListener("click", moKaka);
-$("#btnKakaDong").addEventListener("click", dongKaka);
-$("#btnKakaGoi").addEventListener("click", goiKaka);
-$("#btnKakaThoi").addEventListener("click", () => {
-  if (kakaAm) { try { kakaAm.pause(); kakaAm.currentTime = 0; } catch {} }
+function dongKaka() {
+  dongKakaMan();
+  // Nhả luôn nấc lịch sử đã chèn lúc mở, kẻo bấm Back lại rơi vào màn trống.
+  if (kakaDaDay) { kakaDaDay = false; try { history.back(); } catch { /* thôi */ } }
+}
+
+/** Về bước trước: đang gọi thì quay lại ô nhập tên, ở ô nhập tên thì thoát hẳn. */
+function luiKaka() {
+  if (!$("#kakaDangGoi").hidden) { veFormKaka(); return; }
+  dongKaka();
+}
+
+function veFormKaka() {
+  dungTiengKaka();
   kakaHienVideo(false);
   $("#kakaDangGoi").hidden = true;
   $("#kakaForm").hidden = false;
-});
+}
+
+$("#btnMoKaka").addEventListener("click", moKaka);
+$("#btnKakaDong").addEventListener("click", luiKaka);
+$("#btnKakaGoi").addEventListener("click", goiKaka);
+$("#btnKakaThoi").addEventListener("click", veFormKaka);
 $("#kakaTen").addEventListener("input", goiYKaka);
+// Nút "Xem tất cả": mặc định danh sách tình huống chỉ một hàng trượt ngang.
+$("#btnKakaXem").addEventListener("click", () => {
+  const h = $("#kakaChips"), b = $("#btnKakaXem");
+  const mo = h.classList.toggle("mo");
+  b.textContent = mo ? "Thu gọn" : "Xem tất cả";
+  b.setAttribute("aria-expanded", mo ? "true" : "false");
+});
+// Nút Back của máy (Android) và vuốt lùi: đóng màn Kaka chứ đừng thoát hẳn app.
+window.addEventListener("popstate", () => {
+  kakaDaDay = false;
+  if (!$("#kakaView").hidden) dongKakaMan();
+});
 
 /* ---------- Trang thưởng đầy màn hình ----------
    Thầy chốt: cứ 3 câu đúng thì mở hẳn một trang, pháo bông nổ độp độp, đứng đó

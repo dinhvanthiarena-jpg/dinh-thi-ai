@@ -1895,29 +1895,40 @@
   <div class="kaka-mo" aria-hidden="true"></div>
 
   <header class="kaka-bar">
-    <button class="icon-btn" id="btnKakaDong" type="button" aria-label="Đóng">
-      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg>
+    <button class="icon-btn" id="btnKakaDong" type="button" aria-label="Quay lại">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-left"/></svg>
     </button>
+    <span class="kaka-bar-tit">Bà phù thuỷ Kaka</span>
   </header>
 
-  <!-- Bước 1: nhập tên con và chọn tình huống -->
+  <!-- Bước 1: nhập tên con và chọn tình huống.
+       Phần giữa tự cuộn, nút gọi luôn dính đáy để không bị đẩy khuất. -->
   <div class="kaka-form" id="kakaForm">
-    <h2 id="kakaTitle">Gọi bà phù thuỷ Kaka</h2>
-    <p class="kaka-sub">Nhập tên con, chọn việc con chưa ngoan. Bà phù thuỷ sẽ nói chuyện với con.</p>
-    <label class="kaka-lb" for="kakaTen">Tên con</label>
-    <input class="kaka-input" id="kakaTen" type="text" maxlength="24"
-           placeholder="Ví dụ: Bin, Ốc, Su…" autocomplete="off" />
-    <p class="kaka-goi" id="kakaGoiY" hidden></p>
-    <label class="kaka-lb">Con đang chưa ngoan việc gì?</label>
-    <div class="kaka-chips" id="kakaChips"></div>
-    <button class="btn btn-primary btn-block mt" id="btnKakaGoi" type="button">Gọi bà phù thuỷ</button>
+    <div class="kaka-cuon" id="kakaCuon">
+      <h2 id="kakaTitle">Gọi bà phù thuỷ Kaka</h2>
+      <p class="kaka-sub">Nhập tên con, chọn việc con chưa ngoan. Bà phù thuỷ sẽ gọi đích danh tên con.</p>
+      <label class="kaka-lb" for="kakaTen">Tên con</label>
+      <input class="kaka-input" id="kakaTen" type="text" maxlength="24"
+             placeholder="Ví dụ: Bin, Ốc, Su…" autocomplete="off" />
+      <p class="kaka-goi" id="kakaGoiY" hidden></p>
+      <div class="kaka-hang">
+        <span class="kaka-lb">Con đang chưa ngoan việc gì?</span>
+        <button class="kaka-xem" id="btnKakaXem" type="button" aria-expanded="false">Xem tất cả</button>
+      </div>
+      <div class="kaka-chips" id="kakaChips" role="group" aria-label="Tình huống"></div>
+    </div>
+    <div class="kaka-day">
+      <button class="btn btn-primary btn-block" id="btnKakaGoi" type="button">Gọi bà phù thuỷ</button>
+    </div>
   </div>
 
   <!-- Bước 2: đang gọi -->
   <div class="kaka-goi-man" id="kakaDangGoi" hidden>
     <p class="kaka-ten-to" id="kakaTenTo"></p>
     <p class="kaka-viec" id="kakaViec"></p>
-    <button class="btn btn-soft btn-block" id="btnKakaThoi" type="button">Xong rồi</button>
+    <div class="kaka-day">
+      <button class="btn btn-soft btn-block" id="btnKakaThoi" type="button">Xong rồi</button>
+    </div>
   </div>
 </div>
 
