@@ -61,4 +61,34 @@ module.exports = [
     image: 'https://down-vn.img.susercontent.com/file/sg-11134201-825aa-msjq2pyvgf7m78',
     url: 'https://s.shopee.vn/qjGGRCrUh',
   },
+  {
+    name: 'Túi Nước Giặt Xả MaxKleen 3.8kg/3.6kg (mua 1 tặng 1)',
+    price: 'Giá tốt - xem trên Shopee',
+    image: 'https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-msjbnk0gclj8e5',
+    url: 'https://s.shopee.vn/gPq54Kaf5',
+  },
+  {
+    name: 'Combo 2 Nước Giặt Xả MaxKleen hương nước hoa cao cấp',
+    price: 'Giá tốt - xem trên Shopee',
+    image: 'https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-msjbn4jp4emc75',
+    url: 'https://s.shopee.vn/W6PslLE04',
+  },
+  {
+    name: 'Chai nước lau sàn MaxKleen 1kg',
+    price: 'Giá tốt - xem trên Shopee',
+    image: 'https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-msjcfmntw64mcc',
+    url: 'https://s.shopee.vn/LmzgSLrL3',
+  },
+  {
+    name: 'Giày chạy bộ Nam/Nữ Warrior thể thao, siêu nhẹ - màu Đen',
+    price: 'Giá tốt - xem trên Shopee',
+    image: 'https://down-vn.img.susercontent.com/file/vn-11134207-820l4-me84pbakpe6fd3',
+    url: 'https://s.shopee.vn/BTZU9MUg2',
+  },
+  {
+    name: '1kg Khô cá bò da xuất khẩu',
+    price: 'Giá tốt - xem trên Shopee',
+    image: 'https://down-vn.img.susercontent.com/file/vn-11134207-820l4-mgcz64tmxix54d',
+    url: 'https://s.shopee.vn/1A9HqN811',
+  },
 ];
