@@ -545,3 +545,11 @@ exports.toolDelete = async (req, res) => {
   req.flash('success', 'Đã xóa tool / game.');
   res.redirect('/admin/tools');
 };
+
+// Trang tạo/kiểm tra mã bản quyền cho tool A-AI-3dvietpro (Electron desktop app,
+// không liên quan gì tới database/model của site này) — thuật toán chạy hoàn
+// toàn ở trình duyệt (Web Crypto), phải khớp CHÍNH XÁC với license-core.js bên
+// D:\CLAUDE CODE\fb-ads-manager để mã tạo ra dùng được thật với tool đó.
+exports.aaiKeygenPage = (req, res) => {
+  res.render('admin/aai-keygen', { title: 'Mã bản quyền A-AI-3dvietpro' });
+};

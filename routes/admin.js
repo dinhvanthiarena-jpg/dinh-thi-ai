@@ -44,6 +44,8 @@ router.get('/game-installs', adminController.gameInstallList);
 router.get('/push-broadcast', adminController.pushBroadcastForm);
 router.post('/push-broadcast', adminController.pushBroadcastSend);
 
+router.get('/aai-keygen', adminController.aaiKeygenPage);
+
 router.get('/chats', adminController.chatList);
 router.get('/chats/:channel/:sessionId', adminController.chatDetail);
 
