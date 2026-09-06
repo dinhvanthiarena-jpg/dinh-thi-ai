@@ -4988,7 +4988,12 @@ function veCong() {
   $("#fMk").autocomplete = dangKy ? "new-password" : "current-password";
   $("#fMk").placeholder = dangKy ? "Ít nhất 6 ký tự" : "Mật khẩu của bạn";
   $("#congGui").textContent = dangKy ? "Đăng ký" : "Đăng nhập";
-  $("#congDoi").textContent = dangKy ? "Đã có tài khoản? Đăng nhập" : "Chưa có tài khoản? Đăng ký";
+  // Tách phần dẫn và VIỆC CẦN LÀM ra hai thẻ: chữ "Đăng nhập" phải nổi hẳn lên,
+  // chứ nằm lẫn trong một dòng chữ mờ thì không ai nhận ra là bấm được.
+  const doi = $("#congDoi");
+  doi.textContent = "";
+  doi.append(el("span", "cong-doi-dan", dangKy ? "Đã có tài khoản?" : "Chưa có tài khoản?"),
+             el("b", "cong-doi-viec", dangKy ? "Đăng nhập" : "Đăng ký"));
   loiCong("");
 }
 

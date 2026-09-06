@@ -1333,6 +1333,22 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 #congOtpForm { margin-top: var(--s5); display: flex; flex-direction: column; gap: var(--s3); }
 .cong-otp-actions { display: flex; justify-content: space-between; margin-top: var(--s1); }
 
+/* Lối sang màn Đăng nhập. Trước đây là một dòng chữ mờ phẳng lì nên không ai
+   nhận ra bấm được — nay là nút viền hẳn hoi, và chữ "Đăng nhập" nổi lên. */
+.cong-doi {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 14px; border-radius: var(--r3);
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--brand) 50%, transparent);
+}
+.cong-doi:active { background: color-mix(in srgb, var(--brand) 20%, transparent); }
+.cong-doi-dan { color: var(--muted-fg); font-weight: 600; }
+.cong-doi-viec { color: var(--brand); font-weight: 900; font-size: 1.02rem;
+  text-decoration: underline; text-underline-offset: 3px;
+  text-decoration-thickness: 2px; }
+/* "Xem thử" là lối phụ, phải nhạt hơn để ba nút không tranh nhau. */
+#congXemThu { font-weight: 700; font-size: .92rem; }
+
 /* ---------- 15g. KHUNG ẢNH MINH HOẠ TRONG BÀI ---------- */
 /* Đặt giữa câu hỏi và phần trả lời, đúng chỗ mắt nhìn tới trước khi đọc chữ.
    Tỉ lệ cố định để bố cục không giật khi ảnh tải xong. */
