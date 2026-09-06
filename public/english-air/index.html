@@ -1907,6 +1907,9 @@
 <!-- ============ STICKER ĂN MỪNG (cứ 2 câu đúng thì nổ ra một cái) ============ -->
 <audio id="amThuong" src="assets/thuong.mp3" preload="auto" playsinline></audio>
 <audio id="amVoTay" src="assets/vo-tay.mp3" preload="auto" playsinline></audio>
+<!-- Một thẻ tiếng DÙNG CHUNG cho bà phù thuỷ. Phải là thẻ có sẵn trong trang và
+     được mồi từ cú chạm đầu tiên; tạo new Audio() giữa chừng thì iPhone chặn. -->
+<audio id="amKaka" preload="none" playsinline></audio>
 
 <!-- ================= GỌI BÀ PHÙ THUỶ KAKA ================= -->
 <div class="kaka" id="kakaView" hidden role="dialog" aria-modal="true" aria-labelledby="kakaTitle">
@@ -1972,6 +1975,10 @@
       <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
     </div>
     <div class="kaka-day">
+      <button class="kaka-lai" id="btnKakaLai" type="button">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-review"/></svg>
+        <span>Nghe lại</span>
+      </button>
       <button class="kaka-cup" id="btnKakaThoi" type="button">
         <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-hangup"/></svg>
         <span>Kết thúc</span>

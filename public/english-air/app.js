@@ -2519,6 +2519,20 @@ function boTiengs() {
    hẹn vào mốc ĐÃ TRÔI QUA và không kêu gì cả. Nay đánh thức ngay từ cú chạm
    ĐẦU TIÊN vào màn hình, tới lúc cần kêu thì nó chạy sẵn rồi. */
 let tiengDaThuc = false;
+/** Mồi một thẻ tiếng ngay trong cú chạm hiện tại: phát câm rồi tắt luôn.
+    Gọi lại được nhiều lần, không hại gì — mà lại cứu được trường hợp lần mồi
+    đầu tiên bị máy từ chối, vì trước đây hỏng lần đó là câm cả buổi. */
+function moiTheTieng(id) {
+  try {
+    const e = document.getElementById(id);
+    if (!e || !e.paused) return;
+    e.muted = true;
+    const p = e.play();
+    const tat = () => { e.pause(); e.currentTime = 0; e.muted = false; };
+    p && p.then ? p.then(tat).catch(() => { e.muted = false; }) : tat();
+  } catch { /* thôi vậy */ }
+}
+
 function danhThucTieng() {
   if (tiengDaThuc) return;
   const a = boTiengs();
@@ -2535,15 +2549,9 @@ function danhThucTieng() {
   // Mồi luôn thẻ <audio>: phát rồi tắt ngay trong đúng cú chạm này, để lần sau
   // gọi play() máy không chặn nữa. iPhone chỉ cho phát tiếng nếu đã được mồi
   // trong một cú chạm thật của người dùng.
-  try {
-    const el2 = document.getElementById("amThuong");
-    if (el2) {
-      el2.muted = true;
-      const p = el2.play();
-      const tat = () => { el2.pause(); el2.currentTime = 0; el2.muted = false; };
-      p && p.then ? p.then(tat).catch(() => { el2.muted = false; }) : tat();
-    }
-  } catch { /* thôi vậy */ }
+  // Mồi MỌI thẻ tiếng của app, không riêng thẻ thưởng: thẻ nào không được mồi
+  // trong đúng cú chạm này thì về sau gọi play() sẽ bị iPhone chặn.
+  ["amThuong", "amVoTay", "amKaka"].forEach(moiTheTieng);
 }
 ["pointerdown", "touchstart", "keydown"].forEach(ev =>
   window.addEventListener(ev, danhThucTieng, { once: false, passive: true }));
@@ -2846,10 +2854,14 @@ function kakaHienVideo(dangNoi) {
 
 let kakaViecChon = "";
 let kakaDaDay = false;          // đã chèn một nấc lịch sử cho màn này chưa
+let kakaPhatLai = null;         // phát lại đúng chuỗi tiếng của lần gọi vừa rồi
 async function moKaka() {
   const v = $("#kakaView");
   if (!v) return;
   danhThucTieng();
+  // Mồi lại thẻ tiếng Kaka NGAY trong cú chạm mở màn này. danhThucTieng() chỉ
+  // chạy đúng một lần cả buổi, nên nếu lần đó máy từ chối thì thẻ vẫn khoá.
+  moiTheTieng("amKaka");
   // Chèn một nấc lịch sử để nút Back của máy đóng màn này, không thoát app.
   if (!kakaDaDay) { try { history.pushState({ kaka: 1 }, ""); kakaDaDay = true; } catch { /* thôi */ } }
   const kho = await napKhoKaka();
@@ -2928,21 +2940,30 @@ function traTenKaka(kho, ten) {
   return null;
 }
 
-/** Phát lần lượt nhiều đoạn tiếng, hết đoạn này sang đoạn kia. */
+/* Phát lần lượt nhiều đoạn tiếng, hết đoạn này sang đoạn kia.
+   Dùng ĐÚNG MỘT thẻ <audio> có sẵn trong trang (#amKaka) và chỉ đổi src.
+   Trước đây mỗi đoạn tạo một new Audio() mới: thẻ mới chưa từng được mồi trong
+   cú chạm nào nên iPhone chặn thẳng — bấm gọi mà im ru. Đoạn nối sau lại chạy
+   trong sự kiện "ended", càng nằm ngoài cú chạm, càng chắc chắn bị chặn. */
 function phatChuoiKaka(ds, xong) {
+  const am = $("#amKaka") || new Audio();
+  kakaAm = am;
   let i = 0;
   const tiep = () => {
     if (i >= ds.length) { if (xong) xong(); return; }
-    const u = ds[i++];
-    if (kakaAm) { try { kakaAm.pause(); } catch { /* thôi */ } }
-    kakaAm = new Audio(u);
-    kakaAm.addEventListener("ended", tiep);
-    kakaAm.addEventListener("error", tiep);
-    kakaAm.play().catch(() => {
-      kakaHienVideo(false);
+    am.src = ds[i++];
+    am.muted = false;
+    // KHÔNG đặt currentTime ở đây: lúc này tệp chưa nạp xong nên vài trình duyệt
+    // ném lỗi, và lỗi đó văng ra trước khi kịp gọi play() — bấm gọi mà im ru.
+    // Gán src mới thì máy tự đưa về đầu rồi.
+    const p = am.play();
+    if (p && p.catch) p.catch(() => {
+      kakaHienVideo(false); kakaNoi(false);
       toast("Máy chưa cho phát tiếng. Chạm vào màn hình rồi bấm lại nhé.");
     });
   };
+  am.onended = tiep;
+  am.onerror = tiep;
   tiep();
 }
 
@@ -2985,8 +3006,12 @@ function docTenKaka(ten, xong) {
   } catch { xong(); }
 }
 
-async function goiKaka() {
-  const kho = await napKhoKaka();
+/* KHÔNG để hàm này là async: mọi lần chờ (await) đều làm đứt "cú chạm" mà
+   iPhone dựa vào để cho phép phát tiếng. Kho đã nạp từ lúc mở màn rồi, nên
+   thường dùng ngay được; hiếm khi chưa có thì mới nạp rồi gọi lại. */
+function goiKaka() {
+  const kho = kakaKho;
+  if (!kho) { napKhoKaka().then(goiKaka); return; }
   const ten = ($("#kakaTen").value || "").trim();
   if (!ten) { toast("Nhập tên con đã nhé."); return; }
 
@@ -3017,6 +3042,7 @@ async function goiKaka() {
   kakaNoi(true);
 
   const phat = () => phatChuoiKaka(chuoi, () => { kakaHienVideo(false); kakaNoi(false); });
+  kakaPhatLai = () => { kakaHienVideo(true); kakaNoi(true); phat(); };
   if (co) {
     try { window.speechSynthesis && speechSynthesis.cancel(); } catch { /* thôi */ }
     phat();
@@ -3034,7 +3060,11 @@ function kakaNoi(dang) {
 
 /** Ngắt mọi tiếng đang phát của màn này. */
 function dungTiengKaka() {
-  if (kakaAm) { try { kakaAm.pause(); kakaAm.currentTime = 0; } catch { /* thôi */ } }
+  if (kakaAm) {
+    // Gỡ tay nghe TRƯỚC khi dừng, kẻo đoạn sau trong chuỗi lại tự phát tiếp.
+    try { kakaAm.onended = null; kakaAm.onerror = null; } catch { /* thôi */ }
+    try { kakaAm.pause(); kakaAm.currentTime = 0; } catch { /* thôi */ }
+  }
   try { window.speechSynthesis && speechSynthesis.cancel(); } catch { /* thôi */ }
 }
 
@@ -3072,6 +3102,12 @@ $("#btnMoKaka").addEventListener("click", moKaka);
 $("#btnKakaDong").addEventListener("click", luiKaka);
 $("#btnKakaGoi").addEventListener("click", goiKaka);
 $("#btnKakaThoi").addEventListener("click", veFormKaka);
+// Cú chạm này là cú chạm THẬT, nên máy nào chặn tiếng lần đầu thì bấm đây là ra.
+$("#btnKakaLai").addEventListener("click", () => {
+  moiTheTieng("amKaka");
+  dungTiengKaka();
+  if (kakaPhatLai) kakaPhatLai();
+});
 $("#kakaTen").addEventListener("input", goiYKaka);
 // Nút "Xem tất cả": mặc định danh sách tình huống chỉ một hàng trượt ngang.
 $("#btnKakaXem").addEventListener("click", () => {

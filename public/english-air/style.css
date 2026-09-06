@@ -2252,7 +2252,15 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   .kaka-trang-thai i { animation: none }
 }
 
-.kaka-goi-man .kaka-day { width: 100%; display: flex; justify-content: center; }
+.kaka-goi-man .kaka-day { width: 100%; display: flex; justify-content: center;
+  align-items: center; gap: var(--s3); }
+.kaka-lai { display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  padding: 14px 20px; border-radius: 999px; font: inherit;
+  font-size: .95rem; font-weight: 800; color: #fff;
+  background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.kaka-lai:active { background: rgba(255,255,255,.24); }
+.kaka-lai .ic { width: 20px; height: 20px; }
 .kaka-cup { display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
   padding: 14px 26px; border: 0; border-radius: 999px; font: inherit;
   font-size: 1rem; font-weight: 900; color: #fff;
