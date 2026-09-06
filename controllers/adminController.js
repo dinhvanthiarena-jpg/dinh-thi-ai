@@ -10,6 +10,8 @@ const Tool = require('../models/Tool');
 const GameInstall = require('../models/GameInstall');
 const PushSubscription = require('../models/PushSubscription');
 const webpush = require('web-push');
+const aaiAds = require('../services/aaiAdsService');
+const fs = require('fs');
 
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
@@ -565,4 +567,108 @@ exports.toolDelete = async (req, res) => {
 // D:\CLAUDE CODE\fb-ads-manager để mã tạo ra dùng được thật với tool đó.
 exports.aaiKeygenPage = (req, res) => {
   res.render('admin/aai-keygen', { title: 'Mã bản quyền A-AI-3dvietpro' });
+};
+
+// ---------------- A-AI Ads (tạo chiến dịch Facebook Ads từ web) ----------------
+// Port của phần tạo chiến dịch trong tool desktop fb-ads-manager — xem
+// services/aaiAdsService.js để biết lý do kiến trúc + nhắc đồng bộ 2 bên.
+
+exports.aaiAdsPage = async (req, res) => {
+  const connected = aaiAds.isConnected();
+  let adAccounts = [];
+  let pages = [];
+  let loadError = null;
+  if (connected) {
+    try {
+      [adAccounts, pages] = await Promise.all([aaiAds.listAdAccounts(), aaiAds.listPages()]);
+    } catch (e) {
+      loadError = e.message;
+    }
+  }
+  res.render('admin/aai-ads', { title: 'Tạo chiến dịch A-AI Ads', connected, adAccounts, pages, loadError });
+};
+
+exports.aaiAdsConnect = (req, res) => {
+  res.redirect(aaiAds.buildAuthUrl(req));
+};
+
+exports.aaiAdsCallback = async (req, res) => {
+  const { code, error_description } = req.query;
+  if (error_description) {
+    req.flash('error', `Kết nối Facebook thất bại: ${error_description}`);
+    return res.redirect('/admin/aai-ads');
+  }
+  if (!code) {
+    req.flash('error', 'Không nhận được mã xác thực từ Facebook.');
+    return res.redirect('/admin/aai-ads');
+  }
+  try {
+    await aaiAds.exchangeCodeForToken(req, code);
+    req.flash('success', 'Đã kết nối Facebook thành công.');
+  } catch (e) {
+    req.flash('error', `Lỗi kết nối: ${e.message}`);
+  }
+  res.redirect('/admin/aai-ads');
+};
+
+exports.aaiAdsSuggestPlan = async (req, res) => {
+  try {
+    const plan = await aaiAds.suggestCampaignPlan(req.body);
+    res.json(plan);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsInterests = async (req, res) => {
+  try {
+    const results = await aaiAds.searchInterests(req.query.q || '');
+    res.json(results);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsCreateCampaign = async (req, res) => {
+  try {
+    const body = req.body;
+    let creative = null;
+    if (body.pageId && (req.file || body.imageUrl)) {
+      let base64Data;
+      if (req.file) {
+        base64Data = fs.readFileSync(req.file.path).toString('base64');
+      } else {
+        const imgRes = await fetch(body.imageUrl);
+        const buf = Buffer.from(await imgRes.arrayBuffer());
+        base64Data = buf.toString('base64');
+      }
+      const { hash } = await aaiAds.uploadImage(body.adAccountId, base64Data);
+      creative = {
+        pageId: body.pageId,
+        imageHash: hash,
+        message: body.message || '',
+        headline: body.headline || '',
+        description: body.description || '',
+        linkUrl: body.linkUrl || '',
+        cta: body.cta || 'LEARN_MORE',
+      };
+    }
+
+    const result = await aaiAds.createCampaignPlan({
+      adAccountId: body.adAccountId,
+      name: body.name,
+      objective: body.objective,
+      dailyBudget: parseFloat(body.dailyBudget),
+      countries: (body.countries || 'VN').split(',').map((c) => c.trim().toUpperCase()).filter(Boolean),
+      ageMin: parseInt(body.ageMin, 10) || 18,
+      ageMax: parseInt(body.ageMax, 10) || 65,
+      gender: body.gender || 'all',
+      pixelId: body.pixelId || null,
+      interests: body.interests ? JSON.parse(body.interests) : [],
+      creative,
+    });
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 };

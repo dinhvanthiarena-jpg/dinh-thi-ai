@@ -1,0 +1,279 @@
+<div class="space-y-6 max-w-2xl">
+  <% if (!connected) { %>
+    <div class="card p-6">
+      <h2 class="font-semibold text-ink mb-2">Kết nối Facebook</h2>
+      <p class="text-sm text-muted mb-4">Dùng chung Facebook Developer App "Ads Manager - DT" với tool desktop A-AI-3dvietpro. Đăng nhập 1 lần, token lưu trên server (chỉ /admin đã đăng nhập mới dùng được).</p>
+      <a href="/admin/aai-ads/connect" class="btn-primary">Kết nối Facebook</a>
+    </div>
+  <% } else { %>
+    <% if (loadError) { %>
+      <div class="card p-5 bg-amber-50 border border-amber-200">
+        <p class="text-sm text-amber-800">Lỗi tải dữ liệu Facebook: <%= loadError %>. Token có thể đã hết hạn — <a href="/admin/aai-ads/connect" class="underline">kết nối lại</a>.</p>
+      </div>
+    <% } else { %>
+      <div class="card p-6">
+        <h2 class="font-semibold text-ink mb-1">1. AI đề xuất kế hoạch</h2>
+        <p class="text-sm text-muted mb-4">Chỉ cần mô tả sản phẩm + ngân sách, AI tự điền phần còn lại bên dưới.</p>
+        <label class="label">Sản phẩm/dịch vụ</label>
+        <input id="planProduct" type="text" class="input mb-3" placeholder="VD: Sét áo nhung nơ thêu thỏ + quần lụa - giảm còn 699.000đ" />
+        <label class="label">Mục tiêu kinh doanh</label>
+        <input id="planGoal" type="text" class="input mb-3" placeholder="VD: Tăng khách bấm vào trang đặt hàng" />
+        <label class="label">Tổng ngân sách trong tháng (VND)</label>
+        <input id="planBudget" type="text" class="input mb-3" placeholder="3000000" />
+        <button id="suggestPlanBtn" type="button" class="btn-outline">AI đề xuất kế hoạch</button>
+        <p id="planMsg" class="text-sm text-muted mt-2"></p>
+      </div>
+
+      <form id="campaignForm" class="card p-6 space-y-4">
+        <h2 class="font-semibold text-ink">2. Chi tiết chiến dịch</h2>
+
+        <div>
+          <label class="label">Ad Account</label>
+          <select name="adAccountId" class="input">
+            <% adAccounts.forEach(a => { %>
+              <option value="<%= a.id %>"><%= a.name %> (<%= a.id %>)</option>
+            <% }) %>
+          </select>
+        </div>
+
+        <label class="flex items-start gap-2 bg-primary-50/40 border border-primary-100 rounded-lg p-3 cursor-pointer">
+          <input id="coldStartToggle" type="checkbox" class="mt-1" />
+          <span class="text-sm text-ink">🌱 <strong>Trang/sản phẩm mới, chưa có Pixel hay khách hàng cũ</strong> — tự chuyển Mục tiêu sang loại không cần Pixel, ẩn ô Pixel ID.</span>
+        </label>
+
+        <div>
+          <label class="label">Tên chiến dịch</label>
+          <input name="name" id="campName" type="text" class="input" required />
+        </div>
+
+        <div>
+          <label class="label">Mục tiêu</label>
+          <select name="objective" id="campObjective" class="input">
+            <option value="OUTCOME_AWARENESS">Nhận diện thương hiệu</option>
+            <option value="OUTCOME_TRAFFIC" selected>Lưu lượng truy cập (traffic)</option>
+            <option value="OUTCOME_ENGAGEMENT">Tương tác</option>
+            <option value="OUTCOME_LEADS" id="objLeads">Thu thập khách hàng tiềm năng (cần Pixel)</option>
+            <option value="OUTCOME_SALES" id="objSales">Chuyển đổi/bán hàng (cần Pixel)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Ngân sách mỗi ngày (VND)</label>
+          <input name="dailyBudget" id="campBudget" type="text" class="input" placeholder="100000" required />
+        </div>
+
+        <div id="pixelBlock">
+          <label class="label">Pixel ID (chỉ cần nếu chọn mục tiêu cần Pixel)</label>
+          <input name="pixelId" type="text" class="input" placeholder="Dán Pixel ID" />
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="label">Quốc gia</label>
+            <input name="countries" value="VN" type="text" class="input" />
+          </div>
+          <div>
+            <label class="label">Tuổi từ</label>
+            <input name="ageMin" id="campAgeMin" value="18" type="text" class="input" />
+          </div>
+          <div>
+            <label class="label">Tuổi đến</label>
+            <input name="ageMax" id="campAgeMax" value="65" type="text" class="input" />
+          </div>
+        </div>
+
+        <div>
+          <label class="label">Giới tính</label>
+          <select name="gender" id="campGender" class="input">
+            <option value="all">Tất cả</option>
+            <option value="male">Nam</option>
+            <option value="female">Nữ</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Sở thích mục tiêu (Detailed Targeting)</label>
+          <div class="flex gap-2">
+            <input id="interestQuery" type="text" class="input" placeholder="VD: thời trang nữ, mua sắm online" />
+            <button id="searchInterestBtn" type="button" class="btn-outline flex-shrink-0">Tìm</button>
+          </div>
+          <div id="interestResults" class="flex flex-wrap gap-2 mt-2"></div>
+          <div id="selectedInterests" class="flex flex-wrap gap-2 mt-2"></div>
+        </div>
+
+        <hr class="border-primary-100" />
+        <h3 class="font-semibold text-ink">3. Nội dung Ad (bỏ trống nếu chỉ muốn tạo khung Campaign/Ad Set trước)</h3>
+
+        <div>
+          <label class="label">Fanpage đứng tên quảng cáo</label>
+          <select name="pageId" class="input">
+            <option value="">(không tạo Ad, chỉ tạo khung)</option>
+            <% pages.forEach(p => { %>
+              <option value="<%= p.id %>"><%= p.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div>
+          <label class="label">Ảnh quảng cáo — tải lên</label>
+          <input name="image" type="file" accept="image/*" class="input" />
+        </div>
+        <div>
+          <label class="label">...hoặc dán link ảnh có sẵn (VD: ảnh thật trên trang sản phẩm)</label>
+          <input name="imageUrl" id="campImageUrl" type="text" class="input" placeholder="https://3dvietpro.com/shop/uploads/..." />
+        </div>
+
+        <div>
+          <label class="label">Link đích</label>
+          <input name="linkUrl" id="campLinkUrl" type="text" class="input" placeholder="https://3dvietpro.com/shop/lp/set-ao-nhung" />
+        </div>
+        <div>
+          <label class="label">Nội dung chính (primary text)</label>
+          <textarea name="message" id="campMessage" rows="3" class="input"></textarea>
+        </div>
+        <div>
+          <label class="label">Tiêu đề (headline)</label>
+          <input name="headline" id="campHeadline" type="text" class="input" />
+        </div>
+        <div>
+          <label class="label">Mô tả</label>
+          <input name="description" id="campDescription" type="text" class="input" />
+        </div>
+        <div>
+          <label class="label">Call to action</label>
+          <select name="cta" id="campCta" class="input">
+            <option value="LEARN_MORE">Tìm hiểu thêm</option>
+            <option value="SIGN_UP">Đăng ký</option>
+            <option value="SHOP_NOW">Mua ngay</option>
+            <option value="ORDER_NOW">Đặt hàng</option>
+            <option value="CONTACT_US">Liên hệ</option>
+          </select>
+        </div>
+
+        <input type="hidden" name="interests" id="interestsHidden" value="[]" />
+
+        <button type="submit" class="btn-primary">🚀 Tạo chiến dịch (tạm dừng)</button>
+        <div id="createMsg" class="text-sm mt-2"></div>
+      </form>
+    <% } %>
+  <% } %>
+</div>
+
+<script>
+(function () {
+  const coldStartToggle = document.getElementById('coldStartToggle');
+  const pixelBlock = document.getElementById('pixelBlock');
+  const objLeads = document.getElementById('objLeads');
+  const objSales = document.getElementById('objSales');
+  const objective = document.getElementById('campObjective');
+  if (coldStartToggle) {
+    coldStartToggle.addEventListener('change', () => {
+      const on = coldStartToggle.checked;
+      pixelBlock.style.display = on ? 'none' : '';
+      objLeads.disabled = on;
+      objSales.disabled = on;
+      if (on && (objective.value === 'OUTCOME_LEADS' || objective.value === 'OUTCOME_SALES')) {
+        objective.value = 'OUTCOME_TRAFFIC';
+      }
+    });
+  }
+
+  const suggestBtn = document.getElementById('suggestPlanBtn');
+  if (suggestBtn) {
+    suggestBtn.addEventListener('click', async () => {
+      const msg = document.getElementById('planMsg');
+      const product = document.getElementById('planProduct').value.trim();
+      const monthlyBudget = document.getElementById('planBudget').value.trim();
+      if (!product || !monthlyBudget) {
+        msg.textContent = 'Nhập sản phẩm và ngân sách trước.';
+        return;
+      }
+      msg.textContent = 'AI đang phân tích...';
+      try {
+        const res = await fetch('/admin/aai-ads/suggest-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ product, monthlyBudget, goal: document.getElementById('planGoal').value.trim() }),
+        });
+        const plan = await res.json();
+        if (plan.error) throw new Error(plan.error);
+        document.getElementById('campName').value = product;
+        document.getElementById('campObjective').value = plan.objective || 'OUTCOME_TRAFFIC';
+        document.getElementById('campBudget').value = plan.dailyBudget || Math.round(monthlyBudget / 30);
+        document.getElementById('campAgeMin').value = plan.ageMin || 18;
+        document.getElementById('campAgeMax').value = plan.ageMax || 65;
+        document.getElementById('campGender').value = plan.gender || 'all';
+        document.getElementById('campMessage').value = plan.primaryText || '';
+        document.getElementById('campHeadline').value = (plan.headlines && plan.headlines[0]) || '';
+        document.getElementById('campDescription').value = plan.description || '';
+        if (coldStartToggle && coldStartToggle.checked) coldStartToggle.dispatchEvent(new Event('change'));
+        msg.textContent = `Đã điền sẵn form bên dưới. Lý do AI: ${plan.reasoning || ''}`;
+      } catch (e) {
+        msg.textContent = `Lỗi: ${e.message}`;
+      }
+    });
+  }
+
+  let selectedInterests = [];
+  function renderSelectedInterests() {
+    const el = document.getElementById('selectedInterests');
+    if (!el) return;
+    el.innerHTML = selectedInterests
+      .map((i, idx) => `<span class="badge bg-primary-100 text-primary-700">${i.name} <button type="button" data-remove="${idx}" class="ml-1 font-bold">×</button></span>`)
+      .join('');
+    el.querySelectorAll('[data-remove]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        selectedInterests.splice(parseInt(btn.dataset.remove, 10), 1);
+        renderSelectedInterests();
+        document.getElementById('interestsHidden').value = JSON.stringify(selectedInterests);
+      });
+    });
+  }
+
+  const searchInterestBtn = document.getElementById('searchInterestBtn');
+  if (searchInterestBtn) {
+    searchInterestBtn.addEventListener('click', async () => {
+      const q = document.getElementById('interestQuery').value.trim();
+      if (!q) return;
+      const el = document.getElementById('interestResults');
+      el.innerHTML = '<span class="text-sm text-muted">Đang tìm...</span>';
+      try {
+        const res = await fetch('/admin/aai-ads/interests?q=' + encodeURIComponent(q));
+        const results = await res.json();
+        if (results.error) throw new Error(results.error);
+        el.innerHTML = results
+          .map((r, idx) => `<button type="button" data-add="${idx}" class="badge bg-white border border-primary-200 text-primary-700">+ ${r.name}</button>`)
+          .join('') || '<span class="text-sm text-muted">Không tìm thấy.</span>';
+        el.querySelectorAll('[data-add]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const item = results[parseInt(btn.dataset.add, 10)];
+            if (!selectedInterests.some((i) => i.id === item.id)) selectedInterests.push(item);
+            renderSelectedInterests();
+            document.getElementById('interestsHidden').value = JSON.stringify(selectedInterests);
+          });
+        });
+      } catch (e) {
+        el.innerHTML = `<span class="text-sm text-rose-600">${e.message}</span>`;
+      }
+    });
+  }
+
+  const form = document.getElementById('campaignForm');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('createMsg');
+      msg.textContent = 'Đang tạo chiến dịch...';
+      try {
+        const formData = new FormData(form);
+        const res = await fetch('/admin/aai-ads/create-campaign', { method: 'POST', body: formData });
+        const result = await res.json();
+        if (result.error) throw new Error(result.error);
+        msg.innerHTML = `<span class="text-emerald-600 font-medium">✓ Đã tạo Campaign ${result.campaignId} / Ad Set ${result.adSetId}${result.adId ? ' / Ad ' + result.adId : ''} — trạng thái TẠM DỪNG.</span>` + (result.adError ? `<br><span class="text-amber-600">${result.adError}</span>` : '');
+      } catch (e) {
+        msg.innerHTML = `<span class="text-rose-600">Lỗi: ${e.message}</span>`;
+      }
+    });
+  }
+})();
+</script>

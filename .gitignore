@@ -7,3 +7,4 @@ public/uploads/*
 *.log
 .DS_Store
 Thumbs.db
+data/aai-ads-config.json

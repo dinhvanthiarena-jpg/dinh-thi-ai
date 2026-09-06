@@ -50,6 +50,13 @@ router.post('/push-broadcast', adminController.pushBroadcastSend);
 
 router.get('/aai-keygen', adminController.aaiKeygenPage);
 
+router.get('/aai-ads', adminController.aaiAdsPage);
+router.get('/aai-ads/connect', adminController.aaiAdsConnect);
+router.get('/aai-ads/callback', adminController.aaiAdsCallback);
+router.post('/aai-ads/suggest-plan', adminController.aaiAdsSuggestPlan);
+router.get('/aai-ads/interests', adminController.aaiAdsInterests);
+router.post('/aai-ads/create-campaign', upload.single('image'), adminController.aaiAdsCreateCampaign);
+
 router.get('/chats', adminController.chatList);
 router.get('/chats/:channel/:sessionId', adminController.chatDetail);
 
