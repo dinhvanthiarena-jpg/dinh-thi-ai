@@ -32,6 +32,28 @@
     </a>
   </div>
 
+  <% if (post.commentImages && post.commentImages.length) { %>
+    <div class="mt-10">
+      <h3 class="text-lg font-bold text-ink mb-4">Phản hồi thực tế từ học viên</h3>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <% post.commentImages.forEach(function(url) { %>
+          <img src="<%= url %>" alt="Ảnh chụp bình luận học viên" class="w-full rounded-xl border border-primary-100" loading="lazy" />
+        <% }); %>
+      </div>
+    </div>
+  <% } %>
+
+  <div class="mt-10">
+    <h3 class="text-lg font-bold text-ink mb-4">Bình luận</h3>
+    <div class="space-y-6">
+      <div class="fb-comments" data-href="<%= appUrl %>/blog/<%= post.slug %>" data-width="100%" data-numposts="10" data-order-by="social"></div>
+      <div>
+        <div class="zalo-comment-widget" data-href="<%= appUrl %>/blog/<%= post.slug %>" data-size="fullwidth" data-numofitem="10"></div>
+        <script src="https://sp.zalo.me/plugins/sdk.js"></script>
+      </div>
+    </div>
+  </div>
+
   <%- include('../partials/shopee-picks') %>
 </article>
 

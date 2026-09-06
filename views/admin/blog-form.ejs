@@ -29,6 +29,25 @@
       <input class="input" type="text" name="tags" value="<%= (post.tags || []).join(', ') %>" />
     </div>
 
+    <div>
+      <label class="label">Ảnh chụp bình luận (hiện trong bài viết, làm bằng chứng phản hồi thật)</label>
+      <% if ((post.commentImages || []).length) { %>
+        <div class="grid grid-cols-4 gap-3 mb-3">
+          <% post.commentImages.forEach(function(url) { %>
+            <div class="text-center">
+              <img src="<%= url %>" class="w-full h-24 object-cover rounded-lg mb-1" alt="" />
+              <label class="flex items-center justify-center gap-1 text-xs text-red-600">
+                <input type="checkbox" name="removeCommentImages" value="<%= url %>" />
+                Xoá ảnh này
+              </label>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+      <label class="label text-xs text-muted">Thêm ảnh mới (chọn được nhiều ảnh cùng lúc)</label>
+      <input type="file" name="commentImages" accept=".jpg,.jpeg,.png,.webp" multiple class="text-sm" />
+    </div>
+
     <label class="flex items-center gap-2 text-sm text-ink">
       <input type="checkbox" name="isPublished" <%= post.isPublished !== false ? 'checked' : '' %> />
       Xuất bản

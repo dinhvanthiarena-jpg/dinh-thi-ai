@@ -15,6 +15,7 @@ const BlogPost = sequelize.define(
     // silently substitutes a wrong/generic image on auto-shared posts.
     coverImageUrl: { type: DataTypes.STRING, defaultValue: '/images/blog/blog-placeholder-photo.jpg' },
     tags: { type: DataTypes.JSON, defaultValue: [] },
+    commentImages: { type: DataTypes.JSON, defaultValue: [] },
     isPublished: { type: DataTypes.BOOLEAN, defaultValue: true },
     publishedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     viewCount: { type: DataTypes.INTEGER, defaultValue: 0 },

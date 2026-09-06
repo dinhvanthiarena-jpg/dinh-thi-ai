@@ -185,6 +185,10 @@ exports.blogEditForm = async (req, res, next) => {
 
 exports.blogCreate = async (req, res) => {
   const body = req.body;
+  const files = req.files || {};
+  const cover = files.cover && files.cover[0];
+  const commentImages = files.commentImages || [];
+
   const post = await BlogPost.create({
     title: body.title,
     excerpt: body.excerpt,
@@ -192,7 +196,8 @@ exports.blogCreate = async (req, res) => {
     tags: (body.tags || '').split(',').map((s) => s.trim()).filter(Boolean),
     isPublished: body.isPublished === 'on',
     AuthorId: req.user.id,
-    coverImageUrl: req.file ? `/uploads/${req.file.filename}` : undefined,
+    coverImageUrl: cover ? `/uploads/${cover.filename}` : undefined,
+    commentImages: commentImages.map((f) => `/uploads/${f.filename}`),
   });
 
   req.flash('success', 'Đã đăng bài viết.');
@@ -204,14 +209,22 @@ exports.blogUpdate = async (req, res, next) => {
   if (!post) return next();
 
   const body = req.body;
-  await post.update({
+  const files = req.files || {};
+  const cover = files.cover && files.cover[0];
+  const newCommentImages = files.commentImages || [];
+  const toRemove = [].concat(body.removeCommentImages || []);
+  const keptCommentImages = (post.commentImages || []).filter((url) => !toRemove.includes(url));
+
+  post.set({
     title: body.title,
     excerpt: body.excerpt,
     content: body.content,
     tags: (body.tags || '').split(',').map((s) => s.trim()).filter(Boolean),
     isPublished: body.isPublished === 'on',
-    ...(req.file ? { coverImageUrl: `/uploads/${req.file.filename}` } : {}),
+    commentImages: [...keptCommentImages, ...newCommentImages.map((f) => `/uploads/${f.filename}`)],
+    ...(cover ? { coverImageUrl: `/uploads/${cover.filename}` } : {}),
   });
+  await post.save();
 
   req.flash('success', 'Đã cập nhật bài viết.');
   res.redirect('/admin/blog');

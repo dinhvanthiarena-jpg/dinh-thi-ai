@@ -24,11 +24,15 @@ router.post('/courses/:id/delete', adminController.courseDelete);
 router.post('/courses/:id/lessons', adminController.lessonCreate);
 router.post('/courses/:id/lessons/:lessonId/delete', adminController.lessonDelete);
 
+const blogUpload = upload.fields([
+  { name: 'cover', maxCount: 1 },
+  { name: 'commentImages', maxCount: 10 },
+]);
 router.get('/blog', adminController.blogList);
 router.get('/blog/new', adminController.blogNewForm);
-router.post('/blog', upload.single('cover'), upload.processImage({ maxWidth: 1280 }), adminController.blogCreate);
+router.post('/blog', blogUpload, upload.processImage({ maxWidth: 1280 }), adminController.blogCreate);
 router.get('/blog/:id/edit', adminController.blogEditForm);
-router.post('/blog/:id', upload.single('cover'), upload.processImage({ maxWidth: 1280 }), adminController.blogUpdate);
+router.post('/blog/:id', blogUpload, upload.processImage({ maxWidth: 1280 }), adminController.blogUpdate);
 router.post('/blog/:id/delete', adminController.blogDelete);
 
 router.get('/orders', adminController.orderList);
