@@ -2688,6 +2688,24 @@ function phatFileThuong() {
   } catch { return false; }
 }
 
+/** Cúp cuối bài, theo % đúng: 80%+ Vàng, 60-79% Bạc, dưới 60% Đồng. Vàng thì
+    nổ cả kèn + vỗ tay + lấp lánh (keuThuong), Bạc/Đồng chỉ vỗ tay động viên —
+    không thổi kèn ầm ĩ cho một kết quả chưa tốt. */
+function veCup(acc) {
+  const el = $("#resTrophy");
+  if (!el) return;
+  const hang = acc >= 80 ? "vang" : acc >= 60 ? "bac" : "dong";
+  const emoji = hang === "vang" ? "🏆" : hang === "bac" ? "🥈" : "🥉";
+  const ten = hang === "vang" ? "Cúp Vàng" : hang === "bac" ? "Cúp Bạc" : "Cúp Đồng";
+  el.hidden = false;
+  el.className = "res-trophy " + hang;
+  el.innerHTML = `<span class="emoji">${emoji}</span> ${ten}`;
+  if (hang === "vang") { keuThuong(); return; }
+  if (!S.sound) return;
+  const a = tiengSanSang();
+  if (a) tiengVoTay(a, a.currentTime + .02);
+}
+
 /** Cả màn trao thưởng: kèn + vỗ tay + lấp lánh chồng lên nhau. Gọi đúng lúc
     ảnh hiện ra, để tiếng và hình cùng nổ một lượt. */
 function keuThuong() {
@@ -3308,6 +3326,7 @@ function finish() {
   $("#resTitle").textContent = P.wrong === 0 ? "Chậm mà chắc, rất tuyệt!" : acc >= 80 ? "Làm tốt lắm, giữ nhịp nhé!" : "Xong rồi, cứ từ từ mà chắc!";
   $("#resNote").textContent = P.wrong === 0 ? "Không sai câu nào — thưởng thêm 5 XP." : "Ôn lại chương này sẽ chắc hơn.";
   $("#result").dataset.streak = firstToday ? "1" : "";
+  veCup(acc);
   $("#btnResDone").focus();
 }
 $("#btnResDone").addEventListener("click", () => {
@@ -5440,6 +5459,7 @@ function xongDeThi() {
     : "Chưa đạt. Học lại vài bài rồi thi tiếp nhé.";
   $("#resSub").hidden = false;
   $("#resSub").textContent = "Đề " + t.ten + " · đúng " + t.dung + "/" + t.tong + " câu";
+  veCup(pc);
 }
 
 function moManThi() {
