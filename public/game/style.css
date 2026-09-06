@@ -1747,6 +1747,17 @@ button:focus-visible,
 .star { color: var(--line-hi); transition: color 200ms, transform 200ms; display: inline-block; }
 .star.on { color: var(--amber-fill); animation: pop-in 300ms ease-out; }
 
+.result-trophy {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-heading); font-weight: 900; font-size: 0.95rem;
+  padding: 6px 16px; border-radius: var(--rf);
+  margin: 4px 0 10px; animation: pop-in 300ms ease-out;
+}
+.result-trophy .emoji { font-size: 1.3rem; }
+.result-trophy.vang { background: #4A3A0A; color: #FFD966; }
+.result-trophy.bac { background: #3A3D45; color: #D6DCE5; }
+.result-trophy.dong { background: #4A2E18; color: #E0A672; }
+
 .result-stats {
   display: flex;
   gap: 14px;

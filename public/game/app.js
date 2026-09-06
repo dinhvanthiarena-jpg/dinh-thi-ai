@@ -3309,6 +3309,38 @@
     }
   }
 
+  // Cúp cuối ván theo % câu đúng — 80%+ Vàng, 60-79% Bạc, dưới 60% Đồng
+  // (giống hệt cách làm bên English Air). Vàng thì có thêm tiếng vỗ tay,
+  // không chỉ riêng lúc thắng 3 sao/kỷ lục như trước.
+  function showResultTrophy(acc) {
+    const el = $('resultTrophy');
+    if (!el) return;
+    const hang = acc >= 80 ? 'vang' : acc >= 60 ? 'bac' : 'dong';
+    const emoji = hang === 'vang' ? '🏆' : hang === 'bac' ? '🥈' : '🥉';
+    const ten = hang === 'vang' ? 'Cúp Vàng' : hang === 'bac' ? 'Cúp Bạc' : 'Cúp Đồng';
+    el.hidden = false;
+    el.className = 'result-trophy ' + hang;
+    el.innerHTML = `<span class="emoji">${emoji}</span> ${ten}`;
+    return hang;
+  }
+
+  // Tiếng "keng" + pháo giấy bắn ra ngay từ vị trí cái cúp, đúng lúc nó
+  // hiện lên trên màn hình — riêng biệt với tiếng vỗ tay chung cuối ván
+  // (applause() ở endGame), để khoảnh khắc cúp xuất hiện có điểm nhấn rõ
+  // ràng chứ không chìm vào các âm thanh khác.
+  function trophyRevealFx(tier) {
+    const el = $('resultTrophy');
+    if (!el || !tier) return;
+    const mau = { vang: '#FFD966', bac: '#D6DCE5', dong: '#E0A672' }[tier];
+    requestAnimationFrame(() => {
+      const r = el.getBoundingClientRect();
+      burstParticles(r.left + r.width / 2, r.top + r.height / 2, mau, tier === 'vang' ? 26 : tier === 'bac' ? 18 : 12);
+    });
+    if (tier === 'vang') { bellDing(1567.98, 0, 0.3); bellDing(1975.53, 0.12, 0.3); }
+    else if (tier === 'bac') { bellDing(1046.5, 0, 0.26); }
+    else { tone(440, 0, 0.16, 'sine', 0.2); }
+  }
+
   function endGame() {
     clearInterval(state.timerId);
     clearTimeout(thinkTimeoutId);
@@ -3322,6 +3354,10 @@
     [...document.querySelectorAll('.star')].forEach((s, i) => {
       s.classList.toggle('on', i < stars);
     });
+
+    const total = state.mode === 'practice' ? state.totalQuestions : Math.max(1, state.answered);
+    const acc = Math.round((state.correct / total) * 100);
+    const trophyTier = showResultTrophy(acc);
 
     setMascot($('mascotResult'), stars >= 2 ? 'happy' : 'sad');
 
@@ -3338,8 +3374,13 @@
       sfx.win();
       spawnConfetti();
     }
+    // Vỗ tay luôn có ở cuối ván (như bên English Air) — Cúp Vàng thì đã có
+    // thêm sfx.win()+confetti ở trên rồi nên nghe "to" hơn hẳn Bạc/Đồng dù
+    // cùng chung một tiếng vỗ tay này.
+    applause();
 
     showScreen('result');
+    trophyRevealFx(trophyTier);
   }
 
   const OP_POOL = ['add', 'sub', 'mul', 'div', 'mix', 'word'];
