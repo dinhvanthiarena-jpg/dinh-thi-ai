@@ -1758,6 +1758,13 @@ button:focus-visible,
 .result-trophy.bac { background: #3A3D45; color: #D6DCE5; }
 .result-trophy.dong { background: #4A2E18; color: #E0A672; }
 
+#congGoogle { margin-top: 16px; }
+#congGoogle[hidden] { display: none; }
+#gsiNut { display: flex; justify-content: center; min-height: 44px; }
+.cong-hoac { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.cong-hoac::before, .cong-hoac::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.cong-hoac span { font-size: .8rem; font-weight: 700; color: var(--muted-fg); }
+
 .result-stats {
   display: flex;
   gap: 14px;

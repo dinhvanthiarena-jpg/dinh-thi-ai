@@ -51,11 +51,16 @@ function layTransporter() {
   return transporter;
 }
 
-async function guiEmailOtp(email, ma) {
+// Dùng chung 1 dịch vụ cho 2 app khác tên — email phải xưng đúng tên app
+// người dùng đang thấy trên màn hình, không phải lúc nào cũng "Mon-Maths".
+const TEN_APP = { 'mon-maths': 'Mon-Maths', 'english-air': 'ON-Language' };
+
+async function guiEmailOtp(email, ma, app) {
   const t = layTransporter();
   if (!t) throw Object.assign(new Error('Chưa cấu hình gửi email'), { code: 'NO_SMTP' });
+  const ten = TEN_APP[app] || 'Mon-Maths';
   await t.sendMail({
-    from: `"Mon-Maths" <${process.env.SMTP_USER}>`,
+    from: `"${ten}" <${process.env.SMTP_USER}>`,
     to: email,
     subject: `Mã xác nhận đăng ký: ${ma}`,
     text: `Mã xác nhận đăng ký tài khoản của con là: ${ma}\nMã có hiệu lực trong 10 phút. Nếu không phải con yêu cầu, hãy bỏ qua email này.`,
@@ -64,7 +69,7 @@ async function guiEmailOtp(email, ma) {
 }
 
 /** Bước 1: kiểm tra dữ liệu, gửi mã, chưa tạo tài khoản thật. */
-async function yeuCauDangKy({ ten, sdt, matKhau, email }) {
+async function yeuCauDangKy({ ten, sdt, matKhau, email, app }) {
   const so = tk.chuanSdt(sdt);
   if (!tk.sdtHopLe(so)) return { loi: 'Số điện thoại chưa đúng. Ví dụ: 0912345678' };
   if (!matKhau || String(matKhau).length < 6) return { loi: 'Mật khẩu cần ít nhất 6 ký tự.' };
@@ -82,13 +87,14 @@ async function yeuCauDangKy({ ten, sdt, matKhau, email }) {
 
   const ma = taoMa();
   const token = taoToken();
+  const appAn = TEN_APP[app] ? app : 'mon-maths';
   cho.set(token, {
-    code: ma, ten: name, sdt: so, matKhau: String(matKhau), email: e,
+    code: ma, ten: name, sdt: so, matKhau: String(matKhau), email: e, app: appAn,
     expiresAt: Date.now() + OTP_HET_HAN_MS, attempts: 0, lastSentAt: Date.now(),
   });
 
   try {
-    await guiEmailOtp(e, ma);
+    await guiEmailOtp(e, ma, appAn);
   } catch (err) {
     cho.delete(token);
     if (err.code === 'NO_SMTP') return { loi: 'Máy chủ chưa bật gửi email, báo thầy/cô giúp em nhé.' };
@@ -109,7 +115,7 @@ async function guiLai(token) {
   rec.lastSentAt = Date.now();
   rec.attempts = 0;
   try {
-    await guiEmailOtp(rec.email, rec.code);
+    await guiEmailOtp(rec.email, rec.code, rec.app);
   } catch {
     return { loi: 'Không gửi được email, bạn thử lại sau nhé.' };
   }

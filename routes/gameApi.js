@@ -50,6 +50,8 @@ router.post('/dang-ky-gui-lai', otpRequestLimiter, gameApiController.dangKyGuiLa
 router.post('/dang-ky-xac-nhan', loginLimiter, gameApiController.dangKyXacNhan);
 router.post('/dang-nhap', loginLimiter, gameApiController.dangNhap);
 router.post('/thoat', gameApiController.thoat);
+router.get('/google-info', gameApiController.googleInfo);
+router.post('/google', express.json(), gameApiController.google);
 
 // Độ khó cá nhân hoá theo tài khoản (lớp + dạng toán -> tier).
 router.get('/skill', gameApiController.getSkill);

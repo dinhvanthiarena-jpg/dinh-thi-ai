@@ -133,7 +133,7 @@ router.post('/dang-ky-yeu-cau', express.json(), an(async (req, res) => {
   const khoa = ipCua(req);
   if (otpBiChan(khoa)) return res.status(429).json({ error: 'Bạn yêu cầu mã nhiều lần quá, chờ ít phút rồi thử lại nhé.' });
   const { ten, sdt, matKhau, email } = req.body || {};
-  const kq = await otp.yeuCauDangKy({ ten, sdt, matKhau, email });
+  const kq = await otp.yeuCauDangKy({ ten, sdt, matKhau, email, app: 'english-air' });
   if (kq.loi) return res.status(400).json({ error: kq.loi });
   ghiXinOtp(khoa);
   res.json({ ok: true, token: kq.token, email: kq.email });

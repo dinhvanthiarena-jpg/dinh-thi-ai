@@ -129,7 +129,7 @@ exports.dangKyYeuCau = async (req, res) => {
   try {
     if (req.user) return res.json({ dangNhap: true, ...tk.goiVe(req.user) });
     const { ten, sdt, matKhau, email } = req.body || {};
-    const kq = await otp.yeuCauDangKy({ ten, sdt, matKhau, email });
+    const kq = await otp.yeuCauDangKy({ ten, sdt, matKhau, email, app: 'mon-maths' });
     if (kq.loi) return res.status(400).json({ error: kq.loi });
     res.json({ ok: true, token: kq.token, email: kq.email });
   } catch (e) {
@@ -179,6 +179,23 @@ exports.dangNhap = async (req, res) => {
 exports.thoat = async (req, res) => {
   res.clearCookie('token');
   res.json({ dangNhap: false });
+};
+
+/** App hỏi máy chủ xem có bật đăng nhập Google không, và bật thì Client ID nào. */
+exports.googleInfo = async (req, res) => {
+  res.json({ bat: tk.coGoogle(), clientId: process.env.GOOGLE_CLIENT_ID || '' });
+};
+
+exports.google = async (req, res) => {
+  try {
+    const kq = await tk.vaoBangGoogle((req.body || {}).token);
+    if (kq.loi) return res.status(400).json({ error: kq.loi });
+    tk.datCookie(res, kq.user);
+    res.json({ dangNhap: true, moi: kq.moi, ...tk.goiVe(kq.user) });
+  } catch (e) {
+    console.error('[game/google]', e.message);
+    res.status(500).json({ error: 'Có lỗi ở máy chủ, bạn thử lại nhé.' });
+  }
 };
 
 /* ===== Độ khó cá nhân hoá (MathSkill) =====

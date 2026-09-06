@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data: blob:; connect-src 'self';" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' https://accounts.google.com; frame-src https://accounts.google.com; img-src 'self' data: blob: https://*.googleusercontent.com; connect-src 'self' https://accounts.google.com;" />
 <meta name="theme-color" content="#F7F3FD" />
 <meta name="description" content="Game Mon-Maths - luyện toán vui nhộn cho học sinh lớp 1 đến lớp 5, chơi ngay trên trình duyệt." />
 <meta name="mobile-web-app-capable" content="yes" />
@@ -783,6 +783,10 @@
     <div class="modal-box">
       <h2 id="congTitle">Chào bạn, đây là Mon-Maths</h2>
       <p class="settings-desc" id="congSub">Đăng ký để giữ điểm và bậc thi đấu của con trên mọi máy.</p>
+      <div id="congGoogle" hidden>
+        <div id="gsiNut"></div>
+        <div class="cong-hoac"><span>hoặc</span></div>
+      </div>
       <form id="congForm" novalidate>
         <label class="settings-label" id="oTen" for="fTen">Tên của con</label>
         <input type="text" id="fTen" class="license-input settings-name-input" autocomplete="name" maxlength="60" placeholder="Ví dụ: Bin" />
