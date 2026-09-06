@@ -2695,15 +2695,32 @@ function veCup(acc) {
   const el = $("#resTrophy");
   if (!el) return;
   const hang = acc >= 80 ? "vang" : acc >= 60 ? "bac" : "dong";
-  const emoji = hang === "vang" ? "🏆" : hang === "bac" ? "🥈" : "🥉";
   const ten = hang === "vang" ? "Cúp Vàng" : hang === "bac" ? "Cúp Bạc" : "Cúp Đồng";
   el.hidden = false;
-  el.className = "res-trophy " + hang;
-  el.innerHTML = `<span class="emoji">${emoji}</span> ${ten}`;
-  if (hang === "vang") { keuThuong(); return; }
+  el.className = "res-cup " + hang;
+  $("#resCupTen").textContent = ten;
+  $("#result").classList.add("co-cup");
+  phatVoTay();
+  // Vàng mới thổi kèn; Bạc/Đồng chỉ vỗ tay động viên, không ầm ĩ cho một kết
+  // quả chưa tốt.
+  if (hang === "vang" && S.sound) {
+    const a = tiengSanSang();
+    if (a) { const t0 = a.currentTime + .18; tiengKen(a, t0); tiengLapLanh(a, t0); }
+  }
+}
+
+/** Tiếng vỗ tay hoan nghênh. Phát từ FILE cho ra tiếng người vỗ thật; máy chặn
+    hoặc file hỏng thì mới rơi về tiếng tự tổng hợp. */
+function phatVoTay() {
   if (!S.sound) return;
-  const a = tiengSanSang();
-  if (a) tiengVoTay(a, a.currentTime + .02);
+  const el2 = $("#amVoTay");
+  const duPhong = () => { const a = tiengSanSang(); if (a) tiengVoTay(a, a.currentTime + .02); };
+  if (!el2) { duPhong(); return; }
+  try {
+    el2.currentTime = 0;
+    const p = el2.play();
+    if (p && p.catch) p.catch(duPhong);
+  } catch { duPhong(); }
 }
 
 /** Cả màn trao thưởng: kèn + vỗ tay + lấp lánh chồng lên nhau. Gọi đúng lúc
@@ -3331,6 +3348,9 @@ function finish() {
 }
 $("#btnResDone").addEventListener("click", () => {
   const showStreak = $("#result").dataset.streak === "1";
+  try { const v = $("#amVoTay"); v.pause(); v.currentTime = 0; } catch { /* thôi */ }
+  $("#result").classList.remove("co-cup");
+  $("#resTrophy").hidden = true;
   $("#result").hidden = true;
   paintStats();
   if (showStreak) { openStreak(); return; }

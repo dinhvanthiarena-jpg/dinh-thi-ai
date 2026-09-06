@@ -3,7 +3,7 @@
    Toàn bộ app chạy offline sau lần mở đầu tiên.
    Đổi CACHE khi sửa file để buộc tải lại bản mới.
    ============================================================ */
-const CACHE = "english-air-v169";
+const CACHE = "english-air-v170";
 
 const SHELL = [
   "./",
@@ -29,6 +29,7 @@ const SHELL = [
   "./assets/sticker/s16.webp",
   "./assets/sticker/s17.webp",
   "./assets/thuong.mp3",
+  "./assets/vo-tay.mp3",
   "./assets/call-hero.webp",
   "./course-a1.js",
   "./course-a2.js",
