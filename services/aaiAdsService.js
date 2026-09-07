@@ -222,6 +222,9 @@ async function createCampaignPlan(params) {
     objective,
     status: 'PAUSED',
     special_ad_categories: JSON.stringify([]),
+    // Meta hiện bắt buộc trường này khi KHÔNG dùng ngân sách cấp Chiến dịch
+    // (CBO) — false = ngân sách quản lý ở từng Ad Set như bình thường.
+    is_adset_budget_sharing_enabled: 'false',
     access_token: accessToken,
   });
 
