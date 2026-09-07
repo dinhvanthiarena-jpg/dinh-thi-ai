@@ -12,10 +12,9 @@
   <% if (pageUrl) { %><link rel="canonical" href="<%= pageUrl %>" /><% } %>
 
   <meta property="og:site_name" content="Đinh Thi Ai" />
-  <!-- Bắt buộc phải có để khung bình luận Facebook (fb-comments) hoạt động
-       — thiếu thẻ này Facebook Sharing Debugger báo "Thiếu tài sản: fb:app_id"
-       và khung bình luận render với chiều cao 0, không hiện gì cả. -->
-  <meta property="fb:app_id" content="918992840963509" />
+  <!-- App "Dinh Thi Ai Website" (1364909193363859) — app riêng cho web,
+       tách khỏi app "Ads Manager - DT" vốn tạo cho Marketing API. -->
+  <meta property="fb:app_id" content="1364909193363859" />
   <meta property="og:type" content="<%= typeof ogType !== 'undefined' ? ogType : 'website' %>" />
   <meta property="og:title" content="<%= typeof title !== 'undefined' ? title : appName %>" />
   <meta property="og:description" content="<%= metaDesc %>" />
