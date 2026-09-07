@@ -2,7 +2,10 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- interactive-widget=resizes-content: trên iOS/Android, khi bàn phím ảo
+       mở lên, trình duyệt co lại đúng viewport thay vì để các khối
+       position:fixed (như khung chat) bị đẩy lệch/trôi lên trên màn hình. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
   <title><%= typeof title !== 'undefined' ? title + ' | ' + appName : appName %></title>
   <% const metaDesc = typeof description !== 'undefined' && description ? description : 'Đinh Thi Ai - Nền tảng đào tạo AI, đào tạo ứng dụng AI cho người đi làm, từ chuyên gia thực chiến.'; %>
   <% const rawImage = typeof ogImage !== 'undefined' && ogImage ? ogImage : '/images/og-cover.png'; %>

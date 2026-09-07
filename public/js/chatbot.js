@@ -105,6 +105,20 @@
     panel.classList.remove('flex');
   }
 
+  // Dự phòng cho các trình duyệt di động chưa hỗ trợ
+  // "interactive-widget=resizes-content" (đặt trong main.ejs) — khi bàn
+  // phím ảo mở, đẩy khung chat lên đúng bằng chiều cao bàn phím để ô nhập
+  // liệu (#chatbot-form) không bị trôi khỏi màn hình nhìn thấy được.
+  if (window.visualViewport) {
+    var adjustForKeyboard = function () {
+      var vv = window.visualViewport;
+      var keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      root.style.transform = keyboardHeight > 60 ? 'translateY(-' + keyboardHeight + 'px)' : '';
+    };
+    window.visualViewport.addEventListener('resize', adjustForKeyboard);
+    window.visualViewport.addEventListener('scroll', adjustForKeyboard);
+  }
+
   toggleBtn.addEventListener('click', function () {
     if (opened && !panel.classList.contains('hidden')) {
       closePanel();
