@@ -233,6 +233,9 @@ async function createCampaignPlan(params) {
     geo_locations: { countries: countries && countries.length ? countries : ['VN'] },
     age_min: ageMin || 18,
     age_max: ageMax || 65,
+    // Meta hiện bắt buộc chọn rõ có bật Advantage+ Audience (Meta tự mở rộng
+    // đối tượng bằng AI) hay không — 0 = tắt, giữ đúng đối tượng đã chọn thủ công.
+    targeting_automation: { advantage_audience: 0 },
   };
   if (gender === 'male') targeting.genders = [1];
   if (gender === 'female') targeting.genders = [2];
