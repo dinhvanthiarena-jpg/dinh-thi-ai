@@ -210,6 +210,7 @@ async function createCampaignPlan(params) {
     pixelId,
     interests,
     customConversionId,
+    lifetimeDays, // tùy chọn — VD "chạy thử 10 ngày" thay vì chạy liên tục tới khi tự tay dừng
     creative, // { pageId, imageHash, message, headline, linkUrl, cta, instagramActorId }
   } = params;
 
@@ -239,10 +240,18 @@ async function createCampaignPlan(params) {
     billing_event: goalConfig.billing_event,
     optimization_goal: goalConfig.optimization_goal,
     targeting: JSON.stringify(targeting),
-    daily_budget: String(Math.round(dailyBudget)),
     status: 'PAUSED',
     access_token: accessToken,
   };
+  // "Chạy thử N ngày" — dùng lifetime_budget + start/end_time để Facebook TỰ
+  // dừng sau N ngày, thay vì daily_budget chạy liên tục tới khi tự tay dừng.
+  if (lifetimeDays) {
+    adSetBody.lifetime_budget = String(Math.round(dailyBudget) * Number(lifetimeDays));
+    adSetBody.start_time = new Date().toISOString();
+    adSetBody.end_time = new Date(Date.now() + Number(lifetimeDays) * 86400000).toISOString();
+  } else {
+    adSetBody.daily_budget = String(Math.round(dailyBudget));
+  }
   if (customConversionId) {
     adSetBody.promoted_object = JSON.stringify({ custom_conversion_id: customConversionId });
   } else if (pixelId && (objective === 'OUTCOME_SALES' || objective === 'OUTCOME_LEADS')) {

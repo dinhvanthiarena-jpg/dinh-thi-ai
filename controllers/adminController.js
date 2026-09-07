@@ -665,6 +665,7 @@ exports.aaiAdsCreateCampaign = async (req, res) => {
       gender: body.gender || 'all',
       pixelId: body.pixelId || null,
       interests: body.interests ? JSON.parse(body.interests) : [],
+      lifetimeDays: body.lifetimeDays ? parseInt(body.lifetimeDays, 10) : null,
       creative,
     });
     res.json(result);
