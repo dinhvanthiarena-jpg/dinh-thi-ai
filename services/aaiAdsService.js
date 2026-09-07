@@ -245,6 +245,9 @@ async function createCampaignPlan(params) {
     campaign_id: campaign.id,
     billing_event: goalConfig.billing_event,
     optimization_goal: goalConfig.optimization_goal,
+    // Meta hiện bắt buộc 1 chiến lược giá thầu rõ ràng ở Ad Set — auto-bid,
+    // không giới hạn giá thầu (đơn giản, an toàn nhất cho người mới).
+    bid_strategy: 'LOWEST_COST_WITHOUT_CAP',
     targeting: JSON.stringify(targeting),
     status: 'PAUSED',
     access_token: accessToken,
