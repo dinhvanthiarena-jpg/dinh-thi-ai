@@ -1758,6 +1758,8 @@ button:focus-visible,
 .result-trophy.bac { background: #3A3D45; color: #D6DCE5; }
 .result-trophy.dong { background: #4A2E18; color: #E0A672; }
 
+.cong-mascot-wrap { width: 90px; height: 90px; margin-bottom: 4px; }
+
 #congGoogle { margin-top: 16px; }
 #congGoogle[hidden] { display: none; }
 #gsiNut { display: flex; justify-content: center; min-height: 44px; }

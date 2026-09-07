@@ -3788,6 +3788,7 @@
 
     function moCong() {
       congModal.hidden = false;
+      setMascot($('mascotCong'), 'happy');
       moBuoc1();
       batGoogle();
       setTimeout(() => (dangKyDangMo() ? fTen : fSdt).focus(), 80);
@@ -4033,6 +4034,7 @@
     applyTeacherName();
     setMascot($('mascotHome'), 'happy');
     setMascot($('mascotLicense'), 'sad');
+    setMascot($('mascotCong'), 'happy');
   }
 
   function openSettingsModal() {
