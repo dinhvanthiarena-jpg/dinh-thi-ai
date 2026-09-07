@@ -2104,6 +2104,63 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .vcard-bac { display: flex; justify-content: center; gap: 6px; margin-top: 2px; }
 .vcard-bac .w-bac, .vcard-bac .w-lop { margin: 0; }
 
+/* ---------- Kiểm tra xếp trình độ ----------
+   Người học tự chọn trình độ thì hay chọn sai, học bài quá dễ hoặc quá khó rồi
+   bỏ. Màn này đo thật rồi xếp, để nội dung luôn vừa sức. */
+.xep { position: fixed; inset: 0; z-index: 95; background: var(--bg); overflow-y: auto; }
+.xep .p-bar { gap: var(--s3); }
+.xep .bar { flex: 1; }
+.xep-dem { font-size: .82rem; font-weight: 900; color: var(--muted-fg); flex: none; }
+.xep-in { max-width: var(--shell); margin-inline: auto;
+  padding: var(--s4) var(--gut) calc(var(--s6) + env(safe-area-inset-bottom)); }
+.xep-huy, .xep-cup { width: 76px; height: 76px; margin: var(--s4) auto var(--s4);
+  border-radius: 26px; display: grid; place-items: center; color: #fff;
+  background: linear-gradient(140deg, #8B5CF6, #6D28D9);
+  box-shadow: 0 12px 28px rgba(109,40,217,.45); }
+.xep-huy .ic, .xep-cup .ic { width: 38px; height: 38px; }
+.xep-cup.a1 { background: linear-gradient(140deg, #34D399, #059669); box-shadow: 0 12px 28px rgba(5,150,105,.4); }
+.xep-cup.a2 { background: linear-gradient(140deg, #60A5FA, #2563EB); box-shadow: 0 12px 28px rgba(37,99,235,.4); }
+.xep-cup.b1 { background: linear-gradient(140deg, #F59E0B, #D97706); box-shadow: 0 12px 28px rgba(217,119,6,.4); }
+.xep h2 { text-align: center; margin: 0 0 var(--s2); font-size: 1.5rem; font-weight: 900; }
+.xep-sub { text-align: center; margin: 0 0 var(--s5); color: var(--muted-fg); }
+.xep-bac { list-style: none; margin: 0 0 var(--s5); padding: 0;
+  display: flex; flex-direction: column; gap: var(--s2); }
+.xep-bac li { display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s3); border-radius: var(--r3); background: var(--card); }
+.xep-bac .ic { width: 26px; height: 26px; flex: none; color: var(--brand); }
+.xep-bac b { font-weight: 900; }
+.xep-bac span { color: var(--muted-fg); font-size: .88rem; }
+.xep-hoi-lab { text-align: center; margin: var(--s5) 0 var(--s2);
+  font-size: .74rem; font-weight: 900; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted-fg); }
+.xep-hoi { text-align: center; margin: 0 0 var(--s5);
+  font-size: 2rem; font-weight: 900; line-height: 1.2; }
+.xep-dap { display: flex; flex-direction: column; gap: var(--s2); }
+.xep-dap button { width: 100%; padding: 16px; border-radius: var(--r3);
+  border: 2px solid var(--line); background: var(--card); color: var(--fg);
+  font: inherit; font-size: 1.05rem; font-weight: 800; cursor: pointer; text-align: center; }
+.xep-dap button:active { border-color: var(--brand); }
+.xep-lab { text-align: center; margin: 0; font-size: .72rem; font-weight: 900;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted-fg); }
+.xep-ten { text-align: center; margin: 0 0 var(--s5); color: var(--muted-fg); font-weight: 700; }
+.xep-bang { display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--s4); }
+.xep-dong { display: flex; align-items: center; gap: var(--s3);
+  padding: 10px var(--s3); border-radius: var(--r3); background: var(--card); }
+.xep-dong b { width: 30px; font-weight: 900; flex: none; }
+.xep-dong .bar { flex: 1; }
+.xep-dong small { width: 42px; text-align: right; flex: none;
+  font-weight: 800; color: var(--muted-fg); font-variant-numeric: tabular-nums; }
+.xep-note { text-align: center; margin: 0 0 var(--s4); color: var(--muted-fg); font-size: .9rem; }
+/* Lời mời đo trình độ trên màn Học — chỉ hiện khi người học chưa đo bao giờ. */
+.xep-moi { display: flex; align-items: center; gap: var(--s3); width: 100%;
+  padding: var(--s3) var(--s4); margin-bottom: var(--s3); cursor: pointer;
+  border: 1.5px dashed color-mix(in srgb, var(--brand) 45%, transparent);
+  border-radius: var(--r3); background: color-mix(in srgb, var(--brand) 9%, transparent);
+  font: inherit; color: var(--fg); text-align: left; }
+.xep-moi .ic { width: 26px; height: 26px; flex: none; color: var(--brand); }
+.xep-moi strong { display: block; font-weight: 900; }
+.xep-moi small { color: var(--muted-fg); }
+
 /* ---------- Gọi bà phù thuỷ Kaka ---------- */
 .btn-kaka { background: linear-gradient(100deg, #7C3AED, #DB2777); color: #fff;
   display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); }

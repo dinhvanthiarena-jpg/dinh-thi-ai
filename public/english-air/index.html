@@ -56,6 +56,10 @@
     <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
     <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".55"/><path d="M12 8.6v6.8M10.2 10.4h2.6a1.6 1.6 0 0 1 0 3.2h-2.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
     <symbol id="i-crown" viewBox="0 0 24 24"><path d="M4 18h16M4 18 3 7l5 4 4-6 4 6 5-4-1 11"/></symbol>
+    <!-- Ba bậc trình độ, vẽ đơn giản đúng nghĩa: mầm cây → cây con → cây lớn. -->
+    <symbol id="i-bac1" viewBox="0 0 24 24"><path d="M12 21v-7"/><path d="M12 14c0-3-2-5-5-5 0 3 2 5 5 5Z"/><path d="M8.5 21h7"/></symbol>
+    <symbol id="i-bac2" viewBox="0 0 24 24"><path d="M12 21v-9"/><path d="M12 12c0-3-2-5-5-5 0 3 2 5 5 5Z"/><path d="M12 15c0-3 2-5 5-5 0 3-2 5-5 5Z"/><path d="M8.5 21h7"/></symbol>
+    <symbol id="i-bac3" viewBox="0 0 24 24"><path d="M12 21v-4"/><path d="M12 3 7 10h10z"/><path d="M12 8 5 17h14z"/><path d="M8.5 21h7"/></symbol>
     <!-- Cúp cuối bài. Ba hạng chỉ khác nhau ở màu, nên vẽ MỘT hình rồi đổi ba
          biến màu (--cup-a thân, --cup-b bóng sáng, --cup-c ngôi sao). -->
     <symbol id="i-cup" viewBox="0 0 100 120">
@@ -1910,6 +1914,49 @@
 <!-- Một thẻ tiếng DÙNG CHUNG cho bà phù thuỷ. Phải là thẻ có sẵn trong trang và
      được mồi từ cú chạm đầu tiên; tạo new Audio() giữa chừng thì iPhone chặn. -->
 <audio id="amKaka" preload="none" playsinline></audio>
+
+<!-- ============ KIỂM TRA XẾP TRÌNH ĐỘ ============ -->
+<div class="xep" id="xepView" hidden role="dialog" aria-modal="true" aria-labelledby="xepTitle">
+  <header class="p-bar">
+    <button class="icon-btn" id="btnXepDong" type="button" aria-label="Đóng">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+    <div class="bar" id="xepThanh" hidden><i id="xepThanhIn"></i></div>
+    <span class="xep-dem" id="xepDem" hidden></span>
+  </header>
+
+  <!-- Bước 1: giới thiệu -->
+  <div class="xep-in" id="xepMo">
+    <div class="xep-huy" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><use href="#i-target"/></svg></div>
+    <h2 id="xepTitle">Kiểm tra xếp trình độ</h2>
+    <p class="xep-sub">15 câu, khoảng 3 phút. Xong là app tự xếp bạn vào đúng trình độ, học bài vừa sức chứ không phải đoán.</p>
+    <ul class="xep-bac">
+      <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bac1"/></svg><b>A1</b><span>Mới bắt đầu · Lớp 3–5</span></li>
+      <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bac2"/></svg><b>A2</b><span>Giao tiếp cơ bản · Lớp 6–7</span></li>
+      <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bac3"/></svg><b>B1</b><span>Nói được ý riêng · Lớp 8–9</span></li>
+    </ul>
+    <button class="btn btn-primary btn-block" id="btnXepBatDau" type="button">Bắt đầu kiểm tra</button>
+  </div>
+
+  <!-- Bước 2: làm bài -->
+  <div class="xep-in" id="xepCau" hidden>
+    <p class="xep-hoi-lab">Từ này tiếng Anh là gì?</p>
+    <p class="xep-hoi" id="xepHoi"></p>
+    <div class="xep-dap" id="xepDap"></div>
+  </div>
+
+  <!-- Bước 3: kết quả -->
+  <div class="xep-in" id="xepXong" hidden>
+    <div class="xep-cup" id="xepCup" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24"><use href="#i-bac1"/></svg></div>
+    <p class="xep-lab">TRÌNH ĐỘ CỦA BẠN</p>
+    <h2 id="xepMa">A1</h2>
+    <p class="xep-ten" id="xepTen"></p>
+    <div class="xep-bang" id="xepBang"></div>
+    <p class="xep-note" id="xepNote"></p>
+    <button class="btn btn-primary btn-block" id="btnXepNhan" type="button">Học từ trình độ này</button>
+    <button class="btn btn-text btn-block" id="btnXepLam" type="button">Làm lại</button>
+  </div>
+</div>
 
 <!-- ================= GỌI BÀ PHÙ THUỶ KAKA ================= -->
 <div class="kaka" id="kakaView" hidden role="dialog" aria-modal="true" aria-labelledby="kakaTitle">

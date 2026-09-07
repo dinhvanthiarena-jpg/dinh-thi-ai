@@ -92,6 +92,7 @@ const DEFAULTS = {
   kidVoice: false,
   giongChot: 0,   // đánh dấu đã áp giọng mặc định mới, chỉ áp một lần
   ten: "",
+  daXep: "",      // trình độ đã đo được; rỗng nghĩa là chưa kiểm tra bao giờ
   // Đang mở sẵn hết bài để thầy kiểm tra nội dung. Khi nào cần học lần lượt
   // trở lại thì đổi về false — ai đã tự gạt công tắc thì giữ lựa chọn của họ.
   moHet: true,
@@ -751,6 +752,18 @@ function renderLearn() {
 
   const root = $("#unitList");
   root.textContent = "";
+  // Chưa đo trình độ bao giờ thì mời một lần, ngay trên đầu danh sách chương.
+  // Đo rồi (S.daXep) thì thôi, không nhắc nữa cho khỏi phiền.
+  if (!S.daXep) {
+    const moi = el("button", "xep-moi");
+    moi.type = "button";
+    const chu = el("span");
+    chu.append(el("strong", null, "Chưa biết mình ở trình độ nào?"),
+               el("small", null, "Làm 15 câu, app xếp bạn vào đúng bậc để học bài vừa sức."));
+    moi.append(svgUse("i-target", "0 0 24 24", "ic"), chu);
+    moi.addEventListener("click", moXep);
+    root.append(moi);
+  }
   // Chương nào đang học thì mở sẵn; lần đầu vào chưa ai bấm gì thì cũng chỉ mở
   // đúng chương đó — sáu chương bung hết ra một lúc là phải cuộn mỏi tay.
   if (!chuongMo.size && cur) chuongMo.add(cur.unit.id);
@@ -2791,6 +2804,127 @@ function stkTiep() {
   if (!stkDo.length) stkDo = shuffle([...Array(STK_SO).keys()].map(i => i + 1));
   return stkDo.pop();
 }
+
+/* ==================== KIỂM TRA XẾP TRÌNH ĐỘ ====================
+   Trước đây người học tự bấm chọn A1/A2/B1. Ai cũng chọn theo cảm tính nên
+   nhiều người học bài quá dễ (chán) hoặc quá khó (nản rồi bỏ). Màn này đo
+   thật: mỗi bậc 5 câu, xếp vào bậc ĐẦU TIÊN mà người học chưa vững, vì đó mới
+   là chỗ cần học chứ không phải chỗ đã biết rồi. */
+const XEP_MOI_BAC = 5;                 // số câu mỗi bậc
+const XEP_DAT = 0.6;                   // đúng từ 60% của một bậc coi như vững
+const XEP_BAC = ["a1", "a2", "b1"];
+let XEP = null;
+
+function tenBac(id) {
+  const lv = COURSE.levels.find(l => l.id === id);
+  return lv ? lv.name : id.toUpperCase();
+}
+
+/** Dựng đề: mỗi bậc XEP_MOI_BAC câu, mồi nhiễu lấy trong CÙNG bậc cho công bằng. */
+function taoDeXep() {
+  const cau = [];
+  XEP_BAC.forEach(id => {
+    const kho = ALL_WORDS.filter(w => (w.cefr || "").toLowerCase() === id && w.en && w.vi);
+    if (kho.length < 4) return;
+    sample(kho, XEP_MOI_BAC).forEach(w => {
+      const nhieu = sample(kho.filter(x => x.en !== w.en), 3);
+      if (nhieu.length < 3) return;
+      cau.push({ bac: id, w, opts: shuffle([w, ...nhieu]) });
+    });
+  });
+  return cau;
+}
+
+function moXep() {
+  XEP = { cau: taoDeXep(), i: 0, dung: { a1: 0, a2: 0, b1: 0 }, tong: { a1: 0, a2: 0, b1: 0 } };
+  XEP.cau.forEach(c => { XEP.tong[c.bac] += 1; });
+  $("#xepMo").hidden = false;
+  $("#xepCau").hidden = true;
+  $("#xepXong").hidden = true;
+  $("#xepThanh").hidden = true;
+  $("#xepDem").hidden = true;
+  $("#xepView").hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function dongXep() {
+  $("#xepView").hidden = true;
+  document.body.style.overflow = "";
+}
+
+function veCauXep() {
+  const c = XEP.cau[XEP.i];
+  if (!c) return xongXep();
+  $("#xepMo").hidden = true;
+  $("#xepXong").hidden = true;
+  $("#xepCau").hidden = false;
+  $("#xepThanh").hidden = false;
+  $("#xepDem").hidden = false;
+  $("#xepThanhIn").style.width = Math.round((XEP.i / XEP.cau.length) * 100) + "%";
+  $("#xepDem").textContent = (XEP.i + 1) + "/" + XEP.cau.length;
+  $("#xepHoi").textContent = c.w.vi;
+  const hop = $("#xepDap");
+  hop.textContent = "";
+  c.opts.forEach(o => {
+    const b = el("button", null, o.en);
+    b.type = "button";
+    b.addEventListener("click", () => {
+      if (o.en === c.w.en) XEP.dung[c.bac] += 1;
+      XEP.i += 1;
+      veCauXep();
+    }, { once: true });
+    hop.append(b);
+  });
+}
+
+function xongXep() {
+  const ti = id => (XEP.tong[id] ? XEP.dung[id] / XEP.tong[id] : 0);
+  // Bậc đầu tiên chưa vững chính là bậc nên học. Vững hết thì học bậc cao nhất.
+  const nen = XEP_BAC.find(id => ti(id) < XEP_DAT) || XEP_BAC[XEP_BAC.length - 1];
+  XEP.nen = nen;
+  $("#xepCau").hidden = true;
+  $("#xepThanh").hidden = true;
+  $("#xepDem").hidden = true;
+  $("#xepXong").hidden = false;
+
+  const cup = $("#xepCup");
+  cup.className = "xep-cup " + nen;
+  cup.innerHTML = "";
+  cup.append(svgUse("i-bac" + (XEP_BAC.indexOf(nen) + 1), "0 0 24 24"));
+  $("#xepMa").textContent = (NHAN_BAC[nen] || {}).cefr || nen.toUpperCase();
+  $("#xepTen").textContent = tenBac(nen) + " · " + ((NHAN_BAC[nen] || {}).lop || "");
+
+  const bang = $("#xepBang");
+  bang.textContent = "";
+  XEP_BAC.forEach(id => {
+    const d = el("div", "xep-dong");
+    const thanh = el("div", "bar");
+    const trong = el("i");
+    trong.style.width = Math.round(ti(id) * 100) + "%";
+    thanh.append(trong);
+    d.append(el("b", null, (NHAN_BAC[id] || {}).cefr || id.toUpperCase()), thanh,
+             el("small", null, XEP.dung[id] + "/" + XEP.tong[id]));
+    bang.append(d);
+  });
+  $("#xepNote").textContent = nen === XEP_BAC[0]
+    ? "Bắt đầu từ gốc cho chắc, lên nhanh lắm."
+    : ti(nen) < XEP_DAT && XEP_BAC.indexOf(nen) > 0
+      ? "Phần dưới bạn nắm rồi, vào thẳng đây cho đỡ mất thời gian."
+      : "Bạn nắm khá vững, học tiếp ở mức này nhé.";
+}
+
+$("#btnXepDong").addEventListener("click", dongXep);
+$("#btnXepBatDau").addEventListener("click", () => { XEP.i = 0; veCauXep(); });
+$("#btnXepLam").addEventListener("click", moXep);
+$("#btnXepNhan").addEventListener("click", () => {
+  S.level = XEP.nen;
+  S.daXep = XEP.nen;                   // đã đo rồi thì thôi mời nữa
+  save();
+  dongXep();
+  paintStats();
+  go("learn");
+  toast("Đã xếp bạn vào " + ((NHAN_BAC[XEP.nen] || {}).cefr || "") + " — " + tenBac(XEP.nen));
+});
 
 /* ==================== GỌI BÀ PHÙ THUỶ KAKA ====================
    Kho tiếng THẬT của bà phù thuỷ: 58 tên bé gọi đích danh + 40 đoạn theo
@@ -5855,12 +5989,16 @@ $("#btnLevel").addEventListener("click", () => {
     });
     box.append(b);
   });
-  const thi = el("button", "btn btn-primary btn-block mt", "Đề thi Cambridge hôm nay");
+  const do2 = el("button", "btn btn-primary btn-block mt", "Kiểm tra xếp trình độ");
+  do2.type = "button";
+  do2.addEventListener("click", () => { closeSheet(); moXep(); });
+  box.append(do2);
+  const thi = el("button", "btn btn-soft btn-block mt", "Đề thi Cambridge hôm nay");
   thi.type = "button";
   thi.addEventListener("click", () => { closeSheet(); moManThi(); });
   box.append(thi);
 
-  openSheet({ title: "Chọn trình độ", body: "Chuyển bất cứ lúc nào, tiến độ mỗi trình độ giữ riêng.", no: "Đóng", slot: box });
+  openSheet({ title: "Chọn trình độ", body: "Không chắc mình ở đâu thì làm bài kiểm tra bên dưới, app xếp giúp.", no: "Đóng", slot: box });
 });
 $("#btnXp").addEventListener("click", () => toast(`${S.xp} XP · tuần này ${S.weekXp} XP`));
 $("#btnHeart").addEventListener("click", () => {
