@@ -51,7 +51,10 @@ async function graphRequest(pathAndQuery, method = 'GET', bodyParams = null) {
   }
   const res = await fetch(url, opts);
   const json = await res.json();
-  if (json.error) throw new Error(json.error.error_user_msg || json.error.message);
+  if (json.error) {
+    console.error('[aaiAdsService] Graph API error', pathAndQuery.split('?')[0], JSON.stringify(json.error));
+    throw new Error(json.error.error_user_msg || json.error.message);
+  }
   return json;
 }
 
