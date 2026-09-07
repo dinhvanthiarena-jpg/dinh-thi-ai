@@ -51,7 +51,7 @@ async function graphRequest(pathAndQuery, method = 'GET', bodyParams = null) {
   }
   const res = await fetch(url, opts);
   const json = await res.json();
-  if (json.error) throw new Error(json.error.message);
+  if (json.error) throw new Error(json.error.error_user_msg || json.error.message);
   return json;
 }
 
@@ -246,9 +246,12 @@ async function createCampaignPlan(params) {
   // "Chạy thử N ngày" — dùng lifetime_budget + start/end_time để Facebook TỰ
   // dừng sau N ngày, thay vì daily_budget chạy liên tục tới khi tự tay dừng.
   if (lifetimeDays) {
+    // start_time phải nằm trong tương lai — cộng thêm vài phút đệm để tránh
+    // bị Facebook coi là "đã ở quá khứ" ngay lúc request tới server.
+    const startTime = new Date(Date.now() + 5 * 60000);
     adSetBody.lifetime_budget = String(Math.round(dailyBudget) * Number(lifetimeDays));
-    adSetBody.start_time = new Date().toISOString();
-    adSetBody.end_time = new Date(Date.now() + Number(lifetimeDays) * 86400000).toISOString();
+    adSetBody.start_time = startTime.toISOString();
+    adSetBody.end_time = new Date(startTime.getTime() + Number(lifetimeDays) * 86400000).toISOString();
   } else {
     adSetBody.daily_budget = String(Math.round(dailyBudget));
   }
