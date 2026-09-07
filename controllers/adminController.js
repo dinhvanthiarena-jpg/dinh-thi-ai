@@ -11,7 +11,6 @@ const GameInstall = require('../models/GameInstall');
 const PushSubscription = require('../models/PushSubscription');
 const webpush = require('web-push');
 const aaiAds = require('../services/aaiAdsService');
-const fs = require('fs');
 
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
@@ -632,20 +631,14 @@ exports.aaiAdsInterests = async (req, res) => {
 exports.aaiAdsCreateCampaign = async (req, res) => {
   try {
     const body = req.body;
+    // Không cần upload ảnh riêng cho Ad nữa — Ad giờ dùng CHÍNH bài viết công
+    // khai đăng lên Page (link post), Facebook tự lấy ảnh preview từ thẻ OG
+    // của link đích. Ảnh tải lên/imageUrl trong form chỉ còn mang tính tham
+    // khảo cho thầy xem trước, không dùng để tạo Ad.
     let creative = null;
-    if (body.pageId && (req.file || body.imageUrl)) {
-      let base64Data;
-      if (req.file) {
-        base64Data = fs.readFileSync(req.file.path).toString('base64');
-      } else {
-        const imgRes = await fetch(body.imageUrl);
-        const buf = Buffer.from(await imgRes.arrayBuffer());
-        base64Data = buf.toString('base64');
-      }
-      const { hash } = await aaiAds.uploadImage(body.adAccountId, base64Data);
+    if (body.pageId && body.linkUrl) {
       creative = {
         pageId: body.pageId,
-        imageHash: hash,
         message: body.message || '',
         headline: body.headline || '',
         description: body.description || '',

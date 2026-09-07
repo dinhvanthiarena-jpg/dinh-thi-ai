@@ -63,7 +63,7 @@ function oauthRedirectUri(req) {
 }
 
 function buildAuthUrl(req) {
-  const scope = ['ads_management', 'ads_read', 'business_management', 'pages_show_list', 'pages_read_engagement'].join(',');
+  const scope = ['ads_management', 'ads_read', 'business_management', 'pages_show_list', 'pages_read_engagement', 'pages_manage_posts'].join(',');
   return `https://www.facebook.com/${GRAPH_VERSION}/dialog/oauth?client_id=${FB_APP_ID}&redirect_uri=${encodeURIComponent(oauthRedirectUri(req))}&scope=${scope}&response_type=code`;
 }
 
@@ -101,6 +101,27 @@ async function listPages() {
   const accessToken = requireToken();
   const result = await graphRequest(`/me/accounts?fields=id,name,fan_count&access_token=${accessToken}`);
   return result.data || [];
+}
+
+async function getPageAccessToken(pageId) {
+  const accessToken = requireToken();
+  const result = await graphRequest(`/me/accounts?fields=id,access_token&access_token=${accessToken}`);
+  const page = (result.data || []).find((p) => p.id === pageId);
+  if (!page) throw new Error('Không tìm thấy quyền quản trị Page này — có thể cần kết nối lại Facebook để cấp thêm quyền pages_manage_posts.');
+  return page.access_token;
+}
+
+// Đăng 1 bài công khai (kèm link) lên Page thật, dùng bài đó làm Ad — né được
+// hạn chế "bài viết ẩn (dark post) phải công khai" của Facebook khi App đang
+// ở chế độ Đang phát triển (chưa qua App Review).
+async function publishPageLinkPost(pageId, message, link) {
+  const pageAccessToken = await getPageAccessToken(pageId);
+  const result = await graphRequest(`/${pageId}/feed`, 'POST', {
+    message,
+    link,
+    access_token: pageAccessToken,
+  });
+  return result.id; // dạng "{page_id}_{post_id}", dùng làm object_story_id cho Ad Creative
 }
 
 async function searchInterests(query) {
@@ -282,22 +303,19 @@ async function createCampaignPlan(params) {
 
   const result = { campaignId: campaign.id, adSetId: adSet.id };
 
-  if (creative && creative.pageId && creative.imageHash) {
+  if (creative && creative.pageId && creative.linkUrl) {
     try {
-      const objectStorySpec = {
-        page_id: creative.pageId,
-        link_data: {
-          message: creative.message || '',
-          link: applyAutoUtm(creative.linkUrl || 'https://facebook.com', name),
-          image_hash: creative.imageHash,
-          name: creative.headline || '',
-          description: creative.description || '',
-          call_to_action: { type: creative.cta || 'LEARN_MORE' },
-        },
-      };
-      if (creative.instagramActorId) objectStorySpec.instagram_actor_id = creative.instagramActorId;
+      // Đăng bài công khai thật lên Page trước (né hạn chế "dark post phải
+      // công khai" của App đang ở chế độ Đang phát triển), rồi dùng CHÍNH bài
+      // đó làm Ad qua object_story_id — thay vì tạo bài viết ẩn qua object_story_spec.
+      const postId = await publishPageLinkPost(
+        creative.pageId,
+        creative.message || creative.headline || name,
+        applyAutoUtm(creative.linkUrl, name)
+      );
       const creativeObj = await graphRequest(`/${adAccountId}/adcreatives`, 'POST', {
-        object_story_spec: JSON.stringify(objectStorySpec),
+        object_story_id: postId,
+        call_to_action: JSON.stringify({ type: creative.cta || 'LEARN_MORE' }),
         access_token: accessToken,
       });
       const ad = await graphRequest(`/${adAccountId}/ads`, 'POST', {
@@ -307,6 +325,7 @@ async function createCampaignPlan(params) {
         status: 'PAUSED',
         access_token: accessToken,
       });
+      result.postId = postId;
       result.creativeId = creativeObj.id;
       result.adId = ad.id;
     } catch (e) {
