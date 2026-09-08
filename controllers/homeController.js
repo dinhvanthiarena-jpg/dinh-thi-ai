@@ -5,6 +5,7 @@ const Review = require('../models/Review');
 const User = require('../models/User');
 const GalleryPhoto = require('../models/GalleryPhoto');
 const Tool = require('../models/Tool');
+const { BLOG_CATEGORIES } = require('../utils/blogCategories');
 
 // Answers real questions people (and AI answer engines relaying real
 // questions) ask about Đinh Thi Ai — kept as plain facts, not marketing
@@ -42,7 +43,7 @@ const HOME_FAQS = [
 ];
 
 exports.index = async (req, res) => {
-  const [featuredCourses, latestPosts, topReviews, latestPhotos, featuredTools] = await Promise.all([
+  const [featuredCourses, latestPosts, topReviews, latestPhotos, featuredTools, categoryColumns] = await Promise.all([
     Course.findAll({ where: { isPublished: true, isFeatured: true }, limit: 6 }),
     BlogPost.findAll({ where: { isPublished: true }, order: [['publishedAt', 'DESC']], limit: 3 }),
     Review.findAll({
@@ -56,6 +57,18 @@ exports.index = async (req, res) => {
     }),
     GalleryPhoto.findAll({ where: { isPublished: true }, order: [['eventDate', 'DESC']], limit: 6 }),
     Tool.findAll({ where: { isPublished: true }, order: [['createdAt', 'DESC']] }),
+    // Cột tin theo từng chuyên mục ở đầu trang chủ (kiểu trang báo điện tử)
+    // — thay cho banner bán khóa học cũ.
+    Promise.all(
+      BLOG_CATEGORIES.map(async (cat) => ({
+        category: cat,
+        posts: await BlogPost.findAll({
+          where: { isPublished: true, category: cat.slug },
+          order: [['publishedAt', 'DESC']],
+          limit: 4,
+        }),
+      }))
+    ).then((cols) => cols.filter((c) => c.posts.length)),
   ]);
 
   res.render('home', {
@@ -77,6 +90,7 @@ exports.index = async (req, res) => {
     topReviews,
     latestPhotos,
     featuredTools,
+    categoryColumns,
   });
 };
 

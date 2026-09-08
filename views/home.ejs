@@ -1,19 +1,50 @@
-<!-- Hero -->
+<!-- Cột tin theo chuyên mục (kiểu trang chủ báo điện tử) -->
+<% if (categoryColumns.length) { %>
+<section class="bg-white border-b border-primary-100">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
+      <% categoryColumns.forEach(function(col) { %>
+        <div>
+          <div class="flex items-center justify-between border-b-2 border-primary-600 pb-2 mb-4">
+            <h2 class="text-sm font-bold uppercase tracking-wide text-primary-700"><%= col.category.emoji %> <%= col.category.label %></h2>
+            <a href="/blog?category=<%= col.category.slug %>" class="text-xs font-semibold text-muted hover:text-primary-700 whitespace-nowrap">Xem thêm &rarr;</a>
+          </div>
+          <div class="space-y-4">
+            <% col.posts.forEach(function(post, idx) { %>
+              <a href="/blog/<%= post.slug %>" class="flex gap-3 group">
+                <div class="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-primary-50">
+                  <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-sm font-semibold text-ink leading-snug line-clamp-2 group-hover:text-primary-700"><%= post.title %></h3>
+                  <p class="text-xs text-muted mt-1"><%= new Date(post.publishedAt).toLocaleDateString('vi-VN') %></p>
+                </div>
+              </a>
+            <% }); %>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<!-- Giới thiệu khóa học ngắn gọn -->
 <section class="relative overflow-hidden bg-gradient-to-br from-primary-50 via-white to-accent-50">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
     <div class="max-w-3xl mx-auto text-center">
       <span class="badge bg-primary-100 text-primary-700 mb-4">Đào tạo AI, Đào tạo Ứng dụng AI #1 dành cho người đi làm</span>
-      <h1 class="text-4xl sm:text-5xl font-extrabold text-ink leading-tight">
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-ink leading-tight">
         Đào tạo AI, đào tạo ứng dụng AI cùng chuyên gia Đinh Thi Ai
       </h1>
-      <p class="mt-5 text-lg text-muted max-w-2xl mx-auto">
+      <p class="mt-4 text-base sm:text-lg text-muted max-w-2xl mx-auto">
         Khóa học đào tạo AI và đào tạo ứng dụng AI thực chiến, giúp bạn ứng dụng AI vào công việc: từ Prompt Engineering, Generative AI đến triển khai AI cho doanh nghiệp — không cần nền tảng lập trình.
       </p>
-      <div class="mt-8 flex flex-wrap gap-4 justify-center">
+      <div class="mt-6 flex flex-wrap gap-4 justify-center">
         <a href="/courses" class="btn-primary text-base px-6 py-3">Khám phá khóa học</a>
         <a href="/gioi-thieu" class="btn-outline text-base px-6 py-3">Về chuyên gia đào tạo</a>
       </div>
-      <div class="mt-10 flex items-center gap-8 text-sm text-muted justify-center">
+      <div class="mt-8 flex items-center gap-8 text-sm text-muted justify-center">
         <div><span class="block text-2xl font-bold text-ink">5,000+</span>học viên</div>
         <div><span class="block text-2xl font-bold text-ink">30+</span>khóa học</div>
         <div><span class="block text-2xl font-bold text-ink">4.8/5</span>đánh giá</div>
