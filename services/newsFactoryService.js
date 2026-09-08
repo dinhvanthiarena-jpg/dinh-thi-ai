@@ -184,7 +184,7 @@ function markdownToHtml(markdown) {
     .map((block) => block.trim())
     .filter(Boolean)
     .map((block) => {
-      const heading = block.match(/^#{2,3}\s+(.+)$/);
+      const heading = block.match(/^#{1,3}\s+(.+)$/);
       if (heading) return `<h2>${inlineMarkdown(heading[1])}</h2>`;
       return `<p>${inlineMarkdown(block).replace(/\n/g, '<br>')}</p>`;
     })
@@ -206,9 +206,11 @@ TỪ KHOÁ SEO CẦN NHẮM TỚI: "${keyword}" — đưa từ khoá này (hoặ
 YÊU CẦU:
 1. Bài dài 800-1200 từ tiếng Việt, chia nhiều đoạn/heading phụ dạng "## Tiêu đề phụ" rõ ràng — đi sâu phân tích, giải thích bối cảnh, ý nghĩa và ứng dụng thực tế của chủ đề, KHÔNG chỉ tóm tắt lại tin gốc trong vài dòng.
 2. Có thể mở rộng thêm góc nhìn, giải thích khái niệm liên quan, gợi ý ứng dụng thực tế cho người đọc — miễn là dựa trên kiến thức chung hợp lý, KHÔNG bịa thêm số liệu, trích dẫn hay sự kiện cụ thể ngoài thông tin gốc được cung cấp.
-3. Giọng văn chuyên nghiệp, mạch lạc, phù hợp độc giả Việt Nam quan tâm đến chuyên mục "${categoryLabel}".
-4. Cuối bài PHẢI có đoạn bắt đầu bằng "**Nguồn tham khảo:**" rồi 1 dòng duy nhất theo định dạng markdown: [Tên bài gốc](link).
-5. CHỈ trả về JSON hợp lệ (không kèm giải thích, không bọc trong dấu backtick), đúng cấu trúc:
+3. VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT THUẦN — TUYỆT ĐỐI không chen từ/cụm từ tiếng Anh vào giữa câu tiếng Việt (VD: không viết "obligations", "proactive", "mindset", "aspects", "accumulate"...). Chỉ giữ nguyên các từ viết tắt kỹ thuật đã quá quen thuộc với người Việt như AI, SEO nếu thật sự cần. Đây là lỗi NGHIÊM TRỌNG cần tránh tuyệt đối.
+4. Giọng văn chuyên nghiệp, mạch lạc, phù hợp độc giả Việt Nam quan tâm đến chuyên mục "${categoryLabel}".
+5. KHÔNG lặp lại tiêu đề bài viết thành một heading ở đầu content (trang web đã tự hiển thị tiêu đề riêng) — bắt đầu content ngay bằng đoạn mở bài. Không dùng gạch đầu dòng "-" hay danh sách số thứ tự để liệt kê — viết thành đoạn văn liền mạch.
+6. Cuối bài PHẢI có đoạn bắt đầu bằng "**Nguồn tham khảo:**" rồi 1 dòng duy nhất theo định dạng markdown: [Tên bài gốc](link).
+7. CHỈ trả về JSON hợp lệ (không kèm giải thích, không bọc trong dấu backtick), đúng cấu trúc:
 {"title": "tiêu đề bài viết mới (không trùng tiêu đề gốc, có chứa từ khoá SEO)", "excerpt": "mô tả ngắn 140-160 ký tự dùng làm meta description, có chứa từ khoá SEO", "content": "toàn bộ nội dung bài viết, dùng \\n\\n giữa các đoạn", "tags": ["3 đến 5 từ khoá liên quan"]}`;
 
   const userMessage = `Chủ đề gốc: "${item.title}"\nTóm tắt: ${item.description}\nLink: ${item.link}`;
