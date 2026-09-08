@@ -87,6 +87,7 @@
     panel.classList.remove('hidden');
     panel.classList.add('flex');
     opened = true;
+    if (window.matchMedia('(max-width: 639px)').matches) lockBodyScroll();
     if (!messagesEl.childElementCount) {
       appendTyping();
       setTimeout(function () {
@@ -100,23 +101,32 @@
     input.focus();
   }
 
+  // Khi khung chat mở toàn màn hình trên điện thoại, khóa cuộn trang nền lại
+  // — nếu không, Safari/Chrome di động có thể tự cuộn trang phía sau khi
+  // người dùng chạm vào ô nhập trong khung "fixed", khiến cả khung như bị
+  // "nhảy" lệch vị trí khi bàn phím ảo mở lên (đúng lỗi thầy gặp).
+  var scrollYBeforeOpen = 0;
+  function lockBodyScroll() {
+    scrollYBeforeOpen = window.scrollY || document.documentElement.scrollTop || 0;
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + scrollYBeforeOpen + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+  }
+  function unlockBodyScroll() {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollYBeforeOpen);
+  }
+
   function closePanel() {
     panel.classList.add('hidden');
     panel.classList.remove('flex');
-  }
-
-  // Dự phòng cho các trình duyệt di động chưa hỗ trợ
-  // "interactive-widget=resizes-content" (đặt trong main.ejs) — khi bàn
-  // phím ảo mở, đẩy khung chat lên đúng bằng chiều cao bàn phím để ô nhập
-  // liệu (#chatbot-form) không bị trôi khỏi màn hình nhìn thấy được.
-  if (window.visualViewport) {
-    var adjustForKeyboard = function () {
-      var vv = window.visualViewport;
-      var keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      root.style.transform = keyboardHeight > 60 ? 'translateY(-' + keyboardHeight + 'px)' : '';
-    };
-    window.visualViewport.addEventListener('resize', adjustForKeyboard);
-    window.visualViewport.addEventListener('scroll', adjustForKeyboard);
+    if (window.matchMedia('(max-width: 639px)').matches) unlockBodyScroll();
   }
 
   toggleBtn.addEventListener('click', function () {

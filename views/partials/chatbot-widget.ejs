@@ -24,11 +24,18 @@
     </svg>
   </button>
 
+  <!-- Trên điện thoại: mở toàn màn hình (kiểu Messenger/Zalo) thay vì ô nhỏ
+       nổi góc màn hình — tránh hẳn lỗi kinh niên của Safari/Chrome di động:
+       phần tử "fixed" định vị bằng bottom/right bị bàn phím ảo đẩy lệch vị
+       trí. Toàn màn hình + h-dvh thì khung luôn tự co đúng theo vùng nhìn
+       thấy thực tế, ô nhập luôn nằm ở đáy khung nhờ flexbox, không cần tính
+       toán offset bằng JS nữa. Từ sm (tablet/PC) trở lên mới quay lại kiểu
+       ô nhỏ nổi góc màn hình như cũ. -->
   <div
     id="chatbot-panel"
-    class="hidden flex-col absolute bottom-16 right-0 w-[92vw] max-w-sm h-[70dvh] max-h-[560px] rounded-2xl bg-white shadow-2xl border border-primary-100 overflow-hidden"
+    class="hidden flex-col fixed inset-0 h-[100dvh] w-full rounded-none sm:absolute sm:inset-auto sm:bottom-16 sm:right-0 sm:h-[70dvh] sm:max-h-[560px] sm:w-[92vw] sm:max-w-sm sm:rounded-2xl bg-white shadow-2xl border border-primary-100 overflow-hidden"
   >
-    <div class="flex items-center gap-3 px-4 py-3 text-white" style="background: linear-gradient(135deg,#8B5CF6,#0891B2)">
+    <div class="flex items-center gap-3 px-4 py-3 text-white" style="background: linear-gradient(135deg,#8B5CF6,#0891B2); padding-top: max(0.75rem, env(safe-area-inset-top));">
       <img src="/images/chatbot-avatar.png" alt="Nhân viên tư vấn" class="h-9 w-9 rounded-full object-cover flex-shrink-0" />
       <div class="flex-1 min-w-0">
         <p class="font-semibold text-sm leading-tight">Nhân viên tư vấn</p>
@@ -41,7 +48,7 @@
 
     <div id="chatbot-messages" class="flex-1 overflow-y-auto px-4 py-3 space-y-3 text-sm bg-surface"></div>
 
-    <form id="chatbot-form" class="flex items-center gap-2 border-t border-primary-100 p-3">
+    <form id="chatbot-form" class="flex items-center gap-2 border-t border-primary-100 p-3" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
       <input
         id="chatbot-input"
         type="text"
