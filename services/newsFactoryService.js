@@ -52,8 +52,7 @@ function weightedShuffledSlugs() {
   return [...new Set(pool)];
 }
 
-// Ảnh bìa dạng SVG nhẹ (vài trăm byte, không phải ảnh chụp) — để web không
-// bị nặng khi đăng nhiều bài tự động mỗi ngày, theo đúng yêu cầu của thầy.
+// Ảnh bìa dự phòng dạng SVG nhẹ — dùng khi không tìm được ảnh thật phù hợp.
 const CATEGORY_COVER = {
   'ai-cong-nghe': '/images/blog/cat-ai-cong-nghe.svg',
   'xu-huong': '/images/blog/cat-xu-huong.svg',
@@ -62,6 +61,50 @@ const CATEGORY_COVER = {
   'doi-song': '/images/blog/cat-doi-song.svg',
   'giai-tri': '/images/blog/cat-giai-tri.svg',
 };
+
+// Từ khoá tiếng Anh để tìm ảnh thật liên quan trên Wikimedia Commons — kho
+// ảnh được cấp phép tự do (CC BY/CC BY-SA/public domain), không phải ảnh của
+// báo khác nên không dính bản quyền. Dùng link ảnh trực tiếp từ máy chủ
+// Wikimedia (không tải về lưu trên server mình) nên không làm nặng web.
+const CATEGORY_IMAGE_QUERY = {
+  'ai-cong-nghe': 'artificial intelligence technology',
+  'xu-huong': 'news media',
+  'dao-tao-nghe-nghiep': 'education career training',
+  'kinh-doanh': 'business digital technology',
+  'doi-song': 'healthy lifestyle',
+  'giai-tri': 'entertainment social media',
+};
+
+// Tìm 1 ảnh thật, có giấy phép tự do, liên quan tới chuyên mục trên
+// Wikimedia Commons — không cần API key, không cần tải/lưu ảnh về server.
+// Trả về null nếu không tìm được (khi đó dùng ảnh SVG dự phòng).
+async function fetchStockImage(categorySlug) {
+  const query = CATEGORY_IMAGE_QUERY[categorySlug] || 'technology';
+  const apiUrl =
+    'https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6' +
+    `&gsrsearch=${encodeURIComponent(`${query} filetype:bitmap`)}&gsrlimit=15` +
+    '&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=900&format=json&origin=*';
+
+  try {
+    const res = await fetch(apiUrl, { headers: { 'user-agent': 'DinhThiAi-NewsFactory/1.0' } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const pages = Object.values((data.query && data.query.pages) || {});
+    const candidates = pages
+      .map((p) => (p.imageinfo && p.imageinfo[0]) || null)
+      .filter((info) => info && info.thumburl && /\.(jpe?g|png)(\?|$)/i.test(info.thumburl));
+    if (!candidates.length) return null;
+
+    const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+    const meta = chosen.extmetadata || {};
+    const artist = ((meta.Artist && meta.Artist.value) || 'Không rõ tác giả').replace(/<[^>]+>/g, '').trim();
+    const license = (meta.LicenseShortName && meta.LicenseShortName.value) || 'Wikimedia Commons';
+    return { url: chosen.thumburl, credit: `Ảnh: ${artist} — Wikimedia Commons (${license})` };
+  } catch (err) {
+    console.error('[newsFactory] fetchStockImage failed', err.message);
+    return null;
+  }
+}
 
 // Mỗi chuyên mục có vài cụm từ khoá SEO xoay vòng theo ngày trong năm — giúp
 // mỗi bài tự động nhắm đúng 1 từ khoá cụ thể thay vì chung chung.
@@ -94,11 +137,11 @@ async function fetchFeedItems(url) {
 }
 
 // Chọn 1 chuyên mục còn tin chưa dùng (kiểm tra qua sourceUrl đã lưu ở các
-// bài trước để không viết trùng lại đúng 1 tin), lấy tối đa 5 tin mới nhất
-// của chuyên mục đó làm nguồn tổng hợp cho 1 bài "điểm tin". Truyền
-// forcedSlug để ưu tiên thử đúng 1 chuyên mục trước (VD: lấp cột còn trống
-// trên trang chủ), vẫn rơi về thứ tự xáo trộn theo trọng số nếu chuyên mục
-// đó không còn tin mới.
+// bài trước để không viết trùng lại đúng 1 tin), lấy tin MỚI NHẤT của chuyên
+// mục đó làm chủ đề cho 1 bài viết chuyên sâu (1 bài = 1 chủ đề, không còn
+// gộp nhiều tin thành 1 bài điểm tin). Truyền forcedSlug để ưu tiên thử đúng
+// 1 chuyên mục trước (VD: lấp cột còn trống trên trang chủ), vẫn rơi về thứ
+// tự xáo trộn theo trọng số nếu chuyên mục đó không còn tin mới.
 async function pickTopic(forcedSlug) {
   const rest = weightedShuffledSlugs().filter((s) => s !== forcedSlug);
   const slugs = forcedSlug && CATEGORY_FEEDS[forcedSlug] ? [forcedSlug, ...rest] : rest;
@@ -115,7 +158,7 @@ async function pickTopic(forcedSlug) {
     const fresh = items.filter((i) => !usedLinks.has(i.link));
     if (!fresh.length) continue;
 
-    return { category: slug, items: fresh.slice(0, 5) };
+    return { category: slug, item: fresh[0] };
   }
   return null;
 }
@@ -148,30 +191,27 @@ function markdownToHtml(markdown) {
     .join('\n');
 }
 
-async function generateArticle(categorySlug, keyword, items) {
+async function generateArticle(categorySlug, keyword, item) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return null;
 
   const categoryLabel = (BLOG_CATEGORIES.find((c) => c.slug === categorySlug) || {}).label || categorySlug;
-  const sourcesText = items
-    .map((item, idx) => `${idx + 1}. "${item.title}" — ${item.description}\nLink: ${item.link}`)
-    .join('\n\n');
 
   const systemPrompt = `Bạn là biên tập viên chuyên mục "${categoryLabel}" của website Đinh Thi Ai (nền tảng đào tạo ứng dụng AI cho người đi làm và doanh nghiệp tại Việt Nam).
 
-NHIỆM VỤ: Viết MỘT bài "điểm tin tổng hợp" bằng tiếng Việt, tổng hợp và diễn giải lại các tin dưới đây thành bài viết mạch lạc, có góc nhìn riêng. TUYỆT ĐỐI KHÔNG sao chép nguyên văn bất kỳ câu nào từ tin gốc — phải viết lại hoàn toàn bằng lời văn của bạn.
+NHIỆM VỤ: Viết MỘT bài viết CHUYÊN SÂU bằng tiếng Việt về chủ đề được cung cấp bên dưới. Đây chỉ là ĐIỂM KHỞI ĐẦU — bạn PHẢI viết lại hoàn toàn bằng lời văn, cấu trúc và góc nhìn riêng của mình. TUYỆT ĐỐI KHÔNG sao chép nguyên văn bất kỳ câu nào từ tin gốc, không dịch/diễn đạt lại từng câu một theo đúng thứ tự của bài gốc.
 
-TỪ KHOÁ SEO CẦN NHẮM TỚI: "${keyword}" — đưa từ khoá này (hoặc biến thể tự nhiên) vào tiêu đề, đoạn mở đầu và ít nhất 1 heading phụ.
+TỪ KHOÁ SEO CẦN NHẮM TỚI: "${keyword}" — đưa từ khoá này (hoặc biến thể tự nhiên) vào tiêu đề, đoạn mở đầu và ít nhất 2 heading phụ.
 
 YÊU CẦU:
-1. Bài dài 500-800 từ tiếng Việt, chia đoạn rõ ràng, có thể dùng heading phụ dạng "## Tiêu đề phụ" khi hợp lý.
-2. Mở đầu nêu bối cảnh chung liên quan đến từ khoá SEO, sau đó lần lượt đề cập từng tin được cung cấp (diễn giải lại, không copy), có thể thêm nhận định hoặc liên hệ ngắn gọn tới việc ứng dụng AI/kỹ năng số nếu hợp lý và tự nhiên (không gượng ép).
-3. KHÔNG bịa thêm số liệu, sự kiện, trích dẫn không có trong tin gốc được cung cấp.
-4. Cuối bài PHẢI có đoạn bắt đầu bằng "**Nguồn tham khảo:**" rồi liệt kê từng nguồn đã dùng theo định dạng markdown: [Tên bài gốc](link).
+1. Bài dài 800-1200 từ tiếng Việt, chia nhiều đoạn/heading phụ dạng "## Tiêu đề phụ" rõ ràng — đi sâu phân tích, giải thích bối cảnh, ý nghĩa và ứng dụng thực tế của chủ đề, KHÔNG chỉ tóm tắt lại tin gốc trong vài dòng.
+2. Có thể mở rộng thêm góc nhìn, giải thích khái niệm liên quan, gợi ý ứng dụng thực tế cho người đọc — miễn là dựa trên kiến thức chung hợp lý, KHÔNG bịa thêm số liệu, trích dẫn hay sự kiện cụ thể ngoài thông tin gốc được cung cấp.
+3. Giọng văn chuyên nghiệp, mạch lạc, phù hợp độc giả Việt Nam quan tâm đến chuyên mục "${categoryLabel}".
+4. Cuối bài PHẢI có đoạn bắt đầu bằng "**Nguồn tham khảo:**" rồi 1 dòng duy nhất theo định dạng markdown: [Tên bài gốc](link).
 5. CHỈ trả về JSON hợp lệ (không kèm giải thích, không bọc trong dấu backtick), đúng cấu trúc:
 {"title": "tiêu đề bài viết mới (không trùng tiêu đề gốc, có chứa từ khoá SEO)", "excerpt": "mô tả ngắn 140-160 ký tự dùng làm meta description, có chứa từ khoá SEO", "content": "toàn bộ nội dung bài viết, dùng \\n\\n giữa các đoạn", "tags": ["3 đến 5 từ khoá liên quan"]}`;
 
-  const userMessage = `Các tin tức để tổng hợp:\n\n${sourcesText}`;
+  const userMessage = `Chủ đề gốc: "${item.title}"\nTóm tắt: ${item.description}\nLink: ${item.link}`;
 
   try {
     const response = await fetch(ANTHROPIC_API_URL, {
@@ -213,22 +253,29 @@ async function createTrendingPost(forcedSlug) {
   }
 
   const keyword = pickKeyword(topic.category);
-  const article = await generateArticle(topic.category, keyword, topic.items);
+  const [article, stockImage] = await Promise.all([
+    generateArticle(topic.category, keyword, topic.item),
+    fetchStockImage(topic.category),
+  ]);
   if (!article) {
     console.log('[newsFactory] Claude không trả về bài viết hợp lệ, bỏ qua lần này.');
     return null;
   }
 
+  // Ghi rõ nguồn ảnh ngay dưới nội dung — bắt buộc với ảnh giấy phép CC
+  // BY/CC BY-SA của Wikimedia Commons.
+  const contentHtml = markdownToHtml(article.content) + (stockImage ? `\n<p class="text-xs text-muted italic">${stockImage.credit}</p>` : '');
+
   const post = await BlogPost.create({
     title: article.title,
     excerpt: article.excerpt || '',
-    content: markdownToHtml(article.content),
+    content: contentHtml,
     category: topic.category,
     tags: Array.isArray(article.tags) ? article.tags : [],
-    coverImageUrl: CATEGORY_COVER[topic.category],
+    coverImageUrl: (stockImage && stockImage.url) || CATEGORY_COVER[topic.category],
     isPublished: true,
     isAutoGenerated: true,
-    sourceUrl: topic.items[0].link,
+    sourceUrl: topic.item.link,
     seoKeyword: keyword,
   });
 
