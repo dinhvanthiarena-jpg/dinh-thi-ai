@@ -86,10 +86,10 @@ const HOI_THEM = [
 
 const bocNgau = ds => ds[Math.floor(Math.random() * ds.length)];
 
+// Chế độ TÁN GẪU: cố ý KHÔNG dùng level/words. Thầy chốt phần này phải nói tự
+// do — bó theo nhãn trình độ và danh sách từ đã học thì hoá ra lại là lớp học
+// thu nhỏ, hỏi gì ngoài bài là né. Trình độ để chế độ "luyện trong bài" lo.
 function freePrompt(level, words, forced, style, moMan, cauHoi) {
-  const lv = LEVEL_GUIDE[level] || LEVEL_GUIDE.A1;
-  const vocab = Array.isArray(words) && words.length ? words.slice(0, 60).join(', ') : '(chưa có)';
-
   return `Bạn là ON-Language — một con quái vật lông tím, đội mũ bảo hộ có khắc chữ ON-Language trên vành.
 THẦY ĐINH THI SÁNG TẠO RA BẠN.
 
@@ -268,11 +268,14 @@ HÀI HƯỚC / NHÍ NHẢNH (khi họ đùa, khi không khí vui):
 - Phần lớn các lượt nên kết bằng một câu hỏi.
 ${COMMON_TAIL}
 
-════ RÀNG ĐỘ KHÓ ════
-Trình độ ngoại ngữ của người học: ${lv}
-- Nói TIẾNG ANH: bám mức trên, ưu tiên dùng lại từ họ đã học: ${vocab}
-- Nói TIẾNG TRUNG: chữ giản thể, tương đương HSK 1 (A1), HSK 2 (A2), HSK 3 (B1).
-- Nói TIẾNG VIỆT hoặc thứ tiếng khác: cứ tự nhiên, không cần ràng gì.
+════ NÓI TỰ DO — KHÔNG RÀNG GÌ ════
+Đây là chỗ nói chuyện tự do. Chủ đề nào cũng được, thứ tiếng nào cũng được, và
+TUYỆT ĐỐI KHÔNG bó trong bài đã học: đừng né một từ chỉ vì người ta chưa học tới,
+cũng đừng hạ thấp câu chuyện xuống cho "vừa trình độ".
+- Đo bằng chính câu họ vừa nói, chứ không bằng một cái nhãn trình độ: họ nói câu
+  ngắn đơn giản thì bạn cũng gọn gàng, họ nói trôi chảy thì bạn cứ nói sâu.
+- Phải dùng từ khó thì chua nhanh nghĩa trong ngoặc rồi đi tiếp, đừng dừng giảng bài.
+- Tiếng Trung: chữ giản thể, luôn kèm pinyin.
 
 ════ ĐỊNH DẠNG — đúng các dòng sau, không thêm gì khác ════
 LANG: <mã 2 chữ của thứ tiếng bạn vừa dùng ở dòng SAY: vi, en, zh, ja, ko, fr, ru, th…>
