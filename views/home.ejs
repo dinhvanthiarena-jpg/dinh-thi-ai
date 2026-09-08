@@ -72,31 +72,6 @@
 </section>
 <% } %>
 
-<!-- Recent activity photos -->
-<% if (latestPhotos.length) { %>
-<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-  <div class="flex items-end justify-between mb-8">
-    <div>
-      <h2 class="text-2xl sm:text-3xl font-bold text-ink">Hoạt động gần đây</h2>
-      <p class="text-muted mt-1">Hình ảnh các buổi giảng dạy và sự kiện thực tế</p>
-    </div>
-    <a href="/hoat-dong" class="text-primary-700 font-semibold hover:underline hidden sm:block">Xem tất cả &rarr;</a>
-  </div>
-  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    <% latestPhotos.slice(0, 6).forEach(function(photo) { %>
-      <a href="/hoat-dong" class="card overflow-hidden group">
-        <div class="aspect-video bg-primary-50 overflow-hidden">
-          <img src="<%= photo.imageUrl %>" alt="<%= photo.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
-        </div>
-        <div class="p-4">
-          <h3 class="font-semibold text-sm text-ink line-clamp-1"><%= photo.title %></h3>
-        </div>
-      </a>
-    <% }); %>
-  </div>
-</section>
-<% } %>
-
 <!-- Testimonials -->
 <% if (topReviews.length) { %>
 <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
@@ -225,3 +200,28 @@
     <a href="/auth/register" class="btn bg-white text-primary-700 hover:bg-primary-50 mt-6 px-8 py-3 text-base">Đăng ký miễn phí</a>
   </div>
 </section>
+
+<!-- Recent activity photos (đưa xuống cuối trang theo yêu cầu) -->
+<% if (latestPhotos.length) { %>
+<section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+  <div class="flex items-end justify-between mb-8">
+    <div>
+      <h2 class="text-2xl sm:text-3xl font-bold text-ink">Hoạt động gần đây</h2>
+      <p class="text-muted mt-1">Hình ảnh các buổi giảng dạy và sự kiện thực tế</p>
+    </div>
+    <a href="/hoat-dong" class="text-primary-700 font-semibold hover:underline hidden sm:block">Xem tất cả &rarr;</a>
+  </div>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% latestPhotos.slice(0, 6).forEach(function(photo) { %>
+      <a href="/hoat-dong" class="card overflow-hidden group">
+        <div class="aspect-video bg-primary-50 overflow-hidden">
+          <img src="<%= photo.imageUrl %>" alt="<%= photo.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+        </div>
+        <div class="p-4">
+          <h3 class="font-semibold text-sm text-ink line-clamp-1"><%= photo.title %></h3>
+        </div>
+      </a>
+    <% }); %>
+  </div>
+</section>
+<% } %>
