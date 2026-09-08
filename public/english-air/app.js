@@ -584,6 +584,30 @@ const SINGLE = ALL_WORDS.filter(w => !w.en.includes(" "));
 // Cau/cum nhieu chu - dung rieng lam kho luoi bay cho cau hoi dang cum,
 // khong de tu don lac vao chung voi dap an la ca mot cau.
 const PHRASES = ALL_WORDS.filter(w => w.en.includes(" "));
+
+/* Kho từ THEO TRÌNH ĐỘ ĐANG HỌC, dùng làm mồi nhiễu (ba đáp án sai).
+   Trước đây mồi nhiễu bốc từ cả ba bậc, nên bé A1 học "con mèo" lại thấy
+   "environment", "technology" nằm cạnh — vừa là chữ chưa học tới, vừa lộ đáp
+   án vì từ lạ hoắc thì chắc chắn sai. Lấy bậc đang học TRỞ XUỐNG: từ bậc dưới
+   đã học rồi nên vẫn là mồi nhiễu tử tế, từ bậc trên thì không. */
+let BAC_KHO = { lv: null, all: null, single: null, phrase: null };
+function khoTheoBac() {
+  if (BAC_KHO.lv === S.level) return BAC_KHO;
+  const thu = COURSE.levels.findIndex(l => l.id === S.level);
+  const hop = new Set(COURSE.levels.slice(0, thu < 0 ? 1 : thu + 1)
+    .map(l => (NHAN_BAC[l.id] || {}).cefr || (l.code || "").toUpperCase()));
+  const all = ALL_WORDS.filter(w => hop.has(w.cefr));
+  const single = all.filter(w => !w.en.includes(" "));
+  const phrase = all.filter(w => w.en.includes(" "));
+  // Bậc nào ít từ quá thì mới nới ra kho chung, kẻo không đủ mồi nhiễu.
+  BAC_KHO = {
+    lv: S.level,
+    all: all.length >= 8 ? all : ALL_WORDS,
+    single: single.length >= 8 ? single : SINGLE,
+    phrase: phrase.length >= 8 ? phrase : PHRASES,
+  };
+  return BAC_KHO;
+}
 /* Kho từ dùng cho bài chọn ảnh: chỉ những từ thật sự vẽ được.
    TÍNH MUỘN, không tính ngay lúc nạp: hàm dò cảnh khai báo mãi phía dưới, gọi
    lên là cả app chết ngay từ dòng đầu. Tính một lần rồi giữ lại. */
@@ -918,7 +942,7 @@ function buildPractice(words, sentences, max) {
     }
     if (tfTurn++ % 3 === 2) {                        // cứ ba từ lại một câu đúng/sai
       const lie = Math.random() < .5;
-      const other = sample(ALL_WORDS.filter(x => x.en !== w.en), 1)[0];
+      const other = sample(khoTheoBac().all.filter(x => x.en !== w.en), 1)[0];
       q.push({ type: "truefalse", word: w, shown: lie ? other.en : w.en, answer: !lie });
       return;
     }
@@ -928,8 +952,9 @@ function buildPractice(words, sentences, max) {
     // Luoi bay phai CUNG KIEU voi dap an dung: cum thi lay cum, tu don thi lay
     // tu don - khong thi ra cau hoi vo ly nhu dap an la ca cau ma 3 luoi bay
     // chi la mot tu roi rac khong lien quan.
-    const kho = w.en.includes(" ") ? PHRASES : SINGLE;
-    const nguon = kho.filter(x => x.en !== w.en).length >= 3 ? kho : ALL_WORDS;
+    const bac = khoTheoBac();
+    const kho = w.en.includes(" ") ? bac.phrase : bac.single;
+    const nguon = kho.filter(x => x.en !== w.en).length >= 3 ? kho : bac.all;
     q.push({ type, word: w, opts: shuffle([w, ...sample(nguon.filter(x => x.en !== w.en), 3)]) });
   });
 
@@ -939,7 +964,9 @@ function buildPractice(words, sentences, max) {
       const n = parts.length >= 5 ? 2 : 1;
       const idx = sample(parts.map((_, i) => i), n).sort((a, b) => a - b);
       const answers = idx.map(i => parts[i]);
-      const extra = sample(SINGLE.filter(w => !parts.includes(w.en)), 2).map(w => w.en);
+      // Chữ thừa trong kho từ cũng phải trong tầm trình độ, kẻo bé A1 thấy
+      // một chữ B1 lạ hoắc nằm chình ình giữa kho từ.
+      const extra = sample(khoTheoBac().single.filter(w => !parts.includes(w.en)), 2).map(w => w.en);
       q.push({ type: "blanks", sent: s, idx, answers, bank: shuffle(answers.concat(extra)) });
     }
   });
@@ -5580,7 +5607,7 @@ function deHomNay(mucMa) {
         const n = phan.length >= 5 ? 2 : 1;
         const idx = tronTheoHat(phan.map((_, k) => k), r).slice(0, n).sort((x, y) => x - y);
         const dap = idx.map(k => phan[k]);
-        const them = tronTheoHat(SINGLE.filter(x => !phan.includes(x.en)), r).slice(0, 2).map(x => x.en);
+        const them = tronTheoHat(khoTheoBac().single.filter(x => !phan.includes(x.en)), r).slice(0, 2).map(x => x.en);
         q.push({ type: "blanks", sent: s, idx, answers: dap, bank: tronTheoHat(dap.concat(them), r) });
         continue;
       }
