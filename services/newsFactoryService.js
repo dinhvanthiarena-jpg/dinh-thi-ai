@@ -92,13 +92,41 @@ async function fetchStockImage(categorySlug, usedPageIds) {
     if (!res.ok) return null;
     const data = await res.json();
     const pages = Object.values((data.query && data.query.pages) || {});
+    // Chỉ nhận ảnh mà FILE GỐC là ảnh chụp thật (.jpg/.png) — không nhận ảnh
+    // "bitmap" được Wikimedia tự chuyển từ PDF/SVG/tài liệu khác, vì loại đó
+    // thường không liên quan tới chủ đề (bìa sách, sơ đồ...) và thumbnail
+    // sinh theo yêu cầu nên hay tải lỗi/rớt ảnh trên trang.
     const candidates = pages
       .filter((p) => !usedPageIds || !usedPageIds.has(String(p.pageid)))
       .map((p) => ({ pageid: p.pageid, info: (p.imageinfo && p.imageinfo[0]) || null }))
-      .filter((c) => c.info && c.info.thumburl && /\.(jpe?g|png)(\?|$)/i.test(c.info.thumburl));
+      .filter(
+        (c) =>
+          c.info &&
+          c.info.thumburl &&
+          c.info.url &&
+          /\.(jpe?g|png)(\?|$)/i.test(c.info.thumburl) &&
+          /\.(jpe?g|png)(\?|$)/i.test(c.info.url)
+      );
     if (!candidates.length) return null;
 
-    const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+    // Thumbnail Wikimedia sinh theo yêu cầu (on-demand) nên thỉnh thoảng lần
+    // đầu load bị lỗi/timeout — thử tối đa 5 ứng viên ngẫu nhiên, xác minh
+    // bằng HEAD request thật trước khi chốt dùng ảnh đó.
+    const shuffled = [...candidates].sort(() => Math.random() - 0.5).slice(0, 5);
+    let chosen = null;
+    for (const c of shuffled) {
+      try {
+        const head = await fetch(c.info.thumburl, { method: 'HEAD' });
+        if (head.ok) {
+          chosen = c;
+          break;
+        }
+      } catch (e) {
+        // thử ứng viên tiếp theo
+      }
+    }
+    if (!chosen) return null;
+
     const meta = chosen.info.extmetadata || {};
     const artist = ((meta.Artist && meta.Artist.value) || 'Không rõ tác giả').replace(/<[^>]+>/g, '').trim();
     const license = (meta.LicenseShortName && meta.LicenseShortName.value) || 'Wikimedia Commons';
