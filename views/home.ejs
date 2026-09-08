@@ -29,30 +29,6 @@
 </section>
 <% } %>
 
-<!-- Giới thiệu khóa học ngắn gọn -->
-<section class="relative overflow-hidden bg-gradient-to-br from-primary-50 via-white to-accent-50">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-    <div class="max-w-3xl mx-auto text-center">
-      <span class="badge bg-primary-100 text-primary-700 mb-4">Đào tạo AI, Đào tạo Ứng dụng AI #1 dành cho người đi làm</span>
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-ink leading-tight">
-        Đào tạo AI, đào tạo ứng dụng AI cùng chuyên gia Đinh Thi Ai
-      </h1>
-      <p class="mt-4 text-base sm:text-lg text-muted max-w-2xl mx-auto">
-        Khóa học đào tạo AI và đào tạo ứng dụng AI thực chiến, giúp bạn ứng dụng AI vào công việc: từ Prompt Engineering, Generative AI đến triển khai AI cho doanh nghiệp — không cần nền tảng lập trình.
-      </p>
-      <div class="mt-6 flex flex-wrap gap-4 justify-center">
-        <a href="/courses" class="btn-primary text-base px-6 py-3">Khám phá khóa học</a>
-        <a href="/gioi-thieu" class="btn-outline text-base px-6 py-3">Về chuyên gia đào tạo</a>
-      </div>
-      <div class="mt-8 flex items-center gap-8 text-sm text-muted justify-center">
-        <div><span class="block text-2xl font-bold text-ink">5,000+</span>học viên</div>
-        <div><span class="block text-2xl font-bold text-ink">30+</span>khóa học</div>
-        <div><span class="block text-2xl font-bold text-ink">4.8/5</span>đánh giá</div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- Featured tools & games -->
 <% if (featuredTools.length) { %>
 <section class="bg-gradient-to-br from-primary-50 to-accent-50 border-y border-primary-100">
@@ -79,6 +55,7 @@
 <% } %>
 
 <!-- Featured courses -->
+<% if (featuredCourses.length) { %>
 <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
   <div class="flex items-end justify-between mb-8">
     <div>
@@ -87,17 +64,13 @@
     </div>
     <a href="/courses" class="text-primary-700 font-semibold hover:underline hidden sm:block">Xem tất cả &rarr;</a>
   </div>
-
-  <% if (featuredCourses.length) { %>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <% featuredCourses.forEach(function(course) { %>
-        <%- include('partials/course-card', { course }) %>
-      <% }); %>
-    </div>
-  <% } else { %>
-    <div class="card p-10 text-center text-muted">Chưa có khóa học nổi bật. Hãy thêm khóa học trong trang quản trị.</div>
-  <% } %>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% featuredCourses.forEach(function(course) { %>
+      <%- include('partials/course-card', { course }) %>
+    <% }); %>
+  </div>
 </section>
+<% } %>
 
 <!-- Recent activity photos -->
 <% if (latestPhotos.length) { %>
@@ -201,7 +174,9 @@
   <%- include('partials/shopee-picks') %>
 </section>
 
-<!-- Why us -->
+<!-- Why us (ẩn theo yêu cầu — đổi showWhyUs thành true để hiện lại) -->
+<% const showWhyUs = false; %>
+<% if (showWhyUs) { %>
 <section class="bg-white border-y border-primary-100">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
     <h2 class="text-2xl sm:text-3xl font-bold text-ink text-center">Vì sao chọn Đinh Thi Ai</h2>
@@ -240,6 +215,7 @@
     </div>
   </div>
 </section>
+<% } %>
 
 <!-- CTA -->
 <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
