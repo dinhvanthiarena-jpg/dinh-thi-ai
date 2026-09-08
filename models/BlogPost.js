@@ -23,6 +23,9 @@ const BlogPost = sequelize.define(
     sourceUrl: { type: DataTypes.STRING, allowNull: true },
     // Từ khoá SEO mà bài này nhắm tới — chỉ để theo dõi/báo cáo, không hiển thị.
     seoKeyword: { type: DataTypes.STRING, allowNull: true },
+    // pageid của ảnh Wikimedia Commons đang dùng làm coverImageUrl — chỉ để
+    // kiểm tra trùng lặp giữa các bài tự động, không hiển thị.
+    coverImageSourceId: { type: DataTypes.STRING, allowNull: true },
     commentImages: { type: DataTypes.JSON, defaultValue: [] },
     isPublished: { type: DataTypes.BOOLEAN, defaultValue: true },
     publishedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
