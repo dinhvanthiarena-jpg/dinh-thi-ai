@@ -23,6 +23,35 @@ const CATEGORY_FEEDS = {
   'giai-tri': ['https://vnexpress.net/rss/giai-tri.rss'],
 };
 
+// Web vẫn chú trọng chủ đề AI & Công nghệ là chính — các chuyên mục khác vẫn
+// duy trì (thầy muốn giữ những phần đang làm) nhưng với tỉ trọng thấp hơn.
+// Số càng lớn thì chuyên mục đó càng được chọn nhiều lần hơn trong ngày.
+const CATEGORY_WEIGHT = {
+  'ai-cong-nghe': 4,
+  'xu-huong': 3,
+  'dao-tao-nghe-nghiep': 1,
+  'kinh-doanh': 1,
+  'doi-song': 1,
+  'giai-tri': 1,
+};
+
+// Xáo trộn danh sách chuyên mục có tính đến trọng số ở trên (chuyên mục
+// trọng số cao xuất hiện nhiều lần trong "túi" nên có xác suất được rút ra
+// đầu tiên cao hơn), rồi rút gọn về danh sách không trùng lặp theo thứ tự đã
+// xáo — dùng làm thứ tự ưu tiên thử khi tìm chuyên mục còn tin mới.
+function weightedShuffledSlugs() {
+  const pool = [];
+  Object.keys(CATEGORY_FEEDS).forEach((slug) => {
+    const weight = CATEGORY_WEIGHT[slug] || 1;
+    for (let i = 0; i < weight; i++) pool.push(slug);
+  });
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return [...new Set(pool)];
+}
+
 // Ảnh bìa dạng SVG nhẹ (vài trăm byte, không phải ảnh chụp) — để web không
 // bị nặng khi đăng nhiều bài tự động mỗi ngày, theo đúng yêu cầu của thầy.
 const CATEGORY_COVER = {
@@ -68,7 +97,7 @@ async function fetchFeedItems(url) {
 // bài trước để không viết trùng lại đúng 1 tin), lấy tối đa 5 tin mới nhất
 // của chuyên mục đó làm nguồn tổng hợp cho 1 bài "điểm tin".
 async function pickTopic() {
-  const slugs = Object.keys(CATEGORY_FEEDS).sort(() => Math.random() - 0.5);
+  const slugs = weightedShuffledSlugs();
 
   for (const slug of slugs) {
     const items = (await Promise.all(CATEGORY_FEEDS[slug].map(fetchFeedItems)))
