@@ -1120,152 +1120,46 @@ function khungAnh(w) {
 /* Phần lớn nội dung là CÂU chứ không phải từ đơn, nên gán ảnh theo từ khoá xuất
    hiện trong câu: một cảnh phủ được hàng chục câu. Xếp từ cụ thể lên trước từ
    chung, vì "coffee shop" phải ra quán cà phê chứ không ra cái cửa hàng. */
-const CANH = [
-  /* Danh từ CỤ THỂ được xếp lên đầu và có hình RIÊNG, không dùng chung một
-     cảnh "car" cho cả xe hơi/xe buýt/nhà ga/bản đồ nữa — thầy đã chỉ ra ảnh
-     bị lẫn lộn giữa các nội dung khác nhau. "left"/"right" cũng tách hai mũi
-     tên riêng, không dùng chung một hình xe. */
-  ["bus|bus stop|bus station", "bus"],
-  ["ticket", "ticket"],
-  ["station|train|railway|platform", "station"],
-  ["map", "map"],
-  /* Chỉ bắt "left/right" khi ĐÚNG là chỉ hướng (turn left, on the right...).
-     "right" còn có nghĩa "đúng" (That's right! / Maybe you are right) — nếu
-     bắt cả chữ "right" trần thì câu nói về sự đúng/sai lại bị vẽ nhầm mũi tên
-     chỉ hướng. Bắt hẹp lại còn hơn vẽ sai. */
-  ["turn left|on the left|to the left|left turn", "arrowleft"],
-  ["turn right|on the right|to the right|right turn", "arrowright"],
-  ["vietnam|vietnamese|country|nation|flag|culture|tradition", "village"],
-  ["school is near|school near|near my school|near the school", "truonggannha"],
-  ["teacher", "teacher"],
-  ["student|pupil", "student"],
-  ["school|class|classroom|lesson|homework|exam|test", "school"],
-  ["book|read|reading|library", "book"],
-  ["pen|pencil|write|writing|note|study|studies|learn|english|language|word", "work"],
-  ["family|mother|father|mum|mom|dad|parents|sister|brother|son|daughter|baby|child|children|wife|husband", "family"],
-  ["friend|friends|classmate|neighbour|neighbor|together|everyone|people", "friend"],
-  ["juice", "juice"],
-  ["milk", "milk"],
-  ["tea", "tea"],
-  ["coffee|cafe|café|cup", "coffee"],
-  ["rice", "rice"],
-  ["noodle|pho", "noodle"],
-  ["bread|food|eat|eating|ate|hungry|breakfast|lunch|dinner|meal|restaurant|cook|cooking", "bread"],
-  ["water|drink|drinking|thirsty|bottle", "water"],
-  ["banana", "banana"],
-  ["carrot", "carrot"],
-  ["apple|orange|mango|fruit|vegetable", "apple"],
-  ["beach|seaside|shore", "beach"],
-  ["fish|sea|river|lake|swim|swimming|boat", "fish"],
-  ["dog|puppy|pet", "dog"],
-  ["cat|kitten", "cat"],
-  /* "like"/"good" CỐ Ý bỏ ra — đây là hai từ cực thông dụng ("I like...",
-     "...is good") xuất hiện trong đủ mọi chủ đề, không hề gắn với ý "vui vẻ",
-     mà lại đứng ưu tiên cao nên cướp mất hình đúng của rất nhiều câu khác
-     (vd "I like reading books" từng ra ảnh ăn mừng thay vì ảnh quyển sách). */
-  ["happy|glad|great|fun|funny|love|beautiful|smile|laugh|enjoy", "happy"],
-  ["tired|sleepy|exhausted|sad", "tired"],
-  ["doctor|hospital|nurse|medicine|health|headache|fever|patient|clinic", "doctor"],
-  /* "here"/"there" CỐ Ý bỏ ra khỏi nhóm này — hai từ này xuất hiện trong vô số
-     câu "there is/are..." chẳng liên quan gì đến đường xá, mà lại cướp ưu
-     tiên trước cả những từ khoá đúng chủ đề câu (nhà, ảnh, năm tháng, khách…).
-     Ví dụ "There are many old houses" từng bị ra nhầm cảnh xe hơi. */
-  ["turn|corner|way|direction|near|far|straight|address", "car"],
-  ["morning|afternoon|today|tomorrow|yesterday|day|week|weekend|month|year|season|spring|autumn", "sun"],
-  ["money|price|cost|buy|bought|pay|cheap|expensive|dong|dollar", "money"],
-  ["menu", "menu"],
-  ["bill", "bill"],
-  ["market|shop|store|supermarket|sell|shopping|order|waiter|table", "market"],
-  ["egg", "egg"],
-  ["meat|chicken", "meat"],
-  ["soup", "soup"],
-  ["tomato", "tomato"],
-  ["salt|sugar|onion|salad|dish|taste|sweet|spicy", "bread"],
-  ["factory|staff|uniform|colleague", "work"],
-  ["work|working|job|office|company|business|meeting|boss|engineer|worker", "work"],
-  ["city|hanoi|saigon|town|street|building|traffic|downtown", "city"],
-  ["village|countryside|farm|field", "village"],
-  ["kitchen", "kitchen"],
-  ["house|home|room|live|living|lived|apartment|door|window", "house"],
-  ["bike|bicycle|cycling", "bike"],
-  ["car|drive|driving|taxi|motorbike|road|ride", "car"],
-  ["plane|airport|fly|flight|travel|trip|holiday|vacation|visit|tourist|country", "plane"],
-  ["sun|sunny|hot|summer|warm|weather|sky|morning|afternoon", "sun"],
-  ["rain|rainy|wet|cold|winter|storm|cloud", "rain"],
-  ["mountain", "mountain"],
-  ["tree|park|garden|flower|green|nature", "tree"],
-  ["bed|sleep|sleeping|slept|night|evening|tired at night|bedroom|dream", "bed"],
-  ["helmet", "helmet"],
-  ["shirt|clothes|dress|wear|wearing|shoes|hat|jacket", "shirt"],
-  ["run|running|jog", "run"],
-  ["ball|football|soccer|sport|play|playing|game|team", "ball"],
-  ["music|song|sing|singing|listen to music|guitar|dance|dancing", "music"],
-  ["birthday|cake|party|celebrate", "cake"],
-  ["gift|present", "gift"],
-  ["phone|call|calling|text|message|internet|computer|email", "phone"],
-  ["clock|time|hour|minute|late|early|oclock|schedule|wait", "clock"],
-  ["what|where|when|who|why|how|question|ask|asking|please help", "question"],
-  /* Bổ sung — chỉ gán khi hình MINH HOẠ ĐÚNG nghĩa của từ. Thầy đã nhắc:
-     ảnh sai còn tệ hơn không có ảnh. Nên từ trừu tượng (fine, quite, enough,
-     probably, same, different…) cố ý KHÔNG gán hình nào cả. */
-  ["hotel|guest|reserve|check in|room service", "house"],
-  ["university|college|campus|lecture|classmate", "school"],
-  ["grandmother|grandfather|grandma|grandpa|childhood|relative", "family"],
-  ["photo|picture|camera|album", "phone"],
-  ["toy", "toy"],
-  ["film|movie|cinema", "film"],
-  ["story|cartoon", "book"],
-  ["salary|wage", "salary"],
-  ["career|hobby|interview|profession", "work"],
-  ["farmer|farming|harvest|crop|rice field", "farmer"],
-  ["driver|taxi driver|traffic light|parking", "car"],
-  ["police|policeman|officer|station guard", "police"],
-  ["potato|cabbage|salad bowl|greens", "apple"],
-  ["bag", "bag"],
-  ["kilo|gram|weight|scale|box|basket", "market"],
-  ["monday|tuesday|wednesday|thursday|friday|saturday|sunday|date|calendar", "clock"],
-  ["sick|ill|hurt|pain|injury|rest at home", "doctor"],
-  ["wind|windy|storm at sea|typhoon", "rain"],
-  ["walk|walking|step|footpath|pavement", "walk"],
-  ["crowded|noisy|modern|downtown area|skyscraper", "city"],
-  ["quiet|peaceful|ancient|old town|temple", "village"],
-  ["swim|swimming pool|seaside|shore", "fish"],
-  ["clean|wash|washing|tidy|laundry|housework", "house"],
-  ["watch tv|television|screen|channel", "phone"],
-  /* Số đếm trần (one/two/three...) đẩy XUỐNG GẦN CUỐI: đây là những từ cực kỳ
-     thông dụng, xuất hiện trong hầu như mọi câu về giá tiền, tuổi tác, thời
-     gian... Để ở trên thì nó cướp mất ảnh đúng — vd "It is two hundred
-     thousand dong" (câu về TIỀN) từng ra nhầm ảnh đồng hồ chỉ vì có chữ "two"
-     đứng trước cả khi tới được từ "dong". Để cuối thì nó chỉ còn vẽ khi
-     không còn từ khoá nào khác cụ thể hơn khớp trước. */
-  ["number|count|counting", "number"],
-  ["one|two|three|four|five|six|seven|eight|nine|ten|twenty|hundred", "clock"],
-  ["man|boy|he|his|sir|mr", "man"],
-  ["woman|girl|she|her|lady|ms|mrs", "woman"],
-  /* Nhóm chào hỏi/cảm ơn xếp CUỐI CÙNG: đây là cụm rất hay xen vào giữa câu
-     dài ("Excuse me, where is the station?"), nếu để lên đầu nó sẽ thắng
-     trước cả những từ chỉ ĐÚNG nội dung chính của câu (nhà ga, bản đồ...). */
-  ["hello|hi|goodbye|bye|welcome|greet|nice to meet|name|introduce|excuse me", "hello"],
-  ["thank|thanks|please|help|helping|kind|sure|of course", "friend"],
-];
-// Ranh gioi tu phai la HAI dau gach cheo trong nguon: mot cai thi JS doc thanh
-// ky tu backspace va regex khong bao gio khop.
-const CANH_RX = CANH.map(([tu, hinh]) => [new RegExp("\\b(" + tu + ")(s|es|ing|ed)?\\b", "i"), hinh]);
+/* ── BẢNG HÌNH: MỘT HÌNH MỘT NGHĨA ────────────────────────────────────────
+   Trước đây đây là 98 luật dò từ khoá gom nhóm, khớp đầu tiên thắng. Kết quả:
+   920 trong 1055 mục dùng chung vỏn vẹn 58 hình — một hình "sun" phải gánh
+   101 câu, "family" gánh 68 câu. Nên mới có chuyện "bút mực" ra bàn làm việc,
+   "đất nước" ra làng quê, "Con trâu ở ngoài đồng" cũng ra làng quê.
+   Thầy chốt: trùng nhau là bỏ, sai là không được.
+   Nay chỉ còn ánh xạ THẲNG một từ vựng → một hình vẽ riêng của chính nó.
+   Từ nào không có hình riêng thì KHÔNG hiện hình — thà thiếu còn hơn sai. */
+const HINH_TU = {
+  apple: "apple", bag: "bag", banana: "banana", beach: "beach", bed: "bed",
+  bike: "bike", bill: "bill", book: "book", bread: "bread", buffalo: "buffalo",
+  bus: "bus", car: "car", carrot: "carrot", cat: "cat", city: "city",
+  coffee: "coffee", cook: "cook", country: "country", doctor: "doctor", dog: "dog",
+  egg: "egg", family: "family", farmer: "farmer", film: "film", fish: "fish",
+  friend: "friend", gift: "gift", happy: "happy", hello: "hello", house: "house",
+  juice: "juice", kitchen: "kitchen", left: "arrowleft", man: "man", map: "map",
+  market: "market", meat: "meat", menu: "menu", milk: "milk", mountain: "mountain",
+  music: "music", noodle: "noodle", number: "number", pen: "pen", phone: "phone",
+  police: "police", question: "question", rain: "rain", rice: "rice", right: "arrowright",
+  run: "run", salary: "salary", school: "school", shirt: "shirt", soup: "soup",
+  station: "station", student: "student", sunny: "sun", tea: "tea", teacher: "teacher",
+  ticket: "ticket", tired: "tired", tomato: "tomato", toy: "toy", village: "village",
+  walk: "walk", water: "water", woman: "woman", work: "work",
+};
 
-/** Tìm hình hợp với một câu tiếng Anh. Không có gì hợp thì trả null. */
-function hinhChoChu(cau) {
-  if (!cau) return null;
-  for (const [rx, hinh] of CANH_RX) if (rx.test(cau)) return hinh;
-  return null;
+/** Hình của MỘT TỪ. Chỉ khớp đúng từ đó, tuyệt đối không dò trong câu —
+    dò trong câu chính là chỗ đẻ ra "Con trâu ở ngoài đồng" mà vẽ làng quê. */
+function hinhChoChu(chu) {
+  if (!chu) return null;
+  const k = String(chu).toLowerCase().trim().replace(/[.,!?;:"']/g, "");
+  return HINH_TU[k] || null;
 }
 
-/** Câu điền từ: ưu tiên ảnh riêng của từ phải điền, không có thì lấy cảnh theo cả câu. */
+/** Câu điền từ: CHỈ dùng ảnh riêng của từ phải điền. Không còn đoán ảnh cho cả
+    câu nữa — một câu có bảy tám chữ thì đoán kiểu gì cũng có lúc ra ảnh vô lý,
+    mà ảnh vô lý còn hại hơn không có ảnh. */
 function anhChoCau(d) {
   const canDien = (d.answers || []).map(a => String(a).toLowerCase().replace(/[.,!?]/g, ""));
   const w = ALL_WORDS.find(x => canDien.includes(x.en.toLowerCase()) && (x.img || x.pic));
-  if (w) return khungAnh(w);
-  const hinh = hinhChoChu(d.sent && d.sent.en);
-  return hinh ? khungAnh({ pic: hinh }) : null;
+  return w ? khungAnh(w) : null;
 }
 
 /** Rung nhẹ để tay biết máy đã nhận cử chỉ. Máy nào không có thì bỏ qua. */
@@ -3287,6 +3181,7 @@ window.addEventListener("popstate", () => {
    Thầy chốt: cứ 3 câu đúng thì mở hẳn một trang, pháo bông nổ độp độp, đứng đó
    cho trẻ ngắm chứ đừng tự tắt, bấm "Tiếp tục" mới sang câu mới. */
 let thuongDangMo = false;
+let thuongDangCho = false;      // đang chờ đọc xong để mở trang thưởng
 let thuongSauKhiDong = null;
 let phaoRaf = 0;
 
@@ -3375,6 +3270,8 @@ function dongThuong() {
   try { const am = $("#amThuong"); am.pause(); am.currentTime = 0; } catch { /* thôi */ }
   dangPhatFile = false;
   thuongDangMo = false;
+  thuongDangCho = false;
+  try { $("#btnNext").disabled = false; } catch { /* thôi */ }
   document.body.style.overflow = "";
   cancelAnimationFrame(phaoRaf);
   const f = thuongSauKhiDong;
@@ -3474,12 +3371,24 @@ function feedback(ok, title, detail, doc) {
 }
 $("#fbSay").addEventListener("click", () => { if (fbDoc && fbDoc.length) docLanLuot(fbDoc); });
 function advance() {
+  // Đang chờ đọc xong để mở trang thưởng thì KHOÁ hẳn, đừng cho tiến tiếp.
+  // Đây là chỗ từng nuốt mất một câu: doiDocXong chờ tới 6 giây, trong lúc đó
+  // màn hình vẫn là câu cũ và nút "Tiếp theo" vẫn bấm được. Ai sốt ruột bấm
+  // thêm một cái là diTiep() chạy ngay sang câu mới, rồi trang thưởng mới mở
+  // đè lên; bấm "Tiếp tục" thì diTiep() chạy lần nữa — nhảy qua trọn một câu.
+  if (thuongDangCho || thuongDangMo) return;
   // Đủ 3 câu đúng thì chen trang thưởng vào GIỮA hai câu: bấm "Tiếp theo" xong
   // là pháo nổ, ngắm chán rồi bấm "Tiếp tục" mới sang câu mới. Chen ở đây chứ
   // không chen lúc vừa chấm — chấm xong còn phải cho đọc lời giải đã.
-  if (stkDung > 0 && stkDung % STK_MOI === 0 && !thuongDangMo) {
+  if (stkDung > 0 && stkDung % STK_MOI === 0) {
     stkDung = 0;                         // đã thưởng rồi thì đếm lại từ đầu
-    return doiDocXong(() => moThuong(diTiep));
+    thuongDangCho = true;
+    $("#btnNext").disabled = true;
+    return doiDocXong(() => {
+      thuongDangCho = false;
+      $("#btnNext").disabled = false;
+      moThuong(diTiep);
+    });
   }
   diTiep();
 }
