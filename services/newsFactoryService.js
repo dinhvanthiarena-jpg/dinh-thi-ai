@@ -95,9 +95,13 @@ async function fetchFeedItems(url) {
 
 // Chọn 1 chuyên mục còn tin chưa dùng (kiểm tra qua sourceUrl đã lưu ở các
 // bài trước để không viết trùng lại đúng 1 tin), lấy tối đa 5 tin mới nhất
-// của chuyên mục đó làm nguồn tổng hợp cho 1 bài "điểm tin".
-async function pickTopic() {
-  const slugs = weightedShuffledSlugs();
+// của chuyên mục đó làm nguồn tổng hợp cho 1 bài "điểm tin". Truyền
+// forcedSlug để ưu tiên thử đúng 1 chuyên mục trước (VD: lấp cột còn trống
+// trên trang chủ), vẫn rơi về thứ tự xáo trộn theo trọng số nếu chuyên mục
+// đó không còn tin mới.
+async function pickTopic(forcedSlug) {
+  const rest = weightedShuffledSlugs().filter((s) => s !== forcedSlug);
+  const slugs = forcedSlug && CATEGORY_FEEDS[forcedSlug] ? [forcedSlug, ...rest] : rest;
 
   for (const slug of slugs) {
     const items = (await Promise.all(CATEGORY_FEEDS[slug].map(fetchFeedItems)))
@@ -201,8 +205,8 @@ YÊU CẦU:
   }
 }
 
-async function createTrendingPost() {
-  const topic = await pickTopic();
+async function createTrendingPost(forcedSlug) {
+  const topic = await pickTopic(forcedSlug);
   if (!topic) {
     console.log('[newsFactory] Không tìm được tin mới để tổng hợp (đã dùng hết hoặc feed lỗi).');
     return null;
