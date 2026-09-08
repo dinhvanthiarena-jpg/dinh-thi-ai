@@ -6,13 +6,6 @@
     <p class="mt-2 text-muted">
       <%= activeCategory ? 'Bài viết chuyên mục ' + activeCategory.label : 'Cập nhật kiến thức AI, tin hot, xu hướng và nhiều chủ đề khác' %>
     </p>
-
-    <div class="mt-6 flex flex-wrap gap-2">
-      <a href="/blog" class="px-3 py-1.5 rounded-full text-sm font-medium border <%= !activeCategory ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-ink border-primary-200 hover:bg-primary-50' %>">Tất cả</a>
-      <% categories.forEach(function(c) { %>
-        <a href="/blog?category=<%= c.slug %>" class="px-3 py-1.5 rounded-full text-sm font-medium border <%= activeCategory && activeCategory.slug === c.slug ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-ink border-primary-200 hover:bg-primary-50' %>"><%= c.emoji %> <%= c.label %></a>
-      <% }); %>
-    </div>
   </div>
 </section>
 
@@ -25,7 +18,7 @@
           <div class="aspect-video bg-primary-50 overflow-hidden relative">
             <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
             <% if (postCat) { %>
-              <span class="absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium bg-white/90 text-ink shadow"><%= postCat.emoji %> <%= postCat.label %></span>
+              <span class="absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-white/90 text-ink shadow"><%= postCat.emoji %> <%= postCat.label %></span>
             <% } %>
           </div>
           <div class="p-5 flex flex-col flex-1">

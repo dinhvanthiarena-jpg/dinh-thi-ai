@@ -1,0 +1,11 @@
+<!-- Thanh chuyên mục ngang kiểu báo điện tử (24h, Kênh14...) — luôn hiện sẵn
+     ngay dưới header, không giấu trong menu thả xuống, để độc giả thấy ngay
+     có nhiều chuyên mục để bấm vào. -->
+<div class="bg-primary-700 overflow-x-auto">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center gap-1 whitespace-nowrap">
+    <a href="/blog" class="px-3 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-white <%= currentPath === '/blog' && !currentCategory ? 'bg-primary-800' : 'hover:bg-primary-600' %>">Tất cả</a>
+    <% (typeof blogCategories !== 'undefined' ? blogCategories : []).forEach(function(c) { %>
+      <a href="/blog?category=<%= c.slug %>" class="px-3 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide text-white <%= typeof currentCategory !== 'undefined' && currentCategory === c.slug ? 'bg-primary-800' : 'hover:bg-primary-600' %>"><%= c.emoji %> <%= c.label %></a>
+    <% }); %>
+  </div>
+</div>
