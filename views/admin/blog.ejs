@@ -8,6 +8,7 @@
     <thead class="bg-primary-50 text-ink">
       <tr>
         <th class="text-left px-5 py-3 font-semibold">Tiêu đề</th>
+        <th class="text-left px-5 py-3 font-semibold">Chuyên mục</th>
         <th class="text-right px-5 py-3 font-semibold">Lượt xem</th>
         <th class="text-center px-5 py-3 font-semibold">Trạng thái</th>
         <th class="text-center px-5 py-3 font-semibold">Ngày đăng</th>
@@ -16,8 +17,10 @@
     </thead>
     <tbody class="divide-y divide-primary-50">
       <% posts.forEach(function(p) { %>
+        <% const cat = categories.find(function(c) { return c.slug === p.category; }); %>
         <tr>
           <td class="px-5 py-3 text-ink font-medium"><%= p.title %></td>
+          <td class="px-5 py-3 text-muted whitespace-nowrap"><%= cat ? cat.emoji + ' ' + cat.label : '—' %></td>
           <td class="px-5 py-3 text-right text-muted"><%= p.viewCount %></td>
           <td class="px-5 py-3 text-center">
             <span class="badge <%= p.isPublished ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600' %>"><%= p.isPublished ? 'Đã đăng' : 'Bản nháp' %></span>
@@ -34,7 +37,7 @@
         </tr>
       <% }); %>
       <% if (!posts.length) { %>
-        <tr><td colspan="5" class="px-5 py-8 text-center text-muted">Chưa có bài viết nào.</td></tr>
+        <tr><td colspan="6" class="px-5 py-8 text-center text-muted">Chưa có bài viết nào.</td></tr>
       <% } %>
     </tbody>
   </table>

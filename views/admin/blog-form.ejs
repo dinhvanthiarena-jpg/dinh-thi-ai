@@ -12,6 +12,15 @@
     </div>
 
     <div>
+      <label class="label">Chuyên mục</label>
+      <select class="input" name="category">
+        <% categories.forEach(function(c) { %>
+          <option value="<%= c.slug %>" <%= (post.category || 'ai-cong-nghe') === c.slug ? 'selected' : '' %>><%= c.emoji %> <%= c.label %></option>
+        <% }); %>
+      </select>
+    </div>
+
+    <div>
       <label class="label">Nội dung *</label>
       <textarea class="input" name="content" rows="10" required><%= post.content || '' %></textarea>
     </div>

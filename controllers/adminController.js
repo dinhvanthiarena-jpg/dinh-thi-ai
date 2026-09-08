@@ -8,6 +8,7 @@ const GalleryPhoto = require('../models/GalleryPhoto');
 const ChatMessage = require('../models/ChatMessage');
 const Tool = require('../models/Tool');
 const GameInstall = require('../models/GameInstall');
+const { BLOG_CATEGORIES } = require('../utils/blogCategories');
 const PushSubscription = require('../models/PushSubscription');
 const webpush = require('web-push');
 const aaiAds = require('../services/aaiAdsService');
@@ -171,17 +172,17 @@ exports.lessonDelete = async (req, res) => {
 // --- Blog ---
 exports.blogList = async (req, res) => {
   const posts = await BlogPost.findAll({ order: [['createdAt', 'DESC']] });
-  res.render('admin/blog', { title: 'Quản lý bài viết', posts });
+  res.render('admin/blog', { title: 'Quản lý bài viết', posts, categories: BLOG_CATEGORIES });
 };
 
 exports.blogNewForm = (req, res) => {
-  res.render('admin/blog-form', { title: 'Thêm bài viết', post: {} });
+  res.render('admin/blog-form', { title: 'Thêm bài viết', post: {}, categories: BLOG_CATEGORIES });
 };
 
 exports.blogEditForm = async (req, res, next) => {
   const post = await BlogPost.findByPk(req.params.id);
   if (!post) return next();
-  res.render('admin/blog-form', { title: 'Sửa bài viết', post });
+  res.render('admin/blog-form', { title: 'Sửa bài viết', post, categories: BLOG_CATEGORIES });
 };
 
 exports.blogCreate = async (req, res) => {
@@ -194,6 +195,7 @@ exports.blogCreate = async (req, res) => {
     title: body.title,
     excerpt: body.excerpt,
     content: body.content,
+    category: body.category || 'ai-cong-nghe',
     tags: (body.tags || '').split(',').map((s) => s.trim()).filter(Boolean),
     isPublished: body.isPublished === 'on',
     AuthorId: req.user.id,
@@ -220,6 +222,7 @@ exports.blogUpdate = async (req, res, next) => {
     title: body.title,
     excerpt: body.excerpt,
     content: body.content,
+    category: body.category || 'ai-cong-nghe',
     tags: (body.tags || '').split(',').map((s) => s.trim()).filter(Boolean),
     isPublished: body.isPublished === 'on',
     commentImages: [...keptCommentImages, ...newCommentImages.map((f) => `/uploads/${f.filename}`)],

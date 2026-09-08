@@ -160,6 +160,7 @@ app.use((req, res, next) => {
 });
 
 const shopeePicks = require('./data/shopeePicks');
+const { BLOG_CATEGORIES } = require('./utils/blogCategories');
 
 app.use((req, res, next) => {
   res.locals.appName = process.env.APP_NAME || 'Dinh Thi Ai';
@@ -172,6 +173,8 @@ app.use((req, res, next) => {
   // (blog posts, courses, tools, homepage) so each controller doesn't
   // need to load and pass it individually.
   res.locals.shopeePicks = shopeePicks;
+  // Dùng cho menu "Kiến thức & Tin tức" trong header — hiện trên mọi trang.
+  res.locals.blogCategories = BLOG_CATEGORIES;
   next();
 });
 

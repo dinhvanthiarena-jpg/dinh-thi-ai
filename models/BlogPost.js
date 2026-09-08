@@ -14,6 +14,7 @@ const BlogPost = sequelize.define(
     // JPG, not SVG: Facebook's link-scraper can't read SVG dimensions and
     // silently substitutes a wrong/generic image on auto-shared posts.
     coverImageUrl: { type: DataTypes.STRING, defaultValue: '/images/blog/blog-placeholder-photo.jpg' },
+    category: { type: DataTypes.STRING, defaultValue: 'ai-cong-nghe', allowNull: false },
     tags: { type: DataTypes.JSON, defaultValue: [] },
     commentImages: { type: DataTypes.JSON, defaultValue: [] },
     isPublished: { type: DataTypes.BOOLEAN, defaultValue: true },

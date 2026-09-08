@@ -3,24 +3,36 @@ const BlogPost = require('../models/BlogPost');
 const User = require('../models/User');
 const PageView = require('../models/PageView');
 const { detectTrafficSource } = require('../utils/trafficSource');
+const { BLOG_CATEGORIES, getCategory } = require('../utils/blogCategories');
 
 exports.list = async (req, res) => {
   const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
   const perPage = 9;
+  const categorySlug = req.query.category || '';
+  const activeCategory = categorySlug ? getCategory(categorySlug) : null;
+
+  const where = { isPublished: true };
+  if (activeCategory) where.category = activeCategory.slug;
 
   const { rows: posts, count: total } = await BlogPost.findAndCountAll({
-    where: { isPublished: true },
+    where,
     order: [['publishedAt', 'DESC']],
     offset: (page - 1) * perPage,
     limit: perPage,
   });
 
   res.render('blog/index', {
-    title: 'Kiến thức Đào tạo AI, Đào tạo Ứng dụng AI',
-    description: 'Kiến thức, hướng dẫn đào tạo AI và đào tạo ứng dụng AI mới nhất — cập nhật thường xuyên bởi Đinh Thi Ai.',
+    title: activeCategory
+      ? `${activeCategory.label} — Đinh Thi Ai`
+      : 'Kiến thức Đào tạo AI, Đào tạo Ứng dụng AI',
+    description: activeCategory
+      ? `Tin tức, bài viết chuyên mục ${activeCategory.label} — cập nhật thường xuyên bởi Đinh Thi Ai.`
+      : 'Kiến thức, hướng dẫn đào tạo AI và đào tạo ứng dụng AI mới nhất — cập nhật thường xuyên bởi Đinh Thi Ai.',
     posts,
     page,
     totalPages: Math.ceil(total / perPage),
+    categories: BLOG_CATEGORIES,
+    activeCategory,
   });
 };
 

@@ -1,7 +1,18 @@
 <section class="bg-gradient-to-br from-primary-50 to-white border-b border-primary-100">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-    <h1 class="text-3xl sm:text-4xl font-extrabold text-ink">Kiến thức AI</h1>
-    <p class="mt-2 text-muted">Cập nhật xu hướng, hướng dẫn và case study ứng dụng AI</p>
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-ink">
+      <%= activeCategory ? activeCategory.emoji + ' ' + activeCategory.label : 'Kiến thức & Tin tức' %>
+    </h1>
+    <p class="mt-2 text-muted">
+      <%= activeCategory ? 'Bài viết chuyên mục ' + activeCategory.label : 'Cập nhật kiến thức AI, tin hot, xu hướng và nhiều chủ đề khác' %>
+    </p>
+
+    <div class="mt-6 flex flex-wrap gap-2">
+      <a href="/blog" class="px-3 py-1.5 rounded-full text-sm font-medium border <%= !activeCategory ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-ink border-primary-200 hover:bg-primary-50' %>">Tất cả</a>
+      <% categories.forEach(function(c) { %>
+        <a href="/blog?category=<%= c.slug %>" class="px-3 py-1.5 rounded-full text-sm font-medium border <%= activeCategory && activeCategory.slug === c.slug ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-ink border-primary-200 hover:bg-primary-50' %>"><%= c.emoji %> <%= c.label %></a>
+      <% }); %>
+    </div>
   </div>
 </section>
 
@@ -9,9 +20,13 @@
   <% if (posts.length) { %>
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <% posts.forEach(function(post) { %>
+        <% const postCat = categories.find(function(c) { return c.slug === post.category; }); %>
         <a href="/blog/<%= post.slug %>" class="card overflow-hidden group flex flex-col">
-          <div class="aspect-video bg-primary-50 overflow-hidden">
+          <div class="aspect-video bg-primary-50 overflow-hidden relative">
             <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+            <% if (postCat) { %>
+              <span class="absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium bg-white/90 text-ink shadow"><%= postCat.emoji %> <%= postCat.label %></span>
+            <% } %>
           </div>
           <div class="p-5 flex flex-col flex-1">
             <h3 class="font-semibold text-ink line-clamp-2 group-hover:text-primary-700"><%= post.title %></h3>
@@ -25,7 +40,7 @@
     <% if (totalPages > 1) { %>
       <div class="flex justify-center gap-2 mt-10">
         <% for (let p = 1; p <= totalPages; p++) { %>
-          <a href="/blog?page=<%= p %>" class="px-4 py-2 rounded-lg text-sm font-medium <%= p === page ? 'bg-primary-600 text-white' : 'bg-white border border-primary-200 text-ink hover:bg-primary-50' %>"><%= p %></a>
+          <a href="/blog?page=<%= p %><%= activeCategory ? '&category=' + activeCategory.slug : '' %>" class="px-4 py-2 rounded-lg text-sm font-medium <%= p === page ? 'bg-primary-600 text-white' : 'bg-white border border-primary-200 text-ink hover:bg-primary-50' %>"><%= p %></a>
         <% } %>
       </div>
     <% } %>
