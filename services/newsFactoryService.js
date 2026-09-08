@@ -91,6 +91,30 @@ function stripCodeFence(text) {
   return text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
 }
 
+// blog/show.ejs render thẳng post.content ra HTML (không qua trình duyệt
+// markdown), nhưng Claude được yêu cầu viết ở dạng markdown đơn giản (##,
+// **bold**, [link](url)) cho dễ đọc/viết — nên phải tự chuyển sang HTML ở
+// đây trước khi lưu, nếu không tiêu đề phụ/link nguồn sẽ hiện ra thành chữ
+// thô "## ..." / "[...](...)" ngay trên trang.
+function inlineMarkdown(text) {
+  return text
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer nofollow">$1</a>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+}
+
+function markdownToHtml(markdown) {
+  return markdown
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => {
+      const heading = block.match(/^#{2,3}\s+(.+)$/);
+      if (heading) return `<h2>${inlineMarkdown(heading[1])}</h2>`;
+      return `<p>${inlineMarkdown(block).replace(/\n/g, '<br>')}</p>`;
+    })
+    .join('\n');
+}
+
 async function generateArticle(categorySlug, keyword, items) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return null;
@@ -165,7 +189,7 @@ async function createTrendingPost() {
   const post = await BlogPost.create({
     title: article.title,
     excerpt: article.excerpt || '',
-    content: article.content,
+    content: markdownToHtml(article.content),
     category: topic.category,
     tags: Array.isArray(article.tags) ? article.tags : [],
     coverImageUrl: CATEGORY_COVER[topic.category],

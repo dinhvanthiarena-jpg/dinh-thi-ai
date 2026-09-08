@@ -131,7 +131,7 @@
           <div class="aspect-video bg-primary-50 overflow-hidden relative">
             <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
             <% if (postCat) { %>
-              <span class="absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-white/90 text-ink shadow"><%= postCat.emoji %> <%= postCat.label %></span>
+              <span class="absolute top-2 left-2 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-white/90 text-ink shadow"><%= postCat.emoji %> <%= postCat.label %></span>
             <% } %>
           </div>
           <div class="p-5 flex flex-col flex-1">
