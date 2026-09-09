@@ -162,13 +162,20 @@ exports.dashboard = async (req, res) => {
   const dailyChart = buildDailyChart(viewsByDaySource, viewsBySource, 30);
   const topViewedPagesTotal = topViewedPages.reduce((sum, row) => sum + row.total, 0);
 
+  // Cùng 1 nguồn phải cùng màu ở cả biểu đồ lẫn danh sách bên dưới — dùng
+  // đúng thứ tự và bảng màu mà buildDailyChart đã gán cho các đường.
+  const viewsBySourceColored = viewsBySource.map((row, i) => ({
+    ...row,
+    color: i < CHART_COLORS.length ? CHART_COLORS[i] : '#94a3b8',
+  }));
+
   res.render('admin/analytics', {
     title: 'Thống kê lượt xem & lượt bấm',
     viewsByDay,
     viewsByMonth,
     clicksByDay,
     clicksByMonth,
-    viewsBySource,
+    viewsBySource: viewsBySourceColored,
     viewsBySourceTotal,
     dailyChart,
     topViewedPages,
