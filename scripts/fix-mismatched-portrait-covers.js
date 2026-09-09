@@ -23,7 +23,7 @@ const BlogPost = require('../models/BlogPost');
 const { Op } = require('sequelize');
 
 const PERSON_PORTRAIT_PATTERN =
-  /\b(president|politician|prime minister|minister of|foreign minister|chancellor|monarch|king of|queen of|senator|governor|diplomat|portrait of|headshot|head of state)\b/i;
+  /\b(president|politician|prime minister|minister of|foreign minister|chancellor|monarch|king of|queen of|senator|governor|diplomat|portraits? of|headshot|head of state)\b/i;
 
 const CATEGORY_COVER_VARIANTS = {
   'ai-cong-nghe': ['cat-ai-cong-nghe.svg', 'cat-ai-cong-nghe-b.svg', 'cat-ai-cong-nghe-c.svg'],
@@ -42,7 +42,12 @@ function pickCategoryCover(categorySlug, avoidFile) {
 }
 
 function isPersonPortrait(title, meta) {
-  const text = [title, meta && meta.ObjectName && meta.ObjectName.value, meta && meta.ImageDescription && meta.ImageDescription.value]
+  const text = [
+    title,
+    meta && meta.ObjectName && meta.ObjectName.value,
+    meta && meta.ImageDescription && meta.ImageDescription.value,
+    meta && meta.Categories && meta.Categories.value,
+  ]
     .filter(Boolean)
     .join(' ');
   return PERSON_PORTRAIT_PATTERN.test(text);

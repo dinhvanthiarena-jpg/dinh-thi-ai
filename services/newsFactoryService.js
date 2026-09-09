@@ -126,10 +126,19 @@ const LOGO_TITLE_PATTERN = /\b(logo|wordmark|emblem|seal of|coat of arms|flag of
 // thực sự nói về nhân vật/sự kiện có người đó (lúc này usedPageIds + specific
 // query đã đủ chặt), còn lại thà rơi về SVG dự phòng còn an toàn hơn.
 const PERSON_PORTRAIT_PATTERN =
-  /\b(president|politician|prime minister|minister of|foreign minister|chancellor|monarch|king of|queen of|senator|governor|diplomat|portrait of|headshot|head of state)\b/i;
+  /\b(president|politician|prime minister|minister of|foreign minister|chancellor|monarch|king of|queen of|senator|governor|diplomat|portraits? of|headshot|head of state)\b/i;
 
 function isPersonPortrait(title, meta) {
-  const text = [title, meta && meta.ObjectName && meta.ObjectName.value, meta && meta.ImageDescription && meta.ImageDescription.value]
+  // Categories là tín hiệu đáng tin nhất — Commons gắn "Portraits of <Tên>"
+  // chuẩn hoá cho ảnh chân dung định danh, kể cả khi tên file/mô tả không hề
+  // nhắc tới chức danh gì (VD file chỉ tên "Knowledge Day greetings.jpg"
+  // nhưng Categories vẫn có "Portraits of Vladimir Putin").
+  const text = [
+    title,
+    meta && meta.ObjectName && meta.ObjectName.value,
+    meta && meta.ImageDescription && meta.ImageDescription.value,
+    meta && meta.Categories && meta.Categories.value,
+  ]
     .filter(Boolean)
     .join(' ');
   return PERSON_PORTRAIT_PATTERN.test(text);
