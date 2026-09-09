@@ -41,6 +41,7 @@ const gameApiRoutes = require('./routes/gameApi');
 const battleApiRoutes = require('./routes/battleApi');
 const englishAirApiRoutes = require('./routes/englishAirApi');
 const proRoutes = require('./routes/pro');
+const autopostRoutes = require('./routes/autopost');
 
 const app = express();
 
@@ -86,6 +87,10 @@ app.use(
   })
 );
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+// Body parser riêng cho /api/auto-post, đặt TRƯỚC giới hạn 200kb chung bên
+// dưới — bài kèm ảnh (imageBase64) thường vượt 200kb, nên route này cần giới
+// hạn lớn hơn (8mb) và phải "ăn" trước khi tới middleware json 200kb chung.
+app.use('/api/auto-post', express.json({ limit: '8mb' }), autopostRoutes);
 app.use(express.urlencoded({ extended: true, limit: '200kb' }));
 app.use(
   express.json({
