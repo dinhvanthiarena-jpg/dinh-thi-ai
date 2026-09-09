@@ -4266,8 +4266,13 @@ $("#callRoll") && $("#callRoll").addEventListener("scroll", () => {
   $("#callBubble").classList.toggle("het-cuon", day);
 });
 
-/** ON-Language nói: hiện câu, chạy hoạt ảnh, nhảy một nhịp mỗi từ cho khớp miệng. */
-function monSays(en, vi, after, py) {
+/** ON-Language nói: hiện câu, chạy hoạt ảnh, nhảy một nhịp mỗi từ cho khớp miệng.
+    audioUrl (nếu có): câu tiếng Anh Claude vừa nghĩ ra, máy chủ đã đọc sẵn bằng
+    MeloTTS (giọng thật, không phải giọng máy) — phát file này thay vì gọi
+    speechSynthesis. Không đồng bộ khớp miệng theo từng từ được (file âm thanh
+    không có sự kiện onboundary như SpeechSynthesisUtterance) nên nhịp miệng ở
+    đây chỉ đều đều theo thời gian, không khớp chính xác từng từ như giọng máy. */
+function monSays(en, vi, after, py, audioUrl) {
   const L = langInfo(C.lang);
   $("#callSaidLang").textContent = L.name;
   $("#callSaidLang").hidden = C.mode !== "free";
@@ -4302,7 +4307,28 @@ function monSays(en, vi, after, py) {
   const doc = (tuChu !== "en-GB" && gocChu !== gocMa) ? tuChu : L.tts;
   const khuc = [{ text: en, lang: doc, pitch: caoDo, onTu: nhip }];
 
-  if (!S.sound || !window.speechSynthesis) {
+  if (!S.sound) { setTimeout(done, 700 + en.length * 45); return; }
+
+  // Có giọng thật (MeloTTS) cho câu tiếng Anh này thì phát file đó, khỏi qua
+  // giọng máy — nhịp miệng đều đều theo thời gian vì không có mốc từng từ.
+  if (audioUrl) {
+    try {
+      const am = new Audio(audioUrl);
+      const soTu = Math.max(1, en.split(/\s+/).filter(Boolean).length);
+      let nhipHen = null;
+      am.addEventListener("loadedmetadata", () => {
+        const khoang = isFinite(am.duration) && am.duration > 0 ? (am.duration * 1000) / soTu : 260;
+        nhipHen = setInterval(nhip, Math.max(120, khoang));
+      });
+      const xongPhat = () => { clearInterval(nhipHen); done(); };
+      am.addEventListener("ended", xongPhat);
+      am.addEventListener("error", xongPhat);
+      am.play().catch(xongPhat);
+      return;
+    } catch { /* rơi xuống giọng máy bên dưới */ }
+  }
+
+  if (!window.speechSynthesis) {
     setTimeout(done, 700 + en.length * 45);
     return;
   }
@@ -4457,7 +4483,7 @@ async function askTutor(first) {
     $("#btnMic").disabled = !SR;
     monSays(data.reply, data.vi, () => {
       if (!C.listening) setState("Tới lượt bạn");
-    }, data.py);
+    }, data.py, data.audio);
   } catch (err) {
     C.busy = false;
     setState("Mất kết nối");

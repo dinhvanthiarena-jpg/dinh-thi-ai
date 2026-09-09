@@ -1,5 +1,36 @@
 // Bộ não hội thoại cho linh vật ON-Language của app ON-Language (/english-air).
 // Khoá API nằm ở server, app phía trình duyệt chỉ gọi /api/english-air/chat.
+
+/* ═══════════════ GIỌNG TIẾNG ANH SỐNG (MeloTTS qua Cloud Run) ═══════════════
+   Từ vựng/bài học đọc trước được vì nội dung cố định — câu Claude vừa trả lời
+   thì KHÔNG, mỗi lượt một câu mới. Chỗ duy nhất phải đọc "sống": gọi một máy
+   chủ MeloTTS nhỏ đang chạy (Cloud Run, chỉ tính tiền đúng giây xử lý), lấy
+   về file mp3 rồi gửi kèm cho app phát trực tiếp — không qua giọng máy nữa.
+   Chưa cấu hình TTS_LIVE_URL thì bỏ qua êm, app tự rơi về giọng máy như cũ. */
+const TTS_TIMEOUT_MS = 12000;
+
+async function synthLiveEn(text) {
+  const url = process.env.TTS_LIVE_URL;
+  if (!url || !text) return null;
+  try {
+    const res = await fetch(url.replace(/\/$/, '') + '/tts', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        ...(process.env.TTS_LIVE_SECRET ? { 'x-tts-secret': process.env.TTS_LIVE_SECRET } : {}),
+      },
+      body: JSON.stringify({ text: String(text).slice(0, 500) }),
+      signal: AbortSignal.timeout(TTS_TIMEOUT_MS),
+    });
+    if (!res.ok) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    return 'data:audio/mpeg;base64,' + buf.toString('base64');
+  } catch (e) {
+    console.error('[english-air/tts-live]', e.message);
+    return null;
+  }
+}
+
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
@@ -549,6 +580,12 @@ async function reply({ history, level, words, mode, style }) {
   // Đã nói tiếng Việt rồi thì dòng nghĩa là thừa; pinyin chỉ có nghĩa với tiếng Trung.
   if (out.lang === 'vi') out.vi = '';
   if (out.lang !== 'zh') out.py = '';
+  // Chỉ đọc sống bằng MeloTTS khi câu là tiếng Anh — tiếng Việt vẫn giữ giọng
+  // cậu bé (máy đọc sẵn có) như trước. Không cấu hình hoặc gọi lỗi thì audio
+  // để trống, app tự rơi về giọng máy, không vỡ luồng chat.
+  if (out.lang === 'en' && out.reply) {
+    out.audio = await synthLiveEn(out.reply);
+  }
   return out;
 }
 
