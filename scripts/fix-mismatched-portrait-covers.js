@@ -70,7 +70,7 @@ async function fetchWikimediaInfo(pageid, attempt) {
       console.error(`  (lỗi tra cứu ảnh pageid=${pageid} sau ${attempt} lần thử:`, err.message, ')');
       return null;
     }
-    await sleep(1000 * attempt);
+    await sleep(5000 * attempt);
     return fetchWikimediaInfo(pageid, attempt + 1);
   }
 }
@@ -91,7 +91,10 @@ async function run() {
   for (const post of posts) {
     checked += 1;
     const info = await fetchWikimediaInfo(post.coverImageSourceId);
-    await sleep(500);
+    // Server đã gọi Wikimedia rất nhiều lần trong ngày (các script trước đó)
+    // nên IP có thể đang bị giới hạn tốc độ chặt hơn bình thường — giãn cách
+    // rộng hơn hẳn để chạy chắc ăn, dù chậm hơn.
+    await sleep(3000);
     if (!info) {
       console.log(`  bỏ qua "${post.title}" — không tra được thông tin ảnh (mạng lỗi/rate limit).`);
       continue;
