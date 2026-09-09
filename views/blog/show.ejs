@@ -1,11 +1,22 @@
 <article class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
   <span class="badge bg-primary-100 text-primary-700 mb-4"><%= new Date(post.publishedAt).toLocaleDateString('vi-VN') %></span>
-  <h1 class="text-3xl sm:text-4xl font-extrabold text-ink leading-tight"><%= post.title %></h1>
+  <h1 id="postTitle" class="text-3xl sm:text-4xl font-extrabold text-ink leading-tight"><%= post.title %></h1>
   <p class="mt-4 text-sm text-muted">Tác giả: <%= post.author ? post.author.name : 'Đinh Thi Ai' %> &middot; <%= post.viewCount %> lượt xem</p>
+
+  <div id="ttsControls" class="mt-4 flex items-center gap-2">
+    <button type="button" id="ttsPlayBtn" onclick="toggleTTS()" class="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 text-primary-700 px-4 py-2 text-sm font-semibold hover:bg-primary-100 transition-colors">
+      <svg id="ttsIconPlay" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M8 5.14v9.72a1 1 0 0 0 1.5.86l7.5-4.86a1 1 0 0 0 0-1.72l-7.5-4.86A1 1 0 0 0 8 5.14Z"/></svg>
+      <svg id="ttsIconPause" class="h-4 w-4 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M6 4h3v12H6V4Zm5 0h3v12h-3V4Z"/></svg>
+      <span id="ttsLabel">Nghe bài viết</span>
+    </button>
+    <button type="button" id="ttsStopBtn" onclick="stopTTS()" class="hidden inline-flex items-center justify-center rounded-full border border-primary-200 text-primary-500 hover:bg-primary-50 h-9 w-9" aria-label="Dừng đọc">
+      <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><rect x="5" y="5" width="10" height="10" rx="1.5"/></svg>
+    </button>
+  </div>
 
   <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full rounded-2xl mt-8 aspect-video object-cover" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>' + ['','-b','-c'][Math.floor(Math.random()*3)] + '.svg'" />
 
-  <div class="prose prose-slate max-w-none mt-8 text-ink leading-relaxed">
+  <div id="postContent" class="prose prose-slate max-w-none mt-8 text-ink leading-relaxed">
     <%- post.content %>
   </div>
 
@@ -50,6 +61,123 @@
 
   <%- include('../partials/shopee-picks') %>
 </article>
+
+<script>
+(function () {
+  var synth = window.speechSynthesis;
+  var controls = document.getElementById('ttsControls');
+  if (!synth) {
+    if (controls) controls.style.display = 'none';
+    return;
+  }
+
+  var playBtn = document.getElementById('ttsPlayBtn');
+  var stopBtn = document.getElementById('ttsStopBtn');
+  var iconPlay = document.getElementById('ttsIconPlay');
+  var iconPause = document.getElementById('ttsIconPause');
+  var label = document.getElementById('ttsLabel');
+
+  var queue = [];
+  var queueIndex = 0;
+  var isPaused = false;
+  var keepAliveTimer = null;
+
+  function pickVoice() {
+    var voices = synth.getVoices();
+    return voices.find(function (v) { return v.lang === 'vi-VN'; })
+      || voices.find(function (v) { return v.lang && v.lang.indexOf('vi') === 0; })
+      || null;
+  }
+
+  // Cắt bài viết thành từng câu — utterance quá dài dễ dính lỗi Chrome tự
+  // ngắt giọng đọc giữa chừng khi tab không ở foreground.
+  function buildQueue() {
+    var titleEl = document.getElementById('postTitle');
+    var contentEl = document.getElementById('postContent');
+    var text = (titleEl ? titleEl.innerText + '. ' : '') + (contentEl ? contentEl.innerText : '');
+    text = text.replace(/\s+/g, ' ').trim();
+    return text.match(/[^.!?…]+[.!?…]*/g) || [text];
+  }
+
+  function setState(state) {
+    if (state === 'playing') {
+      iconPlay.classList.add('hidden');
+      iconPause.classList.remove('hidden');
+      label.textContent = 'Tạm dừng';
+      stopBtn.classList.remove('hidden');
+    } else if (state === 'paused') {
+      iconPlay.classList.remove('hidden');
+      iconPause.classList.add('hidden');
+      label.textContent = 'Tiếp tục nghe';
+      stopBtn.classList.remove('hidden');
+    } else {
+      iconPlay.classList.remove('hidden');
+      iconPause.classList.add('hidden');
+      label.textContent = 'Nghe bài viết';
+      stopBtn.classList.add('hidden');
+      clearInterval(keepAliveTimer);
+    }
+  }
+
+  function speakNext() {
+    if (queueIndex >= queue.length) {
+      setState('idle');
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(queue[queueIndex]);
+    utter.lang = 'vi-VN';
+    var voice = pickVoice();
+    if (voice) utter.voice = voice;
+    utter.onend = function () {
+      queueIndex += 1;
+      speakNext();
+    };
+    utter.onerror = function () { setState('idle'); };
+    synth.speak(utter);
+  }
+
+  window.toggleTTS = function () {
+    if (synth.speaking && !isPaused) {
+      synth.pause();
+      isPaused = true;
+      setState('paused');
+      return;
+    }
+    if (isPaused) {
+      synth.resume();
+      isPaused = false;
+      setState('playing');
+      return;
+    }
+    queue = buildQueue();
+    queueIndex = 0;
+    synth.cancel();
+    speakNext();
+    isPaused = false;
+    setState('playing');
+
+    // Chrome tự ngắt speechSynthesis nếu không có tác động gì sau ~15s —
+    // "đánh thức" định kỳ để bài đọc không bị treo giữa chừng.
+    clearInterval(keepAliveTimer);
+    keepAliveTimer = setInterval(function () {
+      if (synth.speaking && !synth.paused) {
+        synth.pause();
+        synth.resume();
+      }
+    }, 10000);
+  };
+
+  window.stopTTS = function () {
+    synth.cancel();
+    isPaused = false;
+    setState('idle');
+  };
+
+  window.addEventListener('beforeunload', function () {
+    synth.cancel();
+  });
+})();
+</script>
 
 <% if (relatedPosts.length) { %>
 <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
