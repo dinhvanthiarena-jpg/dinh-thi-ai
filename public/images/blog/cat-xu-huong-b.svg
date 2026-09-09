@@ -1,0 +1,10 @@
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="cxhb1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#EA580C"/><stop offset="100%" stop-color="#450A0A"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#cxhb1)"/>
+  <circle cx="90" cy="80" r="90" fill="#ffffff" opacity="0.07"/>
+  <g transform="translate(300,180)" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
+    <polyline points="-90,40 -30,-10 20,20 90,-60"/>
+    <polyline points="50,-60 90,-60 90,-20" fill="none"/>
+  </g>
+  <text x="40" y="330" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#ffffff">Xu hướng - Tin hot</text>
+</svg>

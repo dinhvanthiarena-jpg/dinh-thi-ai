@@ -1,0 +1,14 @@
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="cdtb1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6D28D9"/><stop offset="100%" stop-color="#312E81"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#cdtb1)"/>
+  <circle cx="550" cy="90" r="90" fill="#ffffff" opacity="0.07"/>
+  <g transform="translate(300,170)" fill="#ffffff" opacity="0.92">
+    <rect x="-70" y="-55" width="140" height="100" rx="6"/>
+    <rect x="-62" y="-47" width="124" height="84" rx="4" fill="#312E81"/>
+    <rect x="-45" y="-30" width="90" height="8" rx="4" fill="#ffffff"/>
+    <rect x="-45" y="-10" width="90" height="8" rx="4" fill="#67E8F9"/>
+    <rect x="-45" y="10" width="60" height="8" rx="4" fill="#ffffff"/>
+    <circle cx="55" cy="35" r="14" fill="#FBBF24"/>
+  </g>
+  <text x="40" y="330" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#ffffff">Đào tạo &amp; Nghề nghiệp</text>
+</svg>

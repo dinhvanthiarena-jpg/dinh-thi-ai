@@ -3,7 +3,7 @@
   <h1 class="text-3xl sm:text-4xl font-extrabold text-ink leading-tight"><%= post.title %></h1>
   <p class="mt-4 text-sm text-muted">Tác giả: <%= post.author ? post.author.name : 'Đinh Thi Ai' %> &middot; <%= post.viewCount %> lượt xem</p>
 
-  <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full rounded-2xl mt-8 aspect-video object-cover" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>.svg'" />
+  <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full rounded-2xl mt-8 aspect-video object-cover" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>' + ['','-b','-c'][Math.floor(Math.random()*3)] + '.svg'" />
 
   <div class="prose prose-slate max-w-none mt-8 text-ink leading-relaxed">
     <%- post.content %>

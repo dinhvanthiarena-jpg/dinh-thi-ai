@@ -16,7 +16,7 @@
         <% const postCat = categories.find(function(c) { return c.slug === post.category; }); %>
         <a href="/blog/<%= post.slug %>" class="card overflow-hidden group flex flex-col">
           <div class="aspect-video bg-primary-50 overflow-hidden relative">
-            <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>.svg'" />
+            <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>' + ['','-b','-c'][Math.floor(Math.random()*3)] + '.svg'" />
             <% if (postCat) { %>
               <span class="absolute top-2 left-2 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-white/90 text-ink shadow"><%= postCat.emoji %> <%= postCat.label %></span>
             <% } %>

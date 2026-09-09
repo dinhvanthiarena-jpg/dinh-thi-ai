@@ -18,7 +18,7 @@
             <% col.posts.forEach(function(post, idx) { %>
               <a href="/blog/<%= post.slug %>" class="flex gap-3 group">
                 <div class="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-primary-50">
-                  <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>.svg'" />
+                  <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>' + ['','-b','-c'][Math.floor(Math.random()*3)] + '.svg'" />
                 </div>
                 <div class="min-w-0">
                   <h3 class="text-sm font-semibold text-ink leading-snug line-clamp-2 group-hover:text-primary-700"><%= post.title %></h3>
@@ -41,7 +41,7 @@
           <% col.posts.forEach(function(post) { %>
             <a href="/blog/<%= post.slug %>" class="group">
               <div class="aspect-video rounded-lg overflow-hidden bg-primary-50">
-                <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>.svg'" />
+                <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>' + ['','-b','-c'][Math.floor(Math.random()*3)] + '.svg'" />
               </div>
               <h3 class="mt-2 text-sm font-semibold text-ink leading-snug line-clamp-2 group-hover:text-primary-700"><%= post.title %></h3>
               <p class="text-xs text-muted mt-1"><%= new Date(post.publishedAt).toLocaleDateString('vi-VN') %></p>
@@ -133,7 +133,7 @@
         <% const postCat = (typeof blogCategories !== 'undefined' ? blogCategories : []).find(function(c) { return c.slug === post.category; }); %>
         <a href="/blog/<%= post.slug %>" class="card overflow-hidden group flex flex-col">
           <div class="aspect-video bg-primary-50 overflow-hidden relative">
-            <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>.svg'" />
+            <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>' + ['','-b','-c'][Math.floor(Math.random()*3)] + '.svg'" />
             <% if (postCat) { %>
               <span class="absolute top-2 left-2 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-white/90 text-ink shadow"><%= postCat.emoji %> <%= postCat.label %></span>
             <% } %>
