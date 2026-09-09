@@ -117,6 +117,24 @@ async function downloadImage(url, pageid) {
 // (không liên quan nội dung, nhìn không chuyên nghiệp khi làm ảnh bìa blog).
 const LOGO_TITLE_PATTERN = /\b(logo|wordmark|emblem|seal of|coat of arms|flag of|icon)\b/i;
 
+// Loại ảnh chân dung định danh của 1 người nổi tiếng/chính khách cụ thể —
+// kho ảnh chính khách trên Wikimedia rất lớn (họp báo chính thức, CC-licensed)
+// nên search theo từ khoá chung (VD "emotional guidance", "leadership") rất dễ
+// vô tình trúng ảnh 1 nguyên thủ quốc gia, gắn nhầm mặt người thật cụ thể vào
+// bài viết không liên quan gì tới họ — phản cảm và rủi ro hơn hẳn 1 ảnh chỉ
+// đơn thuần "không khớp chủ đề". Chỉ chấp nhận ảnh 1 người thật khi bài viết
+// thực sự nói về nhân vật/sự kiện có người đó (lúc này usedPageIds + specific
+// query đã đủ chặt), còn lại thà rơi về SVG dự phòng còn an toàn hơn.
+const PERSON_PORTRAIT_PATTERN =
+  /\b(president|politician|prime minister|minister of|foreign minister|chancellor|monarch|king of|queen of|senator|governor|diplomat|portrait of|headshot|head of state)\b/i;
+
+function isPersonPortrait(title, meta) {
+  const text = [title, meta && meta.ObjectName && meta.ObjectName.value, meta && meta.ImageDescription && meta.ImageDescription.value]
+    .filter(Boolean)
+    .join(' ');
+  return PERSON_PORTRAIT_PATTERN.test(text);
+}
+
 async function searchWikimedia(query, usedPageIds) {
   const apiUrl =
     'https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6' +
@@ -131,11 +149,11 @@ async function searchWikimedia(query, usedPageIds) {
   // "bitmap" được Wikimedia tự chuyển từ PDF/SVG/tài liệu khác, vì loại đó
   // thường không liên quan tới chủ đề (bìa sách, sơ đồ...) và thumbnail
   // sinh theo yêu cầu nên hay tải lỗi/rớt ảnh trên trang. Cũng loại bỏ
-  // logo/huy hiệu qua tên file.
+  // logo/huy hiệu qua tên file, và ảnh chân dung chính khách/người nổi tiếng.
   return pages
     .filter((p) => !usedPageIds || !usedPageIds.has(String(p.pageid)))
     .filter((p) => !LOGO_TITLE_PATTERN.test(p.title || ''))
-    .map((p) => ({ pageid: p.pageid, info: (p.imageinfo && p.imageinfo[0]) || null }))
+    .map((p) => ({ pageid: p.pageid, title: p.title, info: (p.imageinfo && p.imageinfo[0]) || null }))
     .filter(
       (c) =>
         c.info &&
@@ -143,7 +161,8 @@ async function searchWikimedia(query, usedPageIds) {
         c.info.url &&
         /\.(jpe?g|png)(\?|$)/i.test(c.info.thumburl) &&
         /\.(jpe?g|png)(\?|$)/i.test(c.info.url)
-    );
+    )
+    .filter((c) => !isPersonPortrait(c.title, c.info.extmetadata));
 }
 
 // Tìm 1 ảnh thật, có giấy phép tự do, minh hoạ đúng nội dung bài trên
@@ -293,7 +312,7 @@ YÊU CẦU:
 5. KHÔNG lặp lại tiêu đề bài viết thành một heading ở đầu content (trang web đã tự hiển thị tiêu đề riêng) — bắt đầu content ngay bằng đoạn mở bài. Không dùng gạch đầu dòng "-" hay danh sách số thứ tự để liệt kê — viết thành đoạn văn liền mạch.
 6. Cuối bài PHẢI có đoạn bắt đầu bằng "**Nguồn tham khảo:**" rồi 1 dòng duy nhất theo định dạng markdown: [Tên bài gốc](link).
 7. CHỈ trả về JSON hợp lệ (không kèm giải thích, không bọc trong dấu backtick), đúng cấu trúc:
-{"title": "tiêu đề bài viết mới (không trùng tiêu đề gốc, có chứa từ khoá SEO)", "excerpt": "mô tả ngắn 140-160 ký tự dùng làm meta description, có chứa từ khoá SEO", "content": "toàn bộ nội dung bài viết, dùng \\n\\n giữa các đoạn", "tags": ["3 đến 5 từ khoá liên quan"], "imageQuery": "cụm từ tiếng Anh (3-6 từ) mô tả 1 CẢNH THẬT cụ thể, có thể chụp được bằng ảnh, minh hoạ đúng nội dung bài (VD: 'elderly couple calculating retirement savings', không viết khái niệm trừu tượng như 'financial freedom trend'; KHÔNG dùng tên thương hiệu/tên báo/tên đài vì dễ ra ảnh logo thay vì ảnh nội dung)"}`;
+{"title": "tiêu đề bài viết mới (không trùng tiêu đề gốc, có chứa từ khoá SEO)", "excerpt": "mô tả ngắn 140-160 ký tự dùng làm meta description, có chứa từ khoá SEO", "content": "toàn bộ nội dung bài viết, dùng \\n\\n giữa các đoạn", "tags": ["3 đến 5 từ khoá liên quan"], "imageQuery": "cụm từ tiếng Anh (3-6 từ) mô tả 1 CẢNH THẬT cụ thể, có thể chụp được bằng ảnh, minh hoạ đúng nội dung bài (VD: 'elderly couple calculating retirement savings', không viết khái niệm trừu tượng như 'financial freedom trend'; KHÔNG dùng tên thương hiệu/tên báo/tên đài vì dễ ra ảnh logo thay vì ảnh nội dung. QUAN TRỌNG: trừ khi bài viết thực sự nói về 1 nhân vật cụ thể (chính khách, người nổi tiếng) được nêu tên trong tiêu đề, TUYỆT ĐỐI không mô tả kiểu 'chân dung/khuôn mặt 1 người' (không dùng từ như portrait, headshot, politician, president, leader...) — kho ảnh chính khách trên Wikimedia rất lớn nên mô tả mơ hồ kiểu 'person feeling emotional' rất dễ vô tình trúng ảnh mặt 1 nguyên thủ quốc gia không liên quan gì, cực kỳ phản cảm. Ưu tiên mô tả CẢNH/HOẠT ĐỘNG/ĐỒ VẬT (VD: 'hands holding smartphone office desk', 'busy city street traffic evening')"}`;
 
   const userMessage = `Chủ đề gốc: "${item.title}"\nTóm tắt: ${item.description}\nLink: ${item.link}`;
 
@@ -391,7 +410,7 @@ async function suggestImageQuery(title) {
         model: MODEL,
         max_tokens: 60,
         system:
-          'Trả về DUY NHẤT 1 cụm từ tiếng Anh (3-6 từ) mô tả 1 cảnh thật, cụ thể, có thể chụp được bằng ảnh, minh hoạ đúng nội dung tiêu đề bài viết tiếng Việt được cung cấp — không phải khái niệm trừu tượng, không dùng tên thương hiệu/tên báo/tên đài. Không giải thích, không dấu ngoặc kép, chỉ trả về đúng cụm từ.',
+          'Trả về DUY NHẤT 1 cụm từ tiếng Anh (3-6 từ) mô tả 1 cảnh thật, cụ thể, có thể chụp được bằng ảnh, minh hoạ đúng nội dung tiêu đề bài viết tiếng Việt được cung cấp — không phải khái niệm trừu tượng, không dùng tên thương hiệu/tên báo/tên đài. Trừ khi tiêu đề thực sự nêu tên 1 nhân vật cụ thể (chính khách, người nổi tiếng), TUYỆT ĐỐI không mô tả kiểu "chân dung/khuôn mặt 1 người" (không dùng portrait, headshot, politician, president, leader...) vì rất dễ vô tình trúng ảnh 1 nguyên thủ quốc gia không liên quan — ưu tiên mô tả CẢNH/HOẠT ĐỘNG/ĐỒ VẬT. Không giải thích, không dấu ngoặc kép, chỉ trả về đúng cụm từ.',
         messages: [{ role: 'user', content: title }],
       }),
     });
