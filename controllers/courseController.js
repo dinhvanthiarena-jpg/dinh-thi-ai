@@ -84,7 +84,7 @@ exports.show = async (req, res, next) => {
       '@type': 'Course',
       name: course.title,
       description: course.description,
-      provider: { '@type': 'Organization', name: 'Đinh Thi Ai' },
+      provider: { '@type': 'Organization', name: 'Vietpro' },
       ...(course.ratingCount
         ? {
             aggregateRating: {

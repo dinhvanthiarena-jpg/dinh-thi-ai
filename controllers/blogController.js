@@ -23,11 +23,11 @@ exports.list = async (req, res) => {
 
   res.render('blog/index', {
     title: activeCategory
-      ? `${activeCategory.label} — Đinh Thi Ai`
+      ? `${activeCategory.label} — Vietpro`
       : 'Kiến thức Đào tạo AI, Đào tạo Ứng dụng AI',
     description: activeCategory
-      ? `Tin tức, bài viết chuyên mục ${activeCategory.label} — cập nhật thường xuyên bởi Đinh Thi Ai.`
-      : 'Kiến thức, hướng dẫn đào tạo AI và đào tạo ứng dụng AI mới nhất — cập nhật thường xuyên bởi Đinh Thi Ai.',
+      ? `Tin tức, bài viết chuyên mục ${activeCategory.label} — cập nhật thường xuyên bởi Vietpro.`
+      : 'Kiến thức, hướng dẫn đào tạo AI và đào tạo ứng dụng AI mới nhất — cập nhật thường xuyên bởi Vietpro.',
     posts,
     page,
     totalPages: Math.ceil(total / perPage),
@@ -74,7 +74,7 @@ exports.show = async (req, res, next) => {
       description: post.excerpt,
       datePublished: post.publishedAt,
       author: { '@type': 'Person', name: post.author ? post.author.name : 'Đinh Thi Ai' },
-      publisher: { '@type': 'Organization', name: 'Đinh Thi Ai' },
+      publisher: { '@type': 'Organization', name: 'Vietpro' },
     },
     post,
     relatedPosts,

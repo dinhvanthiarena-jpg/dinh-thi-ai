@@ -72,7 +72,7 @@ exports.index = async (req, res) => {
   ]);
 
   res.render('home', {
-    title: 'Đào tạo AI, Đào tạo Ứng dụng AI cho người đi làm - Đinh Thi Ai',
+    title: 'Đào tạo AI, Đào tạo Ứng dụng AI cho người đi làm - Vietpro',
     description:
       'Đinh Thi Ai chuyên đào tạo AI và đào tạo ứng dụng AI thực chiến cho người đi làm, doanh nghiệp, giảng viên, giáo viên, công chức và lãnh đạo: Prompt Engineering, Generative AI, triển khai AI.',
     structuredData: {

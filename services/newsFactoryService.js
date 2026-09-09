@@ -79,35 +79,14 @@ const CATEGORY_IMAGE_QUERY = {
   'giai-tri': 'entertainment social media',
 };
 
-// Tải file ảnh về lưu trong public/images/blog/auto/ — quan trọng để tránh
-// đúng lỗi thầy gặp: ảnh hotlink trực tiếp từ Wikimedia có lúc bị lỗi/timeout
-// ngay lần đầu trang tải (dịch vụ tạo thumbnail theo yêu cầu của Wikimedia
-// không phải lúc nào cũng phản hồi kịp), và trình duyệt không tự thử lại nên
-// ảnh vỡ vĩnh viễn trên bài đó. Tải hẳn 1 file về là cách duy nhất đảm bảo
-// ảnh luôn hiển thị ổn định cho mọi người xem sau này, không phụ thuộc dịch
-// vụ ngoài mỗi lần có người load trang. File chỉ vài chục-vài trăm KB/ảnh
-// (đã lấy bản 900px, không phải ảnh gốc) nên không đáng kể cho dung lượng.
-async function downloadImage(url, pageid) {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const ext = /\.png(\?|$)/i.test(url) ? 'png' : 'jpg';
-    const filename = `${pageid}-${Date.now().toString(36)}.${ext}`;
-    fs.mkdirSync(AUTO_IMAGE_DIR, { recursive: true });
-    const buffer = Buffer.from(await res.arrayBuffer());
-    fs.writeFileSync(path.join(AUTO_IMAGE_DIR, filename), buffer);
-    return `/images/blog/auto/${filename}`;
-  } catch (err) {
-    console.error('[newsFactory] downloadImage failed', err.message);
-    return null;
-  }
-}
-
 // Tìm 1 ảnh thật, có giấy phép tự do, liên quan tới chuyên mục trên
-// Wikimedia Commons — không cần API key. usedPageIds (Set các pageid Commons
-// đã dùng cho bài khác) để loại trừ, tránh tình trạng nhiều bài dùng trùng
-// đúng 1 ảnh. Trả về null nếu không tìm/tải được ảnh nào (khi đó dùng ảnh
-// SVG dự phòng).
+// Wikimedia Commons — không cần API key, không tải/lưu về server (hosting
+// hiện chỉ còn ~290MB trống trong quota 6GB, thầy quyết định giữ hotlink
+// trực tiếp thay vì tải ảnh về, chấp nhận rủi ro ảnh occasionally lỗi khi
+// dịch vụ tạo thumbnail của Wikimedia phản hồi chậm — đã có onerror ở views
+// tự chuyển sang ảnh SVG dự phòng khi việc đó xảy ra). usedPageIds (Set các
+// pageid Commons đã dùng cho bài khác) để loại trừ, tránh trùng ảnh giữa các
+// bài. Trả về null nếu không tìm được ảnh nào chưa dùng.
 async function fetchStockImage(categorySlug, usedPageIds) {
   const query = CATEGORY_IMAGE_QUERY[categorySlug] || 'technology';
   const apiUrl =
@@ -137,17 +116,21 @@ async function fetchStockImage(categorySlug, usedPageIds) {
       );
     if (!candidates.length) return null;
 
-    // Thử tối đa 5 ứng viên ngẫu nhiên, tải hẳn từng ảnh về cho tới khi có 1
-    // ảnh tải thành công (không chỉ kiểm tra HEAD — phải tải được thật).
+    // Thumbnail Wikimedia sinh theo yêu cầu (on-demand) nên thỉnh thoảng lần
+    // đầu load bị lỗi/timeout — thử tối đa 5 ứng viên ngẫu nhiên, xác minh
+    // bằng HEAD request thật trước khi chốt dùng ảnh đó (giảm bớt chứ không
+    // loại bỏ hoàn toàn rủi ro vỡ ảnh lúc khách vào xem lần đầu).
     const shuffled = [...candidates].sort(() => Math.random() - 0.5).slice(0, 5);
     let chosen = null;
-    let localPath = null;
     for (const c of shuffled) {
-      const saved = await downloadImage(c.info.thumburl, c.pageid);
-      if (saved) {
-        chosen = c;
-        localPath = saved;
-        break;
+      try {
+        const head = await fetch(c.info.thumburl, { method: 'HEAD' });
+        if (head.ok) {
+          chosen = c;
+          break;
+        }
+      } catch (e) {
+        // thử ứng viên tiếp theo
       }
     }
     if (!chosen) return null;
@@ -156,7 +139,7 @@ async function fetchStockImage(categorySlug, usedPageIds) {
     const artist = ((meta.Artist && meta.Artist.value) || 'Không rõ tác giả').replace(/<[^>]+>/g, '').trim();
     const license = (meta.LicenseShortName && meta.LicenseShortName.value) || 'Wikimedia Commons';
     return {
-      url: localPath,
+      url: chosen.info.thumburl,
       credit: `Ảnh: ${artist} — Wikimedia Commons (${license})`,
       sourceId: String(chosen.pageid),
     };
@@ -257,7 +240,7 @@ async function generateArticle(categorySlug, keyword, item) {
 
   const categoryLabel = (BLOG_CATEGORIES.find((c) => c.slug === categorySlug) || {}).label || categorySlug;
 
-  const systemPrompt = `Bạn là biên tập viên chuyên mục "${categoryLabel}" của website Đinh Thi Ai (nền tảng đào tạo ứng dụng AI cho người đi làm và doanh nghiệp tại Việt Nam).
+  const systemPrompt = `Bạn là biên tập viên chuyên mục "${categoryLabel}" của website Vietpro (nền tảng đào tạo ứng dụng AI cho người đi làm và doanh nghiệp tại Việt Nam).
 
 NHIỆM VỤ: Viết MỘT bài viết CHUYÊN SÂU bằng tiếng Việt về chủ đề được cung cấp bên dưới. Đây chỉ là ĐIỂM KHỞI ĐẦU — bạn PHẢI viết lại hoàn toàn bằng lời văn, cấu trúc và góc nhìn riêng của mình. TUYỆT ĐỐI KHÔNG sao chép nguyên văn bất kỳ câu nào từ tin gốc, không dịch/diễn đạt lại từng câu một theo đúng thứ tự của bài gốc.
 

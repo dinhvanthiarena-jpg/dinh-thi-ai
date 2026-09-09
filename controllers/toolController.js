@@ -14,7 +14,7 @@ exports.list = async (req, res) => {
 
   res.render('tools/index', {
     title: 'Tool & Game',
-    description: 'Kho ứng dụng, tool và game do Đinh Thi Ai xây dựng — tải miễn phí, dùng ngay.',
+    description: 'Kho ứng dụng, tool và game do Vietpro xây dựng — tải miễn phí, dùng ngay.',
     tools,
   });
 };

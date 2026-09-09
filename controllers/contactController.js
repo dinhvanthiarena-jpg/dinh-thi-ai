@@ -16,6 +16,6 @@ exports.submit = async (req, res) => {
   }
 
   await ContactMessage.create({ name, email, phone, subject, message });
-  req.flash('success', 'Cảm ơn bạn đã liên hệ! Đội ngũ Đinh Thi Ai sẽ phản hồi trong 24h.');
+  req.flash('success', 'Cảm ơn bạn đã liên hệ! Đội ngũ Vietpro sẽ phản hồi trong 24h.');
   res.redirect('/lien-he');
 };

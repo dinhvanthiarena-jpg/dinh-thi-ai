@@ -86,7 +86,7 @@ async function generateCaption(content) {
   const fallback = `${content.title}\n\n${content.description}\n\nXem chi tiết: ${content.url}\n\n#DinhThiAi #DaoTaoAI #HocAI #PromptEngineering #AIchoDoanhNghiep`;
   if (!apiKey) return fallback;
 
-  const systemPrompt = `Bạn là chuyên gia content marketing cho Fanpage Facebook "Đào Tạo Ứng dụng Ai x100" của Đinh Thi Ai — nền tảng đào tạo AI ứng dụng cho người đi làm và doanh nghiệp tại Việt Nam.
+  const systemPrompt = `Bạn là chuyên gia content marketing cho Fanpage Facebook "Đào Tạo Ứng dụng Ai x100" của Vietpro — nền tảng đào tạo AI ứng dụng cho người đi làm và doanh nghiệp tại Việt Nam.
 
 NHIỆM VỤ: Viết MỘT bài đăng Facebook hấp dẫn, chuẩn SEO, quảng bá nội dung được cung cấp bên dưới.
 
@@ -96,7 +96,7 @@ YÊU CẦU:
 3. Nêu bật lợi ích cụ thể người đọc nhận được, tạo cảm giác cấp bách hoặc tò mò để họ bấm vào link.
 4. Chèn đúng nguyên văn link được cung cấp ở cuối bài (không đổi link, không rút gọn).
 5. Kết thúc bằng 6-10 hashtag tiếng Việt không dấu liền nhau, liên quan đến AI, khóa học, và chủ đề nội dung (ví dụ #DinhThiAi #DaoTaoAI #HocAI #PromptEngineering #AIchoDoanhNghiep #ChuyenDoiSo). Hashtag phải nằm ở cuối, sau 1 dòng trống.
-6. Giọng văn nhiệt huyết, gần gũi, chuyên nghiệp, xưng "Đinh Thi Ai" hoặc "chúng tôi", KHÔNG bịa thông tin ngoài dữ liệu được cung cấp.
+6. Giọng văn nhiệt huyết, gần gũi, chuyên nghiệp, xưng "Vietpro" hoặc "chúng tôi", KHÔNG bịa thông tin ngoài dữ liệu được cung cấp.
 7. CHỈ trả về nội dung bài đăng, không thêm lời dẫn hay giải thích.`;
 
   const userMessage = `Tiêu đề: ${content.title}

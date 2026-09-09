@@ -163,7 +163,7 @@ const shopeePicks = require('./data/shopeePicks');
 const { BLOG_CATEGORIES } = require('./utils/blogCategories');
 
 app.use((req, res, next) => {
-  res.locals.appName = process.env.APP_NAME || 'Dinh Thi Ai';
+  res.locals.appName = process.env.APP_NAME || 'Vietpro';
   res.locals.appUrl = (process.env.APP_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
   res.locals.canonicalUrl = `${res.locals.appUrl}${req.originalUrl}`;
   res.locals.currentPath = req.path;

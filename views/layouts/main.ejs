@@ -7,7 +7,7 @@
        position:fixed (như khung chat) bị đẩy lệch/trôi lên trên màn hình. -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
   <title><%= typeof title !== 'undefined' ? title + ' | ' + appName : appName %></title>
-  <% const metaDesc = typeof description !== 'undefined' && description ? description : 'Đinh Thi Ai - Nền tảng đào tạo AI, đào tạo ứng dụng AI cho người đi làm, từ chuyên gia thực chiến.'; %>
+  <% const metaDesc = typeof description !== 'undefined' && description ? description : 'Vietpro - Nền tảng đào tạo AI, đào tạo ứng dụng AI cho người đi làm, từ chuyên gia thực chiến.'; %>
   <% const rawImage = typeof ogImage !== 'undefined' && ogImage ? ogImage : '/images/og-cover.png'; %>
   <% const metaImage = /^https?:\/\//.test(rawImage) ? rawImage : `${appUrl}${rawImage}`; %>
   <% const pageUrl = typeof canonicalUrl !== 'undefined' ? canonicalUrl : ''; %>
@@ -15,7 +15,7 @@
   <% if (pageUrl) { %><link rel="canonical" href="<%= pageUrl %>" /><% } %>
   <meta name="google-site-verification" content="FeFP6JE5FW25omeNqpfic8CLHHiKomqylD3EG_9u-7o" />
 
-  <meta property="og:site_name" content="Đinh Thi Ai" />
+  <meta property="og:site_name" content="Vietpro" />
   <!-- App "Dinh Thi Ai Website" (1364909193363859) — app riêng cho web,
        tách khỏi app "Ads Manager - DT" vốn tạo cho Marketing API. -->
   <meta property="fb:app_id" content="1364909193363859" />
@@ -46,7 +46,7 @@
         "@type": "WebSite",
         "@id": `${appUrl}/#website`,
         "url": appUrl,
-        "name": "Đinh Thi Ai",
+        "name": "Vietpro",
         "description": "Nền tảng đào tạo AI, đào tạo ứng dụng AI cho người đi làm và doanh nghiệp tại Việt Nam.",
         "inLanguage": "vi-VN",
         "publisher": { "@id": `${appUrl}/#organization` },
@@ -59,7 +59,7 @@
       {
         "@type": "EducationalOrganization",
         "@id": `${appUrl}/#organization`,
-        "name": "Đinh Thi Ai",
+        "name": "Vietpro",
         "url": appUrl,
         "logo": `${appUrl}/images/favicon.svg`,
         "description": "Nền tảng đào tạo AI, đào tạo ứng dụng AI cho người đi làm và doanh nghiệp tại Việt Nam.",
