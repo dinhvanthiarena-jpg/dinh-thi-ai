@@ -24,10 +24,10 @@ exports.list = async (req, res) => {
   res.render('blog/index', {
     title: activeCategory
       ? `${activeCategory.label} — Vietpro`
-      : 'Kiến thức Đào tạo AI, Đào tạo Ứng dụng AI',
+      : 'Tin tức tổng hợp - Vietpro',
     description: activeCategory
-      ? `Tin tức, bài viết chuyên mục ${activeCategory.label} — cập nhật thường xuyên bởi Vietpro.`
-      : 'Kiến thức, hướng dẫn đào tạo AI và đào tạo ứng dụng AI mới nhất — cập nhật thường xuyên bởi Vietpro.',
+      ? `Tin tức tổng hợp chuyên mục ${activeCategory.label} — cập nhật thường xuyên bởi Vietpro.`
+      : 'Tin tức tổng hợp mới nhất về AI, công nghệ, xu hướng và nhiều chủ đề khác — cập nhật thường xuyên bởi Vietpro.',
     posts,
     page,
     totalPages: Math.ceil(total / perPage),
