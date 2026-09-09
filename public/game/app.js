@@ -217,6 +217,36 @@
     return s.startsWith('-') ? '−' + s.slice(1) : s;
   }
 
+  // Lời giải ngắn cho một phép tính cộng/trừ/nhân/chia — hiện trong
+  // solution-box ngay dưới mỗi câu (lớp 1-5 không có số âm nên phần lớn
+  // rơi vào nhánh đơn giản; lớp 6-9 mới chạm các quy tắc dấu).
+  function explainArithmetic(op, a, b, ans) {
+    const A = fmtNum(a), Babs = fmtNum(Math.abs(b)), Bs = fmtNum(b), R = fmtNum(ans);
+    if (op === 'add') {
+      if (a >= 0 && b >= 0) return `${A} + ${Bs} = ${R}.`;
+      if (a >= 0 && b < 0) return `${A} + (${Bs}) nghĩa là lấy ${A} rồi bớt đi ${Babs}: ${A} − ${Babs} = ${R}.`;
+      if (a < 0 && b >= 0) return `(${A}) + ${Bs} nghĩa là lấy ${Bs} rồi bớt đi ${fmtNum(Math.abs(a))}: ${Bs} − ${fmtNum(Math.abs(a))} = ${R}.`;
+      return `(${A}) + (${Bs}): cộng hai số âm thì cộng phần số rồi giữ dấu âm: −(${fmtNum(Math.abs(a))} + ${Babs}) = ${R}.`;
+    }
+    if (op === 'sub') {
+      if (b >= 0) return `${A} − ${Bs} = ${R}.`;
+      return `${A} − (${Bs}) nghĩa là trừ đi một số âm, tức là CỘNG thêm ${Babs}: ${A} + ${Babs} = ${R}.`;
+    }
+    if (op === 'mul') {
+      const negCount = (a < 0 ? 1 : 0) + (b < 0 ? 1 : 0);
+      const aStr = a < 0 ? `(${A})` : A, bStr = b < 0 ? `(${Bs})` : Bs;
+      if (negCount === 0) {
+        if (Math.abs(a) <= 10 && Math.abs(b) <= 10) return `${A} × ${Bs} = ${R} (lấy ${A} cộng liên tiếp ${Bs} lần).`;
+        return `${A} × ${Bs} = ${R}.`;
+      }
+      if (negCount === 1) return `${aStr} × ${bStr} = ${R}: âm nhân dương ra kết quả ÂM, lấy ${fmtNum(Math.abs(a))} × ${Babs} = ${fmtNum(Math.abs(ans))} rồi thêm dấu trừ.`;
+      return `${aStr} × ${bStr} = ${R}: âm nhân âm ra kết quả DƯƠNG, lấy ${fmtNum(Math.abs(a))} × ${Babs} = ${R}.`;
+    }
+    // div
+    const aStr = a < 0 ? `(${A})` : A, bStr = b < 0 ? `(${Bs})` : Bs, rStr = ans < 0 ? `(${R})` : R;
+    return `${aStr} : ${bStr} = ${R} (vì ${bStr} × ${rStr} = ${A}).`;
+  }
+
   /* ================= VISUAL QUESTION FORMATS =================
    * Diversifies plain "3 + 4 = ?" drilling with two more visual formats
    * (icon-counting operands, and a two-icon "picture algebra" puzzle),
@@ -303,7 +333,11 @@
     const askLine = `${askIcon} = ${dragMode ? dropSlotHtml() : '?'}`;
     const displayHtml = `<div class="icon-algebra"><div class="ia-line">${line1}</div><div class="ia-line">${line2}</div><div class="ia-ask">${askLine}</div></div>`;
 
-    return { kind: 'icon-algebra', answer, choices, displayHtml, dragMode, isWord: false };
+    const solution = askA
+      ? `Lấy dòng 1 trừ dòng 2: (${iconA}+${iconA}+${iconB}) − (${iconA}+${iconB}) = ${t1} − ${t2}, chỉ còn lại đúng 1 ${iconA}, vậy ${iconA} = ${x}.`
+      : `Lấy dòng 1 trừ dòng 2 tính được ${iconA} = ${t1} − ${t2} = ${x}. Thay vào dòng 2: ${iconB} = ${t2} − ${iconA} = ${t2} − ${x} = ${y}.`;
+
+    return { kind: 'icon-algebra', answer, choices, displayHtml, dragMode, isWord: false, solution };
   }
 
   function genByGradeOp(grade, op) {
@@ -457,6 +491,7 @@
       choices,
       dragMode,
       isWord: false,
+      solution: explainArithmetic(op, a, b, ans),
     };
   }
 
@@ -3024,7 +3059,7 @@
       streakBadge.hidden = true;
     }
 
-    if (state.current.isWord) {
+    if (state.current.solution) {
       solutionText.textContent = state.current.solution;
       solutionBox.hidden = false;
       pendingAdvance = advanceAfterAnswer;
