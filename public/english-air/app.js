@@ -4741,7 +4741,20 @@ $("#callPreview").addEventListener("click", () => {
   box.classList.add("talking"); datVideo(true);
   let ended = false;
   const stop = () => { if (ended) return; ended = true; box.classList.remove("talking", "pulse"); datVideo(false); };
-  if (!S.sound || !window.speechSynthesis) { setTimeout(stop, 600 + line.en.length * 45); return; }
+  if (!S.sound) { setTimeout(stop, 600 + line.en.length * 45); return; }
+  // Chỗ này trước đây đọc thẳng bằng giọng máy, không đi qua kho tiếng thu sẵn
+  // — nên cả app đã đổi giọng rồi mà riêng màn Gọi Air vẫn "giọng cũ".
+  const fTruoc = fileTieng(line.en, "en-GB");
+  if (fTruoc) {
+    // Miệng nhân vật vẫn mấp máy theo nhịp, chỉ khác là tiếng lấy từ file.
+    const nhip = setInterval(() => {
+      box.classList.remove("pulse"); void box.offsetWidth; box.classList.add("pulse");
+    }, 320);
+    const dung = () => { clearInterval(nhip); stop(); };
+    if (phatTiengThu(fTruoc, false, dung)) return;
+    clearInterval(nhip);
+  }
+  if (!window.speechSynthesis) { setTimeout(stop, 600 + line.en.length * 45); return; }
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(line.en);
