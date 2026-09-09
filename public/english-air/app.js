@@ -1447,26 +1447,33 @@ function khoiDocThu(mau, nhan) {
   quyenNut.append(icon("i-mic", "ic ic-sm"), el("span", null, "Cho phép dùng micro"));
   hangQuyen.append(quyenChu, quyenNut);
 
+  /* Chỉ đường mở lại quyền micro.
+     iPhone: KHÔNG bắt vào Cài đặt hệ thống — Safari cho mở lại ngay tại trang
+     bằng nút chữ "ᴀA" ở thanh địa chỉ, nhanh hơn nhiều. Vào Cài đặt chỉ là
+     cách hai, để dành cho máy nào không thấy nút đó. */
   function chiDuongMoQuyen() {
     const ua = navigator.userAgent;
     if (/iPhone|iPad|iPod/i.test(ua)) {
-      return "iPhone/iPad: mở Cài đặt → Safari → Micrô → chọn Hỏi hoặc Cho phép, " +
-             "rồi quay lại tải trang này lại.";
+      return "Chạm chữ ᴀA bên trái thanh địa chỉ ở trên → Cài đặt trang web → " +
+             "Micrô → chọn Cho phép. (Không thấy thì vào Cài đặt → Safari → Micrô.)";
     }
     if (/Android/i.test(ua)) {
-      return "Android: chạm vào biểu tượng ổ khoá 🔒 cạnh địa chỉ web ở trên → " +
-             "Quyền → Micrô → Cho phép.";
+      return "Chạm biểu tượng ổ khoá 🔒 cạnh địa chỉ web ở trên → Quyền → Micrô → Cho phép.";
     }
-    return "Máy tính: bấm biểu tượng ổ khoá 🔒 cạnh địa chỉ web ở trên → " +
-           "Micrô → Cho phép, rồi tải lại trang.";
+    return "Bấm biểu tượng ổ khoá 🔒 cạnh địa chỉ web ở trên → Micrô → Cho phép, " +
+           "rồi tải lại trang.";
   }
 
   function hienXinQuyen(daChan) {
     hangQuyen.hidden = false;
     quyenChu.textContent = daChan
-      ? "Máy đang chặn micro nên không chấm điểm đọc được. " + chiDuongMoQuyen()
+      ? "Máy đang chặn micro. " + chiDuongMoQuyen()
       : "Cần quyền dùng micro để nghe bạn đọc. Bấm nút bên dưới rồi chọn Cho phép nhé.";
-    quyenNut.hidden = daChan;
+    // Vẫn để nút bấm lại kể cả khi đang bị chặn: nhiều máy chỉ từ chối tạm,
+    // bấm lần nữa là hiện hộp hỏi quyền; mà mở quyền xong cũng cần nút này để
+    // kiểm tra ngay chứ không phải tải lại trang.
+    quyenNut.hidden = false;
+    quyenNut.lastChild.textContent = daChan ? "Thử lại quyền micro" : "Cho phép dùng micro";
   }
 
   quyenNut.addEventListener("click", async () => {

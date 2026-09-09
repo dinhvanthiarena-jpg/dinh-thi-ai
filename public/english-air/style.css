@@ -1606,15 +1606,16 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   background: var(--brand-fill); color: #fff;
   transition: transform var(--t1) var(--e); }
 
-/* Khối xin quyền micro */
-.dt-quyen { width: 100%; margin-top: var(--s2); padding: var(--s3);
+/* Khối xin quyền micro. Giữ gọn: khối này chen giữa bài học nên to quá là
+   đẩy nội dung đang học xuống dưới màn hình. */
+.dt-quyen { width: 100%; margin-top: var(--s2); padding: 10px var(--s3) 12px;
   border-radius: var(--r3); background: var(--amber-soft);
-  display: flex; flex-direction: column; align-items: center; gap: var(--s2); }
-.dt-quyen-chu { margin: 0; font-size: .86rem; font-weight: 600;
-  color: var(--amber-ink); text-align: center; line-height: 1.5; }
-.dt-quyen-nut { display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
-  padding: 10px 18px; border: 0; border-radius: var(--rf); font: inherit;
-  font-size: .9rem; font-weight: 800; background: var(--amber); color: #fff; }
+  display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.dt-quyen-chu { margin: 0; font-size: .8rem; font-weight: 600;
+  color: var(--amber-ink); text-align: center; line-height: 1.45; }
+.dt-quyen-nut { display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+  padding: 8px 15px; border: 0; border-radius: var(--rf); font: inherit;
+  font-size: .85rem; font-weight: 800; background: var(--amber); color: #fff; }
 .dt-quyen-nut:active { transform: scale(.96); }
 .dt-minh.dang-phat { animation: dtPhat .9s ease-in-out infinite; }
 @keyframes dtPhat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
