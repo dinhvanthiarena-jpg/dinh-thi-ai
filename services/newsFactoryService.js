@@ -112,62 +112,76 @@ async function downloadImage(url, pageid) {
   }
 }
 
-// Tìm 1 ảnh thật, có giấy phép tự do, liên quan tới chuyên mục trên
-// Wikimedia Commons — không cần API key. usedPageIds (Set các pageid Commons
-// đã dùng cho bài khác) để loại trừ, tránh trùng ảnh giữa các bài. Trả về
-// null nếu không tìm/tải được ảnh nào (khi đó dùng ảnh SVG dự phòng).
-async function fetchStockImage(categorySlug, usedPageIds) {
-  const query = CATEGORY_IMAGE_QUERY[categorySlug] || 'technology';
+// Loại các file rõ ràng là logo/huy hiệu/quốc kỳ/biểu trưng — search Wikimedia
+// theo từ khoá chung hay vô tình trả về ảnh logo của 1 đài/báo/tổ chức nào đó
+// (không liên quan nội dung, nhìn không chuyên nghiệp khi làm ảnh bìa blog).
+const LOGO_TITLE_PATTERN = /\b(logo|wordmark|emblem|seal of|coat of arms|flag of|icon)\b/i;
+
+async function searchWikimedia(query, usedPageIds) {
   const apiUrl =
     'https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6' +
     `&gsrsearch=${encodeURIComponent(`${query} filetype:bitmap`)}&gsrlimit=50` +
     '&prop=imageinfo&iiprop=url|extmetadata&iiurlwidth=900&format=json&origin=*';
 
-  try {
-    const res = await fetch(apiUrl, { headers: { 'user-agent': 'DinhThiAi-NewsFactory/1.0' } });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const pages = Object.values((data.query && data.query.pages) || {});
-    // Chỉ nhận ảnh mà FILE GỐC là ảnh chụp thật (.jpg/.png) — không nhận ảnh
-    // "bitmap" được Wikimedia tự chuyển từ PDF/SVG/tài liệu khác, vì loại đó
-    // thường không liên quan tới chủ đề (bìa sách, sơ đồ...) và thumbnail
-    // sinh theo yêu cầu nên hay tải lỗi/rớt ảnh trên trang.
-    const candidates = pages
-      .filter((p) => !usedPageIds || !usedPageIds.has(String(p.pageid)))
-      .map((p) => ({ pageid: p.pageid, info: (p.imageinfo && p.imageinfo[0]) || null }))
-      .filter(
-        (c) =>
-          c.info &&
-          c.info.thumburl &&
-          c.info.url &&
-          /\.(jpe?g|png)(\?|$)/i.test(c.info.thumburl) &&
-          /\.(jpe?g|png)(\?|$)/i.test(c.info.url)
-      );
-    if (!candidates.length) return null;
+  const res = await fetch(apiUrl, { headers: { 'user-agent': 'DinhThiAi-NewsFactory/1.0' } });
+  if (!res.ok) return [];
+  const data = await res.json();
+  const pages = Object.values((data.query && data.query.pages) || {});
+  // Chỉ nhận ảnh mà FILE GỐC là ảnh chụp thật (.jpg/.png) — không nhận ảnh
+  // "bitmap" được Wikimedia tự chuyển từ PDF/SVG/tài liệu khác, vì loại đó
+  // thường không liên quan tới chủ đề (bìa sách, sơ đồ...) và thumbnail
+  // sinh theo yêu cầu nên hay tải lỗi/rớt ảnh trên trang. Cũng loại bỏ
+  // logo/huy hiệu qua tên file.
+  return pages
+    .filter((p) => !usedPageIds || !usedPageIds.has(String(p.pageid)))
+    .filter((p) => !LOGO_TITLE_PATTERN.test(p.title || ''))
+    .map((p) => ({ pageid: p.pageid, info: (p.imageinfo && p.imageinfo[0]) || null }))
+    .filter(
+      (c) =>
+        c.info &&
+        c.info.thumburl &&
+        c.info.url &&
+        /\.(jpe?g|png)(\?|$)/i.test(c.info.thumburl) &&
+        /\.(jpe?g|png)(\?|$)/i.test(c.info.url)
+    );
+}
 
-    // Thử tối đa 5 ứng viên ngẫu nhiên, tải hẳn từng ảnh về cho tới khi có 1
-    // ảnh tải thành công (không chỉ kiểm tra HEAD — phải tải được thật).
-    const shuffled = [...candidates].sort(() => Math.random() - 0.5).slice(0, 5);
-    let chosen = null;
-    let localPath = null;
-    for (const c of shuffled) {
-      const saved = await downloadImage(c.info.thumburl, c.pageid);
-      if (saved) {
-        chosen = c;
-        localPath = saved;
-        break;
+// Tìm 1 ảnh thật, có giấy phép tự do, minh hoạ đúng nội dung bài trên
+// Wikimedia Commons — không cần API key. Ưu tiên thử specificQuery (mô tả
+// cảnh cụ thể do Claude sinh ra theo đúng bài viết) trước, chỉ rơi về từ khoá
+// chung theo chuyên mục nếu không tìm/tải được ảnh nào phù hợp — đây là cách
+// hợp pháp để có ảnh minh hoạ sát bài viết mà KHÔNG copy ảnh có bản quyền
+// trực tiếp từ báo nguồn (ghi nguồn không đồng nghĩa có giấy phép sử dụng
+// ảnh báo chí). usedPageIds (Set các pageid Commons đã dùng cho bài khác) để
+// loại trừ, tránh trùng ảnh giữa các bài. Trả về null nếu không tìm/tải được
+// ảnh nào (khi đó dùng ảnh SVG dự phòng).
+async function fetchStockImage(categorySlug, usedPageIds, specificQuery) {
+  const fallbackQuery = CATEGORY_IMAGE_QUERY[categorySlug] || 'technology';
+  const queries = [specificQuery, fallbackQuery].filter(Boolean);
+
+  try {
+    for (const query of queries) {
+      const candidates = await searchWikimedia(query, usedPageIds);
+      if (!candidates.length) continue;
+
+      // Thử tối đa 5 ứng viên ngẫu nhiên, tải hẳn từng ảnh về cho tới khi có
+      // 1 ảnh tải thành công (không chỉ kiểm tra HEAD — phải tải được thật).
+      const shuffled = [...candidates].sort(() => Math.random() - 0.5).slice(0, 5);
+      for (const c of shuffled) {
+        const saved = await downloadImage(c.info.thumburl, c.pageid);
+        if (!saved) continue;
+
+        const meta = c.info.extmetadata || {};
+        const artist = ((meta.Artist && meta.Artist.value) || 'Không rõ tác giả').replace(/<[^>]+>/g, '').trim();
+        const license = (meta.LicenseShortName && meta.LicenseShortName.value) || 'Wikimedia Commons';
+        return {
+          url: saved,
+          credit: `Ảnh: ${artist} — Wikimedia Commons (${license})`,
+          sourceId: String(c.pageid),
+        };
       }
     }
-    if (!chosen) return null;
-
-    const meta = chosen.info.extmetadata || {};
-    const artist = ((meta.Artist && meta.Artist.value) || 'Không rõ tác giả').replace(/<[^>]+>/g, '').trim();
-    const license = (meta.LicenseShortName && meta.LicenseShortName.value) || 'Wikimedia Commons';
-    return {
-      url: localPath,
-      credit: `Ảnh: ${artist} — Wikimedia Commons (${license})`,
-      sourceId: String(chosen.pageid),
-    };
+    return null;
   } catch (err) {
     console.error('[newsFactory] fetchStockImage failed', err.message);
     return null;
@@ -279,7 +293,7 @@ YÊU CẦU:
 5. KHÔNG lặp lại tiêu đề bài viết thành một heading ở đầu content (trang web đã tự hiển thị tiêu đề riêng) — bắt đầu content ngay bằng đoạn mở bài. Không dùng gạch đầu dòng "-" hay danh sách số thứ tự để liệt kê — viết thành đoạn văn liền mạch.
 6. Cuối bài PHẢI có đoạn bắt đầu bằng "**Nguồn tham khảo:**" rồi 1 dòng duy nhất theo định dạng markdown: [Tên bài gốc](link).
 7. CHỈ trả về JSON hợp lệ (không kèm giải thích, không bọc trong dấu backtick), đúng cấu trúc:
-{"title": "tiêu đề bài viết mới (không trùng tiêu đề gốc, có chứa từ khoá SEO)", "excerpt": "mô tả ngắn 140-160 ký tự dùng làm meta description, có chứa từ khoá SEO", "content": "toàn bộ nội dung bài viết, dùng \\n\\n giữa các đoạn", "tags": ["3 đến 5 từ khoá liên quan"]}`;
+{"title": "tiêu đề bài viết mới (không trùng tiêu đề gốc, có chứa từ khoá SEO)", "excerpt": "mô tả ngắn 140-160 ký tự dùng làm meta description, có chứa từ khoá SEO", "content": "toàn bộ nội dung bài viết, dùng \\n\\n giữa các đoạn", "tags": ["3 đến 5 từ khoá liên quan"], "imageQuery": "cụm từ tiếng Anh (3-6 từ) mô tả 1 CẢNH THẬT cụ thể, có thể chụp được bằng ảnh, minh hoạ đúng nội dung bài (VD: 'elderly couple calculating retirement savings', không viết khái niệm trừu tượng như 'financial freedom trend'; KHÔNG dùng tên thương hiệu/tên báo/tên đài vì dễ ra ảnh logo thay vì ảnh nội dung)"}`;
 
   const userMessage = `Chủ đề gốc: "${item.title}"\nTóm tắt: ${item.description}\nLink: ${item.link}`;
 
@@ -329,15 +343,17 @@ async function createTrendingPost(forcedSlug) {
   });
   const usedPageIds = new Set(usedImages.map((p) => p.coverImageSourceId));
 
-  const [article, stockImage, lastCategoryPost] = await Promise.all([
+  const [article, lastCategoryPost] = await Promise.all([
     generateArticle(topic.category, keyword, topic.item),
-    fetchStockImage(topic.category, usedPageIds),
     BlogPost.findOne({ where: { category: topic.category }, order: [['createdAt', 'DESC']] }),
   ]);
   if (!article) {
     console.log('[newsFactory] Claude không trả về bài viết hợp lệ, bỏ qua lần này.');
     return null;
   }
+  // Tìm ảnh SAU khi có bài viết vì cần imageQuery do Claude sinh ra theo
+  // đúng nội dung bài — ảnh sát chủ đề hơn nhiều so với chỉ tra theo chuyên mục chung.
+  const stockImage = await fetchStockImage(topic.category, usedPageIds, article.imageQuery);
 
   // Ghi rõ nguồn ảnh ngay dưới nội dung — bắt buộc với ảnh giấy phép CC
   // BY/CC BY-SA của Wikimedia Commons.
@@ -361,4 +377,36 @@ async function createTrendingPost(forcedSlug) {
   return post;
 }
 
-module.exports = { createTrendingPost, pickTopic, generateArticle };
+// Sinh 1 cụm từ khoá tiếng Anh mô tả cảnh thật để tìm ảnh trên Wikimedia, dựa
+// vào tiêu đề bài — dùng cho script backfill nâng cấp ảnh của các bài đã đăng
+// trước khi có trường imageQuery (xem generateArticle ở trên).
+async function suggestImageQuery(title) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return null;
+  try {
+    const response = await fetch(ANTHROPIC_API_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': ANTHROPIC_VERSION },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 60,
+        system:
+          'Trả về DUY NHẤT 1 cụm từ tiếng Anh (3-6 từ) mô tả 1 cảnh thật, cụ thể, có thể chụp được bằng ảnh, minh hoạ đúng nội dung tiêu đề bài viết tiếng Việt được cung cấp — không phải khái niệm trừu tượng, không dùng tên thương hiệu/tên báo/tên đài. Không giải thích, không dấu ngoặc kép, chỉ trả về đúng cụm từ.',
+        messages: [{ role: 'user', content: title }],
+      }),
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    const text = (data.content || [])
+      .filter((b) => b.type === 'text')
+      .map((b) => b.text)
+      .join(' ')
+      .trim();
+    return text || null;
+  } catch (err) {
+    console.error('[newsFactory] suggestImageQuery failed', err.message);
+    return null;
+  }
+}
+
+module.exports = { createTrendingPost, pickTopic, generateArticle, fetchStockImage, suggestImageQuery };
