@@ -171,6 +171,30 @@ router.post('/thoat', an(async (req, res) => {
   res.json({ dangNhap: false });
 }));
 
+/* ── Quên mật khẩu: gửi mã về email đã gắn với tài khoản ──
+   Dùng chung bộ đếm chống dò của phần đăng ký, vì đây cũng là chỗ gửi email. */
+router.post('/quen-mk', express.json(), an(async (req, res) => {
+  const khoa = ipCua(req);
+  if (otpBiChan(khoa)) return res.status(429).json({ error: 'Bạn yêu cầu mã nhiều lần quá, chờ ít phút rồi thử lại nhé.' });
+  const kq = await otp.yeuCauQuenMk(req.body || {});
+  if (kq.loi) return res.status(400).json({ error: kq.loi });
+  ghiXinOtp(khoa);
+  res.json({ ok: true, token: kq.token, email: kq.email });
+}));
+
+router.post('/quen-mk-gui-lai', express.json(), an(async (req, res) => {
+  const kq = await otp.guiLaiQuenMk((req.body || {}).token);
+  if (kq.loi) return res.status(400).json({ error: kq.loi });
+  res.json({ ok: true });
+}));
+
+router.post('/quen-mk-dat-lai', express.json(), an(async (req, res) => {
+  const kq = await otp.datLaiMatKhau(req.body || {});
+  if (kq.loi) return res.status(400).json({ error: kq.loi });
+  tk.datCookie(res, kq.user);          // đổi xong cho vào luôn, khỏi đăng nhập lại
+  res.json({ dangNhap: true, ...tk.goiVe(kq.user) });
+}));
+
 router.post('/doi-mat-khau', express.json(), an(async (req, res) => {
   if (!req.user) return res.status(401).json({ error: 'Bạn cần đăng nhập.' });
   const kq = await tk.doiMatKhau(req.user, req.body || {});

@@ -142,10 +142,112 @@ async function xacNhanDangKy({ token, code }) {
   return { user };
 }
 
+/* ═══════════════ QUÊN MẬT KHẨU ═══════════════
+   Cùng cách làm với đăng ký: gửi mã 6 số về email đã gắn với tài khoản, đúng
+   mã mới cho đặt lại mật khẩu. Cố ý KHÔNG nói "số này chưa có tài khoản" —
+   nói ra là người lạ dò được ai đã đăng ký; cứ báo đã gửi mã như nhau. */
+
+// token -> { userId, code, expiresAt, attempts, lastSentAt }
+const quen = new Map();
+
+/** Che bớt email khi hiện lên màn hình: ngoc***@gmail.com */
+function cheEmail(e) {
+  const [ten, mien] = String(e || '').split('@');
+  if (!mien) return '';
+  const dau = ten.slice(0, Math.min(3, ten.length));
+  return dau + '***@' + mien;
+}
+
+async function guiEmailQuenMk(email, ma) {
+  const t = layTransporter();
+  if (!t) throw Object.assign(new Error('Chưa cấu hình gửi email'), { code: 'NO_SMTP' });
+  await t.sendMail({
+    from: `"ON-Language" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: `Mã đặt lại mật khẩu: ${ma}`,
+    text: `Mã đặt lại mật khẩu của bạn là: ${ma}\nMã có hiệu lực trong 10 phút. Nếu không phải bạn yêu cầu, hãy bỏ qua email này — mật khẩu cũ vẫn giữ nguyên.`,
+    html: `<p>Mã đặt lại mật khẩu của bạn là:</p><p style="font-size:28px;font-weight:800;letter-spacing:6px;">${ma}</p><p>Mã có hiệu lực trong 10 phút. Nếu không phải bạn yêu cầu, hãy bỏ qua email này — mật khẩu cũ vẫn giữ nguyên.</p>`,
+  });
+}
+
+/** Bước 1: nhận số điện thoại (hoặc email), gửi mã về email của tài khoản. */
+async function yeuCauQuenMk({ sdt, email }) {
+  const so = tk.chuanSdt(sdt);
+  const mail = String(email || '').trim().toLowerCase();
+  if (!so && !mail) return { loi: 'Nhập số điện thoại hoặc email của tài khoản nhé.' };
+
+  const user = so
+    ? await User.findOne({ where: { phone: so } })
+    : await User.findOne({ where: { email: mail } });
+
+  // Không có tài khoản, hoặc có mà chưa gắn email: vẫn trả về như đã gửi, chỉ
+  // là không gửi gì cả. Người thật sẽ không nhận được mã và tự hiểu.
+  if (!user || !user.email) {
+    return { ok: true, token: taoToken(), email: mail ? cheEmail(mail) : '', trong: true };
+  }
+
+  const ma = taoMa();
+  const token = taoToken();
+  quen.set(token, {
+    userId: user.id, code: ma,
+    expiresAt: Date.now() + OTP_HET_HAN_MS, attempts: 0, lastSentAt: Date.now(),
+  });
+  try {
+    await guiEmailQuenMk(user.email, ma);
+  } catch (e) {
+    quen.delete(token);
+    if (e.code === 'NO_SMTP') return { loi: 'Máy chủ chưa gửi được email. Bạn nhắn cho thầy nhé.' };
+    return { loi: 'Không gửi được email lúc này, bạn thử lại sau ít phút.' };
+  }
+  return { ok: true, token, email: cheEmail(user.email) };
+}
+
+async function guiLaiQuenMk(token) {
+  const rec = quen.get(token);
+  if (!rec) return { loi: 'Phiên đã hết hạn, bạn làm lại từ đầu nhé.' };
+  if (Date.now() - rec.lastSentAt < GUI_LAI_CACH_MS) {
+    const con = Math.ceil((GUI_LAI_CACH_MS - (Date.now() - rec.lastSentAt)) / 1000);
+    return { loi: `Chờ ${con} giây nữa rồi gửi lại nhé.` };
+  }
+  const user = await User.findByPk(rec.userId);
+  if (!user || !user.email) return { loi: 'Không tìm thấy tài khoản.' };
+  rec.code = taoMa();
+  rec.expiresAt = Date.now() + OTP_HET_HAN_MS;
+  rec.attempts = 0;
+  rec.lastSentAt = Date.now();
+  try { await guiEmailQuenMk(user.email, rec.code); }
+  catch { return { loi: 'Không gửi được email lúc này, bạn thử lại sau ít phút.' }; }
+  return { ok: true };
+}
+
+/** Bước 2: đúng mã thì đặt mật khẩu mới. */
+async function datLaiMatKhau({ token, code, matKhau }) {
+  const rec = quen.get(token);
+  if (!rec) return { loi: 'Phiên đã hết hạn, bạn làm lại từ đầu nhé.' };
+  if (Date.now() > rec.expiresAt) { quen.delete(token); return { loi: 'Mã đã hết hạn, bạn bấm gửi lại mã nhé.' }; }
+  if (rec.attempts >= SO_LAN_SAI_TOI_DA) { quen.delete(token); return { loi: 'Bạn nhập sai quá nhiều lần, làm lại từ đầu nhé.' }; }
+  if (String(code || '').trim() !== rec.code) {
+    rec.attempts += 1;
+    return { loi: 'Mã không đúng, bạn kiểm tra lại nhé.' };
+  }
+  const l = tk.loiMatKhau(matKhau);
+  if (l) return { loi: l };
+  const user = await User.findByPk(rec.userId);
+  if (!user) { quen.delete(token); return { loi: 'Không tìm thấy tài khoản.' }; }
+  user.password = matKhau;
+  await user.save();
+  quen.delete(token);
+  return { user };
+}
+
 // Dọn các phiên đăng ký hết hạn, không bị treo trong bộ nhớ mãi.
 setInterval(() => {
   const now = Date.now();
   for (const [k, v] of cho) if (now > v.expiresAt) cho.delete(k);
+  for (const [k, v] of quen) if (now > v.expiresAt) quen.delete(k);
 }, 5 * PHUT).unref?.();
 
-module.exports = { yeuCauDangKy, guiLai, xacNhanDangKy, emailHopLe };
+module.exports = {
+  yeuCauDangKy, guiLai, xacNhanDangKy, emailHopLe,
+  yeuCauQuenMk, guiLaiQuenMk, datLaiMatKhau,
+};

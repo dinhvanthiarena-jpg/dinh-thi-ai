@@ -5257,6 +5257,9 @@ function veCong() {
   $("#fMk").autocomplete = dangKy ? "new-password" : "current-password";
   $("#fMk").placeholder = dangKy ? "Ít nhất 6 ký tự" : "Mật khẩu của bạn";
   $("#congGui").textContent = dangKy ? "Đăng ký" : "Đăng nhập";
+  // "Quên mật khẩu" chỉ có nghĩa ở màn ĐĂNG NHẬP. Đặt ở đây chứ không đặt riêng
+  // trong moBuoc1(), vì bấm đổi qua lại giữa hai màn cũng phải cập nhật theo.
+  $("#congQuen").hidden = dangKy;
   // Tách phần dẫn và VIỆC CẦN LÀM ra hai thẻ: chữ "Đăng nhập" phải nổi hẳn lên,
   // chứ nằm lẫn trong một dòng chữ mờ thì không ai nhận ra là bấm được.
   const doi = $("#congDoi");
@@ -5280,9 +5283,42 @@ function loiOtp(msg) {
 // Bước 1 (tên/sđt/email/mật khẩu, hoặc sđt/mật khẩu nếu đăng nhập).
 function moBuoc1() {
   $("#congOtpForm").hidden = true;
+  $("#congQuenForm").hidden = true;
+  $("#congMkForm").hidden = true;
   $("#congForm").hidden = false;
   $("#congChanDuoi").hidden = false;
   veCong();
+}
+
+/* ---------- Quên mật khẩu ----------
+   Trước đây ai quên mật khẩu là mất luôn tài khoản, không có đường nào lấy
+   lại. Nay: nhập số điện thoại (hoặc email) → máy chủ gửi mã 6 số về email đã
+   gắn với tài khoản → nhập mã và mật khẩu mới là vào được ngay. */
+let QUEN_TOKEN = "";
+
+function loiQuen(msg) { const o = $("#congQuenLoi"); o.textContent = msg || ""; o.hidden = !msg; }
+function loiMkMoi(msg) { const o = $("#congMkLoi"); o.textContent = msg || ""; o.hidden = !msg; }
+
+function moQuenMk() {
+  $("#congForm").hidden = true;
+  $("#congOtpForm").hidden = true;
+  $("#congMkForm").hidden = true;
+  $("#congChanDuoi").hidden = true;
+  $("#congQuenForm").hidden = false;
+  loiQuen("");
+  $("#fQuen").value = $("#fSdt") ? $("#fSdt").value : "";
+  setTimeout(() => $("#fQuen").focus(), 80);
+}
+
+function moDatLaiMk(email) {
+  $("#congQuenForm").hidden = true;
+  $("#congMkForm").hidden = false;
+  $("#congMkSub").textContent = email
+    ? `Nhập mã 6 số vừa gửi tới ${email}.`
+    : "Nhập mã 6 số vừa gửi tới email của tài khoản.";
+  loiMkMoi("");
+  $("#fMaQuen").value = ""; $("#fMkMoi").value = "";
+  setTimeout(() => $("#fMaQuen").focus(), 80);
 }
 // Bước 2 (nhập mã OTP vừa gửi qua email) — chỉ khi đăng ký.
 function moBuocOtp(email) {
@@ -5375,6 +5411,78 @@ $("#congForm").addEventListener("submit", async ev => {
   } finally {
     nut.disabled = false;
     veCongNut();
+  }
+});
+
+$("#congQuen").addEventListener("click", moQuenMk);
+$("#congQuenVe").addEventListener("click", moBuoc1);
+$("#congMkVe").addEventListener("click", moQuenMk);
+
+$("#congQuenForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const nut = $("#congQuenGui");
+  if (nut.disabled) return;
+  const v = $("#fQuen").value.trim();
+  if (!v) { loiQuen("Nhập số điện thoại hoặc email của tài khoản nhé."); return; }
+  const laEmail = v.includes("@");
+  nut.disabled = true; nut.textContent = "Đang gửi…"; loiQuen("");
+  try {
+    const r = await fetch(TK_URL + "/quen-mk", {
+      method: "POST", credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(laEmail ? { email: v } : { sdt: v }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { loiQuen(j.error || "Chưa gửi được, bạn thử lại nhé."); return; }
+    QUEN_TOKEN = j.token || "";
+    moDatLaiMk(j.email);
+  } catch {
+    loiQuen("Mất mạng rồi, bạn kiểm tra lại đường truyền nhé.");
+  } finally {
+    nut.disabled = false; nut.textContent = "Gửi mã về email";
+  }
+});
+
+$("#congMkGuiLai").addEventListener("click", async () => {
+  const nut = $("#congMkGuiLai");
+  if (nut.disabled) return;
+  nut.disabled = true; loiMkMoi("");
+  try {
+    const r = await fetch(TK_URL + "/quen-mk-gui-lai", {
+      method: "POST", credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: QUEN_TOKEN }),
+    });
+    const j = await r.json().catch(() => ({}));
+    loiMkMoi(r.ok ? "" : (j.error || "Chưa gửi lại được."));
+    if (r.ok) toast("Đã gửi lại mã, bạn xem email nhé.");
+  } catch { loiMkMoi("Mất mạng rồi."); }
+  finally { nut.disabled = false; }
+});
+
+$("#congMkForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const nut = $("#congMkXong");
+  if (nut.disabled) return;
+  const code = $("#fMaQuen").value.trim();
+  const mk = $("#fMkMoi").value;
+  if (code.length !== 6) { loiMkMoi("Mã gồm 6 chữ số, bạn kiểm tra lại nhé."); return; }
+  if (!mk || mk.length < 6) { loiMkMoi("Mật khẩu mới cần ít nhất 6 ký tự."); return; }
+  nut.disabled = true; nut.textContent = "Đang đổi…"; loiMkMoi("");
+  try {
+    const r = await fetch(TK_URL + "/quen-mk-dat-lai", {
+      method: "POST", credentials: "same-origin",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token: QUEN_TOKEN, code, matKhau: mk }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { loiMkMoi(j.error || "Chưa đổi được, bạn thử lại nhé."); return; }
+    toast("Đổi mật khẩu xong, vào học thôi!");
+    xongDangNhap(j);
+  } catch {
+    loiMkMoi("Mất mạng rồi, bạn kiểm tra lại đường truyền nhé.");
+  } finally {
+    nut.disabled = false; nut.textContent = "Đặt mật khẩu mới";
   }
 });
 
