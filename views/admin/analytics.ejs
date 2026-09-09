@@ -1,4 +1,89 @@
 <div class="space-y-8">
+  <div class="card p-6">
+    <h2 class="text-lg font-bold text-ink mb-1">Lượt xem theo ngày — theo nguồn truy cập</h2>
+    <p class="text-xs text-muted mb-4">30 ngày gần nhất</p>
+
+    <% if (!dailyChart.series.length) { %>
+      <p class="py-10 text-center text-sm text-muted">Chưa có dữ liệu.</p>
+    <% } else { %>
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-2 mb-4 text-sm">
+        <% dailyChart.series.forEach(function(s) { %>
+          <span class="flex items-center gap-1.5">
+            <span class="h-2.5 w-2.5 rounded-full" style="background: <%= s.color %>"></span>
+            <span class="text-ink"><%= s.name %></span>
+            <span class="text-muted font-semibold"><%= s.total.toLocaleString('vi-VN') %></span>
+          </span>
+        <% }); %>
+        <% if (dailyChart.othersCount > 0) { %>
+          <span class="text-muted">+<%= dailyChart.othersCount %> nguồn khác</span>
+        <% } %>
+      </div>
+
+      <div class="overflow-x-auto">
+        <svg viewBox="0 0 <%= dailyChart.width %> <%= dailyChart.height %>" class="w-full" style="min-width: 480px;">
+          <% dailyChart.yTicks.forEach(function(t) { %>
+            <line x1="<%= dailyChart.plotLeft %>" y1="<%= t.y %>" x2="<%= dailyChart.width - 12 %>" y2="<%= t.y %>" stroke="#eef2ff" stroke-width="1" />
+            <text x="0" y="<%= t.y %>" dy="4" font-size="11" fill="#94a3b8"><%= t.label %></text>
+          <% }); %>
+          <% dailyChart.xTicks.forEach(function(t) { %>
+            <text x="<%= t.x %>" y="<%= dailyChart.height - 4 %>" font-size="11" fill="#94a3b8" text-anchor="middle"><%= t.label %></text>
+          <% }); %>
+          <% dailyChart.series.forEach(function(s) { %>
+            <polyline points="<%= s.points %>" fill="none" stroke="<%= s.color %>" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />
+          <% }); %>
+        </svg>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="grid sm:grid-cols-2 gap-6">
+    <div class="card p-6">
+      <h2 class="text-lg font-bold text-ink mb-1">Top nguồn truy cập</h2>
+      <p class="text-xs text-muted mb-4">30 ngày gần nhất — Google, Facebook, quảng cáo, hay trực tiếp</p>
+      <% if (!viewsBySource.length) { %>
+        <p class="py-6 text-center text-sm text-muted">Chưa có dữ liệu.</p>
+      <% } else { %>
+        <div class="space-y-3">
+          <% viewsBySource.forEach(function(row) { %>
+            <% const pct = viewsBySourceTotal ? Math.round((row.total / viewsBySourceTotal) * 100) : 0; %>
+            <a href="#" class="block">
+              <div class="flex items-center justify-between text-sm mb-1">
+                <span class="text-ink font-medium"><%= row.source %></span>
+                <span class="text-muted"><%= row.total %> lượt (<%= pct %>%)</span>
+              </div>
+              <div class="h-2 rounded-full bg-primary-50 overflow-hidden">
+                <div class="h-full rounded-full bg-primary-600" style="width: <%= pct %>%"></div>
+              </div>
+            </a>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="card p-6">
+      <h2 class="text-lg font-bold text-ink mb-1">Top bài viết được xem nhiều nhất</h2>
+      <p class="text-xs text-muted mb-4">30 ngày gần nhất</p>
+      <% if (!topViewedPages.length) { %>
+        <p class="py-6 text-center text-sm text-muted">Chưa có dữ liệu.</p>
+      <% } else { %>
+        <div class="space-y-3">
+          <% topViewedPages.forEach(function(row) { %>
+            <% const pct = topViewedPagesTotal ? Math.round((row.total / topViewedPagesTotal) * 100) : 0; %>
+            <a href="/blog/<%= row.slug %>" target="_blank" class="block group">
+              <div class="flex items-center justify-between text-sm mb-1 gap-4">
+                <span class="text-ink font-medium truncate group-hover:text-primary-700"><%= row.title %></span>
+                <span class="text-muted shrink-0"><%= row.total %> lượt</span>
+              </div>
+              <div class="h-2 rounded-full bg-primary-50 overflow-hidden">
+                <div class="h-full rounded-full bg-accent-600" style="width: <%= pct %>%"></div>
+              </div>
+            </a>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
   <div class="grid sm:grid-cols-2 gap-6">
     <div class="card p-6">
       <h2 class="text-lg font-bold text-ink mb-1">Lượt xem bài viết — theo ngày</h2>
@@ -51,29 +136,6 @@
         </table>
       </div>
     </div>
-  </div>
-
-  <div class="card p-6">
-    <h2 class="text-lg font-bold text-ink mb-1">Lượt xem bài viết — theo nguồn truy cập</h2>
-    <p class="text-xs text-muted mb-4">30 ngày gần nhất — Google, Facebook, quảng cáo, hay trực tiếp</p>
-    <% if (!viewsBySource.length) { %>
-      <p class="py-6 text-center text-sm text-muted">Chưa có dữ liệu.</p>
-    <% } else { %>
-      <div class="space-y-3">
-        <% viewsBySource.forEach(function(row) { %>
-          <% const pct = viewsBySourceTotal ? Math.round((row.total / viewsBySourceTotal) * 100) : 0; %>
-          <div>
-            <div class="flex items-center justify-between text-sm mb-1">
-              <span class="text-ink font-medium"><%= row.source %></span>
-              <span class="text-muted"><%= row.total %> lượt (<%= pct %>%)</span>
-            </div>
-            <div class="h-2 rounded-full bg-primary-50 overflow-hidden">
-              <div class="h-full rounded-full bg-primary-600" style="width: <%= pct %>%"></div>
-            </div>
-          </div>
-        <% }); %>
-      </div>
-    <% } %>
   </div>
 
   <div class="grid sm:grid-cols-2 gap-6">
