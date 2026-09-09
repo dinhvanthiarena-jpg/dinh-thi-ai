@@ -181,6 +181,45 @@ exports.thoat = async (req, res) => {
   res.json({ dangNhap: false });
 };
 
+/* ===== Quên mật khẩu =====
+ * Cùng dịch vụ dùng chung với English Air (otpDangKyService.js). */
+exports.quenMkYeuCau = async (req, res) => {
+  try {
+    const { sdt, email } = req.body || {};
+    const kq = await otp.yeuCauQuenMk({ sdt, email });
+    if (kq.loi) return res.status(400).json({ error: kq.loi });
+    res.json({ ok: true, token: kq.token, email: kq.email, trong: !!kq.trong });
+  } catch (e) {
+    console.error('[game/quen-mk-yeu-cau]', e.message);
+    res.status(500).json({ error: 'Có lỗi ở máy chủ, bạn thử lại nhé.' });
+  }
+};
+
+exports.quenMkGuiLai = async (req, res) => {
+  try {
+    const { token } = req.body || {};
+    const kq = await otp.guiLaiQuenMk(token);
+    if (kq.loi) return res.status(400).json({ error: kq.loi });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('[game/quen-mk-gui-lai]', e.message);
+    res.status(500).json({ error: 'Có lỗi ở máy chủ, bạn thử lại nhé.' });
+  }
+};
+
+exports.quenMkDatLai = async (req, res) => {
+  try {
+    const { token, code, matKhau } = req.body || {};
+    const kq = await otp.datLaiMatKhau({ token, code, matKhau });
+    if (kq.loi) return res.status(400).json({ error: kq.loi });
+    tk.datCookie(res, kq.user);
+    res.json({ dangNhap: true, ...tk.goiVe(kq.user) });
+  } catch (e) {
+    console.error('[game/quen-mk-dat-lai]', e.message);
+    res.status(500).json({ error: 'Có lỗi ở máy chủ, bạn thử lại nhé.' });
+  }
+};
+
 /** App hỏi máy chủ xem có bật đăng nhập Google không, và bật thì Client ID nào. */
 exports.googleInfo = async (req, res) => {
   res.json({ bat: tk.coGoogle(), clientId: process.env.GOOGLE_CLIENT_ID || '' });

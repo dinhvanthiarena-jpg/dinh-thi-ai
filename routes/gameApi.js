@@ -53,6 +53,11 @@ router.post('/thoat', gameApiController.thoat);
 router.get('/google-info', gameApiController.googleInfo);
 router.post('/google', express.json(), gameApiController.google);
 
+// Quên mật khẩu — cùng dịch vụ dùng chung với English Air.
+router.post('/quen-mk', otpRequestLimiter, express.json(), gameApiController.quenMkYeuCau);
+router.post('/quen-mk-gui-lai', otpRequestLimiter, express.json(), gameApiController.quenMkGuiLai);
+router.post('/quen-mk-dat-lai', loginLimiter, express.json(), gameApiController.quenMkDatLai);
+
 // Độ khó cá nhân hoá theo tài khoản (lớp + dạng toán -> tier).
 router.get('/skill', gameApiController.getSkill);
 router.post('/skill', gameApiController.updateSkill);

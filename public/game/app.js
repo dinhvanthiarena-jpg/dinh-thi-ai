@@ -3770,6 +3770,21 @@
     const congOtpXacNhan = $('congOtpXacNhan');
     const congOtpGuiLai = $('congOtpGuiLai');
     const congOtpQuayLai = $('congOtpQuayLai');
+    const congQuen = $('congQuen');
+    const congQuenForm = $('congQuenForm');
+    const congQuenLoi = $('congQuenLoi');
+    const congQuenGui = $('congQuenGui');
+    const congQuenVe = $('congQuenVe');
+    const fQuen = $('fQuen');
+    const congMkForm = $('congMkForm');
+    const congMkSub = $('congMkSub');
+    const congMkLoi = $('congMkLoi');
+    const congMkXong = $('congMkXong');
+    const congMkGuiLai = $('congMkGuiLai');
+    const congMkVe = $('congMkVe');
+    const fMaQuen = $('fMaQuen');
+    const fMkMoi = $('fMkMoi');
+    let quenToken = '';
     const settingsAccountRow = $('settingsAccountRow');
     const tkTen = $('tkTen');
     const tkSdt = $('tkSdt');
@@ -3784,6 +3799,14 @@
     function loiOtp(msg) {
       congOtpLoi.textContent = msg || '';
       congOtpLoi.hidden = !msg;
+    }
+    function loiQuen(msg) {
+      congQuenLoi.textContent = msg || '';
+      congQuenLoi.hidden = !msg;
+    }
+    function loiMkMoi(msg) {
+      congMkLoi.textContent = msg || '';
+      congMkLoi.hidden = !msg;
     }
 
     function veCong() {
@@ -3800,12 +3823,16 @@
       fMk.placeholder = dk ? 'Ít nhất 6 ký tự' : 'Mật khẩu của bạn';
       congGui.textContent = dk ? 'Đăng ký' : 'Đăng nhập';
       congDoi.textContent = dk ? 'Đã có tài khoản? Đăng nhập' : 'Chưa có tài khoản? Đăng ký';
+      // Lối "Quên mật khẩu" chỉ có nghĩa khi đang ĐĂNG NHẬP; lúc đăng ký thì giấu.
+      congQuen.hidden = dk;
       loiCong('');
     }
 
     // Bước 1 (tên/sđt/email/mật khẩu, hoặc sđt/mật khẩu nếu đăng nhập).
     function moBuoc1() {
       congOtpForm.hidden = true;
+      congQuenForm.hidden = true;
+      congMkForm.hidden = true;
       congForm.hidden = false;
       congChanDuoi.hidden = false;
       veCong();
@@ -3819,6 +3846,32 @@
       loiOtp('');
       fMa.value = '';
       setTimeout(() => fMa.focus(), 80);
+    }
+
+    /* ---------- Quên mật khẩu ----------
+       Nhập số điện thoại (hoặc email) → máy chủ gửi mã 6 số về email đã gắn
+       với tài khoản → nhập mã và mật khẩu mới là vào được ngay. */
+    function moQuenMk() {
+      congForm.hidden = true;
+      congOtpForm.hidden = true;
+      congMkForm.hidden = true;
+      congChanDuoi.hidden = true;
+      congQuenForm.hidden = false;
+      loiQuen('');
+      fQuen.value = fSdt.value || '';
+      setTimeout(() => fQuen.focus(), 80);
+    }
+
+    function moDatLaiMk(email) {
+      congQuenForm.hidden = true;
+      congMkForm.hidden = false;
+      congMkSub.textContent = email
+        ? `Nhập mã 6 số vừa gửi tới ${email}.`
+        : 'Nhập mã 6 số vừa gửi tới email của tài khoản.';
+      loiMkMoi('');
+      fMaQuen.value = '';
+      fMkMoi.value = '';
+      setTimeout(() => fMaQuen.focus(), 80);
     }
 
     function moCong() {
@@ -3876,6 +3929,92 @@
       TK.kieu = dangKyDangMo() ? 'dangNhap' : 'dangKy';
       veCong();
       (dangKyDangMo() ? fTen : fSdt).focus();
+    });
+
+    congQuen.addEventListener('click', () => { sfx.click(); moQuenMk(); });
+    congQuenVe.addEventListener('click', () => { sfx.click(); moBuoc1(); });
+    congMkVe.addEventListener('click', () => { sfx.click(); moQuenMk(); });
+
+    congQuenForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (congQuenGui.disabled) return;
+      const v = fQuen.value.trim();
+      if (!v) { loiQuen('Nhập số điện thoại hoặc email của tài khoản nhé.'); return; }
+      const laEmail = v.includes('@');
+      congQuenGui.disabled = true;
+      congQuenGui.textContent = 'Đang gửi…';
+      loiQuen('');
+      try {
+        const r = await fetch(TK_URL + '/quen-mk', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(laEmail ? { email: v } : { sdt: v }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) { loiQuen(j.error || 'Chưa gửi được, con thử lại nhé.'); return; }
+        quenToken = j.token || '';
+        moDatLaiMk(j.email);
+      } catch (e2) {
+        loiQuen('Không nối được máy chủ. Con kiểm tra mạng rồi thử lại nhé.');
+      } finally {
+        congQuenGui.disabled = false;
+        congQuenGui.textContent = 'Gửi mã về email';
+      }
+    });
+
+    congMkGuiLai.addEventListener('click', async () => {
+      sfx.click();
+      if (congMkGuiLai.disabled) return;
+      congMkGuiLai.disabled = true;
+      loiMkMoi('');
+      try {
+        const r = await fetch(TK_URL + '/quen-mk-gui-lai', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ token: quenToken }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) loiMkMoi(j.error || 'Chưa gửi lại được, con thử lại nhé.');
+      } catch (e) {
+        loiMkMoi('Không nối được máy chủ.');
+      } finally {
+        setTimeout(() => { congMkGuiLai.disabled = false; }, 3000);
+      }
+    });
+
+    congMkForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (congMkXong.disabled) return;
+      const code = fMaQuen.value.trim();
+      const mk = fMkMoi.value;
+      if (code.length !== 6) return loiMkMoi('Mã gồm 6 chữ số, con kiểm tra lại nhé.');
+      if (!mk || mk.length < 6) return loiMkMoi('Mật khẩu mới cần ít nhất 6 ký tự.');
+      congMkXong.disabled = true;
+      congMkXong.textContent = 'Đang đổi…';
+      loiMkMoi('');
+      try {
+        const r = await fetch(TK_URL + '/quen-mk-dat-lai', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ token: quenToken, code, matKhau: mk }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) { loiMkMoi(j.error || 'Chưa đổi được, con thử lại nhé.'); return; }
+        xongDangNhap(j);
+      } catch (e2) {
+        loiMkMoi('Không nối được máy chủ. Con kiểm tra mạng rồi thử lại nhé.');
+      } finally {
+        congMkXong.disabled = false;
+        congMkXong.textContent = 'Đặt mật khẩu mới';
+      }
+    });
+
+    fMaQuen.addEventListener('input', () => {
+      const v = fMaQuen.value.replace(/[^0-9]/g, '').slice(0, 6);
+      if (v !== fMaQuen.value) fMaQuen.value = v;
     });
 
     fSdt.addEventListener('input', () => {

@@ -182,6 +182,6 @@ async function vaoBangGoogle(token) {
 
 module.exports = {
   coGoogle, vaoBangGoogle,
-  chuanSdt, sdtHopLe, datCookie, goiVe,
+  chuanSdt, sdtHopLe, loiMatKhau, datCookie, goiVe,
   dangKySdt, dangNhapSdt, doiMatKhau, themEmail,
 };

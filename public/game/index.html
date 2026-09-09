@@ -815,7 +815,35 @@
         </div>
       </form>
 
+      <!-- Quên mật khẩu: gửi mã 6 số về email đã gắn với tài khoản -->
+      <form id="congQuenForm" novalidate hidden>
+        <p class="settings-desc">Nhập số điện thoại hoặc email của tài khoản. Mon-Maths gửi mã 6 số về email cho bạn.</p>
+        <label class="settings-label" for="fQuen">Số điện thoại hoặc email</label>
+        <input type="text" id="fQuen" class="license-input settings-name-input" autocomplete="username" maxlength="120" placeholder="0912345678" />
+        <p class="license-error" id="congQuenLoi" hidden></p>
+        <button class="btn btn-primary btn-xl" id="congQuenGui" type="submit">Gửi mã về email</button>
+        <div class="settings-notif-row" style="margin-top:10px; background:transparent; padding:0;">
+          <button class="btn btn-text" id="congQuenVe" type="button">← Quay lại đăng nhập</button>
+        </div>
+      </form>
+
+      <!-- Nhập mã rồi đặt mật khẩu mới -->
+      <form id="congMkForm" novalidate hidden>
+        <p class="settings-desc" id="congMkSub">Nhập mã 6 số vừa gửi tới email của bạn.</p>
+        <label class="settings-label" for="fMaQuen">Mã xác nhận</label>
+        <input type="text" id="fMaQuen" class="license-input settings-name-input" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code" />
+        <label class="settings-label" for="fMkMoi">Mật khẩu mới</label>
+        <input type="password" id="fMkMoi" class="license-input settings-name-input" autocomplete="new-password" maxlength="72" placeholder="Ít nhất 6 ký tự" />
+        <p class="license-error" id="congMkLoi" hidden></p>
+        <button class="btn btn-primary btn-xl" id="congMkXong" type="submit">Đặt mật khẩu mới</button>
+        <div class="settings-notif-row" style="margin-top:10px; background:transparent; padding:0;">
+          <button class="btn btn-text" id="congMkGuiLai" type="button">Gửi lại mã</button>
+          <button class="btn btn-text" id="congMkVe" type="button">← Quay lại</button>
+        </div>
+      </form>
+
       <div id="congChanDuoi">
+        <button class="btn btn-text btn-block" id="congQuen" type="button">Quên mật khẩu?</button>
         <button class="btn btn-text btn-block" id="congDoi" type="button">Đã có tài khoản? Đăng nhập</button>
         <button class="btn btn-text btn-block" id="congXemThu" type="button">Chơi thử trước, đăng ký sau</button>
         <p class="settings-desc" id="congFine" style="margin-top:14px; font-size:0.8rem;">Chỉ giữ tên, số điện thoại và email để nhận ra con, không dùng vào việc gì khác.</p>
