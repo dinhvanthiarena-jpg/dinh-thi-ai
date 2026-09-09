@@ -53,14 +53,26 @@ function isPersonPortrait(title, meta) {
   return PERSON_PORTRAIT_PATTERN.test(text);
 }
 
-async function fetchWikimediaInfo(pageid) {
+async function fetchWikimediaInfo(pageid, attempt) {
+  attempt = attempt || 1;
   const url = `https://commons.wikimedia.org/w/api.php?action=query&pageids=${pageid}&prop=imageinfo&iiprop=extmetadata&format=json&origin=*`;
-  const res = await fetch(url, { headers: { 'user-agent': 'DinhThiAi-NewsFactory/1.0' } });
-  if (!res.ok) return null;
-  const data = await res.json();
-  const page = data.query && data.query.pages && data.query.pages[pageid];
-  if (!page) return null;
-  return { title: page.title, meta: (page.imageinfo && page.imageinfo[0] && page.imageinfo[0].extmetadata) || {} };
+  try {
+    const res = await fetch(url, { headers: { 'user-agent': 'DinhThiAi-NewsFactory/1.0' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const page = data.query && data.query.pages && data.query.pages[pageid];
+    if (!page) return null;
+    return { title: page.title, meta: (page.imageinfo && page.imageinfo[0] && page.imageinfo[0].extmetadata) || {} };
+  } catch (err) {
+    // Gọi API dồn dập rất dễ bị Wikimedia giới hạn tốc độ/timeout thoáng qua
+    // — thử lại tối đa 2 lần trước khi bỏ qua, tránh im lặng bỏ sót bài lỗi.
+    if (attempt >= 3) {
+      console.error(`  (lỗi tra cứu ảnh pageid=${pageid} sau ${attempt} lần thử:`, err.message, ')');
+      return null;
+    }
+    await sleep(1000 * attempt);
+    return fetchWikimediaInfo(pageid, attempt + 1);
+  }
 }
 
 function sleep(ms) {
@@ -79,8 +91,11 @@ async function run() {
   for (const post of posts) {
     checked += 1;
     const info = await fetchWikimediaInfo(post.coverImageSourceId);
-    await sleep(200);
-    if (!info) continue;
+    await sleep(500);
+    if (!info) {
+      console.log(`  bỏ qua "${post.title}" — không tra được thông tin ảnh (mạng lỗi/rate limit).`);
+      continue;
+    }
 
     if (!isPersonPortrait(info.title, info.meta)) continue;
 
