@@ -50,12 +50,12 @@ async function run() {
   let skipped = 0;
   for (const post of posts) {
     const imageQuery = await suggestImageQuery(post.title);
-    const stockImage = await fetchStockImage(post.category, usedPageIds, imageQuery);
+    const stockImage = await fetchStockImage(post.category, usedPageIds, imageQuery, post.title);
 
     if (!stockImage || stockImage.sourceId === post.coverImageSourceId) {
       skipped += 1;
       console.log('bỏ qua (không tìm được ảnh tốt hơn):', post.title);
-      await sleep(300);
+      await sleep(1500);
       continue;
     }
 
@@ -76,7 +76,7 @@ async function run() {
 
     upgraded += 1;
     console.log('đã nâng cấp ảnh cho:', post.title);
-    await sleep(300);
+    await sleep(1500);
   }
 
   console.log(`Xong — đã nâng cấp ${upgraded} bài, giữ nguyên ${skipped} bài.`);

@@ -174,6 +174,52 @@ async function searchWikimedia(query, usedPageIds) {
     .filter((c) => !isPersonPortrait(c.title, c.info.extmetadata));
 }
 
+// Xác thực bằng Claude (đọc được ảnh) rằng ảnh vừa tải THỰC SỰ minh hoạ đúng
+// nội dung bài — các bộ lọc theo tên file/category ở trên (loại logo, loại
+// chân dung định danh) chỉ bắt được từng loại lỗi cụ thể đã biết. Đây là lớp
+// kiểm tra tổng quát hơn: search Wikimedia theo từ khoá chung đôi khi trả về
+// ảnh hoàn toàn lạc đề mà không cách nào liệt kê hết bằng regex (phát hiện
+// thực tế: 1 sơ đồ kỹ thuật "Embodied AI" và 1 ảnh chiếc xe hơi đều bị gắn
+// nhầm vào bài viết về điện thoại). Trả về true khi không chắc chắn (thiếu
+// API key, lỗi mạng) để không làm gãy cả pipeline vì 1 lần gọi lỗi.
+async function isImageRelevant(localPath, postTitle) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey || !postTitle) return true;
+
+  try {
+    const absPath = path.join(__dirname, '..', 'public', localPath.replace(/^\//, ''));
+    const buffer = fs.readFileSync(absPath);
+    const mediaType = /\.png$/i.test(localPath) ? 'image/png' : 'image/jpeg';
+
+    const response = await fetch(ANTHROPIC_API_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': ANTHROPIC_VERSION },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 10,
+        system:
+          'Bạn xét duyệt ảnh bìa cho 1 bài blog. Xem ảnh và tiêu đề bài viết, trả lời DUY NHẤT 1 từ: "CO" nếu ảnh hợp lý để minh hoạ tiêu đề đó (không cần khớp 100% chi tiết, chỉ cần cùng chủ đề, không gây hiểu lầm), hoặc "KHONG" nếu ảnh hoàn toàn lạc đề (VD: sơ đồ/biểu đồ kỹ thuật không liên quan, phương tiện/đồ vật không liên quan, ảnh cận mặt 1 người cụ thể không được nhắc tới trong tiêu đề). Không giải thích gì thêm.',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: mediaType, data: buffer.toString('base64') } },
+              { type: 'text', text: `Tiêu đề bài viết: "${postTitle}"` },
+            ],
+          },
+        ],
+      }),
+    });
+    if (!response.ok) return true;
+    const data = await response.json();
+    const text = (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('').trim().toUpperCase();
+    return text.startsWith('CO');
+  } catch (err) {
+    console.error('[newsFactory] isImageRelevant failed', err.message);
+    return true;
+  }
+}
+
 // Tìm 1 ảnh thật, có giấy phép tự do, minh hoạ đúng nội dung bài trên
 // Wikimedia Commons — không cần API key. Ưu tiên thử specificQuery (mô tả
 // cảnh cụ thể do Claude sinh ra theo đúng bài viết) trước, chỉ rơi về từ khoá
@@ -181,9 +227,10 @@ async function searchWikimedia(query, usedPageIds) {
 // hợp pháp để có ảnh minh hoạ sát bài viết mà KHÔNG copy ảnh có bản quyền
 // trực tiếp từ báo nguồn (ghi nguồn không đồng nghĩa có giấy phép sử dụng
 // ảnh báo chí). usedPageIds (Set các pageid Commons đã dùng cho bài khác) để
-// loại trừ, tránh trùng ảnh giữa các bài. Trả về null nếu không tìm/tải được
-// ảnh nào (khi đó dùng ảnh SVG dự phòng).
-async function fetchStockImage(categorySlug, usedPageIds, specificQuery) {
+// loại trừ, tránh trùng ảnh giữa các bài. postTitle (nếu có) được dùng để
+// Claude xác thực độ liên quan trước khi chấp nhận ảnh. Trả về null nếu
+// không tìm/tải được ảnh nào (khi đó dùng ảnh SVG dự phòng).
+async function fetchStockImage(categorySlug, usedPageIds, specificQuery, postTitle) {
   const fallbackQuery = CATEGORY_IMAGE_QUERY[categorySlug] || 'technology';
   const queries = [specificQuery, fallbackQuery].filter(Boolean);
 
@@ -193,11 +240,18 @@ async function fetchStockImage(categorySlug, usedPageIds, specificQuery) {
       if (!candidates.length) continue;
 
       // Thử tối đa 5 ứng viên ngẫu nhiên, tải hẳn từng ảnh về cho tới khi có
-      // 1 ảnh tải thành công (không chỉ kiểm tra HEAD — phải tải được thật).
+      // 1 ảnh tải thành công (không chỉ kiểm tra HEAD — phải tải được thật)
+      // VÀ được Claude xác nhận thực sự liên quan tới bài viết.
       const shuffled = [...candidates].sort(() => Math.random() - 0.5).slice(0, 5);
       for (const c of shuffled) {
         const saved = await downloadImage(c.info.thumburl, c.pageid);
         if (!saved) continue;
+
+        const relevant = await isImageRelevant(saved, postTitle);
+        if (!relevant) {
+          fs.unlink(path.join(__dirname, '..', 'public', saved.replace(/^\//, '')), () => {});
+          continue;
+        }
 
         const meta = c.info.extmetadata || {};
         const artist = ((meta.Artist && meta.Artist.value) || 'Không rõ tác giả').replace(/<[^>]+>/g, '').trim();
@@ -381,7 +435,7 @@ async function createTrendingPost(forcedSlug) {
   }
   // Tìm ảnh SAU khi có bài viết vì cần imageQuery do Claude sinh ra theo
   // đúng nội dung bài — ảnh sát chủ đề hơn nhiều so với chỉ tra theo chuyên mục chung.
-  const stockImage = await fetchStockImage(topic.category, usedPageIds, article.imageQuery);
+  const stockImage = await fetchStockImage(topic.category, usedPageIds, article.imageQuery, article.title);
 
   // Ghi rõ nguồn ảnh ngay dưới nội dung — bắt buộc với ảnh giấy phép CC
   // BY/CC BY-SA của Wikimedia Commons.
@@ -437,4 +491,4 @@ async function suggestImageQuery(title) {
   }
 }
 
-module.exports = { createTrendingPost, pickTopic, generateArticle, fetchStockImage, suggestImageQuery };
+module.exports = { createTrendingPost, pickTopic, generateArticle, fetchStockImage, suggestImageQuery, isImageRelevant };
