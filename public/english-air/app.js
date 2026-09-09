@@ -471,9 +471,76 @@ function apToc(u, toc) {
   u.rate = clamp(toc * (u.__heSoToc || 1), 0.4, 1.6);
 }
 
+/* ==================== GIỌNG ĐỌC THU SẴN ====================
+   Trước đây mọi câu tiếng Anh đều nhờ speechSynthesis của máy đọc. Mỗi điện
+   thoại một giọng; nhiều máy bán ở Việt Nam không có giọng tiếng Anh tử tế nên
+   đọc ngọng — thầy nói thẳng là "voice cùi".
+   Nay giọng tiếng Anh được đọc sẵn thành file bằng MeloTTS (mã nguồn mở, chạy
+   trên máy thầy, không tốn phí), máy nào cũng nghe đúng một giọng bản xứ.
+   Máy nào chưa tải kịp file, hoặc câu chưa có file, thì mới rơi về giọng máy.
+
+   Tên file = mã băm của chính câu đó nên không cần bảng tra tên. Chỉ nạp một
+   danh sách mã băm (vài chục KB) để biết câu nào có sẵn, khỏi dò 404. */
+const TIENG_THU = "assets/tieng/";
+let khoTieng = null;            // Set các mã băm có sẵn; null = chưa nạp
+let amTieng = null;             // thẻ <audio> dùng chung
+
+/** FNV-1a 32 bit + độ dài. PHẢI khớp hàm bam() bên sinh_tieng_anh.py. */
+function bamCau(s) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i += 1) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0") + (s.length & 0xFF).toString(16).padStart(2, "0");
+}
+
+const chuanCau = s => String(s || "").split(/\s+/).filter(Boolean).join(" ");
+
+async function napKhoTieng() {
+  if (khoTieng) return khoTieng;
+  try {
+    const r = await fetch(TIENG_THU + "kho.json");
+    khoTieng = new Set(await r.json());
+  } catch { khoTieng = new Set(); }
+  return khoTieng;
+}
+napKhoTieng();
+
+/** Địa chỉ file giọng đọc của một câu, không có thì null. */
+function fileTieng(text, lang) {
+  if (!khoTieng || !khoTieng.size) return null;
+  // Chỉ có kho tiếng ANH; câu tiếng Việt vẫn để máy đọc.
+  const t = lang || tiengCua(text);
+  if (t && !/^en/i.test(t)) return null;
+  const k = bamCau(chuanCau(text));
+  return khoTieng.has(k) ? TIENG_THU + k + ".mp3" : null;
+}
+
+/** Phát file giọng đọc. Trả về true nếu đã nhận phát, false thì gọi bên đọc máy. */
+function phatTiengThu(duong, slow, xong) {
+  if (!duong) return false;
+  try {
+    if (!amTieng) {
+      amTieng = document.getElementById("amDoc");
+      if (!amTieng) return false;
+    }
+    try { speechSynthesis.cancel(); } catch { /* thôi */ }
+    amTieng.onended = null; amTieng.onerror = null;
+    amTieng.src = duong;
+    amTieng.playbackRate = slow ? 0.7 : 1;
+    if (xong) { amTieng.onended = xong; amTieng.onerror = xong; }
+    const p = amTieng.play();
+    if (p && p.catch) p.catch(() => { if (xong) xong(); });
+    return true;
+  } catch { return false; }
+}
+
 function speak(text, slow, lang) {
-  if (!S.sound || !window.speechSynthesis || !text) return;
+  if (!S.sound || !text) return;
   lanLuotId += 1;   // cắt lượt đọc nối đang chạy, không thì hai bên chồng tiếng
+  if (phatTiengThu(fileTieng(text, lang), slow)) return;
+  if (!window.speechSynthesis) return;
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
@@ -499,6 +566,12 @@ function docLanLuot(khuc, xong, batDau) {
     if (phien !== lanLuotId) return;
     if (i >= ds.length) { if (xong) xong(); return; }
     const k = ds[i];
+    // Có file thu sẵn thì phát file, đọc xong mới sang câu kế.
+    const f = fileTieng(k.text, k.lang);
+    if (f && !k.onTu) {
+      if (batDau && i === 0) batDau();
+      if (phatTiengThu(f, k.slow, () => { if (phien === lanLuotId) doc(i + 1); })) return;
+    }
     try {
       const u = new SpeechSynthesisUtterance(k.text);
       dungGiong(u, k.lang || tiengCua(k.text));
@@ -524,6 +597,10 @@ function docLanLuot(khuc, xong, batDau) {
 const stopSpeak = () => {
   lanLuotId += 1;
   if (window.speechSynthesis) { try { speechSynthesis.cancel(); } catch { /* bỏ qua */ } }
+  // Giọng đọc thu sẵn cũng phải im: gỡ tay nghe trước rồi mới dừng, kẻo câu
+  // sau trong hàng đợi lại tự chạy tiếp.
+  const a = document.getElementById("amDoc");
+  if (a) { try { a.onended = null; a.onerror = null; a.pause(); } catch { /* bỏ qua */ } }
 };
 
 /* iPhone/iPad chỉ cho phát tiếng lần đầu ngay trong lúc ngón tay còn chạm màn hình.
@@ -2635,7 +2712,7 @@ function danhThucTieng() {
   // trong một cú chạm thật của người dùng.
   // Mồi MỌI thẻ tiếng của app, không riêng thẻ thưởng: thẻ nào không được mồi
   // trong đúng cú chạm này thì về sau gọi play() sẽ bị iPhone chặn.
-  ["amThuong", "amVoTay", "amKaka"].forEach(moiTheTieng);
+  ["amThuong", "amVoTay", "amKaka", "amDoc"].forEach(moiTheTieng);
 }
 ["pointerdown", "touchstart", "keydown"].forEach(ev =>
   window.addEventListener(ev, danhThucTieng, { once: false, passive: true }));
