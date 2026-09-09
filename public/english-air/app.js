@@ -1437,6 +1437,59 @@ function khoiDocThu(mau, nhan) {
   const chu = el("div", "dt-chu", nhacBanDau);
   const diem = el("div", "dt-diem"); diem.hidden = true;
 
+  /* ---- Khối xin quyền micro ----
+     Trước đây máy chặn micro thì chỉ hiện một dòng chữ "bạn chưa cho phép",
+     người học không biết mở ở đâu. Nay có nút xin quyền ngay tại chỗ, và nếu
+     máy đã chặn hẳn thì chỉ đúng đường mở lại theo từng loại máy. */
+  const hangQuyen = el("div", "dt-quyen"); hangQuyen.hidden = true;
+  const quyenChu = el("p", "dt-quyen-chu");
+  const quyenNut = el("button", "dt-quyen-nut"); quyenNut.type = "button";
+  quyenNut.append(icon("i-mic", "ic ic-sm"), el("span", null, "Cho phép dùng micro"));
+  hangQuyen.append(quyenChu, quyenNut);
+
+  function chiDuongMoQuyen() {
+    const ua = navigator.userAgent;
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      return "iPhone/iPad: mở Cài đặt → Safari → Micrô → chọn Hỏi hoặc Cho phép, " +
+             "rồi quay lại tải trang này lại.";
+    }
+    if (/Android/i.test(ua)) {
+      return "Android: chạm vào biểu tượng ổ khoá 🔒 cạnh địa chỉ web ở trên → " +
+             "Quyền → Micrô → Cho phép.";
+    }
+    return "Máy tính: bấm biểu tượng ổ khoá 🔒 cạnh địa chỉ web ở trên → " +
+           "Micrô → Cho phép, rồi tải lại trang.";
+  }
+
+  function hienXinQuyen(daChan) {
+    hangQuyen.hidden = false;
+    quyenChu.textContent = daChan
+      ? "Máy đang chặn micro nên không chấm điểm đọc được. " + chiDuongMoQuyen()
+      : "Cần quyền dùng micro để nghe bạn đọc. Bấm nút bên dưới rồi chọn Cho phép nhé.";
+    quyenNut.hidden = daChan;
+  }
+
+  quyenNut.addEventListener("click", async () => {
+    try {
+      const luong = await navigator.mediaDevices.getUserMedia({ audio: true });
+      luong.getTracks().forEach(t => t.stop());       // xin xong thì trả lại ngay
+      hangQuyen.hidden = true;
+      chu.textContent = "Được rồi! Bấm micro rồi đọc: " + nhan;
+    } catch {
+      hienXinQuyen(true);
+    }
+  });
+
+  // Dò trước trạng thái quyền để mời cho phép ngay, đừng đợi bấm rồi mới báo lỗi.
+  (async () => {
+    try {
+      const q = await navigator.permissions.query({ name: "microphone" });
+      if (q.state === "denied") hienXinQuyen(true);
+      else if (q.state === "prompt") hienXinQuyen(false);
+      q.onchange = () => { if (q.state === "granted") hangQuyen.hidden = true; };
+    } catch { /* trình duyệt không cho hỏi trước thì thôi, bấm rồi biết */ }
+  })();
+
   if (!SR) nut.disabled = true;
 
   nut.addEventListener("click", () => {
@@ -1485,10 +1538,14 @@ function khoiDocThu(mau, nhan) {
       ketThuc();
     };
     r.onerror = e => {
-      chu.textContent = e.error === "not-allowed"
-        ? "Bạn chưa cho phép dùng micro. Mở lại quyền micro rồi thử nhé."
-        : e.error === "no-speech" ? "Không nghe thấy gì. Bấm rồi đọc to hơn chút nhé."
-        : "Micro trục trặc, bạn thử lại nhé.";
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        chu.textContent = "Chưa có quyền dùng micro.";
+        hienXinQuyen(true);
+      } else {
+        chu.textContent = e.error === "no-speech"
+          ? "Không nghe thấy gì. Bấm rồi đọc to hơn chút nhé."
+          : "Micro trục trặc, bạn thử lại nhé.";
+      }
       ketThuc();
     };
     r.onend = ketThuc;
@@ -1534,22 +1591,28 @@ function khoiDocThu(mau, nhan) {
     }
   }
 
-  let nutMinh = null;
+  /* Nút nghe lại giọng mình.
+     Trước đây nút này KHÔNG BAO GIỜ hiện ra: nó chỉ vẽ khi khối điểm đã mở,
+     mà lúc thu xong thì khối điểm còn ẩn nên hàm thoát ngay; rồi khi chấm
+     điểm, hienDiem() lại xoá sạch nội dung khối điểm nên nút có vẽ cũng mất.
+     Nay để nút ở HÀNG RIÊNG bên dưới, hiện ngay khi thu xong. */
+  const hangMinh = el("div", "dt-hang"); hangMinh.hidden = true;
+  const nutMinh = el("button", "dt-minh"); nutMinh.type = "button";
+  nutMinh.append(icon("i-play", "ic ic-sm"), el("span", null, "Nghe lại giọng mình"));
+  nutMinh.addEventListener("click", () => {
+    if (!tiengMinh) return;
+    stopSpeak();
+    const am = new Audio(tiengMinh);
+    nutMinh.classList.add("dang-phat");
+    const het = () => nutMinh.classList.remove("dang-phat");
+    am.onended = het; am.onerror = het;
+    am.play().catch(het);
+  });
+  hangMinh.append(nutMinh);
+
   function veNutTiengMinh() {
-    if (!tiengMinh || diem.hidden) return;
-    if (nutMinh && nutMinh.isConnected) return;
-    nutMinh = el("button", "dt-minh"); nutMinh.type = "button";
-    nutMinh.setAttribute("aria-label", "Nghe lại giọng mình");
-    nutMinh.append(icon("i-mic", "ic ic-sm"));
-    nutMinh.addEventListener("click", () => {
-      stopSpeak();
-      const am = new Audio(tiengMinh);
-      nutMinh.classList.add("dang-phat");
-      const het = () => nutMinh.classList.remove("dang-phat");
-      am.onended = het; am.onerror = het;
-      am.play().catch(het);
-    });
-    diem.append(nutMinh);
+    if (!tiengMinh) return;
+    hangMinh.hidden = false;
   }
 
   function hienDiem(p, nghe) {
@@ -1576,13 +1639,12 @@ function khoiDocThu(mau, nhan) {
     ngheMau.addEventListener("click", () => speak(mau, true, "en-GB"));
     diem.append(ngheMau);
 
-    nutMinh = null;
     veNutTiengMinh();
     rung(p >= 85 ? [12, 40, 12] : 10);
     chu.textContent = "Bấm micro để đọc lại.";
   }
 
-  box.append(nut, chu, diem);
+  box.append(nut, chu, diem, hangMinh, hangQuyen);
   return box;
 }
 
@@ -2321,15 +2383,36 @@ const DRILL = {
     setBtn("Kiểm tra", "btn-primary", false);
   },
 
+  /* Nối từ. Bản cũ chỉ là hai cột nút trơ trọi: không biết cột nào là tiếng gì,
+     nối xong rồi cũng không nhìn ra cặp nào đã nối với cặp nào, còn mấy cặp nữa
+     cũng chịu. Nay: có nhãn hai cột, mỗi cặp nối đúng được đánh SỐ và TÔ CÙNG
+     MỘT MÀU ở cả hai bên, có thanh đếm còn lại. */
   match(d, st) {
     showMascot(false); setKicker("Nối từ với nghĩa");
+    const MAU_CAP = ["c1", "c2", "c3", "c4", "c5", "c6"];
+    const hop = el("div", "match-hop");
+
+    const dem = el("p", "match-dem");
+    const veDem = (con) => {
+      dem.textContent = con
+        ? "Còn " + con + " cặp nữa" : "Xong rồi! Bấm Tiếp theo nhé.";
+      dem.classList.toggle("het", !con);
+    };
+
     const grid = el("div", "match");
+    const cotA = el("div", "match-cot"), cotB = el("div", "match-cot");
+    cotA.append(el("span", "match-nhan", "Tiếng Anh"));
+    cotB.append(el("span", "match-nhan", "Nghĩa tiếng Việt"));
     const colA = el("div", "opts"), colB = el("div", "opts");
-    let sel = null, left = d.pairs.length, missed = 0;
+    cotA.append(colA); cotB.append(colB);
+
+    let sel = null, left = d.pairs.length, missed = 0, soCap = 0;
     const clear = () => $$(".opt", grid).forEach(n => n.classList.remove("sel"));
+
     const cell = (w, label, side) => {
-      const b = el("button", "opt"); b.type = "button";
-      b.append(el("span", null, label));
+      const b = el("button", "opt match-o"); b.type = "button";
+      const so = el("i", "match-so");                 // số thứ tự cặp, hiện khi nối đúng
+      b.append(so, el("span", null, label));
       b.addEventListener("click", () => {
         if (P.answered || b.classList.contains("done")) return;
         if (side === "a") speak(w.en);
@@ -2337,9 +2420,17 @@ const DRILL = {
         if (sel.node === b) { b.classList.remove("sel"); sel = null; return; }
         if (sel.side === side) { clear(); b.classList.add("sel"); sel = { w, side, node: b }; return; }
         if (sel.w.en === w.en) {
-          [sel.node, b].forEach(n => { n.classList.remove("sel"); n.classList.add("ok", "done"); });
+          const mau = MAU_CAP[soCap % MAU_CAP.length];
+          soCap += 1;
+          [sel.node, b].forEach(n => {
+            n.classList.remove("sel");
+            n.classList.add("ok", "done", mau);
+            const s = $(".match-so", n);
+            if (s) s.textContent = soCap;
+          });
           srsUpdate(w.en, true);
-          if (!--left) { P.picked = { ok: missed === 0 }; setBtn("Tiếp theo", "btn-ok", true); }
+          left -= 1; veDem(left);
+          if (!left) { P.picked = { ok: missed === 0 }; setBtn("Tiếp theo", "btn-ok", true); }
         } else {
           missed++; srsUpdate(w.en, false);
           const a = sel.node;
@@ -2350,10 +2441,13 @@ const DRILL = {
       });
       return b;
     };
+
     shuffle(d.pairs).forEach(w => colA.append(cell(w, w.en, "a")));
     shuffle(d.pairs).forEach(w => colB.append(cell(w, w.vi, "b")));
-    grid.append(colA, colB);
-    st.append(grid);
+    grid.append(cotA, cotB);
+    veDem(left);
+    hop.append(dem, grid);
+    st.append(hop);
   },
 
   type(d, st) {

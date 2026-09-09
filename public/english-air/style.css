@@ -783,8 +783,36 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .say-btn.sm svg { width: 24px; height: 24px; }
 
 /* nối cặp */
+/* Nối từ. Hai cột có NHÃN rõ tiếng gì, mỗi cặp nối đúng được đánh số và tô
+   cùng một màu ở cả hai bên — nhìn phát biết đã nối cái nào với cái nào. */
+.match-hop { display: flex; flex-direction: column; gap: var(--s3); }
+.match-dem { margin: 0; text-align: center; font-size: .86rem; font-weight: 800;
+  color: var(--muted-fg); }
+.match-dem.het { color: var(--ok); }
 .match { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
-.match .opt { min-height: 54px; font-size: .95rem; justify-content: center; text-align: center; }
+.match-cot { display: flex; flex-direction: column; gap: var(--s2); min-width: 0; }
+.match-nhan { font-size: .68rem; font-weight: 900; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--muted-fg); text-align: center; }
+.match .opt { min-height: 54px; font-size: .95rem; justify-content: center; text-align: center;
+  position: relative; transition: transform var(--t1) var(--e), border-color var(--t1) var(--e); }
+.match .opt.sel { transform: translateY(-2px) scale(1.02); }
+.match-so { position: absolute; top: 5px; left: 6px; width: 19px; height: 19px;
+  border-radius: 50%; display: grid; place-items: center;
+  font-size: .68rem; font-weight: 900; font-style: normal;
+  background: rgba(255,255,255,.85); color: #1F2937; opacity: 0; }
+.match .opt.done .match-so { opacity: 1; }
+/* Ô đã nối KHÔNG được mờ đi như các bài khác (.opt.done{opacity:.28}) — ở bài
+   này người học phải nhìn rõ mình đã nối cặp nào với cặp nào. Chỉ khoá bấm. */
+.match .opt.done { opacity: 1; pointer-events: none; }
+.match .opt.ok { box-shadow: none; }
+/* Sáu bộ màu cho sáu cặp; hai ô cùng cặp mang cùng một bộ. */
+.match .opt.c1 { background: #DCFCE7; border-color: #22C55E; color: #14532D; }
+.match .opt.c2 { background: #DBEAFE; border-color: #3B82F6; color: #1E3A8A; }
+.match .opt.c3 { background: #FEF3C7; border-color: #F59E0B; color: #78350F; }
+.match .opt.c4 { background: #FCE7F3; border-color: #EC4899; color: #831843; }
+.match .opt.c5 { background: #EDE9FE; border-color: #8B5CF6; color: #4C1D95; }
+.match .opt.c6 { background: #CCFBF1; border-color: #14B8A6; color: #134E4A; }
+@media (prefers-reduced-motion: reduce) { .match .opt.sel { transform: none; } }
 
 /* gõ đáp án */
 .type-in { width: 100%; min-height: 96px; padding: var(--s4); background: var(--card); border: 0; box-shadow: inset 0 0 0 2px var(--line); border-radius: var(--r2); font-size: 1.06rem; font-weight: 700; resize: none; }
@@ -1564,13 +1592,30 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .dt-loi strong { font-size: .95rem; font-weight: 900; }
 .dt-loi small { font-size: .8rem; font-weight: 600; color: var(--muted-fg);
   margin-top: 2px; overflow: hidden; text-overflow: ellipsis; }
-.dt-mau, .dt-minh { flex: none; width: 38px; height: 38px; border: 0; border-radius: var(--rf);
+.dt-mau { flex: none; width: 38px; height: 38px; border: 0; border-radius: var(--rf);
   display: grid; place-items: center; cursor: pointer;
   background: rgba(127,127,127,.18); color: inherit;
   transition: transform var(--t1) var(--e), background var(--t1) var(--e); }
 .dt-mau:active, .dt-minh:active { transform: scale(.9); }
-/* Nút nghe lại giọng mình — khác màu nút nghe mẫu để khỏi lẫn. */
-.dt-minh { background: var(--brand-fill); color: #fff; }
+/* Nút nghe lại giọng mình. Để thành một hàng riêng có CHỮ hẳn hoi: nút tròn
+   chỉ có hình micro trước đây vừa không hiện ra được, vừa dễ nhầm với nút thu. */
+.dt-hang { width: 100%; display: flex; justify-content: center; margin-top: var(--s2); }
+.dt-minh { display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  padding: 10px 18px; border: 0; border-radius: var(--rf); font: inherit;
+  font-size: .9rem; font-weight: 800;
+  background: var(--brand-fill); color: #fff;
+  transition: transform var(--t1) var(--e); }
+
+/* Khối xin quyền micro */
+.dt-quyen { width: 100%; margin-top: var(--s2); padding: var(--s3);
+  border-radius: var(--r3); background: var(--amber-soft);
+  display: flex; flex-direction: column; align-items: center; gap: var(--s2); }
+.dt-quyen-chu { margin: 0; font-size: .86rem; font-weight: 600;
+  color: var(--amber-ink); text-align: center; line-height: 1.5; }
+.dt-quyen-nut { display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  padding: 10px 18px; border: 0; border-radius: var(--rf); font: inherit;
+  font-size: .9rem; font-weight: 800; background: var(--amber); color: #fff; }
+.dt-quyen-nut:active { transform: scale(.96); }
 .dt-minh.dang-phat { animation: dtPhat .9s ease-in-out infinite; }
 @keyframes dtPhat { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
 @media (prefers-reduced-motion: reduce) { .dt-minh.dang-phat { animation: none; } }
