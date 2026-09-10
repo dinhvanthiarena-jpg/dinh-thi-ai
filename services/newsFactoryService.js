@@ -225,6 +225,38 @@ function execCurl(url) {
   });
 }
 
+// Pixabay — kho ảnh miễn phí có API chính thức cho lập trình, ổn định hơn hẳn
+// Openverse (không bị Cloudflare chặn). Chính sách nội dung của Pixabay còn
+// hạn chế ảnh người nổi tiếng/thương hiệu cụ thể (chủ yếu ảnh stock chung
+// chung) — nên ít bị Claude Vision từ chối vì "ảnh 1 người có tên cụ thể
+// không liên quan" như trường hợp ảnh thảm đỏ thật của Openverse hay gặp.
+async function searchPixabay(query, usedPageIds) {
+  const apiKey = process.env.PIXABAY_API_KEY;
+  if (!apiKey) return [];
+
+  const apiUrl =
+    'https://pixabay.com/api/?' +
+    `key=${apiKey}&q=${encodeURIComponent(query)}&image_type=photo&safesearch=true&per_page=30`;
+
+  try {
+    const res = await fetch(apiUrl);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.hits || [])
+      .filter((h) => !usedPageIds || !usedPageIds.has(`px-${h.id}`))
+      .filter((h) => !LOGO_TITLE_PATTERN.test(h.tags || ''))
+      .filter((h) => !isPersonPortrait(h.tags, null))
+      .map((h) => ({
+        pageid: `px-${h.id}`,
+        thumburl: h.largeImageURL || h.webformatURL,
+        credit: `Ảnh: ${h.user || 'Không rõ tác giả'} — Pixabay`,
+      }));
+  } catch (err) {
+    console.error('[newsFactory] searchPixabay failed', err.message);
+    return [];
+  }
+}
+
 async function searchOpenverse(query, usedPageIds) {
   const apiUrl =
     'https://api.openverse.org/v1/images/?' +
@@ -315,14 +347,18 @@ async function fetchStockImage(categorySlug, usedPageIds, specificQuery, postTit
 
   try {
     for (const query of queries) {
-      // Gộp cả 2 nguồn — Openverse thường phong phú hơn hẳn cho các chủ đề
-      // đời thường/sự kiện/con người, Wikimedia mạnh hơn cho khoa học/kỹ
-      // thuật/địa danh. Thử ngẫu nhiên trên toàn bộ gộp, không ưu tiên nguồn
-      // nào để không thiên lệch.
-      const [wm, ov] = await Promise.all([searchWikimedia(query, usedPageIds), searchOpenverse(query, usedPageIds)]);
-      const candidates = [...wm, ...ov];
+      // Gộp cả 3 nguồn — Openverse/Pixabay thường phong phú hơn hẳn cho các
+      // chủ đề đời thường/sự kiện/con người, Wikimedia mạnh hơn cho khoa
+      // học/kỹ thuật/địa danh. Thử ngẫu nhiên trên toàn bộ gộp, không ưu
+      // tiên nguồn nào để không thiên lệch.
+      const [wm, ov, px] = await Promise.all([
+        searchWikimedia(query, usedPageIds),
+        searchOpenverse(query, usedPageIds),
+        searchPixabay(query, usedPageIds),
+      ]);
+      const candidates = [...wm, ...ov, ...px];
       if (process.env.NEWSFACTORY_DEBUG) {
-        console.log(`[fetchStockImage] query="${query}" wikimedia=${wm.length} openverse=${ov.length}`);
+        console.log(`[fetchStockImage] query="${query}" wikimedia=${wm.length} openverse=${ov.length} pixabay=${px.length}`);
       }
       if (!candidates.length) continue;
 
