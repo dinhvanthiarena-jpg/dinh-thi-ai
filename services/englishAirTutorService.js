@@ -6,12 +6,33 @@
    thì KHÔNG, mỗi lượt một câu mới. Chỗ duy nhất phải đọc "sống": gọi một máy
    chủ MeloTTS nhỏ đang chạy (Cloud Run, chỉ tính tiền đúng giây xử lý), lấy
    về file mp3 rồi gửi kèm cho app phát trực tiếp — không qua giọng máy nữa.
-   Chưa cấu hình TTS_LIVE_URL thì bỏ qua êm, app tự rơi về giọng máy như cũ. */
+   Chưa cấu hình TTS_LIVE_URL thì bỏ qua êm, app tự rơi về giọng máy như cũ.
+
+   Trần số lượt/ngày: phòng lúc lỗi/có ai lạm dụng thì tự dừng gọi máy chủ trả
+   phí TRƯỚC khi tốn thêm tiền — không đợi Google báo mới biết. Đếm theo ngày
+   dương lịch, dùng bộ nhớ (mất khi khởi động lại, không sao vì trần này chỉ
+   để chặn bất thường, không cần chính xác tuyệt đối). Đặt qua biến môi
+   trường TTS_LIVE_DAILY_CAP nếu muốn đổi, mặc định 300 lượt/ngày — dư sức
+   cho một trường dùng bình thường, vẫn chặn được nếu có gì bất thường. */
 const TTS_TIMEOUT_MS = 12000;
+const TTS_DAILY_CAP = Number(process.env.TTS_LIVE_DAILY_CAP) || 300;
+let ttsCountDay = null;
+let ttsCount = 0;
+function ttsCapReached() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (ttsCountDay !== today) { ttsCountDay = today; ttsCount = 0; }
+  if (ttsCount >= TTS_DAILY_CAP) return true;
+  ttsCount += 1;
+  return false;
+}
 
 async function synthLiveEn(text) {
   const url = process.env.TTS_LIVE_URL;
   if (!url || !text) return null;
+  if (ttsCapReached()) {
+    console.error('[english-air/tts-live] daily cap reached, falling back to browser voice');
+    return null;
+  }
   try {
     const res = await fetch(url.replace(/\/$/, '') + '/tts', {
       method: 'POST',
