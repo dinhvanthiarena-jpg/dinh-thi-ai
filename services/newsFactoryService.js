@@ -192,13 +192,25 @@ async function searchWikimedia(query, usedPageIds) {
 // cần API key. Đặc biệt quan trọng cho chuyên mục Giải trí: Wikimedia hầu
 // như không có ảnh tự do về sự kiện thảm đỏ/thời trang/hậu trường showbiz,
 // trong khi Openverse có hàng trăm kết quả cho đúng loại này.
+//
+// QUAN TRỌNG: Openverse đứng sau Cloudflare — User-Agent dạng tên app tự đặt
+// (VD "DinhThiAi-NewsFactory/1.0") bị Cloudflare coi là bot và trả về trang
+// thử thách HTML ("Just a moment...") thay vì JSON, khiến kết quả LUÔN rỗng
+// một cách âm thầm (fetch vẫn trả 200 OK nên không lỗi rõ ràng gì). Phải giả
+// lập User-Agent trình duyệt thật thì Cloudflare mới cho qua.
 async function searchOpenverse(query, usedPageIds) {
   const apiUrl =
     'https://api.openverse.org/v1/images/?' +
     `q=${encodeURIComponent(query)}&license_type=commercial&mature=false&page_size=30`;
 
   try {
-    const res = await fetch(apiUrl, { headers: { 'user-agent': 'DinhThiAi-NewsFactory/1.0' } });
+    const res = await fetch(apiUrl, {
+      headers: {
+        'user-agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+        accept: 'application/json',
+      },
+    });
     if (!res.ok) return [];
     const data = await res.json();
     return (data.results || [])
