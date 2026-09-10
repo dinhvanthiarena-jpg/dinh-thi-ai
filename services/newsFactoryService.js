@@ -144,6 +144,9 @@ function isPersonPortrait(title, meta) {
   return PERSON_PORTRAIT_PATTERN.test(text);
 }
 
+// Trả về candidate ở 1 shape thống nhất bất kể nguồn (Wikimedia hay
+// Openverse) — pageid dùng để dedup + lưu vào coverImageSourceId,
+// thumburl là ảnh thực tải về, credit đã dựng sẵn dạng hiển thị được luôn.
 async function searchWikimedia(query, usedPageIds) {
   const apiUrl =
     'https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6' +
@@ -160,7 +163,7 @@ async function searchWikimedia(query, usedPageIds) {
   // sinh theo yêu cầu nên hay tải lỗi/rớt ảnh trên trang. Cũng loại bỏ
   // logo/huy hiệu qua tên file, và ảnh chân dung chính khách/người nổi tiếng.
   return pages
-    .filter((p) => !usedPageIds || !usedPageIds.has(String(p.pageid)))
+    .filter((p) => !usedPageIds || !usedPageIds.has(`wm-${p.pageid}`))
     .filter((p) => !LOGO_TITLE_PATTERN.test(p.title || ''))
     .map((p) => ({ pageid: p.pageid, title: p.title, info: (p.imageinfo && p.imageinfo[0]) || null }))
     .filter(
@@ -171,7 +174,50 @@ async function searchWikimedia(query, usedPageIds) {
         /\.(jpe?g|png)(\?|$)/i.test(c.info.thumburl) &&
         /\.(jpe?g|png)(\?|$)/i.test(c.info.url)
     )
-    .filter((c) => !isPersonPortrait(c.title, c.info.extmetadata));
+    .filter((c) => !isPersonPortrait(c.title, c.info.extmetadata))
+    .map((c) => {
+      const meta = c.info.extmetadata || {};
+      const artist = ((meta.Artist && meta.Artist.value) || 'Không rõ tác giả').replace(/<[^>]+>/g, '').trim();
+      const license = (meta.LicenseShortName && meta.LicenseShortName.value) || 'Wikimedia Commons';
+      return {
+        pageid: `wm-${c.pageid}`,
+        thumburl: c.info.thumburl,
+        credit: `Ảnh: ${artist} — Wikimedia Commons (${license})`,
+      };
+    });
+}
+
+// Openverse (openverse.org) — gom ảnh CC-license từ nhiều nguồn hơn hẳn 1
+// mình Wikimedia Commons (Flickr Commons, bảo tàng, kho ảnh mở...), không
+// cần API key. Đặc biệt quan trọng cho chuyên mục Giải trí: Wikimedia hầu
+// như không có ảnh tự do về sự kiện thảm đỏ/thời trang/hậu trường showbiz,
+// trong khi Openverse có hàng trăm kết quả cho đúng loại này.
+async function searchOpenverse(query, usedPageIds) {
+  const apiUrl =
+    'https://api.openverse.org/v1/images/?' +
+    `q=${encodeURIComponent(query)}&license_type=commercial&mature=false&page_size=30`;
+
+  try {
+    const res = await fetch(apiUrl, { headers: { 'user-agent': 'DinhThiAi-NewsFactory/1.0' } });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.results || [])
+      .filter((r) => !usedPageIds || !usedPageIds.has(`ov-${r.id}`))
+      .filter((r) => !r.mature)
+      .filter((r) => !LOGO_TITLE_PATTERN.test(r.title || ''))
+      .filter((r) => r.url && /\.(jpe?g|png)(\?|$)/i.test(r.url))
+      .filter((r) => !isPersonPortrait(r.title, null))
+      .map((r) => ({
+        pageid: `ov-${r.id}`,
+        thumburl: r.thumbnail || r.url,
+        credit:
+          r.attribution ||
+          `Ảnh: ${r.creator || 'Không rõ tác giả'} — Openverse (${r.license || 'CC'})`,
+      }));
+  } catch (err) {
+    console.error('[newsFactory] searchOpenverse failed', err.message);
+    return [];
+  }
 }
 
 // Xác thực bằng Claude (đọc được ảnh) rằng ảnh vừa tải THỰC SỰ minh hoạ đúng
@@ -236,7 +282,12 @@ async function fetchStockImage(categorySlug, usedPageIds, specificQuery, postTit
 
   try {
     for (const query of queries) {
-      const candidates = await searchWikimedia(query, usedPageIds);
+      // Gộp cả 2 nguồn — Openverse thường phong phú hơn hẳn cho các chủ đề
+      // đời thường/sự kiện/con người, Wikimedia mạnh hơn cho khoa học/kỹ
+      // thuật/địa danh. Thử ngẫu nhiên trên toàn bộ gộp, không ưu tiên nguồn
+      // nào để không thiên lệch.
+      const [wm, ov] = await Promise.all([searchWikimedia(query, usedPageIds), searchOpenverse(query, usedPageIds)]);
+      const candidates = [...wm, ...ov];
       if (!candidates.length) continue;
 
       // Thử tối đa 12 ứng viên ngẫu nhiên, tải hẳn từng ảnh về cho tới khi có
@@ -246,7 +297,7 @@ async function fetchStockImage(categorySlug, usedPageIds, specificQuery, postTit
       // đồn/chưa ra mắt), rơi về SVG dù vẫn còn candidate tốt chưa thử tới.
       const shuffled = [...candidates].sort(() => Math.random() - 0.5).slice(0, 12);
       for (const c of shuffled) {
-        const saved = await downloadImage(c.info.thumburl, c.pageid);
+        const saved = await downloadImage(c.thumburl, c.pageid);
         if (!saved) continue;
 
         const relevant = await isImageRelevant(saved, postTitle);
@@ -255,14 +306,7 @@ async function fetchStockImage(categorySlug, usedPageIds, specificQuery, postTit
           continue;
         }
 
-        const meta = c.info.extmetadata || {};
-        const artist = ((meta.Artist && meta.Artist.value) || 'Không rõ tác giả').replace(/<[^>]+>/g, '').trim();
-        const license = (meta.LicenseShortName && meta.LicenseShortName.value) || 'Wikimedia Commons';
-        return {
-          url: saved,
-          credit: `Ảnh: ${artist} — Wikimedia Commons (${license})`,
-          sourceId: String(c.pageid),
-        };
+        return { url: saved, credit: c.credit, sourceId: c.pageid };
       }
     }
     return null;
