@@ -239,10 +239,12 @@ async function fetchStockImage(categorySlug, usedPageIds, specificQuery, postTit
       const candidates = await searchWikimedia(query, usedPageIds);
       if (!candidates.length) continue;
 
-      // Thử tối đa 5 ứng viên ngẫu nhiên, tải hẳn từng ảnh về cho tới khi có
+      // Thử tối đa 12 ứng viên ngẫu nhiên, tải hẳn từng ảnh về cho tới khi có
       // 1 ảnh tải thành công (không chỉ kiểm tra HEAD — phải tải được thật)
-      // VÀ được Claude xác nhận thực sự liên quan tới bài viết.
-      const shuffled = [...candidates].sort(() => Math.random() - 0.5).slice(0, 5);
+      // VÀ được Claude xác nhận thực sự liên quan tới bài viết. Số nhỏ hơn (5)
+      // hay bị "xui" trượt hết với các chủ đề khó tìm ảnh (VD sản phẩm tin
+      // đồn/chưa ra mắt), rơi về SVG dù vẫn còn candidate tốt chưa thử tới.
+      const shuffled = [...candidates].sort(() => Math.random() - 0.5).slice(0, 12);
       for (const c of shuffled) {
         const saved = await downloadImage(c.info.thumburl, c.pageid);
         if (!saved) continue;
