@@ -3472,6 +3472,7 @@ window.addEventListener("popstate", () => {
    cho trẻ ngắm chứ đừng tự tắt, bấm "Tiếp tục" mới sang câu mới. */
 let thuongDangMo = false;
 let thuongDangCho = false;      // đang chờ đọc xong để mở trang thưởng
+let thuongLuot = 0;             // đếm lượt thưởng để xen kẽ pháo hoa và trò chơi
 let thuongSauKhiDong = null;
 let phaoRaf = 0;
 
@@ -3677,7 +3678,10 @@ function advance() {
     return doiDocXong(() => {
       thuongDangCho = false;
       $("#btnNext").disabled = false;
-      moThuong(diTiep);
+      // Xen kẽ: lần này pháo hoa + sticker, lần sau được chơi bắn chữ. Cứ một
+      // kiểu mãi thì phần thưởng hết là phần thưởng.
+      thuongLuot += 1;
+      if (thuongLuot % 2 === 0) banMo(diTiep); else moThuong(diTiep);
     });
   }
   diTiep();
@@ -6464,6 +6468,671 @@ if ("serviceWorker" in navigator) {
     } catch { /* không có service worker thì app vẫn chạy bình thường */ }
   });
 }
+
+/* ---------- 23b. Trò chơi thưởng: BẮN CHỮ ----------
+   Thầy đặt bài: câu thiếu một chữ nằm dưới, các chữ bay lơ lửng trong bóng bay
+   ở trên, dưới cùng là cây cung phải ngắm rồi mới bắn được. Bắn trúng chữ đúng
+   thì chữ bay về lấp vào chỗ trống; bắn nhầm chữ khác thì hiện chữ "No"; để chữ
+   đúng bay khỏi màn hình là thua.
+
+   Chơi nhưng vẫn là học: câu và chữ mồi đều lấy theo ĐÚNG trình độ người học,
+   và bắn trúng thì máy đọc lại cả câu cho nghe. */
+
+const BAN_TONG = 6;          // sáu câu là vừa một quãng nghỉ, dài hơn thì chán
+const BAN_MANG = 3;          // ba lần bắn nhầm
+const BAN_MAU = ["#EF4444", "#F59E0B", "#22C55E", "#3B82F6", "#A855F7", "#EC4899", "#14B8A6"];
+
+/* Chữ mồi phải CÙNG LOẠI với chữ đúng thì mới đáng để cân nhắc. Thầy lấy ví dụ
+   my / the / we — đúng là ba loại chữ nhỏ hay lẫn nhau nhất. */
+const BAN_HO = [
+  ["my", "your", "his", "her", "our", "their", "its"],
+  ["the", "a", "an", "this", "that", "these", "those"],
+  ["i", "you", "he", "she", "we", "they", "it"],
+  ["am", "is", "are", "was", "were", "be"],
+  ["do", "does", "did", "have", "has", "had"],
+  ["in", "on", "at", "to", "from", "with", "for", "of", "by", "about"],
+  ["and", "but", "or", "so", "because"],
+  ["can", "could", "will", "would", "must", "should", "may"],
+  ["not", "very", "too", "also", "always", "never", "often", "sometimes"],
+  ["what", "where", "when", "who", "why", "how"],
+  ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"],
+];
+
+const banGoc = s => String(s || "").toLowerCase().replace(/[^a-z']/g, "");
+
+/* Kho câu theo trình độ: câu luyện của bài + câu ví dụ của từng từ vựng. Lấy
+   bậc đang học TRỞ XUỐNG, y như kho mồi nhiễu của các bài tập khác. */
+let BAN_KHO = { lv: null, ds: null };
+function banKhoCau() {
+  if (BAN_KHO.lv === S.level && BAN_KHO.ds) return BAN_KHO.ds;
+  const thu = COURSE.levels.findIndex(l => l.id === S.level);
+  const dsLv = COURSE.levels.slice(0, thu < 0 ? 1 : thu + 1);
+  const gap = new Set();
+  const ds = [];
+  const them = (en, vi) => {
+    const c = String(en || "").trim();
+    if (!c || !vi) return;
+    const so = c.replace(/[.,!?]/g, "").split(/\s+/).filter(Boolean);
+    if (so.length < 3 || so.length > 8) return;      // ngắn quá thì không có gì để đoán
+    const k = c.toLowerCase();
+    if (gap.has(k)) return;
+    gap.add(k);
+    ds.push({ en: c, vi: String(vi).trim(), tu: so });
+  };
+  for (const lv of dsLv) {
+    for (const u of lv.units) for (const l of (u.lessons || [])) {
+      (l.sentences || []).forEach(s => them(s.en, s.vi));
+      (l.teach || []).forEach(s => { if (s.ex) them(s.ex.en, s.ex.vi); });
+    }
+  }
+  BAN_KHO = { lv: S.level, ds };
+  return ds;
+}
+
+/** Chọn chỗ khoét và hai chữ mồi. Ưu tiên khoét chữ nhỏ có họ hàng — đó mới là
+    chỗ người học hay sai, và mồi mới cùng loại để phải nghĩ thật. */
+function banRaDe() {
+  const kho = banKhoCau();
+  if (!kho.length) return null;
+  for (const c of shuffle(kho).slice(0, 40)) {
+    const co = c.tu.map(banGoc);
+    // Vòng 1: tìm chữ có họ. Vòng 2: chấp nhận chữ bất kỳ, mồi lấy từ kho từ.
+    for (const chiHo of [true, false]) {
+      const thu = shuffle(c.tu.map((t, i) => i));
+      for (const i of thu) {
+        const g = co[i];
+        if (!g || g.length < 1) continue;
+        if (co.filter(x => x === g).length > 1) continue;   // chữ lặp thì khoét xong mơ hồ
+        const ho = BAN_HO.find(h => h.includes(g));
+        if (chiHo && !ho) continue;
+        let moi = [];
+        if (ho) {
+          moi = shuffle(ho.filter(x => x !== g && !co.includes(x))).slice(0, 2);
+        } else {
+          const kt = khoTheoBac().single || SINGLE;
+          moi = shuffle(kt.map(w => w.en.toLowerCase())
+            .filter(x => /^[a-z]+$/.test(x) && x !== g && !co.includes(x)
+                      && Math.abs(x.length - g.length) <= 3))
+            .slice(0, 2);
+        }
+        if (moi.length < 2) continue;
+        // Ba quả bóng phải viết hoa/thường GIỐNG HỆT nhau. Để nguyên chữ đúng
+        // là "They" còn hai chữ mồi là "you", "i" thì nhìn cái biết ngay, khỏi
+        // cần nghĩ — thành ra trò chơi chẳng dạy được gì.
+        const hoaCa = i === 0 || /^[A-Z]/.test(c.tu[i]);
+        const hien = w => (hoaCa ? w.charAt(0).toUpperCase() + w.slice(1)
+                                 : (w === "i" ? "I" : w));
+        return {
+          en: c.en, vi: c.vi,
+          truoc: c.tu.slice(0, i).join(" "),
+          sau: c.tu.slice(i + 1).join(" "),
+          dap: c.tu[i],                 // giữ nguyên hoa/thường và dấu câu để lấp vào cho khớp
+          goc: g,
+          chu: shuffle([g, ...moi].map(hien)),
+        };
+      }
+    }
+  }
+  return null;
+}
+
+/* ---- Trạng thái ván chơi ---- */
+const BAN = {
+  mo: false, raf: 0, truoc: 0,
+  cv: null, ctx: null, W: 0, H: 0,
+  bong: [], hat: [], may: [], ten: null,
+  goc: 0, luc: .62, keo: false, ngam: false,
+  diem: 0, mang: BAN_MANG, vong: 0, de: null, cho: true,
+};
+let banSauKhiDong = null;
+
+/* ---- Tiếng: tự tổng hợp cho nhẹ, không thêm file nào ---- */
+function banTiengCung() {
+  if (!S.sound) return;
+  const a = tiengSanSang(); if (!a) return;
+  const t = a.currentTime + .01;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = "triangle";
+  o.frequency.setValueAtTime(300, t);
+  o.frequency.exponentialRampToValueAtTime(88, t + .13);
+  g.gain.setValueAtTime(.11, t);
+  g.gain.exponentialRampToValueAtTime(.0001, t + .16);
+  o.connect(g); g.connect(ra(a));
+  o.start(t); o.stop(t + .18);
+}
+function banTiengDung() {
+  if (!S.sound) return;
+  const a = tiengSanSang(); if (!a) return;
+  const t = a.currentTime + .01;
+  [1046.5, 1318.5].forEach((f, i) => {
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = "sine"; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t + i * .1);
+    g.gain.exponentialRampToValueAtTime(.1, t + i * .1 + .02);
+    g.gain.exponentialRampToValueAtTime(.0001, t + i * .1 + .26);
+    o.connect(g); g.connect(ra(a));
+    o.start(t + i * .1); o.stop(t + i * .1 + .3);
+  });
+}
+function banTiengSai() {
+  if (!S.sound) return;
+  const a = tiengSanSang(); if (!a) return;
+  const t = a.currentTime + .01;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = "square";
+  o.frequency.setValueAtTime(196, t);
+  o.frequency.setValueAtTime(146, t + .13);
+  g.gain.setValueAtTime(.07, t);
+  g.gain.setValueAtTime(.07, t + .13);
+  g.gain.exponentialRampToValueAtTime(.0001, t + .3);
+  o.connect(g); g.connect(ra(a));
+  o.start(t); o.stop(t + .32);
+}
+
+/* ---- Dựng màn ---- */
+function banCoCanvas() {
+  const cv = BAN.cv;
+  const tl = Math.min(window.devicePixelRatio || 1, 2);
+  BAN.W = cv.clientWidth;
+  BAN.H = cv.clientHeight;
+  cv.width = Math.round(BAN.W * tl);
+  cv.height = Math.round(BAN.H * tl);
+  BAN.ctx.setTransform(tl, 0, 0, tl, 0, 0);
+}
+const banGocCung = () => ({ x: BAN.W / 2, y: BAN.H - 40 });
+
+function banMayMoi() {
+  BAN.may = [];
+  for (let i = 0; i < 4; i++) {
+    BAN.may.push({
+      x: Math.random() * BAN.W, y: 30 + Math.random() * (BAN.H * .55),
+      r: 26 + Math.random() * 26, toc: 4 + Math.random() * 7, mo: .06 + Math.random() * .07,
+    });
+  }
+}
+
+/** Đặt một quả bóng: đo chữ trước để quả bóng vừa đúng chữ, chữ dài không tràn. */
+function banQua(chu, dung, y) {
+  const c = BAN.ctx;
+  c.font = "900 17px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  const rong = c.measureText(chu).width;
+  const rx = clamp(rong / 2 + 17, 30, BAN.W / 2 - 14);
+  return {
+    chu, dung, rx, ry: rx * 1.14,
+    x: 0, y,
+    pha: Math.random() * Math.PI * 2,
+    lac: 8 + Math.random() * 10,
+    toc: 10 + Math.random() * 4 + BAN.vong * 1.1,   // bay chậm cho kịp ngắm
+    mau: BAN_MAU[Math.floor(Math.random() * BAN_MAU.length)],
+  };
+}
+
+/** Xếp bóng dàn ngang, không quả nào chồng lên quả nào. */
+function banXepNgang() {
+  const n = BAN.bong.length;
+  if (!n) return;
+  const o = BAN.W / n;
+  BAN.bong.forEach((b, i) => {
+    b.x = clamp(o * (i + .5) + (Math.random() - .5) * (o * .3), b.rx + 6, BAN.W - b.rx - 6);
+    b.goc0 = b.x;
+  });
+}
+
+function banVongMoi() {
+  const de = banRaDe();
+  if (!de) { toast("Chưa đủ câu để chơi ở trình độ này."); return banDong(); }
+  BAN.de = de;
+  BAN.vong += 1;
+  BAN.cho = false;
+  BAN.ten = null;
+  BAN.hat = [];
+
+  // Câu có chỗ trống ở dưới
+  const o = $("#banCau");
+  o.textContent = "";
+  if (de.truoc) o.append(de.truoc + " ");
+  const trong = el("span", "ban-o", ".....");
+  trong.id = "banO";
+  o.append(trong);
+  if (de.sau) o.append(" " + de.sau);
+  $("#banViet").textContent = de.vi;
+
+  BAN.bong = de.chu.map((chu, i) =>
+    banQua(chu, banGoc(chu) === de.goc, BAN.H * (.50 + i * .12) + Math.random() * 16));
+  banXepNgang();
+  banVeMang();
+  $("#banBan").disabled = false;
+  $("#banChi").textContent = "Câu " + BAN.vong + "/" + BAN_TONG + " — nghe câu rồi bắn vào chữ còn thiếu.";
+  // Đọc CẢ CÂU đầy đủ ngay từ đầu. Không đọc thì có câu ba chữ mồi đều đúng
+  // ngữ pháp (Open his/their/your notebook) — người học bắn đúng vẫn bị báo
+  // sai, thế là oan. Nghe rồi thì chỉ còn một chữ đúng, mà lại được luyện nghe.
+  clearTimeout(banDocHen);
+  banDocHen = setTimeout(() => { if (BAN.mo) speak(de.en, false, "en-GB"); }, 420);
+}
+let banDocHen = null;
+
+function banVeMang() {
+  // Vẽ tim bằng ký tự thường rồi tô màu bằng CSS: hình trái tim emoji mỗi máy
+  // một kiểu, có máy ra tim đen thui, nhìn không biết còn mấy mạng.
+  const o = $("#banMang");
+  o.textContent = "";
+  for (let i = 0; i < BAN_MANG; i++) {
+    o.append(el("span", "ban-tim" + (i < BAN.mang ? "" : " tat"), "♥"));
+  }
+  $("#banDiem").textContent = BAN.diem;
+}
+
+function banKeu(chu, loai) {
+  const p = $("#banKeu");
+  p.hidden = true;
+  p.textContent = chu;
+  p.className = "ban-keu " + loai;
+  void p.offsetWidth;            // ép vẽ lại để chạy lại hoạt hình
+  p.hidden = false;
+  clearTimeout(banKeuHen);
+  banKeuHen = setTimeout(() => { p.hidden = true; }, 900);
+}
+let banKeuHen = null;
+
+/* ---- Bắn ---- */
+function banNhaTen() {
+  if (BAN.cho || BAN.ten || !BAN.mo) return;
+  const g = banGocCung();
+  const v = 470 + BAN.luc * 470;
+  BAN.ten = {
+    x: g.x + Math.sin(BAN.goc) * 42, y: g.y - Math.cos(BAN.goc) * 42,
+    vx: Math.sin(BAN.goc) * v, vy: -Math.cos(BAN.goc) * v, vet: [],
+  };
+  $("#banBan").disabled = true;
+  banTiengCung();
+}
+
+function banNo(b) {
+  for (let i = 0; i < 16; i++) {
+    const a = Math.random() * Math.PI * 2, s = 60 + Math.random() * 180;
+    BAN.hat.push({ x: b.x, y: b.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, mau: b.mau, doi: 1 });
+  }
+  keuNo(0);
+}
+
+/** Chữ vừa bắn trúng bay xuống lấp vào ô trống. */
+function banChuBayVe(b) {
+  const o = $("#banO");
+  const cv = BAN.cv.getBoundingClientRect();
+  const s = el("span", "ban-bay", b.chu);
+  s.style.left = (cv.left + b.x) + "px";
+  s.style.top = (cv.top + b.y) + "px";
+  document.body.appendChild(s);
+  requestAnimationFrame(() => {
+    const r = o.getBoundingClientRect();
+    s.style.left = (r.left + r.width / 2) + "px";
+    s.style.top = (r.top + r.height / 2) + "px";
+    s.style.fontSize = "1.32rem";
+  });
+  setTimeout(() => {
+    s.remove();
+    o.textContent = BAN.de.dap.replace(/[.,!?]/g, "");
+    o.classList.add("day");
+  }, 640);
+}
+
+function banTrungDung(b) {
+  BAN.cho = true;
+  BAN.diem += 10;
+  banNo(b);
+  BAN.bong = BAN.bong.filter(x => x !== b);
+  banKeu("Yes!", "dung");
+  banTiengDung();
+  banChuBayVe(b);
+  banVeMang();
+  setTimeout(() => { if (BAN.mo) speak(BAN.de.en, false, "en-GB"); }, 700);
+  setTimeout(() => {
+    if (!BAN.mo) return;
+    if (BAN.vong >= BAN_TONG) return banXong(true);
+    banVongMoi();
+  }, 2100);
+}
+
+function banTrungSai(b) {
+  banNo(b);
+  BAN.bong = BAN.bong.filter(x => x !== b);
+  BAN.mang -= 1;
+  banKeu("No", "sai");
+  banTiengSai();
+  banVeMang();
+  if (BAN.mang <= 0) return banXong(false, "Bắn nhầm ba lần rồi.");
+  // Thả lại một chữ mồi khác cho bầu trời khỏi vắng, mà cũng khó dần lên.
+  const co = new Set(BAN.bong.map(x => banGoc(x.chu)).concat(BAN.de.goc));
+  const ho = BAN_HO.find(h => h.includes(BAN.de.goc));
+  const con = (ho || []).filter(x => !co.has(x));
+  if (con.length) {
+    const q = banQua(con[Math.floor(Math.random() * con.length)], false, BAN.H + 40);
+    q.x = clamp(Math.random() * BAN.W, q.rx + 6, BAN.W - q.rx - 6);
+    q.goc0 = q.x;
+    BAN.bong.push(q);
+  }
+}
+
+function banXong(thang, vi) {
+  BAN.cho = true;
+  BAN.ten = null;
+  $("#banBan").disabled = true;
+  $("#banHetTit").textContent = thang ? "Giỏi quá!" : "Hết lượt rồi";
+  $("#banHetSub").textContent = thang
+    ? "Bắn trúng cả " + BAN_TONG + " câu, được " + BAN.diem + " điểm."
+    : (vi || "Chữ đúng bay mất rồi.") + " Được " + BAN.diem + " điểm.";
+  $("#banHet").hidden = false;
+  if (thang) phatVoTay();
+}
+
+/* ---- Vẽ ---- */
+function banVeMay(c) {
+  for (const m of BAN.may) {
+    c.fillStyle = "rgba(255,255,255," + m.mo + ")";
+    c.beginPath();
+    c.ellipse(m.x, m.y, m.r * 1.7, m.r * .62, 0, 0, Math.PI * 2);
+    c.fill();
+    c.beginPath();
+    c.ellipse(m.x - m.r * .5, m.y - m.r * .2, m.r * .8, m.r * .5, 0, 0, Math.PI * 2);
+    c.fill();
+  }
+}
+
+function banVeBong(c, b) {
+  // Dây bóng
+  c.strokeStyle = "rgba(255,255,255,.5)";
+  c.lineWidth = 1.4;
+  c.beginPath();
+  c.moveTo(b.x, b.y + b.ry);
+  c.quadraticCurveTo(b.x + 7, b.y + b.ry + 16, b.x - 3, b.y + b.ry + 30);
+  c.stroke();
+  // Nút thắt
+  c.fillStyle = b.mau;
+  c.beginPath();
+  c.moveTo(b.x - 5, b.y + b.ry - 1);
+  c.lineTo(b.x + 5, b.y + b.ry - 1);
+  c.lineTo(b.x, b.y + b.ry + 7);
+  c.closePath(); c.fill();
+  // Thân bóng
+  const g = c.createRadialGradient(b.x - b.rx * .34, b.y - b.ry * .38, 2, b.x, b.y, b.rx * 1.25);
+  g.addColorStop(0, "rgba(255,255,255,.55)");
+  g.addColorStop(.35, b.mau);
+  g.addColorStop(1, "rgba(0,0,0,.28)");
+  c.fillStyle = g;
+  c.beginPath(); c.ellipse(b.x, b.y, b.rx, b.ry, 0, 0, Math.PI * 2); c.fill();
+  c.strokeStyle = "rgba(255,255,255,.35)"; c.lineWidth = 1.5; c.stroke();
+  // Chữ
+  c.font = "900 17px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillStyle = "rgba(0,0,0,.45)";
+  c.fillText(b.chu, b.x, b.y + 1.5);
+  c.fillStyle = "#fff";
+  c.fillText(b.chu, b.x, b.y);
+}
+
+function banVeCung(c) {
+  const g = banGocCung();
+  c.save();
+  c.translate(g.x, g.y);
+  c.rotate(BAN.goc);
+  // Cánh cung
+  c.strokeStyle = "#8B5A2B"; c.lineWidth = 6; c.lineCap = "round";
+  c.beginPath(); c.arc(0, 0, 34, -Math.PI * .78, -Math.PI * .22, false); c.stroke();
+  // Dây cung, kéo lùi theo lực
+  const k = 6 + BAN.luc * 16;
+  const t1 = { x: Math.cos(-Math.PI * .78) * 34, y: Math.sin(-Math.PI * .78) * 34 };
+  const t2 = { x: Math.cos(-Math.PI * .22) * 34, y: Math.sin(-Math.PI * .22) * 34 };
+  c.strokeStyle = "rgba(255,255,255,.85)"; c.lineWidth = 1.6;
+  c.beginPath(); c.moveTo(t1.x, t1.y); c.lineTo(0, k); c.lineTo(t2.x, t2.y); c.stroke();
+  // Mũi tên đặt sẵn trên dây, chỉ vẽ khi chưa có tên nào đang bay
+  if (!BAN.ten) {
+    c.strokeStyle = "#F1F5F9"; c.lineWidth = 3;
+    c.beginPath(); c.moveTo(0, k); c.lineTo(0, k - 52); c.stroke();
+    c.fillStyle = "#FDE68A";
+    c.beginPath();
+    c.moveTo(0, k - 62); c.lineTo(-6, k - 48); c.lineTo(6, k - 48);
+    c.closePath(); c.fill();
+    c.strokeStyle = "#CBD5E1"; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(-5, k + 4); c.lineTo(0, k - 4); c.lineTo(5, k + 4); c.stroke();
+  }
+  c.restore();
+  // Tay cầm
+  c.fillStyle = "rgba(255,255,255,.16)";
+  c.beginPath(); c.ellipse(g.x, g.y + 22, 30, 12, 0, 0, Math.PI * 2); c.fill();
+}
+
+/** Đường tên sẽ bay — không có nó thì ngắm chỉ là đoán mò. */
+function banVeDuong(c) {
+  if (BAN.ten || BAN.cho) return;
+  const g = banGocCung();
+  const v = 470 + BAN.luc * 470;
+  let x = g.x + Math.sin(BAN.goc) * 42, y = g.y - Math.cos(BAN.goc) * 42;
+  let vx = Math.sin(BAN.goc) * v, vy = -Math.cos(BAN.goc) * v;
+  c.fillStyle = "rgba(255,255,255,.5)";
+  for (let i = 0; i < 46; i++) {
+    vy += 380 * .022; x += vx * .022; y += vy * .022;
+    if (y > BAN.H || x < 0 || x > BAN.W) break;
+    if (i % 3 === 0) { c.beginPath(); c.arc(x, y, 2.1, 0, Math.PI * 2); c.fill(); }
+  }
+}
+
+function banVeTen(c) {
+  const t = BAN.ten;
+  if (!t) return;
+  c.strokeStyle = "rgba(255,255,255,.35)"; c.lineWidth = 2;
+  c.beginPath();
+  t.vet.forEach((p, i) => (i ? c.lineTo(p.x, p.y) : c.moveTo(p.x, p.y)));
+  c.stroke();
+  const a = Math.atan2(t.vy, t.vx);
+  c.save(); c.translate(t.x, t.y); c.rotate(a);
+  c.strokeStyle = "#F1F5F9"; c.lineWidth = 3; c.lineCap = "round";
+  c.beginPath(); c.moveTo(-34, 0); c.lineTo(0, 0); c.stroke();
+  c.fillStyle = "#FDE68A";
+  c.beginPath(); c.moveTo(9, 0); c.lineTo(-3, -5); c.lineTo(-3, 5); c.closePath(); c.fill();
+  c.strokeStyle = "#CBD5E1"; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(-34, -5); c.lineTo(-27, 0); c.lineTo(-34, 5); c.stroke();
+  c.restore();
+}
+
+/* ---- Vòng chạy ---- */
+function banChay(nay) {
+  if (!BAN.mo) return;
+  const dt = Math.min(50, nay - BAN.truoc) / 1000;
+  BAN.truoc = nay;
+  const c = BAN.ctx;
+  c.clearRect(0, 0, BAN.W, BAN.H);
+
+  // Mây trôi
+  for (const m of BAN.may) {
+    m.x += m.toc * dt;
+    if (m.x - m.r * 2 > BAN.W) m.x = -m.r * 2;
+  }
+  banVeMay(c);
+
+  // Bóng bay lên, lắc nhẹ sang hai bên
+  const dangChay = $("#banHet").hidden;   // còn thấy bảng kết thúc thì ván đã dừng
+  for (const b of BAN.bong) {
+    if (dangChay) {
+      b.y -= b.toc * dt;
+      b.pha += dt * 1.1;
+      b.x = clamp(b.goc0 + Math.sin(b.pha) * b.lac, b.rx + 4, BAN.W - b.rx - 4);
+    }
+    banVeBong(c, b);
+  }
+
+  // Bay khỏi màn: chữ đúng bay mất là thua, chữ mồi thì thả lại quả khác
+  if (dangChay && !BAN.cho) {
+    for (const b of BAN.bong.slice()) {
+      if (b.y + b.ry > -4) continue;
+      if (b.dung) { banXong(false, "Chữ đúng bay mất rồi."); break; }
+      b.y = BAN.H + b.ry + 10;
+      b.goc0 = clamp(Math.random() * BAN.W, b.rx + 6, BAN.W - b.rx - 6);
+    }
+  }
+
+  // Hạt bóng nổ
+  for (const h of BAN.hat.slice()) {
+    h.vy += 520 * dt;
+    h.x += h.vx * dt; h.y += h.vy * dt;
+    h.doi -= dt * 1.5;
+    if (h.doi <= 0) { BAN.hat.splice(BAN.hat.indexOf(h), 1); continue; }
+    c.globalAlpha = Math.max(0, h.doi);
+    c.fillStyle = h.mau;
+    c.beginPath(); c.arc(h.x, h.y, 3.2, 0, Math.PI * 2); c.fill();
+    c.globalAlpha = 1;
+  }
+
+  // Mũi tên
+  const t = BAN.ten;
+  if (t) {
+    // Chia nhỏ bước để tên bay nhanh không xuyên qua quả bóng mà không chạm.
+    const buoc = 4;
+    for (let k = 0; k < buoc && BAN.ten; k++) {
+      const d = dt / buoc;
+      t.vy += 380 * d;
+      t.x += t.vx * d; t.y += t.vy * d;
+      for (const b of BAN.bong) {
+        const dx = (t.x - b.x) / b.rx, dy = (t.y - b.y) / b.ry;
+        if (dx * dx + dy * dy <= 1) {
+          BAN.ten = null;
+          $("#banBan").disabled = false;
+          if (b.dung) banTrungDung(b); else banTrungSai(b);
+          break;
+        }
+      }
+    }
+    if (BAN.ten) {
+      t.vet.push({ x: t.x, y: t.y });
+      if (t.vet.length > 12) t.vet.shift();
+      if (t.x < -60 || t.x > BAN.W + 60 || t.y > BAN.H + 60 || t.y < -400) {
+        BAN.ten = null;
+        $("#banBan").disabled = false;
+      }
+    }
+  }
+  banVeTen(c);
+  banVeDuong(c);
+  banVeCung(c);
+
+  BAN.raf = requestAnimationFrame(banChay);
+}
+
+/* ---- Ngắm ---- */
+function banNgamTai(px, py) {
+  const g = banGocCung();
+  const dx = px - g.x, dy = py - g.y;
+  if (dy > -12) return;                       // chỉ ngắm lên trời
+  BAN.goc = clamp(Math.atan2(dx, -dy), -1.15, 1.15);
+  const xa = Math.hypot(dx, dy);
+  BAN.luc = clamp(xa / (BAN.H * .72), .35, 1);
+}
+
+function banGanTay() {
+  // Gắn tay nghe ngay lúc nạp app, nên phải tự tìm lấy canvas — banMo() chạy sau.
+  const cv = $("#banTroi");
+  BAN.cv = cv;
+  BAN.ctx = cv.getContext("2d");
+  const toa = e => {
+    const r = cv.getBoundingClientRect();
+    return [e.clientX - r.left, e.clientY - r.top];
+  };
+  cv.addEventListener("pointerdown", e => {
+    if (BAN.cho || BAN.ten) return;
+    BAN.keo = true;
+    try { cv.setPointerCapture(e.pointerId); } catch { /* thôi */ }
+    banNgamTai(...toa(e));
+  });
+  cv.addEventListener("pointermove", e => { if (BAN.keo) banNgamTai(...toa(e)); });
+  const tha = () => { if (!BAN.keo) return; BAN.keo = false; banNhaTen(); };
+  cv.addEventListener("pointerup", tha);
+  cv.addEventListener("pointercancel", () => { BAN.keo = false; });
+
+  const xoay = d => { BAN.goc = clamp(BAN.goc + d, -1.15, 1.15); };
+  // Giữ nút thì cung xoay đều, không phải bấm từng nhát.
+  [["#banTrai", -.07], ["#banPhai", .07]].forEach(([id, d]) => {
+    const n = $(id);
+    let hen = null, lap = null;
+    const thoi = () => { clearTimeout(hen); clearInterval(lap); hen = lap = null; };
+    n.addEventListener("pointerdown", () => {
+      xoay(d);
+      hen = setTimeout(() => { lap = setInterval(() => xoay(d), 60); }, 340);
+    });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => n.addEventListener(ev, thoi));
+  });
+  $("#banBan").addEventListener("click", banNhaTen);
+}
+
+/* ---- Mở / đóng ---- */
+function banMo(xong) {
+  const v = $("#banView");
+  if (!v) { xong && xong(); return; }
+  if (!banKhoCau().length) { toast("Chưa đủ câu để chơi ở trình độ này."); xong && xong(); return; }
+  banSauKhiDong = xong || null;
+  BAN.cv = $("#banTroi");
+  BAN.ctx = BAN.cv.getContext("2d");
+  v.hidden = false;
+  document.body.style.overflow = "hidden";
+  thuongDangMo = true;                       // dùng chung khoá với trang thưởng
+  BAN.mo = true;
+  BAN.diem = 0; BAN.mang = BAN_MANG; BAN.vong = 0;
+  BAN.goc = 0; BAN.luc = .62; BAN.ten = null; BAN.hat = [];
+  $("#banHet").hidden = true;
+  $("#banKeu").hidden = true;
+  banCoCanvas();
+  banMayMoi();
+  banVongMoi();
+  BAN.truoc = performance.now();
+  cancelAnimationFrame(BAN.raf);
+  BAN.raf = requestAnimationFrame(banChay);
+}
+
+function banDong() {
+  cancelAnimationFrame(BAN.raf);
+  clearTimeout(banDocHen);
+  BAN.mo = false;
+  BAN.keo = false;
+  stopSpeak();
+  $("#banView").hidden = true;
+  $("#banHet").hidden = true;
+  // Đóng trò chơi mà bên dưới còn màn học hay trang kết quả thì PHẢI giữ nguyên
+  // khoá cuộn của lớp đó, không thì trang nền tự trôi lung tung.
+  const conMo = !$("#player").hidden || !$("#result").hidden;
+  document.body.style.overflow = conMo ? "hidden" : "";
+  thuongDangMo = false;
+  thuongDangCho = false;
+  try { $("#btnNext").disabled = false; } catch { /* thôi */ }
+  const f = banSauKhiDong;
+  banSauKhiDong = null;
+  f && f();
+}
+
+$("#banNghe").addEventListener("click", () => { if (BAN.de) speak(BAN.de.en, false, "en-GB"); });
+$("#btnBanDong").addEventListener("click", banDong);
+$("#banHetVe").addEventListener("click", banDong);
+$("#banHetLai").addEventListener("click", () => {
+  BAN.diem = 0; BAN.mang = BAN_MANG; BAN.vong = 0;
+  BAN.goc = 0; BAN.luc = .62; BAN.ten = null; BAN.hat = [];
+  $("#banHet").hidden = true;
+  banVongMoi();
+  $("#banBan").disabled = false;
+});
+$("#btnResChoi").addEventListener("click", () => banMo(null));
+banGanTay();
+
+// Xoay máy hay hiện bàn phím thì khung đổi cỡ — phải dựng lại canvas, không thì
+// bóng bay nằm lệch ra ngoài chỗ chạm được.
+window.addEventListener("resize", () => {
+  if (!BAN.mo) return;
+  const cu = BAN.W;
+  banCoCanvas();
+  const ti = cu ? BAN.W / cu : 1;
+  BAN.bong.forEach(b => {
+    b.rx = Math.min(b.rx, BAN.W / 2 - 14);
+    b.ry = b.rx * 1.14;
+    b.goc0 = clamp((b.goc0 || b.x) * ti, b.rx + 6, BAN.W - b.rx - 6);
+    b.x = b.goc0;
+  });
+});
 
 /* ---------- 24. Khởi động ---------- */
 rollPeriods();

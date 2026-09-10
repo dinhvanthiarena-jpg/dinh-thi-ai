@@ -2161,6 +2161,9 @@
     </div>
     <p class="res-boi" id="resBoi" hidden></p>
     <p class="res-note" id="resNote"></p>
+    <button class="btn btn-choi btn-block" id="btnResChoi" type="button">
+      <span aria-hidden="true">🎈</span> Chơi thưởng — Bắn chữ
+    </button>
     <button class="btn btn-primary btn-block" id="btnResDone" type="button">Tiếp tục</button>
   </div>
 </div>
@@ -2308,6 +2311,55 @@
     </button>
     <p class="thuong-sub" id="thuongSub">Đúng 3 câu liền rồi đó.</p>
     <button class="btn btn-primary btn-block" id="btnThuongTiep" type="button">Tiếp tục</button>
+  </div>
+</div>
+
+<!-- ============ TRÒ CHƠI THƯỞNG: BẮN CHỮ ============
+     Câu thiếu một chữ nằm dưới, các chữ bay trong bóng bay ở trên. Bắn trúng
+     chữ đúng thì nó bay xuống lấp vào chỗ trống; để chữ đúng bay mất là thua.
+     Chơi vẫn là học: câu và chữ đều lấy theo đúng trình độ người học. -->
+<div class="ban" id="banView" hidden role="dialog" aria-modal="true" aria-labelledby="banTitle">
+  <header class="ban-bar">
+    <button class="icon-btn" id="btnBanDong" type="button" aria-label="Đóng trò chơi">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+    <span class="ban-bar-tit" id="banTitle">Bắn chữ</span>
+    <span class="ban-mang" id="banMang" aria-label="Số lần bắn sai còn được phép"></span>
+    <span class="ban-diem"><b id="banDiem">0</b> điểm</span>
+  </header>
+
+  <div class="ban-troi-boc">
+    <canvas class="ban-troi" id="banTroi"></canvas>
+    <p class="ban-keu" id="banKeu" hidden aria-live="assertive"></p>
+  </div>
+
+  <div class="ban-duoi">
+    <p class="ban-cau" id="banCau"></p>
+    <p class="ban-viet" id="banViet"></p>
+    <button class="ban-nghe" id="banNghe" type="button">
+      <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sound"/></svg>
+      Nghe lại câu
+    </button>
+    <div class="ban-tay">
+      <button class="ban-chinh" id="banTrai" type="button" aria-label="Xoay cung sang trái">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-left"/></svg>
+      </button>
+      <button class="ban-nut" id="banBan" type="button">Bắn</button>
+      <button class="ban-chinh" id="banPhai" type="button" aria-label="Xoay cung sang phải">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
+      </button>
+    </div>
+    <p class="ban-chi" id="banChi">Kéo trên bầu trời để ngắm, thả tay là tên bay.</p>
+  </div>
+
+  <div class="ban-het" id="banHet" hidden>
+    <div class="ban-het-in">
+      <div class="ban-het-hinh" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+      <h3 id="banHetTit">Hết lượt rồi</h3>
+      <p class="ban-het-sub" id="banHetSub"></p>
+      <button class="btn btn-primary btn-block" id="banHetLai" type="button">Chơi lại</button>
+      <button class="btn btn-soft btn-block mt" id="banHetVe" type="button">Học tiếp</button>
+    </div>
   </div>
 </div>
 
