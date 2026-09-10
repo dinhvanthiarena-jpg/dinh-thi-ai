@@ -198,7 +198,7 @@ async function isImageRelevant(localPath, postTitle) {
         model: MODEL,
         max_tokens: 10,
         system:
-          'Bạn xét duyệt ảnh bìa cho 1 bài blog. Xem ảnh và tiêu đề bài viết, trả lời DUY NHẤT 1 từ: "CO" nếu ảnh hợp lý để minh hoạ tiêu đề đó (không cần khớp 100% chi tiết, chỉ cần cùng chủ đề, không gây hiểu lầm), hoặc "KHONG" nếu ảnh hoàn toàn lạc đề (VD: sơ đồ/biểu đồ kỹ thuật không liên quan, phương tiện/đồ vật không liên quan, ảnh cận mặt 1 người cụ thể không được nhắc tới trong tiêu đề). Không giải thích gì thêm.',
+          'Bạn xét duyệt ảnh bìa cho 1 bài blog tin tức. Đây là ảnh MINH HOẠ chung, KHÔNG phải ảnh báo chí phải khớp đúng sự kiện cụ thể — tiêu chuẩn chấp nhận PHẢI RỘNG, giống cách các trang tin dùng ảnh stock chung chung (văn phòng, biểu đồ, thành phố, bàn làm việc, con người đang làm việc...) cho hầu hết mọi bài. Trả lời DUY NHẤT 1 từ: "CO" nếu ảnh thuộc cùng LĨNH VỰC/NGỮ CẢNH LỚN với tiêu đề (VD: bất kỳ ảnh văn phòng/biểu đồ/tài chính/thành phố nào đều hợp lệ cho bài kinh doanh dù không khớp đúng công ty hay sự kiện cụ thể trong tiêu đề; ảnh laptop/mạch điện tử/máy tính đều hợp lệ cho bài công nghệ nói chung), chỉ trả lời "KHONG" khi ảnh thuộc HẲN MỘT LĨNH VỰC KHÁC không liên quan gì (VD: sơ đồ khoa học nhận thức/sinh học cho bài về điện thoại, ảnh động vật cho bài tài chính, ảnh chiếc xe hơi cho bài về smartphone) hoặc là ảnh cận mặt 1 người có tên cụ thể không hề được nhắc tới trong tiêu đề. Khi phân vân, LUÔN trả lời "CO". Không giải thích gì thêm.',
         messages: [
           {
             role: 'user',
