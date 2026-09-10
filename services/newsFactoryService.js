@@ -288,6 +288,9 @@ async function fetchStockImage(categorySlug, usedPageIds, specificQuery, postTit
       // nào để không thiên lệch.
       const [wm, ov] = await Promise.all([searchWikimedia(query, usedPageIds), searchOpenverse(query, usedPageIds)]);
       const candidates = [...wm, ...ov];
+      if (process.env.NEWSFACTORY_DEBUG) {
+        console.log(`[fetchStockImage] query="${query}" wikimedia=${wm.length} openverse=${ov.length}`);
+      }
       if (!candidates.length) continue;
 
       // Thử tối đa 12 ứng viên ngẫu nhiên, tải hẳn từng ảnh về cho tới khi có
@@ -298,14 +301,19 @@ async function fetchStockImage(categorySlug, usedPageIds, specificQuery, postTit
       const shuffled = [...candidates].sort(() => Math.random() - 0.5).slice(0, 12);
       for (const c of shuffled) {
         const saved = await downloadImage(c.thumburl, c.pageid);
-        if (!saved) continue;
+        if (!saved) {
+          if (process.env.NEWSFACTORY_DEBUG) console.log(`[fetchStockImage]  ${c.pageid} — tải ảnh LỖI`);
+          continue;
+        }
 
         const relevant = await isImageRelevant(saved, postTitle);
         if (!relevant) {
+          if (process.env.NEWSFACTORY_DEBUG) console.log(`[fetchStockImage]  ${c.pageid} — Vision: KHONG liên quan`);
           fs.unlink(path.join(__dirname, '..', 'public', saved.replace(/^\//, '')), () => {});
           continue;
         }
 
+        if (process.env.NEWSFACTORY_DEBUG) console.log(`[fetchStockImage]  ${c.pageid} — Vision: CO, dùng ảnh này`);
         return { url: saved, credit: c.credit, sourceId: c.pageid };
       }
     }
