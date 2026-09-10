@@ -3,6 +3,7 @@
 // khảo, rồi tự đăng lên blog. Chạy định kỳ từ services/contentScheduler.js.
 const fs = require('fs');
 const path = require('path');
+const { execFile } = require('child_process');
 const { Op } = require('sequelize');
 const BlogPost = require('../models/BlogPost');
 const { parseRss } = require('../utils/rssParser');
@@ -193,26 +194,46 @@ async function searchWikimedia(query, usedPageIds) {
 // như không có ảnh tự do về sự kiện thảm đỏ/thời trang/hậu trường showbiz,
 // trong khi Openverse có hàng trăm kết quả cho đúng loại này.
 //
-// QUAN TRỌNG: Openverse đứng sau Cloudflare — User-Agent dạng tên app tự đặt
-// (VD "DinhThiAi-NewsFactory/1.0") bị Cloudflare coi là bot và trả về trang
-// thử thách HTML ("Just a moment...") thay vì JSON, khiến kết quả LUÔN rỗng
-// một cách âm thầm (fetch vẫn trả 200 OK nên không lỗi rõ ràng gì). Phải giả
-// lập User-Agent trình duyệt thật thì Cloudflare mới cho qua.
+// QUAN TRỌNG: Openverse đứng sau Cloudflare, và Cloudflare chặn theo dấu vân
+// tay TLS/HTTP của client gọi tới — không chỉ theo header User-Agent. Đã thử
+// cả `fetch` của Node (dựa trên undici) với User-Agent trình duyệt thật vẫn
+// bị trả về trang thử thách HTML ("Just a moment...") thay vì JSON (lỗi ÂM
+// THẦM: fetch vẫn 200 OK, chỉ là body không phải JSON mong đợi). Trong khi đó
+// `curl` với CÙNG header lại lấy được dữ liệu thật — nên gọi Openverse qua
+// tiến trình `curl` con thay vì `fetch` trực tiếp.
+function execCurl(url) {
+  return new Promise((resolve) => {
+    execFile(
+      'curl',
+      [
+        '-s',
+        '-H',
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+        '-H',
+        'Accept: application/json',
+        url,
+      ],
+      { timeout: 10000, maxBuffer: 5 * 1024 * 1024 },
+      (err, stdout) => {
+        if (err) {
+          console.error('[newsFactory] execCurl failed', err.message);
+          return resolve(null);
+        }
+        resolve(stdout);
+      }
+    );
+  });
+}
+
 async function searchOpenverse(query, usedPageIds) {
   const apiUrl =
     'https://api.openverse.org/v1/images/?' +
     `q=${encodeURIComponent(query)}&license_type=commercial&mature=false&page_size=30`;
 
   try {
-    const res = await fetch(apiUrl, {
-      headers: {
-        'user-agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-        accept: 'application/json',
-      },
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
+    const raw = await execCurl(apiUrl);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
     return (data.results || [])
       .filter((r) => !usedPageIds || !usedPageIds.has(`ov-${r.id}`))
       .filter((r) => !r.mature)
