@@ -30,6 +30,7 @@ const SHELL = [
   "./assets/sticker/s17.webp",
   "./assets/thuong.mp3",
   "./assets/vo-tay.mp3",
+  "./assets/nhac-nen.mp3",
   "./assets/tieng/kho.json",
   "./assets/call-hero.webp",
   "./course-a1.js",

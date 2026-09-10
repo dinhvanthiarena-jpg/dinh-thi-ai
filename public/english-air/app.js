@@ -88,7 +88,7 @@ const DEFAULTS = {
   done: {}, srs: {},
   goal: 30, goalDay: "", todayXp: 0,
   weekXp: 0, weekStart: "", tier: 0,
-  joined: today(), sound: true, motion: false, showVi: true, theme: "",
+  joined: today(), sound: true, nhac: true, motion: false, showVi: true, theme: "",
   kidVoice: false,
   giongChot: 0,   // đánh dấu đã áp giọng mặc định mới, chỉ áp một lần
   ten: "",
@@ -471,6 +471,57 @@ function apToc(u, toc) {
   u.rate = clamp(toc * (u.__heSoToc || 1), 0.4, 1.6);
 }
 
+/* ==================== NHẠC NỀN NHẸ ====================
+   Thầy muốn vào app là có nhạc nhẹ. Ba nguyên tắc để nhạc không thành phiền:
+   1. Rất nhỏ, và TỰ NHỎ HẲN khi app đang đọc bài — tiếng học luôn phải rõ hơn
+      tiếng nhạc, không thì nhạc hoá ra phá bài.
+   2. Chỉ chạy được sau cú chạm đầu tiên: trình duyệt không cho tự phát tiếng,
+      cố phát sớm chỉ tổ bị chặn im lặng.
+   3. Có công tắc tắt hẳn trong Hồ sơ, và nhớ lựa chọn đó. */
+const NHAC_TO = 0.16;         // mức thường
+const NHAC_NHO = 0.045;       // mức lúc đang đọc bài
+let nhacDaMoi = false;
+let nhacHen = null;
+
+function theNhac() { return document.getElementById("amNhac"); }
+
+function batNhac() {
+  const a = theNhac();
+  if (!a || !S.nhac) return;
+  try {
+    a.volume = NHAC_TO;
+    const p = a.play();
+    if (p && p.catch) p.catch(() => { /* máy chưa cho, đợi cú chạm sau */ });
+  } catch { /* thôi */ }
+}
+
+function tatNhac() {
+  const a = theNhac();
+  if (!a) return;
+  try { a.pause(); } catch { /* thôi */ }
+}
+
+/** Hạ nhạc xuống lúc đang đọc, xong tự nâng lại. */
+function nhacNhuong(dang) {
+  const a = theNhac();
+  if (!a || a.paused) return;
+  clearTimeout(nhacHen);
+  if (dang) {
+    a.volume = NHAC_NHO;
+  } else {
+    // Nâng lại sau một nhịp, kẻo câu sau đọc ngay thì nhạc lại vống lên.
+    nhacHen = setTimeout(() => { try { a.volume = NHAC_TO; } catch { /* thôi */ } }, 700);
+  }
+}
+
+// Cú chạm đầu tiên: mồi và bật nhạc. Sau đó gỡ tay nghe, không cần nữa.
+["pointerdown", "touchstart", "keydown"].forEach(ev =>
+  window.addEventListener(ev, () => {
+    if (nhacDaMoi) return;
+    nhacDaMoi = true;
+    batNhac();
+  }, { once: false, passive: true }));
+
 /* ==================== GIỌNG ĐỌC THU SẴN ====================
    Trước đây mọi câu tiếng Anh đều nhờ speechSynthesis của máy đọc. Mỗi điện
    thoại một giọng; nhiều máy bán ở Việt Nam không có giọng tiếng Anh tử tế nên
@@ -539,15 +590,22 @@ function phatTiengThu(duong, slow, xong) {
 function speak(text, slow, lang) {
   if (!S.sound || !text) return;
   lanLuotId += 1;   // cắt lượt đọc nối đang chạy, không thì hai bên chồng tiếng
-  if (phatTiengThu(fileTieng(text, lang), slow)) return;
-  if (!window.speechSynthesis) return;
+  nhacNhuong(true);
+  if (phatTiengThu(fileTieng(text, lang), slow, () => nhacNhuong(false))) return;
+  // Không đọc được bằng máy thì phải trả nhạc về mức cũ ngay, kẻo nhạc cứ nhỏ mãi.
+  if (!window.speechSynthesis) { nhacNhuong(false); return; }
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     dungGiong(u, lang || tiengCua(text));
     apToc(u, slow ? 0.55 : 0.92);
+    const nang = () => nhacNhuong(false);
+    u.onend = nang;
+    u.onerror = nang;
+    // Vài máy nuốt mất onend, nên hẹn thêm một nhịp theo độ dài câu cho chắc.
+    setTimeout(nang, 1200 + text.length * 90);
     speechSynthesis.speak(u);
-  } catch { /* bỏ qua */ }
+  } catch { nhacNhuong(false); }
 }
 
 /* Đọc lần lượt nhiều đoạn, mỗi đoạn một thứ tiếng.
@@ -561,10 +619,11 @@ function docLanLuot(khuc, xong, batDau) {
   const phien = ++lanLuotId;
   try { speechSynthesis.cancel(); } catch { /* bỏ qua */ }
 
+  nhacNhuong(true);
   const doc = i => {
     // Lượt đọc mới đè lên thì lượt cũ dừng hẳn, không chen ngang nhau.
     if (phien !== lanLuotId) return;
-    if (i >= ds.length) { if (xong) xong(); return; }
+    if (i >= ds.length) { nhacNhuong(false); if (xong) xong(); return; }
     const k = ds[i];
     // Có file thu sẵn thì phát file, đọc xong mới sang câu kế.
     const f = fileTieng(k.text, k.lang);
@@ -601,6 +660,7 @@ const stopSpeak = () => {
   // sau trong hàng đợi lại tự chạy tiếp.
   const a = document.getElementById("amDoc");
   if (a) { try { a.onended = null; a.onerror = null; a.pause(); } catch { /* bỏ qua */ } }
+  nhacNhuong(false);
 };
 
 /* iPhone/iPad chỉ cho phát tiếng lần đầu ngay trong lúc ngón tay còn chạm màn hình.
@@ -3231,8 +3291,10 @@ function phatChuoiKaka(ds, xong) {
   const am = $("#amKaka") || new Audio();
   kakaAm = am;
   let i = 0;
+  // Bà phù thuỷ đang nói thì nhạc nền phải nhường, nghe mới rõ.
+  nhacNhuong(true);
   const tiep = () => {
-    if (i >= ds.length) { if (xong) xong(); return; }
+    if (i >= ds.length) { nhacNhuong(false); if (xong) xong(); return; }
     am.src = ds[i++];
     am.muted = false;
     // KHÔNG đặt currentTime ở đây: lúc này tệp chưa nạp xong nên vài trình duyệt
@@ -3348,6 +3410,7 @@ function dungTiengKaka() {
     try { kakaAm.pause(); kakaAm.currentTime = 0; } catch { /* thôi */ }
   }
   try { window.speechSynthesis && speechSynthesis.cancel(); } catch { /* thôi */ }
+  nhacNhuong(false);
 }
 
 /** Dọn màn hình, không đụng vào lịch sử trình duyệt. */
@@ -6071,6 +6134,7 @@ function renderProfile() {
   $("#goalBar").setAttribute("aria-valuenow", pct);
   $$("[data-goal]").forEach(b => b.classList.toggle("on", +b.dataset.goal === S.goal));
   $("#optSound").checked = S.sound;
+  $("#optNhac").checked = S.nhac;
   $("#optMotion").checked = S.motion;
   $("#optVi").checked = S.showVi;
   $("#optKid").checked = S.kidVoice !== false;
@@ -6081,6 +6145,10 @@ $$("[data-goal]").forEach(b => b.addEventListener("click", () => {
   S.goal = +b.dataset.goal; save(); renderProfile(); toast("Mục tiêu: " + S.goal + " XP mỗi ngày");
 }));
 $("#optSound").addEventListener("change", e => { S.sound = e.target.checked; save(); });
+$("#optNhac").addEventListener("change", e => {
+  S.nhac = e.target.checked; save();
+  if (S.nhac) batNhac(); else tatNhac();
+});
 // Nút nghe thử: bấm một cái là biết ngay máy có kêu được không, khỏi phải học
 // ba câu mới thử được tiếng thưởng.
 $("#btnThuTieng").addEventListener("click", () => {
