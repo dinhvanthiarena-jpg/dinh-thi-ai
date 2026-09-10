@@ -184,6 +184,52 @@
     tone(freq * 2.4, start, 0.14, 'sine', peak * 0.35);
   }
 
+  /* ================= NHẠC NỀN ================= *
+   * Nhạc êm phát ngay từ lúc vào app — không dùng file nhạc (bản quyền, nặng
+   * tải), mà tự tạo bằng Web Audio giống hệt cách sfx.* đang làm. Chọn thang
+   * ngũ cung (pentatonic) nên nốt nào ghép với nốt nào cũng êm tai, không cần
+   * soạn giai điệu thật — chỉ cần rải ngẫu nhiên là nghe dễ chịu. */
+  const PENTA = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25]; // Đô trưởng ngũ cung, C4→C5
+  let bgMusicOn = false;
+  let bgMusicTimer = null;
+
+  function padNote(freq, start, dur, peak) {
+    if (muted) return;
+    const c = ctx();
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const t0 = c.currentTime + start;
+    // Lên êm, xuống êm — khác hẳn tiếng "tách" ngắn của sfx.*, cho cảm giác nhạc nền.
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(peak, t0 + dur * 0.35);
+    gain.gain.linearRampToValueAtTime(0, t0 + dur);
+    osc.connect(gain).connect(c.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.05);
+  }
+
+  function bgMusicNote() {
+    if (!bgMusicOn || muted) return;
+    const freq = PENTA[Math.floor(Math.random() * PENTA.length)];
+    padNote(freq, 0, 3.2, 0.032);
+    // Thi thoảng thêm một nốt trầm hơn một quãng tám, rất khẽ, cho có chiều sâu.
+    if (Math.random() < 0.3) padNote(freq / 2, 0.4, 4, 0.018);
+  }
+
+  function startBgMusic() {
+    if (bgMusicOn || muted) return;
+    bgMusicOn = true;
+    bgMusicNote();
+    bgMusicTimer = setInterval(bgMusicNote, 2400);
+  }
+  function stopBgMusic() {
+    bgMusicOn = false;
+    if (bgMusicTimer) clearInterval(bgMusicTimer);
+    bgMusicTimer = null;
+  }
+
   const sfx = {
     click() { tone(700, 0, 0.1, 'triangle', 0.22); },
     correct() {
@@ -654,11 +700,12 @@
     muted = !muted;
     localStorage.setItem('mathgame_muted', muted ? '1' : '0');
     refreshSoundIcon();
-    if (!muted) sfx.click();
+    if (muted) stopBgMusic(); else { sfx.click(); startBgMusic(); }
   });
 
   function unlockAudio() {
     ctx();
+    startBgMusic();
   }
   ['pointerdown', 'touchstart', 'click'].forEach((evt) => {
     document.addEventListener(evt, unlockAudio, { once: true, passive: true });
