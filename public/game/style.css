@@ -410,6 +410,10 @@ button:focus-visible,
   background: var(--brand-fill);
   color: #fff;
 }
+.btn-archery-icon {
+  background: var(--amber-fill);
+  color: #fff;
+}
 
 /* ==== License screen ==== */
 .license-title {
@@ -1643,6 +1647,175 @@ button:focus-visible,
   60% { transform: scale(1.1); }
   100% { transform: scale(1.35); }
 }
+
+/* ==== Bắn Cung Số Học (archery mini-game) ====
+   Cùng kiểu bóng bay/nổ với balloon-tray phía trên, nhưng bóng ở đây trôi
+   dọc theo toạ độ do JS điều khiển (top/left tuyệt đối trong #archeryArena)
+   thay vì nằm cố định trong hàng flex — phần lớn animation chỉ lo hình
+   dáng quả bóng, còn CHUYỂN ĐỘNG (bay lên, bắn cung) do vòng lặp rAF trong
+   app.js quyết định từng khung hình. */
+.archery-round-badge {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: var(--fg);
+  background: var(--card);
+  padding: 6px 14px;
+  border-radius: var(--rf);
+  box-shadow: var(--sh-1);
+  white-space: nowrap;
+}
+.archery-equation {
+  width: 100%;
+  max-width: 640px;
+  padding: 4px 20px 10px;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: clamp(1.6rem, 6vw, 2.4rem);
+  color: var(--fg);
+  flex-shrink: 0;
+}
+.archery-blank {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 0 6px;
+  margin-left: 4px;
+  border-bottom: 4px solid var(--brand-ink);
+  color: var(--brand-ink);
+  transition: color 200ms, transform 200ms;
+}
+.archery-blank.filled { color: var(--ok); transform: scale(1.15); }
+
+.archery-arena {
+  position: relative;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  touch-action: none;
+  cursor: crosshair;
+  background: linear-gradient(180deg, rgba(124,74,32,0.06), transparent 40%);
+}
+.archery-bow {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  width: 40px;
+  height: 80px;
+  margin-left: -20px;
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+}
+.archery-aim-line {
+  position: absolute;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, var(--brand-ink) 0 8px, transparent 8px 14px);
+  transform-origin: 0 50%;
+  pointer-events: none;
+  opacity: 0.75;
+}
+.archery-arrow {
+  position: absolute;
+  width: 46px;
+  height: 6px;
+  margin-top: -3px;
+  transform-origin: 4px 50%;
+  pointer-events: none;
+}
+.archery-arrow::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  width: 40px;
+  height: 2px;
+  background: #d8c8a8;
+}
+.archery-arrow::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: -4px;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 10px solid #b5a184;
+}
+.archery-hint {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 8px 16px;
+  background: var(--card);
+  color: var(--fg);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: var(--rf);
+  box-shadow: var(--sh-1);
+  white-space: nowrap;
+  z-index: 5;
+  transition: opacity 400ms ease-out;
+}
+.archery-hint.hide { opacity: 0; }
+.archery-balloon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 62px;
+  pointer-events: none;
+}
+.archery-balloon .balloon-body {
+  width: 62px;
+  height: 72px;
+  border-radius: 50% 50% 50% 50% / 58% 58% 42% 42%;
+  background: linear-gradient(155deg, hsl(var(--hue), 90%, 70%), hsl(var(--hue), 85%, 52%));
+  box-shadow: inset -8px -10px 14px rgba(0,0,0,0.18), inset 6px 8px 10px rgba(255,255,255,0.35), var(--sh-1);
+}
+.archery-balloon .balloon-knot {
+  width: 0;
+  height: 0;
+  margin: 0 auto;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid hsl(var(--hue), 85%, 52%);
+}
+.archery-balloon .balloon-num {
+  position: absolute;
+  inset: 0 0 6px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.2rem;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+.archery-balloon.popping .balloon-shape { animation: balloon-pop 380ms cubic-bezier(.2,.8,.3,1) forwards; }
+.archery-balloon.flying-home {
+  z-index: 999;
+  transition: left 480ms cubic-bezier(.3,.6,.3,1), top 480ms cubic-bezier(.3,.6,.3,1), transform 480ms ease-in;
+}
+.archery-feedback-no {
+  position: absolute;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.3rem;
+  color: var(--bad-ink, var(--bad));
+  pointer-events: none;
+  animation: archery-no-pop 650ms ease-out forwards;
+}
+@keyframes archery-no-pop {
+  0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+  25% { transform: translate(-50%, -70%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -130%) scale(1); opacity: 0; }
+}
+.archery-overlay-box { text-align: center; }
 
 /* ==== Thinking dots ==== */
 .thinking-dots {

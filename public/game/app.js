@@ -680,6 +680,7 @@
   const screens = {
     license: $('screen-license'), home: $('screen-home'), setup: $('screen-setup'), game: $('screen-game'), result: $('screen-result'), homework: $('screen-homework'), gifted: $('screen-gifted'), call: $('screen-call'), squad: $('screen-squad'),
     battleSetup: $('screen-battle-setup'), battleLive: $('screen-battle-live'), battleResult: $('screen-battle-result'),
+    archery: $('screen-archery'),
   };
   function showScreen(name) {
     Object.values(screens).forEach(s => s.classList.remove('active'));
@@ -2410,6 +2411,281 @@
 
   $('btnBattlePlayAgain').addEventListener('click', () => { sfx.click(); battleShowSetup(); showScreen('battleSetup'); });
   $('btnBattleResultHome').addEventListener('click', () => { sfx.click(); showScreen('home'); });
+
+  /* ================= BẮN CUNG SỐ HỌC (mini-game) =================
+   * Thầy yêu cầu: phép tính có chỗ trống hiện trên đầu, các quả bóng số
+   * (đáp án đúng + vài số nhiễu) bay chậm từ dưới lên. Kéo trên đấu trường
+   * để ngắm cung — mũi tên bay đúng theo hướng kéo tới, thả tay là bắn.
+   * Bắn trúng số ĐÚNG: bóng bay về điền vào chỗ trống. Bắn trúng số SAI:
+   * hiện chữ "No". Số đúng bay ra khỏi màn hình mà chưa bắn trúng: thua.
+   * Dùng lại đúng khung câu hỏi (genByGradeOp/makeDistractors/fmtNum) và
+   * hình quả bóng (.balloon-shape/.balloon-body/.balloon-knot) đã có sẵn
+   * trong app để giữ đồng bộ hình ảnh + độ khó với phần chơi thường. */
+  const ARCHERY_ROUNDS = 8;
+  const ARCHERY_BALLOON_R = 31;
+  const ARCHERY_SPEED = 34;          // px/s bóng trôi lên — chậm rãi
+  const ARCHERY_ARROW_SPEED = 1100;  // px/s mũi tên bay
+  let AR = null;
+  let archeryPointerId = null;
+
+  function archeryArena() { return $('archeryArena'); }
+  function archeryBowAnchor() {
+    const a = archeryArena();
+    return { x: a.clientWidth / 2, y: a.clientHeight - 54 };
+  }
+
+  function archeryRandomEquation() {
+    const grade = state.grade || 3;
+    const op = pick(grade === 1 ? ['add', 'sub'] : ['add', 'sub', 'mul', 'div']);
+    const { a, b, ans, decimal } = genByGradeOp(grade, op);
+    const bStr = b < 0 ? `(${fmtNum(b)})` : fmtNum(b);
+    const text = `${fmtNum(a)} ${OP_SYMBOL[op]} ${bStr} =`;
+    const distractors = makeDistractors(ans, decimal, grade >= 6).slice(0, 2);
+    const opts = [ans, ...distractors].sort(() => Math.random() - 0.5);
+    return { text, ans, opts };
+  }
+
+  function archeryStop() {
+    if (AR && AR.raf) cancelAnimationFrame(AR.raf);
+    archeryArena().querySelectorAll('.archery-balloon, .archery-arrow, .archery-aim-line, .archery-feedback-no').forEach((el) => el.remove());
+    document.querySelectorAll('body > .archery-balloon').forEach((el) => el.remove());
+    $('archeryBow').style.transform = 'rotate(0deg)';
+    AR = null;
+  }
+
+  function archeryStart() {
+    archeryStop();
+    AR = { round: 0, correctCount: 0, opts: [], arrow: null, aiming: false, raf: null, lastTs: 0 };
+    $('archeryOverlay').hidden = true;
+    const hint = $('archeryHint');
+    hint.hidden = false;
+    hint.classList.remove('hide');
+    archeryNextRound();
+    AR.raf = requestAnimationFrame(archeryTick);
+  }
+
+  function archeryNextRound() {
+    if (AR.round >= ARCHERY_ROUNDS) {
+      archeryStop();
+      archeryWin();
+      return;
+    }
+    AR.round += 1;
+    $('archeryRoundBadge').textContent = AR.round + '/' + ARCHERY_ROUNDS;
+    // Dọn sạch bóng còn sót của lượt trước — quả bắn SAI mà chưa bị bắn
+    // trúng và chưa bay ra khỏi màn hình vẫn còn "sống", nếu không dọn thì
+    // mỗi lượt mới lại chồng thêm bóng cũ, đấu trường rối dần lên.
+    AR.opts.forEach((o) => { if (!o.dead) { o.dead = true; o.el.remove(); } });
+    const q = archeryRandomEquation();
+    $('archeryEqText').textContent = q.text;
+    const blank = $('archeryBlank');
+    blank.textContent = '?';
+    blank.classList.remove('filled');
+
+    const arena = archeryArena();
+    const w = arena.clientWidth, h = arena.clientHeight;
+    const n = q.opts.length;
+    AR.opts = q.opts.map((val, i) => {
+      const el = document.createElement('div');
+      el.className = 'archery-balloon';
+      const hue = (i * 97 + 20) % 360;
+      el.style.setProperty('--hue', hue);
+      el.innerHTML = '<div class="balloon-shape"><div class="balloon-body"></div><div class="balloon-knot"></div></div><span class="balloon-num">' + fmtNum(val) + '</span>';
+      arena.appendChild(el);
+      const x = w * ((i + 1) / (n + 1)) + (Math.random() * 30 - 15);
+      const y = h + 60 + Math.random() * 140 + i * 90;
+      return { val, hue, correct: val === q.ans, el, x, y, baseX: x, wob: Math.random() * Math.PI * 2, dead: false };
+    });
+  }
+
+  function archeryHandleHit(o, hitX, hitY) {
+    o.dead = true;
+    const arenaRect = archeryArena().getBoundingClientRect();
+    if (o.correct) {
+      sfx.pop(); sfx.correct();
+      const startX = arenaRect.left + o.x, startY = arenaRect.top + o.y;
+      o.el.remove();
+      // Bay tự do gắn vào <body> (giống cách wireBalloonDrag làm ở trên) để
+      // không bị cắt bởi overflow:hidden của đấu trường khi bay lên tới ô
+      // trống nằm phía trên đấu trường.
+      const fly = document.createElement('div');
+      fly.className = 'archery-balloon flying-home';
+      fly.style.setProperty('--hue', o.hue);
+      fly.innerHTML = o.el.innerHTML || '<div class="balloon-shape"><div class="balloon-body"></div><div class="balloon-knot"></div></div><span class="balloon-num">' + fmtNum(o.val) + '</span>';
+      fly.style.position = 'fixed';
+      fly.style.left = (startX - ARCHERY_BALLOON_R) + 'px';
+      fly.style.top = (startY - ARCHERY_BALLOON_R) + 'px';
+      document.body.appendChild(fly);
+      const blank = $('archeryBlank');
+      const blankRect = blank.getBoundingClientRect();
+      requestAnimationFrame(() => {
+        fly.style.left = (blankRect.left + blankRect.width / 2 - ARCHERY_BALLOON_R) + 'px';
+        fly.style.top = (blankRect.top + blankRect.height / 2 - ARCHERY_BALLOON_R) + 'px';
+        fly.style.transform = 'scale(0.4)';
+      });
+      burstParticles(hitX + arenaRect.left, hitY + arenaRect.top, 'hsl(' + o.hue + ',85%,60%)', 14, true);
+      setTimeout(() => {
+        fly.remove();
+        if (!AR) return;
+        blank.textContent = fmtNum(o.val);
+        blank.classList.add('filled');
+        AR.correctCount += 1;
+        setTimeout(() => { if (AR) archeryNextRound(); }, 500);
+      }, 520);
+    } else {
+      sfx.wrong();
+      o.el.classList.add('popping');
+      setTimeout(() => o.el.remove(), 400);
+      const no = document.createElement('span');
+      no.className = 'archery-feedback-no';
+      no.textContent = 'No!';
+      no.style.left = hitX + 'px';
+      no.style.top = hitY + 'px';
+      archeryArena().appendChild(no);
+      setTimeout(() => no.remove(), 700);
+    }
+  }
+
+  function archeryTick(ts) {
+    if (!AR) return;
+    if (!AR.lastTs) AR.lastTs = ts;
+    const dt = Math.min(48, ts - AR.lastTs) / 1000;
+    AR.lastTs = ts;
+
+    for (const o of AR.opts) {
+      if (o.dead) continue;
+      o.y -= ARCHERY_SPEED * dt;
+      o.wob += dt * 1.6;
+      o.x = o.baseX + Math.sin(o.wob) * 10;
+      o.el.style.transform = `translate(${o.x - ARCHERY_BALLOON_R}px, ${o.y - ARCHERY_BALLOON_R}px)`;
+      if (o.y + ARCHERY_BALLOON_R < 0) {
+        o.dead = true;
+        o.el.remove();
+        if (o.correct) {
+          const finalCorrect = AR.correctCount;
+          archeryStop();
+          archeryLose(finalCorrect);
+          return;
+        }
+      }
+    }
+
+    if (AR.arrow) {
+      const ar = AR.arrow;
+      ar.x += ar.vx * dt;
+      ar.y += ar.vy * dt;
+      ar.el.style.left = ar.x + 'px';
+      ar.el.style.top = ar.y + 'px';
+      let hit = null;
+      for (const o of AR.opts) {
+        if (o.dead) continue;
+        const dx = ar.x - o.x, dy = ar.y - o.y;
+        if (dx * dx + dy * dy < (ARCHERY_BALLOON_R + 8) * (ARCHERY_BALLOON_R + 8)) { hit = o; break; }
+      }
+      const arena = archeryArena();
+      if (hit) {
+        archeryHandleHit(hit, ar.x, ar.y);
+        ar.el.remove();
+        AR.arrow = null;
+      } else if (ar.x < -60 || ar.x > arena.clientWidth + 60 || ar.y < -60 || ar.y > arena.clientHeight + 60) {
+        ar.el.remove();
+        AR.arrow = null;
+      }
+    }
+
+    if (AR) AR.raf = requestAnimationFrame(archeryTick);
+  }
+
+  function archeryWin() {
+    sfx.win();
+    $('archeryOverlayTitle').textContent = 'Xuất sắc!';
+    $('archeryOverlayDesc').textContent = `Bạn đã bắn đúng cả ${ARCHERY_ROUNDS}/${ARCHERY_ROUNDS} câu!`;
+    $('archeryOverlay').hidden = false;
+  }
+
+  function archeryLose(correctCount) {
+    sfx.wrong();
+    $('archeryOverlayTitle').textContent = 'Bay mất rồi!';
+    $('archeryOverlayDesc').textContent = `Con số đúng đã bay ra khỏi màn hình. Bạn bắn đúng được ${correctCount}/${ARCHERY_ROUNDS} câu.`;
+    $('archeryOverlay').hidden = false;
+  }
+
+  function archeryUpdateAim(e) {
+    const rect = archeryArena().getBoundingClientRect();
+    const px = e.clientX - rect.left, py = e.clientY - rect.top;
+    const anchor = archeryBowAnchor();
+    const dx = px - anchor.x, dy = py - anchor.y;
+    const thetaDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+    $('archeryBow').style.transform = 'rotate(' + (thetaDeg + 90) + 'deg)';
+    let line = archeryArena().querySelector('.archery-aim-line');
+    if (!line) {
+      line = document.createElement('div');
+      line.className = 'archery-aim-line';
+      archeryArena().appendChild(line);
+    }
+    const dist = Math.hypot(dx, dy);
+    line.style.left = anchor.x + 'px';
+    line.style.top = anchor.y + 'px';
+    line.style.width = Math.min(dist, 260) + 'px';
+    line.style.transform = 'rotate(' + thetaDeg + 'deg)';
+  }
+
+  function archeryFire(e) {
+    const line = archeryArena().querySelector('.archery-aim-line');
+    if (line) line.remove();
+    $('archeryBow').style.transform = 'rotate(0deg)';
+    if (!AR || AR.arrow) return;
+    const rect = archeryArena().getBoundingClientRect();
+    const px = e.clientX - rect.left, py = e.clientY - rect.top;
+    const anchor = archeryBowAnchor();
+    const dx = px - anchor.x, dy = py - anchor.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 18) return; // kéo quá ngắn, coi như huỷ chứ không bắn
+    sfx.click();
+    const theta = Math.atan2(dy, dx);
+    const el = document.createElement('div');
+    el.className = 'archery-arrow';
+    el.style.left = anchor.x + 'px';
+    el.style.top = anchor.y + 'px';
+    el.style.transform = 'rotate(' + theta + 'rad)';
+    archeryArena().appendChild(el);
+    AR.arrow = { el, x: anchor.x, y: anchor.y, vx: Math.cos(theta) * ARCHERY_ARROW_SPEED, vy: Math.sin(theta) * ARCHERY_ARROW_SPEED };
+  }
+
+  const archeryArenaEl = $('archeryArena');
+  archeryArenaEl.addEventListener('pointerdown', (e) => {
+    if (!AR || AR.arrow) return;
+    const hint = $('archeryHint');
+    if (!hint.classList.contains('hide')) { hint.classList.add('hide'); setTimeout(() => { hint.hidden = true; }, 400); }
+    archeryPointerId = e.pointerId;
+    AR.aiming = true;
+    try { archeryArenaEl.setPointerCapture(e.pointerId); } catch {}
+    archeryUpdateAim(e);
+  });
+  archeryArenaEl.addEventListener('pointermove', (e) => {
+    if (!AR || !AR.aiming || e.pointerId !== archeryPointerId) return;
+    archeryUpdateAim(e);
+  });
+  archeryArenaEl.addEventListener('pointerup', (e) => {
+    if (!AR || !AR.aiming || e.pointerId !== archeryPointerId) return;
+    AR.aiming = false;
+    archeryFire(e);
+  });
+  archeryArenaEl.addEventListener('pointercancel', () => {
+    if (AR) AR.aiming = false;
+    const line = archeryArenaEl.querySelector('.archery-aim-line');
+    if (line) line.remove();
+    $('archeryBow').style.transform = 'rotate(0deg)';
+  });
+
+  $('btnOpenArchery').addEventListener('click', () => {
+    sfx.click();
+    showScreen('archery');
+    requestAnimationFrame(() => archeryStart());
+  });
+  $('btnBackFromArchery').addEventListener('click', () => { sfx.click(); archeryStop(); showScreen('home'); });
+  $('btnArcheryPlayAgain').addEventListener('click', () => { sfx.click(); archeryStart(); });
+  $('btnArcheryHome').addEventListener('click', () => { sfx.click(); archeryStop(); showScreen('home'); });
 
   /* ================= SETUP ================= */
   const gradeRow = $('gradeRow');
