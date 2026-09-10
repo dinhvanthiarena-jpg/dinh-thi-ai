@@ -9,6 +9,7 @@
  *   NEWSFACTORY_DEBUG=1 node scripts/diagnose-giai-tri-image.js
  */
 require('dotenv').config();
+const connectDB = require('../config/db');
 const { fetchStockImage, suggestImageQuery } = require('../services/newsFactoryService');
 
 const TITLES = [
@@ -17,6 +18,7 @@ const TITLES = [
 ];
 
 async function run() {
+  await connectDB();
   for (const title of TITLES) {
     console.log('\n########## bài:', title);
     const q = await suggestImageQuery(title);
