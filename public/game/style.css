@@ -1820,14 +1820,20 @@ button:focus-visible,
 }
 .archery-bow {
   position: absolute;
-  bottom: 14px;
+  bottom: 8px;
   left: 50%;
-  width: 40px;
-  height: 80px;
-  margin-left: -20px;
+  width: 60px;
+  height: 90px;
+  margin-left: -30px;
   transform-origin: 50% 50%;
   pointer-events: none;
   filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+}
+.archery-bow img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 .archery-aim-line {
   position: absolute;

@@ -2431,7 +2431,8 @@
   function archeryArena() { return $('archeryArena'); }
   function archeryBowAnchor() {
     const a = archeryArena();
-    return { x: a.clientWidth / 2, y: a.clientHeight - 54 };
+    // Ảnh Mon.L bắn súng cao 90px, đặt cách đáy 8px, xoay quanh tâm ảnh.
+    return { x: a.clientWidth / 2, y: a.clientHeight - 53 };
   }
 
   function archeryRandomEquation() {
@@ -2616,9 +2617,9 @@
     const anchor = archeryBowAnchor();
     const dx = px - anchor.x, dy = py - anchor.y;
     const thetaDeg = Math.atan2(dy, dx) * 180 / Math.PI;
-    // Cánh cung mặc định (0deg) phình về bên phải nên hướng bắn lúc nghỉ là
-    // sang TRÁI (180deg) — offset đúng phải là +180, không phải +90.
-    $('archeryBow').style.transform = 'rotate(' + (thetaDeg + 180) + 'deg)';
+    // Ảnh Mon.L bắn súng đồ chơi lúc nghỉ (0deg) đã chĩa thẳng LÊN sẵn nên
+    // offset đúng là +90.
+    $('archeryBow').style.transform = 'rotate(' + (thetaDeg + 90) + 'deg)';
     let line = archeryArena().querySelector('.archery-aim-line');
     if (!line) {
       line = document.createElement('div');
@@ -3489,7 +3490,9 @@
   const ARCHERY_SKIN_SPEED = 24;
   const ARCHERY_SKIN_ARROW_SPEED = 950;
   function archerySkinBowAnchor(arena) {
-    return { x: arena.clientWidth / 2, y: arena.clientHeight - 44 };
+    // Ảnh Mon.L bắn súng đồ chơi cao 90px, đặt cách đáy 8px, xoay quanh tâm
+    // ảnh (50% 50%) — tâm đó nằm cách đáy đấu trường 8 + 45 = 53px.
+    return { x: arena.clientWidth / 2, y: arena.clientHeight - 53 };
   }
   function renderArcherySkin(q) {
     const wrap = document.createElement('div');
@@ -3498,7 +3501,7 @@
     arena.className = 'archery-skin-arena';
     const bow = document.createElement('div');
     bow.className = 'archery-bow';
-    bow.innerHTML = '<svg viewBox="0 0 40 80" width="40" height="80" aria-hidden="true"><path d="M12 6 Q30 20 21 40 Q30 60 12 74" fill="none" stroke="#8b5a2b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="6" x2="12" y2="74" stroke="#f3e6c9" stroke-width="2"/></svg>';
+    bow.innerHTML = '<img src="assets/monl/ban-cung-monl.png" alt="" draggable="false">';
     arena.appendChild(bow);
     wrap.appendChild(arena);
     const hint = document.createElement('p');
@@ -3617,9 +3620,9 @@
       const anchor = archerySkinBowAnchor(arena);
       const dx = px - anchor.x, dy = py - anchor.y;
       const thetaDeg = Math.atan2(dy, dx) * 180 / Math.PI;
-      // Cánh cung mặc định (0deg) phình về bên phải nên hướng bắn lúc nghỉ
-      // là sang TRÁI (180deg) — offset đúng phải là +180, không phải +90.
-      bow.style.transform = 'rotate(' + (thetaDeg + 180) + 'deg)';
+      // Ảnh Mon.L bắn súng đồ chơi lúc nghỉ (0deg) đã chĩa thẳng LÊN sẵn
+      // (chân + súng ở phía trên khung ảnh) nên offset đúng là +90.
+      bow.style.transform = 'rotate(' + (thetaDeg + 90) + 'deg)';
       let line = arena.querySelector('.archery-aim-line');
       if (!line) { line = document.createElement('div'); line.className = 'archery-aim-line'; arena.appendChild(line); }
       const dist = Math.hypot(dx, dy);
