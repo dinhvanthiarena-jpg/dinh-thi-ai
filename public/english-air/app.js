@@ -82,6 +82,7 @@ function markup(node, text) {
 /* ---------- 1. Trạng thái ---------- */
 const KEY = "englishair.v3";
 const DEFAULTS = {
+  khoa: "en-vi",   // cặp ngôn ngữ đang học: xem bảng KHOA bên course.js
   level: "a1",
   xp: 0, xu: 0, hearts: 15, heartAt: Date.now(),
   streak: 0, best: 0, lastDay: "", days: [],
@@ -267,7 +268,26 @@ function pickVoice() {
   if (!window.speechSynthesis) return;
   voices = speechSynthesis.getVoices() || [];
 }
-const chuanTag = t => String(t || "").toLowerCase().replace("_", "-");
+/* ---------- Hai thứ tiếng của khoá đang học ----------
+   QUY ƯỚC XUYÊN SUỐT DỮ LIỆU KHOÁ HỌC:
+     trường `en` = thứ tiếng ĐANG HỌC
+     trường `vi` = thứ tiếng dùng để GIẢI THÍCH
+   Kể cả khoá "người Mỹ học tiếng Việt": ở đó `en` là chữ tiếng Việt, `vi` là
+   lời giải thích tiếng Anh. Giữ nguyên tên trường như vậy thì toàn bộ phần
+   luyện tập, chấm bài, trò chơi, hình ảnh không phải sửa một dòng nào.
+
+   Cả app có 68 chỗ ghi thẳng "en-GB" và "vi-VN" — đều là chỗ đọc hai trường
+   trên. Thay vì sửa 68 chỗ, quy đổi tại ĐÚNG MỘT CỬA là hàm chuanTag() này:
+   mọi mã ngôn ngữ trong app đều chui qua đây trước khi tới bộ đọc. */
+let MA_HOC = "en-gb";     // thứ tiếng của trường `en`
+let MA_GIAI = "vi-vn";    // thứ tiếng của trường `vi`
+
+const chuanTag = t => {
+  const s = String(t || "").toLowerCase().replace("_", "-");
+  if (s === "en-gb") return MA_HOC;
+  if (s === "vi-vn") return MA_GIAI;
+  return s;
+};
 
 /** Lựa chọn giọng của người dùng cho một gốc ngôn ngữ.
     Chịu cả dạng cũ (chỉ lưu tên giọng) để ai đã chọn rồi không bị mất. */
@@ -456,7 +476,7 @@ function tiengCua(text) {
 let lanLuotId = 0;
 
 function dungGiong(u, tag) {
-  u.lang = tag;
+  u.lang = chuanTag(tag);      // phải quy đổi, không thì khoá ngược đọc sai giọng
   const v = voiceFor(tag);
   if (v) u.voice = v;
   // Cùng một giọng gốc nhưng đổi cao độ và tốc độ là ra hẳn một giọng khác —
@@ -532,9 +552,15 @@ function nhacNhuong(dang) {
 
    Tên file = mã băm của chính câu đó nên không cần bảng tra tên. Chỉ nạp một
    danh sách mã băm (vài chục KB) để biết câu nào có sẵn, khỏi dò 404. */
-const TIENG_THU = "assets/tieng/";
-let khoTieng = null;            // Set các mã băm có sẵn; null = chưa nạp
-let amTieng = null;             // thẻ <audio> dùng chung
+/* Mỗi thứ tiếng một kho riêng, chia theo thư mục. Thêm tiếng Trung, tiếng Nhật
+   sau này chỉ việc thêm một dòng vào bảng dưới. */
+const KHO_TIENG = {
+  en: "assets/tieng/",
+  vi: "assets/tieng-vi/",
+};
+const TIENG_THU = KHO_TIENG.en;   // giữ tên cũ cho những chỗ đã trỏ vào
+const khoCo = {};                 // { en: Set(mã băm), vi: Set(...) }
+let amTieng = null;               // thẻ <audio> dùng chung
 
 /** FNV-1a 32 bit + độ dài. PHẢI khớp hàm bam() bên sinh_tieng_anh.py. */
 function bamCau(s) {
@@ -548,24 +574,25 @@ function bamCau(s) {
 
 const chuanCau = s => String(s || "").split(/\s+/).filter(Boolean).join(" ");
 
-async function napKhoTieng() {
-  if (khoTieng) return khoTieng;
+async function napKhoTieng(goc) {
+  if (khoCo[goc]) return khoCo[goc];
+  const thu = KHO_TIENG[goc];
+  if (!thu) return (khoCo[goc] = new Set());
   try {
-    const r = await fetch(TIENG_THU + "kho.json");
-    khoTieng = new Set(await r.json());
-  } catch { khoTieng = new Set(); }
-  return khoTieng;
+    const r = await fetch(thu + "kho.json");
+    khoCo[goc] = new Set(await r.json());
+  } catch { khoCo[goc] = new Set(); }
+  return khoCo[goc];
 }
-napKhoTieng();
+Object.keys(KHO_TIENG).forEach(napKhoTieng);
 
-/** Địa chỉ file giọng đọc của một câu, không có thì null. */
+/** Địa chỉ file giọng đọc của một câu, không có thì null (để máy tự đọc). */
 function fileTieng(text, lang) {
-  if (!khoTieng || !khoTieng.size) return null;
-  // Chỉ có kho tiếng ANH; câu tiếng Việt vẫn để máy đọc.
-  const t = lang || tiengCua(text);
-  if (t && !/^en/i.test(t)) return null;
+  const goc = chuanTag(lang || tiengCua(text)).split("-")[0];
+  const kho = khoCo[goc];
+  if (!kho || !kho.size) return null;
   const k = bamCau(chuanCau(text));
-  return khoTieng.has(k) ? TIENG_THU + k + ".mp3" : null;
+  return kho.has(k) ? KHO_TIENG[goc] + k + ".mp3" : null;
 }
 
 /** Phát file giọng đọc. Trả về true nếu đã nhận phát, false thì gọi bên đọc máy. */
@@ -711,16 +738,131 @@ const NHAN_BAC = {
   a1: { cefr: "A1", lop: "Lớp 3–5" },
   a2: { cefr: "A2", lop: "Lớp 6–7" },
   b1: { cefr: "B1", lop: "Lớp 8–9" },
+  v1: { cefr: "A1", lop: "" },
 };
-const ALL_WORDS = COURSE.levels.flatMap(lv => {
+/* Ba kho này SUY RA từ khoá đang mở, nên đổi khoá là phải tính lại — xem
+   datKhoa(). Vì thế dùng let chứ không dùng const. */
+let ALL_WORDS = [], SINGLE = [], PHRASES = [];
+function tinhLaiKho() {
+  ALL_WORDS = COURSE.levels.flatMap(lv => {
   const n = NHAN_BAC[lv.id] || { cefr: (lv.code || "").toUpperCase(), lop: "" };
   // Từ nào tự khai nhãn riêng thì tôn trọng, không thì lấy nhãn của trình độ.
-  return lv.units.flatMap(unitWords).map(w => ({ ...w, cefr: w.cefr || n.cefr, lop: w.lop || n.lop }));
-});
-const SINGLE = ALL_WORDS.filter(w => !w.en.includes(" "));
-// Cau/cum nhieu chu - dung rieng lam kho luoi bay cho cau hoi dang cum,
-// khong de tu don lac vao chung voi dap an la ca mot cau.
-const PHRASES = ALL_WORDS.filter(w => w.en.includes(" "));
+    return lv.units.flatMap(unitWords).map(w => ({ ...w, cefr: w.cefr || n.cefr, lop: w.lop || n.lop }));
+  });
+  SINGLE = ALL_WORDS.filter(w => !w.en.includes(" "));
+  // Câu/cụm nhiều chữ — dùng riêng làm kho lưới bày cho câu hỏi dạng cụm,
+  // không để từ đơn lạc vào chung với đáp án là cả một câu.
+  PHRASES = ALL_WORDS.filter(w => w.en.includes(" "));
+  // Mọi kho đệm suy ra từ ba kho trên đều phải quên đi
+  BAC_KHO = { lv: null, all: null, single: null, phrase: null };
+  PICS_KHO = null;
+  BAN_KHO = { lv: null, ds: null };
+}
+
+/* ---------- Dịch giao diện theo ngôn ngữ người học ----------
+   Tra ĐÚNG NGUYÊN CHUỖI rồi thay. Chuỗi nào không có trong bảng thì để nguyên,
+   nên bảng thiếu chỗ nào cũng không vỡ gì. Nhờ cách này mà không phải gắn nhãn
+   dịch vào từng thẻ HTML — hơn hai trăm chỗ, gắn tay là sai sót ngay.
+
+   CHỖ KHÔNG ĐƯỢC ĐỤNG VÀO: nội dung bài học. Khoá tiếng Việt có từ "Học" thật,
+   dịch nhầm thành "Learn" là hỏng bài. Nên mọi khung chứa nội dung khoá học
+   đều bị loại trừ. */
+const KHONG_DICH = "#stage, .ban-cau, .ban-hang-viet, .nem-khay, .dialog, " +
+  ".vlist, #wordList, #callLog, .kaka-form, .fb-t, .vcard";
+let TU_DIEN = null;
+let theoDoiDich = null;
+
+const dichChuoi = s => {
+  if (!TU_DIEN) return null;
+  const k = String(s).trim();
+  const ra = TU_DIEN[k];
+  return ra == null || ra === k ? null : ra;
+};
+
+function dichMotNut(n) {
+  if (!TU_DIEN || !n) return;
+  if (n.nodeType === 3) {
+    const cha = n.parentElement;
+    if (!cha || cha.closest(KHONG_DICH)) return;
+    const ra = dichChuoi(n.nodeValue);
+    if (ra != null) n.nodeValue = n.nodeValue.replace(n.nodeValue.trim(), ra);
+    return;
+  }
+  if (n.nodeType !== 1) return;
+  if (n.closest(KHONG_DICH)) return;
+  for (const a of ["aria-label", "placeholder", "title"]) {
+    const v = n.getAttribute && n.getAttribute(a);
+    if (!v) continue;
+    const ra = dichChuoi(v);
+    if (ra != null) n.setAttribute(a, ra);
+  }
+  const di = document.createTreeWalker(n, NodeFilter.SHOW_TEXT);
+  const ds = [];
+  for (let x = di.nextNode(); x; x = di.nextNode()) ds.push(x);
+  ds.forEach(dichMotNut);
+  n.querySelectorAll("[aria-label],[placeholder],[title]").forEach(e => {
+    if (e.closest(KHONG_DICH)) return;
+    for (const a of ["aria-label", "placeholder", "title"]) {
+      const v = e.getAttribute(a);
+      if (!v) continue;
+      const ra = dichChuoi(v);
+      if (ra != null) e.setAttribute(a, ra);
+    }
+  });
+}
+
+function dichCaTrang() {
+  if (!TU_DIEN) return;
+  dichMotNut(document.body);
+  document.documentElement.lang = "en";
+}
+
+/** Đổi ngôn ngữ giao diện. Gọi lại được nhiều lần. */
+function datTiengGiaoDien(goc) {
+  const moi = (typeof UI_BANG !== "undefined" && UI_BANG[goc]) || null;
+  if (moi === TU_DIEN) return;
+  TU_DIEN = moi;
+  if (!TU_DIEN) {
+    // Quay về tiếng Việt: nạp lại trang là cách chắc chắn nhất, vì chữ đã bị
+    // thay tại chỗ thì không lần ngược về được.
+    document.documentElement.lang = "vi";
+    if (theoDoiDich) { theoDoiDich.disconnect(); theoDoiDich = null; location.reload(); }
+    return;
+  }
+  dichCaTrang();
+  // Chữ do JavaScript dựng ra sau này cũng phải được dịch, nên ngồi canh luôn.
+  if (!theoDoiDich && window.MutationObserver) {
+    theoDoiDich = new MutationObserver(ds => {
+      for (const m of ds) m.addedNodes.forEach(dichMotNut);
+    });
+    theoDoiDich.observe(document.body, { childList: true, subtree: true });
+  }
+}
+
+/* ---------- Đổi khoá học (cặp ngôn ngữ) ----------
+   COURSE là một vật thể mà cả app giữ tham chiếu tới, nên đổi khoá là THAY
+   RUỘT chứ không gán lại biến. Đổi xong phải:
+     1. đặt lại hai mã ngôn ngữ (quyết định giọng đọc và kho tiếng nào được dùng)
+     2. tính lại kho từ và xoá mọi kho đệm
+     3. kéo trình độ đang học về đúng khoá mới
+   Mã bài của hai khoá không trùng nhau (a1u1l1 với v1u1l1), nên tiến độ học
+   của khoá này không đè lên khoá kia — học song song hai thứ tiếng vẫn được. */
+function khoaTheoMa(id) { return KHOA.find(k => k.id === id) || KHOA[0]; }
+
+function datKhoa(id, veLai) {
+  const k = khoaTheoMa(id);
+  COURSE.id = k.id;
+  COURSE.name = k.tenHoc;
+  COURSE.levels = k.levels;
+  MA_HOC = k.maHoc;
+  MA_GIAI = k.maGiai;
+  S.khoa = k.id;
+  // Trình độ đang chọn mà không thuộc khoá này thì kéo về trình độ đầu
+  if (!k.levels.some(l => l.id === S.level)) S.level = k.levels[0].id;
+  tinhLaiKho();
+  datTiengGiaoDien(k.giai);
+  if (veLai) { save(); paintStats(); go(view); }
+}
 
 /* Kho từ THEO TRÌNH ĐỘ ĐANG HỌC, dùng làm mồi nhiễu (ba đáp án sai).
    Trước đây mồi nhiễu bốc từ cả ba bậc, nên bé A1 học "con mèo" lại thấy
@@ -6840,7 +6982,7 @@ function banVongMoi() {
   banXepNgang();
   banVeMang();
   $("#banBan").disabled = false;
-  $("#banChi").textContent = "Câu " + BAN.vong + "/" + BAN_TONG + " — nghe câu rồi bắn vào chữ còn thiếu.";
+  $("#banChi").textContent = L("Câu " + BAN.vong + "/" + BAN_TONG + " — nghe câu rồi bắn vào chữ còn thiếu.", "Sentence " + BAN.vong + "/" + BAN_TONG + " — listen, then shoot the missing word.");
   // Đọc CẢ CÂU đầy đủ ngay từ đầu. Không đọc thì có câu ba chữ mồi đều đúng
   // ngữ pháp (Open his/their/your notebook) — người học bắn đúng vẫn bị báo
   // sai, thế là oan. Nghe rồi thì chỉ còn một chữ đúng, mà lại được luyện nghe.
@@ -7423,7 +7565,7 @@ function chemVongMoi() {
   CHEM.qua.forEach((q, i) => { q.song = false; q.cho = i * 0.55; });
 
   chemVeMang();
-  $("#chemChi").textContent = "Câu " + CHEM.vong + "/" + CHEM_TONG + " — vuốt tay chém quả mang chữ đúng.";
+  $("#chemChi").textContent = L("Câu " + CHEM.vong + "/" + CHEM_TONG + " — vuốt tay chém quả mang chữ đúng.", "Sentence " + CHEM.vong + "/" + CHEM_TONG + " — slice the fruit with the right word.");
   clearTimeout(chemDocHen);
   chemDocHen = setTimeout(() => { if (CHEM.mo) speak(de.en, false, "en-GB"); }, 420);
 }
@@ -7823,7 +7965,21 @@ function nemDiVoiAn(en) {
   return /^[aeiou]/.test(s);
 }
 
-const NEM_LOAI = ["Danh từ", "Động từ", "Tính từ", "Trạng từ"];
+/* Lời trong trò chơi phải theo ngôn ngữ NGƯỜI HỌC ĐỌC ĐƯỢC, không phải tiếng
+   Việt cố định — người Mỹ học tiếng Việt thì đề bài phải là tiếng Anh. */
+const L = (vi, en) => (String(MA_GIAI).startsWith("en") ? en : vi);
+
+/* Từ loại có trong khoá — suy thẳng từ dữ liệu nên khoá nào cũng đúng: khoá
+   tiếng Anh ghi "Danh từ", khoá tiếng Việt ghi "Noun". */
+function nemLoaiCo(tu) {
+  const dem = {};
+  tu.forEach(w => { if (w.pos) dem[w.pos] = (dem[w.pos] || 0) + 1; });
+  return Object.keys(dem).filter(k => dem[k] >= NEM_DUNG);
+}
+
+/* Loại từ tiếng Việt — thay cho luật a/an khi người học đang học tiếng Việt.
+   Đây đúng là chỗ người nước ngoài vấp nhất, nên bắt phân loại là hợp lý. */
+const NEM_LOAI_VIET = ["con", "cái", "quả", "cây", "chiếc", "quyển", "người"];
 
 const NEM = {
   mo: false, raf: 0, truoc: 0,
@@ -7858,21 +8014,37 @@ function nemRaDe() {
   for (const kieu of shuffle(["loai", "an", "nghia"])) {
 
     if (kieu === "loai") {
-      for (const l of shuffle(NEM_LOAI)) {
+      for (const l of shuffle(nemLoaiCo(tu))) {
         const hop = tu.filter(w => w.pos === l);
         const khac = tu.filter(w => w.pos && w.pos !== l);
         if (hop.length < NEM_DUNG || khac.length < NEM_SAI) continue;
         return {
-          lenh: "Ném vào những từ là " + l.toUpperCase(),
-          meo: "Chạm vào quả bóng bay có từ đúng — chọn đủ ba từ.",
+          lenh: L("Ném vào những từ là " + l.toUpperCase(),
+                  "Throw at the words that are " + l.toUpperCase() + "S"),
+          meo: L("Chạm vào quả bóng bay có từ đúng — chọn đủ ba từ.",
+                 "Tap the balloon with the right word — find all three."),
           dung: sample(hop, NEM_DUNG),
           sai: sample(khac, NEM_SAI),
         };
       }
     }
 
-    if (kieu === "an") {
-      const danh = tu.filter(w => w.pos === "Danh từ");
+    // Học tiếng Việt thì hỏi LOẠI TỪ thay cho a/an — đúng chỗ người nước ngoài vấp.
+    if (kieu === "an" && String(MA_HOC).startsWith("vi")) {
+      for (const lt of shuffle(NEM_LOAI_VIET)) {
+        const co = tu.filter(w => w.en.toLowerCase().startsWith(lt + " "));
+        const khong = tu.filter(w => !w.en.toLowerCase().startsWith(lt + " "));
+        if (co.length < NEM_DUNG || khong.length < NEM_SAI) continue;
+        return {
+          lenh: "Throw at the words that use “" + lt + "”",
+          meo: "“" + lt + "” is a classifier. Vietnamese nouns need one before you can count them.",
+          dung: sample(co, NEM_DUNG), sai: sample(khong, NEM_SAI),
+        };
+      }
+    }
+
+    if (kieu === "an" && String(MA_HOC).startsWith("en")) {
+      const danh = tu.filter(w => w.pos === "Danh từ" || w.pos === "Noun");
       const co = danh.filter(w => nemDiVoiAn(w.en));
       const khong = danh.filter(w => !nemDiVoiAn(w.en));
       if (co.length >= NEM_DUNG && khong.length >= NEM_SAI) {
@@ -7893,8 +8065,10 @@ function nemRaDe() {
       const dung = ds.slice(0, NEM_DUNG);
       const sai = ds.slice(NEM_DUNG);
       return {
-        lenh: "Ném vào những từ nghĩa là: " + dung.map(w => w.vi).join(" · "),
-        meo: "Ba nghĩa ở trên, tìm đúng ba từ tiếng Anh.",
+        lenh: L("Ném vào những từ nghĩa là: ", "Throw at the words that mean: ")
+              + dung.map(w => w.vi).join(" · "),
+        meo: L("Ba nghĩa ở trên, tìm đúng ba từ tiếng Anh.",
+               "Three meanings above — find the three words."),
         dung, sai,
       };
     }
@@ -7995,7 +8169,7 @@ function nemVongMoi() {
     .concat(de.sai.map(w => nemBia(w, false))));
   nemXep();
   nemVeMang();
-  $("#nemChi").textContent = "Lượt " + NEM.vong + "/" + NEM_TONG + " — chọn đủ ba từ đúng.";
+  $("#nemChi").textContent = L("Lượt " + NEM.vong + "/" + NEM_TONG + " — chọn đủ ba từ đúng.", "Round " + NEM.vong + "/" + NEM_TONG + " — find all three right words.");
 }
 
 function nemVeMang() {
@@ -8514,7 +8688,7 @@ function ranVongMoi() {
 
   RAN.mieng = de.chu.map(c => ranMieng(c, c === de.dungChu));
   ranVeMang();
-  $("#ranChi").textContent = "Câu " + RAN.vong + "/" + RAN_TONG + " — lái rắn đi cắn chữ đúng.";
+  $("#ranChi").textContent = L("Câu " + RAN.vong + "/" + RAN_TONG + " — lái rắn đi cắn chữ đúng.", "Sentence " + RAN.vong + "/" + RAN_TONG + " — steer the snake onto the right word.");
   clearTimeout(ranDocHen);
   ranDocHen = setTimeout(() => { if (RAN.mo) speak(de.doc, false, "en-GB"); }, 420);
 }
@@ -8909,7 +9083,65 @@ window.addEventListener("resize", () => {
   });
 });
 
+/* ---------- 23g. Chọn cặp ngôn ngữ ----------
+   Hai lá cờ: tôi nói tiếng gì → tôi muốn học tiếng gì. Danh sách tự dựng từ
+   bảng KHOA bên course.js, nên thêm thứ tiếng mới là màn này tự có thêm dòng,
+   không phải sửa gì ở đây. */
+const CO_CHU = { vn: "🇻🇳", gb: "🇬🇧", us: "🇺🇸", cn: "🇨🇳", jp: "🇯🇵", kr: "🇰🇷", fr: "🇫🇷" };
+const coCua = ma => CO_CHU[ma] || "🏳️";
+
+function veChonCo() {
+  const box = $("#coDs");
+  if (!box) return;
+  box.textContent = "";
+  for (const k of KHOA) {
+    const n = el("button", "cochon-nut" + (k.id === COURSE.id ? " on" : ""));
+    n.type = "button";
+    n.append(el("span", "cochon-co", coCua(k.coGiai)));
+    n.append(el("span", "cochon-mui", "→"));
+    n.append(el("span", "cochon-co", coCua(k.coHoc)));
+    const chu = el("span", "cochon-chu");
+    chu.append(el("b", null, k.nhan));
+    chu.append(el("small", null, k.tenGiai + " → " + k.tenHoc));
+    n.append(chu);
+    n.addEventListener("click", () => {
+      if (k.id !== COURSE.id) datKhoa(k.id, true);
+      dongChonCo();
+      veChonCo();
+      veNutCo();
+    });
+    box.append(n);
+  }
+}
+
+/** Hai lá cờ nhỏ trên thanh đầu trang, cho biết đang học chiều nào. */
+function veNutCo() {
+  const k = khoaTheoMa(COURSE.id);
+  const a = $("#coNutCo"), b = $("#coNutCo2"), m = $("#flagFace");
+  if (a) a.textContent = coCua(k.coGiai);
+  if (b) b.textContent = coCua(k.coHoc);
+  if (m) m.textContent = k.hoc.toUpperCase();
+}
+
+function moChonCo() {
+  veChonCo();
+  $("#coView").hidden = false;
+  document.body.style.overflow = "hidden";
+}
+function dongChonCo() {
+  $("#coView").hidden = true;
+  const conMo = !$("#player").hidden || !$("#result").hidden;
+  document.body.style.overflow = conMo ? "hidden" : "";
+}
+$("#btnCoMo").addEventListener("click", moChonCo);
+$("#btnCoDong").addEventListener("click", dongChonCo);
+
+
 /* ---------- 24. Khởi động ---------- */
+// Đặt khoá (cặp ngôn ngữ) TRƯỚC mọi thứ khác: nó quyết định kho từ, giọng đọc
+// và ngôn ngữ giao diện, nên phải xong trước khi vẽ bất cứ màn nào.
+datKhoa(S.khoa || KHOA[0].id);
+veNutCo();
 rollPeriods();
 applyTheme();
 paintStats();

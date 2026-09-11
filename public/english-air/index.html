@@ -1682,8 +1682,11 @@
     <!-- ===== thanh trạng thái trên ===== -->
     <header class="topbar">
       <button class="flagchip" id="btnLevel" type="button" aria-label="Đổi trình độ">
-        <span class="flagchip-face" aria-hidden="true">EN</span>
+        <span class="flagchip-face" id="flagFace" aria-hidden="true">EN</span>
         <span class="flagchip-lv" id="levelCode">A1</span>
+      </button>
+      <button class="co-nut" id="btnCoMo" type="button" aria-label="Đổi ngôn ngữ">
+        <span id="coNutCo" aria-hidden="true">🇻🇳</span><span aria-hidden="true">→</span><span id="coNutCo2" aria-hidden="true">🇬🇧</span>
       </button>
       <div class="pills">
         <button class="pill p-flame" id="btnStreak" type="button" aria-label="Chuỗi ngày học">
@@ -2508,6 +2511,19 @@
   </div>
 </div>
 
+<!-- ============ CHỌN CẶP NGÔN NGỮ ============
+     Hai lá cờ: tôi nói tiếng gì, tôi muốn học tiếng gì. Thêm thứ tiếng về sau
+     chỉ là thêm một dòng vào bảng KHOA bên course.js — màn này tự mọc thêm cờ. -->
+<div class="cochon" id="coView" hidden role="dialog" aria-modal="true" aria-labelledby="coTitle">
+  <div class="cochon-in">
+    <div class="cochon-hinh" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+    <h2 id="coTitle">Bạn học tiếng gì?</h2>
+    <p class="cochon-sub">Chọn tiếng mẹ đẻ và thứ tiếng bạn muốn học.</p>
+    <div class="cochon-ds" id="coDs"></div>
+    <button class="btn btn-soft btn-block mt" id="btnCoDong" type="button">Đóng</button>
+  </div>
+</div>
+
 <!-- ================= CHUỖI NGÀY ================= -->
 <div class="streak" id="streakView" hidden role="dialog" aria-modal="true" aria-labelledby="streakTitle">
   <header class="p-bar">
@@ -2729,10 +2745,12 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
+<script src="ngon-ngu.js"></script>
 <script src="letters.js"></script>
 <script src="course-a1.js"></script>
 <script src="course-a2.js"></script>
 <script src="course-b1.js"></script>
+<script src="course-vi1.js"></script>
 <script src="course.js"></script>
 <script src="app.js"></script>
 </body>
