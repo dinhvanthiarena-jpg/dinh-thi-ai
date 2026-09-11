@@ -3784,10 +3784,14 @@ function advance() {
     return doiDocXong(() => {
       thuongDangCho = false;
       $("#btnNext").disabled = false;
-      // Xen kẽ: lần này pháo hoa + sticker, lần sau được chơi bắn chữ. Cứ một
-      // kiểu mãi thì phần thưởng hết là phần thưởng.
+      // Xoay vòng bốn kiểu thưởng: pháo hoa → bắn chữ → chém chữ → ném bóng.
+      // Cứ một kiểu mãi thì phần thưởng hết là phần thưởng.
       thuongLuot += 1;
-      if (thuongLuot % 2 === 0) banMo(diTiep); else moThuong(diTiep);
+      const kieu = thuongLuot % 4;
+      if (kieu === 1) banMo(diTiep);
+      else if (kieu === 2) chemMo(diTiep);
+      else if (kieu === 3) nemMo(diTiep);
+      else moThuong(diTiep);
     });
   }
   diTiep();
@@ -7282,6 +7286,8 @@ $("#banHetLai").addEventListener("click", () => {
   $("#banBan").disabled = false;
 });
 $("#btnResChoi").addEventListener("click", () => banMo(null));
+$("#btnResChem").addEventListener("click", () => chemMo(null));
+$("#btnResNem").addEventListener("click", () => nemMo(null));
 banGanTay();
 
 // Xoay máy hay hiện bàn phím thì khung đổi cỡ — phải dựng lại canvas, không thì
@@ -7779,6 +7785,500 @@ window.addEventListener("resize", () => {
   if (!CHEM.mo) return;
   chemCoCanvas();
   CHEM.qua.forEach(q => { q.x = clamp(q.x, q.r, Math.max(q.r, CHEM.W - q.r)); });
+});
+
+/* ---------- 23d. Trò chơi: NÉM BÓNG ----------
+   Thầy đặt bài: MON.L đứng ném bóng vào NHỮNG đáp án đúng — số nhiều, nên mỗi
+   lượt có BA đích đúng chứ không phải một. Thầy dặn "tư duy thêm đi", nên trò
+   này cố tình làm khác hẳn hai trò kia:
+
+     Bắn chữ  — thi tay ngắm.
+     Chém chữ — thi tay nhanh.
+     Ném bóng — THI ĐẦU. Không phải ngắm, chạm vào đích nào là MON.L ném trúng
+                đích đó; cái khó nằm ở chỗ PHẢI PHÂN LOẠI mới biết ném vào đâu.
+
+   Ba kiểu đề, kiểu nào cũng suy ra được từ dữ liệu khoá học nên không thể sai:
+     1. Từ loại   — "Ném vào những từ là ĐỘNG TỪ" (lấy theo pos đã ghi sẵn)
+     2. A hay AN  — "Ném vào những từ đi với AN" (có danh sách ngoại lệ)
+     3. Ghép nghĩa — "Ném vào những từ nghĩa là: quả táo, cái ghế, con mèo"
+
+   Không có đồng hồ đếm ngược: đây là trò để NGHĨ, không phải để cuống. */
+
+const NEM_TONG = 8;          // tám lượt một ván
+const NEM_MANG = 3;
+const NEM_DUNG = 3;          // mỗi lượt ba đích đúng
+const NEM_SAI = 3;           // và ba đích mồi
+const NEM_G = 900;           // trọng lực đường bóng bay
+
+/* Chữ bắt đầu bằng nguyên âm mà vẫn đi với "a", và ngược lại. Không có bảng này
+   thì máy dạy sai: "an university" là sai, "a hour" cũng sai. */
+const NEM_A_DU = ["university", "uniform", "user", "union", "unit", "useful", "european", "one", "once", "unique"];
+const NEM_AN_DU = ["hour", "honest", "honour", "honor", "heir"];
+function nemDiVoiAn(en) {
+  const s = String(en || "").toLowerCase();
+  if (NEM_AN_DU.includes(s)) return true;
+  if (NEM_A_DU.includes(s)) return false;
+  return /^[aeiou]/.test(s);
+}
+
+const NEM_LOAI = ["Danh từ", "Động từ", "Tính từ", "Trạng từ"];
+
+const NEM = {
+  mo: false, raf: 0, truoc: 0,
+  cv: null, ctx: null, W: 0, H: 0,
+  bia: [], hat: [], bong: null,
+  de: null, cho: true, xong: 0,
+  diem: 0, mang: NEM_MANG, vong: 0,
+  mau: { net: "#3B0764", bong: "#EA580C", vong: "#7C3AED" },
+};
+let nemSauKhiDong = null;
+let nemKeuHen = null, nemAvaHen = null;
+
+/* ---- Ra đề ---- */
+/** Lấy kho từ đơn theo trình độ, mỗi từ chỉ giữ một lần. */
+function nemKhoTu() {
+  const kho = (khoTheoBac().single || SINGLE)
+    .filter(w => w && w.en && w.vi && !w.en.includes(" ") && /^[A-Za-z]+$/.test(w.en));
+  const gap = new Set();
+  return kho.filter(w => {
+    const k = w.en.toLowerCase();
+    if (gap.has(k)) return false;
+    gap.add(k);
+    return true;
+  });
+}
+
+function nemRaDe() {
+  const tu = nemKhoTu();
+  if (tu.length < NEM_DUNG + NEM_SAI) return null;
+
+  // Thử lần lượt ba kiểu đề, kiểu nào đủ từ thì lấy. Xáo thứ tự cho khỏi lặp.
+  for (const kieu of shuffle(["loai", "an", "nghia"])) {
+
+    if (kieu === "loai") {
+      for (const l of shuffle(NEM_LOAI)) {
+        const hop = tu.filter(w => w.pos === l);
+        const khac = tu.filter(w => w.pos && w.pos !== l);
+        if (hop.length < NEM_DUNG || khac.length < NEM_SAI) continue;
+        return {
+          lenh: "Ném vào những từ là " + l.toUpperCase(),
+          meo: "Chạm vào quả bóng bay có từ đúng — chọn đủ ba từ.",
+          dung: sample(hop, NEM_DUNG),
+          sai: sample(khac, NEM_SAI),
+        };
+      }
+    }
+
+    if (kieu === "an") {
+      const danh = tu.filter(w => w.pos === "Danh từ");
+      const co = danh.filter(w => nemDiVoiAn(w.en));
+      const khong = danh.filter(w => !nemDiVoiAn(w.en));
+      if (co.length >= NEM_DUNG && khong.length >= NEM_SAI) {
+        // Hỏi cả hai chiều cho khỏi học vẹt "cứ nguyên âm là an".
+        const hoiAn = Math.random() < .5;
+        return {
+          lenh: hoiAn ? "Ném vào những từ đi với AN" : "Ném vào những từ đi với A",
+          meo: hoiAn ? "an apple, an egg… — nghe chữ đầu chứ đừng nhìn mặt chữ."
+                     : "a book, a university… — nghe chữ đầu chứ đừng nhìn mặt chữ.",
+          dung: sample(hoiAn ? co : khong, NEM_DUNG),
+          sai: sample(hoiAn ? khong : co, NEM_SAI),
+        };
+      }
+    }
+
+    if (kieu === "nghia") {
+      const ds = sample(tu, NEM_DUNG + NEM_SAI);
+      const dung = ds.slice(0, NEM_DUNG);
+      const sai = ds.slice(NEM_DUNG);
+      return {
+        lenh: "Ném vào những từ nghĩa là: " + dung.map(w => w.vi).join(" · "),
+        meo: "Ba nghĩa ở trên, tìm đúng ba từ tiếng Anh.",
+        dung, sai,
+      };
+    }
+  }
+  return null;
+}
+
+/* ---- Dựng màn ---- */
+function nemCoCanvas() {
+  const cv = NEM.cv;
+  const tl = Math.min(window.devicePixelRatio || 1, 2);
+  NEM.W = cv.clientWidth;
+  NEM.H = cv.clientHeight;
+  cv.width = Math.round(NEM.W * tl);
+  cv.height = Math.round(NEM.H * tl);
+  NEM.ctx.setTransform(tl, 0, 0, tl, 0, 0);
+}
+const nemGoc = () => ({ x: NEM.W / 2, y: NEM.H - 30 });
+
+function nemLayMau() {
+  const c = getComputedStyle(document.documentElement);
+  const l = (k, dp) => (c.getPropertyValue(k) || "").trim() || dp;
+  NEM.mau = {
+    net: l("--ink-deep", "#3B0764"),
+    bong: l("--flame", "#C2410C"),
+    vong: l("--brand", "#7E22CE"),
+  };
+}
+
+function nemBia(w, dung) {
+  const c = NEM.ctx;
+  c.font = "900 16px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  const rong = c.measureText(w.en).width;
+  const rx = clamp(rong / 2 + 18, 34, Math.max(36, NEM.W / 2 - 16));
+  return {
+    tu: w, dung, rx, ry: rx * 1.1,
+    x: 0, y: 0, troi: (Math.random() < .5 ? -1 : 1) * (10 + Math.random() * 14),
+    pha: Math.random() * Math.PI * 2,
+    mau: BAN_MAU[Math.floor(Math.random() * BAN_MAU.length)],
+    vo: false,
+  };
+}
+
+/** Xếp sáu quả thành ba hàng, hai quả một hàng — không quả nào đè quả nào. */
+function nemXep() {
+  const n = NEM.bia.length;
+  const cot = 2, hang = Math.ceil(n / cot);
+  // Chừa khoảng trên cho MON.L không đứng lẫn vào, và chừa đáy cho chỗ ném.
+  const tren = NEM.H * .10, duoi = NEM.H * .74;
+  NEM.bia.forEach((b, i) => {
+    const h = Math.floor(i / cot), c = i % cot;
+    b.x = NEM.W * (c === 0 ? .28 : .72) + (Math.random() - .5) * 20;
+    b.y = tren + (duoi - tren) * (hang <= 1 ? .5 : h / (hang - 1));
+    b.x = clamp(b.x, b.rx + 6, NEM.W - b.rx - 6);
+    b.goc0 = b.x;
+  });
+}
+
+function nemVongMoi() {
+  const de = nemRaDe();
+  if (!de) { toast("Chưa đủ từ để chơi ở trình độ này."); return nemDong(); }
+  NEM.de = de;
+  NEM.vong += 1;
+  NEM.cho = false;
+  NEM.xong = 0;
+  NEM.bong = null;
+  NEM.hat = [];
+
+  const o = $("#nemCau");
+  o.textContent = de.lenh;
+  banChayHieuUng(o);
+  $("#nemMeo").textContent = de.meo;
+  banChayHieuUng($("#nemView .ban-hang-viet"));
+
+  // Ba ô chờ ở dưới, đúng được từ nào thì lấp từ đó vào
+  const khay = $("#nemKhay");
+  khay.textContent = "";
+  for (let i = 0; i < NEM_DUNG; i++) {
+    const s = el("span", "nem-o", "?");
+    s.id = "nemO" + i;
+    khay.append(s);
+  }
+
+  NEM.bia = shuffle(de.dung.map(w => nemBia(w, true))
+    .concat(de.sai.map(w => nemBia(w, false))));
+  nemXep();
+  nemVeMang();
+  $("#nemChi").textContent = "Lượt " + NEM.vong + "/" + NEM_TONG + " — chọn đủ ba từ đúng.";
+}
+
+function nemVeMang() {
+  const o = $("#nemMang");
+  o.textContent = "";
+  for (let i = 0; i < NEM_MANG; i++) {
+    o.append(el("span", "ban-tim" + (i < NEM.mang ? "" : " tat"), "♥"));
+  }
+  $("#nemDiem").textContent = NEM.diem;
+}
+
+function nemKeu(chu, loai) {
+  const p = $("#nemKeu");
+  p.hidden = true;
+  p.textContent = chu;
+  p.className = "ban-keu " + loai;
+  void p.offsetWidth;
+  p.hidden = false;
+  clearTimeout(nemKeuHen);
+  nemKeuHen = setTimeout(() => { p.hidden = true; }, 900);
+}
+
+function nemAvaTo(loai) {
+  const n = $("#nemAva");
+  if (!n) return;
+  n.classList.remove("vui", "buon", "nem");
+  void n.offsetWidth;
+  n.classList.add(loai);
+  clearTimeout(nemAvaHen);
+  nemAvaHen = setTimeout(() => n.classList.remove("vui", "buon", "nem"), 800);
+}
+
+/* ---- Ném ---- */
+/** Chạm vào đích nào là ném trúng đích đó. Trò này thi cái đầu, không thi tay
+    ngắm — nên đường bóng tính sẵn sao cho luôn tới đúng chỗ quả sẽ bay tới. */
+function nemNem(b) {
+  if (NEM.cho || NEM.bong || !NEM.mo) return;
+  const g = nemGoc();
+  const t = .52;
+  const dx = (b.x + b.troi * t) - g.x;
+  const dy = b.y - g.y;
+  NEM.bong = {
+    x: g.x, y: g.y,
+    vx: dx / t,
+    vy: dy / t - 0.5 * NEM_G * t,
+    con: t, dich: b,
+  };
+  nemAvaTo("nem");
+  nemTiengNem();
+}
+
+function nemTiengNem() {
+  if (!S.sound) return;
+  const a = tiengSanSang(); if (!a) return;
+  const t = a.currentTime + .005;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = "sine";
+  o.frequency.setValueAtTime(520, t);
+  o.frequency.exponentialRampToValueAtTime(240, t + .18);
+  g.gain.setValueAtTime(.06, t);
+  g.gain.exponentialRampToValueAtTime(.0001, t + .2);
+  o.connect(g); g.connect(ra(a));
+  o.start(t); o.stop(t + .22);
+}
+
+function nemHat(b, manh) {
+  const n = manh ? 24 : 14;
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, s = (manh ? 90 : 50) + Math.random() * (manh ? 260 : 160);
+    NEM.hat.push({ x: b.x, y: b.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+      mau: i % 3 === 0 ? NEM.mau.vong : b.mau, r: 2.4 + Math.random() * 2.8, doi: 1 });
+  }
+}
+
+/** Từ vừa ném trúng rơi xuống lấp vào ô chờ. */
+function nemChuVeO(b, chiSo) {
+  const o = $("#nemO" + chiSo);
+  if (!o) return;
+  const cv = NEM.cv.getBoundingClientRect();
+  const s = el("span", "ban-bay", b.tu.en);
+  s.style.left = (cv.left + b.x) + "px";
+  s.style.top = (cv.top + b.y) + "px";
+  document.body.appendChild(s);
+  requestAnimationFrame(() => {
+    const r = o.getBoundingClientRect();
+    s.style.left = (r.left + r.width / 2) + "px";
+    s.style.top = (r.top + r.height / 2) + "px";
+  });
+  setTimeout(() => {
+    s.remove();
+    o.textContent = b.tu.en;
+    o.classList.add("day");
+  }, 640);
+}
+
+function nemTrungDung(b) {
+  nemHat(b, false);
+  NEM.bia = NEM.bia.filter(x => x !== b);
+  nemChuVeO(b, NEM.xong);
+  NEM.xong += 1;
+  NEM.diem += 10;
+  nemVeMang();
+  nemAvaTo("vui");
+  chemTiengDung();
+  // Đọc từ vừa chọn kèm nghĩa — trúng hay trượt cũng phải học được một từ.
+  docLanLuot([{ text: b.tu.en, lang: "en-GB" }, { text: b.tu.vi, lang: "vi-VN" }]);
+  if (NEM.xong < NEM_DUNG) { nemKeu("Yes!", "dung"); return; }
+
+  // Đủ ba từ thì sang lượt mới
+  NEM.cho = true;
+  nemKeu("Giỏi!", "dung");
+  NEM.diem += 5;                       // thưởng thêm cho việc gom đủ cả ba
+  nemVeMang();
+  setTimeout(() => {
+    if (!NEM.mo) return;
+    if (NEM.vong >= NEM_TONG) return nemXong(true);
+    nemVongMoi();
+  }, 1700);
+}
+
+function nemTrungSai(b) {
+  nemHat(b, true);
+  keuNo(0);
+  NEM.bia = NEM.bia.filter(x => x !== b);
+  NEM.mang -= 1;
+  nemKeu("No", "sai");
+  nemAvaTo("buon");
+  banTiengSai();
+  nemVeMang();
+  docLanLuot([{ text: b.tu.en, lang: "en-GB" }, { text: b.tu.vi, lang: "vi-VN" }]);
+  if (NEM.mang <= 0) nemXong(false, "Ném nhầm ba lần rồi.");
+}
+
+function nemXong(thang, vi) {
+  NEM.cho = true;
+  NEM.bong = null;
+  $("#nemHetTit").textContent = thang ? "Đầu óc sáng lắm!" : "Hết lượt rồi";
+  $("#nemHetSub").textContent = thang
+    ? "Xong cả " + NEM_TONG + " lượt, được " + NEM.diem + " điểm."
+    : (vi || "Hết lượt rồi.") + " Được " + NEM.diem + " điểm.";
+  $("#nemHet").hidden = false;
+  if (thang) phatVoTay();
+}
+
+/* ---- Vẽ ---- */
+function nemVeBia(c, b) {
+  // Dây treo, cho ra dáng quả bóng bay đang lơ lửng
+  c.strokeStyle = NEM.mau.net; c.globalAlpha = .22; c.lineWidth = 1.4;
+  c.beginPath();
+  c.moveTo(b.x, b.y + b.ry);
+  c.quadraticCurveTo(b.x + 6, b.y + b.ry + 14, b.x - 2, b.y + b.ry + 26);
+  c.stroke();
+  c.globalAlpha = 1;
+  // Thân
+  const g = c.createRadialGradient(b.x - b.rx * .34, b.y - b.ry * .36, 2, b.x, b.y, b.rx * 1.25);
+  g.addColorStop(0, "rgba(255,255,255,.58)");
+  g.addColorStop(.36, b.mau);
+  g.addColorStop(1, "rgba(0,0,0,.28)");
+  c.fillStyle = g;
+  c.beginPath(); c.ellipse(b.x, b.y, b.rx, b.ry, 0, 0, Math.PI * 2); c.fill();
+  c.strokeStyle = "rgba(255,255,255,.42)"; c.lineWidth = 2; c.stroke();
+  // Chữ
+  c.font = "900 16px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillStyle = "rgba(0,0,0,.45)";
+  c.fillText(b.tu.en, b.x, b.y + 1.5);
+  c.fillStyle = "#fff";
+  c.fillText(b.tu.en, b.x, b.y);
+}
+
+function nemVeBong(c) {
+  const q = NEM.bong;
+  if (!q) return;
+  c.fillStyle = NEM.mau.bong;
+  c.beginPath(); c.arc(q.x, q.y, 11, 0, Math.PI * 2); c.fill();
+  c.fillStyle = "rgba(255,255,255,.55)";
+  c.beginPath(); c.arc(q.x - 3.5, q.y - 3.5, 3.6, 0, Math.PI * 2); c.fill();
+}
+
+/* ---- Vòng chạy ---- */
+function nemChay(nay) {
+  if (!NEM.mo) return;
+  const dt = Math.min(50, nay - NEM.truoc) / 1000;
+  NEM.truoc = nay;
+  const c = NEM.ctx;
+  c.clearRect(0, 0, NEM.W, NEM.H);
+  const dangChay = $("#nemHet").hidden;
+
+  for (const b of NEM.bia) {
+    if (dangChay) {
+      // Trôi ngang chầm chậm, chạm mép thì quay đầu; thêm nhịp bồng bềnh lên xuống.
+      b.x += b.troi * dt;
+      if (b.x < b.rx + 6) { b.x = b.rx + 6; b.troi = Math.abs(b.troi); }
+      if (b.x > NEM.W - b.rx - 6) { b.x = NEM.W - b.rx - 6; b.troi = -Math.abs(b.troi); }
+      b.pha += dt * 1.2;
+    }
+    const yv = b.y + Math.sin(b.pha) * 5;
+    nemVeBia(c, { ...b, y: yv });
+  }
+
+  // Bóng bay theo đường vòng cung, tới nơi là xử lý
+  if (NEM.bong) {
+    const q = NEM.bong;
+    q.vy += NEM_G * dt;
+    q.x += q.vx * dt;
+    q.y += q.vy * dt;
+    q.con -= dt;
+    nemVeBong(c);
+    if (q.con <= 0) {
+      const b = q.dich;
+      NEM.bong = null;
+      if (NEM.bia.includes(b)) {
+        if (b.dung) nemTrungDung(b); else nemTrungSai(b);
+      }
+    }
+  }
+
+  for (const h of NEM.hat.slice()) {
+    h.vy += 620 * dt;
+    h.x += h.vx * dt; h.y += h.vy * dt;
+    h.doi -= dt * 1.3;
+    if (h.doi <= 0) { NEM.hat.splice(NEM.hat.indexOf(h), 1); continue; }
+    c.globalAlpha = Math.max(0, h.doi);
+    c.fillStyle = h.mau;
+    c.beginPath(); c.arc(h.x, h.y, h.r, 0, Math.PI * 2); c.fill();
+    c.globalAlpha = 1;
+  }
+
+  NEM.raf = requestAnimationFrame(nemChay);
+}
+
+/* ---- Chạm để chọn ---- */
+function nemGanTay() {
+  const cv = $("#nemTroi");
+  NEM.cv = cv;
+  NEM.ctx = cv.getContext("2d");
+  cv.addEventListener("pointerdown", e => {
+    if (NEM.cho || NEM.bong) return;
+    const r = cv.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    // Chạm hụt một tí vẫn tính là chọn quả gần nhất — ngón tay to hơn quả bóng.
+    let gan = null, xa = 1e9;
+    for (const b of NEM.bia) {
+      const d = ((x - b.x) / b.rx) ** 2 + ((y - b.y) / b.ry) ** 2;
+      if (d < xa) { xa = d; gan = b; }
+    }
+    if (gan && xa <= 1.6) nemNem(gan);
+  });
+}
+
+/* ---- Mở / đóng ---- */
+function nemMo(xong) {
+  const v = $("#nemView");
+  if (!v) { xong && xong(); return; }
+  nemSauKhiDong = xong || null;
+  v.hidden = false;
+  document.body.style.overflow = "hidden";
+  NEM.mo = true;
+  NEM.diem = 0; NEM.mang = NEM_MANG; NEM.vong = 0;
+  NEM.bia = []; NEM.hat = []; NEM.bong = null;
+  $("#nemHet").hidden = true;
+  $("#nemKeu").hidden = true;
+  nemLayMau();
+  nemCoCanvas();
+  nemVongMoi();
+  if (!NEM.mo) return;                 // hết từ thì nemVongMoi đã tự đóng màn
+  NEM.truoc = performance.now();
+  cancelAnimationFrame(NEM.raf);
+  NEM.raf = requestAnimationFrame(nemChay);
+}
+
+function nemDong() {
+  cancelAnimationFrame(NEM.raf);
+  NEM.mo = false;
+  stopSpeak();
+  $("#nemView").hidden = true;
+  $("#nemHet").hidden = true;
+  const conMo = !$("#player").hidden || !$("#result").hidden;
+  document.body.style.overflow = conMo ? "hidden" : "";
+  const f = nemSauKhiDong;
+  nemSauKhiDong = null;
+  f && f();
+}
+
+$("#btnNemDong").addEventListener("click", nemDong);
+$("#nemHetVe").addEventListener("click", nemDong);
+$("#nemHetLai").addEventListener("click", () => {
+  NEM.diem = 0; NEM.mang = NEM_MANG; NEM.vong = 0;
+  NEM.bia = []; NEM.hat = []; NEM.bong = null;
+  $("#nemHet").hidden = true;
+  nemVongMoi();
+});
+nemGanTay();
+
+window.addEventListener("resize", () => {
+  if (!NEM.mo) return;
+  nemCoCanvas();
+  nemXep();
 });
 
 /* ---------- 24. Khởi động ---------- */

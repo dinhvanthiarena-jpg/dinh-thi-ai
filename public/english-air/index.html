@@ -2162,9 +2162,12 @@
     </div>
     <p class="res-boi" id="resBoi" hidden></p>
     <p class="res-note" id="resNote"></p>
-    <button class="btn btn-choi btn-block" id="btnResChoi" type="button">
-      <span aria-hidden="true">🎈</span> Chơi thưởng — Bắn chữ
-    </button>
+    <p class="res-choi-lab">Chơi thưởng</p>
+    <div class="res-choi">
+      <button class="btn btn-choi" id="btnResChoi" type="button">Bắn chữ</button>
+      <button class="btn btn-choi" id="btnResChem" type="button">Chém chữ</button>
+      <button class="btn btn-choi" id="btnResNem" type="button">Ném bóng</button>
+    </div>
     <button class="btn btn-primary btn-block" id="btnResDone" type="button">Tiếp tục</button>
   </div>
 </div>
@@ -2404,6 +2407,45 @@
       <p class="ban-het-sub" id="chemHetSub"></p>
       <button class="btn btn-primary btn-block" id="chemHetLai" type="button">Chơi lại</button>
       <button class="btn btn-soft btn-block mt" id="chemHetVe" type="button">Học tiếp</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TRÒ CHƠI: NÉM BÓNG ============
+     MON.L đứng dưới ném bóng vào NHỮNG đáp án đúng — mỗi lượt ba đáp án. Chạm
+     vào quả nào là ném trúng quả đó, cái khó nằm ở chỗ phải phân loại đúng. -->
+<div class="ban nem" id="nemView" hidden role="dialog" aria-modal="true" aria-labelledby="nemTitle">
+  <header class="ban-bar">
+    <button class="icon-btn" id="btnNemDong" type="button" aria-label="Đóng trò chơi">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+    <span class="ban-bar-tit" id="nemTitle">Ném bóng</span>
+    <span class="ban-mang" id="nemMang" aria-label="Số lần ném nhầm còn được phép"></span>
+    <span class="ban-diem"><b id="nemDiem">0</b> điểm</span>
+  </header>
+
+  <div class="ban-troi-boc">
+    <canvas class="ban-troi" id="nemTroi"></canvas>
+    <p class="ban-keu" id="nemKeu" hidden aria-live="assertive"></p>
+    <div class="ban-ava" id="nemAva" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+  </div>
+
+  <div class="ban-duoi">
+    <p class="ban-cau" id="nemCau"></p>
+    <div class="ban-hang-viet">
+      <p class="ban-viet" id="nemMeo"></p>
+    </div>
+    <div class="nem-khay" id="nemKhay"></div>
+    <p class="ban-chi" id="nemChi">Chạm vào quả mang từ đúng — chọn đủ ba từ.</p>
+  </div>
+
+  <div class="ban-het" id="nemHet" hidden>
+    <div class="ban-het-in">
+      <div class="ban-het-hinh" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+      <h3 id="nemHetTit">Hết lượt rồi</h3>
+      <p class="ban-het-sub" id="nemHetSub"></p>
+      <button class="btn btn-primary btn-block" id="nemHetLai" type="button">Chơi lại</button>
+      <button class="btn btn-soft btn-block mt" id="nemHetVe" type="button">Học tiếp</button>
     </div>
   </div>
 </div>

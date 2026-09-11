@@ -2527,16 +2527,48 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   transform: translate(-50%, -50%);
   transition: left 620ms var(--e), top 620ms var(--e), font-size 620ms var(--e); }
 
+/* ---- Riêng màn Ném bóng ---- */
+/* Ở đây MON.L là người NÉM, nên phải đứng dưới đất chứ không lơ lửng trên đầu
+   như hai trò kia. Lệch sang trái để không che quả bóng đang bay lên giữa màn. */
+.nem .ban-ava { top: auto; bottom: 2px; left: var(--s3); margin-left: 0;
+  width: 72px; height: 72px; }
+/* Lúc ném thì chồm người một cái */
+.nem .ban-ava.nem { animation: nemLay 520ms var(--e) 1; }
+@keyframes nemLay {
+  0%   { transform: rotate(0) translateX(0); }
+  25%  { transform: rotate(-16deg) translateX(-6px); }
+  55%  { transform: rotate(14deg) translateX(8px); }
+  100% { transform: rotate(0) translateX(0); }
+}
+/* Ba ô chờ: chọn đúng từ nào thì từ đó rơi vào ô */
+.nem-khay { display: flex; justify-content: center; gap: var(--s2);
+  margin-bottom: var(--s2); flex-wrap: wrap; }
+.nem-o { min-width: 92px; padding: 7px 12px; border-radius: var(--r2);
+  background: var(--muted); color: var(--muted-fg);
+  font-size: 1.02rem; font-weight: 900; }
+.nem-o.day { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok);
+  box-shadow: inset 0 0 0 2px var(--ok);
+  animation: banODay 460ms var(--e) both; }
+/* Câu lệnh ở trò này là một dòng chỉ dẫn dài, không phải một câu tiếng Anh, nên
+   cho nhỏ hơn một bậc để câu dài vẫn gọn trong hai hàng. */
+.nem .ban-cau { font-size: clamp(1.2rem, 5.2vw, 1.5rem); }
+.nem .ban-viet { font-size: clamp(.92rem, 3.6vw, 1.04rem); }
+
 /* Tấm mời chơi chèn giữa phần dạy, ngay trước Góc văn hoá. */
 .choi-moi { padding: var(--s5) var(--s4); border-radius: var(--r3);
   background: var(--brand-soft); text-align: center; }
 .choi-moi-sub { margin: 0 0 var(--s4); color: var(--brand-ink);
   font-size: 1rem; font-weight: 600; line-height: 1.5; }
 
-/* Nút mở trò chơi ở trang kết quả — cùng bộ màu app, chỉ khác nút "Tiếp tục"
-   ở chỗ nó là nút viền chứ không phải nút đặc, nên không bấm nhầm. */
-.btn-choi { background: var(--brand-soft); color: var(--brand-ink);
-  box-shadow: inset 0 0 0 2px var(--brand); margin-bottom: var(--s2); }
+/* Ba nút trò chơi ở trang kết quả — cùng bộ màu app, là nút viền chứ không phải
+   nút đặc như "Tiếp tục", nên không bấm nhầm. */
+.res-choi-lab { margin: var(--s4) 0 var(--s2); font-size: .74rem; font-weight: 900;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted-fg); }
+.res-choi { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2);
+  margin-bottom: var(--s3); }
+.btn-choi { min-height: 48px; padding: 0 var(--s2); font-size: .92rem;
+  background: var(--brand-soft); color: var(--brand-ink);
+  box-shadow: inset 0 0 0 2px var(--brand); }
 
 @media (prefers-reduced-motion: reduce) {
   .ban-keu { animation-duration: 1ms; }
