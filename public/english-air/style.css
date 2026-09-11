@@ -612,6 +612,8 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .mascot-top.hide { display: none; }
 .kicker { text-align: center; color: var(--brand-ink); font-size: .96rem; font-weight: 900; margin-bottom: var(--s3); }
 .stage { width: 100%; max-width: var(--shell); margin: 0 auto; display: flex; flex-direction: column; gap: var(--s4); }
+/* Câu đã chấm rồi thì chỉ để xem lại, bấm vào không ăn gì nữa. */
+.stage.xem-lai { pointer-events: none; }
 .ask { text-align: center; font-size: 1.24rem; font-weight: 900; line-height: 1.35; }
 .ask em { font-style: normal; color: var(--brand-ink); }
 
@@ -2376,25 +2378,28 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
    TRÒ CHƠI THƯỞNG — BẮN CHỮ
    Bầu trời chiếm phần lớn màn hình vì đó là chỗ mắt phải dõi theo bóng bay;
    câu và cây cung dồn xuống dưới, nơi ngón tay cái với tới được.
+
+   Màu: lấy nguyên bộ màu của app (nền tím nhạt sáng dần xuống trắng, y như
+   bầu trời ở màn học), không dùng bảng màu riêng. Thầy chốt: trò chơi nào
+   trong app cũng phải nhìn ra là cùng một app. Vì dùng biến màu nên chế độ
+   tối cũng tự đúng theo.
    ============================================================ */
 .ban { position: fixed; inset: 0; z-index: 97; display: flex; flex-direction: column;
-  background: linear-gradient(180deg, #1B2A5B 0%, #2E4C93 42%, #6E9BE0 78%, #A9C9F2 100%);
-  overflow: hidden; }
+  background: var(--card); color: var(--fg); overflow: hidden; }
 
 .ban-bar { flex: none; position: relative; z-index: 3;
-  padding: calc(var(--s3) + env(safe-area-inset-top)) var(--s4) var(--s3);
+  padding: calc(var(--s3) + env(safe-area-inset-top)) var(--s4) var(--s2);
   display: flex; align-items: center; gap: var(--s3); }
-.ban-bar .icon-btn { width: 46px; height: 46px; flex: none; border-radius: 50%;
-  background: rgba(0,0,0,.4); color: #fff; border: 1px solid rgba(255,255,255,.16); }
-.ban-bar-tit { font-weight: 900; font-size: 1.02rem; color: #fff; margin-right: auto;
-  text-shadow: 0 2px 10px rgba(0,0,0,.6); }
-.ban-mang { font-size: 1.05rem; letter-spacing: 2px; line-height: 1; }
-.ban-tim { font-size: 1.12rem; color: #FB7185; }
-.ban-tim.tat { color: rgba(255,255,255,.26); }
-.ban-diem { font-size: .85rem; font-weight: 700; color: rgba(255,255,255,.82); }
-.ban-diem b { font-size: 1.12rem; font-weight: 900; color: #FDE68A; }
+.ban-bar-tit { font-weight: 900; font-size: 1.02rem; color: var(--fg); margin-right: auto; }
+.ban-mang { line-height: 1; letter-spacing: 2px; }
+.ban-tim { font-size: 1.12rem; color: var(--heart); }
+.ban-tim.tat { color: var(--line-hi); }
+.ban-diem { font-size: .82rem; font-weight: 700; color: var(--muted-fg); }
+.ban-diem b { font-size: 1.1rem; font-weight: 900; color: var(--brand); }
 
-.ban-troi-boc { position: relative; flex: 1 1 auto; min-height: 0; }
+/* Bầu trời đúng bằng nền màn học: tím nhạt trên, trắng dần xuống dưới. */
+.ban-troi-boc { position: relative; flex: 1 1 auto; min-height: 0;
+  background: linear-gradient(180deg, var(--sky-1), var(--card)); }
 /* Trên máy tính màn hình rộng, để bầu trời trải hết bề ngang thì quả bóng ngoài
    cùng nằm ngoài tầm xoay của cung — bắn không tới. Bó lại đúng khổ điện thoại. */
 .ban-bar, .ban-troi-boc, .ban-duoi { width: 100%; max-width: 560px; margin-inline: auto; }
@@ -2403,10 +2408,10 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 /* Chữ báo đúng/sai nảy lên giữa trời — to, đọc lướt là biết, không cần dừng lại đọc. */
 .ban-keu { position: absolute; left: 50%; top: 34%; transform: translate(-50%, -50%);
   margin: 0; font-size: 2.6rem; font-weight: 900; letter-spacing: 1px;
-  text-shadow: 0 6px 22px rgba(0,0,0,.5); pointer-events: none;
+  text-shadow: 0 4px 14px rgba(30,16,48,.22); pointer-events: none;
   animation: banKeu 900ms var(--e) both; }
-.ban-keu.dung { color: #86EFAC; }
-.ban-keu.sai  { color: #FCA5A5; }
+.ban-keu.dung { color: var(--ok); }
+.ban-keu.sai  { color: var(--bad); }
 @keyframes banKeu {
   0%   { opacity: 0; transform: translate(-50%, -30%) scale(.5); }
   22%  { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
@@ -2415,40 +2420,41 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 }
 
 .ban-duoi { flex: none; position: relative; z-index: 3;
-  padding: var(--s3) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(12,10,32,0) 0%, rgba(12,10,32,.55) 30%, rgba(12,10,32,.82) 100%);
-  text-align: center; }
-.ban-cau { margin: 0 0 4px; font-size: 1.32rem; font-weight: 800; color: #fff;
-  line-height: 1.35; text-shadow: 0 2px 10px rgba(0,0,0,.55); }
-.ban-viet { margin: 0 0 var(--s3); font-size: .92rem; color: rgba(255,255,255,.74); }
+  padding: var(--s4) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom));
+  background: var(--card); border-top: 1px solid var(--line);
+  box-shadow: 0 -8px 24px rgba(30,16,48,.08); text-align: center; }
+.ban-cau { margin: 0 0 4px; font-size: 1.3rem; font-weight: 800; color: var(--fg);
+  line-height: 1.35; }
+.ban-viet { margin: 0 0 var(--s3); font-size: .92rem; color: var(--muted-fg); }
 
 /* Ô trống là nơi chữ bay về, nên phải nhìn ra ngay là "chỗ này còn thiếu". */
 .ban-o { display: inline-block; min-width: 76px; padding: 0 8px;
-  border-bottom: 3px solid #FDE68A; color: #FDE68A; }
-.ban-o.day { border-bottom-color: #86EFAC; color: #86EFAC; }
+  border-bottom: 3px solid var(--brand); color: var(--brand); }
+.ban-o.day { border-bottom-color: var(--ok); color: var(--ok); }
 
 .ban-nghe { display: inline-flex; align-items: center; gap: 6px; margin: 0 auto var(--s3);
-  padding: 7px 16px; border: 1px solid rgba(255,255,255,.22); border-radius: var(--rf);
-  background: rgba(255,255,255,.12); color: #fff; font: inherit; font-size: .86rem;
-  font-weight: 700; cursor: pointer; }
-.ban-nghe:active { background: rgba(255,255,255,.26); }
+  padding: 7px 16px; border-radius: var(--rf); cursor: pointer;
+  background: var(--card); color: var(--brand-ink); box-shadow: inset 0 0 0 2px var(--line);
+  font: inherit; font-size: .86rem; font-weight: 800; }
+.ban-nghe:active { opacity: .6; }
 .ban-nghe .ic { width: 18px; height: 18px; }
+
 .ban-tay { display: flex; align-items: center; justify-content: center; gap: var(--s3); }
 .ban-chinh { width: 62px; height: 54px; flex: none; display: grid; place-items: center;
-  border: 1px solid rgba(255,255,255,.22); border-radius: var(--r2); cursor: pointer;
-  background: rgba(255,255,255,.12); color: #fff; }
-.ban-chinh:active { background: rgba(255,255,255,.26); }
+  border-radius: var(--r2); cursor: pointer;
+  background: var(--card); color: var(--brand-ink); box-shadow: inset 0 0 0 2px var(--line); }
+.ban-chinh:active { opacity: .6; }
 .ban-chinh .ic { width: 26px; height: 26px; }
 .ban-nut { min-width: 132px; height: 54px; padding: 0 var(--s5); border: 0; cursor: pointer;
-  border-radius: var(--r2); font: inherit; font-size: 1.06rem; font-weight: 900; color: #3B1004;
-  background: linear-gradient(140deg, #FDE68A, #F59E0B);
-  box-shadow: 0 10px 22px rgba(245,158,11,.42); }
-.ban-nut:active { transform: translateY(1px); }
-.ban-nut[disabled] { opacity: .5; box-shadow: none; }
-.ban-chi { margin: var(--s2) 0 0; font-size: .8rem; color: rgba(255,255,255,.6); }
+  border-radius: var(--rf); font: inherit; font-size: 1.04rem; font-weight: 900;
+  background: var(--brand-fill); color: var(--on-brand);
+  transition: transform var(--t1) var(--e), filter var(--t1) var(--e); }
+.ban-nut:active:not([disabled]) { transform: scale(.975); filter: brightness(.96); }
+.ban-nut[disabled] { background: var(--muted); color: var(--muted-fg); }
+.ban-chi { margin: var(--s3) 0 0; font-size: .8rem; color: var(--muted-fg); }
 
 .ban-het { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
-  padding: var(--s4); background: rgba(9,6,26,.78);
+  padding: var(--s4); background: rgba(30,16,48,.5);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .ban-het-in { width: 100%; max-width: 340px; padding: var(--s5) var(--s4);
   border-radius: var(--r4); background: var(--card); color: var(--fg);
@@ -2461,16 +2467,15 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 /* Chữ bay từ quả bóng vừa nổ xuống lấp vào ô trống. Vẽ ở lớp trên cùng để
    không bị khung nào cắt mất giữa đường. */
 .ban-bay { position: fixed; z-index: 99; margin: 0; pointer-events: none;
-  font-size: 1.3rem; font-weight: 900; color: #FDE68A;
-  text-shadow: 0 4px 16px rgba(0,0,0,.6);
+  font-size: 1.3rem; font-weight: 900; color: var(--brand);
+  text-shadow: 0 4px 14px rgba(30,16,48,.28);
   transform: translate(-50%, -50%);
   transition: left 620ms var(--e), top 620ms var(--e), font-size 620ms var(--e); }
 
-/* Nút mở trò chơi ở trang kết quả — phải khác hẳn nút "Tiếp tục" để không bấm nhầm. */
-.btn-choi { color: #3B1004; border: 0;
-  background: linear-gradient(140deg, #FDE68A, #F59E0B);
-  box-shadow: 0 8px 18px rgba(245,158,11,.34); }
-.btn-choi:active { transform: translateY(1px); }
+/* Nút mở trò chơi ở trang kết quả — cùng bộ màu app, chỉ khác nút "Tiếp tục"
+   ở chỗ nó là nút viền chứ không phải nút đặc, nên không bấm nhầm. */
+.btn-choi { background: var(--brand-soft); color: var(--brand-ink);
+  box-shadow: inset 0 0 0 2px var(--brand); margin-bottom: var(--s2); }
 
 @media (prefers-reduced-motion: reduce) {
   .ban-keu { animation-duration: 1ms; }

@@ -478,8 +478,8 @@ function apToc(u, toc) {
    2. Chỉ chạy được sau cú chạm đầu tiên: trình duyệt không cho tự phát tiếng,
       cố phát sớm chỉ tổ bị chặn im lặng.
    3. Có công tắc tắt hẳn trong Hồ sơ, và nhớ lựa chọn đó. */
-const NHAC_TO = 0.16;         // mức thường
-const NHAC_NHO = 0.045;       // mức lúc đang đọc bài
+const NHAC_TO = 0.22;         // mức thường — thầy nghe bản cũ thấy chìm quá
+const NHAC_NHO = 0.06;        // mức lúc đang đọc bài
 let nhacDaMoi = false;
 let nhacHen = null;
 
@@ -1224,7 +1224,41 @@ function renderSlide() {
   $("#btnHint").hidden = s.phase !== "drill" || s.d.type === "viet";
   if (s.phase === "learn") { TEACH[s.d.t](s.d, stage); setBtn("Tiếp theo", "btn-primary", true); }
   else { DRILL[s.d.type](s.d, stage); setBtn("Kiểm tra", "btn-primary", false); }
+  if (s.daCham) xemLaiCau(s, stage);
+  veNutLui();
 }
+
+/** Bấm quay lại mà rơi vào câu đã chấm rồi thì hiện ĐÁP ÁN, khoá không cho bấm
+    nữa. Cho làm lại thì mỗi lần lui một cái là trừ tim thêm một lần, và số câu
+    đúng cứ thế phồng lên — điểm cuối bài thành sai. */
+function xemLaiCau(s, stage) {
+  P.answered = true;
+  P.correct = !!s.daDung;
+  stage.classList.add("da-cham", "xem-lai");
+  $("#btnHint").hidden = true;      // đáp án đang hiện rồi, gợi ý làm gì nữa
+  danhDauDung(s.d, stage);
+  // Vài dạng bài không có đáp án gọn thành một chữ; thiếu thì bỏ trống dòng đó
+  // chứ không để cả màn hình chết vì một chỗ không đọc ra chữ.
+  let dap = "";
+  try { dap = answerOf(s.d) || ""; } catch { dap = ""; }
+  feedback(!!s.daDung, s.daDung ? "Câu này bạn làm đúng" : "Câu này bạn làm sai",
+    dap ? "Đáp án: " + dap : "", []);
+  setBtn("Tiếp theo", "btn-primary", true);
+}
+
+/** Nút lui chỉ hiện khi thật sự còn chỗ để lui. */
+function veNutLui() {
+  const n = $("#btnBack");
+  if (n) n.hidden = P.i <= 0;
+}
+
+function quayLai() {
+  if (P.i <= 0) return;
+  stopSpeak();
+  P.i -= 1;
+  renderSlide();
+}
+$("#btnBack").addEventListener("click", quayLai);
 
 /** Khung ảnh minh hoạ lớn cho câu hỏi — người học nhìn thấy nghĩa trước khi đọc chữ.
     Từ nào có ảnh thật (assets/pics/…) thì dùng ảnh, không thì lấy hình vẽ trong
@@ -2653,6 +2687,17 @@ $("#btnHint").addEventListener("click", () => {
 });
 
 /* ---------- 12. Chấm bài ---------- */
+/** Tô xanh đáp án đúng trên các ô đang hiện. Dùng cho cả lúc chấm sai lẫn lúc
+    bấm quay lại xem lại câu cũ, nên tách riêng ra một chỗ. */
+function danhDauDung(d, st) {
+  if (d.type === "choice" || d.type === "reverse" || d.type === "listen")
+    $$(".opt", st).forEach(n => { if (n.dataset.en === d.word.en) n.classList.add("ok"); });
+  if (d.type === "picture")
+    $$(".pic", st).forEach(n => { if (n.dataset.en === d.word.en) n.classList.add("ok"); });
+  if (d.type === "truefalse")
+    $$(".tf button", st).forEach(n => { if ((n.dataset.val === "true") === d.answer) n.classList.add("ok"); });
+}
+
 function nextPressed() {
   const s = P.cur;
   if (s.phase === "learn" || P.answered) return advance();
@@ -2678,15 +2723,11 @@ function nextPressed() {
   } else if (P.picked.node) {
     P.picked.node.classList.add(P.correct ? "ok" : "bad");
   }
-  if (!P.correct) {
-    if (d.type === "choice" || d.type === "reverse" || d.type === "listen")
-      $$(".opt", st).forEach(n => { if (n.dataset.en === d.word.en) n.classList.add("ok"); });
-    if (d.type === "picture")
-      $$(".pic", st).forEach(n => { if (n.dataset.en === d.word.en) n.classList.add("ok"); });
-    if (d.type === "truefalse")
-      $$(".tf button", st).forEach(n => { if ((n.dataset.val === "true") === d.answer) n.classList.add("ok"); });
-  }
+  if (!P.correct) danhDauDung(d, st);
   if (d.word) srsUpdate(d.word.en, P.correct);
+  // Ghi lại là câu này đã chấm rồi, để bấm nút quay lại còn biết đường hiện ra
+  // ở dạng XEM LẠI chứ không bắt làm lại (làm lại thì tim và điểm tính hai lần).
+  s.daCham = true; s.daDung = P.correct;
 
   // Đọc đáp án bằng đúng giọng của từng thứ tiếng, dùng chung cho cả đúng lẫn sai.
   const khucDoc = d.word
@@ -2717,7 +2758,9 @@ function nextPressed() {
     docLanLuot(khucDoc);
     feedback(false, "Chưa đúng", "Đáp án: " + answerOf(d), khucDoc);
     // Bài học thì cho gặp lại câu sai để nhớ; đề thi thì không, sai là sai.
-    if (!P.laThi) P.slides.push(s);
+    // Đẩy BẢN SAO chứ không đẩy chính nó: đẩy chính nó thì lần gặp lại cũng
+    // mang cờ "đã chấm", hoá ra chỉ xem lại đáp án chứ không được làm lại.
+    if (!P.laThi) P.slides.push({ ...s, daCham: false, daDung: false });
   }
   setBtn("Tiếp theo", P.correct ? "btn-ok" : "btn-danger", true);
 }
@@ -2996,6 +3039,36 @@ function keuNo(tre = 0) {
 const keuVui = () => chuoiNot([[523.3, 0, .16], [659.3, .09, .16], [784, .18, .30]], "triangle", .05);
 /** Sai: hai nốt đi xuống, nhẹ thôi — tiếc chứ không phải mắng. */
 const keuTiec = () => chuoiNot([[392, 0, .20], [294.7, .13, .34]], "sine", .045);
+
+/* Tiếng bấm nút: một cái "tách" rất ngắn. Trước đây bấm nút chẳng có tiếng gì,
+   trên điện thoại không biết máy đã ăn cú chạm hay chưa. Phải THẬT ngắn và nhỏ —
+   nút bấm cả trăm lần một buổi, tiếng dài một chút là thành phiền ngay. */
+function keuCham(nang) {
+  if (!S.sound) return;
+  const a = tiengSanSang();
+  if (!a) return;
+  const t = a.currentTime + .005;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = "sine";
+  // Nút chính kêu trầm và chắc hơn nút phụ, tai nghe ra được đã bấm cái gì.
+  o.frequency.setValueAtTime(nang ? 880 : 1180, t);
+  o.frequency.exponentialRampToValueAtTime(nang ? 520 : 760, t + .045);
+  g.gain.setValueAtTime(nang ? .075 : .045, t);
+  g.gain.exponentialRampToValueAtTime(.0001, t + .055);
+  o.connect(g); g.connect(ra(a));
+  o.start(t); o.stop(t + .07);
+}
+
+/* Bắt CHUNG cho cả app: nút nào cũng kêu, khỏi phải nhớ gắn tay nghe từng chỗ.
+   Nghe ở pointerdown chứ không phải click — tiếng phải ra ngay lúc ngón tay
+   chạm xuống thì mới thấy nút "ăn", chờ đến click là đã trễ một nhịp. */
+document.addEventListener("pointerdown", e => {
+  const o = e.target;
+  if (!o || !o.closest) return;
+  const n = o.closest("button, .opt, .pic, .tf button, .fcard, .lienket-nut, [role='button']");
+  if (!n || n.disabled || n.dataset.imLang === "1") return;
+  keuCham(n.classList.contains("btn-primary") || n.classList.contains("p-next"));
+}, { passive: true, capture: true });
 
 /* ---------- Sticker ăn mừng ----------
    Cứ 2 câu đúng thì bắn ra một sticker nổ tung toé. Ảnh để 224px, nén webp
@@ -6480,7 +6553,9 @@ if ("serviceWorker" in navigator) {
 
 const BAN_TONG = 6;          // sáu câu là vừa một quãng nghỉ, dài hơn thì chán
 const BAN_MANG = 3;          // ba lần bắn nhầm
-const BAN_MAU = ["#EF4444", "#F59E0B", "#22C55E", "#3B82F6", "#A855F7", "#EC4899", "#14B8A6"];
+/* Bóng bay giữ đúng họ màu của app — tím dẫn đầu, hồng/xanh/cam phụ hoạ — chứ
+   không bốc bừa bảy màu cầu vồng như trước. */
+const BAN_MAU = ["#7C3AED", "#DB2777", "#16A34A", "#EA580C", "#4F46E5", "#C026D3"];
 
 /* Chữ mồi phải CÙNG LOẠI với chữ đúng thì mới đáng để cân nhắc. Thầy lấy ví dụ
    my / the / we — đúng là ba loại chữ nhỏ hay lẫn nhau nhất. */
@@ -6581,6 +6656,7 @@ const BAN = {
   mo: false, raf: 0, truoc: 0,
   cv: null, ctx: null, W: 0, H: 0,
   bong: [], hat: [], may: [], ten: null,
+  mau: { net: "#3B0764", mui: "#C2410C", tim: "#7C3AED", may: "#7E22CE", day: "#C9B6E4" },
   goc: 0, luc: .62, keo: false, ngam: false,
   diem: 0, mang: BAN_MANG, vong: 0, de: null, cho: true,
 };
@@ -6641,12 +6717,27 @@ function banCoCanvas() {
 }
 const banGocCung = () => ({ x: BAN.W / 2, y: BAN.H - 40 });
 
+/* Canvas không hiểu biến CSS, nên đọc thẳng bộ màu của app ra rồi vẽ bằng màu
+   đó. Nhờ vậy cung, tên, mây trong trò chơi luôn cùng tông với cả app, và bật
+   chế độ tối là tự đổi theo chứ không phải chép tay hai bảng màu. */
+function banLayMau() {
+  const c = getComputedStyle(document.documentElement);
+  const l = (k, dp) => (c.getPropertyValue(k) || "").trim() || dp;
+  BAN.mau = {
+    net: l("--ink-deep", "#3B0764"),     // cánh cung, thân mũi tên
+    mui: l("--flame", "#C2410C"),        // đầu mũi tên
+    tim: l("--brand-fill", "#7C3AED"),   // đường ngắm, vệt tên
+    may: l("--brand", "#7E22CE"),        // mây
+    day: l("--line-hi", "#C9B6E4"),      // dây buộc bóng
+  };
+}
+
 function banMayMoi() {
   BAN.may = [];
   for (let i = 0; i < 4; i++) {
     BAN.may.push({
       x: Math.random() * BAN.W, y: 30 + Math.random() * (BAN.H * .55),
-      r: 26 + Math.random() * 26, toc: 4 + Math.random() * 7, mo: .06 + Math.random() * .07,
+      r: 26 + Math.random() * 26, toc: 4 + Math.random() * 7, mo: .10 + Math.random() * .10,
     });
   }
 }
@@ -6828,19 +6919,21 @@ function banXong(thang, vi) {
 /* ---- Vẽ ---- */
 function banVeMay(c) {
   for (const m of BAN.may) {
-    c.fillStyle = "rgba(255,255,255," + m.mo + ")";
+    c.globalAlpha = m.mo;
+    c.fillStyle = BAN.mau.may;
     c.beginPath();
     c.ellipse(m.x, m.y, m.r * 1.7, m.r * .62, 0, 0, Math.PI * 2);
     c.fill();
     c.beginPath();
     c.ellipse(m.x - m.r * .5, m.y - m.r * .2, m.r * .8, m.r * .5, 0, 0, Math.PI * 2);
     c.fill();
+    c.globalAlpha = 1;
   }
 }
 
 function banVeBong(c, b) {
   // Dây bóng
-  c.strokeStyle = "rgba(255,255,255,.5)";
+  c.strokeStyle = BAN.mau.day;
   c.lineWidth = 1.4;
   c.beginPath();
   c.moveTo(b.x, b.y + b.ry);
@@ -6876,29 +6969,31 @@ function banVeCung(c) {
   c.translate(g.x, g.y);
   c.rotate(BAN.goc);
   // Cánh cung
-  c.strokeStyle = "#8B5A2B"; c.lineWidth = 6; c.lineCap = "round";
+  c.strokeStyle = BAN.mau.net; c.lineWidth = 6; c.lineCap = "round";
   c.beginPath(); c.arc(0, 0, 34, -Math.PI * .78, -Math.PI * .22, false); c.stroke();
   // Dây cung, kéo lùi theo lực
   const k = 6 + BAN.luc * 16;
   const t1 = { x: Math.cos(-Math.PI * .78) * 34, y: Math.sin(-Math.PI * .78) * 34 };
   const t2 = { x: Math.cos(-Math.PI * .22) * 34, y: Math.sin(-Math.PI * .22) * 34 };
-  c.strokeStyle = "rgba(255,255,255,.85)"; c.lineWidth = 1.6;
+  c.strokeStyle = BAN.mau.net; c.globalAlpha = .7; c.lineWidth = 1.6;
   c.beginPath(); c.moveTo(t1.x, t1.y); c.lineTo(0, k); c.lineTo(t2.x, t2.y); c.stroke();
+  c.globalAlpha = 1;
   // Mũi tên đặt sẵn trên dây, chỉ vẽ khi chưa có tên nào đang bay
   if (!BAN.ten) {
-    c.strokeStyle = "#F1F5F9"; c.lineWidth = 3;
+    c.strokeStyle = BAN.mau.net; c.lineWidth = 3;
     c.beginPath(); c.moveTo(0, k); c.lineTo(0, k - 52); c.stroke();
-    c.fillStyle = "#FDE68A";
+    c.fillStyle = BAN.mau.mui;
     c.beginPath();
     c.moveTo(0, k - 62); c.lineTo(-6, k - 48); c.lineTo(6, k - 48);
     c.closePath(); c.fill();
-    c.strokeStyle = "#CBD5E1"; c.lineWidth = 2;
+    c.strokeStyle = BAN.mau.tim; c.lineWidth = 2;
     c.beginPath(); c.moveTo(-5, k + 4); c.lineTo(0, k - 4); c.lineTo(5, k + 4); c.stroke();
   }
   c.restore();
   // Tay cầm
-  c.fillStyle = "rgba(255,255,255,.16)";
+  c.globalAlpha = .12; c.fillStyle = BAN.mau.net;
   c.beginPath(); c.ellipse(g.x, g.y + 22, 30, 12, 0, 0, Math.PI * 2); c.fill();
+  c.globalAlpha = 1;
 }
 
 /** Đường tên sẽ bay — không có nó thì ngắm chỉ là đoán mò. */
@@ -6908,28 +7003,30 @@ function banVeDuong(c) {
   const v = 470 + BAN.luc * 470;
   let x = g.x + Math.sin(BAN.goc) * 42, y = g.y - Math.cos(BAN.goc) * 42;
   let vx = Math.sin(BAN.goc) * v, vy = -Math.cos(BAN.goc) * v;
-  c.fillStyle = "rgba(255,255,255,.5)";
+  c.fillStyle = BAN.mau.tim; c.globalAlpha = .55;
   for (let i = 0; i < 46; i++) {
     vy += 380 * .022; x += vx * .022; y += vy * .022;
     if (y > BAN.H || x < 0 || x > BAN.W) break;
     if (i % 3 === 0) { c.beginPath(); c.arc(x, y, 2.1, 0, Math.PI * 2); c.fill(); }
   }
+  c.globalAlpha = 1;
 }
 
 function banVeTen(c) {
   const t = BAN.ten;
   if (!t) return;
-  c.strokeStyle = "rgba(255,255,255,.35)"; c.lineWidth = 2;
+  c.strokeStyle = BAN.mau.tim; c.globalAlpha = .35; c.lineWidth = 2;
   c.beginPath();
   t.vet.forEach((p, i) => (i ? c.lineTo(p.x, p.y) : c.moveTo(p.x, p.y)));
   c.stroke();
+  c.globalAlpha = 1;
   const a = Math.atan2(t.vy, t.vx);
   c.save(); c.translate(t.x, t.y); c.rotate(a);
-  c.strokeStyle = "#F1F5F9"; c.lineWidth = 3; c.lineCap = "round";
+  c.strokeStyle = BAN.mau.net; c.lineWidth = 3; c.lineCap = "round";
   c.beginPath(); c.moveTo(-34, 0); c.lineTo(0, 0); c.stroke();
-  c.fillStyle = "#FDE68A";
+  c.fillStyle = BAN.mau.mui;
   c.beginPath(); c.moveTo(9, 0); c.lineTo(-3, -5); c.lineTo(-3, 5); c.closePath(); c.fill();
-  c.strokeStyle = "#CBD5E1"; c.lineWidth = 2;
+  c.strokeStyle = BAN.mau.tim; c.lineWidth = 2;
   c.beginPath(); c.moveTo(-34, -5); c.lineTo(-27, 0); c.lineTo(-34, 5); c.stroke();
   c.restore();
 }
@@ -7078,6 +7175,7 @@ function banMo(xong) {
   BAN.goc = 0; BAN.luc = .62; BAN.ten = null; BAN.hat = [];
   $("#banHet").hidden = true;
   $("#banKeu").hidden = true;
+  banLayMau();
   banCoCanvas();
   banMayMoi();
   banVongMoi();
