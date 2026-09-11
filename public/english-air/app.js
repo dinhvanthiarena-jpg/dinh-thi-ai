@@ -3067,6 +3067,9 @@ document.addEventListener("pointerdown", e => {
   if (!o || !o.closest) return;
   const n = o.closest("button, .opt, .pic, .tf button, .fcard, .lienket-nut, [role='button']");
   if (!n || n.disabled || n.dataset.imLang === "1") return;
+  // TRỪ màn gọi bà phù thuỷ. Tiếng ở màn đó phải mồi đúng ngay trong cú chạm,
+  // đụng vào là có ngày cả cuộc gọi im ru — thầy dặn giữ nguyên phần ấy.
+  if (n.closest("#kakaView")) return;
   keuCham(n.classList.contains("btn-primary") || n.classList.contains("p-next"));
 }, { passive: true, capture: true });
 
