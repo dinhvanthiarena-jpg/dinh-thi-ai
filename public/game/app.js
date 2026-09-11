@@ -213,9 +213,9 @@
   function bgMusicNote() {
     if (!bgMusicOn || muted) return;
     const freq = PENTA[Math.floor(Math.random() * PENTA.length)];
-    padNote(freq, 0, 3.2, 0.032);
+    padNote(freq, 0, 3.2, 0.016);
     // Thi thoảng thêm một nốt trầm hơn một quãng tám, rất khẽ, cho có chiều sâu.
-    if (Math.random() < 0.3) padNote(freq / 2, 0.4, 4, 0.018);
+    if (Math.random() < 0.3) padNote(freq / 2, 0.4, 4, 0.009);
   }
 
   function startBgMusic() {
