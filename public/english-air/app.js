@@ -8620,12 +8620,13 @@ function ranCanDung(m) {
   ranTiengBocHoi();
   ranChuBayVe(m);
   ranVeMang();
-  setTimeout(() => { if (RAN.mo) speak(RAN.de.doc, false, "en-GB"); }, 700);
+  // Chữ ra LIÊN TỤC: không để màn trống giây nào. Mấy miếng chữ cũ vẫn trôi cho
+  // rắn có cái mà lượn, chữ mới ra ngay khi chữ vừa ăn bay xong vào chỗ trống.
   setTimeout(() => {
     if (!RAN.mo) return;
     if (RAN.vong >= RAN_TONG) return ranXong(true);
-    ranVongMoi();
-  }, 2000);
+    ranVongMoi();          // tự đọc câu mới, khỏi gọi thêm ở đây
+  }, 820);
 }
 
 /** Cắn nhầm: nuốt vào rồi nôn ngược ra đằng miệng. */
@@ -8763,7 +8764,10 @@ function ranChay(nay) {
     if (RAN.y < RAN_DAU) { RAN.y = RAN_DAU; RAN.goc = -RAN.goc; }
     if (RAN.y > RAN.H - RAN_DAU) { RAN.y = RAN.H - RAN_DAU; RAN.goc = -RAN.goc; }
     RAN.duong.unshift({ x: RAN.x, y: RAN.y });
-    const cang = Math.round(RAN.dai) * RAN_DOT + 60;
+    // PHẢI làm tròn. RAN_DOT là 8,5 nên rắn dài số lẻ đốt là ra độ dài lẻ, mà
+    // gán độ dài lẻ cho mảng thì JavaScript ném lỗi ngay tại đây — vòng vẽ chết
+    // đứng sau khi đã xoá màn, thành ra cắn trúng một cái là màn trắng trơn.
+    const cang = Math.ceil(Math.round(RAN.dai) * RAN_DOT) + 60;
     if (RAN.duong.length > cang) RAN.duong.length = cang;
   }
 
