@@ -1342,7 +1342,45 @@ function startLesson(id, opts = {}) {
   document.body.style.overflow = "hidden";
   paintHearts();
   renderSlide();
+  taiTruocTiengBai(P.slides);
 }
+
+/* ---------- Tải trước tiếng của cả bài ----------
+   File tiếng chỉ 8,5 KB nên tải nhanh; cái chậm là khoảng chờ bắt tay máy chủ,
+   50–150 phần nghìn giây mỗi lần. Đợi tới lúc bấm nghe mới tải thì trên mạng
+   yếu nghe bị khựng. Nên ngay khi mở bài, lấy sẵn cả bài về trong lúc người
+   học còn đang đọc tấm giới thiệu — tới lúc cần thì đã nằm sẵn trong máy.
+
+   Cả bài chỉ khoảng 210 KB, và service worker tự giữ lại nên chỉ tải một lần
+   trong đời. Tải hỏng cũng không sao: lúc cần vẫn tải lại được như cũ. */
+function gomChuDoc(o, ra, sau) {
+  if (o == null || sau > 5) return;
+  if (typeof o === "string") { if (o.length > 1 && o.length < 120) ra.push(o); return; }
+  if (Array.isArray(o)) { for (const x of o) gomChuDoc(x, ra, sau + 1); return; }
+  if (typeof o === "object") for (const k in o) gomChuDoc(o[k], ra, sau + 1);
+}
+
+let dangTaiTruoc = false;
+async function taiTruocTiengBai(slides) {
+  if (dangTaiTruoc || !navigator.onLine) return;
+  const chu = [];
+  gomChuDoc(slides, chu, 0);
+  // Chỉ lấy những câu THẬT SỰ có file thu sẵn, khỏi gõ cửa máy chủ vô ích
+  const duong = [...new Set(chu.map(c => fileTieng(c)).filter(Boolean))];
+  if (!duong.length) return;
+  dangTaiTruoc = true;
+  let i = 0;
+  // Ba đường tải song song: đủ nhanh mà không tranh mạng với tiếng đang phát
+  const chay = async () => {
+    while (i < duong.length) {
+      const d = duong[i++];
+      try { await fetch(d, { cache: "force-cache" }); } catch { /* thôi, lúc cần tải lại */ }
+    }
+  };
+  try { await Promise.all([chay(), chay(), chay()]); } catch { /* bỏ qua */ }
+  dangTaiTruoc = false;
+}
+
 function closePlayer() {
   $("#player").hidden = true; document.body.style.overflow = ""; stopSpeak();
   paintStats(); go(view);
