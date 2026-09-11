@@ -3784,13 +3784,14 @@ function advance() {
     return doiDocXong(() => {
       thuongDangCho = false;
       $("#btnNext").disabled = false;
-      // Xoay vòng bốn kiểu thưởng: pháo hoa → bắn chữ → chém chữ → ném bóng.
+      // Xoay vòng năm kiểu thưởng: pháo hoa → bắn chữ → chém chữ → ném bóng → rắn.
       // Cứ một kiểu mãi thì phần thưởng hết là phần thưởng.
       thuongLuot += 1;
-      const kieu = thuongLuot % 4;
+      const kieu = thuongLuot % 5;
       if (kieu === 1) banMo(diTiep);
       else if (kieu === 2) chemMo(diTiep);
       else if (kieu === 3) nemMo(diTiep);
+      else if (kieu === 4) ranMo(diTiep);
       else moThuong(diTiep);
     });
   }
@@ -7288,6 +7289,7 @@ $("#banHetLai").addEventListener("click", () => {
 $("#btnResChoi").addEventListener("click", () => banMo(null));
 $("#btnResChem").addEventListener("click", () => chemMo(null));
 $("#btnResNem").addEventListener("click", () => nemMo(null));
+$("#btnResRan").addEventListener("click", () => ranMo(null));
 banGanTay();
 
 // Xoay máy hay hiện bàn phím thì khung đổi cỡ — phải dựng lại canvas, không thì
@@ -8279,6 +8281,527 @@ window.addEventListener("resize", () => {
   if (!NEM.mo) return;
   nemCoCanvas();
   nemXep();
+});
+
+/* ---------- 23e. Trò chơi: RẮN CẮN CHỮ ----------
+   Thầy đặt bài: con rắn màu tím, điều khiển bằng tay, đi cắn chữ đúng. Cắn
+   trúng thì chữ (hoặc số) bốc hơi rồi bay vào đúng chỗ; cắn nhầm thì rắn NÔN
+   chữ đó ra. Rắn phải mềm mại.
+
+   Rắn đi LIÊN TỤC chứ không đứng yên chờ — ngón tay chỉ hướng, rắn ngoặt dần
+   về hướng đó chứ không bẻ gập một cái. Chính cái ngoặt dần ấy làm nó mềm, và
+   cũng làm việc căn chữ thành một việc phải khéo tay. */
+
+const RAN_TONG = 10;         // mười câu một ván
+const RAN_MANG = 3;
+const RAN_TOC = 158;         // tốc độ bò, px mỗi giây
+const RAN_NGOAT = 4.6;       // ngoặt tối đa, radian mỗi giây — càng nhỏ càng "nặng đuôi"
+const RAN_DAU = 15;          // bán kính đầu
+const RAN_DOT = 8.5;         // khoảng cách giữa hai đốt
+const RAN_DAI = 14;          // số đốt lúc mới vào
+
+const RAN_SO = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+  "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen",
+  "seventeen", "eighteen", "nineteen", "twenty"];
+
+const RAN = {
+  mo: false, raf: 0, truoc: 0,
+  cv: null, ctx: null, W: 0, H: 0,
+  x: 0, y: 0, goc: -Math.PI / 2, duong: [], dai: RAN_DAI,
+  dich: null, mieng: [], chu: [], hat: [],
+  de: null, cho: true,
+  diem: 0, mang: RAN_MANG, vong: 0,
+  mau: { than: "#7C3AED", sang: "#A855F7", net: "#3B0764" },
+};
+let ranSauKhiDong = null;
+let ranKeuHen = null, ranAvaHen = null, ranDocHen = null;
+
+/* ---- Ra đề ---- */
+/** Cứ ba lượt thì một lượt đố SỐ — thầy dặn "chữ hoặc số". Đố số vẫn dựng đúng
+    khuôn câu-có-chỗ-trống nên cả màn chơi không phải đổi gì. */
+function ranRaDe() {
+  if (RAN.vong % 3 === 2) {
+    const n = Math.floor(Math.random() * RAN_SO.length);
+    const sai = shuffle(RAN_SO.map((_, i) => i).filter(i => i !== n)).slice(0, 3);
+    return {
+      truoc: RAN_SO[n] + "  =", sau: "", dap: String(n),
+      doc: RAN_SO[n], vi: "Cắn vào con số đúng.",
+      chu: shuffle([String(n), ...sai.map(String)]),
+      dungChu: String(n),
+    };
+  }
+  const de = banRaDe();
+  if (!de) return null;
+  return {
+    truoc: de.truoc, sau: de.sau, dap: de.dap,
+    doc: de.en, vi: de.vi,
+    chu: de.chu,
+    dungChu: de.chu.find(c => banGoc(c) === de.goc),
+  };
+}
+
+/* ---- Dựng màn ---- */
+function ranCoCanvas() {
+  const cv = RAN.cv;
+  const tl = Math.min(window.devicePixelRatio || 1, 2);
+  RAN.W = cv.clientWidth;
+  RAN.H = cv.clientHeight;
+  cv.width = Math.round(RAN.W * tl);
+  cv.height = Math.round(RAN.H * tl);
+  RAN.ctx.setTransform(tl, 0, 0, tl, 0, 0);
+}
+
+function ranLayMau() {
+  const c = getComputedStyle(document.documentElement);
+  const l = (k, dp) => (c.getPropertyValue(k) || "").trim() || dp;
+  RAN.mau = {
+    than: l("--brand-fill", "#7C3AED"),
+    sang: l("--brand", "#7E22CE"),
+    net: l("--ink-deep", "#3B0764"),
+  };
+}
+
+function ranDatRan() {
+  RAN.x = RAN.W / 2;
+  RAN.y = RAN.H * .78;
+  RAN.goc = -Math.PI / 2;
+  RAN.dai = RAN_DAI;
+  RAN.dich = null;
+  RAN.duong = [];
+  for (let i = 0; i < 400; i++) RAN.duong.push({ x: RAN.x, y: RAN.y + i * 0.6 });
+}
+
+/** Một miếng chữ trôi lơ lửng. Tránh thả ngay trước mũi rắn kẻo vừa vào đã cắn. */
+function ranMieng(chu, dung) {
+  const c = RAN.ctx;
+  c.font = "900 17px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  const r = clamp(c.measureText(chu).width / 2 + 17, 30, Math.max(32, RAN.W / 2 - 18));
+  let x = 0, y = 0, thu = 0;
+  do {
+    x = r + 14 + Math.random() * Math.max(1, RAN.W - 2 * r - 28);
+    y = RAN.H * .12 + Math.random() * Math.max(1, RAN.H * .62);
+    thu++;
+  } while (thu < 30 && Math.hypot(x - RAN.x, y - RAN.y) < 130);
+  const a = Math.random() * Math.PI * 2;
+  return {
+    chu, dung, r, x, y,
+    vx: Math.cos(a) * 16, vy: Math.sin(a) * 16,
+    pha: Math.random() * Math.PI * 2,
+    mau: BAN_MAU[Math.floor(Math.random() * BAN_MAU.length)],
+    nuot: 0, non: 0, mien: 0,
+  };
+}
+
+function ranVongMoi() {
+  const de = ranRaDe();
+  if (!de) { toast("Chưa đủ câu để chơi ở trình độ này."); return ranDong(); }
+  RAN.de = de;
+  RAN.vong += 1;
+  RAN.cho = false;
+  RAN.hat = [];
+
+  const o = $("#ranCau");
+  o.textContent = "";
+  if (de.truoc) o.append(de.truoc + " ");
+  const trong = el("span", "ban-o", ".....");
+  trong.id = "ranO";
+  o.append(trong);
+  if (de.sau) o.append(" " + de.sau);
+  $("#ranViet").textContent = de.vi;
+  banChayHieuUng(o);
+  banChayHieuUng($("#ranView .ban-hang-viet"));
+
+  RAN.mieng = de.chu.map(c => ranMieng(c, c === de.dungChu));
+  ranVeMang();
+  $("#ranChi").textContent = "Câu " + RAN.vong + "/" + RAN_TONG + " — lái rắn đi cắn chữ đúng.";
+  clearTimeout(ranDocHen);
+  ranDocHen = setTimeout(() => { if (RAN.mo) speak(de.doc, false, "en-GB"); }, 420);
+}
+
+function ranVeMang() {
+  const o = $("#ranMang");
+  o.textContent = "";
+  for (let i = 0; i < RAN_MANG; i++) {
+    o.append(el("span", "ban-tim" + (i < RAN.mang ? "" : " tat"), "♥"));
+  }
+  $("#ranDiem").textContent = RAN.diem;
+}
+
+function ranKeu(chu, loai) {
+  const p = $("#ranKeu");
+  p.hidden = true;
+  p.textContent = chu;
+  p.className = "ban-keu " + loai;
+  void p.offsetWidth;
+  p.hidden = false;
+  clearTimeout(ranKeuHen);
+  ranKeuHen = setTimeout(() => { p.hidden = true; }, 900);
+}
+
+function ranAvaTo(loai) {
+  const n = $("#ranAva");
+  if (!n) return;
+  n.classList.remove("vui", "buon");
+  void n.offsetWidth;
+  n.classList.add(loai);
+  clearTimeout(ranAvaHen);
+  ranAvaHen = setTimeout(() => n.classList.remove("vui", "buon"), 800);
+}
+
+/* ---- Tiếng ---- */
+function ranTiengNon() {
+  if (!S.sound) return;
+  const a = tiengSanSang(); if (!a) return;
+  const t = a.currentTime + .005;
+  // Tiếng "ọe": nốt trượt xuống kèm chút nhiễu — nghe là biết nhả ra.
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = "sawtooth";
+  o.frequency.setValueAtTime(300, t);
+  o.frequency.exponentialRampToValueAtTime(90, t + .32);
+  g.gain.setValueAtTime(.07, t);
+  g.gain.exponentialRampToValueAtTime(.0001, t + .36);
+  const lp = a.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 900;
+  o.connect(lp); lp.connect(g); g.connect(ra(a));
+  o.start(t); o.stop(t + .38);
+}
+function ranTiengBocHoi() {
+  if (!S.sound) return;
+  const a = tiengSanSang(); if (!a) return;
+  const t = a.currentTime + .005;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = "sine";
+  o.frequency.setValueAtTime(660, t);
+  o.frequency.exponentialRampToValueAtTime(1760, t + .3);
+  g.gain.setValueAtTime(.075, t);
+  g.gain.exponentialRampToValueAtTime(.0001, t + .34);
+  o.connect(g); g.connect(ra(a));
+  o.start(t); o.stop(t + .36);
+}
+
+/* ---- Cắn ---- */
+function ranHat(m, n, mau) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, s = 40 + Math.random() * 140;
+    RAN.hat.push({ x: m.x, y: m.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 40,
+      mau: mau || m.mau, r: 2 + Math.random() * 2.6, doi: 1 });
+  }
+}
+
+/** Chữ bốc hơi rồi bay vào chỗ trống. */
+function ranChuBayVe(m) {
+  const o = $("#ranO");
+  if (!o) return;
+  const cv = RAN.cv.getBoundingClientRect();
+  const s = el("span", "ban-bay ran-hoi", m.chu);
+  s.style.left = (cv.left + m.x) + "px";
+  s.style.top = (cv.top + m.y) + "px";
+  document.body.appendChild(s);
+  requestAnimationFrame(() => {
+    const r = o.getBoundingClientRect();
+    s.style.left = (r.left + r.width / 2) + "px";
+    s.style.top = (r.top + r.height / 2) + "px";
+  });
+  setTimeout(() => {
+    s.remove();
+    o.textContent = RAN.de.dap.replace(/[.,!?]/g, "");
+    o.classList.add("day");
+  }, 640);
+}
+
+function ranCanDung(m) {
+  RAN.cho = true;
+  RAN.diem += 10;
+  RAN.dai += 3;                        // ăn được thì dài ra, đuôi quét rộng hơn
+  ranHat(m, 18, RAN.mau.sang);
+  RAN.mieng = RAN.mieng.filter(x => x !== m);
+  ranKeu("Yes!", "dung");
+  ranAvaTo("vui");
+  ranTiengBocHoi();
+  ranChuBayVe(m);
+  ranVeMang();
+  setTimeout(() => { if (RAN.mo) speak(RAN.de.doc, false, "en-GB"); }, 700);
+  setTimeout(() => {
+    if (!RAN.mo) return;
+    if (RAN.vong >= RAN_TONG) return ranXong(true);
+    ranVongMoi();
+  }, 2000);
+}
+
+/** Cắn nhầm: nuốt vào rồi nôn ngược ra đằng miệng. */
+function ranCanSai(m) {
+  m.nuot = .34;                        // biến mất trong mồm 0,34 giây
+  RAN.mang -= 1;
+  RAN.dai = Math.max(8, RAN.dai - 2);  // nôn xong thì ngắn lại một chút
+  ranKeu("No", "sai");
+  ranAvaTo("buon");
+  ranTiengNon();
+  ranVeMang();
+  if (RAN.mang <= 0) setTimeout(() => { if (RAN.mo) ranXong(false, "Cắn nhầm ba lần rồi."); }, 600);
+}
+
+function ranXong(thang, vi) {
+  RAN.cho = true;
+  clearTimeout(ranDocHen);
+  $("#ranHetTit").textContent = thang ? "Giỏi quá!" : "Hết lượt rồi";
+  $("#ranHetSub").textContent = thang
+    ? "Cắn trúng cả " + RAN_TONG + " câu, được " + RAN.diem + " điểm."
+    : (vi || "Hết lượt rồi.") + " Được " + RAN.diem + " điểm.";
+  $("#ranHet").hidden = false;
+  if (thang) phatVoTay();
+}
+
+/* ---- Vẽ ---- */
+/** Lấy điểm nằm cách đầu một quãng dọc theo đường vừa bò qua. */
+function ranDiem(quang) {
+  const d = RAN.duong;
+  let di = 0;
+  for (let i = 1; i < d.length; i++) {
+    const b = Math.hypot(d[i].x - d[i - 1].x, d[i].y - d[i - 1].y);
+    if (di + b >= quang) {
+      const t = b ? (quang - di) / b : 0;
+      return { x: d[i - 1].x + (d[i].x - d[i - 1].x) * t,
+               y: d[i - 1].y + (d[i].y - d[i - 1].y) * t };
+    }
+    di += b;
+  }
+  return d[d.length - 1] || { x: RAN.x, y: RAN.y };
+}
+
+function ranVeRan(c) {
+  const n = Math.round(RAN.dai);
+  // Thân: vẽ từ đuôi lên đầu, đốt sau đè lên đốt trước nên nhìn liền một khối.
+  for (let i = n; i >= 0; i--) {
+    const p = ranDiem(i * RAN_DOT);
+    const t = i / n;
+    const r = RAN_DAU * (1 - t * .62);
+    const g = c.createRadialGradient(p.x - r * .34, p.y - r * .34, 1, p.x, p.y, r * 1.2);
+    g.addColorStop(0, RAN.mau.sang);
+    g.addColorStop(.55, RAN.mau.than);
+    g.addColorStop(1, "rgba(0,0,0,.30)");
+    c.fillStyle = g;
+    c.beginPath(); c.arc(p.x, p.y, r, 0, Math.PI * 2); c.fill();
+    // Vạch sáng chạy dọc lưng cho ra vảy
+    if (i % 2 === 0 && i < n) {
+      c.fillStyle = "rgba(255,255,255,.16)";
+      c.beginPath(); c.arc(p.x, p.y - r * .3, r * .32, 0, Math.PI * 2); c.fill();
+    }
+  }
+  // Đầu
+  const h = { x: RAN.x, y: RAN.y };
+  const g = c.createRadialGradient(h.x - 5, h.y - 5, 1, h.x, h.y, RAN_DAU * 1.3);
+  g.addColorStop(0, RAN.mau.sang);
+  g.addColorStop(.5, RAN.mau.than);
+  g.addColorStop(1, "rgba(0,0,0,.3)");
+  c.fillStyle = g;
+  c.beginPath(); c.arc(h.x, h.y, RAN_DAU, 0, Math.PI * 2); c.fill();
+  // Lưỡi thè ra thụt vào
+  const le = (Math.sin(performance.now() / 190) + 1) / 2;
+  c.strokeStyle = "#F43F5E"; c.lineWidth = 2.4; c.lineCap = "round";
+  const lx = h.x + Math.cos(RAN.goc) * (RAN_DAU + 4 + le * 9);
+  const ly = h.y + Math.sin(RAN.goc) * (RAN_DAU + 4 + le * 9);
+  c.beginPath();
+  c.moveTo(h.x + Math.cos(RAN.goc) * RAN_DAU, h.y + Math.sin(RAN.goc) * RAN_DAU);
+  c.lineTo(lx, ly); c.stroke();
+  // Mắt
+  for (const ben of [-1, 1]) {
+    const a = RAN.goc + ben * .62;
+    const ex = h.x + Math.cos(a) * RAN_DAU * .58;
+    const ey = h.y + Math.sin(a) * RAN_DAU * .58;
+    c.fillStyle = "#fff";
+    c.beginPath(); c.arc(ex, ey, 4.4, 0, Math.PI * 2); c.fill();
+    c.fillStyle = RAN.mau.net;
+    c.beginPath();
+    c.arc(ex + Math.cos(RAN.goc) * 1.6, ey + Math.sin(RAN.goc) * 1.6, 2.2, 0, Math.PI * 2);
+    c.fill();
+  }
+}
+
+function ranVeMieng(c, m) {
+  if (m.nuot > 0) return;              // đang nằm trong bụng thì không vẽ
+  const co = m.non > 0 ? 1 + m.non * .5 : 1;
+  c.save();
+  c.translate(m.x, m.y);
+  c.scale(co, co);
+  const g = c.createRadialGradient(-m.r * .3, -m.r * .34, 2, 0, 0, m.r * 1.25);
+  g.addColorStop(0, "rgba(255,255,255,.55)");
+  g.addColorStop(.36, m.mau);
+  g.addColorStop(1, "rgba(0,0,0,.26)");
+  c.fillStyle = g;
+  c.beginPath(); c.arc(0, 0, m.r, 0, Math.PI * 2); c.fill();
+  c.strokeStyle = "rgba(255,255,255,.42)"; c.lineWidth = 2; c.stroke();
+  c.font = "900 17px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillStyle = "rgba(0,0,0,.45)"; c.fillText(m.chu, 0, 1.5);
+  c.fillStyle = "#fff"; c.fillText(m.chu, 0, 0);
+  c.restore();
+}
+
+/* ---- Vòng chạy ---- */
+function ranChay(nay) {
+  if (!RAN.mo) return;
+  const dt = Math.min(50, nay - RAN.truoc) / 1000;
+  RAN.truoc = nay;
+  const c = RAN.ctx;
+  c.clearRect(0, 0, RAN.W, RAN.H);
+  const dangChay = $("#ranHet").hidden;
+
+  if (dangChay) {
+    // Ngoặt DẦN về hướng ngón tay — chính chỗ này làm con rắn mềm.
+    if (RAN.dich) {
+      const muon = Math.atan2(RAN.dich.y - RAN.y, RAN.dich.x - RAN.x);
+      let lech = muon - RAN.goc;
+      while (lech > Math.PI) lech -= Math.PI * 2;
+      while (lech < -Math.PI) lech += Math.PI * 2;
+      RAN.goc += clamp(lech, -RAN_NGOAT * dt, RAN_NGOAT * dt);
+    }
+    RAN.x += Math.cos(RAN.goc) * RAN_TOC * dt;
+    RAN.y += Math.sin(RAN.goc) * RAN_TOC * dt;
+    // Chạm mép thì trượt dọc mép chứ không dừng sững, nhìn vẫn mượt.
+    if (RAN.x < RAN_DAU) { RAN.x = RAN_DAU; RAN.goc = Math.PI - RAN.goc; }
+    if (RAN.x > RAN.W - RAN_DAU) { RAN.x = RAN.W - RAN_DAU; RAN.goc = Math.PI - RAN.goc; }
+    if (RAN.y < RAN_DAU) { RAN.y = RAN_DAU; RAN.goc = -RAN.goc; }
+    if (RAN.y > RAN.H - RAN_DAU) { RAN.y = RAN.H - RAN_DAU; RAN.goc = -RAN.goc; }
+    RAN.duong.unshift({ x: RAN.x, y: RAN.y });
+    const cang = Math.round(RAN.dai) * RAN_DOT + 60;
+    if (RAN.duong.length > cang) RAN.duong.length = cang;
+  }
+
+  // Chữ trôi
+  for (const m of RAN.mieng) {
+    if (m.nuot > 0) {
+      m.nuot -= dt;
+      m.x = RAN.x; m.y = RAN.y;
+      if (m.nuot <= 0) {
+        // Nôn ra: bắn ngược khỏi miệng rồi trôi tiếp, có một nhịp miễn nhiễm
+        // để người chơi không vừa nhả đã cắn lại ngay.
+        m.non = 1;
+        m.mien = 1.1;
+        m.vx = -Math.cos(RAN.goc) * 210;
+        m.vy = -Math.sin(RAN.goc) * 210;
+        ranHat(m, 12, "#A3E635");
+      }
+      continue;
+    }
+    if (m.non > 0) m.non = Math.max(0, m.non - dt * 2.2);
+    if (m.mien > 0) m.mien -= dt;
+    if (dangChay) {
+      m.pha += dt;
+      m.x += m.vx * dt;
+      m.y += m.vy * dt;
+      // Trôi chậm dần về lại nhịp lững lờ sau khi bị nôn ra
+      m.vx *= (1 - Math.min(1, dt * 1.6));
+      m.vy *= (1 - Math.min(1, dt * 1.6));
+      if (Math.hypot(m.vx, m.vy) < 18) {
+        const a = m.pha * .7;
+        m.vx = Math.cos(a) * 16; m.vy = Math.sin(a) * 16;
+      }
+      if (m.x < m.r) { m.x = m.r; m.vx = Math.abs(m.vx); }
+      if (m.x > RAN.W - m.r) { m.x = RAN.W - m.r; m.vx = -Math.abs(m.vx); }
+      if (m.y < m.r) { m.y = m.r; m.vy = Math.abs(m.vy); }
+      if (m.y > RAN.H - m.r) { m.y = RAN.H - m.r; m.vy = -Math.abs(m.vy); }
+    }
+    ranVeMieng(c, m);
+  }
+
+  ranVeRan(c);
+
+  for (const h of RAN.hat.slice()) {
+    h.vy += 300 * dt;
+    h.x += h.vx * dt; h.y += h.vy * dt;
+    h.doi -= dt * 1.4;
+    if (h.doi <= 0) { RAN.hat.splice(RAN.hat.indexOf(h), 1); continue; }
+    c.globalAlpha = Math.max(0, h.doi);
+    c.fillStyle = h.mau;
+    c.beginPath(); c.arc(h.x, h.y, h.r, 0, Math.PI * 2); c.fill();
+    c.globalAlpha = 1;
+  }
+
+  // Cắn
+  if (dangChay && !RAN.cho) {
+    for (const m of RAN.mieng.slice()) {
+      if (m.nuot > 0 || m.mien > 0) continue;
+      if (Math.hypot(m.x - RAN.x, m.y - RAN.y) > m.r + RAN_DAU * .8) continue;
+      if (m.dung) ranCanDung(m); else ranCanSai(m);
+      break;
+    }
+  }
+
+  RAN.raf = requestAnimationFrame(ranChay);
+}
+
+/* ---- Điều khiển bằng tay ---- */
+function ranGanTay() {
+  const cv = $("#ranTroi");
+  RAN.cv = cv;
+  RAN.ctx = cv.getContext("2d");
+  const dat = e => {
+    const r = cv.getBoundingClientRect();
+    RAN.dich = { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+  cv.addEventListener("pointerdown", e => {
+    try { cv.setPointerCapture(e.pointerId); } catch { /* thôi */ }
+    dat(e);
+  });
+  cv.addEventListener("pointermove", e => { if (e.buttons || e.pointerType !== "mouse") dat(e); });
+}
+
+/* ---- Mở / đóng ---- */
+function ranMo(xong) {
+  const v = $("#ranView");
+  if (!v) { xong && xong(); return; }
+  ranSauKhiDong = xong || null;
+  v.hidden = false;
+  document.body.style.overflow = "hidden";
+  RAN.mo = true;
+  RAN.diem = 0; RAN.mang = RAN_MANG; RAN.vong = 0;
+  RAN.mieng = []; RAN.hat = [];
+  $("#ranHet").hidden = true;
+  $("#ranKeu").hidden = true;
+  ranLayMau();
+  ranCoCanvas();
+  ranDatRan();
+  ranVongMoi();
+  if (!RAN.mo) return;
+  RAN.truoc = performance.now();
+  cancelAnimationFrame(RAN.raf);
+  RAN.raf = requestAnimationFrame(ranChay);
+}
+
+function ranDong() {
+  cancelAnimationFrame(RAN.raf);
+  clearTimeout(ranDocHen);
+  RAN.mo = false;
+  stopSpeak();
+  $("#ranView").hidden = true;
+  $("#ranHet").hidden = true;
+  const conMo = !$("#player").hidden || !$("#result").hidden;
+  document.body.style.overflow = conMo ? "hidden" : "";
+  const f = ranSauKhiDong;
+  ranSauKhiDong = null;
+  f && f();
+}
+
+$("#btnRanDong").addEventListener("click", ranDong);
+$("#ranHetVe").addEventListener("click", ranDong);
+$("#ranHetLai").addEventListener("click", () => {
+  RAN.diem = 0; RAN.mang = RAN_MANG; RAN.vong = 0;
+  RAN.mieng = []; RAN.hat = [];
+  $("#ranHet").hidden = true;
+  ranDatRan();
+  ranVongMoi();
+});
+$("#ranNghe").addEventListener("click", () => { if (RAN.de) speak(RAN.de.doc, false, "en-GB"); });
+ranGanTay();
+
+window.addEventListener("resize", () => {
+  if (!RAN.mo) return;
+  ranCoCanvas();
+  RAN.x = clamp(RAN.x, RAN_DAU, Math.max(RAN_DAU, RAN.W - RAN_DAU));
+  RAN.y = clamp(RAN.y, RAN_DAU, Math.max(RAN_DAU, RAN.H - RAN_DAU));
+  RAN.mieng.forEach(m => {
+    m.x = clamp(m.x, m.r, Math.max(m.r, RAN.W - m.r));
+    m.y = clamp(m.y, m.r, Math.max(m.r, RAN.H - m.r));
+  });
 });
 
 /* ---------- 24. Khởi động ---------- */

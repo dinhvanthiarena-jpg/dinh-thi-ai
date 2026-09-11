@@ -2554,6 +2554,17 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .nem .ban-cau { font-size: clamp(1.2rem, 5.2vw, 1.5rem); }
 .nem .ban-viet { font-size: clamp(.92rem, 3.6vw, 1.04rem); }
 
+/* ---- Riêng màn Rắn cắn chữ ---- */
+/* Rắn bò khắp màn nên MON.L phải nhỏ lại và mờ đi một chút, kẻo che mất chữ. */
+.ran .ban-ava { width: 62px; height: 62px; margin-left: -31px; opacity: .82; }
+/* Chữ bốc hơi rồi mới bay đi: phóng to mờ dần một nhịp ngay khi rời quả. */
+.ban-bay.ran-hoi { animation: ranHoi 640ms var(--e) both; }
+@keyframes ranHoi {
+  0%   { opacity: .25; letter-spacing: .22em; filter: blur(3px); }
+  35%  { opacity: 1; letter-spacing: 0; filter: blur(0); }
+  100% { opacity: 1; }
+}
+
 /* Tấm mời chơi chèn giữa phần dạy, ngay trước Góc văn hoá. */
 .choi-moi { padding: var(--s5) var(--s4); border-radius: var(--r3);
   background: var(--brand-soft); text-align: center; }
@@ -2564,7 +2575,7 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
    nút đặc như "Tiếp tục", nên không bấm nhầm. */
 .res-choi-lab { margin: var(--s4) 0 var(--s2); font-size: .74rem; font-weight: 900;
   letter-spacing: .08em; text-transform: uppercase; color: var(--muted-fg); }
-.res-choi { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2);
+.res-choi { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s2);
   margin-bottom: var(--s3); }
 .btn-choi { min-height: 48px; padding: 0 var(--s2); font-size: .92rem;
   background: var(--brand-soft); color: var(--brand-ink);

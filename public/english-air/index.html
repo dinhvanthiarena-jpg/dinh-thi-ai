@@ -2167,6 +2167,7 @@
       <button class="btn btn-choi" id="btnResChoi" type="button">Bắn chữ</button>
       <button class="btn btn-choi" id="btnResChem" type="button">Chém chữ</button>
       <button class="btn btn-choi" id="btnResNem" type="button">Ném bóng</button>
+      <button class="btn btn-choi" id="btnResRan" type="button">Rắn cắn chữ</button>
     </div>
     <button class="btn btn-primary btn-block" id="btnResDone" type="button">Tiếp tục</button>
   </div>
@@ -2446,6 +2447,47 @@
       <p class="ban-het-sub" id="nemHetSub"></p>
       <button class="btn btn-primary btn-block" id="nemHetLai" type="button">Chơi lại</button>
       <button class="btn btn-soft btn-block mt" id="nemHetVe" type="button">Học tiếp</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TRÒ CHƠI: RẮN CẮN CHỮ ============
+     Rắn tím bò liên tục, ngón tay chỉ hướng thì nó ngoặt dần về hướng đó.
+     Cắn trúng chữ đúng thì chữ bốc hơi bay vào chỗ trống; cắn nhầm thì nôn ra. -->
+<div class="ban ran" id="ranView" hidden role="dialog" aria-modal="true" aria-labelledby="ranTitle">
+  <header class="ban-bar">
+    <button class="icon-btn" id="btnRanDong" type="button" aria-label="Đóng trò chơi">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+    <span class="ban-bar-tit" id="ranTitle">Rắn cắn chữ</span>
+    <span class="ban-mang" id="ranMang" aria-label="Số lần cắn nhầm còn được phép"></span>
+    <span class="ban-diem"><b id="ranDiem">0</b> điểm</span>
+  </header>
+
+  <div class="ban-troi-boc">
+    <canvas class="ban-troi" id="ranTroi"></canvas>
+    <div class="ban-ava" id="ranAva" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+    <p class="ban-keu" id="ranKeu" hidden aria-live="assertive"></p>
+  </div>
+
+  <div class="ban-duoi">
+    <p class="ban-cau" id="ranCau"></p>
+    <div class="ban-hang-viet">
+      <p class="ban-viet" id="ranViet"></p>
+      <button class="ban-nghe" id="ranNghe" type="button" aria-label="Nghe lại câu">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sound"/></svg>
+      </button>
+    </div>
+    <p class="ban-chi" id="ranChi">Rê tay trên màn hình, rắn sẽ bò theo tay.</p>
+  </div>
+
+  <div class="ban-het" id="ranHet" hidden>
+    <div class="ban-het-in">
+      <div class="ban-het-hinh" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+      <h3 id="ranHetTit">Hết lượt rồi</h3>
+      <p class="ban-het-sub" id="ranHetSub"></p>
+      <button class="btn btn-primary btn-block" id="ranHetLai" type="button">Chơi lại</button>
+      <button class="btn btn-soft btn-block mt" id="ranHetVe" type="button">Học tiếp</button>
     </div>
   </div>
 </div>
