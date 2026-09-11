@@ -2507,6 +2507,14 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .ban-nut:active:not([disabled]) { transform: scale(.975); filter: brightness(.96); }
 .ban-nut[disabled] { background: var(--muted); color: var(--muted-fg); }
 .ban-chi { margin: var(--s2) 0 0; font-size: .84rem; color: var(--muted-fg); }
+/* Bỏ qua / Chơi lại ngay trong lúc chơi: gặp câu bí thì đi tiếp được, chơi
+   chán rồi thì làm lại từ đầu, không phải thoát ra vào lại. Để dạng chữ gạch
+   chân cho nhẹ, không tranh chỗ với nút chính. */
+.ban-phu { display: flex; justify-content: center; gap: var(--s5); margin-top: 6px; }
+.ban-phu-nut { padding: 6px 4px; border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: .84rem; font-weight: 800; color: var(--brand-ink);
+  text-decoration: underline; text-underline-offset: 3px; }
+.ban-phu-nut:active { opacity: .55; }
 
 .ban-het { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
   padding: var(--s4); background: rgba(30,16,48,.5);
