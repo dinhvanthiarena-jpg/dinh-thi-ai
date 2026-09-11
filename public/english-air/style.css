@@ -2538,8 +2538,11 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 /* ---- Riêng màn Ném bóng ---- */
 /* Ở đây MON.L là người NÉM, nên phải đứng dưới đất chứ không lơ lửng trên đầu
    như hai trò kia. Lệch sang trái để không che quả bóng đang bay lên giữa màn. */
-.nem .ban-ava { top: auto; bottom: 2px; left: var(--s3); margin-left: 0;
-  width: 72px; height: 72px; }
+/* Ảnh MON.L cầm súng phóng là ảnh đứng chứ không phải huy hiệu tròn, nên khung
+   phải cao chứ không vuông; giữ đúng tỷ lệ ảnh 236x380. */
+.nem .ban-ava { top: auto; bottom: 2px; left: var(--s2); margin-left: 0;
+  width: 86px; height: 138px; }
+.nem-ava img { width: 100%; height: 100%; object-fit: contain; display: block; }
 /* Lúc ném thì chồm người một cái */
 .nem .ban-ava.nem { animation: nemLay 520ms var(--e) 1; }
 @keyframes nemLay {

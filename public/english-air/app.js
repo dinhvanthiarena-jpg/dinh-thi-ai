@@ -7920,8 +7920,10 @@ function nemGoc() {
   if (a && cv) {
     const ra2 = a.getBoundingClientRect(), rc = cv.getBoundingClientRect();
     if (ra2.width) {
-      return { x: ra2.left - rc.left + ra2.width * .72,
-               y: ra2.top - rc.top + ra2.height * .34 };
+      // Nòng súng phóng nằm ở đỉnh giữa bức ảnh (MON.L lộn ngược, chĩa súng
+      // lên trời), nên bóng phải bay ra từ đúng chỗ đó.
+      return { x: ra2.left - rc.left + ra2.width * .48,
+               y: ra2.top - rc.top + ra2.height * .10 };
     }
   }
   return { x: 56, y: NEM.H - 52 };

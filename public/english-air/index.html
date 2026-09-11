@@ -2436,7 +2436,9 @@
   <div class="ban-troi-boc">
     <canvas class="ban-troi" id="nemTroi"></canvas>
     <p class="ban-keu" id="nemKeu" hidden aria-live="assertive"></p>
-    <div class="ban-ava" id="nemAva" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+    <!-- KHÔNG đặt data-mascot ở đây: màn này có ảnh MON.L cầm súng phóng riêng,
+         để data-mascot thì lúc khởi động app nó bị thay bằng ảnh tròn chung. -->
+    <div class="ban-ava nem-ava" id="nemAva" aria-hidden="true"><img src="assets/mon-nem.webp" alt="" decoding="async"></div>
   </div>
 
   <div class="ban-duoi">
