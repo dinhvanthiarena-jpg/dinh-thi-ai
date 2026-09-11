@@ -282,8 +282,16 @@ function pickVoice() {
 let MA_HOC = "en-gb";     // thứ tiếng của trường `en`
 let MA_GIAI = "vi-vn";    // thứ tiếng của trường `vi`
 
-const chuanTag = t => {
-  const s = String(t || "").toLowerCase().replace("_", "-");
+const chuanTag = t => String(t || "").toLowerCase().replace("_", "-");
+
+/* Quy đổi mã theo QUY ƯỚC TRƯỜNG: "en-GB" ở mã nguồn nghĩa là "thứ tiếng của
+   trường en", tức thứ tiếng ĐANG HỌC; "vi-VN" là thứ tiếng GIẢI THÍCH.
+
+   CHỈ dùng cho mã do người viết mã ghi thẳng ra. TUYỆT ĐỐI không dùng cho mã
+   do tiengCua() đoán từ mặt chữ: chữ "Hello" đoán ra en-GB là NÓI THẬT nó là
+   tiếng Anh, quy đổi thêm lần nữa thành ra giọng Việt đọc chữ tiếng Anh. */
+const maKhoa = t => {
+  const s = chuanTag(t);
   if (s === "en-gb") return MA_HOC;
   if (s === "vi-vn") return MA_GIAI;
   return s;
@@ -475,13 +483,15 @@ function tiengCua(text) {
 // Đánh số lượt đọc nối, để lượt mới cắt được lượt cũ.
 let lanLuotId = 0;
 
-function dungGiong(u, tag) {
-  u.lang = chuanTag(tag);      // phải quy đổi, không thì khoá ngược đọc sai giọng
-  const v = voiceFor(tag);
+/** tho = true nghĩa là mã đã là mã THẬT (do đoán ra), không quy đổi nữa. */
+function dungGiong(u, tag, tho) {
+  const t = tho ? chuanTag(tag) : maKhoa(tag);
+  u.lang = t;
+  const v = voiceFor(t);
   if (v) u.voice = v;
   // Cùng một giọng gốc nhưng đổi cao độ và tốc độ là ra hẳn một giọng khác —
   // đó là cách có nhiều giọng trên máy vốn chỉ cài sẵn một hai giọng.
-  const ch = luaChonGiong(chuanTag(tag).split("-")[0]);
+  const ch = luaChonGiong(t.split("-")[0]);
   u.pitch = clamp(ch.pitch, 0.5, 2);
   u.__heSoToc = ch.rate;
 }
@@ -588,7 +598,7 @@ Object.keys(KHO_TIENG).forEach(napKhoTieng);
 
 /** Địa chỉ file giọng đọc của một câu, không có thì null (để máy tự đọc). */
 function fileTieng(text, lang) {
-  const goc = chuanTag(lang || tiengCua(text)).split("-")[0];
+  const goc = (lang ? maKhoa(lang) : tiengCua(text).toLowerCase()).split("-")[0];
   const kho = khoCo[goc];
   if (!kho || !kho.size) return null;
   const k = bamCau(chuanCau(text));
@@ -624,7 +634,7 @@ function speak(text, slow, lang) {
   try {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    dungGiong(u, lang || tiengCua(text));
+    dungGiong(u, lang || tiengCua(text), !lang);
     apToc(u, slow ? 0.55 : 0.92);
     const nang = () => nhacNhuong(false);
     u.onend = nang;
@@ -660,7 +670,7 @@ function docLanLuot(khuc, xong, batDau) {
     }
     try {
       const u = new SpeechSynthesisUtterance(k.text);
-      dungGiong(u, k.lang || tiengCua(k.text));
+      dungGiong(u, k.lang || tiengCua(k.text), !k.lang);
       if (k.pitch) u.pitch = clamp(k.pitch, 0.5, 2);
       if (k.onTu) u.onboundary = k.onTu;
       if (batDau) u.onstart = batDau;
