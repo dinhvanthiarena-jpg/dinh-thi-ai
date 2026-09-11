@@ -748,6 +748,7 @@ const NHAN_BAC = {
   a1: { cefr: "A1", lop: "Lớp 3–5" },
   a2: { cefr: "A2", lop: "Lớp 6–7" },
   b1: { cefr: "B1", lop: "Lớp 8–9" },
+  b2: { cefr: "B2", lop: "Lớp 10–12" },
   v1: { cefr: "A1", lop: "" },
 };
 /* Ba kho này SUY RA từ khoá đang mở, nên đổi khoá là phải tính lại — xem

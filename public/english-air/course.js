@@ -18,7 +18,7 @@ const KHOA = [
     hoc: "en", maHoc: "en-gb", tenHoc: "Tiếng Anh", coHoc: "gb",
     giai: "vi", maGiai: "vi-vn", tenGiai: "Tiếng Việt", coGiai: "vn",
     nhan: "Tiếng Anh cho người Việt",
-    levels: [A1, A2, B1],
+    levels: [A1, A2, B1, B2],
   },
   {
     id: "vi-en",
