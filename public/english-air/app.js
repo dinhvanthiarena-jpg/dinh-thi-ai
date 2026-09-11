@@ -6554,7 +6554,7 @@ if ("serviceWorker" in navigator) {
    Chơi nhưng vẫn là học: câu và chữ mồi đều lấy theo ĐÚNG trình độ người học,
    và bắn trúng thì máy đọc lại cả câu cho nghe. */
 
-const BAN_TONG = 6;          // sáu câu là vừa một quãng nghỉ, dài hơn thì chán
+const BAN_TONG = 12;         // thầy bảo cho chơi dài ra — mười hai câu một ván
 const BAN_MANG = 3;          // ba lần bắn nhầm
 /* Bóng bay giữ đúng họ màu của app — tím dẫn đầu, hồng/xanh/cam phụ hoạ — chứ
    không bốc bừa bảy màu cầu vồng như trước. */
@@ -6718,7 +6718,10 @@ function banCoCanvas() {
   cv.height = Math.round(BAN.H * tl);
   BAN.ctx.setTransform(tl, 0, 0, tl, 0, 0);
 }
-const banGocCung = () => ({ x: BAN.W / 2, y: BAN.H - 40 });
+/* Cây cung: thầy bảo cho to lên. Mọi kích thước vẽ cung đều nhân theo BAN_CUNG,
+   chỉnh một số là cả cung, dây và mũi tên đặt sẵn cùng to nhỏ theo. */
+const BAN_CUNG = 46;         // bán kính cánh cung
+const banGocCung = () => ({ x: BAN.W / 2, y: BAN.H - BAN_CUNG - 12 });
 
 /* Canvas không hiểu biến CSS, nên đọc thẳng bộ màu của app ra rồi vẽ bằng màu
    đó. Nhờ vậy cung, tên, mây trong trò chơi luôn cùng tông với cả app, và bật
@@ -6756,7 +6759,9 @@ function banQua(chu, dung, y) {
     x: 0, y,
     pha: Math.random() * Math.PI * 2,
     lac: 8 + Math.random() * 10,
-    toc: 10 + Math.random() * 4 + BAN.vong * 1.1,   // bay chậm cho kịp ngắm
+    // Bay chậm cho kịp ngắm. Ván dài mười hai câu nên phần nhanh dần phải có
+    // trần, không thì mấy câu cuối bóng vụt lên nhanh quá, không ai bắn kịp.
+    toc: 10 + Math.random() * 4 + Math.min(6, BAN.vong * 0.6),
     mau: BAN_MAU[Math.floor(Math.random() * BAN_MAU.length)],
   };
 }
@@ -6792,7 +6797,7 @@ function banVongMoi() {
   $("#banViet").textContent = de.vi;
 
   BAN.bong = de.chu.map((chu, i) =>
-    banQua(chu, banGoc(chu) === de.goc, BAN.H * (.50 + i * .12) + Math.random() * 16));
+    banQua(chu, banGoc(chu) === de.goc, BAN.H * (.44 + i * .12) + Math.random() * 16));
   banXepNgang();
   banVeMang();
   $("#banBan").disabled = false;
@@ -6834,7 +6839,7 @@ function banNhaTen() {
   const g = banGocCung();
   const v = 470 + BAN.luc * 470;
   BAN.ten = {
-    x: g.x + Math.sin(BAN.goc) * 42, y: g.y - Math.cos(BAN.goc) * 42,
+    x: g.x + Math.sin(BAN.goc) * 58, y: g.y - Math.cos(BAN.goc) * 58,
     vx: Math.sin(BAN.goc) * v, vy: -Math.cos(BAN.goc) * v, vet: [],
   };
   $("#banBan").disabled = true;
@@ -6971,31 +6976,32 @@ function banVeCung(c) {
   c.save();
   c.translate(g.x, g.y);
   c.rotate(BAN.goc);
+  const R = BAN_CUNG;
   // Cánh cung
-  c.strokeStyle = BAN.mau.net; c.lineWidth = 6; c.lineCap = "round";
-  c.beginPath(); c.arc(0, 0, 34, -Math.PI * .78, -Math.PI * .22, false); c.stroke();
+  c.strokeStyle = BAN.mau.net; c.lineWidth = 8; c.lineCap = "round";
+  c.beginPath(); c.arc(0, 0, R, -Math.PI * .78, -Math.PI * .22, false); c.stroke();
   // Dây cung, kéo lùi theo lực
-  const k = 6 + BAN.luc * 16;
-  const t1 = { x: Math.cos(-Math.PI * .78) * 34, y: Math.sin(-Math.PI * .78) * 34 };
-  const t2 = { x: Math.cos(-Math.PI * .22) * 34, y: Math.sin(-Math.PI * .22) * 34 };
-  c.strokeStyle = BAN.mau.net; c.globalAlpha = .7; c.lineWidth = 1.6;
+  const k = 8 + BAN.luc * 22;
+  const t1 = { x: Math.cos(-Math.PI * .78) * R, y: Math.sin(-Math.PI * .78) * R };
+  const t2 = { x: Math.cos(-Math.PI * .22) * R, y: Math.sin(-Math.PI * .22) * R };
+  c.strokeStyle = BAN.mau.net; c.globalAlpha = .7; c.lineWidth = 2.2;
   c.beginPath(); c.moveTo(t1.x, t1.y); c.lineTo(0, k); c.lineTo(t2.x, t2.y); c.stroke();
   c.globalAlpha = 1;
   // Mũi tên đặt sẵn trên dây, chỉ vẽ khi chưa có tên nào đang bay
   if (!BAN.ten) {
-    c.strokeStyle = BAN.mau.net; c.lineWidth = 3;
-    c.beginPath(); c.moveTo(0, k); c.lineTo(0, k - 52); c.stroke();
+    c.strokeStyle = BAN.mau.net; c.lineWidth = 4;
+    c.beginPath(); c.moveTo(0, k); c.lineTo(0, k - 70); c.stroke();
     c.fillStyle = BAN.mau.mui;
     c.beginPath();
-    c.moveTo(0, k - 62); c.lineTo(-6, k - 48); c.lineTo(6, k - 48);
+    c.moveTo(0, k - 84); c.lineTo(-8, k - 64); c.lineTo(8, k - 64);
     c.closePath(); c.fill();
-    c.strokeStyle = BAN.mau.tim; c.lineWidth = 2;
-    c.beginPath(); c.moveTo(-5, k + 4); c.lineTo(0, k - 4); c.lineTo(5, k + 4); c.stroke();
+    c.strokeStyle = BAN.mau.tim; c.lineWidth = 2.6;
+    c.beginPath(); c.moveTo(-7, k + 6); c.lineTo(0, k - 6); c.lineTo(7, k + 6); c.stroke();
   }
   c.restore();
   // Tay cầm
   c.globalAlpha = .12; c.fillStyle = BAN.mau.net;
-  c.beginPath(); c.ellipse(g.x, g.y + 22, 30, 12, 0, 0, Math.PI * 2); c.fill();
+  c.beginPath(); c.ellipse(g.x, g.y + 28, 38, 14, 0, 0, Math.PI * 2); c.fill();
   c.globalAlpha = 1;
 }
 
@@ -7004,7 +7010,7 @@ function banVeDuong(c) {
   if (BAN.ten || BAN.cho) return;
   const g = banGocCung();
   const v = 470 + BAN.luc * 470;
-  let x = g.x + Math.sin(BAN.goc) * 42, y = g.y - Math.cos(BAN.goc) * 42;
+  let x = g.x + Math.sin(BAN.goc) * 58, y = g.y - Math.cos(BAN.goc) * 58;
   let vx = Math.sin(BAN.goc) * v, vy = -Math.cos(BAN.goc) * v;
   c.fillStyle = BAN.mau.tim; c.globalAlpha = .55;
   for (let i = 0; i < 46; i++) {
@@ -7025,12 +7031,12 @@ function banVeTen(c) {
   c.globalAlpha = 1;
   const a = Math.atan2(t.vy, t.vx);
   c.save(); c.translate(t.x, t.y); c.rotate(a);
-  c.strokeStyle = BAN.mau.net; c.lineWidth = 3; c.lineCap = "round";
-  c.beginPath(); c.moveTo(-34, 0); c.lineTo(0, 0); c.stroke();
+  c.strokeStyle = BAN.mau.net; c.lineWidth = 4; c.lineCap = "round";
+  c.beginPath(); c.moveTo(-44, 0); c.lineTo(0, 0); c.stroke();
   c.fillStyle = BAN.mau.mui;
-  c.beginPath(); c.moveTo(9, 0); c.lineTo(-3, -5); c.lineTo(-3, 5); c.closePath(); c.fill();
-  c.strokeStyle = BAN.mau.tim; c.lineWidth = 2;
-  c.beginPath(); c.moveTo(-34, -5); c.lineTo(-27, 0); c.lineTo(-34, 5); c.stroke();
+  c.beginPath(); c.moveTo(12, 0); c.lineTo(-4, -7); c.lineTo(-4, 7); c.closePath(); c.fill();
+  c.strokeStyle = BAN.mau.tim; c.lineWidth = 2.6;
+  c.beginPath(); c.moveTo(-44, -7); c.lineTo(-35, 0); c.lineTo(-44, 7); c.stroke();
   c.restore();
 }
 
