@@ -6821,6 +6821,19 @@ function banChayHieuUng(n) {
   n.classList.add("vao");
 }
 
+/** MON.L đứng dưới góc trời: trúng thì nhảy mừng, nhầm thì lắc đầu. Hết hoạt
+    hình phải gỡ lớp ra, không thì lần sau gắn lại nó nằm im. */
+let banAvaHen = null;
+function banAvaTo(loai) {
+  const n = $("#banAva");
+  if (!n) return;
+  n.classList.remove("vui", "buon");
+  void n.offsetWidth;
+  n.classList.add(loai);
+  clearTimeout(banAvaHen);
+  banAvaHen = setTimeout(() => n.classList.remove("vui", "buon"), 800);
+}
+
 function banVeMang() {
   // Vẽ tim bằng ký tự thường rồi tô màu bằng CSS: hình trái tim emoji mỗi máy
   // một kiểu, có máy ra tim đen thui, nhìn không biết còn mấy mạng.
@@ -6892,6 +6905,7 @@ function banTrungDung(b) {
   banNo(b);
   BAN.bong = BAN.bong.filter(x => x !== b);
   banKeu("Yes!", "dung");
+  banAvaTo("vui");
   banTiengDung();
   banChuBayVe(b);
   banVeMang();
@@ -6908,6 +6922,7 @@ function banTrungSai(b) {
   BAN.bong = BAN.bong.filter(x => x !== b);
   BAN.mang -= 1;
   banKeu("No", "sai");
+  banAvaTo("buon");
   banTiengSai();
   banVeMang();
   if (BAN.mang <= 0) return banXong(false, "Bắn nhầm ba lần rồi.");

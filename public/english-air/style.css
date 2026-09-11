@@ -2405,6 +2405,35 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .ban-bar, .ban-troi-boc, .ban-duoi { width: 100%; max-width: 560px; margin-inline: auto; }
 .ban-troi { display: block; width: 100%; height: 100%; touch-action: none; }
 
+/* MON.L đứng dưới góc trời, coi như người cầm cung. Đặt lệch sang trái để không
+   che mất cây cung ở giữa, và không chắn đường mũi tên bay lên. */
+.ban-ava { position: absolute; left: var(--s3); bottom: var(--s2);
+  width: 78px; height: 78px; pointer-events: none;
+  filter: drop-shadow(0 6px 14px rgba(30,16,48,.28));
+  animation: banAvaTho 3.2s ease-in-out infinite; }
+.ban-ava svg, .ban-ava img { width: 100%; height: 100%; }
+@keyframes banAvaTho {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-5px) rotate(2deg); }
+}
+/* Bắn trúng thì nhảy lên mừng, bắn nhầm thì lắc đầu. Hoạt hình riêng đè lên
+   nhịp thở, chạy xong tự trả về nhịp cũ. */
+.ban-ava.vui  { animation: banAvaVui 700ms var(--e) 1; }
+.ban-ava.buon { animation: banAvaBuon 520ms ease-in-out 1; }
+@keyframes banAvaVui {
+  0%   { transform: translateY(0) scale(1); }
+  30%  { transform: translateY(-22px) scale(1.12); }
+  55%  { transform: translateY(0) scale(.94); }
+  75%  { transform: translateY(-9px) scale(1.04); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes banAvaBuon {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  20%      { transform: translateX(-7px) rotate(-7deg); }
+  50%      { transform: translateX(7px) rotate(7deg); }
+  80%      { transform: translateX(-4px) rotate(-4deg); }
+}
+
 /* Chữ báo đúng/sai nảy lên giữa trời — to, đọc lướt là biết, không cần dừng lại đọc. */
 .ban-keu { position: absolute; left: 50%; top: 34%; transform: translate(-50%, -50%);
   margin: 0; font-size: 2.6rem; font-weight: 900; letter-spacing: 1px;
@@ -2505,4 +2534,5 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   .ban-keu { animation-duration: 1ms; }
   .ban-bay { transition-duration: 1ms; }
   .ban-cau.vao, .ban-hang-viet.vao, .ban-o, .ban-o.day { animation: none; }
+  .ban-ava, .ban-ava.vui, .ban-ava.buon { animation: none; }
 }
