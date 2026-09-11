@@ -1962,6 +1962,132 @@ button:focus-visible,
   box-shadow: inset 0 0 0 2px var(--line);
 }
 
+/* ==== Rắn săn số (kéo tay dẫn rắn tím đi cắn đúng số) ====
+   Rắn di chuyển liên tục, đầu luôn xoay dần về phía ngón tay đang chạm —
+   "mềm mại" vì góc quay có giới hạn tốc độ chứ không xoay giật cục. Cắn
+   đúng: số bốc hơi bay vào ô trống, tính là trả lời xong câu (giống các
+   skin khác). Cắn sai: KHÔNG mất mạng, KHÔNG kết thúc câu — số chỉ bị đẩy
+   giật ra xa như bị "nôn" ra, rắn đi tìm tiếp. */
+.snake-skin-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.snake-skin-arena {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+  border-radius: var(--r3);
+  touch-action: none;
+  cursor: pointer;
+  background: linear-gradient(180deg, rgba(124,58,237,0.08), transparent 45%);
+  box-shadow: inset 0 0 0 2px var(--line);
+}
+.snake-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #d8b4fe, var(--brand-fill) 60%, var(--brand-ink) 100%);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.35);
+  pointer-events: none;
+  z-index: 5;
+}
+.snake-head::before, .snake-head::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+}
+.snake-head::before { left: 8px; }
+.snake-head::after { left: 21px; }
+.snake-seg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  background: linear-gradient(155deg, var(--brand-fill), var(--brand-ink));
+  pointer-events: none;
+}
+.snake-num {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(155deg, hsl(var(--hue), 85%, 62%), hsl(var(--hue), 80%, 42%));
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.15rem;
+  box-shadow: var(--sh-1);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  /* transform tĩnh này là chỗ dựa thật sự cho vị trí — keyframe bên dưới chỉ
+     cộng thêm chuyển động đung đưa. Bắt buộc phải khai riêng ở đây: khi
+     "prefers-reduced-motion" bật (media query dùng animation-iteration-count
+     1 !important ở đầu file), animation kết thúc gần như ngay lập tức rồi
+     rơi về đúng transform tĩnh này — thiếu dòng này thì rơi về "không có
+     transform gì cả", số dồn hết về góc (0,0) của đấu trường. */
+  transform: translate(var(--sx, 0px), var(--sy, 0px));
+  animation: snake-num-bob 2.4s ease-in-out infinite;
+}
+@keyframes snake-num-bob {
+  0%, 100% { transform: translate(var(--sx, 0px), var(--sy, 0px)); }
+  50% { transform: translate(var(--sx, 0px), calc(var(--sy, 0px) - 6px)); }
+}
+.snake-num.dim { opacity: 0.5; }
+.snake-num.correct {
+  animation: snake-num-vanish 460ms ease-in forwards;
+}
+@keyframes snake-num-vanish {
+  0% { transform: translate(var(--sx, 0px), var(--sy, 0px)) scale(1); opacity: 1; }
+  55% { transform: translate(var(--sx, 0px), var(--sy, 0px)) scale(1.35); opacity: 0.85; filter: brightness(1.6); }
+  100% { transform: translate(var(--sx, 0px), var(--sy, 0px)) scale(0.2); opacity: 0; }
+}
+.snake-num.wrong-flash {
+  animation: snake-num-reject 420ms ease-out;
+}
+@keyframes snake-num-reject {
+  0% { transform: translate(var(--sx, 0px), var(--sy, 0px)) scale(1) rotate(0); }
+  25% { transform: translate(var(--sx, 0px), var(--sy, 0px)) scale(1.18) rotate(-10deg); }
+  55% { transform: translate(var(--sx, 0px), var(--sy, 0px)) scale(1.18) rotate(10deg); }
+  100% { transform: translate(var(--sx, 0px), var(--sy, 0px)) scale(1) rotate(0); }
+}
+.snake-num-fly {
+  position: fixed;
+  z-index: 999;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(155deg, hsl(var(--hue), 85%, 62%), hsl(var(--hue), 80%, 42%));
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.15rem;
+  box-shadow: var(--sh-1);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  pointer-events: none;
+  transition: left 480ms cubic-bezier(.3,.6,.3,1), top 480ms cubic-bezier(.3,.6,.3,1), transform 480ms ease-in;
+}
+
 /* ==== Thinking dots ==== */
 .thinking-dots {
   display: flex;

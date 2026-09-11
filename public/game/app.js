@@ -2616,7 +2616,9 @@
     const anchor = archeryBowAnchor();
     const dx = px - anchor.x, dy = py - anchor.y;
     const thetaDeg = Math.atan2(dy, dx) * 180 / Math.PI;
-    $('archeryBow').style.transform = 'rotate(' + (thetaDeg + 90) + 'deg)';
+    // Cánh cung mặc định (0deg) phình về bên phải nên hướng bắn lúc nghỉ là
+    // sang TRÁI (180deg) — offset đúng phải là +180, không phải +90.
+    $('archeryBow').style.transform = 'rotate(' + (thetaDeg + 180) + 'deg)';
     let line = archeryArena().querySelector('.archery-aim-line');
     if (!line) {
       line = document.createElement('div');
@@ -2628,11 +2630,24 @@
     line.style.top = anchor.y + 'px';
     line.style.width = Math.min(dist, 260) + 'px';
     line.style.transform = 'rotate(' + thetaDeg + 'deg)';
+    // Mũi tên đã nạp sẵn trên dây, xoay theo hướng ngắm — để người chơi thấy
+    // rõ sắp bắn theo hướng nào trước khi thả tay.
+    let nock = archeryArena().querySelector('.archery-arrow.nocked');
+    if (!nock) {
+      nock = document.createElement('div');
+      nock.className = 'archery-arrow nocked';
+      archeryArena().appendChild(nock);
+    }
+    nock.style.left = anchor.x + 'px';
+    nock.style.top = anchor.y + 'px';
+    nock.style.transform = 'rotate(' + (thetaDeg * Math.PI / 180) + 'rad)';
   }
 
   function archeryFire(e) {
     const line = archeryArena().querySelector('.archery-aim-line');
     if (line) line.remove();
+    const nock = archeryArena().querySelector('.archery-arrow.nocked');
+    if (nock) nock.remove();
     $('archeryBow').style.transform = 'rotate(0deg)';
     if (!AR || AR.arrow) return;
     const rect = archeryArena().getBoundingClientRect();
@@ -2675,6 +2690,8 @@
     if (AR) AR.aiming = false;
     const line = archeryArenaEl.querySelector('.archery-aim-line');
     if (line) line.remove();
+    const nock = archeryArenaEl.querySelector('.archery-arrow.nocked');
+    if (nock) nock.remove();
     $('archeryBow').style.transform = 'rotate(0deg)';
   });
 
@@ -3060,13 +3077,14 @@
     answersGrid.innerHTML = '';
     answersGrid.classList.toggle('drag-mode', !!q.dragMode);
     if (q.dragMode) {
-      // Lớp 1-3 có thêm "chém hoa quả" trong vòng xoay skin — lớp lớn hơn
-      // vẫn chỉ có bóng bay/kéo thả như cũ.
-      const skinPool = (state.grade && state.grade <= 3) ? ['balloons', 'chips', 'fruit', 'archery'] : ['balloons', 'chips'];
+      // Lớp 1-3 có thêm "chém hoa quả"/"bắn cung"/"rắn săn số" trong vòng
+      // xoay skin — lớp lớn hơn vẫn chỉ có bóng bay/kéo thả như cũ.
+      const skinPool = (state.grade && state.grade <= 3) ? ['balloons', 'chips', 'fruit', 'archery', 'snake'] : ['balloons', 'chips'];
       q.answerSkin = pick(skinPool);
       if (q.answerSkin === 'balloons') renderBalloons(q);
       else if (q.answerSkin === 'fruit') renderFruitSlice(q);
       else if (q.answerSkin === 'archery') renderArcherySkin(q);
+      else if (q.answerSkin === 'snake') renderSnakeSkin(q);
       else renderDragChips(q);
       return;
     }
@@ -3599,7 +3617,9 @@
       const anchor = archerySkinBowAnchor(arena);
       const dx = px - anchor.x, dy = py - anchor.y;
       const thetaDeg = Math.atan2(dy, dx) * 180 / Math.PI;
-      bow.style.transform = 'rotate(' + (thetaDeg + 90) + 'deg)';
+      // Cánh cung mặc định (0deg) phình về bên phải nên hướng bắn lúc nghỉ
+      // là sang TRÁI (180deg) — offset đúng phải là +180, không phải +90.
+      bow.style.transform = 'rotate(' + (thetaDeg + 180) + 'deg)';
       let line = arena.querySelector('.archery-aim-line');
       if (!line) { line = document.createElement('div'); line.className = 'archery-aim-line'; arena.appendChild(line); }
       const dist = Math.hypot(dx, dy);
@@ -3607,11 +3627,19 @@
       line.style.top = anchor.y + 'px';
       line.style.width = Math.min(dist, 200) + 'px';
       line.style.transform = 'rotate(' + thetaDeg + 'deg)';
+      // Mũi tên nạp sẵn trên dây, xoay theo hướng ngắm ngay trong lúc kéo.
+      let nock = arena.querySelector('.archery-arrow.nocked');
+      if (!nock) { nock = document.createElement('div'); nock.className = 'archery-arrow nocked'; arena.appendChild(nock); }
+      nock.style.left = anchor.x + 'px';
+      nock.style.top = anchor.y + 'px';
+      nock.style.transform = 'rotate(' + (thetaDeg * Math.PI / 180) + 'rad)';
     }
 
     function fire(e) {
       const line = arena.querySelector('.archery-aim-line');
       if (line) line.remove();
+      const nock = arena.querySelector('.archery-arrow.nocked');
+      if (nock) nock.remove();
       bow.style.transform = 'rotate(0deg)';
       if (spent || arrow) return;
       const rect = arena.getBoundingClientRect();
@@ -3651,8 +3679,209 @@
       aiming = false;
       const line = arena.querySelector('.archery-aim-line');
       if (line) line.remove();
+      const nock = arena.querySelector('.archery-arrow.nocked');
+      if (nock) nock.remove();
       bow.style.transform = 'rotate(0deg)';
     });
+  }
+
+  /* ---- Rắn săn số answer mode (lớp 1-3): kéo tay để dẫn đường, đầu rắn
+   * xoay dần về phía ngón tay (không giật cục) trong lúc thân rắn bò liên
+   * tục. Cắn trúng số ĐÚNG: số bốc hơi bay vào ô trống của câu, coi như trả
+   * lời xong. Cắn trúng số SAI: chỉ bị đẩy bật ra như "nôn" ra, KHÔNG mất
+   * mạng, KHÔNG kết thúc câu — rắn đi tìm tiếp. ---- */
+  const SNAKE_HEAD_R = 17;
+  const SNAKE_NUM_R = 28;
+  const SNAKE_SPEED = 95;
+  const SNAKE_TURN_RATE = 3.6;
+  const SNAKE_BITE_R = SNAKE_HEAD_R + SNAKE_NUM_R - 10;
+  const SNAKE_SEGMENTS = 7;
+  const SNAKE_TRAIL_STEP = 5;
+  function renderSnakeSkin(q) {
+    const wrap = document.createElement('div');
+    wrap.className = 'snake-skin-wrap';
+    const arena = document.createElement('div');
+    arena.className = 'snake-skin-arena';
+    wrap.appendChild(arena);
+    const hint = document.createElement('p');
+    hint.className = 'drag-hint';
+    hint.textContent = 'Kéo tay để dẫn rắn đi cắn đúng số nhé!';
+    wrap.appendChild(hint);
+    answersGrid.appendChild(wrap);
+
+    const w = arena.clientWidth, h = arena.clientHeight;
+    const headEl = document.createElement('div');
+    headEl.className = 'snake-head';
+    arena.appendChild(headEl);
+    const segs = [];
+    for (let i = 0; i < SNAKE_SEGMENTS; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'snake-seg';
+      const size = Math.round(30 - i * 2.6);
+      seg.style.width = size + 'px';
+      seg.style.height = size + 'px';
+      seg.style.marginLeft = (-size / 2) + 'px';
+      seg.style.marginTop = (-size / 2) + 'px';
+      seg.style.opacity = String(Math.max(0.25, 1 - i * 0.11));
+      arena.appendChild(seg);
+      segs.push(seg);
+    }
+
+    const margin = 42;
+    const numbers = q.choices.map((val, i) => {
+      const el = document.createElement('div');
+      el.className = 'snake-num';
+      el.dataset.value = String(val);
+      const hue = (i * 97 + 260) % 360;
+      el.style.setProperty('--hue', hue);
+      el.textContent = fmtNum(val);
+      el.style.animationDelay = (i * 200) + 'ms';
+      const x = margin + Math.random() * Math.max(10, w - margin * 2);
+      const y = margin + Math.random() * Math.max(10, h - margin * 2);
+      el.style.setProperty('--sx', x + 'px');
+      el.style.setProperty('--sy', y + 'px');
+      arena.appendChild(el);
+      return { val, correct: val === q.answer, el, x, y, dead: false, cooldownUntil: 0 };
+    });
+
+    const snakeState = {
+      head: { x: w / 2, y: h / 2 },
+      heading: -Math.PI / 2,
+      target: null,
+      trail: [],
+      frame: 0,
+    };
+    wireSnakeSkin(arena, headEl, segs, numbers, snakeState);
+  }
+
+  function wireSnakeSkin(arena, headEl, segs, numbers, s) {
+    let raf = null, lastTs = 0, spent = false, pointerId = null;
+
+    function normalizeAngle(a) {
+      while (a > Math.PI) a -= Math.PI * 2;
+      while (a < -Math.PI) a += Math.PI * 2;
+      return a;
+    }
+
+    function handleBite(num) {
+      if (num.correct) {
+        spent = true;
+        if (raf) cancelAnimationFrame(raf);
+        num.dead = true;
+        sfx.pop();
+        num.el.classList.add('correct');
+        const r = num.el.getBoundingClientRect();
+        const fly = document.createElement('div');
+        fly.className = 'snake-num-fly';
+        fly.style.setProperty('--hue', num.el.style.getPropertyValue('--hue'));
+        fly.textContent = fmtNum(num.val);
+        fly.style.left = (r.left + r.width / 2) + 'px';
+        fly.style.top = (r.top + r.height / 2) + 'px';
+        document.body.appendChild(fly);
+        const slot = document.getElementById('dropSlot');
+        if (slot) {
+          requestAnimationFrame(() => {
+            const sr = slot.getBoundingClientRect();
+            fly.style.left = (sr.left + sr.width / 2) + 'px';
+            fly.style.top = (sr.top + sr.height / 2) + 'px';
+            fly.style.transform = 'scale(0.4)';
+          });
+        }
+        selectAnswer(num.val, num.el);
+        setTimeout(() => {
+          fly.remove();
+          if (slot) { slot.textContent = fmtNum(num.val); slot.classList.add('correct', 'filled-effect'); }
+        }, 520);
+      } else {
+        sfx.wrong();
+        num.cooldownUntil = performance.now() + 900;
+        num.el.classList.remove('wrong-flash');
+        void num.el.offsetWidth;
+        num.el.classList.add('wrong-flash');
+        // Bỏ lớp này lại sau khi rung xong, không thì hết rung là bóng đứng
+        // im hẳn — mất luôn nhịp đung đưa nhàn rỗi của .snake-num.
+        setTimeout(() => { if (num.el) num.el.classList.remove('wrong-flash'); }, 430);
+        // Đẩy số bật ra xa khỏi đầu rắn một chút, như bị "nôn" ra.
+        const dx = num.x - s.head.x, dy = num.y - s.head.y;
+        const dist = Math.hypot(dx, dy) || 1;
+        const pushDist = 46;
+        const w = arena.clientWidth, h = arena.clientHeight;
+        num.x = Math.min(w - SNAKE_HEAD_R, Math.max(SNAKE_HEAD_R, num.x + (dx / dist) * pushDist));
+        num.y = Math.min(h - SNAKE_HEAD_R, Math.max(SNAKE_HEAD_R, num.y + (dy / dist) * pushDist));
+        num.el.style.setProperty('--sx', num.x + 'px');
+        num.el.style.setProperty('--sy', num.y + 'px');
+      }
+    }
+
+    function tick(ts) {
+      if (spent) return;
+      if (!lastTs) lastTs = ts;
+      const dt = Math.min(48, ts - lastTs) / 1000;
+      lastTs = ts;
+      const w = arena.clientWidth, h = arena.clientHeight;
+
+      if (s.target) {
+        const desired = Math.atan2(s.target.y - s.head.y, s.target.x - s.head.x);
+        let diff = normalizeAngle(desired - s.heading);
+        const maxTurn = SNAKE_TURN_RATE * dt;
+        if (diff > maxTurn) diff = maxTurn;
+        if (diff < -maxTurn) diff = -maxTurn;
+        s.heading += diff;
+      }
+      s.head.x += Math.cos(s.heading) * SNAKE_SPEED * dt;
+      s.head.y += Math.sin(s.heading) * SNAKE_SPEED * dt;
+      if (s.head.x < SNAKE_HEAD_R) { s.head.x = SNAKE_HEAD_R; s.heading = Math.PI - s.heading; }
+      if (s.head.x > w - SNAKE_HEAD_R) { s.head.x = w - SNAKE_HEAD_R; s.heading = Math.PI - s.heading; }
+      if (s.head.y < SNAKE_HEAD_R) { s.head.y = SNAKE_HEAD_R; s.heading = -s.heading; }
+      if (s.head.y > h - SNAKE_HEAD_R) { s.head.y = h - SNAKE_HEAD_R; s.heading = -s.heading; }
+
+      headEl.style.transform = `translate(${s.head.x}px, ${s.head.y}px) rotate(${s.heading}rad)`;
+
+      s.frame++;
+      if (s.frame % SNAKE_TRAIL_STEP === 0) {
+        s.trail.unshift({ x: s.head.x, y: s.head.y });
+        if (s.trail.length > segs.length + 2) s.trail.length = segs.length + 2;
+      }
+      segs.forEach((seg, i) => {
+        const p = s.trail[i] || s.trail[s.trail.length - 1] || s.head;
+        seg.style.transform = `translate(${p.x}px, ${p.y}px)`;
+      });
+
+      const now = performance.now();
+      for (const num of numbers) {
+        if (num.dead || now < num.cooldownUntil) continue;
+        const dx = s.head.x - num.x, dy = s.head.y - num.y;
+        if (dx * dx + dy * dy < SNAKE_BITE_R * SNAKE_BITE_R) {
+          handleBite(num);
+          if (spent) return;
+        }
+      }
+
+      if (!spent) raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+
+    function updateTarget(e) {
+      const rect = arena.getBoundingClientRect();
+      s.target = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+
+    arena.addEventListener('pointerdown', (e) => {
+      if (spent) return;
+      pointerId = e.pointerId;
+      try { arena.setPointerCapture(e.pointerId); } catch {}
+      updateTarget(e);
+    });
+    arena.addEventListener('pointermove', (e) => {
+      if (spent || e.pointerId !== pointerId) return;
+      updateTarget(e);
+    });
+    const endTouch = (e) => {
+      if (e.pointerId !== pointerId) return;
+      pointerId = null;
+    };
+    arena.addEventListener('pointerup', endTouch);
+    arena.addEventListener('pointercancel', endTouch);
   }
 
   function selectAnswer(choice, btn) {
@@ -3663,8 +3892,8 @@
     const isCorrect = choice === state.current.answer;
     mathAdjustTier(isCorrect);
     const skin = state.current.answerSkin || 'buttons';
-    const isCustom = skin !== 'buttons'; // chips + balloons + fruit + archery share div-based markup
-    const selector = skin === 'balloons' ? '.balloon' : skin === 'chips' ? '.drag-chip' : skin === 'fruit' ? '.fruit-slice-item' : skin === 'archery' ? '.archery-balloon' : null;
+    const isCustom = skin !== 'buttons'; // chips + balloons + fruit + archery + snake share div-based markup
+    const selector = skin === 'balloons' ? '.balloon' : skin === 'chips' ? '.drag-chip' : skin === 'fruit' ? '.fruit-slice-item' : skin === 'archery' ? '.archery-balloon' : skin === 'snake' ? '.snake-num' : null;
     const allBtns = selector ? [...document.querySelectorAll(selector)] : [...answersGrid.children];
     allBtns.forEach((b) => {
       if (isCustom) b.style.pointerEvents = 'none'; else b.disabled = true;
