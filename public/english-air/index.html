@@ -2366,6 +2366,48 @@
   </div>
 </div>
 
+<!-- ============ TRÒ CHƠI: CHÉM CHỮ ============
+     Hoa quả tung lên, mỗi quả mang một chữ. Vuốt tay chém trúng quả có chữ
+     đúng thì chữ rơi xuống nhảy vào chỗ trống; chém nhầm thì nổ đụp một cái.
+     Dùng chung khung và bộ màu với màn Bắn chữ nên hai trò nhìn là một nhà. -->
+<div class="ban chem" id="chemView" hidden role="dialog" aria-modal="true" aria-labelledby="chemTitle">
+  <header class="ban-bar">
+    <button class="icon-btn" id="btnChemDong" type="button" aria-label="Đóng trò chơi">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+    <span class="ban-bar-tit" id="chemTitle">Chém chữ</span>
+    <span class="ban-mang" id="chemMang" aria-label="Số lần chém nhầm còn được phép"></span>
+    <span class="ban-diem"><b id="chemDiem">0</b> điểm</span>
+  </header>
+
+  <div class="ban-troi-boc">
+    <canvas class="ban-troi" id="chemTroi"></canvas>
+    <div class="ban-ava" id="chemAva" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+    <p class="ban-keu" id="chemKeu" hidden aria-live="assertive"></p>
+  </div>
+
+  <div class="ban-duoi">
+    <p class="ban-cau" id="chemCau"></p>
+    <div class="ban-hang-viet">
+      <p class="ban-viet" id="chemViet"></p>
+      <button class="ban-nghe" id="chemNghe" type="button" aria-label="Nghe lại câu">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sound"/></svg>
+      </button>
+    </div>
+    <p class="ban-chi" id="chemChi">Vuốt tay ngang quả mang chữ đúng để chém.</p>
+  </div>
+
+  <div class="ban-het" id="chemHet" hidden>
+    <div class="ban-het-in">
+      <div class="ban-het-hinh" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
+      <h3 id="chemHetTit">Hết lượt rồi</h3>
+      <p class="ban-het-sub" id="chemHetSub"></p>
+      <button class="btn btn-primary btn-block" id="chemHetLai" type="button">Chơi lại</button>
+      <button class="btn btn-soft btn-block mt" id="chemHetVe" type="button">Học tiếp</button>
+    </div>
+  </div>
+</div>
+
 <!-- ================= CHUỖI NGÀY ================= -->
 <div class="streak" id="streakView" hidden role="dialog" aria-modal="true" aria-labelledby="streakTitle">
   <header class="p-bar">

@@ -1175,7 +1175,7 @@ function startLesson(id, opts = {}) {
   let words, sentences, teach = [];
   if (opts.words) { words = opts.words; sentences = []; }
   else if (lesson.checkpoint) { words = unitWords(lesson.unit); sentences = sample(unitSentences(lesson.unit), 4); }
-  else { teach = lesson.teach || []; words = lessonWords(lesson); sentences = lesson.sentences || []; }
+  else { teach = chenChem(lesson.teach || []); words = lessonWords(lesson); sentences = lesson.sentences || []; }
 
   const drills = buildPractice(words, sentences, opts.max || 12);
   if (!drills.length) { toast("Chưa có nội dung để luyện."); return; }
@@ -1431,7 +1431,37 @@ function anhChoTu(w) {
 const chiAnh = khuc => (khuc || []).filter(k => k && k.lang !== "vi-VN");
 
 /* ---------- 9. Slide dạy ---------- */
+/** Chèn màn chơi Chém chữ vào NGAY TRƯỚC Góc văn hoá — thầy chốt đúng chỗ đó:
+    học một lượt từ mới xong thì chơi cho giãn đầu, rồi mới đọc phần văn hoá.
+    Bài nào không có góc văn hoá thì để cuối phần dạy, trước lúc vào luyện tập.
+    Trả về mảng MỚI, không đụng vào dữ liệu khoá học gốc. */
+function chenChem(ds) {
+  if (!ds || !ds.length) return ds || [];
+  let k = ds.findIndex(s => s.t === "culture");
+  if (k < 0) k = ds.length;
+  const ra = ds.slice();
+  ra.splice(k, 0, { t: "chem" });
+  return ra;
+}
+
 const TEACH = {
+  /** Tấm mời chơi. Bấm nút là mở màn chém; bấm "Tiếp theo" thì bỏ qua. */
+  chem(d, st) {
+    showMascot(true); setKicker("Giải lao");
+    st.append(el("p", "ask", "Chém chữ"));
+    const box = el("div", "choi-moi");
+    box.append(el("p", "choi-moi-sub",
+      "Hoa quả tung lên, mỗi quả mang một chữ. Vuốt tay chém đúng quả có chữ còn thiếu trong câu."));
+    const b = el("button", "btn btn-primary btn-block", "Chơi ngay");
+    b.type = "button";
+    b.addEventListener("click", () => {
+      b.textContent = "Chơi lại";
+      chemMo(null);
+    });
+    box.append(b);
+    st.append(box);
+  },
+
   intro(d, st) {
     showMascot(true); setKicker("Giới thiệu");
     st.append(el("p", "ask", d.title));
@@ -6796,7 +6826,9 @@ function banVongMoi() {
   if (de.sau) o.append(" " + de.sau);
   $("#banViet").textContent = de.vi;
   banChayHieuUng(o);
-  banChayHieuUng($(".ban-hang-viet"));
+  // Phải chỉ rõ trong màn nào: hai trò chơi dùng chung tên lớp, tìm trống
+  // không thì luôn vớ phải cái của màn Bắn chữ.
+  banChayHieuUng($("#banView .ban-hang-viet"));
 
   BAN.bong = de.chu.map((chu, i) =>
     banQua(chu, banGoc(chu) === de.goc, BAN.H * (.44 + i * .12) + Math.random() * 16));
@@ -7265,6 +7297,488 @@ window.addEventListener("resize", () => {
     b.goc0 = clamp((b.goc0 || b.x) * ti, b.rx + 6, BAN.W - b.rx - 6);
     b.x = b.goc0;
   });
+});
+
+/* ---------- 23c. Trò chơi: CHÉM CHỮ ----------
+   Thầy đặt bài: chém hoa quả kiểu Fruit Ninja, nhưng trên mỗi quả có một chữ
+   tiếng Anh. Câu thiếu một chữ nằm dưới; chém trúng quả mang chữ đúng thì chữ
+   rơi xuống nhảy vào đúng chỗ trống, chém nhầm thì hiện "No" và quả nổ đụp một
+   cái như pháo. Phải có vệt chém, màu theo màu app.
+
+   Dùng chung bộ đề với trò Bắn chữ (banRaDe) nên câu và chữ mồi vẫn đúng trình
+   độ người học, và vẫn đọc cả câu đầu mỗi lượt cho khỏi có chữ nào cũng đúng. */
+
+const CHEM_TONG = 10;        // mười câu một ván
+const CHEM_MANG = 3;
+const CHEM_G = 520;          // trọng lực: quả bay lên rồi rơi xuống trong ~2,2 giây
+const CHEM_VET_DOI = 260;    // vệt chém sống 0,26 giây rồi tan
+
+const CHEM = {
+  mo: false, raf: 0, truoc: 0,
+  cv: null, ctx: null, W: 0, H: 0,
+  qua: [], manh: [], hat: [], vet: [],
+  de: null, cho: true, keo: false,
+  diem: 0, mang: CHEM_MANG, vong: 0,
+  mau: { net: "#3B0764", la: "#16A34A", vet: "#7C3AED" },
+};
+let chemSauKhiDong = null;
+let chemKeuHen = null, chemAvaHen = null, chemDocHen = null;
+
+/* ---- Tiếng ---- */
+function chemTiengChem() {
+  if (!S.sound) return;
+  const a = tiengSanSang(); if (!a) return;
+  const t = a.currentTime + .005;
+  // Tiếng "vút": nhiễu trắng lọc cao, tắt rất nhanh — nghe ra lưỡi dao đi qua.
+  const n = Math.floor(a.sampleRate * .16);
+  const buf = a.createBuffer(1, n, a.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3.2);
+  const src = a.createBufferSource(); src.buffer = buf;
+  const f = a.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 2200;
+  const g = a.createGain(); g.gain.value = .1;
+  src.connect(f); f.connect(g); g.connect(ra(a));
+  src.start(t);
+}
+const chemTiengDung = () => chuoiNot([[659.3, 0, .16], [880, .09, .28]], "triangle", .07);
+
+/* ---- Dựng màn ---- */
+function chemCoCanvas() {
+  const cv = CHEM.cv;
+  const tl = Math.min(window.devicePixelRatio || 1, 2);
+  CHEM.W = cv.clientWidth;
+  CHEM.H = cv.clientHeight;
+  cv.width = Math.round(CHEM.W * tl);
+  cv.height = Math.round(CHEM.H * tl);
+  CHEM.ctx.setTransform(tl, 0, 0, tl, 0, 0);
+}
+
+function chemLayMau() {
+  const c = getComputedStyle(document.documentElement);
+  const l = (k, dp) => (c.getPropertyValue(k) || "").trim() || dp;
+  CHEM.mau = {
+    net: l("--ink-deep", "#3B0764"),
+    la: l("--ok", "#16A34A"),
+    vet: l("--brand", "#7E22CE"),
+  };
+}
+
+/** Một quả: to nhỏ theo chữ in trên nó, chữ dài thì quả to ra cho vừa. */
+function chemQua(chu, dung) {
+  const c = CHEM.ctx;
+  c.font = "900 17px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  const rong = c.measureText(chu).width;
+  const r = clamp(rong / 2 + 20, 36, Math.min(58, CHEM.W / 2 - 16));
+  return {
+    chu, dung, r,
+    mau: BAN_MAU[Math.floor(Math.random() * BAN_MAU.length)],
+    x: 0, y: 0, vx: 0, vy: 0, goc: 0, xoay: 0, song: false, cho: 0,
+  };
+}
+
+/** Tung một quả lên từ đáy màn. Đỉnh bay lên khoảng 2/3 chiều cao trời. */
+function chemNem(q) {
+  q.r = Math.min(q.r, Math.max(30, CHEM.W / 2 - 16));
+  q.x = q.r + 20 + Math.random() * Math.max(1, CHEM.W - 2 * q.r - 40);
+  q.y = CHEM.H + q.r + 10;
+  const cao = (0.58 + Math.random() * 0.14) * CHEM.H;
+  q.vy = -Math.sqrt(2 * CHEM_G * cao);
+  // Hơi chụm vào giữa để quả không bay thẳng ra mép rồi mất hút.
+  q.vx = (CHEM.W / 2 - q.x) * 0.42 + (Math.random() - .5) * 70;
+  q.goc = Math.random() * Math.PI;
+  q.xoay = (Math.random() - .5) * 2.6;
+  q.song = true;
+  q.cho = 0;
+}
+
+function chemVongMoi() {
+  const de = banRaDe();
+  if (!de) { toast("Chưa đủ câu để chơi ở trình độ này."); return chemDong(); }
+  CHEM.de = de;
+  CHEM.vong += 1;
+  CHEM.cho = false;
+  CHEM.manh = []; CHEM.hat = []; CHEM.vet = [];
+
+  const o = $("#chemCau");
+  o.textContent = "";
+  if (de.truoc) o.append(de.truoc + " ");
+  const trong = el("span", "ban-o", ".....");
+  trong.id = "chemO";
+  o.append(trong);
+  if (de.sau) o.append(" " + de.sau);
+  $("#chemViet").textContent = de.vi;
+  banChayHieuUng(o);
+  banChayHieuUng($("#chemView .ban-hang-viet"));
+
+  // Tung lệch nhau vài nhịp cho quả không chồng lên nhau giữa không trung.
+  CHEM.qua = de.chu.map(chu => chemQua(chu, banGoc(chu) === de.goc));
+  CHEM.qua.forEach((q, i) => { q.song = false; q.cho = i * 0.55; });
+
+  chemVeMang();
+  $("#chemChi").textContent = "Câu " + CHEM.vong + "/" + CHEM_TONG + " — vuốt tay chém quả mang chữ đúng.";
+  clearTimeout(chemDocHen);
+  chemDocHen = setTimeout(() => { if (CHEM.mo) speak(de.en, false, "en-GB"); }, 420);
+}
+
+function chemVeMang() {
+  const o = $("#chemMang");
+  o.textContent = "";
+  for (let i = 0; i < CHEM_MANG; i++) {
+    o.append(el("span", "ban-tim" + (i < CHEM.mang ? "" : " tat"), "♥"));
+  }
+  $("#chemDiem").textContent = CHEM.diem;
+}
+
+function chemKeu(chu, loai) {
+  const p = $("#chemKeu");
+  p.hidden = true;
+  p.textContent = chu;
+  p.className = "ban-keu " + loai;
+  void p.offsetWidth;
+  p.hidden = false;
+  clearTimeout(chemKeuHen);
+  chemKeuHen = setTimeout(() => { p.hidden = true; }, 900);
+}
+
+function chemAvaTo(loai) {
+  const n = $("#chemAva");
+  if (!n) return;
+  n.classList.remove("vui", "buon");
+  void n.offsetWidth;
+  n.classList.add(loai);
+  clearTimeout(chemAvaHen);
+  chemAvaHen = setTimeout(() => n.classList.remove("vui", "buon"), 800);
+}
+
+/* ---- Chém trúng ---- */
+/** Quả vỡ đôi: hai nửa văng ra hai bên rồi rơi xuống. */
+function chemVoDoi(q, gocDao) {
+  for (const ben of [-1, 1]) {
+    CHEM.manh.push({
+      x: q.x, y: q.y, r: q.r, mau: q.mau, ben,
+      dao: gocDao,
+      vx: q.vx + Math.cos(gocDao + ben * Math.PI / 2) * 150,
+      vy: q.vy + Math.sin(gocDao + ben * Math.PI / 2) * 150 - 60,
+      goc: q.goc, xoay: q.xoay + ben * 1.6, doi: 1,
+    });
+  }
+  // Nước quả bắn ra
+  for (let i = 0; i < 14; i++) {
+    const a = Math.random() * Math.PI * 2, s = 50 + Math.random() * 170;
+    CHEM.hat.push({ x: q.x, y: q.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+      mau: q.mau, r: 2.6 + Math.random() * 2.4, doi: 1 });
+  }
+}
+
+/** Chém nhầm: nổ đụp một cái như pháo — thầy dặn phải nghe ra tiếng nổ. */
+function chemNoDup(q) {
+  for (let i = 0; i < 26; i++) {
+    const a = Math.random() * Math.PI * 2, s = 90 + Math.random() * 280;
+    CHEM.hat.push({ x: q.x, y: q.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+      mau: i % 3 === 0 ? CHEM.mau.vet : q.mau, r: 2.4 + Math.random() * 3.2, doi: 1 });
+  }
+  keuNo(0);
+}
+
+/** Chữ vừa chém rơi xuống, nhảy vào đúng chỗ trống trong câu. */
+function chemChuRoiVe(q) {
+  const o = $("#chemO");
+  if (!o) return;
+  const cv = CHEM.cv.getBoundingClientRect();
+  const s = el("span", "ban-bay", q.chu);
+  s.style.left = (cv.left + q.x) + "px";
+  s.style.top = (cv.top + q.y) + "px";
+  document.body.appendChild(s);
+  requestAnimationFrame(() => {
+    const r = o.getBoundingClientRect();
+    s.style.left = (r.left + r.width / 2) + "px";
+    s.style.top = (r.top + r.height / 2) + "px";
+  });
+  setTimeout(() => {
+    s.remove();
+    o.textContent = CHEM.de.dap.replace(/[.,!?]/g, "");
+    o.classList.add("day");
+  }, 640);
+}
+
+function chemTrungDung(q, gocDao) {
+  CHEM.cho = true;
+  CHEM.diem += 10;
+  chemVoDoi(q, gocDao);
+  CHEM.qua = CHEM.qua.filter(x => x !== q);
+  chemKeu("Yes!", "dung");
+  chemAvaTo("vui");
+  chemTiengDung();
+  chemChuRoiVe(q);
+  chemVeMang();
+  setTimeout(() => { if (CHEM.mo) speak(CHEM.de.en, false, "en-GB"); }, 700);
+  setTimeout(() => {
+    if (!CHEM.mo) return;
+    if (CHEM.vong >= CHEM_TONG) return chemXong(true);
+    chemVongMoi();
+  }, 2100);
+}
+
+function chemTrungSai(q) {
+  chemNoDup(q);
+  CHEM.mang -= 1;
+  chemKeu("No", "sai");
+  chemAvaTo("buon");
+  chemVeMang();
+  if (CHEM.mang <= 0) return chemXong(false, "Chém nhầm ba lần rồi.");
+  // Quả đó tung lại sau một nhịp, bầu trời khỏi vắng.
+  q.song = false;
+  q.cho = 0.9;
+}
+
+function chemXong(thang, vi) {
+  CHEM.cho = true;
+  clearTimeout(chemDocHen);
+  $("#chemHetTit").textContent = thang ? "Giỏi quá!" : "Hết lượt rồi";
+  $("#chemHetSub").textContent = thang
+    ? "Chém trúng cả " + CHEM_TONG + " câu, được " + CHEM.diem + " điểm."
+    : (vi || "Hết lượt rồi.") + " Được " + CHEM.diem + " điểm.";
+  $("#chemHet").hidden = false;
+  if (thang) phatVoTay();
+}
+
+/* ---- Vẽ ---- */
+function chemVeQua(c, q) {
+  c.save();
+  c.translate(q.x, q.y);
+  c.rotate(q.goc);
+  // Cuống và lá
+  c.strokeStyle = CHEM.mau.net; c.lineWidth = 3; c.lineCap = "round";
+  c.beginPath(); c.moveTo(0, -q.r); c.lineTo(0, -q.r - 9); c.stroke();
+  c.fillStyle = CHEM.mau.la;
+  c.beginPath();
+  c.ellipse(q.r * .34, -q.r - 8, q.r * .34, q.r * .17, -.5, 0, Math.PI * 2);
+  c.fill();
+  // Thân quả
+  const g = c.createRadialGradient(-q.r * .34, -q.r * .36, 2, 0, 0, q.r * 1.22);
+  g.addColorStop(0, "rgba(255,255,255,.6)");
+  g.addColorStop(.38, q.mau);
+  g.addColorStop(1, "rgba(0,0,0,.3)");
+  c.fillStyle = g;
+  c.beginPath(); c.arc(0, 0, q.r, 0, Math.PI * 2); c.fill();
+  c.strokeStyle = "rgba(255,255,255,.4)"; c.lineWidth = 2; c.stroke();
+  c.restore();
+  // Chữ vẽ THẲNG, không xoay theo quả — chữ mà quay lộn ngược thì đọc sao kịp.
+  c.font = "900 17px system-ui, -apple-system, Segoe UI, Roboto, sans-serif";
+  c.textAlign = "center"; c.textBaseline = "middle";
+  c.fillStyle = "rgba(0,0,0,.45)";
+  c.fillText(q.chu, q.x, q.y + 1.5);
+  c.fillStyle = "#fff";
+  c.fillText(q.chu, q.x, q.y);
+}
+
+function chemVeManh(c, m) {
+  c.save();
+  c.translate(m.x, m.y);
+  c.rotate(m.goc);
+  c.globalAlpha = Math.max(0, Math.min(1, m.doi));
+  // Nửa quả: cắt theo đúng góc lưỡi dao đi qua.
+  c.beginPath();
+  c.arc(0, 0, m.r, m.dao, m.dao + Math.PI, m.ben < 0);
+  c.closePath();
+  const g = c.createRadialGradient(0, 0, 2, 0, 0, m.r * 1.2);
+  g.addColorStop(0, "rgba(255,255,255,.66)");
+  g.addColorStop(.42, m.mau);
+  g.addColorStop(1, "rgba(0,0,0,.3)");
+  c.fillStyle = g; c.fill();
+  // Mặt cắt sáng màu, nhìn ra ruột quả
+  c.strokeStyle = "rgba(255,255,255,.85)"; c.lineWidth = 3; c.stroke();
+  c.globalAlpha = 1;
+  c.restore();
+}
+
+/** Vệt chém: nối các điểm ngón tay vừa đi qua, càng cũ càng mảnh và mờ. */
+function chemVeVet(c) {
+  const n = CHEM.vet.length;
+  if (n < 2) return;
+  const nay = performance.now();
+  for (let i = 1; i < n; i++) {
+    const a = CHEM.vet[i - 1], b = CHEM.vet[i];
+    const con = 1 - (nay - b.t) / CHEM_VET_DOI;
+    if (con <= 0) continue;
+    c.strokeStyle = CHEM.mau.vet;
+    c.globalAlpha = con * .85;
+    c.lineWidth = 2 + con * 9;
+    c.lineCap = "round";
+    c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke();
+    // Lõi trắng cho ra ánh thép
+    c.strokeStyle = "#fff";
+    c.globalAlpha = con * .6;
+    c.lineWidth = 1 + con * 3;
+    c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke();
+  }
+  c.globalAlpha = 1;
+}
+
+/* ---- Vòng chạy ---- */
+function chemChay(nay) {
+  if (!CHEM.mo) return;
+  const dt = Math.min(50, nay - CHEM.truoc) / 1000;
+  CHEM.truoc = nay;
+  const c = CHEM.ctx;
+  c.clearRect(0, 0, CHEM.W, CHEM.H);
+  const dangChay = $("#chemHet").hidden;
+
+  // Quả bay
+  for (const q of CHEM.qua) {
+    if (!q.song) {
+      if (!dangChay || CHEM.cho) continue;
+      q.cho -= dt;
+      if (q.cho <= 0) chemNem(q);
+      continue;
+    }
+    q.vy += CHEM_G * dt;
+    q.x += q.vx * dt;
+    q.y += q.vy * dt;
+    q.goc += q.xoay * dt;
+    // Chạm mép thì nảy vào, đỡ mất hút ra ngoài màn
+    if (q.x < q.r && q.vx < 0) { q.x = q.r; q.vx = -q.vx * .7; }
+    if (q.x > CHEM.W - q.r && q.vx > 0) { q.x = CHEM.W - q.r; q.vx = -q.vx * .7; }
+    // Rơi hết xuống đáy thì tung lại, không phạt gì — hụt tay là chuyện thường
+    if (q.y - q.r > CHEM.H + 20) { q.song = false; q.cho = .5 + Math.random() * .5; }
+    chemVeQua(c, q);
+  }
+
+  // Nửa quả rơi
+  for (const m of CHEM.manh.slice()) {
+    m.vy += CHEM_G * dt;
+    m.x += m.vx * dt; m.y += m.vy * dt;
+    m.goc += m.xoay * dt;
+    m.doi -= dt * .7;
+    if (m.doi <= 0 || m.y - m.r > CHEM.H + 40) { CHEM.manh.splice(CHEM.manh.indexOf(m), 1); continue; }
+    chemVeManh(c, m);
+  }
+
+  // Nước quả / mảnh pháo
+  for (const h of CHEM.hat.slice()) {
+    h.vy += CHEM_G * dt;
+    h.x += h.vx * dt; h.y += h.vy * dt;
+    h.doi -= dt * 1.3;
+    if (h.doi <= 0) { CHEM.hat.splice(CHEM.hat.indexOf(h), 1); continue; }
+    c.globalAlpha = Math.max(0, h.doi);
+    c.fillStyle = h.mau;
+    c.beginPath(); c.arc(h.x, h.y, h.r, 0, Math.PI * 2); c.fill();
+    c.globalAlpha = 1;
+  }
+
+  // Vệt chém: bỏ điểm đã quá hạn rồi mới vẽ
+  const han = nay - CHEM_VET_DOI;
+  while (CHEM.vet.length && CHEM.vet[0].t < han) CHEM.vet.shift();
+  chemVeVet(c);
+
+  CHEM.raf = requestAnimationFrame(chemChay);
+}
+
+/* ---- Vuốt để chém ---- */
+/** Đoạn thẳng ngón tay vừa quét có cắt qua quả không. */
+function chemCham(q, x1, y1, x2, y2) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const d2 = dx * dx + dy * dy;
+  let t = d2 ? ((q.x - x1) * dx + (q.y - y1) * dy) / d2 : 0;
+  t = clamp(t, 0, 1);
+  const gx = x1 + dx * t, gy = y1 + dy * t;
+  return (gx - q.x) ** 2 + (gy - q.y) ** 2 <= q.r * q.r;
+}
+
+function chemQuet(x1, y1, x2, y2) {
+  if (CHEM.cho) return;
+  // Vuốt quá ngắn thì không tính là chém, chỉ là chạm hụt.
+  if ((x2 - x1) ** 2 + (y2 - y1) ** 2 < 36) return;
+  const dao = Math.atan2(y2 - y1, x2 - x1);
+  for (const q of CHEM.qua.slice()) {
+    if (!q.song || !chemCham(q, x1, y1, x2, y2)) continue;
+    chemTiengChem();
+    q.song = false;
+    if (q.dung) return chemTrungDung(q, dao);
+    chemTrungSai(q);
+    return;
+  }
+}
+
+function chemGanTay() {
+  const cv = $("#chemTroi");
+  CHEM.cv = cv;
+  CHEM.ctx = cv.getContext("2d");
+  const toa = e => {
+    const r = cv.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+  cv.addEventListener("pointerdown", e => {
+    CHEM.keo = true;
+    try { cv.setPointerCapture(e.pointerId); } catch { /* thôi */ }
+    const p = toa(e);
+    CHEM.vet = [{ x: p.x, y: p.y, t: performance.now() }];
+  });
+  cv.addEventListener("pointermove", e => {
+    if (!CHEM.keo) return;
+    const p = toa(e);
+    const cuoi = CHEM.vet[CHEM.vet.length - 1];
+    CHEM.vet.push({ x: p.x, y: p.y, t: performance.now() });
+    if (CHEM.vet.length > 24) CHEM.vet.shift();
+    if (cuoi) chemQuet(cuoi.x, cuoi.y, p.x, p.y);
+  });
+  const tha = () => { CHEM.keo = false; };
+  cv.addEventListener("pointerup", tha);
+  cv.addEventListener("pointercancel", tha);
+  cv.addEventListener("pointerleave", tha);
+}
+
+/* ---- Mở / đóng ---- */
+function chemMo(xong) {
+  const v = $("#chemView");
+  if (!v) { xong && xong(); return; }
+  if (!banKhoCau().length) { toast("Chưa đủ câu để chơi ở trình độ này."); xong && xong(); return; }
+  chemSauKhiDong = xong || null;
+  v.hidden = false;
+  document.body.style.overflow = "hidden";
+  CHEM.mo = true;
+  CHEM.diem = 0; CHEM.mang = CHEM_MANG; CHEM.vong = 0;
+  CHEM.qua = []; CHEM.manh = []; CHEM.hat = []; CHEM.vet = [];
+  $("#chemHet").hidden = true;
+  $("#chemKeu").hidden = true;
+  chemLayMau();
+  chemCoCanvas();
+  chemVongMoi();
+  CHEM.truoc = performance.now();
+  cancelAnimationFrame(CHEM.raf);
+  CHEM.raf = requestAnimationFrame(chemChay);
+}
+
+function chemDong() {
+  cancelAnimationFrame(CHEM.raf);
+  clearTimeout(chemDocHen);
+  CHEM.mo = false;
+  CHEM.keo = false;
+  stopSpeak();
+  $("#chemView").hidden = true;
+  $("#chemHet").hidden = true;
+  const conMo = !$("#player").hidden || !$("#result").hidden;
+  document.body.style.overflow = conMo ? "hidden" : "";
+  const f = chemSauKhiDong;
+  chemSauKhiDong = null;
+  f && f();
+}
+
+$("#btnChemDong").addEventListener("click", chemDong);
+$("#chemHetVe").addEventListener("click", chemDong);
+$("#chemHetLai").addEventListener("click", () => {
+  CHEM.diem = 0; CHEM.mang = CHEM_MANG; CHEM.vong = 0;
+  CHEM.qua = []; CHEM.manh = []; CHEM.hat = []; CHEM.vet = [];
+  $("#chemHet").hidden = true;
+  chemVongMoi();
+});
+$("#chemNghe").addEventListener("click", () => { if (CHEM.de) speak(CHEM.de.en, false, "en-GB"); });
+chemGanTay();
+
+window.addEventListener("resize", () => {
+  if (!CHEM.mo) return;
+  chemCoCanvas();
+  CHEM.qua.forEach(q => { q.x = clamp(q.x, q.r, Math.max(q.r, CHEM.W - q.r)); });
 });
 
 /* ---------- 24. Khởi động ---------- */

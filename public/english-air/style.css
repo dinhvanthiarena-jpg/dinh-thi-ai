@@ -2405,10 +2405,11 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 .ban-bar, .ban-troi-boc, .ban-duoi { width: 100%; max-width: 560px; margin-inline: auto; }
 .ban-troi { display: block; width: 100%; height: 100%; touch-action: none; }
 
-/* MON.L đứng dưới góc trời, coi như người cầm cung. Đặt lệch sang trái để không
-   che mất cây cung ở giữa, và không chắn đường mũi tên bay lên. */
-.ban-ava { position: absolute; left: var(--s3); bottom: var(--s2);
-  width: 78px; height: 78px; pointer-events: none;
+/* MON.L ngồi chính giữa trên đầu màn chơi — thầy chốt chỗ này. Dùng margin âm
+   để căn giữa chứ không dùng transform, vì transform đã dành cho hoạt hình
+   nhảy/lắc rồi, đặt cả hai vào một chỗ là đá nhau. */
+.ban-ava { position: absolute; left: 50%; margin-left: -41px; top: var(--s2);
+  width: 82px; height: 82px; pointer-events: none;
   filter: drop-shadow(0 6px 14px rgba(30,16,48,.28));
   animation: banAvaTho 3.2s ease-in-out infinite; }
 .ban-ava svg, .ban-ava img { width: 100%; height: 100%; }
@@ -2434,8 +2435,9 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   80%      { transform: translateX(-4px) rotate(-4deg); }
 }
 
-/* Chữ báo đúng/sai nảy lên giữa trời — to, đọc lướt là biết, không cần dừng lại đọc. */
-.ban-keu { position: absolute; left: 50%; top: 34%; transform: translate(-50%, -50%);
+/* Chữ báo đúng/sai nảy lên giữa trời — to, đọc lướt là biết, không cần dừng lại đọc.
+   Đặt dưới chỗ MON.L ngồi một quãng để hai thứ không đè lên nhau. */
+.ban-keu { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%);
   margin: 0; font-size: 2.6rem; font-weight: 900; letter-spacing: 1px;
   text-shadow: 0 4px 14px rgba(30,16,48,.22); pointer-events: none;
   animation: banKeu 900ms var(--e) both; }
@@ -2524,6 +2526,12 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   text-shadow: 0 4px 14px rgba(30,16,48,.28);
   transform: translate(-50%, -50%);
   transition: left 620ms var(--e), top 620ms var(--e), font-size 620ms var(--e); }
+
+/* Tấm mời chơi chèn giữa phần dạy, ngay trước Góc văn hoá. */
+.choi-moi { padding: var(--s5) var(--s4); border-radius: var(--r3);
+  background: var(--brand-soft); text-align: center; }
+.choi-moi-sub { margin: 0 0 var(--s4); color: var(--brand-ink);
+  font-size: 1rem; font-weight: 600; line-height: 1.5; }
 
 /* Nút mở trò chơi ở trang kết quả — cùng bộ màu app, chỉ khác nút "Tiếp tục"
    ở chỗ nó là nút viền chứ không phải nút đặc, nên không bấm nhầm. */
