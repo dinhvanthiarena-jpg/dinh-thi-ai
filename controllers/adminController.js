@@ -587,7 +587,23 @@ exports.aaiAdsPage = async (req, res) => {
       loadError = e.message;
     }
   }
-  res.render('admin/aai-ads', { title: 'Tạo chiến dịch A-AI Ads', connected, adAccounts, pages, loadError });
+  const websiteTargets = aaiAds.loadWebsiteTargets();
+  const postingQueue = aaiAds.loadPostingQueue();
+  const postingLog = aaiAds.loadPostingLog();
+  const postingFreq = aaiAds.getPostingFreqSettings();
+  const aiAutoPostConfig = aaiAds.getAiAutoPostConfig();
+  res.render('admin/aai-ads', {
+    title: 'Tạo chiến dịch A-AI Ads',
+    connected,
+    adAccounts,
+    pages,
+    loadError,
+    websiteTargets,
+    postingQueue,
+    postingLog,
+    postingFreq,
+    aiAutoPostConfig,
+  });
 };
 
 exports.aaiAdsConnect = (req, res) => {
@@ -664,6 +680,80 @@ exports.aaiAdsCreateCampaign = async (req, res) => {
       lifetimeDays: body.lifetimeDays ? parseInt(body.lifetimeDays, 10) : null,
       creative,
     });
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+// ---------------- A-AI Ads — Đăng bài tự động ----------------
+// Port từ tool desktop fb-ads-manager, chạy trên server luôn bật — xem ghi
+// chú kiến trúc ở đầu services/aaiAdsService.js.
+
+exports.aaiAdsWebsiteTargetAdd = (req, res) => {
+  try {
+    const { name, apiUrl, authToken } = req.body;
+    if (!name || !apiUrl) throw new Error('Vui lòng nhập tên và địa chỉ API.');
+    const target = aaiAds.addWebsiteTarget({ name, apiUrl, authToken: authToken || undefined });
+    res.json(target);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsWebsiteTargetDelete = (req, res) => {
+  aaiAds.deleteWebsiteTarget(req.params.id);
+  res.json({ ok: true });
+};
+
+exports.aaiAdsSaveFrequency = (req, res) => {
+  const { postsPerDay, minGapMinutes } = req.body;
+  aaiAds.savePostingFreqSettings(parseInt(postsPerDay, 10) || 3, parseInt(minGapMinutes, 10) || 60);
+  res.json({ ok: true });
+};
+
+exports.aaiAdsQueueAdd = (req, res) => {
+  try {
+    const item = aaiAds.addToPostingQueue(req.body);
+    res.json(item);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsQueueDelete = (req, res) => {
+  aaiAds.deleteFromPostingQueue(req.params.id);
+  res.json({ ok: true });
+};
+
+exports.aaiAdsQueuePublishNow = async (req, res) => {
+  try {
+    const item = await aaiAds.publishQueueItemNow(req.params.id);
+    res.json(item);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsGetPostingLog = (req, res) => {
+  res.json(aaiAds.loadPostingLog());
+};
+
+exports.aaiAdsSaveAutoPostConfig = (req, res) => {
+  try {
+    aaiAds.saveAiAutoPostConfig(req.body);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+// Điểm "cửa" chính để Claude (qua trình duyệt) hoặc thầy tự bấm — chạy NGAY cả
+// hàng chờ thủ công đang tới hạn lẫn AI tự động đăng bài, không cần chờ bộ
+// đếm giờ nền (5 phút/1 giờ).
+exports.aaiAdsRunPostingNow = async (req, res) => {
+  try {
+    const result = await aaiAds.runAllPostingNow();
     res.json(result);
   } catch (e) {
     res.status(400).json({ error: e.message });

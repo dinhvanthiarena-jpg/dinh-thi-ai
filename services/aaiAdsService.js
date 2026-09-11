@@ -15,6 +15,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const GRAPH_VERSION = 'v21.0';
 const CLAUDE_MODEL = 'claude-sonnet-5';
@@ -139,11 +140,421 @@ async function uploadImage(adAccountId, base64Data) {
   return { hash: images[firstKey].hash, url: images[firstKey].url };
 }
 
+// ---------------- Đăng bài tự động (port từ fb-ads-manager/main.js) ----------------
+// Khác với tool desktop (phải mở app mới chạy tự động hóa nền), service này
+// chạy TRONG server luôn bật của web dinh-thi-ai — nên bộ đếm giờ AI tự động
+// đăng bài / xử lý hàng chờ chạy độc lập, không cần ai mở trang admin.
+// Đây cũng là "cửa" để Claude (qua trình duyệt) tự vào đăng bài thay vì chỉ
+// hướng dẫn thầy bấm trong app desktop — thầy yêu cầu đồng bộ 2026-09-12.
+
+const WEBSITE_TARGETS_PATH = path.join(__dirname, '..', 'data', 'aai-ads-website-targets.json');
+const POSTING_QUEUE_PATH = path.join(__dirname, '..', 'data', 'aai-ads-posting-queue.json');
+const POSTING_LOG_PATH = path.join(__dirname, '..', 'data', 'aai-ads-posting-log.json');
+
+function readJsonArray(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (e) {
+    return [];
+  }
+}
+function writeJsonArray(filePath, arr) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, JSON.stringify(arr, null, 2));
+}
+
+function loadWebsiteTargets() {
+  return readJsonArray(WEBSITE_TARGETS_PATH);
+}
+function saveWebsiteTargets(list) {
+  writeJsonArray(WEBSITE_TARGETS_PATH, list);
+}
+function addWebsiteTarget(target) {
+  const list = loadWebsiteTargets();
+  target.id = crypto.randomUUID();
+  list.push(target);
+  saveWebsiteTargets(list);
+  return target;
+}
+function deleteWebsiteTarget(id) {
+  saveWebsiteTargets(loadWebsiteTargets().filter((t) => t.id !== id));
+}
+
+function loadPostingQueue() {
+  return readJsonArray(POSTING_QUEUE_PATH);
+}
+function savePostingQueue(list) {
+  writeJsonArray(POSTING_QUEUE_PATH, list);
+}
+function loadPostingLog() {
+  return readJsonArray(POSTING_LOG_PATH);
+}
+function appendPostingLog(entries) {
+  const log = [...entries, ...loadPostingLog()].slice(0, 300);
+  writeJsonArray(POSTING_LOG_PATH, log);
+}
+
+function getPostingFreqSettings() {
+  const config = loadConfig();
+  return { postsPerDay: config.postFreqPerDay || 3, minGapMinutes: config.postFreqGapMinutes || 60 };
+}
+function savePostingFreqSettings(postsPerDay, minGapMinutes) {
+  saveConfig({ postFreqPerDay: postsPerDay, postFreqGapMinutes: minGapMinutes });
+}
+
+function targetPostCountToday(targetId) {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  return loadPostingLog().filter((e) => e.targetId === targetId && e.status === 'posted' && e.time >= startOfToday.getTime()).length;
+}
+function minutesSinceLastPost(targetId) {
+  const last = loadPostingLog().find((e) => e.targetId === targetId && e.status === 'posted');
+  if (!last) return Infinity;
+  return (Date.now() - last.time) / 60000;
+}
+function canPostToTargetNow(targetId, freq) {
+  if (targetPostCountToday(targetId) >= freq.postsPerDay) return false;
+  if (minutesSinceLastPost(targetId) < freq.minGapMinutes) return false;
+  return true;
+}
+
+// Đăng 1 bài (chữ + ảnh tùy chọn) lên Page/Group thật — khác publishPageLinkPost
+// ở trên (dành riêng cho tạo Ad), hàm này dùng cho đăng bài thường.
+async function publishToTarget(pageToken, targetId, targetType, item) {
+  const caption = item.link ? `${item.message || ''}\n\n${item.link}` : item.message || '';
+  try {
+    let result;
+    if (item.imageBase64) {
+      const buffer = Buffer.from(item.imageBase64, 'base64');
+      const form = new FormData();
+      form.append('caption', caption);
+      form.append('access_token', pageToken);
+      form.append('source', new Blob([buffer]), 'image.jpg');
+      const res = await fetch(`https://graph.facebook.com/${GRAPH_VERSION}/${targetId}/photos`, { method: 'POST', body: form });
+      result = await res.json();
+      if (result.error) throw new Error(result.error.message);
+    } else {
+      result = await graphRequest(`/${targetId}/feed`, 'POST', { message: caption, access_token: pageToken });
+    }
+    return { ok: true, postId: result.post_id || result.id };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+// Đăng lên 1 website tùy ý qua API — cùng chuẩn payload JSON với tool desktop
+// ({title, content, link, imageBase64}) để 1 website chỉ cần code 1 endpoint
+// dùng chung được cho cả 2 nơi.
+async function postToWebsite(target, item) {
+  try {
+    const res = await fetch(target.apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(target.authToken ? { Authorization: `Bearer ${target.authToken}` } : {}),
+      },
+      body: JSON.stringify({
+        title: item.headline || (item.message || '').slice(0, 60),
+        content: item.message || '',
+        link: item.link || null,
+        imageBase64: item.imageBase64 || null,
+      }),
+    });
+    if (res.ok) return { ok: true };
+    const text = await res.text().catch(() => '');
+    return { ok: false, error: `HTTP ${res.status}: ${text.slice(0, 200)}` };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+async function downloadImageAsBase64(imgUrl) {
+  const res = await fetch(imgUrl);
+  if (!res.ok) throw new Error(`Tải ảnh thất bại: HTTP ${res.status}`);
+  const buf = Buffer.from(await res.arrayBuffer());
+  return buf.toString('base64');
+}
+
+// Tự tìm 1 ảnh stock miễn phí khớp chủ đề — dùng LẠI process.env.PIXABAY_API_KEY
+// đã có sẵn trên server này cho newsFactoryService (xem
+// project_dinh-thi-ai_newsfactory_images), KHÔNG cần thêm Pexels key riêng
+// như bên tool desktop vì server đã có sẵn nguồn ảnh tương đương.
+async function findStockPhotoBase64(query) {
+  const apiKey = process.env.PIXABAY_API_KEY;
+  if (!apiKey) return null;
+  try {
+    const url = `https://pixabay.com/api/?key=${apiKey}&q=${encodeURIComponent(query)}&image_type=photo&safesearch=true&per_page=5`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const hit = (data.hits || [])[0];
+    if (!hit) return null;
+    return await downloadImageAsBase64(hit.largeImageURL || hit.webformatURL);
+  } catch (e) {
+    return null;
+  }
+}
+
+// ---- Hàng chờ đăng bài thủ công ----
+
+function addToPostingQueue(item) {
+  const queue = loadPostingQueue();
+  item.id = crypto.randomUUID();
+  item.status = 'pending';
+  item.createdAt = Date.now();
+  item.targetResults = {};
+  queue.unshift(item);
+  savePostingQueue(queue);
+  return item;
+}
+function deleteFromPostingQueue(id) {
+  savePostingQueue(loadPostingQueue().filter((i) => i.id !== id));
+}
+async function publishQueueItemNow(id) {
+  const queue = loadPostingQueue();
+  const item = queue.find((i) => i.id === id);
+  if (!item) throw new Error('Không tìm thấy bài trong hàng chờ.');
+  item.scheduledTime = 0;
+  savePostingQueue(queue);
+  await processPostingQueue();
+  return loadPostingQueue().find((i) => i.id === id);
+}
+
+async function processPostingQueue() {
+  const config = loadConfig();
+  if (!config.accessToken) return;
+  const queue = loadPostingQueue();
+  if (!queue.length) return;
+  const freq = getPostingFreqSettings();
+  const newLogEntries = [];
+  let changed = false;
+
+  for (const item of queue) {
+    if (item.status === 'posted' || item.status === 'cancelled') continue;
+    if (item.scheduledTime && item.scheduledTime > Date.now()) continue;
+
+    item.targetResults = item.targetResults || {};
+    let pageToken;
+    try {
+      pageToken = await getPageAccessToken(item.pageId);
+    } catch (e) {
+      continue; // thử lại lượt sau
+    }
+
+    const allTargets = [
+      { id: item.pageId, name: item.pageName, type: 'page' },
+      ...(item.groupTargets || []).map((g) => ({ ...g, type: 'group' })),
+      ...(item.websiteTargets || []).map((w) => ({ ...w, type: 'website' })),
+    ];
+
+    for (const target of allTargets) {
+      if (item.targetResults[target.id] && item.targetResults[target.id].status === 'posted') continue;
+      if (!canPostToTargetNow(target.id, freq)) continue;
+      const result = target.type === 'website' ? await postToWebsite(target, item) : await publishToTarget(pageToken, target.id, target.type, item);
+      changed = true;
+      if (result.ok) {
+        item.targetResults[target.id] = { status: 'posted' };
+        newLogEntries.push({ time: Date.now(), targetId: target.id, targetName: target.name, status: 'posted', source: 'manual-queue' });
+      } else if (target.type === 'group') {
+        item.targetResults[target.id] = { status: 'needs_manual', error: result.error };
+        newLogEntries.push({ time: Date.now(), targetId: target.id, targetName: target.name, status: 'needs_manual', error: result.error, source: 'manual-queue' });
+      } else {
+        item.targetResults[target.id] = { status: 'error', error: result.error };
+        newLogEntries.push({ time: Date.now(), targetId: target.id, targetName: target.name, status: 'error', error: result.error, source: 'manual-queue' });
+      }
+    }
+
+    const allHandled = allTargets.every((t) => ['posted', 'needs_manual', 'error'].includes((item.targetResults[t.id] || {}).status));
+    if (allHandled) item.status = 'posted';
+  }
+
+  if (changed) savePostingQueue(queue);
+  if (newLogEntries.length) appendPostingLog(newLogEntries);
+}
+
+// ---- AI tự động đăng bài hàng ngày ----
+
+function getAiAutoPostConfig() {
+  const config = loadConfig();
+  return {
+    enabled: !!config.aiAutoPostEnabled,
+    topic: config.aiAutoPostTopic || '',
+    pageIds: config.aiAutoPostPageIds || [],
+    pageNames: config.aiAutoPostPageNames || [],
+    link: config.aiAutoPostLink || '',
+    websiteTargetIds: config.aiAutoPostWebsiteTargetIds || [],
+    groupIds: config.aiAutoPostGroupIds || [],
+  };
+}
+function saveAiAutoPostConfig(partial) {
+  saveConfig({
+    aiAutoPostEnabled: !!partial.enabled,
+    aiAutoPostTopic: partial.topic || '',
+    aiAutoPostPageIds: partial.pageIds || [],
+    aiAutoPostPageNames: partial.pageNames || [],
+    aiAutoPostLink: partial.link || '',
+    aiAutoPostWebsiteTargetIds: partial.websiteTargetIds || [],
+    aiAutoPostGroupIds: partial.groupIds || [],
+  });
+}
+
+async function runAiAutoPost() {
+  const config = loadConfig();
+  if (!config.aiAutoPostEnabled) return;
+  if (!config.accessToken) return;
+  const pageIds = config.aiAutoPostPageIds || [];
+  const pageNames = config.aiAutoPostPageNames || [];
+  if (!config.aiAutoPostTopic || !pageIds.length) return;
+
+  const freq = getPostingFreqSettings();
+  const websiteTargets = loadWebsiteTargets().filter((t) => (config.aiAutoPostWebsiteTargetIds || []).includes(t.id));
+  const groupTargets = (config.aiAutoPostGroupIds || []).map((id) => ({ id, type: 'group', name: `Group ${id}` }));
+  const pageTargets = pageIds.map((id, i) => ({ id, type: 'page', name: pageNames[i] || 'Fanpage' }));
+  const allTargets = [...pageTargets, ...websiteTargets.map((w) => ({ ...w, type: 'website' })), ...groupTargets];
+
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const triedTodayIds = new Set(
+    loadPostingLog()
+      .filter((e) => e.source === 'ai-autopost' && e.status === 'needs_manual' && e.time >= startOfToday.getTime())
+      .map((e) => e.targetId)
+  );
+  const dueTargets = allTargets.filter((t) => !triedTodayIds.has(t.id) && canPostToTargetNow(t.id, freq));
+  if (!dueTargets.length) return;
+
+  const recentTitles = loadPostingLog()
+    .filter((e) => e.source === 'ai-autopost' && e.articleTitle)
+    .slice(0, 5)
+    .map((e) => `- ${e.articleTitle}`)
+    .join('\n');
+
+  // Tự tra cứu web (web_search tool của Claude API) để bài viết dựa trên tin
+  // tức/xu hướng THẬT mới nhất — nhưng bắt buộc viết lại 100% văn phong riêng,
+  // không copy nguyên câu của nguồn tìm được (tránh bản quyền + tránh bị
+  // Google coi là nội dung "biên soạn lại" và hạ thứ hạng).
+  let fbCaption, articleTitle, articleContent;
+  try {
+    const system = `Bạn là chuyên gia content marketing kiêm biên tập viên công nghệ. Dùng công cụ tìm kiếm web để tra cứu tin tức/bài viết MỚI NHẤT, nổi bật nhất về chủ đề được giao. Sau đó TỰ VIẾT một bài hoàn toàn mới bằng văn phong, cách diễn đạt của riêng bạn — dựa trên thông tin/xu hướng tìm được để bài viết cập nhật và có giá trị thật, nhưng TUYỆT ĐỐI không sao chép nguyên câu/đoạn văn từ bất kỳ nguồn nào.
+Trả lời CHỈ bằng 1 khối JSON hợp lệ, không markdown, không code fence, không giải thích gì thêm, đúng format sau:
+{"articleTitle": "tiêu đề bài viết cho website, hấp dẫn, tối đa 70 ký tự", "articleContent": "nội dung bài viết đầy đủ cho website, khoảng 400-600 chữ, chia đoạn bằng \\n\\n, văn phong tự nhiên và có thông tin thật", "fbCaption": "bản tóm tắt ngắn 3-5 câu để đăng Facebook, hấp dẫn, có thể dùng 1-2 emoji phù hợp, tối đa 2-3 hashtag"}`;
+    const userMessage = `Chủ đề/sản phẩm/dịch vụ cần quảng bá: ${config.aiAutoPostTopic}${
+      recentTitles ? `\n\nCác bài đã viết gần đây (viết theo góc độ khác, đừng lặp lại ý/tiêu đề):\n${recentTitles}` : ''
+    }`;
+    const raw = await callClaude(system, userMessage, {
+      maxTokens: 2000,
+      tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }],
+    });
+    let parsed;
+    try {
+      const match = raw.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(match ? match[0] : raw);
+    } catch (e) {
+      parsed = {};
+    }
+    articleTitle = (parsed.articleTitle || '').trim() || config.aiAutoPostTopic.slice(0, 60);
+    articleContent = (parsed.articleContent || '').trim() || raw.trim();
+    fbCaption = (parsed.fbCaption || '').trim() || articleContent.slice(0, 300);
+  } catch (e) {
+    appendPostingLog([{ time: Date.now(), targetId: 'ai-autopost', targetName: 'AI tự động đăng bài', status: 'error', error: `Lỗi AI viết bài: ${e.message}`, source: 'ai-autopost' }]);
+    return;
+  }
+
+  const pageTokens = {};
+  const tokenErrorEntries = [];
+  for (let i = 0; i < pageIds.length; i++) {
+    try {
+      pageTokens[pageIds[i]] = await getPageAccessToken(pageIds[i]);
+    } catch (e) {
+      tokenErrorEntries.push({ time: Date.now(), targetId: pageIds[i], targetName: pageNames[i], status: 'error', error: `Không lấy được token Page: ${e.message}`, source: 'ai-autopost' });
+    }
+  }
+  if (tokenErrorEntries.length) appendPostingLog(tokenErrorEntries);
+  if (!Object.keys(pageTokens).length) return;
+  const primaryPageToken = pageTokens[pageIds[0]];
+
+  let imageBase64 = null;
+  try {
+    imageBase64 = await findStockPhotoBase64(articleTitle || config.aiAutoPostTopic);
+  } catch (e) {
+    imageBase64 = null;
+  }
+
+  const fbItem = { message: fbCaption, link: config.aiAutoPostLink || null, imageBase64 };
+  const websiteItem = { headline: articleTitle, message: articleContent, link: config.aiAutoPostLink || null, imageBase64 };
+  const newLogEntries = [];
+  for (const target of dueTargets) {
+    let result;
+    if (target.type === 'website') {
+      result = await postToWebsite(target, websiteItem);
+    } else if (target.type === 'group') {
+      result = primaryPageToken
+        ? await publishToTarget(primaryPageToken, target.id, target.type, fbItem)
+        : { ok: false, error: 'Không có token Page để đăng chéo Group.' };
+    } else {
+      const token = pageTokens[target.id];
+      result = token ? await publishToTarget(token, target.id, target.type, fbItem) : { ok: false, error: 'Không lấy được token cho Page này.' };
+    }
+    if (result.ok) {
+      newLogEntries.push({ time: Date.now(), targetId: target.id, targetName: target.name, status: 'posted', message: target.type === 'website' ? articleContent : fbCaption, articleTitle, source: 'ai-autopost' });
+    } else if (target.type === 'group') {
+      newLogEntries.push({ time: Date.now(), targetId: target.id, targetName: target.name, status: 'needs_manual', error: result.error, message: fbCaption, articleTitle, source: 'ai-autopost' });
+    } else {
+      newLogEntries.push({ time: Date.now(), targetId: target.id, targetName: target.name, status: 'error', error: result.error, source: 'ai-autopost' });
+    }
+  }
+  appendPostingLog(newLogEntries);
+}
+
+async function runAllPostingNow() {
+  const results = { queue: null, aiAutoPost: null };
+  try {
+    await processPostingQueue();
+    results.queue = 'ok';
+  } catch (e) {
+    results.queue = `Lỗi hàng chờ: ${e.message}`;
+  }
+  try {
+    await runAiAutoPost();
+    results.aiAutoPost = 'ok';
+  } catch (e) {
+    results.aiAutoPost = `Lỗi AI tự động: ${e.message}`;
+  }
+  return results;
+}
+
+// Server luôn bật (không như desktop phải mở app) — bộ đếm giờ chạy ngay khi
+// module được require lần đầu lúc server khởi động. Cờ schedulerStarted tránh
+// tạo interval nhân đôi nếu module vô tình bị require lại.
+let schedulerStarted = false;
+function startPostingScheduler() {
+  if (schedulerStarted) return;
+  schedulerStarted = true;
+  // .unref() để các interval này không giữ tiến trình Node sống mãi nếu file
+  // này lỡ bị require từ 1 script chạy-rồi-thoát (migration/seed...) — trên
+  // server thật (luôn chạy sẵn vì có request tới) thì không ảnh hưởng gì.
+  setInterval(() => {
+    processPostingQueue().catch((e) => console.error('[aaiAdsService] processPostingQueue error', e.message));
+  }, 5 * 60 * 1000).unref();
+  setInterval(() => {
+    runAiAutoPost().catch((e) => console.error('[aaiAdsService] runAiAutoPost error', e.message));
+  }, 60 * 60 * 1000).unref();
+}
+startPostingScheduler();
+
 // ---------------- AI plan (Claude) ----------------
 
-async function callClaude(system, userMessage) {
+async function callClaude(system, userMessage, options = {}) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('Chưa cấu hình ANTHROPIC_API_KEY trên server.');
+  const body = {
+    model: CLAUDE_MODEL,
+    max_tokens: options.maxTokens || 1500,
+    system,
+    messages: [{ role: 'user', content: userMessage }],
+  };
+  // options.tools cho phép truyền tool phía server của Claude (vd: web_search)
+  // — dùng khi cần AI tự tra cứu tin tức thay vì chỉ dựa kiến thức tĩnh.
+  if (options.tools) body.tools = options.tools;
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -151,16 +562,13 @@ async function callClaude(system, userMessage) {
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
     },
-    body: JSON.stringify({
-      model: CLAUDE_MODEL,
-      max_tokens: 1500,
-      system,
-      messages: [{ role: 'user', content: userMessage }],
-    }),
+    body: JSON.stringify(body),
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
-  return (data.content || []).map((b) => b.text).join('\n');
+  // Khi dùng tool (vd web_search), content còn có block không phải "text"
+  // (server_tool_use, web_search_tool_result...) — chỉ lấy block text.
+  return (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('\n');
 }
 
 async function suggestCampaignPlan({ product, monthlyBudget, goal, audience }) {
@@ -347,4 +755,20 @@ module.exports = {
   uploadImage,
   suggestCampaignPlan,
   createCampaignPlan,
+  // Đăng bài tự động
+  loadWebsiteTargets,
+  addWebsiteTarget,
+  deleteWebsiteTarget,
+  getPostingFreqSettings,
+  savePostingFreqSettings,
+  loadPostingQueue,
+  addToPostingQueue,
+  deleteFromPostingQueue,
+  publishQueueItemNow,
+  processPostingQueue,
+  loadPostingLog,
+  getAiAutoPostConfig,
+  saveAiAutoPostConfig,
+  runAiAutoPost,
+  runAllPostingNow,
 };

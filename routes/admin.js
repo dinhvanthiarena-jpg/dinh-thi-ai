@@ -57,6 +57,16 @@ router.post('/aai-ads/suggest-plan', adminController.aaiAdsSuggestPlan);
 router.get('/aai-ads/interests', adminController.aaiAdsInterests);
 router.post('/aai-ads/create-campaign', upload.single('image'), adminController.aaiAdsCreateCampaign);
 
+router.post('/aai-ads/website-targets', adminController.aaiAdsWebsiteTargetAdd);
+router.post('/aai-ads/website-targets/:id/delete', adminController.aaiAdsWebsiteTargetDelete);
+router.post('/aai-ads/frequency', adminController.aaiAdsSaveFrequency);
+router.post('/aai-ads/queue', adminController.aaiAdsQueueAdd);
+router.post('/aai-ads/queue/:id/delete', adminController.aaiAdsQueueDelete);
+router.post('/aai-ads/queue/:id/publish-now', adminController.aaiAdsQueuePublishNow);
+router.get('/aai-ads/posting-log', adminController.aaiAdsGetPostingLog);
+router.post('/aai-ads/autopost-config', adminController.aaiAdsSaveAutoPostConfig);
+router.post('/aai-ads/run-now', adminController.aaiAdsRunPostingNow);
+
 router.get('/chats', adminController.chatList);
 router.get('/chats/:channel/:sessionId', adminController.chatDetail);
 

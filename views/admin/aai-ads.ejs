@@ -160,6 +160,113 @@
         <button type="submit" class="btn-primary">🚀 Tạo chiến dịch (tạm dừng)</button>
         <div id="createMsg" class="text-sm mt-2"></div>
       </form>
+
+      <hr class="border-primary-100" />
+
+      <div class="card p-6">
+        <h2 class="font-semibold text-ink mb-1">4. Website nhận bài (tùy chọn)</h2>
+        <p class="text-sm text-muted mb-4">Website cần tự có sẵn 1 địa chỉ API nhận bài — tool gửi tới đó JSON dạng <code>{title, content, link, imageBase64}</code>. Thêm bao nhiêu website cũng được.</p>
+        <div class="grid grid-cols-3 gap-2 mb-2">
+          <input id="wtName" type="text" class="input" placeholder="Tên (VD: 3dvietpro)" />
+          <input id="wtApiUrl" type="text" class="input" placeholder="https://.../api/auto-post" />
+          <input id="wtAuthToken" type="text" class="input" placeholder="Mã xác thực (Bearer Token, nếu có)" />
+        </div>
+        <button id="addWebsiteTargetBtn" type="button" class="btn-outline">Thêm Website</button>
+        <p id="wtMsg" class="text-sm text-muted mt-2"></p>
+        <div id="websiteTargetsList" class="mt-3 space-y-1 text-sm">
+          <% websiteTargets.forEach(t => { %>
+            <div class="flex items-center justify-between bg-primary-50/40 rounded px-3 py-2" data-wt-row="<%= t.id %>">
+              <span><strong><%= t.name %></strong> — <%= t.apiUrl %></span>
+              <button type="button" class="text-rose-600 text-xs" data-wt-delete="<%= t.id %>">Xóa</button>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <h2 class="font-semibold text-ink mb-1">5. Đăng bài tự động</h2>
+        <p class="text-sm text-muted mb-4">Đăng lên Fanpage, Group, và cả Website chỉ trong 1 lần chạy — không cần đăng riêng từng nơi. Chạy trên server LUÔN BẬT, không cần mở trang admin này.</p>
+
+        <button id="runAllNowBtn" type="button" class="btn-primary mb-2">▶ Chạy đăng bài ngay</button>
+        <p id="runAllNowMsg" class="text-sm text-muted mb-4"></p>
+
+        <h3 class="font-semibold text-ink mb-2">Tần suất đăng (áp dụng chung mọi Page/Group/Website)</h3>
+        <div class="grid grid-cols-2 gap-3 mb-2 max-w-sm">
+          <div>
+            <label class="label">Số bài / ngày</label>
+            <input id="postFreqPerDay" type="text" class="input" value="<%= postingFreq.postsPerDay %>" />
+          </div>
+          <div>
+            <label class="label">Cách nhau tối thiểu (phút)</label>
+            <input id="postFreqGap" type="text" class="input" value="<%= postingFreq.minGapMinutes %>" />
+          </div>
+        </div>
+        <button id="savePostFreqBtn" type="button" class="btn-outline">Lưu tần suất</button>
+        <p id="postFreqMsg" class="text-sm text-muted mt-2 mb-4"></p>
+
+        <hr class="border-primary-100 my-4" />
+        <h3 class="font-semibold text-ink mb-2">🤖 AI tự động đăng bài hàng ngày</h3>
+        <p class="text-sm text-muted mb-2">AI tự tìm kiếm tin tức/xu hướng mới nhất về chủ đề, tự viết bài (bài dài cho Website, caption ngắn cho Facebook, không sao chép nguồn), tự tìm ảnh phù hợp, và tự đăng — không cần soạn tay.</p>
+        <label class="flex items-center gap-2 mb-3">
+          <input id="aiApEnabled" type="checkbox" <%= aiAutoPostConfig.enabled ? 'checked' : '' %> />
+          <span class="text-sm text-ink">Bật AI tự động đăng bài</span>
+        </label>
+        <label class="label">Chủ đề/sản phẩm/dịch vụ cần quảng bá</label>
+        <textarea id="aiApTopic" rows="2" class="input mb-3" placeholder="VD: Khóa học ứng dụng AI cho giáo viên"><%= aiAutoPostConfig.topic %></textarea>
+        <label class="label">Fanpage muốn đăng (giữ Ctrl để chọn nhiều)</label>
+        <select id="aiApPageIds" multiple class="input mb-3" style="height:110px;">
+          <% pages.forEach(p => { %>
+            <option value="<%= p.id %>" <%= aiAutoPostConfig.pageIds.includes(p.id) ? 'selected' : '' %>><%= p.name %></option>
+          <% }) %>
+        </select>
+        <label class="label">Website muốn đăng đồng thời (giữ Ctrl để chọn nhiều, tùy chọn)</label>
+        <select id="aiApWebsiteTargetIds" multiple class="input mb-3" style="height:80px;">
+          <% websiteTargets.forEach(t => { %>
+            <option value="<%= t.id %>" <%= aiAutoPostConfig.websiteTargetIds.includes(t.id) ? 'selected' : '' %>><%= t.name %></option>
+          <% }) %>
+        </select>
+        <label class="label">Link đính kèm (tùy chọn)</label>
+        <input id="aiApLink" type="text" class="input mb-3" value="<%= aiAutoPostConfig.link %>" placeholder="https://..." />
+        <label class="label">ID các Group muốn đăng chéo (mỗi dòng 1 ID, tùy chọn)</label>
+        <textarea id="aiApGroupIds" rows="2" class="input mb-3"><%= (aiAutoPostConfig.groupIds || []).join('\n') %></textarea>
+        <button id="saveAiApBtn" type="button" class="btn-outline">Lưu cấu hình</button>
+        <button id="runAiApNowBtn" type="button" class="btn-outline">Chạy thử ngay</button>
+        <p id="aiApMsg" class="text-sm text-muted mt-2"></p>
+
+        <hr class="border-primary-100 my-4" />
+        <h3 class="font-semibold text-ink mb-2">Hàng chờ đăng bài thủ công</h3>
+        <label class="label">Fanpage</label>
+        <select id="apPageId" class="input mb-2">
+          <% pages.forEach(p => { %>
+            <option value="<%= p.id %>"><%= p.name %></option>
+          <% }) %>
+        </select>
+        <label class="label">Nội dung</label>
+        <textarea id="apMessage" rows="3" class="input mb-2" placeholder="Nội dung bài đăng..."></textarea>
+        <label class="label">Link đính kèm (tùy chọn)</label>
+        <input id="apLink" type="text" class="input mb-2" placeholder="https://..." />
+        <button id="addToQueueBtn" type="button" class="btn-outline">Thêm vào hàng chờ</button>
+        <p id="apMsg" class="text-sm text-muted mt-2 mb-3"></p>
+        <div id="queueList" class="space-y-2 text-sm">
+          <% postingQueue.forEach(item => { %>
+            <div class="bg-primary-50/40 rounded px-3 py-2" data-queue-row="<%= item.id %>">
+              <p><strong><%= (item.message || '').slice(0, 80) %></strong></p>
+              <p class="text-xs text-muted">Trạng thái: <%= item.status %></p>
+              <button type="button" class="text-xs text-primary-700" data-queue-publish="<%= item.id %>">Đăng ngay</button>
+              <button type="button" class="text-xs text-rose-600 ml-2" data-queue-delete="<%= item.id %>">Xóa</button>
+            </div>
+          <% }) %>
+        </div>
+
+        <hr class="border-primary-100 my-4" />
+        <h3 class="font-semibold text-ink mb-2">Nhật ký hoạt động</h3>
+        <button id="loadPostingLogBtn" type="button" class="btn-outline mb-2">Tải nhật ký</button>
+        <div id="postingLogList" class="space-y-1 text-xs max-h-64 overflow-y-auto">
+          <% postingLog.slice(0, 30).forEach(e => { %>
+            <div><%= new Date(e.time).toLocaleString('vi-VN') %> — <%= e.targetName || e.targetId %> → <%= e.status === 'posted' ? 'Đã đăng' : ('Lỗi: ' + (e.error || '')) %></div>
+          <% }) %>
+        </div>
+      </div>
     <% } %>
   <% } %>
 </div>
@@ -280,5 +387,210 @@
       }
     });
   }
+
+  // ---------------- Đăng bài tự động ----------------
+
+  const addWebsiteTargetBtn = document.getElementById('addWebsiteTargetBtn');
+  if (addWebsiteTargetBtn) {
+    addWebsiteTargetBtn.addEventListener('click', async () => {
+      const msg = document.getElementById('wtMsg');
+      const name = document.getElementById('wtName').value.trim();
+      const apiUrl = document.getElementById('wtApiUrl').value.trim();
+      const authToken = document.getElementById('wtAuthToken').value.trim();
+      if (!name || !apiUrl) {
+        msg.textContent = 'Vui lòng nhập tên và địa chỉ API.';
+        return;
+      }
+      try {
+        const res = await fetch('/admin/aai-ads/website-targets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, apiUrl, authToken }),
+        });
+        const target = await res.json();
+        if (target.error) throw new Error(target.error);
+        msg.textContent = `Đã thêm "${name}".`;
+        const list = document.getElementById('websiteTargetsList');
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between bg-primary-50/40 rounded px-3 py-2';
+        row.dataset.wtRow = target.id;
+        row.innerHTML = `<span><strong>${target.name}</strong> — ${target.apiUrl}</span><button type="button" class="text-rose-600 text-xs" data-wt-delete="${target.id}">Xóa</button>`;
+        list.appendChild(row);
+        row.querySelector('[data-wt-delete]').addEventListener('click', () => deleteWebsiteTarget(target.id));
+        [document.getElementById('aiApWebsiteTargetIds')].forEach((sel) => {
+          const opt = document.createElement('option');
+          opt.value = target.id;
+          opt.textContent = target.name;
+          sel.appendChild(opt);
+        });
+        document.getElementById('wtName').value = '';
+        document.getElementById('wtApiUrl').value = '';
+        document.getElementById('wtAuthToken').value = '';
+      } catch (e) {
+        msg.textContent = `Lỗi: ${e.message}`;
+      }
+    });
+  }
+
+  async function deleteWebsiteTarget(id) {
+    await fetch(`/admin/aai-ads/website-targets/${id}/delete`, { method: 'POST' });
+    const row = document.querySelector(`[data-wt-row="${id}"]`);
+    if (row) row.remove();
+  }
+  document.querySelectorAll('[data-wt-delete]').forEach((btn) => {
+    btn.addEventListener('click', () => deleteWebsiteTarget(btn.dataset.wtDelete));
+  });
+
+  const savePostFreqBtn = document.getElementById('savePostFreqBtn');
+  if (savePostFreqBtn) {
+    savePostFreqBtn.addEventListener('click', async () => {
+      const msg = document.getElementById('postFreqMsg');
+      await fetch('/admin/aai-ads/frequency', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postsPerDay: document.getElementById('postFreqPerDay').value,
+          minGapMinutes: document.getElementById('postFreqGap').value,
+        }),
+      });
+      msg.textContent = 'Đã lưu.';
+    });
+  }
+
+  function selectedValues(id) {
+    return Array.from(document.getElementById(id).selectedOptions).map((o) => o.value).filter(Boolean);
+  }
+  function selectedTexts(id) {
+    return Array.from(document.getElementById(id).selectedOptions).map((o) => o.textContent);
+  }
+
+  async function saveAiAutoPostConfig() {
+    await fetch('/admin/aai-ads/autopost-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        enabled: document.getElementById('aiApEnabled').checked,
+        topic: document.getElementById('aiApTopic').value.trim(),
+        pageIds: selectedValues('aiApPageIds'),
+        pageNames: selectedTexts('aiApPageIds'),
+        link: document.getElementById('aiApLink').value.trim(),
+        websiteTargetIds: selectedValues('aiApWebsiteTargetIds'),
+        groupIds: document.getElementById('aiApGroupIds').value.split('\n').map((s) => s.trim()).filter(Boolean),
+      }),
+    });
+  }
+
+  const saveAiApBtn = document.getElementById('saveAiApBtn');
+  if (saveAiApBtn) {
+    saveAiApBtn.addEventListener('click', async () => {
+      await saveAiAutoPostConfig();
+      document.getElementById('aiApMsg').textContent = 'Đã lưu cấu hình.';
+    });
+  }
+
+  const runAiApNowBtn = document.getElementById('runAiApNowBtn');
+  if (runAiApNowBtn) {
+    runAiApNowBtn.addEventListener('click', async () => {
+      const msg = document.getElementById('aiApMsg');
+      msg.textContent = 'Đang lưu cấu hình và chạy thử...';
+      try {
+        await saveAiAutoPostConfig();
+        const res = await fetch('/admin/aai-ads/run-now', { method: 'POST' });
+        const result = await res.json();
+        if (result.error) throw new Error(result.error);
+        msg.textContent = 'Đã chạy xong — xem Nhật ký hoạt động bên dưới.';
+        loadPostingLog();
+      } catch (e) {
+        msg.textContent = `Lỗi: ${e.message}`;
+      }
+    });
+  }
+
+  const runAllNowBtn = document.getElementById('runAllNowBtn');
+  if (runAllNowBtn) {
+    runAllNowBtn.addEventListener('click', async () => {
+      const msg = document.getElementById('runAllNowMsg');
+      msg.textContent = 'Đang chạy...';
+      try {
+        const res = await fetch('/admin/aai-ads/run-now', { method: 'POST' });
+        const result = await res.json();
+        if (result.error) throw new Error(result.error);
+        msg.textContent = `Hàng chờ: ${result.queue === 'ok' ? 'đã xử lý xong' : result.queue}. AI tự động: ${result.aiAutoPost === 'ok' ? 'đã chạy xong' : result.aiAutoPost}.`;
+        loadPostingLog();
+        loadQueue();
+      } catch (e) {
+        msg.textContent = `Lỗi: ${e.message}`;
+      }
+    });
+  }
+
+  const addToQueueBtn = document.getElementById('addToQueueBtn');
+  if (addToQueueBtn) {
+    addToQueueBtn.addEventListener('click', async () => {
+      const msg = document.getElementById('apMsg');
+      const pageSelect = document.getElementById('apPageId');
+      const pageId = pageSelect.value;
+      const pageName = pageSelect.selectedOptions[0] ? pageSelect.selectedOptions[0].textContent : pageId;
+      const message = document.getElementById('apMessage').value.trim();
+      const link = document.getElementById('apLink').value.trim();
+      if (!pageId || !message) {
+        msg.textContent = 'Vui lòng chọn Fanpage và nhập nội dung.';
+        return;
+      }
+      msg.textContent = 'Đang thêm...';
+      try {
+        const res = await fetch('/admin/aai-ads/queue', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pageId, pageName, message, link: link || undefined, scheduledTime: 0 }),
+        });
+        const item = await res.json();
+        if (item.error) throw new Error(item.error);
+        msg.textContent = 'Đã thêm vào hàng chờ. Bấm "Chạy đăng bài ngay" ở trên để đăng lập tức, hoặc để tự chạy theo tần suất (kiểm tra mỗi 5 phút).';
+        document.getElementById('apMessage').value = '';
+        document.getElementById('apLink').value = '';
+        loadQueue();
+      } catch (e) {
+        msg.textContent = `Lỗi: ${e.message}`;
+      }
+    });
+  }
+
+  function loadQueue() {
+    // Tải lại nguyên trang là cách đơn giản/chắc chắn nhất để hiện đúng danh
+    // sách hàng chờ mới nhất (kèm cả select Fanpage/Website đã render sẵn từ server).
+    location.reload();
+  }
+  document.querySelectorAll('[data-queue-delete]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      await fetch(`/admin/aai-ads/queue/${btn.dataset.queueDelete}/delete`, { method: 'POST' });
+      const row = document.querySelector(`[data-queue-row="${btn.dataset.queueDelete}"]`);
+      if (row) row.remove();
+    });
+  });
+  document.querySelectorAll('[data-queue-publish]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = 'Đang đăng...';
+      await fetch(`/admin/aai-ads/queue/${btn.dataset.queuePublish}/publish-now`, { method: 'POST' });
+      loadPostingLog();
+      location.reload();
+    });
+  });
+
+  async function loadPostingLog() {
+    const res = await fetch('/admin/aai-ads/posting-log');
+    const log = await res.json();
+    const el = document.getElementById('postingLogList');
+    if (!el) return;
+    el.innerHTML = log.length
+      ? log
+          .slice(0, 30)
+          .map((e) => `<div>${new Date(e.time).toLocaleString('vi-VN')} — ${e.targetName || e.targetId} → ${e.status === 'posted' ? 'Đã đăng' : ('Lỗi: ' + (e.error || ''))}</div>`)
+          .join('')
+      : '<p class="text-muted">Chưa có nhật ký nào.</p>';
+  }
+  const loadPostingLogBtn = document.getElementById('loadPostingLogBtn');
+  if (loadPostingLogBtn) loadPostingLogBtn.addEventListener('click', loadPostingLog);
 })();
 </script>
