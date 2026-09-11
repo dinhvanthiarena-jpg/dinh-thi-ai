@@ -2425,16 +2425,37 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   padding: var(--s3) var(--s4) calc(var(--s2) + env(safe-area-inset-bottom));
   background: var(--card); border-top: 1px solid var(--line);
   box-shadow: 0 -8px 24px rgba(30,16,48,.08); text-align: center; }
-.ban-cau { margin: 0 0 2px; font-size: 1.62rem; font-weight: 800; color: var(--fg);
-  line-height: 1.3; }
+/* Chữ to hết cỡ mà vẫn không vỡ khung: clamp cho nó tự nhỏ lại trên máy hẹp,
+   câu tám chữ cũng không tràn thành ba hàng. */
+.ban-cau { margin: 0 0 2px; font-size: clamp(1.55rem, 7vw, 2.05rem); font-weight: 900;
+  color: var(--fg); line-height: 1.25; text-wrap: balance; }
 .ban-hang-viet { display: flex; align-items: center; justify-content: center;
   gap: var(--s2); margin-bottom: var(--s2); }
-.ban-viet { margin: 0; font-size: 1.06rem; color: var(--muted-fg); }
+.ban-viet { margin: 0; font-size: clamp(1rem, 4vw, 1.2rem); color: var(--muted-fg);
+  font-weight: 600; }
 
-/* Ô trống là nơi chữ bay về, nên phải nhìn ra ngay là "chỗ này còn thiếu". */
-.ban-o { display: inline-block; min-width: 84px; padding: 0 8px;
-  border-bottom: 3px solid var(--brand); color: var(--brand); }
-.ban-o.day { border-bottom-color: var(--ok); color: var(--ok); }
+/* Câu mới bay vào chứ không hiện đánh phịch — mắt bắt được là "sang câu khác rồi". */
+.ban-cau.vao { animation: banCauVao 520ms var(--e) both; }
+.ban-hang-viet.vao { animation: banCauVao 520ms var(--e) 90ms both; }
+@keyframes banCauVao {
+  0%   { opacity: 0; transform: translateY(16px) scale(.92); }
+  60%  { opacity: 1; transform: translateY(0) scale(1.03); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Ô trống là nơi chữ bay về, nên phải nhìn ra ngay là "chỗ này còn thiếu":
+   nó tự thở nhè nhẹ cho mắt dính vào đó. */
+.ban-o { display: inline-block; min-width: 92px; padding: 0 10px;
+  border-bottom: 4px solid var(--brand); color: var(--brand);
+  animation: banOTho 1.5s ease-in-out infinite; }
+@keyframes banOTho { 0%, 100% { opacity: 1; } 50% { opacity: .42; } }
+.ban-o.day { border-bottom-color: var(--ok); color: var(--ok);
+  animation: banODay 460ms var(--e) both; }
+@keyframes banODay {
+  0%   { transform: scale(1.35); }
+  55%  { transform: scale(.94); }
+  100% { transform: scale(1); }
+}
 
 .ban-nghe { flex: none; display: grid; place-items: center; width: 40px; height: 40px;
   border-radius: var(--rf); cursor: pointer;
@@ -2483,4 +2504,5 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 @media (prefers-reduced-motion: reduce) {
   .ban-keu { animation-duration: 1ms; }
   .ban-bay { transition-duration: 1ms; }
+  .ban-cau.vao, .ban-hang-viet.vao, .ban-o, .ban-o.day { animation: none; }
 }

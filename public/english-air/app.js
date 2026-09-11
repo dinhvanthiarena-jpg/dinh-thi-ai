@@ -6795,6 +6795,8 @@ function banVongMoi() {
   o.append(trong);
   if (de.sau) o.append(" " + de.sau);
   $("#banViet").textContent = de.vi;
+  banChayHieuUng(o);
+  banChayHieuUng($(".ban-hang-viet"));
 
   BAN.bong = de.chu.map((chu, i) =>
     banQua(chu, banGoc(chu) === de.goc, BAN.H * (.44 + i * .12) + Math.random() * 16));
@@ -6809,6 +6811,15 @@ function banVongMoi() {
   banDocHen = setTimeout(() => { if (BAN.mo) speak(de.en, false, "en-GB"); }, 420);
 }
 let banDocHen = null;
+
+/* Gỡ lớp rồi gắn lại thì hoạt hình mới chạy lại từ đầu. Chỉ gắn lớp không thì
+   lần thứ hai trở đi trình duyệt coi như "vẫn lớp cũ", chữ hiện đánh phịch. */
+function banChayHieuUng(n) {
+  if (!n) return;
+  n.classList.remove("vao");
+  void n.offsetWidth;
+  n.classList.add("vao");
+}
 
 function banVeMang() {
   // Vẽ tim bằng ký tự thường rồi tô màu bằng CSS: hình trái tim emoji mỗi máy
