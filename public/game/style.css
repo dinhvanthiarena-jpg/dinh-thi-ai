@@ -1521,6 +1521,127 @@ button:focus-visible,
   margin: 10px 0 0;
 }
 
+/* ==== Fruit-slice answer mode (chém hoa quả, lớp 1-3) ====
+   Trái cây đứng yên đung đưa nhẹ, vung tay/chuột vẽ một đường qua đúng quả
+   có số cần tìm là "chém" trúng — không cần thả đúng ô như kéo-thả, chỉ
+   cần đường vung quét qua. Dùng lại đúng hạ tầng dropSlot/selectAnswer/
+   burstParticles đã có ở chip/balloon để đồng bộ điểm-mạng-chuỗi. */
+.fruit-arena {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  justify-content: center;
+  width: 100%;
+  touch-action: none;
+  padding: 6px 0;
+}
+.fruit-slice-item {
+  position: relative;
+  width: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  animation: fruit-bob 2.6s ease-in-out infinite;
+  animation-delay: inherit;
+}
+@keyframes fruit-bob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-10px) rotate(3deg); }
+}
+.fruit-emoji {
+  font-size: 3.4rem;
+  line-height: 1;
+  filter: drop-shadow(0 6px 8px rgba(0,0,0,0.25));
+}
+.fruit-num {
+  margin-top: -6px;
+  padding: 3px 14px;
+  border-radius: var(--rf);
+  background: linear-gradient(155deg, var(--brand-fill), var(--brand-ink));
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.15rem;
+  box-shadow: var(--sh-1);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+.fruit-slice-item.reveal { animation: btn-pop-in 320ms ease-out backwards, fruit-bob 2.6s ease-in-out infinite 320ms; }
+.fruit-slice-item.sliced { pointer-events: none; }
+.fruit-slice-item.sliced .fruit-emoji,
+.fruit-slice-item.sliced .fruit-num {
+  animation: fruit-pop 380ms cubic-bezier(.2,.8,.3,1) forwards;
+}
+@keyframes fruit-pop {
+  0% { transform: scale(1); opacity: 1; }
+  30% { transform: scale(1.3) rotate(-8deg); opacity: 1; }
+  100% { transform: scale(0.3) rotate(14deg); opacity: 0; }
+}
+.fruit-slice-item.slice-correct::after,
+.fruit-slice-item.slice-wrong::after {
+  content: "";
+  position: absolute;
+  left: 6%;
+  top: 42%;
+  width: 88%;
+  height: 4px;
+  border-radius: 2px;
+  transform: rotate(-18deg) scaleX(0);
+  transform-origin: 0 50%;
+  animation: fruit-slash 220ms ease-out forwards;
+}
+.fruit-slice-item.slice-correct::after { background: var(--ok); box-shadow: 0 0 10px 2px var(--ok); }
+.fruit-slice-item.slice-wrong::after { background: var(--bad); box-shadow: 0 0 10px 2px var(--bad); }
+@keyframes fruit-slash {
+  0% { transform: rotate(-18deg) scaleX(0); opacity: 1; }
+  60% { transform: rotate(-18deg) scaleX(1); opacity: 1; }
+  100% { transform: rotate(-18deg) scaleX(1); opacity: 0; }
+}
+.slice-trail {
+  position: fixed;
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, var(--brand-fill), #fff);
+  transform-origin: 0 50%;
+  pointer-events: none;
+  z-index: 998;
+  animation: slice-trail-fade 260ms ease-out forwards;
+}
+@keyframes slice-trail-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.fruit-num-fly {
+  position: fixed;
+  z-index: 999;
+  transition: left 420ms cubic-bezier(.3,.6,.3,1), top 420ms cubic-bezier(.3,.6,.3,1), transform 420ms ease-in;
+  pointer-events: none;
+}
+.fruit-no-feedback {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.6rem;
+  color: var(--bad-ink);
+  pointer-events: none;
+  z-index: 1000;
+  animation: fruit-no-pop 700ms ease-out forwards;
+}
+@keyframes fruit-no-pop {
+  0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+  25% { transform: translate(-50%, -110%) scale(1.3); opacity: 1; }
+  100% { transform: translate(-50%, -220%) scale(1); opacity: 0; }
+}
+.drop-slot.filled-effect { animation: drop-slot-land 380ms ease-out; }
+@keyframes drop-slot-land {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
 /* ==== Confetti burst (correct/wrong reveals, balloon pops) ==== */
 .pop-particle {
   position: fixed;
@@ -1816,6 +1937,30 @@ button:focus-visible,
   100% { transform: translate(-50%, -130%) scale(1); opacity: 0; }
 }
 .archery-overlay-box { text-align: center; }
+.archery-balloon.dim { opacity: 0.5; }
+.archery-balloon.correct .balloon-num { color: var(--ok-ink); transform: scale(1.2); }
+.archery-balloon.wrong .balloon-num { color: var(--bad-ink); transform: scale(1.2); }
+.archery-balloon.wrong .balloon-body { background: linear-gradient(155deg, var(--bad), #b83338); }
+
+/* ==== Bắn cung ngay trong câu hỏi (skin trộn cùng bóng bay/kéo thả) ==== */
+.archery-skin-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.archery-skin-arena {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+  border-radius: var(--r3);
+  touch-action: none;
+  cursor: crosshair;
+  background: linear-gradient(180deg, rgba(124,74,32,0.06), transparent 40%);
+  box-shadow: inset 0 0 0 2px var(--line);
+}
 
 /* ==== Thinking dots ==== */
 .thinking-dots {

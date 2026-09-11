@@ -2678,11 +2678,6 @@
     $('archeryBow').style.transform = 'rotate(0deg)';
   });
 
-  $('btnOpenArchery').addEventListener('click', () => {
-    sfx.click();
-    showScreen('archery');
-    requestAnimationFrame(() => archeryStart());
-  });
   $('btnBackFromArchery').addEventListener('click', () => { sfx.click(); archeryStop(); showScreen('home'); });
   $('btnArcheryPlayAgain').addEventListener('click', () => { sfx.click(); archeryStart(); });
   $('btnArcheryHome').addEventListener('click', () => { sfx.click(); archeryStop(); showScreen('home'); });
@@ -3065,8 +3060,13 @@
     answersGrid.innerHTML = '';
     answersGrid.classList.toggle('drag-mode', !!q.dragMode);
     if (q.dragMode) {
-      q.answerSkin = Math.random() < 0.5 ? 'balloons' : 'chips';
+      // Lớp 1-3 có thêm "chém hoa quả" trong vòng xoay skin — lớp lớn hơn
+      // vẫn chỉ có bóng bay/kéo thả như cũ.
+      const skinPool = (state.grade && state.grade <= 3) ? ['balloons', 'chips', 'fruit', 'archery'] : ['balloons', 'chips'];
+      q.answerSkin = pick(skinPool);
       if (q.answerSkin === 'balloons') renderBalloons(q);
+      else if (q.answerSkin === 'fruit') renderFruitSlice(q);
+      else if (q.answerSkin === 'archery') renderArcherySkin(q);
       else renderDragChips(q);
       return;
     }
@@ -3324,6 +3324,337 @@
     });
   }
 
+  /* ---- Chém hoa quả answer mode (lớp 1-3): trái cây đứng yên đung đưa,
+   * vung tay/chuột vẽ một đường quét qua đúng quả có số cần tìm là "chém"
+   * trúng luôn, không cần nhấc tay lên. Chém đúng: số bay về ô trống của
+   * bài toán. Chém sai: hiện chữ "No" và nổ đùng như pháo. ---- */
+  const FRUIT_EMOJI = ['🍎', '🍊', '🍉', '🍇', '🍓', '🍍', '🍑', '🥝', '🍐', '🍒'];
+  function renderFruitSlice(q) {
+    const arena = document.createElement('div');
+    arena.className = 'fruit-arena';
+    const items = [];
+    const usedEmoji = shuffle(FRUIT_EMOJI);
+    q.choices.forEach((choice, i) => {
+      const item = document.createElement('div');
+      item.className = 'fruit-slice-item reveal';
+      item.style.animationDelay = (i * 90) + 'ms';
+      item.dataset.value = String(choice);
+      item.innerHTML = `<span class="fruit-emoji">${usedEmoji[i % usedEmoji.length]}</span><span class="fruit-num">${fmtNum(choice)}</span>`;
+      arena.appendChild(item);
+      items.push({ el: item, choice, sliced: false });
+    });
+    answersGrid.appendChild(arena);
+    const hint = document.createElement('p');
+    hint.className = 'drag-hint';
+    hint.textContent = 'Vung tay chém đúng quả có số cần tìm nhé!';
+    answersGrid.appendChild(hint);
+    wireFruitArena(arena, items);
+  }
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = randInt(0, i);
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function sliceTrail(x1, y1, x2, y2) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const len = Math.hypot(dx, dy);
+    if (len < 2) return;
+    const trail = document.createElement('div');
+    trail.className = 'slice-trail';
+    trail.style.left = x1 + 'px';
+    trail.style.top = y1 + 'px';
+    trail.style.width = len + 'px';
+    trail.style.transform = 'rotate(' + Math.atan2(dy, dx) + 'rad)';
+    document.body.appendChild(trail);
+    setTimeout(() => trail.remove(), 280);
+  }
+
+  function sliceFruit(item, choice) {
+    const isCorrect = choice === state.current.answer;
+    const el = item.el;
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    el.classList.add('sliced', isCorrect ? 'slice-correct' : 'slice-wrong');
+    sfx.pop();
+
+    if (isCorrect) {
+      const slot = document.getElementById('dropSlot');
+      if (slot) {
+        const numEl = el.querySelector('.fruit-num');
+        const nr = numEl.getBoundingClientRect();
+        const fly = numEl.cloneNode(true);
+        fly.className = 'fruit-num fruit-num-fly';
+        fly.style.left = nr.left + 'px';
+        fly.style.top = nr.top + 'px';
+        document.body.appendChild(fly);
+        requestAnimationFrame(() => {
+          const sr = slot.getBoundingClientRect();
+          fly.style.left = (sr.left + sr.width / 2 - nr.width / 2) + 'px';
+          fly.style.top = (sr.top + sr.height / 2 - nr.height / 2) + 'px';
+          fly.style.transform = 'scale(0.7)';
+        });
+        setTimeout(() => {
+          fly.remove();
+          slot.textContent = fmtNum(choice);
+          slot.classList.add('correct', 'filled-effect');
+        }, 420);
+      }
+    } else {
+      const no = document.createElement('span');
+      no.className = 'fruit-no-feedback';
+      no.textContent = 'No!';
+      no.style.left = cx + 'px';
+      no.style.top = cy + 'px';
+      document.body.appendChild(no);
+      setTimeout(() => no.remove(), 700);
+    }
+
+    selectAnswer(choice, el);
+  }
+
+  function wireFruitArena(arena, items) {
+    let activeId = null;
+    let lastX = 0, lastY = 0;
+
+    function checkSliceAt(x, y) {
+      if (state.locked) return;
+      for (const it of items) {
+        if (it.sliced) continue;
+        const r = it.el.getBoundingClientRect();
+        const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        const rad = Math.max(r.width, r.height) / 2;
+        if (Math.hypot(x - cx, y - cy) < rad) {
+          it.sliced = true;
+          sliceFruit(it, it.choice);
+          return;
+        }
+      }
+    }
+
+    function onMove(e) {
+      if (e.pointerId !== activeId) return;
+      sliceTrail(lastX, lastY, e.clientX, e.clientY);
+      checkSliceAt(e.clientX, e.clientY);
+      lastX = e.clientX; lastY = e.clientY;
+    }
+
+    function onUp(e) {
+      if (e.pointerId !== activeId) return;
+      activeId = null;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+    }
+
+    arena.addEventListener('pointerdown', (e) => {
+      if (state.locked || activeId !== null) return;
+      activeId = e.pointerId;
+      lastX = e.clientX; lastY = e.clientY;
+      checkSliceAt(e.clientX, e.clientY);
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+      e.preventDefault();
+    });
+  }
+
+  /* ---- Bắn cung answer mode (lớp 1-3), ngay trong câu hỏi đang học chứ
+   * không phải màn riêng: đáp án đúng + vài số nhiễu bay chậm trong bóng
+   * bay, kéo trên đấu trường để ngắm cung rồi thả tay là bắn. Bắn trúng số
+   * đúng: bóng bay về ô trống của câu. Bắn trúng số sai: hiện chữ "No". ---- */
+  const ARCHERY_SKIN_R = 30;
+  const ARCHERY_SKIN_SPEED = 24;
+  const ARCHERY_SKIN_ARROW_SPEED = 950;
+  function archerySkinBowAnchor(arena) {
+    return { x: arena.clientWidth / 2, y: arena.clientHeight - 44 };
+  }
+  function renderArcherySkin(q) {
+    const wrap = document.createElement('div');
+    wrap.className = 'archery-skin-wrap';
+    const arena = document.createElement('div');
+    arena.className = 'archery-skin-arena';
+    const bow = document.createElement('div');
+    bow.className = 'archery-bow';
+    bow.innerHTML = '<svg viewBox="0 0 40 80" width="40" height="80" aria-hidden="true"><path d="M12 6 Q30 20 21 40 Q30 60 12 74" fill="none" stroke="#8b5a2b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="6" x2="12" y2="74" stroke="#f3e6c9" stroke-width="2"/></svg>';
+    arena.appendChild(bow);
+    wrap.appendChild(arena);
+    const hint = document.createElement('p');
+    hint.className = 'drag-hint';
+    hint.textContent = 'Kéo trên hình để ngắm cung, thả tay để bắn số đúng nhé!';
+    wrap.appendChild(hint);
+    answersGrid.appendChild(wrap);
+
+    const w = arena.clientWidth, h = arena.clientHeight;
+    const n = q.choices.length;
+    const items = q.choices.map((val, i) => {
+      const el = document.createElement('div');
+      el.className = 'archery-balloon';
+      el.dataset.value = String(val);
+      const hue = (i * 97 + 20) % 360;
+      el.style.setProperty('--hue', hue);
+      el.innerHTML = '<div class="balloon-shape"><div class="balloon-body"></div><div class="balloon-knot"></div></div><span class="balloon-num">' + fmtNum(val) + '</span>';
+      arena.appendChild(el);
+      const x = w * ((i + 1) / (n + 1)) + (Math.random() * 24 - 12);
+      const y = h + 40 + Math.random() * 90 + i * 60;
+      return { val, hue, correct: val === q.answer, el, x, y, baseX: x, wob: Math.random() * Math.PI * 2, dead: false };
+    });
+    wireArcherySkin(arena, bow, items);
+  }
+
+  function wireArcherySkin(arena, bow, items) {
+    let raf = null, lastTs = 0, arrow = null, aiming = false, pointerId = null, spent = false;
+
+    function tick(ts) {
+      if (spent) return;
+      if (!lastTs) lastTs = ts;
+      const dt = Math.min(48, ts - lastTs) / 1000;
+      lastTs = ts;
+      for (const it of items) {
+        if (it.dead) continue;
+        it.y -= ARCHERY_SKIN_SPEED * dt;
+        it.wob += dt * 1.6;
+        it.x = it.baseX + Math.sin(it.wob) * 8;
+        it.el.style.transform = `translate(${it.x - ARCHERY_SKIN_R}px, ${it.y - ARCHERY_SKIN_R}px)`;
+        if (it.y + ARCHERY_SKIN_R < -20) { it.dead = true; it.el.remove(); }
+      }
+      if (arrow) {
+        arrow.x += arrow.vx * dt;
+        arrow.y += arrow.vy * dt;
+        arrow.el.style.left = arrow.x + 'px';
+        arrow.el.style.top = arrow.y + 'px';
+        let hit = null;
+        for (const it of items) {
+          if (it.dead) continue;
+          const dx = arrow.x - it.x, dy = arrow.y - it.y;
+          if (dx * dx + dy * dy < (ARCHERY_SKIN_R + 8) * (ARCHERY_SKIN_R + 8)) { hit = it; break; }
+        }
+        if (hit) {
+          arrow.el.remove();
+          arrow = null;
+          handleHit(hit);
+        } else if (arrow.x < -60 || arrow.x > arena.clientWidth + 60 || arrow.y < -60 || arrow.y > arena.clientHeight + 60) {
+          arrow.el.remove();
+          arrow = null;
+        }
+      }
+      if (!spent) raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
+
+    function handleHit(it) {
+      it.dead = true;
+      spent = true;
+      if (raf) cancelAnimationFrame(raf);
+      bow.style.transform = 'rotate(0deg)';
+      const aimLine = arena.querySelector('.archery-aim-line');
+      if (aimLine) aimLine.remove();
+
+      if (it.correct) {
+        sfx.pop();
+        const r = it.el.getBoundingClientRect();
+        document.body.appendChild(it.el);
+        it.el.style.position = 'fixed';
+        it.el.style.left = r.left + 'px';
+        it.el.style.top = r.top + 'px';
+        it.el.style.width = r.width + 'px';
+        it.el.style.transform = 'none';
+        it.el.classList.add('flying-home');
+        const slot = document.getElementById('dropSlot');
+        if (slot) {
+          requestAnimationFrame(() => {
+            const sr = slot.getBoundingClientRect();
+            it.el.style.left = (sr.left + sr.width / 2 - r.width / 2) + 'px';
+            it.el.style.top = (sr.top + sr.height / 2 - r.height / 2) + 'px';
+            it.el.style.transform = 'scale(0.4)';
+          });
+        }
+        selectAnswer(it.val, it.el);
+        setTimeout(() => {
+          if (slot) { slot.textContent = fmtNum(it.val); slot.classList.add('correct', 'filled-effect'); }
+          it.el.remove();
+        }, 520);
+      } else {
+        sfx.pop();
+        const r = it.el.getBoundingClientRect();
+        const no = document.createElement('span');
+        no.className = 'archery-feedback-no';
+        no.textContent = 'No!';
+        no.style.position = 'fixed';
+        no.style.left = (r.left + r.width / 2) + 'px';
+        no.style.top = (r.top + r.height / 2) + 'px';
+        document.body.appendChild(no);
+        setTimeout(() => no.remove(), 700);
+        selectAnswer(it.val, it.el);
+      }
+    }
+
+    function updateAim(e) {
+      const rect = arena.getBoundingClientRect();
+      const px = e.clientX - rect.left, py = e.clientY - rect.top;
+      const anchor = archerySkinBowAnchor(arena);
+      const dx = px - anchor.x, dy = py - anchor.y;
+      const thetaDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+      bow.style.transform = 'rotate(' + (thetaDeg + 90) + 'deg)';
+      let line = arena.querySelector('.archery-aim-line');
+      if (!line) { line = document.createElement('div'); line.className = 'archery-aim-line'; arena.appendChild(line); }
+      const dist = Math.hypot(dx, dy);
+      line.style.left = anchor.x + 'px';
+      line.style.top = anchor.y + 'px';
+      line.style.width = Math.min(dist, 200) + 'px';
+      line.style.transform = 'rotate(' + thetaDeg + 'deg)';
+    }
+
+    function fire(e) {
+      const line = arena.querySelector('.archery-aim-line');
+      if (line) line.remove();
+      bow.style.transform = 'rotate(0deg)';
+      if (spent || arrow) return;
+      const rect = arena.getBoundingClientRect();
+      const px = e.clientX - rect.left, py = e.clientY - rect.top;
+      const anchor = archerySkinBowAnchor(arena);
+      const dx = px - anchor.x, dy = py - anchor.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 14) return;
+      sfx.click();
+      const theta = Math.atan2(dy, dx);
+      const el = document.createElement('div');
+      el.className = 'archery-arrow';
+      el.style.left = anchor.x + 'px';
+      el.style.top = anchor.y + 'px';
+      el.style.transform = 'rotate(' + theta + 'rad)';
+      arena.appendChild(el);
+      arrow = { el, x: anchor.x, y: anchor.y, vx: Math.cos(theta) * ARCHERY_SKIN_ARROW_SPEED, vy: Math.sin(theta) * ARCHERY_SKIN_ARROW_SPEED };
+    }
+
+    arena.addEventListener('pointerdown', (e) => {
+      if (spent || arrow) return;
+      pointerId = e.pointerId;
+      aiming = true;
+      try { arena.setPointerCapture(e.pointerId); } catch {}
+      updateAim(e);
+    });
+    arena.addEventListener('pointermove', (e) => {
+      if (!aiming || e.pointerId !== pointerId) return;
+      updateAim(e);
+    });
+    arena.addEventListener('pointerup', (e) => {
+      if (!aiming || e.pointerId !== pointerId) return;
+      aiming = false;
+      fire(e);
+    });
+    arena.addEventListener('pointercancel', () => {
+      aiming = false;
+      const line = arena.querySelector('.archery-aim-line');
+      if (line) line.remove();
+      bow.style.transform = 'rotate(0deg)';
+    });
+  }
+
   function selectAnswer(choice, btn) {
     if (state.locked) return;
     state.locked = true;
@@ -3332,8 +3663,8 @@
     const isCorrect = choice === state.current.answer;
     mathAdjustTier(isCorrect);
     const skin = state.current.answerSkin || 'buttons';
-    const isCustom = skin !== 'buttons'; // chips + balloons share div-based markup
-    const selector = skin === 'balloons' ? '.balloon' : skin === 'chips' ? '.drag-chip' : null;
+    const isCustom = skin !== 'buttons'; // chips + balloons + fruit + archery share div-based markup
+    const selector = skin === 'balloons' ? '.balloon' : skin === 'chips' ? '.drag-chip' : skin === 'fruit' ? '.fruit-slice-item' : skin === 'archery' ? '.archery-balloon' : null;
     const allBtns = selector ? [...document.querySelectorAll(selector)] : [...answersGrid.children];
     allBtns.forEach((b) => {
       if (isCustom) b.style.pointerEvents = 'none'; else b.disabled = true;
