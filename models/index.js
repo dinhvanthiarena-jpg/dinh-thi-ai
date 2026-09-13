@@ -53,6 +53,8 @@ BlogPost.belongsTo(User, { foreignKey: 'AuthorId', as: 'author' });
 User.hasMany(MathSkill, { foreignKey: 'UserId', onDelete: 'CASCADE' });
 MathSkill.belongsTo(User, { foreignKey: 'UserId', as: 'user' });
 
+const NhacHoc = require("./NhacHoc");
+
 module.exports = {
   User,
   Course,
@@ -76,4 +78,5 @@ module.exports = {
   BattlePlayer,
   BattleMatch,
   MathSkill,
+  NhacHoc,
 };

@@ -90,6 +90,8 @@ const DEFAULTS = {
   goal: 30, goalDay: "", todayXp: 0,
   weekXp: 0, weekStart: "", tier: 0,
   joined: today(), sound: true, nhac: true, motion: false, showVi: true, theme: "",
+  nhacHoc: false,   // đã bật nhắc học chưa
+  daHoiNhac: false, // đã hỏi xin quyền một lần rồi thì thôi, không hỏi lại
   kidVoice: false,
   giongChot: 0,   // đánh dấu đã áp giọng mặc định mới, chỉ áp một lần
   ten: "",
@@ -4012,6 +4014,10 @@ const weakWords = () => seenWords().filter(w => S.srs[w.en].wrong > 0).sort((a, 
 /* ---------- 14. Kết thúc bài ---------- */
 function finish() {
   if (P.laThi) return xongDeThi();
+  // Học xong một bài thì báo máy chủ, để hôm nay khỏi bị nhắc nữa; và nếu chưa
+  // hỏi xin quyền lần nào thì hỏi ngay lúc này — lúc vừa xong bài, đang vui.
+  baoDaHoc();
+  hoiXinNhacSauBai();
   const secs = Math.round((Date.now() - P.startedAt) / 1000);
   const tries = Math.max(1, P.attempts);
   const acc = clamp(Math.round(((tries - P.wrong) / tries) * 100), 0, 100);
@@ -6441,6 +6447,7 @@ function renderProfile() {
   $$("[data-goal]").forEach(b => b.classList.toggle("on", +b.dataset.goal === S.goal));
   $("#optSound").checked = S.sound;
   $("#optNhac").checked = S.nhac;
+  { const n = $("#optNhacHoc"); if (n) n.checked = !!S.nhacHoc; }
   $("#optMotion").checked = S.motion;
   $("#optVi").checked = S.showVi;
   $("#optKid").checked = S.kidVoice !== false;
@@ -9184,6 +9191,142 @@ function dongChonCo() {
 }
 $("#btnCoMo").addEventListener("click", moChonCo);
 $("#btnCoDong").addEventListener("click", dongChonCo);
+
+
+/* ---------- 23h. Nhắc học ----------
+   Thầy đặt bài: "cứ lâu lâu trong ngày không học, không mở app là thông báo".
+   Máy chủ gửi lúc 8h, 12h, 16h, 20h cho ai hôm đó chưa học.
+
+   Hai điều phải biết trước khi đọc phần này:
+
+   1. XIN QUYỀN ĐÚNG LÚC. Trình duyệt chỉ cho hỏi MỘT LẦN; người dùng bấm Chặn
+      là coi như mất luôn, không xin lại được nữa (họ phải tự vào cài đặt trình
+      duyệt mở ra, mà chẳng ai làm). Nên KHÔNG hỏi lúc vừa mở app — lúc đó họ
+      chưa biết app là gì, gần như chắc chắn bấm Chặn. Hỏi sau khi học xong bài
+      đầu tiên, lúc đang vui vì vừa làm được việc.
+
+   2. TRÊN iPHONE chỉ chạy khi app đã được CÀI VÀO MÀN HÌNH CHÍNH. Mở bằng
+      Safari thường thì Apple không cho đẩy thông báo, không có cách nào lách. */
+
+const NHAC_APP = "english-air";
+let nhacDangKy = null;          // địa chỉ đẩy của máy này, có rồi thì thôi xin lại
+
+const coNhac = () =>
+  "Notification" in window && "serviceWorker" in navigator && "PushManager" in window;
+
+/** Đổi khoá VAPID dạng chữ sang dạng byte mà trình duyệt đòi. */
+function khoaSangByte(s) {
+  const dem = "=".repeat((4 - (s.length % 4)) % 4);
+  const b64 = (s + dem).replace(/-/g, "+").replace(/_/g, "/");
+  const tho = atob(b64);
+  const ra = new Uint8Array(tho.length);
+  for (let i = 0; i < tho.length; i++) ra[i] = tho.charCodeAt(i);
+  return ra;
+}
+
+/** Đăng ký nhận nhắc. Trả về địa chỉ đẩy, hoặc null nếu không được. */
+async function dangKyNhac() {
+  if (!coNhac()) return null;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      const r = await fetch("../api/game/vapid-public-key");
+      const d = await r.json();
+      if (!d || !d.ok || !d.publicKey) return null;
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: khoaSangByte(d.publicKey),
+      });
+    }
+    const j = sub.toJSON();
+    await fetch("../api/game/push-subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ appId: NHAC_APP, endpoint: j.endpoint, keys: j.keys }),
+    });
+    nhacDangKy = j.endpoint;
+    S.nhacHoc = true;
+    save();
+    return j.endpoint;
+  } catch (e) {
+    return null;
+  }
+}
+
+/** Hỏi xin quyền rồi đăng ký. Chỉ gọi ngay sau một việc vui, đừng gọi lúc mở app. */
+async function xinQuyenNhac(imLang) {
+  if (!coNhac()) {
+    if (!imLang) toast("Máy này không nhận được thông báo nhắc học.");
+    return false;
+  }
+  if (Notification.permission === "denied") {
+    if (!imLang) toast("Bạn đã chặn thông báo. Mở lại trong cài đặt trình duyệt nhé.");
+    return false;
+  }
+  let quyen = Notification.permission;
+  if (quyen !== "granted") quyen = await Notification.requestPermission();
+  if (quyen !== "granted") return false;
+  const d = await dangKyNhac();
+  if (d && !imLang) toast("Xong! ON-Language sẽ nhắc bạn học mỗi ngày.");
+  return !!d;
+}
+
+/** Tắt nhắc: giữ đăng ký lại, chỉ báo máy chủ đừng gửi nữa. Bật lại là xong
+    ngay, khỏi phải xin quyền lần thứ hai — mà lần thứ hai thì xin không được. */
+async function tatNhac() {
+  S.nhacHoc = false;
+  save();
+  if (!nhacDangKy) return;
+  await fetch("../api/english-air/nhac-hoc/bat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ endpoint: nhacDangKy, bat: false }),
+  }).catch(() => {});
+}
+
+/** Báo máy chủ là hôm nay đã học, để hôm nay khỏi bị nhắc nữa. */
+async function baoDaHoc() {
+  if (!nhacDangKy || !S.nhacHoc) return;
+  await fetch("../api/english-air/nhac-hoc/da-hoc", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ endpoint: nhacDangKy, chuoi: S.streak || 0 }),
+  }).catch(() => {});
+}
+
+/** Lấy lại địa chỉ đẩy lúc mở app, nếu lần trước đã cho phép rồi. */
+async function noiLaiNhac() {
+  if (!coNhac() || Notification.permission !== "granted") return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) nhacDangKy = sub.toJSON().endpoint;
+  } catch { /* thôi */ }
+}
+
+/* Xin quyền SAU KHI học xong bài đầu tiên — đúng lúc người học đang vui.
+   Chỉ hỏi một lần trong đời máy đó; từ chối thì thôi, không hỏi lại. */
+async function hoiXinNhacSauBai() {
+  if (!coNhac() || S.daHoiNhac || Notification.permission !== "default") return;
+  S.daHoiNhac = true;
+  save();
+  await xinQuyenNhac(true);
+}
+
+/* Công tắc trong Cài đặt — để ai lỡ từ chối, hoặc muốn tắt, vẫn tự làm được. */
+const nutNhac = $("#optNhacHoc");
+if (nutNhac) nutNhac.addEventListener("change", async e => {
+  if (e.target.checked) {
+    const xong = await xinQuyenNhac(false);
+    e.target.checked = xong;
+  } else {
+    await tatNhac();
+    toast("Đã tắt nhắc học.");
+  }
+});
+
+noiLaiNhac();
 
 
 /* ---------- 24. Khởi động ---------- */

@@ -4,6 +4,7 @@ const pro = require('../services/proService');
 const tk = require('../services/taiKhoanAppService');
 const otp = require('../services/otpDangKyService');
 const tienDo = require('../services/tienDoMonlService');
+const nhacHoc = require('../services/nhacHocService');
 
 const router = express.Router();
 
@@ -228,6 +229,26 @@ router.put('/tien-do', express.json({ limit: '600kb' }), an(async (req, res) => 
   }
   const daGop = await tienDo.dongBo(req.user.id, cuaMay);
   res.json({ ok: true, tienDo: daGop });
+}));
+
+/* ===== Nhắc học =====
+ * App tự báo lên "tôi vừa học xong" để máy chủ biết ai cần nhắc. Tiến độ học
+ * nằm trên máy người dùng chứ không nằm ở máy chủ, nên không có cái báo này
+ * thì máy chủ nhắc mù — nhắc cả người vừa học xong, kiểu chắc chắn bị tắt
+ * thông báo. Chỉ gửi lên đúng địa chỉ đẩy và chuỗi ngày, không gửi gì riêng tư.
+ */
+router.post('/nhac-hoc/da-hoc', express.json(), an(async (req, res) => {
+  const { endpoint, chuoi } = req.body || {};
+  if (typeof endpoint !== 'string' || !endpoint.trim()) return res.status(400).json({ ok: false });
+  await nhacHoc.danhDauDaHoc(endpoint.trim(), Number(chuoi) || 0);
+  res.json({ ok: true });
+}));
+
+router.post('/nhac-hoc/bat', express.json(), an(async (req, res) => {
+  const { endpoint, bat } = req.body || {};
+  if (typeof endpoint !== 'string' || !endpoint.trim()) return res.status(400).json({ ok: false });
+  await nhacHoc.datBat(endpoint.trim(), bat !== false);
+  res.json({ ok: true });
 }));
 
 module.exports = router;

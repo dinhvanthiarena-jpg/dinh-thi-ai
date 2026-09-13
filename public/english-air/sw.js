@@ -3,7 +3,7 @@
    Toàn bộ app chạy offline sau lần mở đầu tiên.
    Đổi CACHE khi sửa file để buộc tải lại bản mới.
    ============================================================ */
-const CACHE = "english-air-v205";
+const CACHE = "english-air-v206";
 
 const SHELL = [
   "./",
@@ -116,4 +116,38 @@ self.addEventListener("fetch", e => {
       return hit || net;
     })
   );
+});
+
+/* ============================================================
+   NHẮC HỌC — nhận thông báo đẩy từ máy chủ
+   Máy chủ gửi tới lúc 8h, 12h, 16h, 20h cho ai hôm đó chưa học.
+   ============================================================ */
+self.addEventListener("push", e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { /* gói hỏng thì dùng lời mặc định */ }
+  const tieuDe = d.title || "Bạn ơi, vào học thôi nào!";
+  // iOS BẮT BUỘC phải hiện thông báo cho mọi gói đẩy nhận được. Nhận mà không
+  // hiện thì hệ điều hành thu hồi quyền đẩy của cả app.
+  e.waitUntil(self.registration.showNotification(tieuDe, {
+    body: d.body || "Mở ON-Language ra làm một bài nhé.",
+    icon: "./icons/icon-192.png",
+    badge: "./icons/icon-192.png",
+    tag: d.tag || "nhac-hoc",
+    renotify: true,
+    data: { url: d.url || "./" },
+  }));
+});
+
+self.addEventListener("notificationclick", e => {
+  e.notification.close();
+  const dich = new URL((e.notification.data && e.notification.data.url) || "./",
+                       self.location).href;
+  e.waitUntil((async () => {
+    const ds = await clients.matchAll({ type: "window", includeUncontrolled: true });
+    // App đang mở sẵn thì đưa cửa sổ đó lên, đừng mở thêm cửa sổ thứ hai
+    for (const c of ds) {
+      if (c.url.startsWith(dich.split("#")[0]) && "focus" in c) return c.focus();
+    }
+    if (clients.openWindow) return clients.openWindow(dich);
+  })());
 });

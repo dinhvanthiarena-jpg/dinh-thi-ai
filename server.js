@@ -16,6 +16,7 @@ const connectDB = require('./config/db');
 const { attachUser } = require('./middleware/auth');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const { startScheduler } = require('./services/contentScheduler');
+const { batDauNhacHoc } = require('./services/nhacHocService');
 const telegramService = require('./services/telegramService');
 
 // Express 4 does not catch errors thrown inside async route handlers, so an
@@ -240,6 +241,7 @@ require('./services/battleSocket')(io);
 connectDB()
   .then(() => {
     startScheduler();
+    batDauNhacHoc();   // nhắc học cho English Air
     telegramService.ensureWebhook();
   })
   .catch((err) => {
