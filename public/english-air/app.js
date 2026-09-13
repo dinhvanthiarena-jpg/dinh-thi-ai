@@ -508,8 +508,8 @@ function apToc(u, toc) {
    2. Chỉ chạy được sau cú chạm đầu tiên: trình duyệt không cho tự phát tiếng,
       cố phát sớm chỉ tổ bị chặn im lặng.
    3. Có công tắc tắt hẳn trong Hồ sơ, và nhớ lựa chọn đó. */
-const NHAC_TO = 0.22;         // mức thường — thầy nghe bản cũ thấy chìm quá
-const NHAC_NHO = 0.06;        // mức lúc đang đọc bài
+const NHAC_TO = 0.14;         // mức thường — hạ xuống một nấc theo ý thầy
+const NHAC_NHO = 0.04;        // mức lúc đang đọc bài
 let nhacDaMoi = false;
 let nhacHen = null;
 
