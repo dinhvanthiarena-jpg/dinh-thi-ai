@@ -569,6 +569,7 @@ function nhacNhuong(dang) {
 const KHO_TIENG = {
   en: "assets/tieng/",
   vi: "assets/tieng-vi/",
+  zh: "assets/tieng-zh/",
 };
 const TIENG_THU = KHO_TIENG.en;   // giữ tên cũ cho những chỗ đã trỏ vào
 const khoCo = {};                 // { en: Set(mã băm), vi: Set(...) }
@@ -752,6 +753,7 @@ const NHAN_BAC = {
   b1: { cefr: "B1", lop: "Lớp 8–9" },
   b2: { cefr: "B2", lop: "Lớp 10–12" },
   v1: { cefr: "A1", lop: "" },
+  z1: { cefr: "HSK1", lop: "" },
 };
 /* Ba kho này SUY RA từ khoá đang mở, nên đổi khoá là phải tính lại — xem
    datKhoa(). Vì thế dùng let chứ không dùng const. */

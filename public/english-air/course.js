@@ -27,6 +27,13 @@ const KHOA = [
     nhan: "Vietnamese for English speakers",
     levels: [VI1],
   },
+  {
+    id: "zh-vi",
+    hoc: "zh", maHoc: "zh-cn", tenHoc: "Tiếng Trung", coHoc: "cn",
+    giai: "vi", maGiai: "vi-vn", tenGiai: "Tiếng Việt", coGiai: "vn",
+    nhan: "Tiếng Trung cho người Việt",
+    levels: [ZH1],
+  },
 ];
 
 /* Khoá đang mở. KHÔNG gán lại biến này — app giữ tham chiếu tới nó ở nhiều nơi,
