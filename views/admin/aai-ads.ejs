@@ -1,18 +1,142 @@
-<div class="space-y-6 max-w-2xl">
-  <% if (!connected) { %>
-    <div class="card p-6">
-      <h2 class="font-semibold text-ink mb-2">Kết nối Facebook</h2>
-      <p class="text-sm text-muted mb-4">Dùng chung Facebook Developer App "Ads Manager - DT" với tool desktop A-AI-3dvietpro. Đăng nhập 1 lần, token lưu trên server (chỉ /admin đã đăng nhập mới dùng được).</p>
-      <a href="/admin/aai-ads/connect" class="btn-primary">Kết nối Facebook</a>
+<style>
+  .aai-shell { display: flex; gap: 24px; align-items: flex-start; }
+  .aai-nav { width: 224px; flex-shrink: 0; font-size: 14px; }
+  .aai-nav-btn { display: block; width: 100%; text-align: left; padding: 8px 12px; border-radius: 8px; color: #57534e; background: transparent; border: none; cursor: pointer; margin-bottom: 2px; }
+  .aai-nav-btn:hover { background: rgba(124,58,237,0.06); }
+  .aai-nav-btn.active { background: #7c3aed; color: #fff; font-weight: 600; }
+  .aai-nav-group-toggle { display: flex; justify-content: space-between; width: 100%; text-align: left; padding: 8px 12px; border-radius: 8px; color: #57534e; background: transparent; border: none; cursor: pointer; font-weight: 600; font-size: 13px; margin-top: 10px; }
+  .aai-nav-group { padding-left: 10px; border-left: 2px solid #ede9fe; margin-left: 10px; }
+  .aai-nav-group.collapsed { display: none; }
+  .aai-content { flex: 1; min-width: 0; }
+  .aai-tab { display: none; }
+  .aai-tab.active { display: block; }
+  .aai-soon { border: 1px dashed #d6d3d1; border-radius: 10px; padding: 24px; text-align: center; color: #78716c; }
+</style>
+
+<% if (!connected) { %>
+  <div class="card p-6 max-w-2xl">
+    <h2 class="font-semibold text-ink mb-2">Kết nối Facebook</h2>
+    <p class="text-sm text-muted mb-4">Dùng chung Facebook Developer App "Ads Manager - DT" với tool desktop A-AI-3dvietpro. Đăng nhập 1 lần, token lưu trên server (chỉ /admin đã đăng nhập mới dùng được).</p>
+    <a href="/admin/aai-ads/connect" class="btn-primary">Kết nối Facebook</a>
+  </div>
+<% } else if (loadError) { %>
+  <div class="card p-5 bg-amber-50 border border-amber-200 max-w-2xl">
+    <p class="text-sm text-amber-800">Lỗi tải dữ liệu Facebook: <%= loadError %>. Token có thể đã hết hạn — <a href="/admin/aai-ads/connect" class="underline">kết nối lại</a>.</p>
+  </div>
+<% } else { %>
+
+<div class="aai-shell">
+  <nav class="aai-nav">
+    <button class="aai-nav-btn active" data-tab="settings">Cài đặt</button>
+    <button class="aai-nav-btn" data-tab="intro">ℹ️ Giới thiệu</button>
+    <button class="aai-nav-btn" data-tab="coldstart">🌱 Bắt đầu chạy Ads</button>
+    <button class="aai-nav-btn" data-tab="fanpage">📄 Fanpage</button>
+
+    <button class="aai-nav-group-toggle" data-group="ads"><span>📢 Chạy quảng cáo</span><span>▾</span></button>
+    <div class="aai-nav-group" id="aai-group-ads">
+      <button class="aai-nav-btn" data-tab="dashboard">Tổng quan</button>
+      <button class="aai-nav-btn" data-tab="decisioncenter">🧠 AI Decision Center</button>
+      <button class="aai-nav-btn" data-tab="profitcrm">💰 Lợi nhuận &amp; CRM</button>
+      <button class="aai-nav-btn" data-tab="accounts">BM / Ad Account</button>
+      <button class="aai-nav-btn" data-tab="pixels">Pixel &amp; CAPI</button>
+      <button class="aai-nav-btn" data-tab="insights">Hiệu suất</button>
+      <button class="aai-nav-btn" data-tab="research">Nghiên cứu đối thủ</button>
+      <button class="aai-nav-btn" data-tab="audiences">Đối tượng</button>
+      <button class="aai-nav-btn" data-tab="catalog">🛍️ Catalog</button>
+      <button class="aai-nav-btn" data-tab="campaigns">Chiến dịch</button>
+      <button class="aai-nav-btn" data-tab="googleads">Google Ads</button>
+      <button class="aai-nav-btn" data-tab="automation">Tự động hóa</button>
     </div>
-  <% } else { %>
-    <% if (loadError) { %>
-      <div class="card p-5 bg-amber-50 border border-amber-200">
-        <p class="text-sm text-amber-800">Lỗi tải dữ liệu Facebook: <%= loadError %>. Token có thể đã hết hạn — <a href="/admin/aai-ads/connect" class="underline">kết nối lại</a>.</p>
+
+    <button class="aai-nav-group-toggle" data-group="content"><span>📝 Đăng bài &amp; Nội dung</span><span>▾</span></button>
+    <div class="aai-nav-group" id="aai-group-content">
+      <button class="aai-nav-btn" data-tab="autopost">Đăng bài tự động</button>
+      <button class="aai-nav-btn" data-tab="chatbot">Chatbot AI</button>
+      <button class="aai-nav-btn" data-tab="seo">SEO tự động</button>
+      <button class="aai-nav-btn" data-tab="marketing">Marketing</button>
+    </div>
+  </nav>
+
+  <div class="aai-content">
+
+    <!-- ============ CÀI ĐẶT ============ -->
+    <div class="aai-tab active" id="aai-tab-settings">
+      <div class="card p-6 mb-6">
+        <h2 class="font-semibold text-ink mb-1">Trạng thái kết nối</h2>
+        <p class="text-sm text-emerald-600 mb-2">✓ Đã kết nối tài khoản Facebook (dùng chung App "Ads Manager - DT" với tool desktop).</p>
+        <a href="/admin/aai-ads/connect" class="text-sm text-primary-700 underline">Kết nối lại</a>
       </div>
-    <% } else { %>
       <div class="card p-6">
-        <h2 class="font-semibold text-ink mb-1">1. AI đề xuất kế hoạch</h2>
+        <h2 class="font-semibold text-ink mb-1">Website nhận bài (tùy chọn)</h2>
+        <p class="text-sm text-muted mb-4">Website cần tự có sẵn 1 địa chỉ API nhận bài — tool gửi tới đó JSON dạng <code>{title, content, link, imageBase64}</code>. Thêm bao nhiêu website cũng được, rồi sang tab <strong>Đăng bài tự động</strong> để chọn nơi muốn đăng.</p>
+        <div class="grid grid-cols-3 gap-2 mb-2">
+          <input id="wtName" type="text" class="input" placeholder="Tên (VD: 3dvietpro)" />
+          <input id="wtApiUrl" type="text" class="input" placeholder="https://.../api/auto-post" />
+          <input id="wtAuthToken" type="text" class="input" placeholder="Mã xác thực (Bearer Token, nếu có)" />
+        </div>
+        <button id="addWebsiteTargetBtn" type="button" class="btn-outline">Thêm Website</button>
+        <p id="wtMsg" class="text-sm text-muted mt-2"></p>
+        <div id="websiteTargetsList" class="mt-3 space-y-1 text-sm">
+          <% websiteTargets.forEach(t => { %>
+            <div class="flex items-center justify-between bg-primary-50/40 rounded px-3 py-2" data-wt-row="<%= t.id %>">
+              <span><strong><%= t.name %></strong> — <%= t.apiUrl %></span>
+              <button type="button" class="text-rose-600 text-xs" data-wt-delete="<%= t.id %>">Xóa</button>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ GIỚI THIỆU ============ -->
+    <div class="aai-tab" id="aai-tab-intro">
+      <div class="card p-6 max-w-2xl">
+        <h2 class="font-semibold text-ink mb-1">A-AI Ads — bản Web</h2>
+        <p class="text-sm text-muted mb-3">Đây là bản chạy trên web của tool desktop AAi-3dvietpro — cùng 1 bộ chức năng, nhưng chạy trên server luôn bật 24/7, không cần mở máy tính. Đăng nhập <code>/admin</code> ở bất kỳ đâu là dùng được.</p>
+        <ul class="text-sm text-muted list-disc pl-5 space-y-1">
+          <li>🎯 Chạy quảng cáo Facebook &amp; Google — AI đề xuất kế hoạch, tạo chiến dịch, theo dõi hiệu suất.</li>
+          <li>📢 Đăng bài tự động — lên Fanpage, Group, Website, mỗi nơi 1 chủ đề riêng.</li>
+          <li>💰 Theo dõi lợi nhuận thật, không chỉ ROAS.</li>
+        </ul>
+        <p class="text-sm text-muted mt-3">Một số mục vẫn đang được chuyển dần từ bản desktop sang — mục nào chưa xong sẽ ghi rõ "Sắp ra mắt".</p>
+      </div>
+    </div>
+
+    <!-- ============ BẮT ĐẦU CHẠY ADS ============ -->
+    <div class="aai-tab" id="aai-tab-coldstart">
+      <div class="card p-6 max-w-2xl">
+        <h2 class="font-semibold text-ink mb-1">🌱 Bắt đầu chạy Ads khi chưa có gì cả</h2>
+        <p class="text-sm text-muted mb-3">Dành cho Fanpage/sản phẩm mới toanh: chưa cài Pixel, chưa có traffic, chưa biết khách hàng cũ là ai. Đây là cách chạy quảng cáo tiếp cận NGƯỜI MỚI hoàn toàn (gọi là <strong>Prospecting</strong>) — khác với nhắm lại khách quen (Retargeting, cần Pixel/danh sách khách).</p>
+        <ul class="text-sm text-muted list-disc pl-5 space-y-1 mb-4">
+          <li>Chỉ cần chọn Sở thích, Quốc gia, Độ tuổi, Giới tính phù hợp — Facebook tự tìm đúng nhóm người.</li>
+          <li>Mục tiêu quảng cáo dùng loại Lưu lượng truy cập/Tương tác/Nhận diện thương hiệu — không dùng "Chuyển đổi" (cần Pixel).</li>
+        </ul>
+        <button type="button" class="btn-primary" id="coldStartJumpBtn">🚀 Bắt đầu tạo chiến dịch ngay</button>
+      </div>
+    </div>
+
+    <!-- ============ FANPAGE ============ -->
+    <div class="aai-tab" id="aai-tab-fanpage">
+      <div class="card p-6">
+        <h2 class="font-semibold text-ink mb-3">Fanpage đang quản trị</h2>
+        <% if (pages.length) { %>
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-muted"><th class="pb-2">Tên Page</th><th class="pb-2">ID</th><th class="pb-2">Người theo dõi</th></tr></thead>
+            <tbody>
+              <% pages.forEach(p => { %>
+                <tr class="border-t border-primary-100"><td class="py-2"><%= p.name %></td><td class="py-2 text-muted"><%= p.id %></td><td class="py-2 text-muted"><%= (p.fan_count || 0).toLocaleString() %></td></tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <p class="text-sm text-muted">Không tìm thấy Fanpage nào — kiểm tra tài khoản Facebook đã kết nối có quyền Admin/Editor trên Page không.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- ============ CHIẾN DỊCH (AI plan + form) ============ -->
+    <div class="aai-tab" id="aai-tab-campaigns">
+      <div class="card p-6 mb-6">
+        <h2 class="font-semibold text-ink mb-1">AI đề xuất kế hoạch</h2>
         <p class="text-sm text-muted mb-4">Chỉ cần mô tả sản phẩm + ngân sách, AI tự điền phần còn lại bên dưới.</p>
         <label class="label">Sản phẩm/dịch vụ</label>
         <input id="planProduct" type="text" class="input mb-3" placeholder="VD: Sét áo nhung nơ thêu thỏ + quần lụa - giảm còn 699.000đ" />
@@ -25,7 +149,7 @@
       </div>
 
       <form id="campaignForm" class="card p-6 space-y-4">
-        <h2 class="font-semibold text-ink">2. Chi tiết chiến dịch</h2>
+        <h2 class="font-semibold text-ink">Chi tiết chiến dịch</h2>
 
         <div>
           <label class="label">Ad Account</label>
@@ -107,7 +231,7 @@
         </div>
 
         <hr class="border-primary-100" />
-        <h3 class="font-semibold text-ink">3. Nội dung Ad (bỏ trống nếu chỉ muốn tạo khung Campaign/Ad Set trước)</h3>
+        <h3 class="font-semibold text-ink">Nội dung Ad (bỏ trống nếu chỉ muốn tạo khung Campaign/Ad Set trước)</h3>
 
         <div>
           <label class="label">Fanpage đứng tên quảng cáo</label>
@@ -160,31 +284,12 @@
         <button type="submit" class="btn-primary">🚀 Tạo chiến dịch (tạm dừng)</button>
         <div id="createMsg" class="text-sm mt-2"></div>
       </form>
+    </div>
 
-      <hr class="border-primary-100" />
-
+    <!-- ============ ĐĂNG BÀI TỰ ĐỘNG ============ -->
+    <div class="aai-tab" id="aai-tab-autopost">
       <div class="card p-6">
-        <h2 class="font-semibold text-ink mb-1">4. Website nhận bài (tùy chọn)</h2>
-        <p class="text-sm text-muted mb-4">Website cần tự có sẵn 1 địa chỉ API nhận bài — tool gửi tới đó JSON dạng <code>{title, content, link, imageBase64}</code>. Thêm bao nhiêu website cũng được.</p>
-        <div class="grid grid-cols-3 gap-2 mb-2">
-          <input id="wtName" type="text" class="input" placeholder="Tên (VD: 3dvietpro)" />
-          <input id="wtApiUrl" type="text" class="input" placeholder="https://.../api/auto-post" />
-          <input id="wtAuthToken" type="text" class="input" placeholder="Mã xác thực (Bearer Token, nếu có)" />
-        </div>
-        <button id="addWebsiteTargetBtn" type="button" class="btn-outline">Thêm Website</button>
-        <p id="wtMsg" class="text-sm text-muted mt-2"></p>
-        <div id="websiteTargetsList" class="mt-3 space-y-1 text-sm">
-          <% websiteTargets.forEach(t => { %>
-            <div class="flex items-center justify-between bg-primary-50/40 rounded px-3 py-2" data-wt-row="<%= t.id %>">
-              <span><strong><%= t.name %></strong> — <%= t.apiUrl %></span>
-              <button type="button" class="text-rose-600 text-xs" data-wt-delete="<%= t.id %>">Xóa</button>
-            </div>
-          <% }) %>
-        </div>
-      </div>
-
-      <div class="card p-6">
-        <h2 class="font-semibold text-ink mb-1">5. Đăng bài tự động</h2>
+        <h2 class="font-semibold text-ink mb-1">Đăng bài tự động</h2>
         <p class="text-sm text-muted mb-4">Đăng lên Fanpage, Group, và cả Website chỉ trong 1 lần chạy — không cần đăng riêng từng nơi. Chạy trên server LUÔN BẬT, không cần mở trang admin này.</p>
 
         <button id="runAllNowBtn" type="button" class="btn-primary mb-2">▶ Chạy đăng bài ngay</button>
@@ -201,8 +306,6 @@
             <input id="postFreqGap" type="text" class="input" value="<%= postingFreq.minGapMinutes %>" />
           </div>
         </div>
-        <button id="savePostFreqBtn" type="button" class="btn-outline">Lưu tần suất</button>
-        <p id="postFreqMsg" class="text-sm text-muted mt-2 mb-4"></p>
 
         <hr class="border-primary-100 my-4" />
         <h3 class="font-semibold text-ink mb-2">🤖 AI tự động đăng bài hàng ngày</h3>
@@ -267,12 +370,68 @@
           <% }) %>
         </div>
       </div>
-    <% } %>
-  <% } %>
+    </div>
+
+    <!-- ============ CÁC TAB CHƯA PORT — PLACEHOLDER ============ -->
+    <% [
+      ['dashboard', 'Tổng quan', 'Xem nhanh tổng chi tiêu và số chiến dịch đang chạy/tổng số.'],
+      ['decisioncenter', '🧠 AI Decision Center', 'AI đọc toàn bộ chiến dịch + dữ liệu lợi nhuận, đề xuất Tăng/Giữ/Giảm/Dừng cho từng chiến dịch — bạn duyệt riêng từng cái.'],
+      ['profitcrm', '💰 Lợi nhuận & CRM', 'Tính lợi nhuận thật (Doanh thu − Giá vốn − Ship − Hoa hồng − Chi phí quảng cáo), quản lý Sản phẩm/Đơn hàng/Lead.'],
+      ['accounts', 'BM / Ad Account', 'Quản lý Business Manager và Ad Account liên kết.'],
+      ['pixels', 'Pixel & CAPI', 'Xem Pixel, gửi sự kiện Conversions API, tạo Custom Conversion.'],
+      ['insights', 'Hiệu suất', 'Bảng hiệu suất từng Ad: chi tiêu/CTR/CPC/CPA/ROAS, xuất CSV.'],
+      ['research', 'Nghiên cứu đối thủ', 'Tra cứu Meta Ad Library, phân tích thị trường bằng AI.'],
+      ['audiences', 'Đối tượng', 'Tạo Custom/Lookalike/Website/Engagement Audience.'],
+      ['catalog', '🛍️ Catalog', 'Tạo Catalog sản phẩm, đồng bộ hàng loạt từ API website.'],
+      ['googleads', 'Google Ads', 'Kết nối và tạo chiến dịch Search trên Google Ads.'],
+      ['automation', 'Tự động hóa', 'Đặt luật "Nếu CPA > X thì Tạm dừng" — tự kiểm tra định kỳ.'],
+      ['chatbot', 'Chatbot AI', 'Chatbot trả lời khách tự động qua Telegram, đúng tính cách thương hiệu.'],
+      ['seo', 'SEO tự động', 'Quét lỗi SEO cơ bản và lấy điểm PageSpeed thật từ Google.'],
+      ['marketing', 'Marketing', 'Tạo link UTM, sổ tay ghi chú kết quả các đợt chạy.'],
+    ].forEach(([id, title, desc]) => { %>
+      <div class="aai-tab" id="aai-tab-<%= id %>">
+        <div class="aai-soon">
+          <p class="font-semibold text-ink mb-1"><%= title %></p>
+          <p class="text-sm mb-2"><%= desc %></p>
+          <p class="text-xs">Sắp ra mắt trên bản web — hiện có sẵn trong tool desktop AAi-3dvietpro.</p>
+        </div>
+      </div>
+    <% }) %>
+
+  </div>
 </div>
+
+<% } %>
 
 <script>
 (function () {
+  // ---------------- Điều hướng tab nội bộ (giống hệt tool desktop) ----------------
+  const navBtns = document.querySelectorAll('.aai-nav-btn');
+  const tabs = document.querySelectorAll('.aai-tab');
+  function activateTab(tabId) {
+    navBtns.forEach((b) => b.classList.toggle('active', b.dataset.tab === tabId));
+    tabs.forEach((t) => t.classList.toggle('active', t.id === `aai-tab-${tabId}`));
+    const group = document.querySelector(`.aai-nav-btn[data-tab="${tabId}"]`)?.closest('.aai-nav-group');
+    if (group) group.classList.remove('collapsed');
+  }
+  navBtns.forEach((btn) => btn.addEventListener('click', () => activateTab(btn.dataset.tab)));
+  document.querySelectorAll('.aai-nav-group-toggle').forEach((toggle) => {
+    toggle.addEventListener('click', () => {
+      document.getElementById(`aai-group-${toggle.dataset.group}`).classList.toggle('collapsed');
+    });
+  });
+  const coldStartJumpBtn = document.getElementById('coldStartJumpBtn');
+  if (coldStartJumpBtn) {
+    coldStartJumpBtn.addEventListener('click', () => {
+      activateTab('campaigns');
+      const toggle = document.getElementById('coldStartToggle');
+      if (toggle && !toggle.checked) {
+        toggle.checked = true;
+        toggle.dispatchEvent(new Event('change'));
+      }
+    });
+  }
+
   const coldStartToggle = document.getElementById('coldStartToggle');
   const pixelBlock = document.getElementById('pixelBlock');
   const objLeads = document.getElementById('objLeads');
@@ -441,22 +600,6 @@
     btn.addEventListener('click', () => deleteWebsiteTarget(btn.dataset.wtDelete));
   });
 
-  const savePostFreqBtn = document.getElementById('savePostFreqBtn');
-  if (savePostFreqBtn) {
-    savePostFreqBtn.addEventListener('click', async () => {
-      const msg = document.getElementById('postFreqMsg');
-      await fetch('/admin/aai-ads/frequency', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          postsPerDay: document.getElementById('postFreqPerDay').value,
-          minGapMinutes: document.getElementById('postFreqGap').value,
-        }),
-      });
-      msg.textContent = 'Đã lưu.';
-    });
-  }
-
   function selectedValues(id) {
     return Array.from(document.getElementById(id).selectedOptions).map((o) => o.value).filter(Boolean);
   }
@@ -478,13 +621,22 @@
         groupIds: document.getElementById('aiApGroupIds').value.split('\n').map((s) => s.trim()).filter(Boolean),
       }),
     });
+    // Số bài/ngày nằm chung 1 khối với AI tự động đăng bài — lưu cùng lúc, 1 nút duy nhất.
+    await fetch('/admin/aai-ads/frequency', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        postsPerDay: document.getElementById('postFreqPerDay').value,
+        minGapMinutes: document.getElementById('postFreqGap').value,
+      }),
+    });
   }
 
   const saveAiApBtn = document.getElementById('saveAiApBtn');
   if (saveAiApBtn) {
     saveAiApBtn.addEventListener('click', async () => {
       await saveAiAutoPostConfig();
-      document.getElementById('aiApMsg').textContent = 'Đã lưu cấu hình.';
+      document.getElementById('aiApMsg').textContent = 'Đã lưu cấu hình — tool sẽ tự đăng theo đúng lịch này cho tới khi đổi lại.';
     });
   }
 
