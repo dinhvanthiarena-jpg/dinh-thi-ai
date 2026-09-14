@@ -1243,7 +1243,14 @@ function buildPractice(words, sentences, max) {
       q.push({ type: "truefalse", word: w, shown: lie ? other.en : w.en, answer: !lie });
       return;
     }
-    const kinds = w.en.includes(" ") ? ["choice", "reverse", "listen"] : ["choice", "listen", "reverse", "type"];
+    // Dạng "gõ chữ" CHỈ hợp với thứ tiếng gõ thẳng được bằng bàn phím thường.
+    // Tiếng Trung thì người mới học không có bộ gõ chữ Hán, bắt gõ 学生 là bắt
+    // bí — bỏ dạng đó ra, thay bằng ba dạng chọn còn lại.
+    const goDuoc = !String(MA_HOC).startsWith("zh") && !String(MA_HOC).startsWith("ja")
+                && !String(MA_HOC).startsWith("ko");
+    const kinds = w.en.includes(" ") || !goDuoc
+      ? ["choice", "reverse", "listen"]
+      : ["choice", "listen", "reverse", "type"];
     const type = kinds[i % kinds.length];
     if (type === "type") { q.push({ type: "type", word: w }); return; }
     // Luoi bay phai CUNG KIEU voi dap an dung: cum thi lay cum, tu don thi lay
@@ -1406,6 +1413,20 @@ function setBtn(label, cls, on) {
   b.textContent = label; b.className = "btn p-next " + cls; b.disabled = !on;
 }
 function setKicker(text) { $("#slideKicker").textContent = text || ""; }
+
+/* Tên thứ tiếng ĐANG HỌC, lấy từ khoá chứ không viết chết là "tiếng Anh".
+   Người Việt học tiếng Trung mà màn hình bảo "Dịch sang tiếng Anh" thì sai hẳn.
+   Bỏ chữ "Tiếng" đầu cho ghép câu được: "Dịch sang tiếng " + tenTiengHoc(). */
+function tenTiengHoc() {
+  const k = khoaTheoMa(S.khoa || COURSE.id);
+  // Cắt chữ "Tiếng" đầu bằng tay, KHÔNG dùng biểu thức chính quy: dấu gạch chéo
+  // ngược đi qua mấy lớp công cụ hay bị nuốt mất, đã dính đúng bẫy đó ở chính
+  // dòng này — biểu thức thành /^Tiếngs*/ nên thừa lại một dấu cách.
+  const t = String(k.tenHoc || "").trim();
+  const bo = t.slice(0, 5).toLowerCase() === "tiếng" ? t.slice(5).trim() : t;
+  return bo || t;
+}
+
 function showMascot(on) { $("#mascotTop").classList.toggle("hide", !on); }
 
 function renderSlide() {
@@ -2204,7 +2225,7 @@ const DRILL = {
   },
 
   reverse(d, st) {
-    setKicker("Dịch sang tiếng Anh");
+    setKicker("Dịch sang tiếng " + tenTiengHoc());
     st.append(cauHoiNgheDuoc("“" + d.word.vi + "”", "vi-VN", d.word.vi));
     const anh = anhChoTu(d.word);
     showMascot(!anh);
@@ -2857,10 +2878,10 @@ const DRILL = {
   },
 
   type(d, st) {
-    showMascot(true); setKicker("Viết bằng tiếng Anh");
+    showMascot(true); setKicker("Viết bằng tiếng " + tenTiengHoc());
     st.append(cauHoiNgheDuoc(d.word.vi, "vi-VN"));
     const box = el("textarea", "type-in"); box.rows = 2;
-    box.setAttribute("aria-label", "Nhập từ tiếng Anh cho: " + d.word.vi);
+    box.setAttribute("aria-label", "Nhập từ tiếng " + tenTiengHoc() + " cho: " + d.word.vi);
     box.autocapitalize = "off"; box.autocomplete = "off"; box.spellcheck = false;
     box.addEventListener("input", () => {
       P.picked = { built: box.value, ok: norm(box.value) === norm(d.word.en) };
@@ -9841,5 +9862,4 @@ function hanChuSau() {
   // Màn Học nằm ngoài khối này nên phải phơi hàm ra mới gọi được.
   window.capNhatTheViet = hanCapNhatThe;
 })();
-
 })();
