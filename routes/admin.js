@@ -67,6 +67,30 @@ router.get('/aai-ads/posting-log', adminController.aaiAdsGetPostingLog);
 router.post('/aai-ads/autopost-config', adminController.aaiAdsSaveAutoPostConfig);
 router.post('/aai-ads/run-now', adminController.aaiAdsRunPostingNow);
 
+router.get('/aai-ads/automation/rules', adminController.aaiAdsAutomationRules);
+router.post('/aai-ads/automation/rules', adminController.aaiAdsAutomationSaveRule);
+router.post('/aai-ads/automation/rules/:id/delete', adminController.aaiAdsAutomationDeleteRule);
+router.post('/aai-ads/automation/rules/:id/toggle', adminController.aaiAdsAutomationToggleRule);
+router.get('/aai-ads/automation/log', adminController.aaiAdsAutomationLog);
+router.post('/aai-ads/automation/run-now', adminController.aaiAdsAutomationRunNow);
+
+router.post('/aai-ads/crm/products', adminController.aaiAdsProductAdd);
+router.post('/aai-ads/crm/products/:id/delete', adminController.aaiAdsProductDelete);
+router.post('/aai-ads/crm/order-sources', adminController.aaiAdsOrderSourceAdd);
+router.post('/aai-ads/crm/order-sources/:id/delete', adminController.aaiAdsOrderSourceDelete);
+router.post('/aai-ads/crm/order-sources/:id/sync', adminController.aaiAdsOrderSourceSync);
+router.post('/aai-ads/crm/orders', adminController.aaiAdsOrderAdd);
+router.post('/aai-ads/crm/orders/:id/delete', adminController.aaiAdsOrderDelete);
+router.post('/aai-ads/crm/leads', adminController.aaiAdsLeadAdd);
+router.post('/aai-ads/crm/leads/bulk', adminController.aaiAdsLeadAddBulk);
+router.post('/aai-ads/crm/leads/:id/status', adminController.aaiAdsLeadUpdateStatus);
+router.post('/aai-ads/crm/leads/:id/delete', adminController.aaiAdsLeadDelete);
+router.get('/aai-ads/crm/profit-summary', adminController.aaiAdsProfitSummary);
+
+router.get('/aai-ads/decision-center', adminController.aaiAdsDecisionCenter);
+router.post('/aai-ads/decision-center/apply', adminController.aaiAdsApplyRecommendation);
+router.get('/aai-ads/learning-insights', adminController.aaiAdsLearningInsights);
+
 router.get('/chats', adminController.chatList);
 router.get('/chats/:channel/:sessionId', adminController.chatDetail);
 

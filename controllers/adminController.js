@@ -592,6 +592,12 @@ exports.aaiAdsPage = async (req, res) => {
   const postingLog = aaiAds.loadPostingLog();
   const postingFreq = aaiAds.getPostingFreqSettings();
   const aiAutoPostConfig = aaiAds.getAiAutoPostConfig();
+  const automationRules = aaiAds.loadAutomationRules();
+  const automationLog = aaiAds.loadAutomationLog();
+  const products = aaiAds.loadProducts();
+  const orderSources = aaiAds.loadOrderSources();
+  const orders = aaiAds.loadOrders();
+  const leads = aaiAds.loadLeads();
   res.render('admin/aai-ads', {
     title: 'Tạo chiến dịch A-AI Ads',
     connected,
@@ -603,6 +609,12 @@ exports.aaiAdsPage = async (req, res) => {
     postingLog,
     postingFreq,
     aiAutoPostConfig,
+    automationRules,
+    automationLog,
+    products,
+    orderSources,
+    orders,
+    leads,
   });
 };
 
@@ -754,6 +766,217 @@ exports.aaiAdsSaveAutoPostConfig = (req, res) => {
 exports.aaiAdsRunPostingNow = async (req, res) => {
   try {
     const result = await aaiAds.runAllPostingNow();
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+// ---------------- A-AI Ads — Tự động hóa (Automation rules) ----------------
+// Port từ tool desktop fb-ads-manager — xem services/aaiAdsService.js.
+
+exports.aaiAdsAutomationRules = (req, res) => {
+  res.json(aaiAds.loadAutomationRules());
+};
+
+exports.aaiAdsAutomationSaveRule = (req, res) => {
+  try {
+    const body = req.body;
+    const rule = aaiAds.saveAutomationRule({
+      id: body.id || undefined,
+      name: body.name,
+      adAccountId: body.adAccountId,
+      scope: body.scope || 'campaign',
+      metric: body.metric,
+      operator: body.operator,
+      threshold: parseFloat(body.threshold),
+      windowDays: parseInt(body.windowDays, 10) || 7,
+      action: body.action,
+      scalePercent: parseInt(body.scalePercent, 10) || 20,
+      enabled: body.enabled !== false && body.enabled !== 'false',
+    });
+    res.json(rule);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsAutomationDeleteRule = (req, res) => {
+  aaiAds.deleteAutomationRule(req.params.id);
+  res.json({ ok: true });
+};
+
+exports.aaiAdsAutomationToggleRule = (req, res) => {
+  try {
+    const rules = aaiAds.loadAutomationRules();
+    const existing = rules.find((r) => r.id === req.params.id);
+    if (!existing) throw new Error('Không tìm thấy luật.');
+    const rule = aaiAds.saveAutomationRule({ ...existing, enabled: !existing.enabled });
+    res.json(rule);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsAutomationLog = (req, res) => {
+  res.json(aaiAds.loadAutomationLog());
+};
+
+exports.aaiAdsAutomationRunNow = async (req, res) => {
+  try {
+    const result = await aaiAds.runAutomationCheck();
+    res.json({ ok: true, triggered: result });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+// ---------------- A-AI Ads — Lợi nhuận & CRM ----------------
+// Port từ tool desktop fb-ads-manager — xem services/aaiAdsService.js.
+
+exports.aaiAdsProductAdd = (req, res) => {
+  try {
+    const body = req.body;
+    if (!body.name) throw new Error('Vui lòng nhập tên sản phẩm.');
+    const product = aaiAds.addProduct({
+      name: body.name,
+      cost: parseFloat(body.cost) || 0,
+      shippingCost: parseFloat(body.shippingCost) || 0,
+      commissionPercent: parseFloat(body.commissionPercent) || 0,
+    });
+    res.json(product);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsProductDelete = (req, res) => {
+  aaiAds.deleteProduct(req.params.id);
+  res.json({ ok: true });
+};
+
+exports.aaiAdsOrderSourceAdd = (req, res) => {
+  try {
+    const { name, apiUrl, authToken } = req.body;
+    if (!name || !apiUrl) throw new Error('Vui lòng nhập tên và địa chỉ API.');
+    const source = aaiAds.addOrderSource({ name, apiUrl, authToken: authToken || undefined });
+    res.json(source);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsOrderSourceDelete = (req, res) => {
+  aaiAds.deleteOrderSource(req.params.id);
+  res.json({ ok: true });
+};
+
+exports.aaiAdsOrderSourceSync = async (req, res) => {
+  try {
+    const result = await aaiAds.syncOrderSource(req.params.id);
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsOrderAdd = (req, res) => {
+  try {
+    const body = req.body;
+    if (!body.amount) throw new Error('Vui lòng nhập số tiền đơn hàng.');
+    const order = aaiAds.addOrder({
+      amount: parseFloat(body.amount),
+      productId: body.productId || null,
+      campaignName: body.campaignName || null,
+      orderChannel: body.orderChannel || 'website',
+      customerEmail: body.customerEmail || null,
+      customerPhone: body.customerPhone || null,
+      orderDate: body.orderDate || new Date().toISOString(),
+    });
+    res.json(order);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsOrderDelete = (req, res) => {
+  aaiAds.deleteOrder(req.params.id);
+  res.json({ ok: true });
+};
+
+exports.aaiAdsLeadAdd = (req, res) => {
+  try {
+    const body = req.body;
+    if (!body.name) throw new Error('Vui lòng nhập tên khách hàng.');
+    const lead = aaiAds.addLead({
+      name: body.name,
+      email: body.email || null,
+      phone: body.phone || null,
+      source: body.source || 'manual',
+      orderValue: parseFloat(body.orderValue) || 0,
+    });
+    res.json(lead);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsLeadAddBulk = (req, res) => {
+  try {
+    const added = aaiAds.addLeadsBulk(req.body.text || '');
+    res.json({ added: added.length });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsLeadUpdateStatus = (req, res) => {
+  const lead = aaiAds.updateLeadStatus(req.params.id, req.body.status);
+  res.json(lead || { ok: false });
+};
+
+exports.aaiAdsLeadDelete = (req, res) => {
+  aaiAds.deleteLead(req.params.id);
+  res.json({ ok: true });
+};
+
+exports.aaiAdsProfitSummary = async (req, res) => {
+  try {
+    const { adAccountId, windowDays } = req.query;
+    const summary = await aaiAds.computeProfitSummary(adAccountId, parseInt(windowDays, 10) || 30);
+    res.json(summary);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+// ---------------- A-AI Ads — AI Decision Center + Learning Loop ----------------
+// Port từ tool desktop fb-ads-manager — xem services/aaiAdsService.js.
+
+exports.aaiAdsDecisionCenter = async (req, res) => {
+  try {
+    const { adAccountId, windowDays } = req.query;
+    const result = await aaiAds.getDecisionCenter(adAccountId, parseInt(windowDays, 10) || 30);
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsApplyRecommendation = async (req, res) => {
+  try {
+    const { adAccountId, campaignName, action } = req.body;
+    const result = await aaiAds.applyDecisionRecommendation(adAccountId, campaignName, action);
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+};
+
+exports.aaiAdsLearningInsights = async (req, res) => {
+  try {
+    const { adAccountId, windowDays } = req.query;
+    const result = await aaiAds.getLearningInsights(adAccountId, parseInt(windowDays, 10) || 30);
     res.json(result);
   } catch (e) {
     res.status(400).json({ error: e.message });

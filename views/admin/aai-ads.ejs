@@ -372,11 +372,242 @@
       </div>
     </div>
 
+    <!-- ============ AI Decision Center (port từ fb-ads-manager) ============ -->
+    <div class="aai-tab" id="aai-tab-decisioncenter">
+      <div class="card mb-4">
+        <p class="font-semibold text-ink mb-1">🧠 AI Decision Center</p>
+        <p class="text-sm text-muted mb-3">AI đọc toàn bộ chiến dịch + dữ liệu lợi nhuận, đề xuất Tăng/Giữ/Giảm/Dừng cho từng chiến dịch — bạn duyệt riêng từng cái hoặc duyệt tất cả.</p>
+        <div class="flex flex-wrap gap-2 items-end mb-2">
+          <div>
+            <label class="label">Ad Account</label>
+            <select id="dcAdAccount" class="input">
+              <% adAccounts.forEach(a => { %><option value="<%= a.id %>"><%= a.name %> (<%= a.id %>)</option><% }) %>
+            </select>
+          </div>
+          <div>
+            <label class="label">Khoảng thời gian</label>
+            <select id="dcWindow" class="input">
+              <option value="7">7 ngày</option>
+              <option value="14">14 ngày</option>
+              <option value="30" selected>30 ngày</option>
+              <option value="90">90 ngày</option>
+            </select>
+          </div>
+          <button type="button" id="runDecisionCenterBtn" class="btn-primary">Phân tích ngay</button>
+          <button type="button" id="approveAllBtn" class="btn-outline" style="display:none">Duyệt tất cả đề xuất</button>
+        </div>
+        <p id="dcMsg" class="text-sm text-muted"></p>
+      </div>
+      <div id="dcFindings" class="card mb-4" style="display:none"></div>
+      <div id="dcRecommendations"></div>
+
+      <div class="card mt-6">
+        <p class="font-semibold text-ink mb-1">📈 AI Learning Loop</p>
+        <p class="text-sm text-muted mb-3">Tìm pattern/xu hướng, cảnh báo mỏi quảng cáo, nguồn lead tốt nhất, và lời khuyên cho chiến dịch tiếp theo — dựa trên dữ liệu chiến dịch + đơn hàng + lead đã có sẵn.</p>
+        <button type="button" id="runLearningBtn" class="btn-outline mb-2">Chạy phân tích Learning Loop</button>
+        <div id="learningResult"></div>
+      </div>
+    </div>
+
+    <!-- ============ Lợi nhuận & CRM (port từ fb-ads-manager) ============ -->
+    <div class="aai-tab" id="aai-tab-profitcrm">
+      <div class="card mb-4">
+        <p class="font-semibold text-ink mb-1">💰 Lợi nhuận thực tế</p>
+        <p class="text-sm text-muted mb-3">Doanh thu − Giá vốn − Ship − Hoa hồng − Chi phí quảng cáo, tính theo từng chiến dịch.</p>
+        <div class="flex flex-wrap gap-2 items-end mb-2">
+          <div>
+            <label class="label">Ad Account</label>
+            <select id="profitAdAccount" class="input">
+              <% adAccounts.forEach(a => { %><option value="<%= a.id %>"><%= a.name %> (<%= a.id %>)</option><% }) %>
+            </select>
+          </div>
+          <div>
+            <label class="label">Khoảng thời gian</label>
+            <select id="profitWindow" class="input">
+              <option value="7">7 ngày</option>
+              <option value="14">14 ngày</option>
+              <option value="30" selected>30 ngày</option>
+              <option value="90">90 ngày</option>
+            </select>
+          </div>
+          <button type="button" id="loadProfitBtn" class="btn-primary">Tính lợi nhuận</button>
+        </div>
+        <div id="profitKpis" class="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-2"></div>
+        <div id="profitByCampaign" class="mt-3 text-sm"></div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="card">
+          <p class="font-semibold text-ink mb-2">Sản phẩm</p>
+          <div class="grid grid-cols-2 gap-2 mb-2">
+            <input id="pName" class="input" placeholder="Tên sản phẩm">
+            <input id="pCost" class="input" type="number" placeholder="Giá vốn">
+            <input id="pShip" class="input" type="number" placeholder="Phí ship">
+            <input id="pCommission" class="input" type="number" placeholder="Hoa hồng %">
+          </div>
+          <button type="button" id="addProductBtn" class="btn-outline mb-2">Thêm sản phẩm</button>
+          <div id="productsList" class="space-y-1 text-sm">
+            <% products.forEach(p => { %>
+              <div class="flex items-center justify-between bg-primary-50/40 rounded px-3 py-2" data-product-row="<%= p.id %>">
+                <span><strong><%= p.name %></strong> — vốn <%= p.cost %>đ + ship <%= p.shippingCost %>đ + <%= p.commissionPercent %>% hoa hồng</span>
+                <button type="button" class="text-rose-600 text-xs" data-product-delete="<%= p.id %>">Xóa</button>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="font-semibold text-ink mb-2">Nguồn đơn hàng tự động (đồng bộ từ website)</p>
+          <div class="grid grid-cols-1 gap-2 mb-2">
+            <input id="osName" class="input" placeholder="Tên (VD: Website chính)">
+            <input id="osApiUrl" class="input" placeholder="https://.../api/orders">
+            <input id="osAuthToken" class="input" placeholder="Bearer Token (nếu có)">
+          </div>
+          <button type="button" id="addOrderSourceBtn" class="btn-outline mb-2">Thêm nguồn</button>
+          <div id="orderSourcesList" class="space-y-1 text-sm">
+            <% orderSources.forEach(s => { %>
+              <div class="flex items-center justify-between bg-primary-50/40 rounded px-3 py-2" data-os-row="<%= s.id %>">
+                <span><strong><%= s.name %></strong> — <%= s.apiUrl %></span>
+                <span class="flex gap-2">
+                  <button type="button" class="text-primary-700 text-xs" data-os-sync="<%= s.id %>">Đồng bộ ngay</button>
+                  <button type="button" class="text-rose-600 text-xs" data-os-delete="<%= s.id %>">Xóa</button>
+                </span>
+              </div>
+            <% }) %>
+          </div>
+          <p id="osMsg" class="text-xs text-muted mt-1"></p>
+        </div>
+      </div>
+
+      <div class="card mt-4">
+        <p class="font-semibold text-ink mb-2">Đơn hàng thủ công (không qua website)</p>
+        <div class="grid sm:grid-cols-3 gap-2 mb-2">
+          <input id="oAmount" class="input" type="number" placeholder="Số tiền (VNĐ)">
+          <select id="oProduct" class="input">
+            <option value="">-- Sản phẩm --</option>
+            <% products.forEach(p => { %><option value="<%= p.id %>"><%= p.name %></option><% }) %>
+          </select>
+          <input id="oCampaign" class="input" placeholder="Tên chiến dịch (khớp Facebook)">
+          <input id="oPhone" class="input" placeholder="SĐT khách (tùy chọn)">
+          <select id="oChannel" class="input">
+            <option value="website">Website</option>
+            <option value="phone">Điện thoại</option>
+            <option value="zalo">Zalo</option>
+            <option value="store">Tại cửa hàng</option>
+          </select>
+        </div>
+        <button type="button" id="addOrderBtn" class="btn-outline mb-2">Thêm đơn hàng</button>
+        <div id="ordersList" class="space-y-1 text-sm max-h-64 overflow-y-auto">
+          <% orders.slice(-30).reverse().forEach(o => { %>
+            <div class="flex items-center justify-between bg-primary-50/40 rounded px-3 py-2" data-order-row="<%= o.id %>">
+              <span><%= new Date(o.orderDate).toLocaleDateString('vi-VN') %> — <%= Number(o.amount).toLocaleString('vi-VN') %>đ<%= o.campaignName ? ' — ' + o.campaignName : '' %></span>
+              <button type="button" class="text-rose-600 text-xs" data-order-delete="<%= o.id %>">Xóa</button>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <div class="card mt-4">
+        <p class="font-semibold text-ink mb-2">Lead / Khách tiềm năng</p>
+        <div class="grid sm:grid-cols-4 gap-2 mb-2">
+          <input id="lName" class="input" placeholder="Tên">
+          <input id="lEmail" class="input" placeholder="Email">
+          <input id="lPhone" class="input" placeholder="SĐT">
+          <input id="lOrderValue" class="input" type="number" placeholder="Giá trị đơn dự kiến">
+        </div>
+        <button type="button" id="addLeadBtn" class="btn-outline mb-2">Thêm lead</button>
+        <textarea id="lBulk" class="input mb-2" rows="3" placeholder="Dán nhiều lead, mỗi dòng: Tên,Email,SĐT"></textarea>
+        <button type="button" id="addLeadBulkBtn" class="btn-outline mb-2">Thêm hàng loạt</button>
+        <div id="leadsList" class="space-y-1 text-sm max-h-64 overflow-y-auto">
+          <% leads.slice(-30).reverse().forEach(l => { %>
+            <div class="flex items-center justify-between bg-primary-50/40 rounded px-3 py-2" data-lead-row="<%= l.id %>">
+              <span><strong><%= l.name %></strong> <span class="badge"><%= l.tier %></span> <%= l.email || '' %> <%= l.phone || '' %></span>
+              <span class="flex gap-2 items-center">
+                <select class="input text-xs" data-lead-status="<%= l.id %>">
+                  <option value="LEAD" <%= l.status==='LEAD'?'selected':'' %>>LEAD</option>
+                  <option value="QUALIFIED" <%= l.status==='QUALIFIED'?'selected':'' %>>QUALIFIED</option>
+                  <option value="CUSTOMER" <%= l.status==='CUSTOMER'?'selected':'' %>>CUSTOMER</option>
+                </select>
+                <button type="button" class="text-rose-600 text-xs" data-lead-delete="<%= l.id %>">Xóa</button>
+              </span>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ Tự động hóa (port từ fb-ads-manager) ============ -->
+    <div class="aai-tab" id="aai-tab-automation">
+      <div class="card mb-4">
+        <p class="font-semibold text-ink mb-1">Tự động hóa — đặt luật bảo vệ ngân sách</p>
+        <p class="text-sm text-muted mb-3">Đặt luật kiểu "Nếu CPA &gt; X thì Tạm dừng" hoặc "Nếu ROAS &gt; X thì Tăng ngân sách" — hệ thống tự kiểm tra mỗi 15 phút trên server, không cần mở trang này.</p>
+        <div class="grid sm:grid-cols-3 gap-2 mb-2">
+          <input id="autoName" class="input" placeholder="Tên luật">
+          <select id="autoAdAccount" class="input">
+            <% adAccounts.forEach(a => { %><option value="<%= a.id %>"><%= a.name %> (<%= a.id %>)</option><% }) %>
+          </select>
+          <select id="autoScope" class="input">
+            <option value="campaign">Cấp Chiến dịch</option>
+            <option value="ad">Cấp Quảng cáo (Ad)</option>
+          </select>
+          <select id="autoMetric" class="input">
+            <option value="spend">Chi tiêu</option>
+            <option value="cpc">CPC</option>
+            <option value="ctr">CTR</option>
+            <option value="cpm">CPM</option>
+            <option value="cpa">CPA</option>
+            <option value="roas">ROAS</option>
+          </select>
+          <select id="autoOperator" class="input">
+            <option value=">">Lớn hơn (&gt;)</option>
+            <option value="<">Nhỏ hơn (&lt;)</option>
+          </select>
+          <input id="autoThreshold" class="input" type="number" step="0.01" placeholder="Ngưỡng">
+          <select id="autoWindow" class="input">
+            <option value="7">7 ngày</option>
+            <option value="14">14 ngày</option>
+            <option value="30" selected>30 ngày</option>
+          </select>
+          <select id="autoAction" class="input">
+            <option value="notify">Chỉ ghi log</option>
+            <option value="pause">Tạm dừng</option>
+            <option value="scale_up">Tăng ngân sách</option>
+          </select>
+          <input id="autoScalePercent" class="input" type="number" placeholder="% tăng ngân sách (mặc định 20)">
+        </div>
+        <button type="button" id="saveRuleBtn" class="btn-primary mb-2">Lưu luật</button>
+        <button type="button" id="runAutomationNowBtn" class="btn-outline mb-2">Chạy kiểm tra ngay</button>
+        <p id="autoMsg" class="text-sm text-muted"></p>
+      </div>
+
+      <div class="card mb-4">
+        <p class="font-semibold text-ink mb-2">Danh sách luật</p>
+        <div id="rulesList" class="space-y-1 text-sm">
+          <% automationRules.forEach(r => { %>
+            <div class="flex items-center justify-between bg-primary-50/40 rounded px-3 py-2" data-rule-row="<%= r.id %>">
+              <span><strong><%= r.name %></strong> — Nếu <%= r.metric %> <%= r.operator %> <%= r.threshold %> (<%= r.windowDays %> ngày, <%= r.scope %>) thì <%= r.action %> <span class="badge"><%= r.enabled ? 'Bật' : 'Tắt' %></span></span>
+              <span class="flex gap-2">
+                <button type="button" class="text-primary-700 text-xs" data-rule-toggle="<%= r.id %>" data-rule-enabled="<%= r.enabled ? '1' : '' %>"><%= r.enabled ? 'Tắt' : 'Bật' %></button>
+                <button type="button" class="text-rose-600 text-xs" data-rule-delete="<%= r.id %>">Xóa</button>
+              </span>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="font-semibold text-ink mb-2">Nhật ký hoạt động</p>
+        <div id="automationLogList" class="space-y-1 text-sm max-h-64 overflow-y-auto">
+          <% automationLog.slice(0, 30).forEach(e => { %>
+            <div><%= new Date(e.time).toLocaleString('vi-VN') %> — <%= e.ruleName %> — <%= e.campaignName %> (<%= e.metric %>=<%= e.value %>) → <%= e.result %></div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
     <!-- ============ CÁC TAB CHƯA PORT — PLACEHOLDER ============ -->
     <% [
       ['dashboard', 'Tổng quan', 'Xem nhanh tổng chi tiêu và số chiến dịch đang chạy/tổng số.'],
-      ['decisioncenter', '🧠 AI Decision Center', 'AI đọc toàn bộ chiến dịch + dữ liệu lợi nhuận, đề xuất Tăng/Giữ/Giảm/Dừng cho từng chiến dịch — bạn duyệt riêng từng cái.'],
-      ['profitcrm', '💰 Lợi nhuận & CRM', 'Tính lợi nhuận thật (Doanh thu − Giá vốn − Ship − Hoa hồng − Chi phí quảng cáo), quản lý Sản phẩm/Đơn hàng/Lead.'],
       ['accounts', 'BM / Ad Account', 'Quản lý Business Manager và Ad Account liên kết.'],
       ['pixels', 'Pixel & CAPI', 'Xem Pixel, gửi sự kiện Conversions API, tạo Custom Conversion.'],
       ['insights', 'Hiệu suất', 'Bảng hiệu suất từng Ad: chi tiêu/CTR/CPC/CPA/ROAS, xuất CSV.'],
@@ -384,7 +615,6 @@
       ['audiences', 'Đối tượng', 'Tạo Custom/Lookalike/Website/Engagement Audience.'],
       ['catalog', '🛍️ Catalog', 'Tạo Catalog sản phẩm, đồng bộ hàng loạt từ API website.'],
       ['googleads', 'Google Ads', 'Kết nối và tạo chiến dịch Search trên Google Ads.'],
-      ['automation', 'Tự động hóa', 'Đặt luật "Nếu CPA > X thì Tạm dừng" — tự kiểm tra định kỳ.'],
       ['chatbot', 'Chatbot AI', 'Chatbot trả lời khách tự động qua Telegram, đúng tính cách thương hiệu.'],
       ['seo', 'SEO tự động', 'Quét lỗi SEO cơ bản và lấy điểm PageSpeed thật từ Google.'],
       ['marketing', 'Marketing', 'Tạo link UTM, sổ tay ghi chú kết quả các đợt chạy.'],
@@ -744,5 +974,380 @@
   }
   const loadPostingLogBtn = document.getElementById('loadPostingLogBtn');
   if (loadPostingLogBtn) loadPostingLogBtn.addEventListener('click', loadPostingLog);
+
+  // ---------------- AI Decision Center + Learning Loop ----------------
+
+  const actionLabel = { scale_up: 'Tăng ngân sách', hold: 'Giữ nguyên', reduce: 'Giảm ngân sách', pause: 'Tạm dừng' };
+  let pendingRecommendations = [];
+
+  const runDecisionCenterBtn = document.getElementById('runDecisionCenterBtn');
+  if (runDecisionCenterBtn) {
+    runDecisionCenterBtn.addEventListener('click', async () => {
+      const msg = document.getElementById('dcMsg');
+      const adAccountId = document.getElementById('dcAdAccount').value;
+      const windowDays = document.getElementById('dcWindow').value;
+      msg.textContent = 'AI đang phân tích toàn bộ chiến dịch...';
+      document.getElementById('dcFindings').style.display = 'none';
+      document.getElementById('dcRecommendations').innerHTML = '';
+      document.getElementById('approveAllBtn').style.display = 'none';
+      try {
+        const res = await fetch(`/admin/aai-ads/decision-center?adAccountId=${encodeURIComponent(adAccountId)}&windowDays=${windowDays}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        pendingRecommendations = data.recommendations || [];
+        const findingsEl = document.getElementById('dcFindings');
+        if (data.findings && data.findings.length) {
+          findingsEl.style.display = '';
+          findingsEl.innerHTML = '<p class="font-semibold text-ink mb-2">Nhận định</p>' + data.findings.map((f) => `<p class="text-sm mb-1">• ${f}</p>`).join('');
+        }
+        const recEl = document.getElementById('dcRecommendations');
+        recEl.innerHTML = pendingRecommendations.length
+          ? pendingRecommendations
+              .map(
+                (r, idx) => `
+          <div class="card mb-2 flex items-center justify-between" data-rec-row="${idx}">
+            <div><strong>${r.campaignName}</strong> — <span class="badge">${actionLabel[r.action] || r.action}</span><p class="text-sm text-muted">${r.reason || ''}</p></div>
+            <button type="button" class="btn-outline" data-rec-approve="${idx}">Duyệt riêng</button>
+          </div>`
+              )
+              .join('')
+          : '<p class="text-muted text-sm">Không có đề xuất nào — mọi chiến dịch đang ổn.</p>';
+        recEl.querySelectorAll('[data-rec-approve]').forEach((btn) => {
+          btn.addEventListener('click', () => applyRecommendation(parseInt(btn.dataset.recApprove, 10), adAccountId));
+        });
+        document.getElementById('approveAllBtn').style.display = pendingRecommendations.length ? '' : 'none';
+        msg.textContent = `Đã phân tích ${data.campaigns ? data.campaigns.length : 0} chiến dịch.`;
+      } catch (e) {
+        msg.textContent = `Lỗi: ${e.message}`;
+      }
+    });
+  }
+
+  async function applyRecommendation(idx, adAccountId) {
+    const rec = pendingRecommendations[idx];
+    if (!rec) return;
+    const row = document.querySelector(`[data-rec-row="${idx}"]`);
+    try {
+      const res = await fetch('/admin/aai-ads/decision-center/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adAccountId, campaignName: rec.campaignName, action: rec.action }),
+      });
+      const result = await res.json();
+      if (result.error) throw new Error(result.error);
+      if (row) row.innerHTML = `<span class="text-emerald-600 text-sm">✓ Đã áp dụng "${actionLabel[rec.action] || rec.action}" cho ${rec.campaignName}</span>`;
+    } catch (e) {
+      if (row) row.querySelector('p').innerHTML += `<br><span class="text-rose-600">Lỗi: ${e.message}</span>`;
+    }
+  }
+
+  const approveAllBtn = document.getElementById('approveAllBtn');
+  if (approveAllBtn) {
+    approveAllBtn.addEventListener('click', async () => {
+      const adAccountId = document.getElementById('dcAdAccount').value;
+      for (let i = 0; i < pendingRecommendations.length; i++) {
+        await applyRecommendation(i, adAccountId);
+      }
+    });
+  }
+
+  const runLearningBtn = document.getElementById('runLearningBtn');
+  if (runLearningBtn) {
+    runLearningBtn.addEventListener('click', async () => {
+      const el = document.getElementById('learningResult');
+      const adAccountId = document.getElementById('dcAdAccount').value;
+      const windowDays = document.getElementById('dcWindow').value;
+      el.innerHTML = '<p class="text-sm text-muted">AI đang phân tích...</p>';
+      try {
+        const res = await fetch(`/admin/aai-ads/learning-insights?adAccountId=${encodeURIComponent(adAccountId)}&windowDays=${windowDays}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        function block(title, items) {
+          if (!items || !items.length) return '';
+          return `<p class="font-semibold text-ink mt-3 mb-1">${title}</p>` + items.map((i) => `<p class="text-sm mb-1">• ${i}</p>`).join('');
+        }
+        el.innerHTML =
+          block('Pattern/Xu hướng', data.patterns) +
+          block('⚠️ Cảnh báo mỏi quảng cáo', data.fatigueWarnings) +
+          block('Nguồn tốt nhất', data.bestSources) +
+          block('Lời khuyên cho chiến dịch tiếp theo', data.nextCampaignAdvice) || '<p class="text-sm text-muted">Chưa đủ dữ liệu để đưa ra nhận định.</p>';
+      } catch (e) {
+        el.innerHTML = `<p class="text-sm text-rose-600">Lỗi: ${e.message}</p>`;
+      }
+    });
+  }
+
+  // ---------------- Lợi nhuận & CRM ----------------
+
+  const loadProfitBtn = document.getElementById('loadProfitBtn');
+  if (loadProfitBtn) {
+    loadProfitBtn.addEventListener('click', async () => {
+      const adAccountId = document.getElementById('profitAdAccount').value;
+      const windowDays = document.getElementById('profitWindow').value;
+      const kpisEl = document.getElementById('profitKpis');
+      const byCampEl = document.getElementById('profitByCampaign');
+      kpisEl.innerHTML = '<p class="text-sm text-muted">Đang tính...</p>';
+      byCampEl.innerHTML = '';
+      try {
+        const res = await fetch(`/admin/aai-ads/crm/profit-summary?adAccountId=${encodeURIComponent(adAccountId)}&windowDays=${windowDays}`);
+        const s = await res.json();
+        if (s.error) throw new Error(s.error);
+        function fmt(n) { return Math.round(n || 0).toLocaleString('vi-VN') + 'đ'; }
+        kpisEl.innerHTML = `
+          <div class="card"><p class="text-xs text-muted">Doanh thu</p><p class="font-semibold text-ink">${fmt(s.revenue)}</p></div>
+          <div class="card"><p class="text-xs text-muted">Chi phí quảng cáo</p><p class="font-semibold text-ink">${fmt(s.adSpend)}</p></div>
+          <div class="card"><p class="text-xs text-muted">Lợi nhuận</p><p class="font-semibold ${s.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${fmt(s.profit)}</p></div>
+          <div class="card"><p class="text-xs text-muted">Số đơn</p><p class="font-semibold text-ink">${s.orderCount}</p></div>
+          <div class="card"><p class="text-xs text-muted">AOV / ROAS</p><p class="font-semibold text-ink">${fmt(s.aov)} / ${(s.roas || 0).toFixed(2)}x</p></div>`;
+        byCampEl.innerHTML = (s.byCampaign || [])
+          .map((c) => `<div class="flex justify-between border-b border-primary-100 py-1"><span>${c.campaignName}</span><span>Chi ${fmt(c.spend)} → DT ${fmt(c.revenue)} → LN <strong class="${c.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${fmt(c.profit)}</strong></span></div>`)
+          .join('') || '<p class="text-muted">Chưa có đơn hàng khớp chiến dịch nào trong khoảng thời gian này.</p>';
+      } catch (e) {
+        kpisEl.innerHTML = `<p class="text-sm text-rose-600">Lỗi: ${e.message}</p>`;
+      }
+    });
+  }
+
+  const addProductBtn = document.getElementById('addProductBtn');
+  if (addProductBtn) {
+    addProductBtn.addEventListener('click', async () => {
+      const name = document.getElementById('pName').value.trim();
+      if (!name) return;
+      const res = await fetch('/admin/aai-ads/crm/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          cost: document.getElementById('pCost').value,
+          shippingCost: document.getElementById('pShip').value,
+          commissionPercent: document.getElementById('pCommission').value,
+        }),
+      });
+      const p = await res.json();
+      if (p.error) return;
+      const list = document.getElementById('productsList');
+      const row = document.createElement('div');
+      row.className = 'flex items-center justify-between bg-primary-50/40 rounded px-3 py-2';
+      row.dataset.productRow = p.id;
+      row.innerHTML = `<span><strong>${p.name}</strong> — vốn ${p.cost}đ + ship ${p.shippingCost}đ + ${p.commissionPercent}% hoa hồng</span><button type="button" class="text-rose-600 text-xs" data-product-delete="${p.id}">Xóa</button>`;
+      list.appendChild(row);
+      row.querySelector('[data-product-delete]').addEventListener('click', () => deleteRow('product', p.id));
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.name;
+      document.getElementById('oProduct').appendChild(opt);
+      ['pName', 'pCost', 'pShip', 'pCommission'].forEach((id) => (document.getElementById(id).value = ''));
+    });
+  }
+
+  async function deleteRow(kind, id) {
+    const pathByKind = { product: 'crm/products', os: 'crm/order-sources', order: 'crm/orders', lead: 'crm/leads', rule: 'automation/rules' };
+    await fetch(`/admin/aai-ads/${pathByKind[kind]}/${id}/delete`, { method: 'POST' });
+    const row = document.querySelector(`[data-${kind}-row="${id}"]`);
+    if (row) row.remove();
+  }
+  document.querySelectorAll('[data-product-delete]').forEach((btn) => btn.addEventListener('click', () => deleteRow('product', btn.dataset.productDelete)));
+  document.querySelectorAll('[data-order-delete]').forEach((btn) => btn.addEventListener('click', () => deleteRow('order', btn.dataset.orderDelete)));
+  document.querySelectorAll('[data-lead-delete]').forEach((btn) => btn.addEventListener('click', () => deleteRow('lead', btn.dataset.leadDelete)));
+  document.querySelectorAll('[data-rule-delete]').forEach((btn) => btn.addEventListener('click', () => deleteRow('rule', btn.dataset.ruleDelete)));
+
+  const addOrderSourceBtn = document.getElementById('addOrderSourceBtn');
+  if (addOrderSourceBtn) {
+    addOrderSourceBtn.addEventListener('click', async () => {
+      const msg = document.getElementById('osMsg');
+      const name = document.getElementById('osName').value.trim();
+      const apiUrl = document.getElementById('osApiUrl').value.trim();
+      const authToken = document.getElementById('osAuthToken').value.trim();
+      if (!name || !apiUrl) { msg.textContent = 'Vui lòng nhập tên và địa chỉ API.'; return; }
+      const res = await fetch('/admin/aai-ads/crm/order-sources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, apiUrl, authToken }),
+      });
+      const s = await res.json();
+      if (s.error) { msg.textContent = `Lỗi: ${s.error}`; return; }
+      const list = document.getElementById('orderSourcesList');
+      const row = document.createElement('div');
+      row.className = 'flex items-center justify-between bg-primary-50/40 rounded px-3 py-2';
+      row.dataset.osRow = s.id;
+      row.innerHTML = `<span><strong>${s.name}</strong> — ${s.apiUrl}</span><span class="flex gap-2"><button type="button" class="text-primary-700 text-xs" data-os-sync="${s.id}">Đồng bộ ngay</button><button type="button" class="text-rose-600 text-xs" data-os-delete="${s.id}">Xóa</button></span>`;
+      list.appendChild(row);
+      wireOrderSourceRow(row);
+      document.getElementById('osName').value = '';
+      document.getElementById('osApiUrl').value = '';
+      document.getElementById('osAuthToken').value = '';
+      msg.textContent = `Đã thêm "${name}".`;
+    });
+  }
+  function wireOrderSourceRow(row) {
+    const syncBtn = row.querySelector('[data-os-sync]');
+    const delBtn = row.querySelector('[data-os-delete]');
+    if (syncBtn) syncBtn.addEventListener('click', async () => {
+      const msg = document.getElementById('osMsg');
+      syncBtn.textContent = 'Đang đồng bộ...';
+      try {
+        const res = await fetch(`/admin/aai-ads/crm/order-sources/${syncBtn.dataset.osSync}/sync`, { method: 'POST' });
+        const result = await res.json();
+        if (result.error) throw new Error(result.error);
+        msg.textContent = `Đã đồng bộ: thêm mới ${result.added}/${result.total} đơn.`;
+      } catch (e) {
+        msg.textContent = `Lỗi đồng bộ: ${e.message}`;
+      }
+      syncBtn.textContent = 'Đồng bộ ngay';
+    });
+    if (delBtn) delBtn.addEventListener('click', () => deleteRow('os', delBtn.dataset.osDelete));
+  }
+  document.querySelectorAll('#orderSourcesList [data-os-row]').forEach(wireOrderSourceRow);
+
+  const addOrderBtn = document.getElementById('addOrderBtn');
+  if (addOrderBtn) {
+    addOrderBtn.addEventListener('click', async () => {
+      const amount = document.getElementById('oAmount').value;
+      if (!amount) return;
+      const res = await fetch('/admin/aai-ads/crm/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount,
+          productId: document.getElementById('oProduct').value,
+          campaignName: document.getElementById('oCampaign').value.trim(),
+          customerPhone: document.getElementById('oPhone').value.trim(),
+          orderChannel: document.getElementById('oChannel').value,
+        }),
+      });
+      const o = await res.json();
+      if (o.error) return;
+      const list = document.getElementById('ordersList');
+      const row = document.createElement('div');
+      row.className = 'flex items-center justify-between bg-primary-50/40 rounded px-3 py-2';
+      row.dataset.orderRow = o.id;
+      row.innerHTML = `<span>${new Date(o.orderDate).toLocaleDateString('vi-VN')} — ${Number(o.amount).toLocaleString('vi-VN')}đ${o.campaignName ? ' — ' + o.campaignName : ''}</span><button type="button" class="text-rose-600 text-xs" data-order-delete="${o.id}">Xóa</button>`;
+      list.prepend(row);
+      row.querySelector('[data-order-delete]').addEventListener('click', () => deleteRow('order', o.id));
+      ['oAmount', 'oCampaign', 'oPhone'].forEach((id) => (document.getElementById(id).value = ''));
+    });
+  }
+
+  const addLeadBtn = document.getElementById('addLeadBtn');
+  if (addLeadBtn) {
+    addLeadBtn.addEventListener('click', async () => {
+      const name = document.getElementById('lName').value.trim();
+      if (!name) return;
+      const res = await fetch('/admin/aai-ads/crm/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email: document.getElementById('lEmail').value.trim(),
+          phone: document.getElementById('lPhone').value.trim(),
+          orderValue: document.getElementById('lOrderValue').value,
+          source: 'manual',
+        }),
+      });
+      const l = await res.json();
+      if (l.error) return;
+      prependLeadRow(l);
+      ['lName', 'lEmail', 'lPhone', 'lOrderValue'].forEach((id) => (document.getElementById(id).value = ''));
+    });
+  }
+  function prependLeadRow(l) {
+    const list = document.getElementById('leadsList');
+    const row = document.createElement('div');
+    row.className = 'flex items-center justify-between bg-primary-50/40 rounded px-3 py-2';
+    row.dataset.leadRow = l.id;
+    row.innerHTML = `<span><strong>${l.name}</strong> <span class="badge">${l.tier}</span> ${l.email || ''} ${l.phone || ''}</span><span class="flex gap-2 items-center"><select class="input text-xs" data-lead-status="${l.id}"><option value="LEAD" selected>LEAD</option><option value="QUALIFIED">QUALIFIED</option><option value="CUSTOMER">CUSTOMER</option></select><button type="button" class="text-rose-600 text-xs" data-lead-delete="${l.id}">Xóa</button></span>`;
+    list.prepend(row);
+    row.querySelector('[data-lead-delete]').addEventListener('click', () => deleteRow('lead', l.id));
+    wireLeadStatus(row.querySelector('[data-lead-status]'));
+  }
+  function wireLeadStatus(sel) {
+    if (!sel) return;
+    sel.addEventListener('change', () => {
+      fetch(`/admin/aai-ads/crm/leads/${sel.dataset.leadStatus}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: sel.value }),
+      });
+    });
+  }
+  document.querySelectorAll('[data-lead-status]').forEach(wireLeadStatus);
+
+  const addLeadBulkBtn = document.getElementById('addLeadBulkBtn');
+  if (addLeadBulkBtn) {
+    addLeadBulkBtn.addEventListener('click', async () => {
+      const text = document.getElementById('lBulk').value.trim();
+      if (!text) return;
+      const res = await fetch('/admin/aai-ads/crm/leads/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      const result = await res.json();
+      if (!result.error) {
+        document.getElementById('lBulk').value = '';
+        location.reload();
+      }
+    });
+  }
+
+  // ---------------- Tự động hóa ----------------
+
+  const saveRuleBtn = document.getElementById('saveRuleBtn');
+  if (saveRuleBtn) {
+    saveRuleBtn.addEventListener('click', async () => {
+      const msg = document.getElementById('autoMsg');
+      const name = document.getElementById('autoName').value.trim();
+      const threshold = document.getElementById('autoThreshold').value;
+      if (!name || !threshold) { msg.textContent = 'Vui lòng nhập tên luật và ngưỡng.'; return; }
+      try {
+        const res = await fetch('/admin/aai-ads/automation/rules', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            adAccountId: document.getElementById('autoAdAccount').value,
+            scope: document.getElementById('autoScope').value,
+            metric: document.getElementById('autoMetric').value,
+            operator: document.getElementById('autoOperator').value,
+            threshold,
+            windowDays: document.getElementById('autoWindow').value,
+            action: document.getElementById('autoAction').value,
+            scalePercent: document.getElementById('autoScalePercent').value || 20,
+            enabled: true,
+          }),
+        });
+        const rule = await res.json();
+        if (rule.error) throw new Error(rule.error);
+        msg.textContent = 'Đã lưu luật — hệ thống sẽ tự kiểm tra mỗi 15 phút.';
+        location.reload();
+      } catch (e) {
+        msg.textContent = `Lỗi: ${e.message}`;
+      }
+    });
+  }
+
+  document.querySelectorAll('[data-rule-toggle]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const res = await fetch(`/admin/aai-ads/automation/rules/${btn.dataset.ruleToggle}/toggle`, { method: 'POST' });
+      if (res.ok) location.reload();
+    });
+  });
+
+  const runAutomationNowBtn = document.getElementById('runAutomationNowBtn');
+  if (runAutomationNowBtn) {
+    runAutomationNowBtn.addEventListener('click', async () => {
+      const msg = document.getElementById('autoMsg');
+      msg.textContent = 'Đang kiểm tra...';
+      try {
+        const res = await fetch('/admin/aai-ads/automation/run-now', { method: 'POST' });
+        const result = await res.json();
+        if (result.error) throw new Error(result.error);
+        msg.textContent = `Đã kiểm tra xong — ${result.triggered.length} luật được kích hoạt.`;
+        location.reload();
+      } catch (e) {
+        msg.textContent = `Lỗi: ${e.message}`;
+      }
+    });
+  }
 })();
 </script>
