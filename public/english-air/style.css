@@ -2630,3 +2630,152 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   border: 0; border-radius: var(--rf); cursor: pointer;
   background: var(--muted); font: inherit; font-size: 1.02rem; line-height: 1; }
 .co-nut:active { opacity: .6; }
+
+/* ================= 23. LUYỆN VIẾT CHỮ HÁN =================
+   Chữ Hán không đoán được hình dạng từ âm, nên khác hẳn chữ cái La-tinh:
+   phải THẤY chữ to, THẤY thứ tự nét, rồi tự tay đi lại đúng đường ấy. Cả màn
+   xoay quanh một ô vuông lớn kẻ khung như vở tập viết thật.
+   Màu vẫn là màu tím của app — không đặt tông riêng cho phần này. */
+
+/* ---- Thẻ mở màn, nằm trên trang Học ---- */
+.vietvao { width: 100%; display: flex; align-items: center; gap: var(--s4);
+  padding: var(--s4); margin-bottom: var(--s4);
+  border: 1px solid var(--line); border-radius: var(--r3);
+  background: var(--card); box-shadow: var(--sh-1);
+  text-align: left; cursor: pointer;
+  transition: transform var(--t1) var(--e), box-shadow var(--t1) var(--e); }
+.vietvao:active { transform: scale(.985); box-shadow: var(--sh-2); }
+.vietvao-o { flex: none; width: 56px; height: 56px; border-radius: var(--r2);
+  display: grid; place-items: center;
+  background: var(--brand-soft); color: var(--brand-ink);
+  font-size: 2rem; font-weight: 700; line-height: 1;
+  font-family: "Noto Serif SC", "Songti SC", SimSun, serif; }
+.vietvao-noi { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.vietvao-noi b { font-size: 1.02rem; font-weight: 900; color: var(--ink-deep); }
+.vietvao-noi small { font-size: .8rem; font-weight: 600; color: var(--muted-fg); }
+.vietvao-bar { display: block; height: 6px; margin-top: 3px; border-radius: var(--rf);
+  background: var(--muted); overflow: hidden; }
+.vietvao-bar i { display: block; height: 100%; border-radius: var(--rf);
+  background: var(--brand-fill); transition: width var(--t3) var(--e); }
+.vietvao-mui { flex: none; color: var(--line-hi); }
+
+/* ---- Khung màn ---- */
+.viet { position: fixed; inset: 0; z-index: 97; display: flex; flex-direction: column;
+  background: var(--bg); color: var(--fg); overflow: hidden; }
+.viet-dem { font-size: .82rem; font-weight: 800; color: var(--muted-fg); }
+
+/* ---- Lớp 1: danh sách chữ ---- */
+.viet-ds { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 0 var(--gut) calc(var(--s6) + env(safe-area-inset-bottom)); }
+.viet-loc { position: sticky; top: 0; z-index: 2;
+  display: flex; gap: var(--s2); overflow-x: auto; scrollbar-width: none;
+  padding: var(--s3) 0; margin-bottom: var(--s2); background: var(--bg); }
+.viet-loc::-webkit-scrollbar { display: none; }
+.viet-loc-o { flex: none; padding: 7px 14px; border-radius: var(--rf);
+  border: 1px solid var(--line); background: var(--card);
+  font-size: .82rem; font-weight: 800; color: var(--muted-fg); cursor: pointer;
+  transition: background var(--t1) var(--e), color var(--t1) var(--e); }
+.viet-loc-o.on { background: var(--brand-fill); border-color: var(--brand-fill);
+  color: var(--on-brand); }
+
+.viet-luoi { display: grid; gap: var(--s2);
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); }
+.viet-nhom { grid-column: 1 / -1; margin: var(--s4) 0 0; font-size: .78rem;
+  font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted-fg); }
+.viet-o { position: relative; aspect-ratio: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+  border: 1px solid var(--line); border-radius: var(--r2);
+  background: var(--card); box-shadow: var(--sh-1); cursor: pointer;
+  transition: transform var(--t1) var(--e); }
+.viet-o:active { transform: scale(.94); }
+.viet-o-chu { font-size: 1.9rem; line-height: 1; font-weight: 500; color: var(--ink-deep);
+  font-family: "Noto Serif SC", "Songti SC", SimSun, serif; }
+.viet-o-pin { font-size: .68rem; font-weight: 700; color: var(--muted-fg);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.viet-o.xong { background: var(--ok-soft); border-color: #BFE6CC; }
+.viet-o.xong .viet-o-chu { color: var(--ok-ink); }
+.viet-o-tich { position: absolute; top: 4px; right: 4px; width: 15px; height: 15px;
+  border-radius: var(--rf); background: var(--ok); color: #fff;
+  font-size: .62rem; font-weight: 900; display: grid; place-items: center; line-height: 1; }
+.viet-ghi { margin-top: var(--s5); font-size: .7rem; color: var(--muted-fg); text-align: center; }
+
+/* ---- Lớp 2: màn tô ---- */
+.viet-to { flex: 1; min-height: 0; display: flex; flex-direction: column;
+  padding: 0 var(--gut) calc(var(--s4) + env(safe-area-inset-bottom)); }
+.viet-dau { flex: none; display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s2) 0 var(--s3); }
+.viet-lui, .viet-loa { flex: none; width: 40px; height: 40px; border-radius: var(--rf);
+  display: grid; place-items: center; border: 1px solid var(--line);
+  background: var(--card); color: var(--brand); cursor: pointer; }
+.viet-lui:active, .viet-loa:active { transform: scale(.92); }
+.viet-dau-noi { flex: 1; min-width: 0; display: flex; flex-direction: column;
+  align-items: center; gap: 1px; text-align: center; }
+.viet-dau-noi b { font-size: 1.2rem; font-weight: 900; color: var(--brand-ink); }
+.viet-dau-noi small { font-size: .82rem; font-weight: 600; color: var(--muted-fg);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Ô tô: VUÔNG, không theo tỉ lệ 100/120 như chữ cái La-tinh — chữ Hán vốn
+   vuông, kéo cao lên là sai dáng ngay. */
+/* Ô vuông PHẢI vuông thật.
+   Đã sai hai lần ở đây, ghi lại cho khỏi sửa vòng thứ ba:
+   — đặt aspect-ratio lên khung ngoài mà khung là con của cột flex: flex kéo
+     cao lên 662px trong khi rộng 340px;
+   — chuyển aspect-ratio xuống thẻ SVG: thẻ SVG không có thuộc tính width/height
+     thì mặc định là 100%, tức height KHÔNG phải "auto" thật, nên aspect-ratio
+     không có chỗ mà áp — vẫn ra 300x374.
+   Cách chạy được: khung ngoài giữ aspect-ratio nhưng KHÔNG cho flex kéo dãn
+   (flex: 0 1 auto), còn SVG cứ lấp đầy khung. Hình chữ thì dù ô có méo vì màn
+   hình quá thấp vẫn không méo theo, vì SVG tự giữ tỉ lệ; và toạ độ ngón tay
+   tính bằng getScreenCTM nên lề thừa bao nhiêu cũng ra đúng chỗ. */
+.viet-khung { flex: 0 1 auto; min-height: 0; width: min(100%, 340px);
+  aspect-ratio: 1; margin: var(--s2) auto 0;
+  display: grid; place-items: center; overflow: hidden;
+  border-radius: var(--r3); background: var(--card); box-shadow: var(--sh-1); }
+.viet-svg { width: 100%; height: 100%; display: block;
+  touch-action: none; -webkit-user-select: none; user-select: none; cursor: crosshair; }
+/* Khung kẻ ô mễ, y như vở tập viết */
+.viet-vien { fill: none; stroke: var(--line); stroke-width: 1; }
+.viet-ke { stroke: var(--line-hi); stroke-width: .7; stroke-dasharray: 3 3; opacity: .75; }
+/* Chữ mẫu mờ nằm dưới cùng */
+.viet-mo { fill: var(--line-hi); opacity: .45; font-size: 86px; text-anchor: middle;
+  font-family: "Noto Serif SC", "Songti SC", SimSun, serif; }
+/* Bề nét không cố định: chữ 1 nét mà vẽ mảnh thì trông nghèo, chữ 15 nét mà vẽ
+   dày thì các nét dính thành một cục đen, nhìn không ra chữ nữa. Bề nét do JS
+   tính theo số nét rồi đặt vào biến --nb. */
+.viet-net-nen { fill: none; stroke: var(--line-hi); stroke-width: calc(var(--nb, 7) * .85);
+  stroke-linecap: round; stroke-linejoin: round; opacity: .55; }
+.viet-net-to { fill: none; stroke: var(--brand-fill); stroke-width: var(--nb, 7);
+  stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.viet-net-to.dang, .viet-net-to.roi { opacity: 1; }
+.viet-net-to.roi { stroke: var(--ok); }
+.viet-svg.xong .viet-net-to { stroke: var(--ok); }
+.viet-svg.xong { animation: toXong .45s var(--e); }
+.viet-cham { fill: var(--brand); animation: chamNhay 1.1s ease-in-out infinite; }
+
+.viet-net { flex: none; margin: var(--s3) 0 0; text-align: center;
+  font-size: .84rem; font-weight: 800; color: var(--muted-fg); }
+.viet-nut { flex: none; display: flex; gap: var(--s2); margin-top: var(--s3); }
+.viet-nut-o { flex: 1; padding: 12px 8px; border-radius: var(--r2);
+  border: 1px solid var(--line); background: var(--card);
+  font-size: .88rem; font-weight: 800; color: var(--brand-ink); cursor: pointer;
+  transition: transform var(--t1) var(--e); }
+.viet-nut-o:active { transform: scale(.97); }
+.viet-nut-chinh { background: var(--brand-fill); border-color: var(--brand-fill);
+  color: var(--on-brand); }
+
+/* ---- Khen khi viết xong một chữ ---- */
+.viet-khen { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
+  padding: var(--gut); background: rgba(30,16,48,.55); }
+.viet-khen-in { width: 100%; max-width: 320px; padding: var(--s5);
+  border-radius: var(--r4); background: var(--card); box-shadow: var(--sh-3);
+  text-align: center; }
+.viet-khen-chu { display: block; font-size: 4rem; line-height: 1; color: var(--ok);
+  font-family: "Noto Serif SC", "Songti SC", SimSun, serif;
+  animation: toXong .5s var(--e); }
+.viet-khen-noi { margin: var(--s3) 0 var(--s4); font-size: .95rem; font-weight: 700;
+  color: var(--muted-fg); }
+
+/* Chấm sáng nháy mạnh một nhịp khi người học đặt tay sai chỗ */
+.viet-cham.nhac { animation: chamNhac .5s var(--e) 2; }
+@keyframes chamNhac { 0%, 100% { opacity: 1; r: 4.5; } 50% { opacity: .3; r: 9; } }

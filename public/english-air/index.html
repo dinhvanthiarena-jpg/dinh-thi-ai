@@ -1752,6 +1752,19 @@
           </span>
         </button>
 
+        <!-- Luyện viết chữ Hán — chỉ hiện khi khoá đang học là tiếng Trung.
+             Người Việt học chữ Hán vướng nhất ở khâu viết, nên tách hẳn một màn
+             riêng chứ không nhét vào giữa bài như phần tô chữ cái La-tinh. -->
+        <button class="vietvao" id="vietVao" type="button" hidden>
+          <span class="vietvao-o" aria-hidden="true">写</span>
+          <span class="vietvao-noi">
+            <b>Luyện viết chữ Hán</b>
+            <small id="vietVaoSo">Tô theo nét bằng ngón tay</small>
+            <span class="vietvao-bar" aria-hidden="true"><i id="vietVaoBar" style="width:0%"></i></span>
+          </span>
+          <svg class="ic ic-sm vietvao-mui" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
+        </button>
+
         <div id="unitList"></div>
       </section>
 
@@ -2054,6 +2067,7 @@
         <p class="fine">Tiến độ học lưu trên máy bạn; tên và số điện thoại lưu ở tài khoản.</p>
         <!-- Giấy phép CC-BY của giọng đọc BẮT BUỘC phải ghi công. Đừng xoá dòng này. -->
         <p class="fine">Giọng đọc: MeloTTS (MIT) · Piper — giọng vais1000, bộ VAIS-1000 (CC BY 4.0).</p>
+        <p class="fine">Nét chữ Hán: Make Me a Hanzi — bóc từ phông chữ Arphic Technology (Arphic Public License).</p>
       </section>
     </main>
 
@@ -2517,6 +2531,64 @@
 <!-- ============ CHỌN CẶP NGÔN NGỮ ============
      Hai lá cờ: tôi nói tiếng gì, tôi muốn học tiếng gì. Thêm thứ tiếng về sau
      chỉ là thêm một dòng vào bảng KHOA bên course.js — màn này tự mọc thêm cờ. -->
+<!-- ============ LUYỆN VIẾT CHỮ HÁN ============
+     Hai lớp trong một màn: lớp DANH SÁCH để chọn chữ, lớp TÔ để viết.
+     Bộ máy chấm nét dùng lại đúng cái của phần tô chữ cái (rải mốc dọc nét rồi
+     xét thứ tự ngón tay đi qua) — nét chữ Hán đã dựng sẵn trong net-han.js theo
+     cùng khung 100x120 nên không phải viết lại lần nữa. -->
+<div class="viet" id="vietView" hidden role="dialog" aria-modal="true" aria-labelledby="vietTitle">
+  <header class="ban-bar">
+    <button class="icon-btn" id="btnVietDong" type="button" aria-label="Đóng phần luyện viết">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+    <span class="ban-bar-tit" id="vietTitle">Luyện viết</span>
+    <span class="viet-dem" id="vietDem"></span>
+  </header>
+
+  <!-- ---- Lớp 1: chọn chữ ---- -->
+  <div class="viet-ds" id="vietDs">
+    <div class="viet-loc" id="vietLoc"></div>
+    <div class="viet-luoi" id="vietLuoi"></div>
+    <p class="viet-ghi">Nét chữ lấy từ bộ Make Me a Hanzi (Arphic Public License).</p>
+  </div>
+
+  <!-- ---- Lớp 2: tô chữ ---- -->
+  <div class="viet-to" id="vietTo" hidden>
+    <div class="viet-dau">
+      <button class="viet-lui" id="vietLui" type="button" aria-label="Về danh sách chữ">
+        <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-left"/></svg>
+      </button>
+      <span class="viet-dau-noi">
+        <b id="vietPin">—</b>
+        <small id="vietNghia">—</small>
+      </span>
+      <button class="viet-loa" id="vietNghe" type="button" aria-label="Nghe cách đọc">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sound"/></svg>
+      </button>
+    </div>
+
+    <div class="to-khung viet-khung" id="vietKhung"></div>
+
+    <p class="viet-net" id="vietNet" aria-live="polite">Nét 1 / 1</p>
+
+    <div class="viet-nut">
+      <button class="viet-nut-o" id="vietMau" type="button">Xem mẫu</button>
+      <button class="viet-nut-o" id="vietLai" type="button">Viết lại</button>
+      <button class="viet-nut-o viet-nut-chinh" id="vietSau" type="button">Chữ sau</button>
+    </div>
+  </div>
+
+  <!-- Khen khi viết xong một chữ -->
+  <div class="viet-khen" id="vietKhen" hidden aria-live="assertive">
+    <div class="viet-khen-in">
+      <b class="viet-khen-chu" id="vietKhenChu">好</b>
+      <p class="viet-khen-noi" id="vietKhenNoi">Viết đúng rồi!</p>
+      <button class="btn btn-primary btn-block" id="vietKhenSau" type="button">Chữ tiếp theo</button>
+      <button class="btn btn-soft btn-block mt" id="vietKhenVe" type="button">Về danh sách</button>
+    </div>
+  </div>
+</div>
+
 <div class="cochon" id="coView" hidden role="dialog" aria-modal="true" aria-labelledby="coTitle">
   <div class="cochon-in">
     <div class="cochon-hinh" data-mascot="full" aria-hidden="true"><svg viewBox="0 0 120 120"><use href="#m-air"/></svg></div>
@@ -2750,6 +2822,7 @@
 
 <script src="ngon-ngu.js"></script>
 <script src="letters.js"></script>
+<script src="net-han.js"></script>
 <script src="course-a1.js"></script>
 <script src="course-a2.js"></script>
 <script src="course-b1.js"></script>

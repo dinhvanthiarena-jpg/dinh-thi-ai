@@ -783,7 +783,7 @@ function tinhLaiKho() {
    dịch nhầm thành "Learn" là hỏng bài. Nên mọi khung chứa nội dung khoá học
    đều bị loại trừ. */
 const KHONG_DICH = "#stage, .ban-cau, .ban-hang-viet, .nem-khay, .dialog, " +
-  ".vlist, #wordList, #callLog, .kaka-form, .fb-t, .vcard";
+  ".vlist, #wordList, #callLog, .kaka-form, .fb-t, .vcard, .viet-luoi, .viet-dau-noi, .viet-khen-in";
 let TU_DIEN = null;
 let theoDoiDich = null;
 
@@ -1067,6 +1067,9 @@ function renderLearn() {
   $("#contMeta").textContent = cur.checkpoint
     ? `Ôn tập chương · ${m.drill} câu hỏi`
     : `${m.teach} slide dạy · ${m.drill} câu hỏi`;
+
+  // Thẻ Luyện viết chữ Hán — tự ẩn nếu khoá đang học không phải tiếng Trung.
+  if (window.capNhatTheViet) window.capNhatTheViet();
 
   const root = $("#unitList");
   root.textContent = "";
@@ -9421,4 +9424,422 @@ ganBoQuaChoiLai("ran", RAN, RAN_TONG,
     ranDatRan();
     ranVongMoi();
   });
+
+/* ═══════════════ 23i. LUYỆN VIẾT CHỮ HÁN ═══════════════
+   Người Việt học tiếng Trung vấp nặng nhất ở khâu VIẾT: nhìn thì nhận ra chữ,
+   cầm bút lên là không biết nét nào trước nét nào sau. Nên phần này tách hẳn
+   một màn riêng — không nhét vào giữa bài như phần tô chữ cái La-tinh — và bám
+   đúng ba thứ người ta cần: chữ TO, thứ tự nét RÕ, tự tay đi lại đường ấy.
+
+   Nét chữ nằm sẵn trong net-han.js (326 chữ), dựng từ bộ Make Me a Hanzi theo
+   Arphic Public License — đã kiểm, cho dùng thương mại. Mỗi chữ có:
+     n = số nét | d = đường đi giữa từng nét, đúng thứ tự viết
+     p = pinyin | h = âm Hán Việt      | v = nghĩa tiếng Việt
+
+   Âm Hán Việt để ở chỗ dễ thấy nhất, vì đó là lợi thế riêng của người Việt:
+   biết "hảo" thì nhớ 好 nhanh hơn người Âu Mỹ nhiều.
+
+   Khung vẽ dùng viewBox "4 14 92 92" — đúng ô vuông chứa chữ trong net-han.js.
+   Lấy vuông chứ không lấy 100x120 như chữ cái: chữ Hán vốn vuông, kéo cao lên
+   là sai dáng ngay. */
+
+const HAN_KHO = () => window.NET_HAN || {};
+/* Mốc chia nhóm theo số nét — ít nét học trước, đúng lối vỡ lòng. */
+const HAN_NHOM = [
+  { id: "a", nhan: "1–4 nét",  tu: 1,  den: 4 },
+  { id: "b", nhan: "5–7 nét",  tu: 5,  den: 7 },
+  { id: "c", nhan: "8–10 nét", tu: 8,  den: 10 },
+  { id: "d", nhan: "11+ nét",  tu: 11, den: 99 },
+];
+
+/* Cho ngón tay lệch bao nhiêu thì vẫn tính là trúng. Ngón tay to hơn nét
+   nhiều, khắt khe quá thì người học chỉ thấy bực; rộng quá thì tô loạn cũng
+   qua. 10 đơn vị trên khung 92 — khoảng một phần chín bề ngang chữ. */
+const HAN_SAI = 10;
+
+const HAN = { chu: null, ds: [], loc: "tat", svg: null, netEls: [],
+              iNet: 0, iMoc: 0, moc: [], xong: false, cham: null, mauRaf: null };
+
+/** Danh sách chữ đã xếp sẵn: ít nét trước, cùng số nét thì giữ thứ tự trong kho. */
+function hanDs() {
+  const kho = HAN_KHO();
+  return Object.keys(kho).sort((a, b) => kho[a].n - kho[b].n);
+}
+function hanDaViet() { return (S.vietHan = S.vietHan || {}); }
+function hanXong(c) { return !!hanDaViet()[c]; }
+
+/* ---------- Thẻ mở màn trên trang Học ---------- */
+/* Chỉ hiện khi khoá đang học là tiếng Trung — người học tiếng Anh mà thấy thẻ
+   chữ Hán trên màn hình chính thì chỉ tổ rối. */
+function hanCapNhatThe() {
+  const nut = $("#vietVao");
+  if (!nut) return;
+  const k = khoaTheoMa(S.khoa || COURSE.id);
+  const hien = k.hoc === "zh" && Object.keys(HAN_KHO()).length > 0;
+  nut.hidden = !hien;
+  if (!hien) return;
+  const tong = Object.keys(HAN_KHO()).length;
+  const roi = Object.keys(hanDaViet()).filter(c => HAN_KHO()[c]).length;
+  $("#vietVaoSo").textContent = roi
+    ? `Đã viết ${roi} / ${tong} chữ — viết tiếp nào`
+    : `${tong} chữ cơ bản — tô theo nét bằng ngón tay`;
+  $("#vietVaoBar").style.width = Math.round((roi / tong) * 100) + "%";
+}
+
+/* ---------- Mở / đóng màn ---------- */
+let hanCuonNen = "";
+function hanMo() {
+  const v = $("#vietView");
+  if (!v || !Object.keys(HAN_KHO()).length) { toast("Chưa nạp được nét chữ."); return; }
+  HAN.ds = hanDs();
+  v.hidden = false;
+  hanCuonNen = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+  hanDsVe();
+  hanVeDanhSach();
+}
+
+function hanDong() {
+  cancelAnimationFrame(HAN.mauRaf);
+  stopSpeak();
+  $("#vietView").hidden = true;
+  $("#vietKhen").hidden = true;
+  document.body.style.overflow = hanCuonNen || "";
+  hanCapNhatThe();
+}
+
+/** Về lớp danh sách. */
+function hanVeDanhSach() {
+  cancelAnimationFrame(HAN.mauRaf);
+  stopSpeak();
+  $("#vietKhen").hidden = true;
+  $("#vietDs").hidden = false;
+  $("#vietTo").hidden = true;
+  $("#vietTitle").textContent = "Luyện viết";
+  const tong = HAN.ds.length;
+  const roi = HAN.ds.filter(hanXong).length;
+  $("#vietDem").textContent = roi + " / " + tong;
+}
+
+/* ---------- Lớp 1: danh sách chữ ---------- */
+function hanDsVe() {
+  const loc = $("#vietLoc");
+  loc.textContent = "";
+  const cac = [{ id: "tat", nhan: "Tất cả" }].concat(HAN_NHOM)
+    .concat([{ id: "chua", nhan: "Chưa viết" }]);
+  cac.forEach(n => {
+    const b = el("button", "viet-loc-o" + (HAN.loc === n.id ? " on" : ""), n.nhan);
+    b.type = "button";
+    b.addEventListener("click", () => { HAN.loc = n.id; hanDsVe(); });
+    loc.append(b);
+  });
+
+  const kho = HAN_KHO();
+  let ds = HAN.ds;
+  if (HAN.loc === "chua") ds = ds.filter(c => !hanXong(c));
+  else {
+    const n = HAN_NHOM.find(x => x.id === HAN.loc);
+    if (n) ds = ds.filter(c => kho[c].n >= n.tu && kho[c].n <= n.den);
+  }
+
+  const luoi = $("#vietLuoi");
+  luoi.textContent = "";
+  if (!ds.length) {
+    luoi.append(el("p", "viet-ghi", "Bạn đã viết hết phần này rồi. Giỏi quá!"));
+    return;
+  }
+  let netTruoc = -1;
+  ds.forEach(c => {
+    const d = kho[c];
+    if (d.n !== netTruoc) {
+      netTruoc = d.n;
+      luoi.append(el("h3", "viet-nhom", d.n + " nét"));
+    }
+    const o = el("button", "viet-o" + (hanXong(c) ? " xong" : ""));
+    o.type = "button";
+    o.setAttribute("aria-label", `Chữ ${c}, đọc là ${d.p}, nghĩa là ${d.v}`);
+    o.append(el("span", "viet-o-chu", c), el("span", "viet-o-pin", d.p));
+    if (hanXong(c)) o.append(el("span", "viet-o-tich", "✓"));
+    o.addEventListener("click", () => hanChonChu(c));
+    luoi.append(o);
+  });
+}
+
+/* ---------- Lớp 2: tô chữ ---------- */
+function hanChonChu(c) {
+  HAN.chu = c;
+  $("#vietDs").hidden = true;
+  $("#vietTo").hidden = false;
+  $("#vietKhen").hidden = true;
+  const d = HAN_KHO()[c];
+  $("#vietTitle").textContent = "Chữ " + c;
+  $("#vietDem").textContent = d.n + " nét";
+  $("#vietPin").textContent = d.p;
+  // Âm Hán Việt đi kèm nghĩa: người Việt nhớ chữ qua âm Hán Việt nhanh nhất.
+  $("#vietNghia").textContent = "Hán Việt: " + d.h + " · " + d.v;
+  hanDungKhung(c);
+  hanDoc(c);
+}
+
+const HAN_NS = "http://www.w3.org/2000/svg";
+function hanTao(ten, thuoc) {
+  const n = document.createElementNS(HAN_NS, ten);
+  for (const k in thuoc) n.setAttribute(k, thuoc[k]);
+  return n;
+}
+
+/** Dựng lại toàn bộ khung vẽ cho một chữ. */
+function hanDungKhung(c) {
+  const d = HAN_KHO()[c];
+  const khung = $("#vietKhung");
+  khung.textContent = "";
+  cancelAnimationFrame(HAN.mauRaf);
+
+  const svg = hanTao("svg", { viewBox: "4 14 92 92", class: "viet-svg" });
+  // Chữ càng nhiều nét thì nét phải càng mảnh, không thì các nét chồng lên nhau
+  // thành một cục đen — chữ 15 nét mà vẽ dày như chữ 1 nét là không đọc ra.
+  svg.style.setProperty("--nb",
+    d.n <= 3 ? 8 : d.n <= 6 ? 6.6 : d.n <= 10 ? 5.4 : 4.4);
+  HAN.svg = svg;
+
+  // Khung ô mễ của vở tập viết: viền ngoài + hai đường chia giữa + hai đường chéo
+  svg.append(hanTao("rect", { x: 4, y: 14, width: 92, height: 92, rx: 3, class: "viet-vien" }));
+  [["4", "60", "96", "60"], ["50", "14", "50", "106"],
+   ["4", "14", "96", "106"], ["96", "14", "4", "106"]].forEach(([x1, y1, x2, y2]) => {
+    svg.append(hanTao("line", { x1, y1, x2, y2, class: "viet-ke" }));
+  });
+
+  // Chữ mẫu mờ: vẽ bằng CHÍNH chữ Hán ở cỡ lớn — sắc nét hơn đường vẽ tay,
+  // và không tốn thêm một byte dữ liệu nào.
+  const mo = hanTao("text", { x: 50, y: 60, class: "viet-mo",
+                              "dominant-baseline": "central" });
+  mo.textContent = c;
+  svg.append(mo);
+
+  // Nét mờ chỉ đường đi, rồi nét đậm vẽ dần theo ngón tay
+  d.d.forEach(dd => svg.append(hanTao("path", { d: dd, class: "viet-net-nen" })));
+  HAN.netEls = d.d.map(dd => {
+    const p = hanTao("path", { d: dd, class: "viet-net-to" });
+    svg.append(p);
+    return p;
+  });
+
+  khung.append(svg);
+  HAN.cham = null;
+  HAN.xong = false;
+  hanGanTay(svg);
+  hanVaoNet(0);
+}
+
+/** Rải mốc dọc một nét. Nét chấm của chữ Hán rất ngắn nên phải có sàn tối thiểu,
+    không thì cả nét chỉ còn một hai mốc, chạm hụt là kẹt. */
+function hanRaiMoc(p) {
+  const dai = p.getTotalLength();
+  const n = Math.max(5, Math.round(dai / 4));
+  const ds = [];
+  for (let i = 0; i <= n; i += 1) ds.push(p.getPointAtLength((dai * i) / n));
+  return ds;
+}
+
+function hanVaoNet(k) {
+  HAN.iNet = k; HAN.iMoc = 0;
+  HAN.netEls.forEach((p, i) => p.classList.toggle("dang", i === k));
+  if (k >= HAN.netEls.length) { hanHoanTat(); return; }
+  const p = HAN.netEls[k];
+  HAN.moc = hanRaiMoc(p);
+  const dai = p.getTotalLength();
+  p.style.strokeDasharray = dai;
+  p.style.strokeDashoffset = dai;
+  $("#vietNet").textContent = `Nét ${k + 1} / ${HAN.netEls.length}` +
+    (k === 0 ? " — đặt ngón tay lên chấm sáng rồi kéo theo nét" : "");
+  hanDatCham(HAN.moc[0]);
+}
+
+function hanDatCham(pt) {
+  if (!HAN.cham) {
+    HAN.cham = hanTao("circle", { r: "4.5", class: "viet-cham" });
+    HAN.svg.append(HAN.cham);
+  }
+  HAN.cham.setAttribute("cx", pt.x);
+  HAN.cham.setAttribute("cy", pt.y);
+  HAN.cham.style.display = "";
+}
+
+/* Chấm điểm: ngón tay phải đi qua LẦN LƯỢT các mốc. Chỉ đo khoảng cách tới nét
+   thì tô ngược chiều hay tô loạn vẫn qua — mà viết ngược nét là hỏng cả cái
+   việc đang luyện. Cho lệch 10 đơn vị: ngón tay to hơn nét nhiều, khắt khe quá
+   thì người học chỉ thấy bực. */
+/** Nhắc đặt tay đúng chỗ: nháy chấm sáng lên cho dễ thấy. */
+function hanNhacCham() {
+  $("#vietNet").textContent = "Bắt đầu từ chấm sáng nhé";
+  if (!HAN.cham) return;
+  HAN.cham.style.display = "";
+  HAN.cham.classList.remove("nhac");
+  void HAN.cham.getBoundingClientRect();
+  HAN.cham.classList.add("nhac");
+}
+
+function hanToiDiem(x, y) {
+  if (HAN.xong || HAN.iNet >= HAN.netEls.length) return;
+  let tien = false;
+  while (HAN.iMoc < HAN.moc.length) {
+    const m = HAN.moc[HAN.iMoc];
+    if (Math.hypot(x - m.x, y - m.y) > HAN_SAI) break;
+    HAN.iMoc += 1; tien = true;
+  }
+  if (!tien) return;
+  const p = HAN.netEls[HAN.iNet];
+  const dai = p.getTotalLength();
+  p.style.strokeDashoffset = dai * (1 - HAN.iMoc / (HAN.moc.length - 1));
+  if (HAN.cham && HAN.iMoc > 0) HAN.cham.style.display = "none";
+  if (HAN.iMoc >= HAN.moc.length) {
+    p.classList.add("roi"); p.classList.remove("dang");
+    p.style.strokeDashoffset = 0;
+    rung(12);
+    hanVaoNet(HAN.iNet + 1);
+  }
+}
+
+function hanGanTay(svg) {
+  /* Đổi toạ độ màn hình sang toạ độ trong khung vẽ.
+     KHÔNG tự tính bằng getBoundingClientRect: nếu thẻ SVG không đúng tỉ lệ
+     vuông thì trình duyệt tự chèn lề hai bên, tính tay là lệch — đã dính đúng
+     lỗi đó, ô vẽ cao 662 mà rộng 340 nên ngón tay bấm đâu cũng trượt. Hỏi thẳng
+     trình duyệt bằng getScreenCTM thì lề bao nhiêu cũng ra đúng. */
+  const doiToa = ev => {
+    const m = svg.getScreenCTM();
+    if (m) {
+      const p = svg.createSVGPoint();
+      p.x = ev.clientX; p.y = ev.clientY;
+      const q = p.matrixTransform(m.inverse());
+      return { x: q.x, y: q.y };
+    }
+    const r = svg.getBoundingClientRect();   // máy quá cũ mới rơi vào đây
+    return { x: 4 + ((ev.clientX - r.left) / r.width) * 92,
+             y: 14 + ((ev.clientY - r.top) / r.height) * 92 };
+  };
+  let ve = false;
+  svg.addEventListener("pointerdown", ev => {
+    if (HAN.xong) return;
+    ev.preventDefault();
+    const t = doiToa(ev);
+    // PHẢI đặt ngón tay vào ĐẦU nét mới tính. Thiếu luật này thì đặt tay giữa
+    // một nét ngắn rồi kéo ngược vẫn qua hết mốc — máy thử đếm được 398 nét bị
+    // như vậy. Mà viết ngược nét là hỏng đúng cái đang luyện, nên phải chặn.
+    const m = HAN.moc[HAN.iMoc] || HAN.moc[0];
+    if (!m || Math.hypot(t.x - m.x, t.y - m.y) > HAN_SAI) { hanNhacCham(); return; }
+    ve = true;
+    try { svg.setPointerCapture(ev.pointerId); } catch { /* trình duyệt cũ */ }
+    hanToiDiem(t.x, t.y);
+  });
+  svg.addEventListener("pointermove", ev => {
+    if (!ve || HAN.xong) return;
+    const t = doiToa(ev); hanToiDiem(t.x, t.y);
+  });
+  const thoi = () => {
+    ve = false;
+    // Bỏ dở giữa nét thì trả nét đó về đầu, để đi lại cho liền mạch.
+    if (!HAN.xong && HAN.iMoc > 0 && HAN.iMoc < HAN.moc.length) hanVaoNet(HAN.iNet);
+  };
+  ["pointerup", "pointercancel", "pointerleave"].forEach(e => svg.addEventListener(e, thoi));
+}
+
+function hanHoanTat() {
+  HAN.xong = true;
+  if (HAN.cham) HAN.cham.style.display = "none";
+  HAN.svg.classList.add("xong");
+  rung([14, 60, 14]);
+  const c = HAN.chu;
+  const moi = !hanXong(c);
+  hanDaViet()[c] = 1;
+  if (moi) { addXp(2); }        // viết xong một chữ mới thì được 2 XP
+  save();
+  $("#vietNet").textContent = "Viết xong rồi!";
+
+  const d = HAN_KHO()[c];
+  $("#vietKhenChu").textContent = c;
+  $("#vietKhenNoi").textContent = `${d.p} · Hán Việt: ${d.h} · ${d.v}`;
+  $("#vietKhen").hidden = false;
+  keuCham(1);
+  hanDoc(c);
+}
+
+/** Đọc chữ. Ưu tiên file giọng Melo trong kho tiếng Trung; máy nào không có thì
+    speak() tự lùi về giọng máy. */
+function hanDoc(c) { speak(c, false, "zh-cn"); }
+
+/* ---------- Xem mẫu: máy viết trước một lượt ---------- */
+function hanXemMau() {
+  if (!HAN.svg) return;
+  cancelAnimationFrame(HAN.mauRaf);
+  HAN.xong = false;
+  HAN.svg.classList.remove("xong");
+  if (HAN.cham) HAN.cham.style.display = "none";
+  HAN.netEls.forEach(p => {
+    p.classList.remove("roi", "dang");
+    const dai = p.getTotalLength();
+    p.style.strokeDasharray = dai;
+    p.style.strokeDashoffset = dai;
+  });
+
+  let k = 0, batDau = 0;
+  const chay = now => {
+    if (k >= HAN.netEls.length) { hanVietLai(); return; }
+    const p = HAN.netEls[k];
+    const dai = p.getTotalLength();
+    // Nét dài thì vẽ lâu hơn, nhưng nét chấm cũng phải thấy được — nên có sàn.
+    const lau = Math.max(320, dai * 16);
+    if (!batDau) batDau = now;
+    p.classList.add("dang");
+    const t = Math.min(1, (now - batDau) / lau);
+    p.style.strokeDashoffset = dai * (1 - t);
+    if (t >= 1) {
+      p.classList.remove("dang"); p.classList.add("roi");
+      k += 1; batDau = 0;
+      $("#vietNet").textContent = `Xem mẫu — nét ${Math.min(k + 1, HAN.netEls.length)} / ${HAN.netEls.length}`;
+    }
+    HAN.mauRaf = requestAnimationFrame(chay);
+  };
+  $("#vietNet").textContent = `Xem mẫu — nét 1 / ${HAN.netEls.length}`;
+  HAN.mauRaf = requestAnimationFrame(chay);
+}
+
+function hanVietLai() {
+  cancelAnimationFrame(HAN.mauRaf);
+  if (!HAN.chu) return;
+  hanDungKhung(HAN.chu);
+}
+
+/** Chữ kế tiếp trong danh sách đang lọc. Hết danh sách thì quay về lớp chọn. */
+function hanChuSau() {
+  const kho = HAN_KHO();
+  let ds = HAN.ds;
+  if (HAN.loc === "chua") ds = HAN.ds;      // lọc "chưa viết" thì cứ đi theo thứ tự chung
+  else {
+    const n = HAN_NHOM.find(x => x.id === HAN.loc);
+    if (n) ds = ds.filter(c => kho[c].n >= n.tu && kho[c].n <= n.den);
+  }
+  const i = ds.indexOf(HAN.chu);
+  if (i < 0 || i + 1 >= ds.length) { hanDsVe(); hanVeDanhSach(); return; }
+  hanChonChu(ds[i + 1]);
+}
+
+/* ---------- Nối nút ---------- */
+(function hanGanNut() {
+  const v = $("#vietVao");
+  if (v) v.addEventListener("click", hanMo);
+  const g = (id, f) => { const n = $(id); if (n) n.addEventListener("click", f); };
+  g("#btnVietDong", hanDong);
+  g("#vietLui", () => { hanDsVe(); hanVeDanhSach(); });
+  g("#vietNghe", () => HAN.chu && hanDoc(HAN.chu));
+  g("#vietMau", hanXemMau);
+  g("#vietLai", hanVietLai);
+  g("#vietSau", hanChuSau);
+  g("#vietKhenSau", () => { $("#vietKhen").hidden = true; hanChuSau(); });
+  g("#vietKhenVe", () => { hanDsVe(); hanVeDanhSach(); });
+  hanCapNhatThe();
+  // Màn Học nằm ngoài khối này nên phải phơi hàm ra mới gọi được.
+  window.capNhatTheViet = hanCapNhatThe;
+})();
+
 })();
