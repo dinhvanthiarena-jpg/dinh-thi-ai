@@ -50,6 +50,11 @@ router.post('/push-broadcast', adminController.pushBroadcastSend);
 
 router.get('/aai-keygen', adminController.aaiKeygenPage);
 
+router.get('/aai-license-keys', adminController.aaiLicenseKeysPage);
+router.post('/aai-license-keys', adminController.aaiLicenseKeyIssue);
+router.post('/aai-license-keys/:key/revoke', adminController.aaiLicenseKeyRevoke);
+router.post('/aai-license-keys/:key/reactivate', adminController.aaiLicenseKeyReactivate);
+
 router.get('/aai-ads', adminController.aaiAdsPage);
 router.get('/aai-ads/connect', adminController.aaiAdsConnect);
 router.get('/aai-ads/callback', adminController.aaiAdsCallback);

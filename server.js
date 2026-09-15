@@ -92,6 +92,7 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 // dưới — bài kèm ảnh (imageBase64) thường vượt 200kb, nên route này cần giới
 // hạn lớn hơn (8mb) và phải "ăn" trước khi tới middleware json 200kb chung.
 app.use('/api/auto-post', express.json({ limit: '8mb' }), autopostRoutes);
+app.use('/api/aai-license', express.json(), require('./routes/aaiLicense'));
 app.use(express.urlencoded({ extended: true, limit: '200kb' }));
 app.use(
   express.json({

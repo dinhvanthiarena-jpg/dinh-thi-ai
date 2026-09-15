@@ -1,0 +1,56 @@
+<div class="space-y-6 max-w-3xl">
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-1">Cấp key mới cho web A-AI Ads</h2>
+    <p class="text-sm text-muted mb-4">
+      Key dạng <code class="font-mono">AIWEB-XXXX-XXXX-XXXX</code>, dùng để kích hoạt bản A-AI Ads
+      chạy trên web của khách hàng (thư mục <code class="font-mono">aai-ads-module/</code>).
+      Khác key desktop — key này thầy <strong>thu hồi được</strong> bất cứ lúc nào (web của khách tự
+      hỏi lại server này mỗi ngày để biết còn hiệu lực không), không cần đăng nhập vào web của họ.
+    </p>
+    <form action="/admin/aai-license-keys" method="POST" class="flex flex-wrap gap-3">
+      <input
+        name="note"
+        type="text"
+        class="input flex-1 min-w-[240px]"
+        placeholder="Ghi chú (VD: tên khách/tên miền — để thầy biết key này cấp cho ai)"
+      />
+      <button type="submit" class="btn-primary">🔑 Cấp key mới</button>
+    </form>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-4">Danh sách key đã cấp (<%= keys.length %>)</h2>
+    <% if (!keys.length) { %>
+      <p class="text-sm text-muted">Chưa cấp key nào.</p>
+    <% } else { %>
+      <div class="space-y-2">
+        <% keys.forEach(k => { %>
+          <div class="flex items-center justify-between gap-3 rounded-lg border border-primary-100 px-4 py-3 <%= k.active === false ? 'opacity-50' : '' %>">
+            <div class="min-w-0">
+              <div class="font-mono font-semibold text-ink break-all"><%= k.key %></div>
+              <div class="text-xs text-muted mt-0.5">
+                <%= k.note || '(không có ghi chú)' %>
+                · Cấp lúc <%= new Date(k.issuedAt).toLocaleString('vi-VN') %>
+                <% if (k.boundDomain) { %> · Đang chạy tại <strong><%= k.boundDomain %></strong><% } %>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <span class="badge <%= k.active === false ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' %>">
+                <%= k.active === false ? 'Đã thu hồi' : 'Đang hoạt động' %>
+              </span>
+              <% if (k.active === false) { %>
+                <form action="/admin/aai-license-keys/<%= encodeURIComponent(k.key) %>/reactivate" method="POST">
+                  <button type="submit" class="btn-outline text-xs">Kích hoạt lại</button>
+                </form>
+              <% } else { %>
+                <form action="/admin/aai-license-keys/<%= encodeURIComponent(k.key) %>/revoke" method="POST">
+                  <button type="submit" class="text-rose-600 text-xs font-medium">Thu hồi</button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>

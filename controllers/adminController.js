@@ -12,6 +12,7 @@ const { BLOG_CATEGORIES } = require('../utils/blogCategories');
 const PushSubscription = require('../models/PushSubscription');
 const webpush = require('web-push');
 const aaiAds = require('../services/aaiAdsService');
+const aaiLicense = require('../services/aaiLicenseService');
 
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
@@ -569,6 +570,37 @@ exports.toolDelete = async (req, res) => {
 // D:\CLAUDE CODE\fb-ads-manager để mã tạo ra dùng được thật với tool đó.
 exports.aaiKeygenPage = (req, res) => {
   res.render('admin/aai-keygen', { title: 'Mã bản quyền A-AI-3dvietpro' });
+};
+
+// ---------------- Key A-AI Ads (bản Web — cho khách clone tool lên web riêng) ----------------
+// Khác trang trên (key desktop, tự sinh ở trình duyệt, không server nào theo
+// dõi) — key này thầy CẤP và có thể THU HỒI, vì mỗi bản clone (thư mục
+// aai-ads-module/) tự gọi về /api/aai-license/verify để hỏi trạng thái mới
+// nhất, không chỉ tự kiểm tra checksum toán học — xem routes/aaiLicense.js.
+exports.aaiLicenseKeysPage = (req, res) => {
+  res.render('admin/aai-license-keys', { title: 'Key A-AI Ads (Web)', keys: aaiLicense.listKeys() });
+};
+
+exports.aaiLicenseKeyIssue = (req, res) => {
+  try {
+    const entry = aaiLicense.issueKey(req.body.note || '');
+    req.flash('success', `Đã cấp key mới: ${entry.key}`);
+  } catch (e) {
+    req.flash('error', `Lỗi cấp key: ${e.message}`);
+  }
+  res.redirect('/admin/aai-license-keys');
+};
+
+exports.aaiLicenseKeyRevoke = (req, res) => {
+  aaiLicense.revokeKey(req.params.key);
+  req.flash('success', 'Đã thu hồi key.');
+  res.redirect('/admin/aai-license-keys');
+};
+
+exports.aaiLicenseKeyReactivate = (req, res) => {
+  aaiLicense.reactivateKey(req.params.key);
+  req.flash('success', 'Đã kích hoạt lại key.');
+  res.redirect('/admin/aai-license-keys');
 };
 
 // ---------------- A-AI Ads (tạo chiến dịch Facebook Ads từ web) ----------------
