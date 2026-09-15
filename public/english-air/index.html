@@ -1786,7 +1786,7 @@
 
         <div class="search-wrap" id="wordSearchWrap" hidden>
           <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-search"/></svg>
-          <input type="search" id="wordSearch" placeholder="Tìm từ tiếng Anh hoặc nghĩa…" aria-label="Tìm trong kho từ" />
+          <input type="search" id="wordSearch" placeholder="Tìm từ hoặc nghĩa…" aria-label="Tìm trong kho từ" />
           <button class="round-btn sm" id="btnSearchClear" type="button" aria-label="Xoá ô tìm">
             <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-close"/></svg>
           </button>
@@ -1861,7 +1861,7 @@
         </div>
         <div class="card call-info">
           <div class="ci-row"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mic"/></svg>
-            <span><b>Nói vào micro</b><small>Bấm nút micro rồi đọc câu tiếng Anh.</small></span></div>
+            <span><b>Nói vào micro</b><small>Bấm nút micro rồi đọc câu lên.</small></span></div>
           <div class="ci-row"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg>
             <span><b>Chấm ngay từng câu</b><small>Máy nghe bạn đọc rồi chấm, giáo viên sửa phát âm.</small></span></div>
           <div class="ci-row"><svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chat"/></svg>
@@ -2035,12 +2035,12 @@
         <div class="card set"><label class="switch"><input type="checkbox" id="optKid" checked /><span class="track" aria-hidden="true"></span><span>Giọng trẻ con cho ON-Language</span></label></div>
         <div class="card set giong-hang">
           <button class="giong-nut" id="btnGiongAnh" type="button">
-            <span class="giong-nhan">Giọng tiếng Anh</span>
+            <span class="giong-nhan" id="giongNhanHoc">Giọng tiếng Anh</span>
             <span class="giong-ten" id="giongAnh">—</span>
             <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
           </button>
           <button class="giong-nut" id="btnGiongViet" type="button">
-            <span class="giong-nhan">Giọng tiếng Việt</span>
+            <span class="giong-nhan" id="giongNhanGiai">Giọng tiếng Việt</span>
             <span class="giong-ten" id="giongViet">—</span>
             <svg class="ic ic-sm" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
           </button>
@@ -2229,7 +2229,7 @@
 
   <!-- Bước 2: làm bài -->
   <div class="xep-in" id="xepCau" hidden>
-    <p class="xep-hoi-lab">Từ này tiếng Anh là gì?</p>
+    <p class="xep-hoi-lab" id="xepHoiLab">Từ này tiếng Anh là gì?</p>
     <p class="xep-hoi" id="xepHoi"></p>
     <div class="xep-dap" id="xepDap"></div>
   </div>
@@ -2767,7 +2767,7 @@
     </div>
   </div>
     <div class="call-type" id="callType" hidden>
-      <input type="text" id="callInput" placeholder="Gõ câu tiếng Anh của bạn…" aria-label="Gõ câu trả lời" />
+      <input type="text" id="callInput" placeholder="Gõ câu trả lời của bạn…" aria-label="Gõ câu trả lời" />
       <button class="round-btn lg" id="btnCallSend" type="button" aria-label="Gửi">
         <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
       </button>

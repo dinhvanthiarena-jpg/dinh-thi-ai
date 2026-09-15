@@ -81,6 +81,14 @@ function markup(node, text) {
 
 /* ---------- 1. Trạng thái ---------- */
 const KEY = "englishair.v3";
+const HEART_MS = 30 * 60 * 1000;
+// Số tim tối đa. Con số này trước nằm rải rác bảy chỗ trong file — sửa một chỗ
+// mà sót chỗ khác là tim hồi tới 5 rồi đứng, hoặc mất tim mà đồng hồ không chạy.
+const TIM_TOI_DA = 15;
+// PHẢI khai báo TRƯỚC DEFAULTS và load(): vaLai() dùng TIM_TOI_DA để kẹp số tim,
+// mà load() chạy ngay dòng `let S = load()` — để hằng này ở dưới là app chết
+// ngay từ dòng đầu với lỗi "Cannot access before initialization".
+
 const DEFAULTS = {
   khoa: "en-vi",   // cặp ngôn ngữ đang học: xem bảng KHOA bên course.js
   level: "a1",
@@ -107,6 +115,49 @@ const DEFAULTS = {
   avatar: { k: "m" }
 };
 let S = load();
+
+/* Ép mỗi trường về đúng kiểu của nó. Sai kiểu thì lấy giá trị mặc định, chứ
+   không để nguyên rồi chết ở tận đâu đó trong lúc dựng màn hình. */
+function vaLai(s) {
+  const D = DEFAULTS;
+  const laObj = v => v && typeof v === "object" && !Array.isArray(v);
+  const so = (v, mac, nho, to) => {
+    const n = Number(v);
+    if (!Number.isFinite(n)) return mac;
+    return Math.max(nho, Math.min(to, n));
+  };
+
+  ["done", "srs", "thi", "giong", "avatar", "vietHan"].forEach(k => {
+    if (s[k] !== undefined && !laObj(s[k])) s[k] = k === "vietHan" ? {} : (D[k] !== undefined ? D[k] : {});
+    if (s[k] === undefined && D[k] !== undefined) s[k] = D[k];
+  });
+  if (!laObj(s.done)) s.done = {};
+  if (!laObj(s.srs)) s.srs = {};
+  if (!Array.isArray(s.days)) s.days = [];
+
+  s.xp      = so(s.xp, D.xp, 0, 1e9);
+  s.xu      = so(s.xu, D.xu, 0, 1e9);
+  s.hearts  = so(s.hearts, D.hearts, 0, TIM_TOI_DA);
+  s.heartAt = so(s.heartAt, Date.now(), 0, 4e12);
+  s.streak  = so(s.streak, D.streak, 0, 100000);
+  s.best    = so(s.best, D.best, 0, 100000);
+  s.goal    = so(s.goal, D.goal, 1, 100000);
+  s.todayXp = so(s.todayXp, 0, 0, 1e9);
+  s.weekXp  = so(s.weekXp, 0, 0, 1e9);
+  s.tier    = so(s.tier, 0, 0, 10);
+
+  ["sound", "nhac", "motion", "showVi", "moHet", "kidVoice", "nhacHoc",
+   "daHoiNhac", "xemThu"].forEach(k => { s[k] = !!s[k]; });
+  ["ten", "theme", "lastDay", "goalDay", "weekStart", "daXep", "joined"]
+    .forEach(k => { if (typeof s[k] !== "string") s[k] = D[k] !== undefined ? D[k] : ""; });
+
+  // Khoá và trình độ phải là thứ CÓ THẬT trong bảng, không thì màn Học trống.
+  const k = KHOA.find(x => x.id === s.khoa) || KHOA[0];
+  s.khoa = k.id;
+  if (!k.levels.some(l => l.id === s.level)) s.level = k.levels[0].id;
+  return s;
+}
+
 function load() {
   let s;
   try { s = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || "{}")); }
@@ -121,17 +172,14 @@ function load() {
     s.kidVoice = false;
     if (s.giong && s.giong.en) delete s.giong.en;
   }
-  return s;
+  return vaLai(s);
 }
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* chế độ riêng tư */ }
   henDayLen();   // gửi lên máy chủ, gộp nhiều lần sửa thành một lượt
 }
 
-const HEART_MS = 30 * 60 * 1000;
-// Số tim tối đa. Con số này trước nằm rải rác bảy chỗ trong file — sửa một chỗ
-// mà sót chỗ khác là tim hồi tới 5 rồi đứng, hoặc mất tim mà đồng hồ không chạy.
-const TIM_TOI_DA = 15;
+
 function regenHearts() {
   if (S.hearts >= TIM_TOI_DA) { S.heartAt = Date.now(); return; }
   const got = Math.floor((Date.now() - S.heartAt) / HEART_MS);
@@ -875,6 +923,7 @@ function datKhoa(id, veLai) {
   // Trình độ đang chọn mà không thuộc khoá này thì kéo về trình độ đầu
   if (!k.levels.some(l => l.id === S.level)) S.level = k.levels[0].id;
   tinhLaiKho();
+  veNhanGiong();
   datTiengGiaoDien(k.giai);
   if (veLai) { save(); paintStats(); go(view); }
 }
@@ -1417,6 +1466,15 @@ function setKicker(text) { $("#slideKicker").textContent = text || ""; }
 /* Tên thứ tiếng ĐANG HỌC, lấy từ khoá chứ không viết chết là "tiếng Anh".
    Người Việt học tiếng Trung mà màn hình bảo "Dịch sang tiếng Anh" thì sai hẳn.
    Bỏ chữ "Tiếng" đầu cho ghép câu được: "Dịch sang tiếng " + tenTiengHoc(). */
+/* Tên thứ tiếng GIẢI THÍCH — cột nghĩa trong bài nối từ, và mọi chỗ nói về
+   tiếng mà người học đã biết. Người Mỹ học tiếng Việt thì cột này là English. */
+function tenTiengGiai() {
+  const k = khoaTheoMa(S.khoa || COURSE.id);
+  const t = String(k.tenGiai || "").trim();
+  const bo = t.slice(0, 5).toLowerCase() === "tiếng" ? t.slice(5).trim() : t;
+  return bo || t;
+}
+
 function tenTiengHoc() {
   const k = khoaTheoMa(S.khoa || COURSE.id);
   // Cắt chữ "Tiếng" đầu bằng tay, KHÔNG dùng biểu thức chính quy: dấu gạch chéo
@@ -2204,6 +2262,29 @@ function vocabSlide(d, st, label) {
 }
 
 /* ---------- 10. Dạng bài luyện tập ---------- */
+/* Chữ nhiễu cho bài ghép chữ. PHẢI cùng loại chữ với từ đang học.
+   Trước đây lấy cứng từ bảng A-Z, nên từ tiếng Trung 你好 hiện ra bàn phím
+   "你 好 J K" — nhìn là biết đáp án, mà trông cũng như app hỏng. Nay bốc từ
+   chính kho từ của thứ tiếng đang học. */
+function chuNhieu(tu) {
+  const daCo = new Set([...String(tu).toUpperCase()]);
+  const ra = new Set();
+  const kho = khoTheoBac().all || [];
+  for (const w of shuffle(kho)) {
+    for (const c of String(w.en).toUpperCase()) {
+      if (c === " " || daCo.has(c)) continue;
+      ra.add(c);
+      if (ra.size >= 12) break;
+    }
+    if (ra.size >= 12) break;
+  }
+  // Kho quá nghèo thì mới lùi về bảng chữ cái — và chỉ khi từ này là chữ La-tinh.
+  if (ra.size < 4 && /^[A-Z '-]+$/.test(String(tu).toUpperCase())) {
+    "ABCDEFGHIJKLMNOPRSTUVWY".split("").forEach(c => { if (!daCo.has(c)) ra.add(c); });
+  }
+  return [...ra];
+}
+
 const DRILL = {
   choice(d, st) {
     setKicker("Chọn nghĩa đúng");
@@ -2275,7 +2356,7 @@ const DRILL = {
   truefalse(d, st) {
     showMascot(true); setKicker("Đúng hay sai");
     const ask = el("p", "ask");
-    markup(ask, `Trong tiếng Anh, “${d.word.vi}” được gọi là **${d.shown}**.`);
+    markup(ask, `Trong tiếng ${tenTiengHoc()}, “${d.word.vi}” được gọi là **${d.shown}**.`);
     const tf = el("div", "tf");
     const mk = (cls, ic, val, lab) => {
       const b = el("button", cls); b.type = "button";
@@ -2648,12 +2729,11 @@ const DRILL = {
     });
     st.append(hang);
 
-    // Chữ cái của từ, xáo lên, thêm vài chữ nhiễu cho khỏi đoán bừa.
-    const nhieu = "ABCDEFGHIJKLMNOPRSTUVWY".split("");
+    // Chữ của từ, xáo lên, thêm vài chữ nhiễu cho khỏi đoán bừa.
     const themN = clamp(Math.round(chuCan.filter(c => c !== " ").length / 3), 2, 4);
     const kho = shuffle(
       chuCan.filter(c => c !== " ")
-        .concat(sample(nhieu.filter(c => !tu.toUpperCase().includes(c)), themN))
+        .concat(sample(chuNhieu(tu), themN))
     );
 
     const bang = el("div", "gc-bang");
@@ -2828,8 +2908,10 @@ const DRILL = {
 
     const grid = el("div", "match");
     const cotA = el("div", "match-cot"), cotB = el("div", "match-cot");
-    cotA.append(el("span", "match-nhan", "Tiếng Anh"));
-    cotB.append(el("span", "match-nhan", "Nghĩa tiếng Việt"));
+    // Tên hai cột lấy theo khoá. Viết chết "Tiếng Anh" / "Nghĩa tiếng Việt" thì
+    // người Việt học tiếng Trung mở bài nối từ ra thấy cột chữ Hán đề "Tiếng Anh".
+    cotA.append(el("span", "match-nhan", khoaTheoMa(S.khoa || COURSE.id).tenHoc));
+    cotB.append(el("span", "match-nhan", "Nghĩa tiếng " + tenTiengGiai()));
     const colA = el("div", "opts"), colB = el("div", "opts");
     cotA.append(colA); cotB.append(colB);
 
@@ -6506,17 +6588,54 @@ $("#optVi").addEventListener("change", e => { S.showVi = e.target.checked; save(
 $("#optKid").addEventListener("change", e => { S.kidVoice = e.target.checked; save(); });
 /* Mỗi máy có sẵn một bộ giọng khác nhau, và giọng máy tự chọn không phải lúc nào
    cũng dễ nghe. Cho người dùng tự chọn, nghe thử ngay trong lúc chọn. */
-const CAU_THU = { en: "Good morning. Nice to meet you.", vi: "Chào bạn, hôm nay học gì nào?" };
+/* Câu đọc thử khi chọn giọng. Thêm thứ tiếng mới thì thêm một dòng ở đây. */
+const CAU_THU = {
+  en: "Good morning. Nice to meet you.",
+  vi: "Chào bạn, hôm nay học gì nào?",
+  zh: "你好，今天学什么？",
+  ja: "おはようございます。",
+  ko: "안녕하세요. 만나서 반갑습니다.",
+};
+/* Mã đầy đủ của một gốc ngôn ngữ, để gọi speak() và lọc danh sách giọng máy. */
+function maGoc(goc) {
+  const k = khoaTheoMa(S.khoa || COURSE.id);
+  if (goc === k.hoc) return k.maHoc;
+  if (goc === k.giai) return k.maGiai;
+  return goc;
+}
+
+/* Tên gọi của một gốc ngôn ngữ, lấy từ khoá đang mở. */
+function tenGoc(goc) {
+  const k = khoaTheoMa(S.khoa || COURSE.id);
+  if (goc === k.hoc) return k.tenHoc;
+  if (goc === k.giai) return k.tenGiai;
+  return (CALL_LANGS[goc] && CALL_LANGS[goc].name) || goc;
+}
 
 function tenGiong(v) {
   // Bỏ phần thừa kiểu "Microsoft David Desktop - English (United States)"
   return String(v.name).replace(/^(Microsoft|Google)\s+/i, "").replace(/\s*-\s*.*$/, "").trim() || v.name;
 }
 
+/* Nhãn hai dòng giọng trong Cài đặt — đổi theo khoá đang học. */
+function veNhanGiong() {
+  const k = khoaTheoMa(S.khoa || COURSE.id);
+  const a1 = $("#giongNhanHoc"), a2 = $("#giongNhanGiai");
+  // GIỮ NGUYÊN chữ hoa: "Giọng tiếng Anh" và "Từ này tiếng Anh là gì?" là hai
+  // khoá có thật trong bảng dịch giao diện (ngon-ngu.js). Viết thường đi là
+  // bảng tra trượt, khoá tiếng Việt cho người Mỹ sẽ hiện chữ Việt lẫn vào.
+  if (a1) a1.textContent = "Giọng tiếng " + tenTiengHoc();
+  if (a2) a2.textContent = "Giọng tiếng " + tenTiengGiai();
+  const xl = $("#xepHoiLab");
+  if (xl) xl.textContent = "Từ này tiếng " + tenTiengHoc() + " là gì?";
+}
+
 function veDongGiong(goc) {
-  const o = $(goc === "en" ? "#giongAnh" : "#giongViet");
+  // Dòng TRÊN luôn là thứ tiếng đang học, dòng DƯỚI là thứ tiếng giải thích.
+  const k = khoaTheoMa(S.khoa || COURSE.id);
+  const o = $(goc === k.hoc ? "#giongAnh" : "#giongViet");
   if (!o) return;
-  const v = voiceFor(goc === "en" ? "en-GB" : "vi-VN");
+  const v = voiceFor(maGoc(goc));
   if (!v) { o.textContent = "máy chưa có giọng này"; o.classList.add("thieu"); return; }
   const ch = luaChonGiong(goc);
   const kieu = KIEU_GIONG.find(k => Math.abs(ch.pitch - k.pitch) < 0.01 && Math.abs(ch.rate - k.rate) < 0.01);
@@ -6525,7 +6644,7 @@ function veDongGiong(goc) {
   o.textContent = tenGiong(v) + " · " + nuocCuaGiong(v.lang) + (ch.uri && kieu ? " — " + kieu.ten : "");
   // Moira là en-IE, Daniel là en-GB, Samantha là en-US — đều là tiếng Anh thật.
   // Chỉ báo thiếu khi máy KHÔNG có giọng tiếng Anh nào cả.
-  o.classList.toggle("thieu", goc === "en" && !chuanTag(v.lang).startsWith("en"));
+  o.classList.toggle("thieu", !chuanTag(v.lang).startsWith(goc));
 }
 
 /** Đổi mã ngôn ngữ thành tên nước cho dễ đọc. */
@@ -6557,7 +6676,7 @@ function moChonGiong(goc) {
 
   if (!ds.length) {
     box.append(el("p", "pro-fine",
-      "Máy này chưa cài giọng " + (goc === "en" ? "tiếng Anh" : "tiếng Việt") +
+      "Máy này chưa cài giọng " + tenGoc(goc) +
       ". Vào Cài đặt máy → Trợ năng → Nội dung đọc để tải thêm."));
   }
 
@@ -6579,7 +6698,7 @@ function moChonGiong(goc) {
         $$(".giong-o", box).forEach(x => x.classList.remove("on"));
         b.classList.add("on");
         veDongGiong(goc);
-        speak(CAU_THU[goc], false, goc === "en" ? "en-GB" : "vi-VN");
+        speak(CAU_THU[goc] || "Xin chào", false, maGoc(goc));
       });
       box.append(b);
     });
@@ -6597,15 +6716,18 @@ function moChonGiong(goc) {
   }
 
   openSheet({
-    title: goc === "en" ? "Giọng tiếng Anh" : "Giọng tiếng Việt",
+    title: "Giọng tiếng " + tenGoc(goc).replace(/^Tiếng /, ""),
     body: "Chạm vào một kiểu để nghe thử và chọn luôn.",
     no: "Xong",
     slot: box,
   });
 }
 
-$("#btnGiongAnh").addEventListener("click", () => moChonGiong("en"));
-$("#btnGiongViet").addEventListener("click", () => moChonGiong("vi"));
+// Hai nút đi theo khoá: nút trên = tiếng đang học, nút dưới = tiếng giải thích.
+$("#btnGiongAnh").addEventListener("click",
+  () => moChonGiong(khoaTheoMa(S.khoa || COURSE.id).hoc));
+$("#btnGiongViet").addEventListener("click",
+  () => moChonGiong(khoaTheoMa(S.khoa || COURSE.id).giai));
 $("#btnThuGiong").addEventListener("click", () => {
   pickVoice();
   const anh = voiceFor("en-GB");
@@ -9862,4 +9984,5 @@ function hanChuSau() {
   // Màn Học nằm ngoài khối này nên phải phơi hàm ra mới gọi được.
   window.capNhatTheViet = hanCapNhatThe;
 })();
+
 })();
