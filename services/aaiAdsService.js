@@ -16,6 +16,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { markdownToHtml } = require('../utils/markdownToHtml');
 
 const GRAPH_VERSION = 'v21.0';
 const CLAUDE_MODEL = 'claude-sonnet-5';
@@ -245,7 +246,20 @@ async function publishToTarget(pageToken, targetId, targetType, item) {
 // Đăng lên 1 website tùy ý qua API — cùng chuẩn payload JSON với tool desktop
 // ({title, content, link, imageBase64}) để 1 website chỉ cần code 1 endpoint
 // dùng chung được cho cả 2 nơi.
+// Đăng bài lên 1 Website đích — hỗ trợ 2 "adapter" khác nhau tuỳ nền tảng của
+// web đó, để không bắt buộc mọi web khách phải là Node.js/Express mới dùng
+// được tool (thầy yêu cầu 2026-09-16: "tool theo các web hiện đã có sẵn, kiểu
+// tool đa dạng"):
+//   - platform 'wordpress': web chạy WordPress (VD suni.vn) — gọi thẳng REST
+//     API có sẵn của WordPress (/wp-json/wp/v2/posts), xác thực bằng
+//     "Application Password" (tính năng có sẵn từ WP 5.6, tạo ở Users →
+//     Profile, không cần cài plugin hay sửa code gì trên web đó).
+//   - platform khác (mặc định, web Node.js tự viết như dinh-thi-ai): giữ
+//     nguyên cách cũ — gọi 1 API tự quy ước (routes/autopost.js) bằng Bearer
+//     token tĩnh.
 async function postToWebsite(target, item) {
+  if (target.platform === 'wordpress') return postToWordPress(target, item);
+
   try {
     const res = await fetch(target.apiUrl, {
       method: 'POST',
@@ -260,9 +274,77 @@ async function postToWebsite(target, item) {
         imageBase64: item.imageBase64 || null,
       }),
     });
-    if (res.ok) return { ok: true };
+    if (res.ok) {
+      // /api/auto-post trả {ok, id, slug, url} với url dạng "/blog/{slug}"
+      // (đường dẫn tương đối) — suy ra permalink đầy đủ từ chính apiUrl đã
+      // cấu hình (VD apiUrl ".../api/auto-post" → gốc web ".../")  để nhật ký
+      // đăng bài có link bấm được ngay, không phải tự tìm slug thủ công.
+      const data = await res.json().catch(() => null);
+      let permalink = null;
+      if (data && data.url) {
+        try {
+          permalink = new URL(data.url, target.apiUrl).toString();
+        } catch (e) {
+          permalink = null;
+        }
+      }
+      return { ok: true, permalink };
+    }
     const text = await res.text().catch(() => '');
     return { ok: false, error: `HTTP ${res.status}: ${text.slice(0, 200)}` };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+async function postToWordPress(target, item) {
+  try {
+    const baseUrl = target.apiUrl.replace(/\/+$/, '');
+    const authHeader = `Basic ${Buffer.from(`${target.wpUsername}:${target.wpAppPassword}`).toString('base64')}`;
+
+    let featuredMediaId = null;
+    if (item.imageBase64) {
+      try {
+        const imgBuffer = Buffer.from(item.imageBase64, 'base64');
+        const mediaRes = await fetch(`${baseUrl}/wp-json/wp/v2/media`, {
+          method: 'POST',
+          headers: {
+            Authorization: authHeader,
+            'Content-Type': 'image/jpeg',
+            'Content-Disposition': `attachment; filename="ai-autopost-${Date.now()}.jpg"`,
+          },
+          body: imgBuffer,
+        });
+        if (mediaRes.ok) {
+          const media = await mediaRes.json();
+          featuredMediaId = media.id || null;
+        }
+        // Tải ảnh lỗi không chặn đăng bài — vẫn đăng bài không ảnh còn hơn
+        // huỷ cả bài chỉ vì lỗi ảnh.
+      } catch (e) {
+        featuredMediaId = null;
+      }
+    }
+
+    const res = await fetch(`${baseUrl}/wp-json/wp/v2/posts`, {
+      method: 'POST',
+      headers: {
+        Authorization: authHeader,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: item.headline || (item.message || '').slice(0, 60),
+        content: markdownToHtml(item.message || ''),
+        status: 'publish',
+        ...(featuredMediaId ? { featured_media: featuredMediaId } : {}),
+      }),
+    });
+    if (res.ok) {
+      const post = await res.json();
+      return { ok: true, permalink: post.link || null };
+    }
+    const text = await res.text().catch(() => '');
+    return { ok: false, error: `WordPress HTTP ${res.status}: ${text.slice(0, 200)}` };
   } catch (e) {
     return { ok: false, error: e.message };
   }
@@ -525,10 +607,16 @@ Trả lời CHỈ bằng 1 khối JSON hợp lệ, không markdown, không code 
     }
     if (result.ok) {
       // FB trả postId dạng "{page_id}_{post_id}" cho cả /feed lẫn /photos — suy
-      // ra thẳng link công khai của bài mà không cần gọi thêm Graph API.
-      const permalink = target.type !== 'website' && result.postId && result.postId.includes('_')
-        ? `https://www.facebook.com/${result.postId.replace('_', '/posts/')}`
-        : null;
+      // ra thẳng link công khai của bài mà không cần gọi thêm Graph API. Còn
+      // website thì lấy permalink thật mà postToWebsite/postToWordPress đã
+      // trả về (trước đây bị bỏ qua, luôn ghi null — phải tự tìm slug thủ
+      // công mỗi lần cần link, xem feedback_aai_ads_caption_style).
+      let permalink = null;
+      if (target.type === 'website') {
+        permalink = result.permalink || null;
+      } else if (result.postId && result.postId.includes('_')) {
+        permalink = `https://www.facebook.com/${result.postId.replace('_', '/posts/')}`;
+      }
       newLogEntries.push({ time: Date.now(), targetId: target.id, targetName: target.name, status: 'posted', message: target.type === 'website' ? articleContent : fbCaption, articleTitle, permalink, source: 'ai-autopost' });
     } else if (target.type === 'group') {
       newLogEntries.push({ time: Date.now(), targetId: target.id, targetName: target.name, status: 'needs_manual', error: result.error, message: fbCaption, articleTitle, source: 'ai-autopost' });

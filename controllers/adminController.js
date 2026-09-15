@@ -736,9 +736,19 @@ exports.aaiAdsCreateCampaign = async (req, res) => {
 
 exports.aaiAdsWebsiteTargetAdd = (req, res) => {
   try {
-    const { name, apiUrl, authToken } = req.body;
-    if (!name || !apiUrl) throw new Error('Vui lòng nhập tên và địa chỉ API.');
-    const target = aaiAds.addWebsiteTarget({ name, apiUrl, authToken: authToken || undefined });
+    const { name, apiUrl, authToken, platform, wpUsername, wpAppPassword } = req.body;
+    if (!name || !apiUrl) throw new Error('Vui lòng nhập tên và địa chỉ.');
+    if (platform === 'wordpress' && (!wpUsername || !wpAppPassword)) {
+      throw new Error('Web WordPress cần nhập Username và Application Password.');
+    }
+    const target = aaiAds.addWebsiteTarget({
+      name,
+      apiUrl,
+      authToken: authToken || undefined,
+      platform: platform === 'wordpress' ? 'wordpress' : 'node',
+      wpUsername: platform === 'wordpress' ? wpUsername : undefined,
+      wpAppPassword: platform === 'wordpress' ? wpAppPassword : undefined,
+    });
     res.json(target);
   } catch (e) {
     res.status(400).json({ error: e.message });

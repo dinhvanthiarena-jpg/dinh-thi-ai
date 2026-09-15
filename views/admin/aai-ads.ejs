@@ -68,18 +68,27 @@
       </div>
       <div class="card p-6">
         <h2 class="font-semibold text-ink mb-1">Website nhận bài (tùy chọn)</h2>
-        <p class="text-sm text-muted mb-4">Website cần tự có sẵn 1 địa chỉ API nhận bài — tool gửi tới đó JSON dạng <code>{title, content, link, imageBase64}</code>. Thêm bao nhiêu website cũng được, rồi sang tab <strong>Đăng bài tự động</strong> để chọn nơi muốn đăng.</p>
+        <p class="text-sm text-muted mb-2">Hỗ trợ 2 kiểu web — chọn đúng loại web đích:</p>
+        <div class="flex gap-4 mb-3 text-sm">
+          <label class="flex items-center gap-1"><input type="radio" name="wtPlatform" value="node" checked /> Web Node.js tự viết (có sẵn API <code>/api/auto-post</code>)</label>
+          <label class="flex items-center gap-1"><input type="radio" name="wtPlatform" value="wordpress" /> Web WordPress (dùng Application Password có sẵn của WordPress)</label>
+        </div>
         <div class="grid grid-cols-3 gap-2 mb-2">
           <input id="wtName" type="text" class="input" placeholder="Tên (VD: 3dvietpro)" />
           <input id="wtApiUrl" type="text" class="input" placeholder="https://.../api/auto-post" />
           <input id="wtAuthToken" type="text" class="input" placeholder="Mã xác thực (Bearer Token, nếu có)" />
         </div>
+        <div id="wtWordpressFields" class="grid grid-cols-2 gap-2 mb-2" style="display:none">
+          <input id="wtWpUsername" type="text" class="input" placeholder="Username WordPress" />
+          <input id="wtWpAppPassword" type="text" class="input" placeholder="Application Password" />
+        </div>
+        <p class="text-xs text-muted mb-2">Web Node.js: nhập đúng địa chỉ API auto-post (VD <code>https://domain/api/auto-post</code>) + Bearer Token nếu có. Web WordPress: ô "địa chỉ" chỉ cần domain gốc (VD <code>https://suni.vn</code>), không cần Bearer Token — thay vào đó nhập Username + Application Password (tạo ở WordPress: Users → Profile → Application Passwords).</p>
         <button id="addWebsiteTargetBtn" type="button" class="btn-outline">Thêm Website</button>
         <p id="wtMsg" class="text-sm text-muted mt-2"></p>
         <div id="websiteTargetsList" class="mt-3 space-y-1 text-sm">
           <% websiteTargets.forEach(t => { %>
             <div class="flex items-center justify-between bg-primary-50/40 rounded px-3 py-2" data-wt-row="<%= t.id %>">
-              <span><strong><%= t.name %></strong> — <%= t.apiUrl %></span>
+              <span><strong><%= t.name %></strong> — <%= t.apiUrl %><%= t.platform === 'wordpress' ? ' (WordPress)' : '' %></span>
               <button type="button" class="text-rose-600 text-xs" data-wt-delete="<%= t.id %>">Xóa</button>
             </div>
           <% }) %>
@@ -779,6 +788,14 @@
 
   // ---------------- Đăng bài tự động ----------------
 
+  document.querySelectorAll('input[name="wtPlatform"]').forEach((el) => {
+    el.addEventListener('change', () => {
+      const isWp = document.querySelector('input[name="wtPlatform"]:checked').value === 'wordpress';
+      document.getElementById('wtWordpressFields').style.display = isWp ? 'grid' : 'none';
+      document.getElementById('wtAuthToken').style.display = isWp ? 'none' : '';
+    });
+  });
+
   const addWebsiteTargetBtn = document.getElementById('addWebsiteTargetBtn');
   if (addWebsiteTargetBtn) {
     addWebsiteTargetBtn.addEventListener('click', async () => {
@@ -786,15 +803,18 @@
       const name = document.getElementById('wtName').value.trim();
       const apiUrl = document.getElementById('wtApiUrl').value.trim();
       const authToken = document.getElementById('wtAuthToken').value.trim();
+      const platform = document.querySelector('input[name="wtPlatform"]:checked').value;
+      const wpUsername = document.getElementById('wtWpUsername').value.trim();
+      const wpAppPassword = document.getElementById('wtWpAppPassword').value.trim();
       if (!name || !apiUrl) {
-        msg.textContent = 'Vui lòng nhập tên và địa chỉ API.';
+        msg.textContent = 'Vui lòng nhập tên và địa chỉ.';
         return;
       }
       try {
         const res = await fetch('/admin/aai-ads/website-targets', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, apiUrl, authToken }),
+          body: JSON.stringify({ name, apiUrl, authToken, platform, wpUsername, wpAppPassword }),
         });
         const target = await res.json();
         if (target.error) throw new Error(target.error);
