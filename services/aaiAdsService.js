@@ -450,7 +450,7 @@ async function runAiAutoPost() {
 
 Yêu cầu riêng cho fbCaption (ĐỌC KỸ, đây là phần hiển thị công khai trên Fanpage nên phải thật chuyên nghiệp và hấp dẫn):
 - Dài khoảng 150-250 chữ (không phải 1 đoạn tóm tắt ngắn 2-3 câu).
-- Câu mở đầu phải là 1 câu "hook" thật giật gân/gây tò mò để giữ chân người đọc (câu hỏi, số liệu sốc, hoặc tuyên bố bất ngờ).
+- Câu mở đầu phải là 1 câu "hook" thật giật gân/gây tò mò để giữ chân người đọc (câu hỏi, số liệu sốc, hoặc tuyên bố bất ngờ). VIẾT IN HOA TOÀN BỘ khoảng 3-6 từ đầu tiên của câu hook này để tạo điểm nhấn thị giác ngay khi lướt Facebook (ví dụ: "CÙNG MỘT NGÀY, nước Mỹ chứng kiến AI vừa 'chào đời' đã bị tuyên án tử hình 🤖⚖️") — chỉ in hoa phần mở đầu, phần còn lại của câu và các đoạn sau viết bình thường.
 - Trình bày CHUYÊN NGHIỆP: chia thành nhiều đoạn ngắn 1-2 câu bằng \\n\\n (không viết dồn thành 1 khối văn bản dài), có thể dùng gạch đầu dòng bằng emoji (👉, ✅, 🔥...) để liệt kê ý khi phù hợp.
 - Dùng 3-5 emoji rải rác đúng chỗ (không lạm dụng) để tăng cảm xúc.
 - Kết thúc bằng 1 câu kêu gọi tương tác (đặt câu hỏi cho người đọc, mời bình luận/chia sẻ ý kiến).
