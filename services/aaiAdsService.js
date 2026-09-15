@@ -447,8 +447,8 @@ Trả lời CHỈ bằng 1 khối JSON hợp lệ, không markdown, không code 
     // Tăng token + parser chịu lỗi tốt hơn, và QUAN TRỌNG: không còn đăng bài
     // khi không lấy được JSON hợp lệ.
     const raw = await callClaude(system, userMessage, {
-      maxTokens: 6000,
-      tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }],
+      maxTokens: 10000,
+      tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }],
     });
     const parsed = parseJsonLoose(raw);
     if (!parsed || !(parsed.articleContent || parsed.fbCaption)) {
