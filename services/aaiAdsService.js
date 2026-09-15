@@ -279,9 +279,9 @@ async function downloadImageAsBase64(imgUrl) {
 // đã có sẵn trên server này cho newsFactoryService (xem
 // project_dinh-thi-ai_newsfactory_images), KHÔNG cần thêm Pexels key riêng
 // như bên tool desktop vì server đã có sẵn nguồn ảnh tương đương.
-async function findStockPhotoBase64(query) {
+async function findStockPhotoBase64One(query) {
   const apiKey = process.env.PIXABAY_API_KEY;
-  if (!apiKey) return null;
+  if (!apiKey || !query) return null;
   try {
     const url = `https://pixabay.com/api/?key=${apiKey}&q=${encodeURIComponent(query)}&image_type=photo&safesearch=true&per_page=5`;
     const res = await fetch(url);
@@ -293,6 +293,18 @@ async function findStockPhotoBase64(query) {
   } catch (e) {
     return null;
   }
+}
+
+// Pixabay tìm tốt nhất bằng từ khóa tiếng Anh ngắn — câu tiếng Việt dài (vd
+// nguyên tiêu đề bài) thường ra 0 kết quả. Thử lần lượt nhiều query, từ cụ
+// thể nhất tới chung chung nhất, để hầu như luôn có ảnh thay vì đăng bài trắng.
+async function findStockPhotoBase64(queries) {
+  const candidates = [...new Set([...(Array.isArray(queries) ? queries : [queries]), 'technology', 'business'])].filter(Boolean);
+  for (const q of candidates) {
+    const result = await findStockPhotoBase64One(q);
+    if (result) return result;
+  }
+  return null;
 }
 
 // ---- Hàng chờ đăng bài thủ công ----
@@ -432,11 +444,20 @@ async function runAiAutoPost() {
   // tức/xu hướng THẬT mới nhất — nhưng bắt buộc viết lại 100% văn phong riêng,
   // không copy nguyên câu của nguồn tìm được (tránh bản quyền + tránh bị
   // Google coi là nội dung "biên soạn lại" và hạ thứ hạng).
-  let fbCaption, articleTitle, articleContent;
+  let fbCaption, articleTitle, articleContent, imageKeywords;
   try {
-    const system = `Bạn là chuyên gia content marketing kiêm biên tập viên công nghệ. Dùng công cụ tìm kiếm web để tra cứu tin tức/bài viết MỚI NHẤT, nổi bật nhất về chủ đề được giao. Sau đó TỰ VIẾT một bài hoàn toàn mới bằng văn phong, cách diễn đạt của riêng bạn — dựa trên thông tin/xu hướng tìm được để bài viết cập nhật và có giá trị thật, nhưng TUYỆT ĐỐI không sao chép nguyên câu/đoạn văn từ bất kỳ nguồn nào.
+    const system = `Bạn là chuyên gia content marketing kiêm biên tập viên công nghệ, chuyên viết caption Facebook thu hút tương tác cao. Dùng công cụ tìm kiếm web để tra cứu tin tức/bài viết MỚI NHẤT, nổi bật nhất về chủ đề được giao. Sau đó TỰ VIẾT một bài hoàn toàn mới bằng văn phong, cách diễn đạt của riêng bạn — dựa trên thông tin/xu hướng tìm được để bài viết cập nhật và có giá trị thật, nhưng TUYỆT ĐỐI không sao chép nguyên câu/đoạn văn từ bất kỳ nguồn nào.
+
+Yêu cầu riêng cho fbCaption (ĐỌC KỸ, đây là phần hiển thị công khai trên Fanpage nên phải thật chuyên nghiệp và hấp dẫn):
+- Dài khoảng 150-250 chữ (không phải 1 đoạn tóm tắt ngắn 2-3 câu).
+- Câu mở đầu phải là 1 câu "hook" thật giật gân/gây tò mò để giữ chân người đọc (câu hỏi, số liệu sốc, hoặc tuyên bố bất ngờ).
+- Trình bày CHUYÊN NGHIỆP: chia thành nhiều đoạn ngắn 1-2 câu bằng \\n\\n (không viết dồn thành 1 khối văn bản dài), có thể dùng gạch đầu dòng bằng emoji (👉, ✅, 🔥...) để liệt kê ý khi phù hợp.
+- Dùng 3-5 emoji rải rác đúng chỗ (không lạm dụng) để tăng cảm xúc.
+- Kết thúc bằng 1 câu kêu gọi tương tác (đặt câu hỏi cho người đọc, mời bình luận/chia sẻ ý kiến).
+- Cuối cùng thêm 3-5 hashtag liên quan, viết liền không dấu cách kiểu #ViDu.
+
 Trả lời CHỈ bằng 1 khối JSON hợp lệ, không markdown, không code fence, không giải thích gì thêm, đúng format sau:
-{"articleTitle": "tiêu đề bài viết cho website, hấp dẫn, tối đa 70 ký tự", "articleContent": "nội dung bài viết đầy đủ cho website, khoảng 400-600 chữ, chia đoạn bằng \\n\\n, văn phong tự nhiên và có thông tin thật", "fbCaption": "bản tóm tắt ngắn 3-5 câu để đăng Facebook, hấp dẫn, có thể dùng 1-2 emoji phù hợp, tối đa 2-3 hashtag"}`;
+{"articleTitle": "tiêu đề bài viết cho website, hấp dẫn, tối đa 70 ký tự", "articleContent": "nội dung bài viết đầy đủ cho website, khoảng 400-600 chữ, chia đoạn bằng \\n\\n, văn phong tự nhiên và có thông tin thật", "fbCaption": "caption Facebook đầy đủ theo đúng yêu cầu trình bày ở trên", "imageKeywords": "2-4 từ khóa TIẾNG ANH ngắn gọn, đơn giản, mô tả hình ảnh minh họa phù hợp nhất để tìm trên kho ảnh stock quốc tế (vd: 'artificial intelligence technology', 'business meeting office')"}`;
     const userMessage = `Chủ đề/sản phẩm/dịch vụ cần quảng bá: ${config.aiAutoPostTopic}${
       recentTitles ? `\n\nCác bài đã viết gần đây (viết theo góc độ khác, đừng lặp lại ý/tiêu đề):\n${recentTitles}` : ''
     }`;
@@ -457,6 +478,7 @@ Trả lời CHỈ bằng 1 khối JSON hợp lệ, không markdown, không code 
     articleTitle = (parsed.articleTitle || '').trim() || config.aiAutoPostTopic.slice(0, 60);
     articleContent = (parsed.articleContent || '').trim();
     fbCaption = (parsed.fbCaption || '').trim() || articleContent.slice(0, 300);
+    imageKeywords = (parsed.imageKeywords || '').trim();
   } catch (e) {
     appendPostingLog([{ time: Date.now(), targetId: 'ai-autopost', targetName: 'AI tự động đăng bài', status: 'error', error: `Lỗi AI viết bài: ${e.message}`, source: 'ai-autopost' }]);
     return;
@@ -477,7 +499,7 @@ Trả lời CHỈ bằng 1 khối JSON hợp lệ, không markdown, không code 
 
   let imageBase64 = null;
   try {
-    imageBase64 = await findStockPhotoBase64(articleTitle || config.aiAutoPostTopic);
+    imageBase64 = await findStockPhotoBase64([imageKeywords, articleTitle, config.aiAutoPostTopic]);
   } catch (e) {
     imageBase64 = null;
   }
