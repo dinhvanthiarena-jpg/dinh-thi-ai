@@ -495,7 +495,12 @@ Trả lời CHỈ bằng 1 khối JSON hợp lệ, không markdown, không code 
       result = token ? await publishToTarget(token, target.id, target.type, fbItem) : { ok: false, error: 'Không lấy được token cho Page này.' };
     }
     if (result.ok) {
-      newLogEntries.push({ time: Date.now(), targetId: target.id, targetName: target.name, status: 'posted', message: target.type === 'website' ? articleContent : fbCaption, articleTitle, source: 'ai-autopost' });
+      // FB trả postId dạng "{page_id}_{post_id}" cho cả /feed lẫn /photos — suy
+      // ra thẳng link công khai của bài mà không cần gọi thêm Graph API.
+      const permalink = target.type !== 'website' && result.postId && result.postId.includes('_')
+        ? `https://www.facebook.com/${result.postId.replace('_', '/posts/')}`
+        : null;
+      newLogEntries.push({ time: Date.now(), targetId: target.id, targetName: target.name, status: 'posted', message: target.type === 'website' ? articleContent : fbCaption, articleTitle, permalink, source: 'ai-autopost' });
     } else if (target.type === 'group') {
       newLogEntries.push({ time: Date.now(), targetId: target.id, targetName: target.name, status: 'needs_manual', error: result.error, message: fbCaption, articleTitle, source: 'ai-autopost' });
     } else {

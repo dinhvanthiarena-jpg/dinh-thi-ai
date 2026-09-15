@@ -366,7 +366,7 @@
         <button id="loadPostingLogBtn" type="button" class="btn-outline mb-2">Tải nhật ký</button>
         <div id="postingLogList" class="space-y-1 text-xs max-h-64 overflow-y-auto">
           <% postingLog.slice(0, 30).forEach(e => { %>
-            <div><%= new Date(e.time).toLocaleString('vi-VN') %> — <%= e.targetName || e.targetId %> → <%= e.status === 'posted' ? 'Đã đăng' : ('Lỗi: ' + (e.error || '')) %></div>
+            <div><%= new Date(e.time).toLocaleString('vi-VN') %> — <%= e.targetName || e.targetId %> → <%= e.status === 'posted' ? 'Đã đăng' : ('Lỗi: ' + (e.error || '')) %><%- e.permalink ? ' — <a href="' + e.permalink + '" target="_blank" class="text-primary-700 underline">Xem bài</a>' : '' %></div>
           <% }) %>
         </div>
       </div>
@@ -968,7 +968,7 @@
     el.innerHTML = log.length
       ? log
           .slice(0, 30)
-          .map((e) => `<div>${new Date(e.time).toLocaleString('vi-VN')} — ${e.targetName || e.targetId} → ${e.status === 'posted' ? 'Đã đăng' : ('Lỗi: ' + (e.error || ''))}</div>`)
+          .map((e) => `<div>${new Date(e.time).toLocaleString('vi-VN')} — ${e.targetName || e.targetId} → ${e.status === 'posted' ? 'Đã đăng' : ('Lỗi: ' + (e.error || ''))}${e.permalink ? ` — <a href="${e.permalink}" target="_blank" class="text-primary-700 underline">Xem bài</a>` : ''}</div>`)
           .join('')
       : '<p class="text-muted">Chưa có nhật ký nào.</p>';
   }
