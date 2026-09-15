@@ -468,12 +468,16 @@ Trả lời CHỈ bằng 1 khối JSON hợp lệ, không markdown, không code 
     // Tăng token + parser chịu lỗi tốt hơn, và QUAN TRỌNG: không còn đăng bài
     // khi không lấy được JSON hợp lệ.
     const raw = await callClaude(system, userMessage, {
-      maxTokens: 10000,
+      maxTokens: 16000,
       tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 2 }],
     });
     const parsed = parseJsonLoose(raw);
     if (!parsed || !(parsed.articleContent || parsed.fbCaption)) {
-      throw new Error('AI không trả về JSON hợp lệ (có thể do bị cắt giữa chừng) — đã hủy đăng để tránh đăng nội dung lỗi.');
+      // Debug tạm thời: kèm độ dài + đuôi text thô vào log lỗi để biết chính
+      // xác model dừng ở đâu (rỗng hoàn toàn = hết token trước cả khi viết
+      // text, hay có text nhưng JSON không đóng ngoặc = cắt giữa chừng).
+      const tail = raw.slice(-300);
+      throw new Error(`AI không trả về JSON hợp lệ (raw length=${raw.length}, đuôi: ${JSON.stringify(tail)}) — đã hủy đăng để tránh đăng nội dung lỗi.`);
     }
     articleTitle = (parsed.articleTitle || '').trim() || config.aiAutoPostTopic.slice(0, 60);
     articleContent = (parsed.articleContent || '').trim();
