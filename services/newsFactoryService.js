@@ -8,6 +8,7 @@ const { Op } = require('sequelize');
 const BlogPost = require('../models/BlogPost');
 const { parseRss } = require('../utils/rssParser');
 const { BLOG_CATEGORIES } = require('../utils/blogCategories');
+const { markdownToHtml } = require('../utils/markdownToHtml');
 
 const AUTO_IMAGE_DIR = path.join(__dirname, '..', 'public', 'images', 'blog', 'auto');
 
@@ -459,25 +460,6 @@ function stripCodeFence(text) {
 // **bold**, [link](url)) cho dễ đọc/viết — nên phải tự chuyển sang HTML ở
 // đây trước khi lưu, nếu không tiêu đề phụ/link nguồn sẽ hiện ra thành chữ
 // thô "## ..." / "[...](...)" ngay trên trang.
-function inlineMarkdown(text) {
-  return text
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer nofollow">$1</a>')
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-}
-
-function markdownToHtml(markdown) {
-  return markdown
-    .split(/\n{2,}/)
-    .map((block) => block.trim())
-    .filter(Boolean)
-    .map((block) => {
-      const heading = block.match(/^#{1,3}\s+(.+)$/);
-      if (heading) return `<h2>${inlineMarkdown(heading[1])}</h2>`;
-      return `<p>${inlineMarkdown(block).replace(/\n/g, '<br>')}</p>`;
-    })
-    .join('\n');
-}
-
 async function generateArticle(categorySlug, keyword, item) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return null;
