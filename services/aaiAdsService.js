@@ -440,19 +440,22 @@ Trả lời CHỈ bằng 1 khối JSON hợp lệ, không markdown, không code 
     const userMessage = `Chủ đề/sản phẩm/dịch vụ cần quảng bá: ${config.aiAutoPostTopic}${
       recentTitles ? `\n\nCác bài đã viết gần đây (viết theo góc độ khác, đừng lặp lại ý/tiêu đề):\n${recentTitles}` : ''
     }`;
+    // maxTokens thấp (từng để 2000) khiến phần JSON cuối cùng bị cắt cụt giữa
+    // chừng khi model dùng nhiều lượt web_search trước đó (tốn token cho kết
+    // quả tìm kiếm) — JSON.parse lỗi, rơi vào nhánh dự phòng và từng đăng
+    // NGUYÊN VĂN JSON thô lên Facebook (bug thật đã xảy ra, đã dọn các bài đó).
+    // Tăng token + parser chịu lỗi tốt hơn, và QUAN TRỌNG: không còn đăng bài
+    // khi không lấy được JSON hợp lệ.
     const raw = await callClaude(system, userMessage, {
-      maxTokens: 2000,
+      maxTokens: 6000,
       tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }],
     });
-    let parsed;
-    try {
-      const match = raw.match(/\{[\s\S]*\}/);
-      parsed = JSON.parse(match ? match[0] : raw);
-    } catch (e) {
-      parsed = {};
+    const parsed = parseJsonLoose(raw);
+    if (!parsed || !(parsed.articleContent || parsed.fbCaption)) {
+      throw new Error('AI không trả về JSON hợp lệ (có thể do bị cắt giữa chừng) — đã hủy đăng để tránh đăng nội dung lỗi.');
     }
     articleTitle = (parsed.articleTitle || '').trim() || config.aiAutoPostTopic.slice(0, 60);
-    articleContent = (parsed.articleContent || '').trim() || raw.trim();
+    articleContent = (parsed.articleContent || '').trim();
     fbCaption = (parsed.fbCaption || '').trim() || articleContent.slice(0, 300);
   } catch (e) {
     appendPostingLog([{ time: Date.now(), targetId: 'ai-autopost', targetName: 'AI tự động đăng bài', status: 'error', error: `Lỗi AI viết bài: ${e.message}`, source: 'ai-autopost' }]);
@@ -910,9 +913,8 @@ async function getDecisionCenter(adAccountId, windowDays) {
   const userMessage = `Dữ liệu chiến dịch (${windowDays} ngày gần nhất):\n${JSON.stringify(campaigns, null, 2)}${
     profitSummary ? `\n\nLợi nhuận tổng quan:\n${JSON.stringify(profitSummary, null, 2)}` : ''
   }`;
-  const raw = await callClaude(system, userMessage, { maxTokens: 2000 });
-  const match = raw.match(/\{[\s\S]*\}/);
-  const parsed = match ? JSON.parse(match[0]) : { findings: [], recommendations: [] };
+  const raw = await callClaude(system, userMessage, { maxTokens: 4000 });
+  const parsed = parseJsonLoose(raw) || {};
   return { campaigns, findings: parsed.findings || [], recommendations: parsed.recommendations || [] };
 }
 
@@ -940,9 +942,8 @@ async function getLearningInsights(adAccountId, windowDays) {
   const system = `Bạn là chuyên gia phân tích quảng cáo Facebook. Dựa trên dữ liệu chiến dịch, đơn hàng, lead được cung cấp, hãy tìm ra pattern/xu hướng đáng chú ý, cảnh báo mỏi quảng cáo (ad fatigue — CTR giảm dần), nguồn lead/kênh tốt nhất, và lời khuyên cụ thể cho chiến dịch tiếp theo. Trả lời CHỈ bằng JSON hợp lệ, không markdown:
 {"patterns": ["..."], "fatigueWarnings": ["..."], "bestSources": ["..."], "nextCampaignAdvice": ["..."]}`;
   const userMessage = `Chiến dịch (${windowDays} ngày gần nhất):\n${JSON.stringify(campaigns, null, 2)}\n\nĐơn hàng (tổng ${orders.length}, mẫu gần nhất):\n${JSON.stringify(orders.slice(-50), null, 2)}\n\nLead (tổng ${leads.length}, mẫu gần nhất):\n${JSON.stringify(leads.slice(-50), null, 2)}`;
-  const raw = await callClaude(system, userMessage, { maxTokens: 2000 });
-  const match = raw.match(/\{[\s\S]*\}/);
-  const parsed = match ? JSON.parse(match[0]) : {};
+  const raw = await callClaude(system, userMessage, { maxTokens: 4000 });
+  const parsed = parseJsonLoose(raw) || {};
   return {
     patterns: parsed.patterns || [],
     fatigueWarnings: parsed.fatigueWarnings || [],
@@ -952,6 +953,68 @@ async function getLearningInsights(adAccountId, windowDays) {
 }
 
 // ---------------- AI plan (Claude) ----------------
+
+// Trích JSON đầu tiên trong text bằng cách đếm dấu ngoặc nhọn cân bằng (bỏ
+// qua ngoặc nằm trong chuỗi) — đáng tin hơn regex tham lam /\{[\s\S]*\}/ khi
+// model lỡ in thêm chữ trước/sau JSON, hoặc nội dung bài viết chứa dấu {}.
+function extractJsonObjectString(text) {
+  const start = text.indexOf('{');
+  if (start === -1) return null;
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escape) escape = false;
+      else if (ch === '\\') escape = true;
+      else if (ch === '"') inString = false;
+    } else if (ch === '"') {
+      inString = true;
+    } else if (ch === '{') {
+      depth++;
+    } else if (ch === '}') {
+      depth--;
+      if (depth === 0) return text.slice(start, i + 1);
+    }
+  }
+  return null; // JSON bị cắt cụt giữa chừng (vd hết max_tokens) — không đóng hết ngoặc
+}
+
+// Parse JSON "khoan dung": thử parse thẳng, nếu lỗi (thường do model quên
+// escape xuống dòng/tab thật bên trong chuỗi) thì escape lại các ký tự điều
+// khiển bên trong chuỗi rồi parse lại. Trả về null nếu vẫn không parse được —
+// gọi nơi dùng phải coi null là "AI trả lời lỗi", KHÔNG dùng text thô làm dự phòng.
+function parseJsonLoose(text) {
+  const jsonStr = extractJsonObjectString(text);
+  if (!jsonStr) return null;
+  try {
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    let fixed = '';
+    let inString = false;
+    let escape = false;
+    for (const ch of jsonStr) {
+      if (inString) {
+        if (escape) { fixed += ch; escape = false; }
+        else if (ch === '\\') { fixed += ch; escape = true; }
+        else if (ch === '"') { inString = false; fixed += ch; }
+        else if (ch === '\n') fixed += '\\n';
+        else if (ch === '\r') fixed += '\\r';
+        else if (ch === '\t') fixed += '\\t';
+        else fixed += ch;
+      } else {
+        if (ch === '"') inString = true;
+        fixed += ch;
+      }
+    }
+    try {
+      return JSON.parse(fixed);
+    } catch (e2) {
+      return null;
+    }
+  }
+}
 
 async function callClaude(system, userMessage, options = {}) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -996,10 +1059,10 @@ async function suggestCampaignPlan({ product, monthlyBudget, goal, audience }) {
   "cta": "..."
 }`;
   const userMessage = `Sản phẩm/dịch vụ: ${product}\nĐối tượng khách hàng dự kiến: ${audience || 'chưa xác định, hãy tự đề xuất'}\nMục tiêu kinh doanh: ${goal || 'tăng khách hàng/đơn hàng'}\nTổng ngân sách khả dụng trong tháng: ${monthlyBudget} VND\n\nHãy đề xuất kế hoạch chiến dịch tối ưu nhất (ngân sách/ngày = tổng ngân sách / 30, làm tròn hợp lý).`;
-  const raw = await callClaude(system, userMessage);
-  const jsonMatch = raw.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('AI không trả về JSON hợp lệ. Thử lại.');
-  return JSON.parse(jsonMatch[0]);
+  const raw = await callClaude(system, userMessage, { maxTokens: 2000 });
+  const parsed = parseJsonLoose(raw);
+  if (!parsed) throw new Error('AI không trả về JSON hợp lệ. Thử lại.');
+  return parsed;
 }
 
 // ---------------- Campaign creation (giữ đúng logic main.js) ----------------
