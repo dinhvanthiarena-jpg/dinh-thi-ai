@@ -2765,8 +2765,14 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
   color: var(--on-brand); }
 
 /* ---- Khen khi viết xong một chữ ---- */
-.viet-khen { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
-  padding: var(--gut); background: rgba(30,16,48,.55); }
+/* Bảng khen nằm THẤP xuống chứ không giữa màn: căn giữa thì nó đè lên đúng chỗ
+   chữ vừa tô xong, mà đó mới là cái người ta muốn ngắm lại. Đẩy xuống dưới để
+   chữ nằm trọn phía trên bảng.
+   Vẫn để cuộn được, phòng màn hình thấp thì bảng không bị cụt mất đầu. */
+.viet-khen { position: absolute; inset: 0; z-index: 5; display: grid;
+  align-items: end; justify-items: center; overflow-y: auto;
+  padding: var(--gut) var(--gut) calc(12vh + env(safe-area-inset-bottom));
+  background: rgba(30,16,48,.55); }
 .viet-khen-in { width: 100%; max-width: 320px; padding: var(--s5);
   border-radius: var(--r4); background: var(--card); box-shadow: var(--sh-3);
   text-align: center; }
