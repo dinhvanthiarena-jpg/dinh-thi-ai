@@ -551,56 +551,17 @@ function apToc(u, toc) {
   u.rate = clamp(toc * (u.__heSoToc || 1), 0.4, 1.6);
 }
 
-/* ==================== NHẠC NỀN NHẸ ====================
-   Thầy muốn vào app là có nhạc nhẹ. Ba nguyên tắc để nhạc không thành phiền:
-   1. Rất nhỏ, và TỰ NHỎ HẲN khi app đang đọc bài — tiếng học luôn phải rõ hơn
-      tiếng nhạc, không thì nhạc hoá ra phá bài.
-   2. Chỉ chạy được sau cú chạm đầu tiên: trình duyệt không cho tự phát tiếng,
-      cố phát sớm chỉ tổ bị chặn im lặng.
-   3. Có công tắc tắt hẳn trong Hồ sơ, và nhớ lựa chọn đó. */
-const NHAC_TO = 0.14;         // mức thường — hạ xuống một nấc theo ý thầy
-const NHAC_NHO = 0.04;        // mức lúc đang đọc bài
-let nhacDaMoi = false;
-let nhacHen = null;
+/* ==================== NHẠC NỀN — ĐÃ BỎ ====================
+   Thầy bảo bỏ nhạc nền, nên khối này chỉ còn một cái vỏ rỗng.
 
-function theNhac() { return document.getElementById("amNhac"); }
+   Vì sao vẫn để lại nhacNhuong(): phần đọc bài gọi nó hơn mười chỗ, mỗi lần
+   trước và sau khi đọc. Xoá hết từng lời gọi thì được rất ít mà đụng vào đúng
+   cái mạch quan trọng nhất của app. Để nó trả về ngay là xong.
 
-function batNhac() {
-  const a = theNhac();
-  if (!a || !S.nhac) return;
-  try {
-    a.volume = NHAC_TO;
-    const p = a.play();
-    if (p && p.catch) p.catch(() => { /* máy chưa cho, đợi cú chạm sau */ });
-  } catch { /* thôi */ }
-}
-
-function tatNhac() {
-  const a = theNhac();
-  if (!a) return;
-  try { a.pause(); } catch { /* thôi */ }
-}
-
-/** Hạ nhạc xuống lúc đang đọc, xong tự nâng lại. */
-function nhacNhuong(dang) {
-  const a = theNhac();
-  if (!a || a.paused) return;
-  clearTimeout(nhacHen);
-  if (dang) {
-    a.volume = NHAC_NHO;
-  } else {
-    // Nâng lại sau một nhịp, kẻo câu sau đọc ngay thì nhạc lại vống lên.
-    nhacHen = setTimeout(() => { try { a.volume = NHAC_TO; } catch { /* thôi */ } }, 700);
-  }
-}
-
-// Cú chạm đầu tiên: mồi và bật nhạc. Sau đó gỡ tay nghe, không cần nữa.
-["pointerdown", "touchstart", "keydown"].forEach(ev =>
-  window.addEventListener(ev, () => {
-    if (nhacDaMoi) return;
-    nhacDaMoi = true;
-    batNhac();
-  }, { once: false, passive: true }));
+   Nhân đây gỡ luôn một cái bẫy: tatNhac() của nhạc TRÙNG TÊN với tatNhac() tắt
+   nhắc học ở cuối file. Hàm khai báo sau đè hàm trước, nên bấm công tắc tắt
+   nhạc thì app đi TẮT NHẮC HỌC, còn nhạc vẫn chạy. Giờ chỉ còn một hàm. */
+function nhacNhuong() { /* không còn nhạc để nhường */ }
 
 /* ==================== GIỌNG ĐỌC THU SẴN ====================
    Trước đây mọi câu tiếng Anh đều nhờ speechSynthesis của máy đọc. Mỗi điện
@@ -6554,7 +6515,7 @@ function renderProfile() {
   $("#goalBar").setAttribute("aria-valuenow", pct);
   $$("[data-goal]").forEach(b => b.classList.toggle("on", +b.dataset.goal === S.goal));
   $("#optSound").checked = S.sound;
-  $("#optNhac").checked = S.nhac;
+
   { const n = $("#optNhacHoc"); if (n) n.checked = !!S.nhacHoc; }
   $("#optMotion").checked = S.motion;
   $("#optVi").checked = S.showVi;
@@ -6566,10 +6527,7 @@ $$("[data-goal]").forEach(b => b.addEventListener("click", () => {
   S.goal = +b.dataset.goal; save(); renderProfile(); toast("Mục tiêu: " + S.goal + " XP mỗi ngày");
 }));
 $("#optSound").addEventListener("change", e => { S.sound = e.target.checked; save(); });
-$("#optNhac").addEventListener("change", e => {
-  S.nhac = e.target.checked; save();
-  if (S.nhac) batNhac(); else tatNhac();
-});
+
 // Nút nghe thử: bấm một cái là biết ngay máy có kêu được không, khỏi phải học
 // ba câu mới thử được tiếng thưởng.
 $("#btnThuTieng").addEventListener("click", () => {
