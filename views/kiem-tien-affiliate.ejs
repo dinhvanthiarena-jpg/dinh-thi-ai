@@ -47,6 +47,28 @@
   </div>
 </section>
 
+<!-- Bộ tài liệu giới thiệu (ảnh trượt) -->
+<section class="bg-slate-950 py-14">
+  <div class="text-center mb-8 px-4">
+    <span class="badge bg-white/10 text-white ring-1 ring-white/20 mb-4">Toàn cảnh chương trình</span>
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Xem chi tiết cách vận hành</h2>
+    <p class="mt-2 text-white/60 text-sm">Vuốt/kéo sang để xem hết 6 trang giới thiệu</p>
+  </div>
+
+  <div class="flex gap-5 overflow-x-auto snap-x snap-mandatory px-6 sm:px-[calc(50%-190px)] pb-4" style="scrollbar-width: thin;">
+    <% ['slide-0-cover','slide-1','slide-2','slide-3','slide-4','slide-5'].forEach(function(slide, i) { %>
+      <div class="shrink-0 w-[280px] sm:w-[380px] snap-center">
+        <img
+          src="/images/affiliate/<%= slide %>.png"
+          alt="Mua hàng hoàn tiền - trang <%= i + 1 %>"
+          class="w-full h-auto rounded-2xl shadow-2xl ring-1 ring-white/10 hover:scale-[1.02] transition-transform duration-300"
+          loading="lazy"
+        />
+      </div>
+    <% }); %>
+  </div>
+</section>
+
 <!-- Cách thức hoạt động -->
 <section class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
   <div class="text-center mb-12">
