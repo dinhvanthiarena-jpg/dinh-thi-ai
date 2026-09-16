@@ -14,9 +14,15 @@
     </button>
   </div>
 
-  <div class="relative mt-8">
+  <% var hasShopeePicks = post.content && post.content.includes('<!-- shopee-picks-ai-16-9 -->'); %>
+  <div class="relative mt-8 group">
     <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full rounded-2xl aspect-video object-cover" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>' + ['','-b','-c'][Math.floor(Math.random()*3)] + '.svg'" />
-    <% if (post.content && post.content.includes('<!-- shopee-picks-ai-16-9 -->')) { %>
+    <% if (hasShopeePicks) { %>
+      <a href="#goi-y-mua-sam" class="absolute inset-0 rounded-2xl flex items-end justify-center bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <span class="mb-4 inline-flex items-center gap-1.5 rounded-full bg-orange-500 text-white text-sm font-bold px-4 py-2 shadow-lg">
+          🛍️ Xem ưu đãi mua sắm hôm nay
+        </span>
+      </a>
       <a href="#goi-y-mua-sam" class="absolute top-3 right-3 sm:top-4 sm:right-4 inline-flex items-center gap-1.5 rounded-full bg-orange-500 text-white text-xs sm:text-sm font-bold px-3.5 py-2 shadow-lg hover:bg-orange-600 hover:scale-105 transition-all duration-200">
         🛍️ Ưu đãi hôm nay
       </a>
