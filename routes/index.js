@@ -12,6 +12,7 @@ router.get('/hoat-dong', galleryController.list);
 router.get('/lien-he', contactController.showForm);
 router.post('/lien-he', contactController.submit);
 router.get('/uu-dai', homeController.deals);
+router.get('/kiem-tien-affiliate', affiliateController.landing);
 router.get('/go/shopee', affiliateController.goShopee);
 
 router.get('/robots.txt', seoController.robots);

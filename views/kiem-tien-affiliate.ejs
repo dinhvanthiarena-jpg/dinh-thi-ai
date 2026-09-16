@@ -1,0 +1,126 @@
+<style>
+  @keyframes ktaFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes ktaGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.55); }
+    50% { box-shadow: 0 0 0 14px rgba(249, 115, 22, 0); }
+  }
+  .kta-float { animation: ktaFloat 3.2s ease-in-out infinite; }
+  .kta-glow { animation: ktaGlow 2s ease-out infinite; }
+</style>
+
+<!-- Hero -->
+<section class="relative overflow-hidden bg-gradient-to-br from-orange-600 via-rose-600 to-primary-700 text-white">
+  <div class="absolute -top-16 -right-16 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
+  <div class="absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
+
+  <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-20 text-center">
+    <span class="badge bg-white/15 text-white ring-1 ring-white/30 mb-5">
+      <span class="relative flex h-2 w-2 mr-2">
+        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+        <span class="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
+      </span>
+      🔥 Đang HOT — Cộng đồng hơn 200 thành viên
+    </span>
+
+    <h1 class="text-4xl sm:text-6xl font-extrabold leading-tight text-wrap-balance">
+      Mua Sắm Online<br class="hidden sm:block" /> <span class="text-yellow-300">Vừa Mua Vừa Nhận Hoa Hồng</span>
+    </h1>
+    <p class="mt-6 text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">
+      Bạn vẫn mua hàng trên Shopee, Lazada, TikTok Shop như bình thường — chỉ khác là qua Đinh Thi Ai, mỗi đơn hàng
+      thành công bạn được nhận lại một phần hoa hồng thẳng vào ví, không tốn thêm đồng nào.
+    </p>
+
+    <div class="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
+      <a href="https://zalo.me/0977317988" target="_blank" rel="noopener"
+         class="kta-glow inline-flex items-center gap-2 rounded-full bg-white text-orange-700 font-bold text-base px-8 py-4 shadow-xl hover:scale-105 hover:bg-yellow-50 transition-all duration-200">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.02 2 11c0 2.79 1.44 5.28 3.69 6.94-.12 1.13-.5 2.54-1.47 3.8-.17.22.01.55.29.5 1.98-.32 3.52-1.14 4.54-1.84C10.05 20.8 11 21 12 21c5.52 0 10-4.02 10-9s-4.48-10-10-10Z"/></svg>
+        Nhắn Zalo tham gia ngay
+      </a>
+      <a href="tel:0977317988" class="inline-flex items-center gap-2 rounded-full border-2 border-white/70 text-white font-semibold text-base px-8 py-4 hover:bg-white/10 transition-colors">
+        📞 Hotline: 0977 317 988
+      </a>
+    </div>
+    <p class="mt-4 text-sm text-white/70">Miễn phí tham gia — không ràng buộc, không mất phí duy trì.</p>
+  </div>
+</section>
+
+<!-- Cách thức hoạt động -->
+<section class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
+  <div class="text-center mb-12">
+    <span class="badge bg-primary-100 text-primary-700 mb-4">Cách thức hoạt động</span>
+    <h2 class="text-2xl sm:text-3xl font-extrabold text-ink">Chỉ 3 bước, đơn giản như mua hàng bình thường</h2>
+  </div>
+
+  <div class="grid sm:grid-cols-3 gap-6">
+    <div class="card p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+      <div class="h-12 w-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-xl font-bold mb-4">1</div>
+      <h3 class="font-bold text-ink mb-2">Gửi link sản phẩm</h3>
+      <p class="text-sm text-muted leading-relaxed">Thấy món đồ muốn mua trên Shopee, Lazada hay TikTok Shop? Gửi link vào nhóm Zalo hoặc nhắn trực tiếp cho Đinh Thi Ai.</p>
+    </div>
+    <div class="card p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+      <div class="h-12 w-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-xl font-bold mb-4">2</div>
+      <h3 class="font-bold text-ink mb-2">Nhận lại link mua hàng</h3>
+      <p class="text-sm text-muted leading-relaxed">Bạn nhận lại đúng sản phẩm đó qua một đường link riêng — giá không đổi, đặt hàng và thanh toán như thường lệ.</p>
+    </div>
+    <div class="card p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-200">
+      <div class="h-12 w-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-xl font-bold mb-4">3</div>
+      <h3 class="font-bold text-ink mb-2">Nhận hoàn tiền</h3>
+      <p class="text-sm text-muted leading-relaxed">Đơn hàng hoàn tất, một phần hoa hồng được cộng vào ví của bạn — yêu cầu rút bất cứ lúc nào, chuyển khoản trực tiếp.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Vì sao chọn -->
+<section class="bg-primary-50/60 border-y border-primary-100">
+  <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <span class="badge bg-orange-100 text-orange-700 mb-4">Vì sao nên tham gia</span>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-ink">Mua đằng nào cũng mua — sao không nhận thêm hoa hồng?</h2>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-6">
+      <div class="flex gap-4">
+        <div class="kta-float shrink-0 h-11 w-11 rounded-full bg-white shadow-card flex items-center justify-center text-xl">💸</div>
+        <div>
+          <h3 class="font-bold text-ink">Không tốn thêm chi phí</h3>
+          <p class="text-sm text-muted mt-1">Giá sản phẩm giữ nguyên như trên sàn — hoa hồng đến từ nhà bán hàng, không phải từ túi tiền bạn.</p>
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <div class="kta-float shrink-0 h-11 w-11 rounded-full bg-white shadow-card flex items-center justify-center text-xl" style="animation-delay:.4s">🛍️</div>
+        <div>
+          <h3 class="font-bold text-ink">Đa nền tảng</h3>
+          <p class="text-sm text-muted mt-1">Hỗ trợ Shopee, Lazada, TikTok Shop — hầu hết mọi thứ bạn hay mua online đều có thể hoàn tiền được.</p>
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <div class="kta-float shrink-0 h-11 w-11 rounded-full bg-white shadow-card flex items-center justify-center text-xl" style="animation-delay:.8s">⚡</div>
+        <div>
+          <h3 class="font-bold text-ink">Nhanh, minh bạch</h3>
+          <p class="text-sm text-muted mt-1">Theo dõi đơn hàng và hoa hồng ngay trong nhóm Zalo, rút tiền về tài khoản ngân hàng khi cần.</p>
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <div class="kta-float shrink-0 h-11 w-11 rounded-full bg-white shadow-card flex items-center justify-center text-xl" style="animation-delay:1.2s">🤝</div>
+        <div>
+          <h3 class="font-bold text-ink">Cộng đồng thật, hỗ trợ tận tình</h3>
+          <p class="text-sm text-muted mt-1">Hơn 200 thành viên đang mua sắm hoàn tiền mỗi ngày — Đinh Thi Ai trực tiếp hỗ trợ, không qua trung gian.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA cuối -->
+<section class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-16 text-center">
+  <h2 class="text-2xl sm:text-3xl font-extrabold text-ink">Sẵn sàng nhận hoàn tiền cho đơn hàng tiếp theo?</h2>
+  <p class="mt-3 text-muted">Tham gia miễn phí ngay hôm nay — chỉ mất 30 giây qua Zalo.</p>
+  <a href="https://zalo.me/0977317988" target="_blank" rel="noopener"
+     class="kta-glow mt-7 inline-flex items-center gap-2 rounded-full bg-orange-600 text-white font-bold text-base px-9 py-4 shadow-xl hover:bg-orange-700 hover:scale-105 transition-all duration-200">
+    🔥 Tham gia cộng đồng Hoàn Tiền
+  </a>
+  <p class="mt-6 text-xs text-muted">Hoa hồng được chi trả từ phần tiếp thị liên kết Đinh Thi Ai nhận được từ sàn thương mại điện tử, không phát sinh thêm chi phí cho người mua.</p>
+</section>
