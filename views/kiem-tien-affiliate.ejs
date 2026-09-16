@@ -89,12 +89,10 @@
         <img
           src="/images/affiliate/<%= slide %>.png"
           alt="Mua hàng hoàn tiền - trang <%= i + 1 %>"
-          class="w-full h-auto rounded-xl shadow-2xl ring-1 ring-white/10 cursor-zoom-in hover:scale-105 hover:ring-orange-400 transition-all duration-300 select-none pointer-events-auto"
+          class="kta-slide-thumb w-full h-auto rounded-xl shadow-2xl ring-1 ring-white/10 cursor-zoom-in hover:scale-105 hover:ring-orange-400 transition-all duration-300 select-none"
           style="-webkit-user-drag: none; user-drag: none;"
           draggable="false"
           loading="lazy"
-          onclick="ktaOpenLightbox(this.src, this.alt)"
-          onmousedown="return false"
         />
       </div>
     <% }); %>
@@ -103,13 +101,18 @@
 </section>
 
 <!-- Lightbox xem ảnh cỡ lớn -->
-<div id="ktaLightbox" onclick="ktaCloseLightbox()" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/85 backdrop-blur-sm p-4 cursor-zoom-out">
-  <button type="button" onclick="ktaCloseLightbox()" aria-label="Đóng" class="absolute top-4 right-4 sm:top-6 sm:right-6 h-10 w-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors">
+<div id="ktaLightbox" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/85 backdrop-blur-sm p-4 cursor-zoom-out">
+  <button type="button" id="ktaLightboxClose" aria-label="Đóng" class="absolute top-4 right-4 sm:top-6 sm:right-6 h-10 w-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors">
     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
   </button>
   <img id="ktaLightboxImg" src="" alt="" class="max-w-full max-h-full rounded-xl shadow-2xl" />
 </div>
 <script>
+  // Gan su kien bang addEventListener thay vi thuoc tinh onclick="" trong
+  // HTML — CSP cua site (helmet, xem server.js) khong cho phep inline event
+  // handler attribute chay du scriptSrc da co 'unsafe-inline', khien nut
+  // "bam de xem anh to" truoc do khong phan hoi du element/onclick attribute
+  // van co trong DOM (loi am tham, khong log ra console).
   function ktaOpenLightbox(src, alt) {
     var box = document.getElementById('ktaLightbox');
     var img = document.getElementById('ktaLightboxImg');
@@ -125,6 +128,16 @@
     box.classList.remove('flex');
     document.body.style.overflow = '';
   }
+  document.querySelectorAll('.kta-slide-thumb').forEach(function (img) {
+    img.addEventListener('click', function () {
+      ktaOpenLightbox(img.src, img.alt);
+    });
+  });
+  document.getElementById('ktaLightbox').addEventListener('click', ktaCloseLightbox);
+  document.getElementById('ktaLightboxClose').addEventListener('click', function (e) {
+    e.stopPropagation();
+    ktaCloseLightbox();
+  });
 </script>
 
 <!-- Cách thức hoạt động -->
