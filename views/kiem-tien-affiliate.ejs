@@ -89,6 +89,7 @@
         <img
           src="/images/affiliate/<%= slide %>.png"
           alt="Mua hàng hoàn tiền - trang <%= i + 1 %>"
+          data-kta-index="<%= i %>"
           class="kta-slide-thumb w-full h-auto rounded-xl shadow-2xl ring-1 ring-white/10 cursor-zoom-in hover:scale-105 hover:ring-orange-400 transition-all duration-300 select-none"
           style="-webkit-user-drag: none; user-drag: none;"
           draggable="false"
@@ -97,15 +98,22 @@
       </div>
     <% }); %>
   </div>
-  <p class="text-center text-white/40 text-xs mt-2">Bấm vào ảnh để xem cỡ lớn</p>
+  <p class="text-center text-white/40 text-xs mt-2">Bấm vào ảnh để xem cỡ lớn — dùng nút mũi tên để xem lần lượt</p>
 </section>
 
 <!-- Lightbox xem ảnh cỡ lớn -->
 <div id="ktaLightbox" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/85 backdrop-blur-sm p-4 cursor-zoom-out">
-  <button type="button" id="ktaLightboxClose" aria-label="Đóng" class="absolute top-4 right-4 sm:top-6 sm:right-6 h-10 w-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors">
+  <button type="button" id="ktaLightboxClose" aria-label="Đóng" class="absolute top-4 right-4 sm:top-6 sm:right-6 h-10 w-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors z-10">
     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
   </button>
-  <img id="ktaLightboxImg" src="" alt="" class="max-w-full max-h-full rounded-xl shadow-2xl" />
+  <button type="button" id="ktaLightboxPrev" aria-label="Ảnh trước" class="cursor-pointer absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/25 transition-colors z-10">
+    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+  </button>
+  <button type="button" id="ktaLightboxNext" aria-label="Ảnh tiếp theo" class="cursor-pointer absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/25 transition-colors z-10">
+    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+  </button>
+  <img id="ktaLightboxImg" src="" alt="" class="max-w-full max-h-full rounded-xl shadow-2xl cursor-default" />
+  <p id="ktaLightboxCounter" class="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 text-white/70 text-xs sm:text-sm font-semibold"></p>
 </div>
 <script>
   // Gan su kien bang addEventListener thay vi thuoc tinh onclick="" trong
@@ -113,11 +121,22 @@
   // handler attribute chay du scriptSrc da co 'unsafe-inline', khien nut
   // "bam de xem anh to" truoc do khong phan hoi du element/onclick attribute
   // van co trong DOM (loi am tham, khong log ra console).
-  function ktaOpenLightbox(src, alt) {
-    var box = document.getElementById('ktaLightbox');
+  var ktaSlides = Array.prototype.map.call(document.querySelectorAll('.kta-slide-thumb'), function (img) {
+    return { src: img.src, alt: img.alt };
+  });
+  var ktaCurrentIndex = 0;
+
+  function ktaRenderSlide() {
+    var slide = ktaSlides[ktaCurrentIndex];
     var img = document.getElementById('ktaLightboxImg');
-    img.src = src;
-    img.alt = alt || '';
+    img.src = slide.src;
+    img.alt = slide.alt;
+    document.getElementById('ktaLightboxCounter').textContent = (ktaCurrentIndex + 1) + ' / ' + ktaSlides.length;
+  }
+  function ktaOpenLightbox(index) {
+    ktaCurrentIndex = index;
+    ktaRenderSlide();
+    var box = document.getElementById('ktaLightbox');
     box.classList.remove('hidden');
     box.classList.add('flex');
     document.body.style.overflow = 'hidden';
@@ -128,10 +147,36 @@
     box.classList.remove('flex');
     document.body.style.overflow = '';
   }
-  document.querySelectorAll('.kta-slide-thumb').forEach(function (img) {
+  function ktaShowPrev() {
+    ktaCurrentIndex = (ktaCurrentIndex - 1 + ktaSlides.length) % ktaSlides.length;
+    ktaRenderSlide();
+  }
+  function ktaShowNext() {
+    ktaCurrentIndex = (ktaCurrentIndex + 1) % ktaSlides.length;
+    ktaRenderSlide();
+  }
+  document.querySelectorAll('.kta-slide-thumb').forEach(function (img, i) {
     img.addEventListener('click', function () {
-      ktaOpenLightbox(img.src, img.alt);
+      ktaOpenLightbox(i);
     });
+  });
+  document.getElementById('ktaLightboxPrev').addEventListener('click', function (e) {
+    e.stopPropagation();
+    ktaShowPrev();
+  });
+  document.getElementById('ktaLightboxNext').addEventListener('click', function (e) {
+    e.stopPropagation();
+    ktaShowNext();
+  });
+  document.getElementById('ktaLightboxImg').addEventListener('click', function (e) {
+    e.stopPropagation();
+  });
+  document.addEventListener('keydown', function (e) {
+    var box = document.getElementById('ktaLightbox');
+    if (box.classList.contains('hidden')) return;
+    if (e.key === 'ArrowLeft') ktaShowPrev();
+    if (e.key === 'ArrowRight') ktaShowNext();
+    if (e.key === 'Escape') ktaCloseLightbox();
   });
   document.getElementById('ktaLightbox').addEventListener('click', ktaCloseLightbox);
   document.getElementById('ktaLightboxClose').addEventListener('click', function (e) {
