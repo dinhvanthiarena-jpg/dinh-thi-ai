@@ -62,6 +62,16 @@ exports.show = async (req, res, next) => {
     .filter((p) => (p.tags || []).some((t) => postTags.includes(t)))
     .slice(0, 3);
 
+  // Với các bài có khối "Gợi ý mua sắm hôm nay" (đánh dấu bởi comment HTML
+  // chen sẵn trong content, xem scripts/insert-shopee-picks-ai-posts.js),
+  // bấm vào ảnh bìa đi thẳng ra link Shopee đầu tiên trong khối đó luôn —
+  // không chỉ cuộn xuống — để mua sắm nhanh hơn.
+  let heroShopeeLink = null;
+  if (post.content && post.content.includes('<!-- shopee-picks-ai-16-9 -->')) {
+    const match = post.content.match(/href="(\/go\/shopee\?url=[^"]+)"/);
+    if (match) heroShopeeLink = match[1];
+  }
+
   res.render('blog/show', {
     title: post.title,
     description: post.excerpt,
@@ -78,5 +88,6 @@ exports.show = async (req, res, next) => {
     },
     post,
     relatedPosts,
+    heroShopeeLink,
   });
 };
