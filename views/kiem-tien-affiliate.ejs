@@ -89,9 +89,12 @@
         <img
           src="/images/affiliate/<%= slide %>.png"
           alt="Mua hàng hoàn tiền - trang <%= i + 1 %>"
-          class="w-full h-auto rounded-xl shadow-2xl ring-1 ring-white/10 cursor-zoom-in hover:scale-105 hover:ring-orange-400 transition-all duration-300"
+          class="w-full h-auto rounded-xl shadow-2xl ring-1 ring-white/10 cursor-zoom-in hover:scale-105 hover:ring-orange-400 transition-all duration-300 select-none pointer-events-auto"
+          style="-webkit-user-drag: none; user-drag: none;"
+          draggable="false"
           loading="lazy"
           onclick="ktaOpenLightbox(this.src, this.alt)"
+          onmousedown="return false"
         />
       </div>
     <% }); %>
