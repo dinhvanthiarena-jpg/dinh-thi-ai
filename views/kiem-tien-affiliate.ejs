@@ -55,19 +55,46 @@
     <p class="mt-2 text-white/60 text-sm">Vuốt/kéo sang để xem hết 6 trang giới thiệu</p>
   </div>
 
-  <div class="flex gap-5 overflow-x-auto snap-x snap-mandatory px-6 sm:px-[calc(50%-190px)] pb-4" style="scrollbar-width: thin;">
+  <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory px-6 sm:px-[calc(50%-90px)] pb-4" style="scrollbar-width: thin;">
     <% ['slide-0-cover','slide-1','slide-2','slide-3','slide-4','slide-5'].forEach(function(slide, i) { %>
-      <div class="shrink-0 w-[280px] sm:w-[380px] snap-center">
+      <div class="shrink-0 w-[130px] sm:w-[180px] snap-center">
         <img
           src="/images/affiliate/<%= slide %>.png"
           alt="Mua hàng hoàn tiền - trang <%= i + 1 %>"
-          class="w-full h-auto rounded-2xl shadow-2xl ring-1 ring-white/10 hover:scale-[1.02] transition-transform duration-300"
+          class="w-full h-auto rounded-xl shadow-2xl ring-1 ring-white/10 cursor-zoom-in hover:scale-105 hover:ring-orange-400 transition-all duration-300"
           loading="lazy"
+          onclick="ktaOpenLightbox(this.src, this.alt)"
         />
       </div>
     <% }); %>
   </div>
+  <p class="text-center text-white/40 text-xs mt-2">Bấm vào ảnh để xem cỡ lớn</p>
 </section>
+
+<!-- Lightbox xem ảnh cỡ lớn -->
+<div id="ktaLightbox" onclick="ktaCloseLightbox()" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/85 backdrop-blur-sm p-4 cursor-zoom-out">
+  <button type="button" onclick="ktaCloseLightbox()" aria-label="Đóng" class="absolute top-4 right-4 sm:top-6 sm:right-6 h-10 w-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors">
+    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+  </button>
+  <img id="ktaLightboxImg" src="" alt="" class="max-w-full max-h-full rounded-xl shadow-2xl" />
+</div>
+<script>
+  function ktaOpenLightbox(src, alt) {
+    var box = document.getElementById('ktaLightbox');
+    var img = document.getElementById('ktaLightboxImg');
+    img.src = src;
+    img.alt = alt || '';
+    box.classList.remove('hidden');
+    box.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+  function ktaCloseLightbox() {
+    var box = document.getElementById('ktaLightbox');
+    box.classList.add('hidden');
+    box.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+</script>
 
 <!-- Cách thức hoạt động -->
 <section class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16">
