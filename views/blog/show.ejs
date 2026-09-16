@@ -14,7 +14,14 @@
     </button>
   </div>
 
-  <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full rounded-2xl mt-8 aspect-video object-cover" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>' + ['','-b','-c'][Math.floor(Math.random()*3)] + '.svg'" />
+  <div class="relative mt-8">
+    <img src="<%= post.coverImageUrl %>" alt="<%= post.title %>" class="w-full rounded-2xl aspect-video object-cover" onerror="this.onerror=null;this.src='/images/blog/cat-<%= post.category %>' + ['','-b','-c'][Math.floor(Math.random()*3)] + '.svg'" />
+    <% if (post.content && post.content.includes('<!-- shopee-picks-ai-16-9 -->')) { %>
+      <a href="#goi-y-mua-sam" class="absolute top-3 right-3 sm:top-4 sm:right-4 inline-flex items-center gap-1.5 rounded-full bg-orange-500 text-white text-xs sm:text-sm font-bold px-3.5 py-2 shadow-lg hover:bg-orange-600 hover:scale-105 transition-all duration-200">
+        🛍️ Ưu đãi hôm nay
+      </a>
+    <% } %>
+  </div>
 
   <div id="postContent" class="prose prose-slate max-w-none mt-8 text-ink leading-relaxed">
     <%- post.content %>
