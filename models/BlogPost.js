@@ -1,6 +1,9 @@
 const { DataTypes } = require('sequelize');
 const slugify = require('slugify');
 const { sequelize } = require('../config/db');
+const HERO_SHOPEE_LINKS = require('../data/heroShopeeLinks');
+
+const HERO_SHOPEE_MARKER = /<!-- hero-shopee:(https:\/\/s\.shopee\.vn\/\S+) -->/;
 
 const BlogPost = sequelize.define(
   'BlogPost',
@@ -37,6 +40,18 @@ const BlogPost = sequelize.define(
       beforeValidate: (post) => {
         if (post.title && !post.slug) {
           post.slug = `${slugify(post.title, { lower: true, strict: true })}-${Date.now().toString(36)}`;
+        }
+      },
+      // Thầy muốn MỌI bài đăng trên web (không riêng bài tự động) đều có 1
+      // link Shopee gắn vào ảnh bìa để bấm vào là ra thẳng link đó — đặt ở
+      // đây (model hook) thay vì ở từng chỗ tạo bài, để không bỏ sót dù bài
+      // được tạo qua đường nào (nhà máy tin tức tự động, trang quản trị,
+      // API auto-post...). Đánh dấu bằng comment HTML vô hình trong content,
+      // blogController đọc lại marker này để build link khi hiển thị bài.
+      beforeCreate: (post) => {
+        if (post.content && !HERO_SHOPEE_MARKER.test(post.content)) {
+          const link = HERO_SHOPEE_LINKS[Math.floor(Math.random() * HERO_SHOPEE_LINKS.length)];
+          post.content += `\n<!-- hero-shopee:${link} -->`;
         }
       },
     },

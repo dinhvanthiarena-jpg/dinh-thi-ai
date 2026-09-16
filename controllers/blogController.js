@@ -62,12 +62,17 @@ exports.show = async (req, res, next) => {
     .filter((p) => (p.tags || []).some((t) => postTags.includes(t)))
     .slice(0, 3);
 
-  // Với các bài có khối "Gợi ý mua sắm hôm nay" (đánh dấu bởi comment HTML
-  // chen sẵn trong content, xem scripts/insert-shopee-picks-ai-posts.js),
-  // bấm vào ảnh bìa đi thẳng ra link Shopee đầu tiên trong khối đó luôn —
-  // không chỉ cuộn xuống — để mua sắm nhanh hơn.
+  // Bấm vào ảnh bìa đi thẳng ra 1 link Shopee — 2 nguồn có thể có:
+  // (1) marker "hero-shopee" model tự gắn cho MỌI bài (models/BlogPost.js
+  //     hook beforeCreate, dùng data/heroShopeeLinks.js) — áp dụng chung.
+  // (2) marker "shopee-picks-ai-16-9" cũ, riêng cho đợt 7 bài AI & Công
+  //     nghệ ngày 16/9 (scripts/insert-shopee-picks-ai-posts.js) — giữ lại
+  //     để không đổi hành vi của các bài đó.
   let heroShopeeLink = null;
-  if (post.content && post.content.includes('<!-- shopee-picks-ai-16-9 -->')) {
+  const heroMatch = post.content && post.content.match(/<!-- hero-shopee:(https:\/\/s\.shopee\.vn\/\S+) -->/);
+  if (heroMatch) {
+    heroShopeeLink = `/go/shopee?url=${encodeURIComponent(heroMatch[1])}&name=${encodeURIComponent(post.title)}`;
+  } else if (post.content && post.content.includes('<!-- shopee-picks-ai-16-9 -->')) {
     const match = post.content.match(/href="(\/go\/shopee\?url=[^"]+)"/);
     if (match) heroShopeeLink = match[1];
   }
