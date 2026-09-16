@@ -1,0 +1,64 @@
+<div class="space-y-6 max-w-3xl">
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-1">Cấp key mới cho tool desktop AAi-3dvietpro</h2>
+    <p class="text-sm text-muted mb-4">
+      Key dạng <code class="font-mono">FBAI-XXXX-XXXX-XXXX</code>. Trước đây tool desktop chỉ kiểm
+      tra checksum tại chỗ (offline hoàn toàn) — ai cầm được source code cũng tự tạo key hợp lệ được,
+      không cách nào thu hồi. Từ 2026-09-16, tool desktop <strong>bắt buộc hỏi lại trang này</strong>
+      mỗi lần kích hoạt và định kỳ mỗi 24h sau đó — nên giờ thầy <strong>thu hồi được</strong> key bất
+      cứ lúc nào, dù ai đang cầm source code cũng không tự cấp được key mới hợp lệ (server này mới là
+      nơi quyết định key có "sống" hay không). Mỗi key cấp ra chạy đúng <strong>30 ngày</strong>, hết
+      hạn tự khoá — khách trả phí tiếp thì bấm "Gia hạn" để cộng thêm 30 ngày.
+    </p>
+    <form action="/admin/fbai-license-keys" method="POST" class="flex flex-wrap gap-3">
+      <input
+        name="note"
+        type="text"
+        class="input flex-1 min-w-[240px]"
+        placeholder="Ghi chú (VD: tên khách mua tool desktop)"
+      />
+      <button type="submit" class="btn-primary">🔑 Cấp key mới</button>
+    </form>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-4">Danh sách key đã cấp (<%= keys.length %>)</h2>
+    <% if (!keys.length) { %>
+      <p class="text-sm text-muted">Chưa cấp key nào.</p>
+    <% } else { %>
+      <div class="space-y-2">
+        <% keys.forEach(k => { %>
+          <% const expired = k.expiresAt && Date.now() > k.expiresAt; %>
+          <div class="flex items-center justify-between gap-3 rounded-lg border border-primary-100 px-4 py-3 <%= (k.active === false || expired) ? 'opacity-50' : '' %>">
+            <div class="min-w-0">
+              <div class="font-mono font-semibold text-ink break-all"><%= k.key %></div>
+              <div class="text-xs text-muted mt-0.5">
+                <%= k.note || '(không có ghi chú)' %>
+                · Cấp lúc <%= new Date(k.issuedAt).toLocaleString('vi-VN') %>
+                <% if (k.expiresAt) { %> · <%= expired ? 'Đã hết hạn' : 'Hết hạn' %> lúc <%= new Date(k.expiresAt).toLocaleString('vi-VN') %><% } %>
+                <% if (k.boundMachine) { %> · Đang chạy tại <strong><%= k.boundMachine %></strong><% } %>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <span class="badge <%= (k.active === false || expired) ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' %>">
+                <%= k.active === false ? 'Đã thu hồi' : (expired ? 'Hết hạn' : 'Đang hoạt động') %>
+              </span>
+              <form action="/admin/fbai-license-keys/<%= encodeURIComponent(k.key) %>/renew" method="POST">
+                <button type="submit" class="btn-outline text-xs">Gia hạn +30 ngày</button>
+              </form>
+              <% if (k.active === false) { %>
+                <form action="/admin/fbai-license-keys/<%= encodeURIComponent(k.key) %>/reactivate" method="POST">
+                  <button type="submit" class="btn-outline text-xs">Kích hoạt lại</button>
+                </form>
+              <% } else { %>
+                <form action="/admin/fbai-license-keys/<%= encodeURIComponent(k.key) %>/revoke" method="POST">
+                  <button type="submit" class="text-rose-600 text-xs font-medium">Thu hồi</button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>

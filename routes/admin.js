@@ -56,6 +56,12 @@ router.post('/aai-license-keys/:key/revoke', adminController.aaiLicenseKeyRevoke
 router.post('/aai-license-keys/:key/reactivate', adminController.aaiLicenseKeyReactivate);
 router.post('/aai-license-keys/:key/renew', adminController.aaiLicenseKeyRenew);
 
+router.get('/fbai-license-keys', adminController.fbaiLicenseKeysPage);
+router.post('/fbai-license-keys', adminController.fbaiLicenseKeyIssue);
+router.post('/fbai-license-keys/:key/revoke', adminController.fbaiLicenseKeyRevoke);
+router.post('/fbai-license-keys/:key/reactivate', adminController.fbaiLicenseKeyReactivate);
+router.post('/fbai-license-keys/:key/renew', adminController.fbaiLicenseKeyRenew);
+
 router.get('/aai-ads', adminController.aaiAdsPage);
 router.get('/aai-ads/connect', adminController.aaiAdsConnect);
 router.get('/aai-ads/callback', adminController.aaiAdsCallback);

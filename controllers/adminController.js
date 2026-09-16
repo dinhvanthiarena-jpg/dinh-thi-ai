@@ -13,6 +13,7 @@ const PushSubscription = require('../models/PushSubscription');
 const webpush = require('web-push');
 const aaiAds = require('../services/aaiAdsService');
 const aaiLicense = require('../services/aaiLicenseService');
+const fbaiLicense = require('../services/fbaiLicenseService');
 
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
@@ -568,8 +569,13 @@ exports.toolDelete = async (req, res) => {
 // không liên quan gì tới database/model của site này) — thuật toán chạy hoàn
 // toàn ở trình duyệt (Web Crypto), phải khớp CHÍNH XÁC với license-core.js bên
 // D:\CLAUDE CODE\fb-ads-manager để mã tạo ra dùng được thật với tool đó.
+// Trang tạo mã cũ (offline hoàn toàn, JS chạy ngay trên trình duyệt) — từ
+// 2026-09-16 tool desktop bắt buộc xác minh online, nên mã tạo ở trang này
+// tuy ĐÚNG checksum nhưng KHÔNG có trong danh sách đã cấp ở server, sẽ bị
+// isActiveLicense() từ chối. Giữ route cũ (tránh 404 nếu ai đã lưu link) và
+// điều hướng sang trang cấp key mới, thật sự dùng được.
 exports.aaiKeygenPage = (req, res) => {
-  res.render('admin/aai-keygen', { title: 'Mã bản quyền A-AI-3dvietpro' });
+  res.redirect('/admin/fbai-license-keys');
 };
 
 // ---------------- Key A-AI Ads (bản Web — cho khách clone tool lên web riêng) ----------------
@@ -607,6 +613,40 @@ exports.aaiLicenseKeyRenew = (req, res) => {
   aaiLicense.renewKey(req.params.key);
   req.flash('success', 'Đã gia hạn thêm 30 ngày.');
   res.redirect('/admin/aai-license-keys');
+};
+
+// ---------------- Key desktop AAi-3dvietpro (online, thu hồi được) ----------------
+
+exports.fbaiLicenseKeysPage = (req, res) => {
+  res.render('admin/fbai-license-keys', { title: 'Key AAi-3dvietpro (Desktop)', keys: fbaiLicense.listKeys() });
+};
+
+exports.fbaiLicenseKeyIssue = (req, res) => {
+  try {
+    const entry = fbaiLicense.issueKey(req.body.note || '');
+    req.flash('success', `Đã cấp key mới: ${entry.key}`);
+  } catch (e) {
+    req.flash('error', `Lỗi cấp key: ${e.message}`);
+  }
+  res.redirect('/admin/fbai-license-keys');
+};
+
+exports.fbaiLicenseKeyRevoke = (req, res) => {
+  fbaiLicense.revokeKey(req.params.key);
+  req.flash('success', 'Đã thu hồi key.');
+  res.redirect('/admin/fbai-license-keys');
+};
+
+exports.fbaiLicenseKeyReactivate = (req, res) => {
+  fbaiLicense.reactivateKey(req.params.key);
+  req.flash('success', 'Đã kích hoạt lại key.');
+  res.redirect('/admin/fbai-license-keys');
+};
+
+exports.fbaiLicenseKeyRenew = (req, res) => {
+  fbaiLicense.renewKey(req.params.key);
+  req.flash('success', 'Đã gia hạn thêm 30 ngày.');
+  res.redirect('/admin/fbai-license-keys');
 };
 
 // ---------------- A-AI Ads (tạo chiến dịch Facebook Ads từ web) ----------------
