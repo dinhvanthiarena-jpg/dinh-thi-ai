@@ -19,6 +19,12 @@ const ALPHABET = '23456789ABCDEFGHJKLMNPQRSTVWXYZ'; // không có 0/1/O/I/U — 
 const PREFIX = 'AIWEB';
 
 const KEYS_PATH = path.join(__dirname, '..', 'data', 'aai-ads-web-licenses.json');
+// Bán theo tháng: mỗi key cấp ra chỉ có hiệu lực đúng 30 ngày kể từ lúc cấp,
+// hết hạn tự động khoá — không cần thầy nhớ tay để thu hồi mỗi tháng. Thầy
+// gia hạn cho khách trả phí tiếp bằng renewKey() (cộng thêm 30 ngày kể từ
+// LÚC GIA HẠN, không cộng dồn từ ngày hết hạn cũ, tránh cộng dồn sai nếu gia
+// hạn trễ).
+const LICENSE_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
 
 function loadKeys() {
   try {
@@ -71,8 +77,23 @@ function issueKey(note) {
   const check = checksumFor(body);
   const key = formatKey(body, check);
   const list = loadKeys();
-  const entry = { key, note: note || '', issuedAt: Date.now(), active: true, boundDomain: null };
+  const entry = { key, note: note || '', issuedAt: Date.now(), expiresAt: Date.now() + LICENSE_DURATION_MS, active: true, boundDomain: null };
   list.unshift(entry);
+  saveKeys(list);
+  return entry;
+}
+
+// Gia hạn thêm 1 tháng cho key đã cấp — cộng 30 ngày kể từ THỜI ĐIỂM GIA HẠN
+// (không phải từ ngày hết hạn cũ), vì thầy thường gia hạn sau khi khách đã
+// nhắn báo trả phí, có thể trễ vài ngày so với hạn cũ — cộng dồn từ hạn cũ sẽ
+// cho khách dùng miễn phí đúng số ngày trễ đó một cách không chủ ý.
+function renewKey(key) {
+  const list = loadKeys();
+  const entry = list.find((k) => k.key === normalizeAndFormat(key));
+  if (entry) {
+    entry.expiresAt = Date.now() + LICENSE_DURATION_MS;
+    entry.active = true; // gia hạn thì đương nhiên cũng mở lại nếu trước đó bị khoá tay
+  }
   saveKeys(list);
   return entry;
 }
@@ -121,7 +142,11 @@ function isActiveLicense(input) {
   if (!isWellFormed(input)) return false;
   const formatted = normalizeAndFormat(input);
   const entry = loadKeys().find((k) => k.key === formatted);
-  return !!(entry && entry.active !== false);
+  if (!entry || entry.active === false) return false;
+  // Key cấp trước khi có field expiresAt (dữ liệu cũ) coi như không hết hạn,
+  // để không tự khoá oan các key đã cấp trước bản cập nhật này.
+  if (entry.expiresAt && Date.now() > entry.expiresAt) return false;
+  return true;
 }
 
 module.exports = {
@@ -129,6 +154,7 @@ module.exports = {
   listKeys,
   revokeKey,
   reactivateKey,
+  renewKey,
   recordActivation,
   isActiveLicense,
   isWellFormed,

@@ -6,6 +6,9 @@
       chạy trên web của khách hàng (thư mục <code class="font-mono">aai-ads-module/</code>).
       Khác key desktop — key này thầy <strong>thu hồi được</strong> bất cứ lúc nào (web của khách tự
       hỏi lại server này mỗi ngày để biết còn hiệu lực không), không cần đăng nhập vào web của họ.
+      Mỗi key cấp ra chỉ chạy đúng <strong>30 ngày</strong> kể từ lúc cấp — hết hạn tự khoá, đúng mô
+      hình bán theo tháng (khách trả phí tiếp thì thầy bấm "Gia hạn" để cộng thêm 30 ngày, không phải
+      cấp key mới).
     </p>
     <form action="/admin/aai-license-keys" method="POST" class="flex flex-wrap gap-3">
       <input
@@ -25,19 +28,24 @@
     <% } else { %>
       <div class="space-y-2">
         <% keys.forEach(k => { %>
-          <div class="flex items-center justify-between gap-3 rounded-lg border border-primary-100 px-4 py-3 <%= k.active === false ? 'opacity-50' : '' %>">
+          <% const expired = k.expiresAt && Date.now() > k.expiresAt; %>
+          <div class="flex items-center justify-between gap-3 rounded-lg border border-primary-100 px-4 py-3 <%= (k.active === false || expired) ? 'opacity-50' : '' %>">
             <div class="min-w-0">
               <div class="font-mono font-semibold text-ink break-all"><%= k.key %></div>
               <div class="text-xs text-muted mt-0.5">
                 <%= k.note || '(không có ghi chú)' %>
                 · Cấp lúc <%= new Date(k.issuedAt).toLocaleString('vi-VN') %>
+                <% if (k.expiresAt) { %> · <%= expired ? 'Đã hết hạn' : 'Hết hạn' %> lúc <%= new Date(k.expiresAt).toLocaleString('vi-VN') %><% } %>
                 <% if (k.boundDomain) { %> · Đang chạy tại <strong><%= k.boundDomain %></strong><% } %>
               </div>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
-              <span class="badge <%= k.active === false ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' %>">
-                <%= k.active === false ? 'Đã thu hồi' : 'Đang hoạt động' %>
+              <span class="badge <%= (k.active === false || expired) ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' %>">
+                <%= k.active === false ? 'Đã thu hồi' : (expired ? 'Hết hạn' : 'Đang hoạt động') %>
               </span>
+              <form action="/admin/aai-license-keys/<%= encodeURIComponent(k.key) %>/renew" method="POST">
+                <button type="submit" class="btn-outline text-xs">Gia hạn +30 ngày</button>
+              </form>
               <% if (k.active === false) { %>
                 <form action="/admin/aai-license-keys/<%= encodeURIComponent(k.key) %>/reactivate" method="POST">
                   <button type="submit" class="btn-outline text-xs">Kích hoạt lại</button>

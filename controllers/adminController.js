@@ -603,6 +603,12 @@ exports.aaiLicenseKeyReactivate = (req, res) => {
   res.redirect('/admin/aai-license-keys');
 };
 
+exports.aaiLicenseKeyRenew = (req, res) => {
+  aaiLicense.renewKey(req.params.key);
+  req.flash('success', 'Đã gia hạn thêm 30 ngày.');
+  res.redirect('/admin/aai-license-keys');
+};
+
 // ---------------- A-AI Ads (tạo chiến dịch Facebook Ads từ web) ----------------
 // Port của phần tạo chiến dịch trong tool desktop fb-ads-manager — xem
 // services/aaiAdsService.js để biết lý do kiến trúc + nhắc đồng bộ 2 bên.
