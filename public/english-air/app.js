@@ -108,6 +108,7 @@ const DEFAULTS = {
   // trở lại thì đổi về false — ai đã tự gạt công tắc thì giữ lựa chọn của họ.
   moHet: true,
   thi: {},   // kết quả đề thi theo ngày
+  goiThu: 0,      // số cuộc gọi thử đã dùng (không tính gọi Kaka)
   xemThu: false,   // đã chọn xem thử trước khi đăng ký
   // Giọng người dùng tự chọn, theo gốc ngôn ngữ: { en: "...", vi: "..." }
   giong: {},
@@ -145,6 +146,7 @@ function vaLai(s) {
   s.todayXp = so(s.todayXp, 0, 0, 1e9);
   s.weekXp  = so(s.weekXp, 0, 0, 1e9);
   s.tier    = so(s.tier, 0, 0, 10);
+  s.goiThu  = so(s.goiThu, 0, 0, 1e6);
 
   ["sound", "nhac", "motion", "showVi", "moHet", "kidVoice", "nhacHoc",
    "daHoiNhac", "xemThu"].forEach(k => { s[k] = !!s[k]; });
@@ -4673,8 +4675,33 @@ function datVideo(dangNoi) {
   v.play().catch(() => {});
 }
 
+/** Ghi số lượt còn lại lên hai nút gọi, để người ta biết trước chứ không
+    bấm vào rồi mới bị chặn. */
+function veLuotGoi() {
+  const con = goiConLai();
+  const ghi = (id, chu) => {
+    const n = $(id);
+    if (!n) return;
+    let phu = $(".goi-con", n);
+    if (!phu) { phu = el("small", "goi-con"); n.append(phu); }
+    phu.textContent = chu;
+  };
+  if (con === Infinity) {
+    ghi("#btnStartFree", "Gói Pro — gọi thoải mái");
+    ghi("#btnStartCall", "Gói Pro — gọi thoải mái");
+  } else if (con > 0) {
+    const chu = "Còn " + con + " / " + GOI_THU_TOI_DA + " cuộc gọi thử";
+    ghi("#btnStartFree", chu);
+    ghi("#btnStartCall", chu);
+  } else {
+    ghi("#btnStartFree", "Đã hết lượt thử — mở gói Pro để gọi tiếp");
+    ghi("#btnStartCall", "Đã hết lượt thử — mở gói Pro để gọi tiếp");
+  }
+}
+
 function renderCall() {
   doVideoMon();
+  veLuotGoi();
   $("#callMicNote").textContent = !SR
     ? "Trình duyệt này chưa nghe được bằng micro, bạn gõ chữ để nói chuyện nhé."
     : (isIosStandalone()
@@ -4795,7 +4822,44 @@ function monSays(en, vi, after, py, audioUrl) {
 }
 
 /* ----- bắt đầu / kết thúc ----- */
-function startCall(mode) {
+/* ───────── Giới hạn cuộc gọi thử ─────────
+   Hai chế độ gọi có dùng máy chủ thì mỗi tài khoản được thử 2 cuộc. Gọi Kaka
+   KHÔNG tính: đó là phần chơi cho vui, không gọi ra ngoài, nên để thoải mái. */
+const GOI_THU_TOI_DA = 2;
+
+/** Đang có gói Pro thì gọi không giới hạn. */
+function laPro() { return !!(P2.data && P2.data.pro); }
+
+/** Còn mấy cuộc gọi thử. Pro thì trả về Vô cực. */
+function goiConLai() {
+  if (laPro()) return Infinity;
+  return Math.max(0, GOI_THU_TOI_DA - (S.goiThu || 0));
+}
+
+/** Chế độ này có bị tính vào hạn mức không. */
+const goiCoTinh = mode => mode === "free" || mode === "teach";
+
+/** Hết lượt thì mời mua Pro, và chỉ luôn hai đường vẫn miễn phí. */
+function baoHetLuotGoi() {
+  openSheet({
+    title: "Bạn đã dùng hết " + GOI_THU_TOI_DA + " cuộc gọi thử",
+    body: "Mỗi tài khoản được gọi thử " + GOI_THU_TOI_DA + " cuộc với ON-Language. "
+        + "Muốn gọi tiếp thì mở gói Pro. Còn gọi bà phù thuỷ Kaka thì vẫn thoải mái, "
+        + "và phần luyện nói trong mỗi bài học cũng không giới hạn.",
+    yes: "Xem gói Pro",
+    no: "Để sau",
+    onYes() { moPro(); },
+  });
+}
+
+function startCall(mode, khongTinh) {
+  // Hết lượt thì dừng ngay ở đây, đừng mở màn gọi rồi mới báo.
+  if (goiCoTinh(mode) && !khongTinh && goiConLai() <= 0) { baoHetLuotGoi(); return; }
+  if (goiCoTinh(mode) && !khongTinh && !laPro()) {
+    S.goiThu = (S.goiThu || 0) + 1;
+    save();
+    veLuotGoi();
+  }
   C.mode = mode;
   // Luyện hội thoại trong bài luôn là tiếng Anh vì đó là lời thoại đã học.
   // Giờ học luôn là tiếng Anh; tán gẫu thì bắt đầu bằng tiếng của máy rồi
@@ -4939,7 +5003,9 @@ async function askTutor(first) {
       title: "Chưa gọi tự do được",
       body: "Chế độ nói chuyện tự do cần mạng. Bạn chuyển sang luyện hội thoại trong bài nhé — cái này chạy được cả khi không có mạng.",
       yes: "Luyện hội thoại trong bài", no: "Đóng",
-      onYes() { startCall("teach"); }
+      // KHÔNG trừ lượt lần nữa: cuộc gọi tự do vừa rồi đã trừ một lượt mà
+      // không dùng được vì mất mạng. Trừ thêm là một lần gọi tính tiền hai lần.
+      onYes() { startCall("teach", true); }
     });
   }
 }
@@ -5542,8 +5608,10 @@ async function veThePro() {
       ? "Đang dùng Pro · hạn " + ngayVN(d.proUntil)
       : (d.thuPhi ? "Gọi thoải mái, không giới hạn" : "Đang mở miễn phí cho tất cả");
     const nut = d.pro ? "Gói của tôi" : (re ? "Từ " + tien(re.moiThang) + "/thg" : "Xem gói");
-    $$("#pbSub, #pbSub2").forEach(x => { x.textContent = phu; });
-    $$("#pbGia, #pbGia2").forEach(x => { x.textContent = nut; });
+    $("#pbSub, #pbSub2").forEach(x => { x.textContent = phu; });
+    $("#pbGia, #pbGia2").forEach(x => { x.textContent = nut; });
+    // Biết có Pro hay không rồi thì ghi lại số lượt cho đúng.
+    veLuotGoi();
   } catch { /* mất mạng thì cứ để chữ mặc định */ }
 }
 veThePro();

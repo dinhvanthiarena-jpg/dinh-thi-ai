@@ -2785,3 +2785,8 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
 /* Chấm sáng nháy mạnh một nhịp khi người học đặt tay sai chỗ */
 .viet-cham.nhac { animation: chamNhac .5s var(--e) 2; }
 @keyframes chamNhac { 0%, 100% { opacity: 1; r: 4.5; } 50% { opacity: .3; r: 9; } }
+
+/* Dòng nhỏ dưới hai nút gọi: còn mấy cuộc gọi thử.
+   Nút gọi vốn là một dòng chữ; thêm dòng phụ nên phải xếp dọc lại. */
+#btnStartFree, #btnStartCall { display: flex; flex-direction: column; gap: 2px; }
+.goi-con { font-size: .74rem; font-weight: 700; opacity: .82; }

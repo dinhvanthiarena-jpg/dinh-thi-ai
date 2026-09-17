@@ -17,7 +17,10 @@ function gop(may, chu) {
   const r = { ...chu, ...may };
 
   // Các con số chỉ có tăng: lấy bên nào lớn hơn.
-  ['xp', 'streak', 'best', 'weekXp', 'tier'].forEach((k) => {
+  // goiThu (số cuộc gọi thử đã dùng) PHẢI nằm trong nhóm này: nếu lấy theo bản
+  // của máy thì chỉ cần xoá dữ liệu trong máy rồi đăng nhập lại là số về 0, hạn
+  // mức 2 cuộc thành vô nghĩa. Lấy bên lớn hơn thì máy chủ luôn giữ số thật.
+  ['xp', 'streak', 'best', 'weekXp', 'tier', 'goiThu'].forEach((k) => {
     r[k] = Math.max(soNguyen(may[k]), soNguyen(chu[k]));
   });
 
