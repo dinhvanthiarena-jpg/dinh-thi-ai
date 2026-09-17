@@ -1,18 +1,42 @@
 <!-- 3 ô hợp tác kinh doanh nổi bật — đặt ngay dưới menu chính, hiện trên mọi
      trang, theo yêu cầu của thầy. -->
 <style>
-  @keyframes boGlow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0.15); }
-    50% { box-shadow: 0 0 22px 4px rgba(0,0,0,0.12); }
+  @keyframes boGlowOrange {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(244,63,94,0.6); }
+    50% { box-shadow: 0 0 24px 6px rgba(244,63,94,0.45); }
   }
-  .bo-card { animation: boGlow 2.6s ease-in-out infinite; }
+  @keyframes boGlowBlue {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(37,99,235,0.6); }
+    50% { box-shadow: 0 0 24px 6px rgba(37,99,235,0.45); }
+  }
+  @keyframes boGlowTeal {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(13,148,136,0.6); }
+    50% { box-shadow: 0 0 24px 6px rgba(13,148,136,0.45); }
+  }
+  @keyframes boShine {
+    0% { transform: translateX(-130%) skewX(-20deg); }
+    45%, 100% { transform: translateX(220%) skewX(-20deg); }
+  }
+  @keyframes boIconPop {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+  }
+  .bo-card { position: relative; overflow: hidden; }
+  .bo-card-1 { animation: boGlowOrange 2.4s ease-in-out infinite; }
+  .bo-card-2 { animation: boGlowBlue 2.4s ease-in-out infinite; animation-delay: .3s; }
+  .bo-card-3 { animation: boGlowTeal 2.4s ease-in-out infinite; animation-delay: .6s; }
+  .bo-shine { position: absolute; top: 0; left: 0; height: 100%; width: 30%; pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+    animation: boShine 3.2s ease-in-out infinite; }
+  .bo-icon { animation: boIconPop 1.8s ease-in-out infinite; }
 </style>
 <section class="bg-slate-950 py-4 sm:py-5">
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
       <a href="https://zalo.me/g/pq5eq2t93g9vb1kg0fhf" target="_blank" rel="noopener"
-         class="bo-card group flex items-center gap-3 rounded-xl bg-gradient-to-br from-orange-500 via-rose-500 to-purple-600 px-4 py-3.5 hover:scale-[1.02] transition-transform duration-200">
-        <span class="shrink-0 h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-xl">🤖</span>
+         class="bo-card bo-card-1 group flex items-center gap-3 rounded-xl bg-gradient-to-br from-orange-500 via-rose-500 to-purple-600 px-4 py-3.5 hover:scale-[1.03] transition-transform duration-200">
+        <span class="bo-shine"></span>
+        <span class="bo-icon shrink-0 h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-xl">🤖</span>
         <div class="min-w-0">
           <p class="text-white font-extrabold text-sm leading-snug">Hợp tác kinh doanh</p>
           <p class="text-white/90 text-xs leading-snug">Kiếm tiền thụ động từ AI</p>
@@ -20,8 +44,9 @@
       </a>
 
       <a href="/lien-he"
-         class="bo-card group flex items-center gap-3 rounded-xl bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-700 px-4 py-3.5 hover:scale-[1.02] transition-transform duration-200">
-        <span class="shrink-0 h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-xl">🎬</span>
+         class="bo-card bo-card-2 group flex items-center gap-3 rounded-xl bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-700 px-4 py-3.5 hover:scale-[1.03] transition-transform duration-200">
+        <span class="bo-shine"></span>
+        <span class="bo-icon shrink-0 h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-xl">🎬</span>
         <div class="min-w-0">
           <p class="text-white font-extrabold text-sm leading-snug">Thương mại Tool</p>
           <p class="text-white/90 text-xs leading-snug">Sản xuất video bằng AI</p>
@@ -29,8 +54,9 @@
       </a>
 
       <a href="/lien-he"
-         class="bo-card group flex items-center gap-3 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 px-4 py-3.5 hover:scale-[1.02] transition-transform duration-200">
-        <span class="shrink-0 h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-xl">📤</span>
+         class="bo-card bo-card-3 group flex items-center gap-3 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-700 px-4 py-3.5 hover:scale-[1.03] transition-transform duration-200">
+        <span class="bo-shine"></span>
+        <span class="bo-icon shrink-0 h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-xl">📤</span>
         <div class="min-w-0">
           <p class="text-white font-extrabold text-sm leading-snug">Hợp tác thương mại</p>
           <p class="text-white/90 text-xs leading-snug">Tool đăng bài tự động</p>
