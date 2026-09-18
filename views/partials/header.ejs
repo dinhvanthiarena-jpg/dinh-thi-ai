@@ -19,6 +19,9 @@
             <span class="relative inline-flex h-1.5 w-1.5 lg:h-2 lg:w-2 rounded-full bg-orange-500"></span>
           </span>
         </a>
+        <a href="/dang-ky-hoc-mien-phi" class="relative flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs lg:text-sm font-semibold whitespace-nowrap <%= currentPath === '/dang-ky-hoc-mien-phi' ? 'text-white bg-primary-700' : 'text-white bg-primary-600 hover:bg-primary-700' %>">
+          🎓 Đăng ký học miễn phí
+        </a>
 
         <div class="relative group">
           <button type="button" class="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs lg:text-sm font-medium text-ink hover:text-primary-700 hover:bg-primary-50">
@@ -27,7 +30,6 @@
           </button>
           <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity absolute right-0 top-full pt-1 w-44">
             <div class="rounded-xl border border-primary-100 bg-white shadow-lg py-1">
-              <a href="/dang-ky-hoc-mien-phi" class="block px-4 py-2 text-sm font-semibold <%= currentPath === '/dang-ky-hoc-mien-phi' ? 'text-orange-700 bg-orange-50' : 'text-orange-600 hover:bg-orange-50 hover:text-orange-700' %>">🎓 Đăng ký học miễn phí</a>
               <a href="/gioi-thieu" class="block px-4 py-2 text-sm text-ink hover:bg-primary-50 hover:text-primary-700">Giới thiệu</a>
               <a href="/hoat-dong" class="block px-4 py-2 text-sm <%= currentPath === '/hoat-dong' ? 'text-primary-700 bg-primary-50' : 'text-ink hover:bg-primary-50 hover:text-primary-700' %>">Hoạt động</a>
               <a href="/lien-he" class="block px-4 py-2 text-sm text-ink hover:bg-primary-50 hover:text-primary-700">Liên hệ</a>
