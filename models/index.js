@@ -17,6 +17,7 @@ const ProOrder = require('./ProOrder');
 const MonlTienDo = require('./MonlTienDo');
 const PageView = require('./PageView');
 const AffiliateClick = require('./AffiliateClick');
+const CourseRegistration = require('./CourseRegistration');
 const BattlePlayer = require('./BattlePlayer');
 const BattleMatch = require('./BattleMatch');
 const MathSkill = require('./MathSkill');
@@ -75,6 +76,7 @@ module.exports = {
   MonlTienDo,
   PageView,
   AffiliateClick,
+  CourseRegistration,
   BattlePlayer,
   BattleMatch,
   MathSkill,

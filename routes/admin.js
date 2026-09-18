@@ -43,6 +43,9 @@ router.get('/students', adminController.studentList);
 router.get('/messages', adminController.messageList);
 router.post('/messages/:id/read', adminController.messageMarkRead);
 
+router.get('/course-registrations', adminController.courseRegistrationList);
+router.post('/course-registrations/:id/contacted', adminController.courseRegistrationMarkContacted);
+
 router.get('/game-installs', adminController.gameInstallList);
 
 router.get('/push-broadcast', adminController.pushBroadcastForm);
@@ -55,6 +58,9 @@ router.post('/aai-license-keys', adminController.aaiLicenseKeyIssue);
 router.post('/aai-license-keys/:key/revoke', adminController.aaiLicenseKeyRevoke);
 router.post('/aai-license-keys/:key/reactivate', adminController.aaiLicenseKeyReactivate);
 router.post('/aai-license-keys/:key/renew', adminController.aaiLicenseKeyRenew);
+
+router.get('/vai-license-keys', adminController.vaiLicenseKeysPage);
+router.post('/vai-license-keys', adminController.vaiLicenseKeyIssue);
 
 router.get('/fbai-license-keys', adminController.fbaiLicenseKeysPage);
 router.post('/fbai-license-keys', adminController.fbaiLicenseKeyIssue);

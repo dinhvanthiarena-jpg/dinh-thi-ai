@@ -1,0 +1,122 @@
+<style>
+  @keyframes dkPulseRing {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.5); }
+    50% { box-shadow: 0 0 0 14px rgba(250, 204, 21, 0); }
+  }
+  .dk-pulse { animation: dkPulseRing 2s ease-out infinite; }
+  @keyframes dkFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .dk-float { animation: dkFloat 3.4s ease-in-out infinite; }
+</style>
+
+<!-- Hero: đào tạo miễn phí kiếm tiền AFF với AI tự động hoá -->
+<section class="relative overflow-hidden bg-gradient-to-br from-[#1a0a3d] via-[#2d1367] to-[#0a1a4d] text-white">
+  <div class="absolute -top-16 -right-16 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
+  <div class="absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
+
+  <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 text-center">
+    <img src="/images/affiliate/slide-0-cover.png" alt="Đào tạo miễn phí kiếm tiền AFF với AI" class="dk-float mx-auto h-28 w-28 sm:h-36 sm:w-36 rounded-2xl object-cover shadow-2xl ring-2 ring-white/30" />
+
+    <span class="badge bg-white/15 text-white ring-1 ring-white/30 mt-6 mb-4">
+      <span class="relative flex h-2 w-2 mr-2">
+        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-300 opacity-75"></span>
+        <span class="relative inline-flex h-2 w-2 rounded-full bg-yellow-300"></span>
+      </span>
+      Đào tạo miễn phí — 100% online
+    </span>
+
+    <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight text-wrap-balance">
+      Kiếm Tiền AFF<br class="hidden sm:block" /> với <span class="text-yellow-300">AI Tự Động Hoá</span>
+    </h1>
+    <p class="mt-5 text-lg sm:text-xl text-white/90">
+      🗓️ Vào <span class="font-bold text-yellow-300">Chủ Nhật này</span> (<%= eventDate %>) — Đăng ký ngay để giữ chỗ, số lượng có hạn.
+    </p>
+    <p class="mt-4 text-white/80 max-w-2xl mx-auto">
+      Thầy Đinh Thi Ai hướng dẫn trực tiếp cách xây dựng dòng tiền thụ động từ hoa hồng affiliate Shopee/Lazada/TikTok Shop,
+      dùng AI tự động hoá toàn bộ quy trình — không cần kinh nghiệm, không mất phí.
+    </p>
+
+    <a href="#dk-form" class="dk-pulse mt-8 inline-flex items-center gap-2 rounded-full bg-yellow-400 hover:bg-yellow-300 text-ink font-extrabold text-base sm:text-lg px-8 sm:px-10 py-3.5 sm:py-4 shadow-xl transition-colors">
+      🎓 Đăng ký ngay — Miễn phí
+    </a>
+  </div>
+</section>
+
+<!-- Lợi ích -->
+<section class="bg-surface py-14">
+  <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+    <div class="grid sm:grid-cols-3 gap-5">
+      <div class="card p-6 text-center">
+        <p class="text-3xl mb-2">🤖</p>
+        <p class="font-bold text-ink">AI tự động hoá</p>
+        <p class="text-sm text-muted mt-1">Học cách dùng AI để tự động chạy affiliate, không tốn thời gian thủ công.</p>
+      </div>
+      <div class="card p-6 text-center">
+        <p class="text-3xl mb-2">💸</p>
+        <p class="font-bold text-ink">Dòng tiền thụ động</p>
+        <p class="text-sm text-muted mt-1">Xây dựng nguồn thu nhập hoa hồng chạy 24/7, không cần túc trực.</p>
+      </div>
+      <div class="card p-6 text-center">
+        <p class="text-3xl mb-2">👥</p>
+        <p class="font-bold text-ink">Cộng đồng hỗ trợ</p>
+        <p class="text-sm text-muted mt-1">10 cộng đồng với hơn 10.000 thành viên, thầy Đinh Thi Ai trực tiếp hỗ trợ.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Form đăng ký -->
+<section id="dk-form" class="bg-slate-950 py-16">
+  <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-8">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Đăng ký giữ chỗ miễn phí</h2>
+      <p class="mt-2 text-white/70">Điền thông tin bên dưới, đội ngũ Vietpro sẽ liên hệ xác nhận lịch học qua Zalo/điện thoại.</p>
+    </div>
+
+    <div class="card p-6 sm:p-8">
+      <% if (success) { %>
+        <div class="rounded-lg bg-emerald-50 border border-emerald-300 px-5 py-6 text-center">
+          <p class="text-3xl mb-2">🎉</p>
+          <p class="font-bold text-ink text-lg">Đăng ký thành công!</p>
+          <p class="mt-1 text-sm text-muted">Cảm ơn bạn đã đăng ký. Đội ngũ Vietpro sẽ liên hệ xác nhận lịch học sớm nhất.</p>
+          <a href="https://zalo.me/g/pq5eq2t93g9vb1kg0fhf" target="_blank" rel="noopener" class="btn-primary inline-flex mt-5">Tham gia nhóm Zalo ngay</a>
+        </div>
+      <% } else { %>
+        <% if (errors && errors.length) { %>
+          <div class="mb-6 rounded-lg bg-red-50 border border-danger/30 px-4 py-3 text-sm text-red-800">
+            <% errors.forEach(function(e) { %><p><%= e.msg %></p><% }); %>
+          </div>
+        <% } %>
+
+        <form action="/dang-ky-hoc-mien-phi" method="POST" class="space-y-5">
+          <div>
+            <label class="label" for="name">Họ và tên *</label>
+            <input class="input" type="text" id="name" name="name" value="<%= old.name || '' %>" required />
+          </div>
+          <div class="grid sm:grid-cols-2 gap-5">
+            <div>
+              <label class="label" for="phone">Số điện thoại *</label>
+              <input class="input" type="tel" id="phone" name="phone" value="<%= old.phone || '' %>" required />
+            </div>
+            <div>
+              <label class="label" for="zalo">Zalo (nếu khác SĐT)</label>
+              <input class="input" type="text" id="zalo" name="zalo" value="<%= old.zalo || '' %>" />
+            </div>
+          </div>
+          <div>
+            <label class="label" for="email">Email</label>
+            <input class="input" type="email" id="email" name="email" value="<%= old.email || '' %>" />
+          </div>
+          <div>
+            <label class="label" for="note">Bạn muốn tìm hiểu thêm điều gì? (không bắt buộc)</label>
+            <textarea class="input" id="note" name="note" rows="3"><%= old.note || '' %></textarea>
+          </div>
+          <button type="submit" class="btn-primary w-full">🎓 Đăng ký ngay — Miễn phí</button>
+          <p class="text-xs text-muted text-center">Thông tin của bạn chỉ dùng để liên hệ xác nhận lịch học, không chia sẻ cho bên thứ ba.</p>
+        </form>
+      <% } %>
+    </div>
+  </div>
+</section>

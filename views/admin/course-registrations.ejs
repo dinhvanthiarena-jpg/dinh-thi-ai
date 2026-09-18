@@ -1,0 +1,31 @@
+<div class="space-y-4">
+  <div class="flex items-center justify-between">
+    <p class="text-sm text-muted">Tổng cộng <span class="font-bold text-ink"><%= registrations.length %></span> lượt đăng ký.</p>
+    <a href="/dang-ky-hoc-mien-phi" target="_blank" class="text-sm text-primary-600 hover:underline">Xem trang đăng ký &rarr;</a>
+  </div>
+
+  <% registrations.forEach(function(r) { %>
+    <div class="card p-5 <%= r.isContacted ? '' : 'border-l-4 border-l-primary-600' %>">
+      <div class="flex justify-between items-start gap-4">
+        <div>
+          <p class="font-semibold text-ink"><%= r.name %></p>
+          <p class="text-xs text-muted mt-0.5">
+            📞 <%= r.phone %>
+            <% if (r.email) { %> &middot; ✉️ <%= r.email %><% } %>
+            <% if (r.zalo) { %> &middot; Zalo: <%= r.zalo %><% } %>
+            &middot; <%= new Date(r.createdAt).toLocaleString('vi-VN') %>
+          </p>
+          <% if (r.note) { %><p class="mt-2 text-sm text-muted whitespace-pre-line"><%= r.note %></p><% } %>
+        </div>
+        <% if (!r.isContacted) { %>
+          <form action="/admin/course-registrations/<%= r._id %>/contacted" method="POST">
+            <button type="submit" class="btn-outline text-xs">Đánh dấu đã liên hệ</button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+  <% }); %>
+  <% if (!registrations.length) { %>
+    <div class="card p-10 text-center text-muted">Chưa có ai đăng ký.</div>
+  <% } %>
+</div>

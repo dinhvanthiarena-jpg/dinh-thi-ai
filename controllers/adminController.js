@@ -4,6 +4,7 @@ const BlogPost = require('../models/BlogPost');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const ContactMessage = require('../models/ContactMessage');
+const CourseRegistration = require('../models/CourseRegistration');
 const GalleryPhoto = require('../models/GalleryPhoto');
 const ChatMessage = require('../models/ChatMessage');
 const Tool = require('../models/Tool');
@@ -14,6 +15,7 @@ const webpush = require('web-push');
 const aaiAds = require('../services/aaiAdsService');
 const aaiLicense = require('../services/aaiLicenseService');
 const fbaiLicense = require('../services/fbaiLicenseService');
+const vaiLicense = require('../services/vaiLicenseService');
 
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
@@ -302,6 +304,17 @@ exports.messageList = async (req, res) => {
 exports.messageMarkRead = async (req, res) => {
   await ContactMessage.update({ isRead: true }, { where: { id: req.params.id } });
   res.redirect('/admin/messages');
+};
+
+// --- Course registrations (đăng ký học miễn phí) ---
+exports.courseRegistrationList = async (req, res) => {
+  const registrations = await CourseRegistration.findAll({ order: [['createdAt', 'DESC']] });
+  res.render('admin/course-registrations', { title: 'Đăng ký học miễn phí', registrations });
+};
+
+exports.courseRegistrationMarkContacted = async (req, res) => {
+  await CourseRegistration.update({ isContacted: true }, { where: { id: req.params.id } });
+  res.redirect('/admin/course-registrations');
 };
 
 // --- Game installs (Toan Vui Cap 1) ---
@@ -613,6 +626,24 @@ exports.aaiLicenseKeyRenew = (req, res) => {
   aaiLicense.renewKey(req.params.key);
   req.flash('success', 'Đã gia hạn thêm 30 ngày.');
   res.redirect('/admin/aai-license-keys');
+};
+
+// ---------------- Key V-AI STUDIO (desktop, ký RS256, offline vĩnh viễn) ----------------
+// Khác 2 hệ trên: key ký xong là TỰ ĐỦ, app xác minh chữ ký offline, KHÔNG
+// hỏi lại đây nên KHÔNG thu hồi được sau khi đã gửi khách — xem ghi chú đầu
+// services/vaiLicenseService.js. Trang này chỉ có Cấp key + sổ ghi lại.
+exports.vaiLicenseKeysPage = (req, res) => {
+  res.render('admin/vai-license-keys', { title: 'Key V-AI', keys: vaiLicense.listKeys() });
+};
+
+exports.vaiLicenseKeyIssue = (req, res) => {
+  try {
+    const entry = vaiLicense.issueKey(req.body.name || '', req.body.ngay || 0);
+    req.flash('success', `Đã cấp key mới cho "${entry.name || '(không tên)'}" — copy ở dòng đầu danh sách bên dưới.`);
+  } catch (e) {
+    req.flash('error', `Lỗi cấp key: ${e.message}`);
+  }
+  res.redirect('/admin/vai-license-keys');
 };
 
 // ---------------- Key desktop AAi-3dvietpro (online, thu hồi được) ----------------
