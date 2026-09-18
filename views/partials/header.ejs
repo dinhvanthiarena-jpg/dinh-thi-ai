@@ -8,7 +8,7 @@
 
       <nav class="hidden xl:flex items-center gap-0.5 xl:gap-1">
         <a href="/courses" class="px-2 py-1.5 rounded-lg text-xs lg:text-sm font-medium whitespace-nowrap <%= currentPath && currentPath.startsWith('/courses') ? 'text-primary-700 bg-primary-50' : 'text-ink hover:text-primary-700 hover:bg-primary-50' %>">Khóa học</a>
-        <a href="/blog" class="px-2 py-1.5 rounded-lg text-xs lg:text-sm font-medium whitespace-nowrap <%= currentPath && currentPath.startsWith('/blog') ? 'text-primary-700 bg-primary-50' : 'text-ink hover:text-primary-700 hover:bg-primary-50' %>">Kiến thức &amp; Tin tức</a>
+        <a href="/blog" class="px-2 py-1.5 rounded-lg text-xs lg:text-sm font-medium whitespace-nowrap <%= currentPath && currentPath.startsWith('/blog') ? 'text-primary-700 bg-primary-50' : 'text-ink hover:text-primary-700 hover:bg-primary-50' %>">Kiến thức</a>
         <a href="/kho-tai-nguyen" class="px-2 py-1.5 rounded-lg text-xs lg:text-sm font-medium whitespace-nowrap <%= currentPath && currentPath.startsWith('/kho-tai-nguyen') ? 'text-primary-700 bg-primary-50' : 'text-ink hover:text-primary-700 hover:bg-primary-50' %>">Tool &amp; Game</a>
         <a href="/shop/" class="px-2 py-1.5 rounded-lg text-xs lg:text-sm font-medium whitespace-nowrap <%= currentPath && currentPath.startsWith('/shop') ? 'text-primary-700 bg-primary-50' : 'text-ink hover:text-primary-700 hover:bg-primary-50' %>">Shop</a>
         <a href="/uu-dai" class="px-2 py-1.5 rounded-lg text-xs lg:text-sm font-medium whitespace-nowrap <%= currentPath === '/uu-dai' ? 'text-primary-700 bg-primary-50' : 'text-ink hover:text-primary-700 hover:bg-primary-50' %>">Ưu đãi</a>
@@ -20,7 +20,7 @@
           </span>
         </a>
         <a href="/dang-ky-hoc-mien-phi" class="relative flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs lg:text-sm font-semibold whitespace-nowrap <%= currentPath === '/dang-ky-hoc-mien-phi' ? 'text-white bg-primary-700' : 'text-white bg-primary-600 hover:bg-primary-700' %>">
-          🎓 Đăng ký học miễn phí
+          🎓 Đăng ký học
         </a>
 
         <div class="relative group">
@@ -43,13 +43,13 @@
           <% if (currentUser.role === 'admin') { %>
             <a href="/admin" class="btn-ghost">Quản trị</a>
           <% } %>
-          <a href="/dashboard" class="btn-ghost">Khu vực học tập</a>
+          <a href="/dashboard" class="btn-ghost">Học tập</a>
           <form action="/auth/logout" method="POST">
             <button type="submit" class="btn-outline">Đăng xuất</button>
           </form>
         <% } else { %>
           <a href="/auth/login" class="btn-ghost">Đăng nhập</a>
-          <a href="/auth/register" class="btn-primary">Đăng ký miễn phí</a>
+          <a href="/auth/register" class="btn-primary">Đăng ký</a>
         <% } %>
       </div>
 
