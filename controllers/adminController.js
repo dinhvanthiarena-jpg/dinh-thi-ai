@@ -47,11 +47,12 @@ function normalizeVideoUrl(url) {
 
 // --- Dashboard ---
 exports.dashboard = async (req, res) => {
-  const [courseCount, studentCount, postCount, paidOrders] = await Promise.all([
+  const [courseCount, studentCount, postCount, paidOrders, registrationCount] = await Promise.all([
     Course.count(),
     User.count({ where: { role: 'student' } }),
     BlogPost.count(),
     Order.findAll({ where: { status: 'paid' } }),
+    CourseRegistration.count(),
   ]);
 
   const revenue = paidOrders.reduce((sum, o) => sum + o.amount, 0);
@@ -64,11 +65,13 @@ exports.dashboard = async (req, res) => {
     order: [['createdAt', 'DESC']],
     limit: 8,
   });
+  const recentRegistrations = await CourseRegistration.findAll({ order: [['createdAt', 'DESC']], limit: 8 });
 
   res.render('admin/index', {
     title: 'Bảng điều khiển quản trị',
-    stats: { courseCount, studentCount, postCount, orderCount: paidOrders.length, revenue },
+    stats: { courseCount, studentCount, postCount, orderCount: paidOrders.length, revenue, registrationCount },
     recentOrders,
+    recentRegistrations,
   });
 };
 

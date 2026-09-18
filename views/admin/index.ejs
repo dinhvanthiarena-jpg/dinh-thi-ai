@@ -1,4 +1,4 @@
-<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+<div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
   <div class="card p-5">
     <p class="text-sm text-muted">Khóa học</p>
     <p class="text-2xl font-bold text-ink mt-1"><%= stats.courseCount %></p>
@@ -15,6 +15,10 @@
     <p class="text-sm text-muted">Doanh thu</p>
     <p class="text-2xl font-bold text-primary-700 mt-1"><%= stats.revenue.toLocaleString('vi-VN') %>đ</p>
   </div>
+  <a href="/admin/course-registrations" class="card p-5 hover:ring-1 hover:ring-orange-300 transition-shadow">
+    <p class="text-sm text-muted">🎓 Đăng ký học miễn phí</p>
+    <p class="text-2xl font-bold text-orange-600 mt-1"><%= stats.registrationCount %></p>
+  </a>
 </div>
 
 <div class="card overflow-hidden">
@@ -39,6 +43,34 @@
       <% }); %>
       <% if (!recentOrders.length) { %>
         <tr><td colspan="4" class="px-5 py-8 text-center text-muted">Chưa có đơn hàng nào.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="card overflow-hidden mt-6">
+  <div class="px-5 py-4 border-b border-primary-100 flex items-center justify-between">
+    <span class="font-semibold text-ink">🎓 Đăng ký học miễn phí gần đây</span>
+    <a href="/admin/course-registrations" class="text-sm text-primary-600 hover:underline">Xem tất cả &rarr;</a>
+  </div>
+  <table class="w-full text-sm">
+    <thead class="bg-primary-50 text-ink">
+      <tr>
+        <th class="text-left px-5 py-3 font-semibold">Họ tên</th>
+        <th class="text-left px-5 py-3 font-semibold">Số điện thoại</th>
+        <th class="text-right px-5 py-3 font-semibold">Ngày đăng ký</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-primary-50">
+      <% recentRegistrations.forEach(function(r) { %>
+        <tr>
+          <td class="px-5 py-3 text-ink"><%= r.name %></td>
+          <td class="px-5 py-3 text-muted"><%= r.phone %></td>
+          <td class="px-5 py-3 text-right text-muted"><%= new Date(r.createdAt).toLocaleString('vi-VN') %></td>
+        </tr>
+      <% }); %>
+      <% if (!recentRegistrations.length) { %>
+        <tr><td colspan="3" class="px-5 py-8 text-center text-muted">Chưa có ai đăng ký.</td></tr>
       <% } %>
     </tbody>
   </table>
