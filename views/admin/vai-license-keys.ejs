@@ -1,0 +1,54 @@
+<div class="space-y-6 max-w-3xl">
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-1">Cấp key kích hoạt V-AI STUDIO</h2>
+    <p class="text-sm text-muted mb-4">
+      Key ký bằng chữ ký số (RS256) — app xác minh <strong>offline</strong>, không cần khách gửi mã
+      máy, không cần mạng lúc kích hoạt. Vì xác minh hoàn toàn offline nên
+      <strong>key đã cấp không thu hồi được</strong> từ trang này — cẩn thận trước khi gửi.
+      Bỏ trống "Số ngày" = key dùng <strong>vĩnh viễn</strong>.
+    </p>
+    <form action="/admin/vai-license-keys" method="POST" class="flex flex-wrap gap-3">
+      <input
+        name="name"
+        type="text"
+        class="input flex-1 min-w-[200px]"
+        placeholder="Tên khách hàng (hiện trong app)"
+      />
+      <input
+        name="ngay"
+        type="number"
+        min="0"
+        class="input w-32"
+        placeholder="Số ngày"
+      />
+      <button type="submit" class="btn-primary">🔑 Cấp key mới</button>
+    </form>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-4">Sổ key đã cấp (<%= keys.length %>)</h2>
+    <p class="text-xs text-muted mb-4">Chỉ để tra cứu đã cấp cho ai/ngày nào — không phải nơi kiểm
+      soát quyền dùng (xem ghi chú ở trên).</p>
+    <% if (!keys.length) { %>
+      <p class="text-sm text-muted">Chưa cấp key nào.</p>
+    <% } else { %>
+      <div class="space-y-2">
+        <% keys.forEach(k => { %>
+          <div class="rounded-lg border border-primary-100 px-4 py-3">
+            <div class="flex items-center justify-between gap-3 mb-2">
+              <div class="text-sm font-semibold text-ink"><%= k.name || '(không tên)' %></div>
+              <span class="badge bg-emerald-100 text-emerald-700">
+                <%= k.days ? `${k.days} ngày` : 'Vĩnh viễn' %>
+              </span>
+            </div>
+            <div class="text-xs text-muted mb-2">
+              Cấp lúc <%= new Date(k.issuedAt).toLocaleString('vi-VN') %>
+              <% if (k.expiresAt) { %> · Hết hạn lúc <%= new Date(k.expiresAt).toLocaleString('vi-VN') %><% } %>
+            </div>
+            <div class="font-mono text-xs text-muted break-all bg-slate-50 rounded p-2"><%= k.key %></div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>
