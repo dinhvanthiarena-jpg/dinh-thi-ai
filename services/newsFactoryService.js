@@ -596,4 +596,4 @@ async function suggestImageQuery(title) {
   }
 }
 
-module.exports = { createTrendingPost, pickTopic, generateArticle, fetchStockImage, suggestImageQuery, isImageRelevant };
+module.exports = { createTrendingPost, pickTopic, generateArticle, fetchStockImage, suggestImageQuery, isImageRelevant, pickCategoryCover };

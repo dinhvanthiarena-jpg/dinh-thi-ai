@@ -13,6 +13,7 @@ const path = require('path');
 const crypto = require('crypto');
 const BlogPost = require('../models/BlogPost');
 const { markdownToHtml } = require('../utils/markdownToHtml');
+const { pickCategoryCover } = require('../services/newsFactoryService');
 
 const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
 
@@ -42,6 +43,13 @@ router.post('/', checkToken, async (req, res) => {
       const filename = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}.jpg`;
       fs.writeFileSync(path.join(uploadDir, filename), buffer);
       coverImageUrl = `/uploads/${filename}`;
+    } else {
+      // Tool ngoài đôi khi gửi bài không kèm ảnh — nếu không set gì thì
+      // Sequelize rơi về 1 ảnh placeholder TĨNH duy nhất cho mọi bài (default
+      // của cột coverImageUrl), khiến nhiều bài liền nhau hiện y hệt 1 ảnh.
+      // Dùng bộ ảnh SVG theo chuyên mục (đã có sẵn cho "Nhà máy tin tức AI")
+      // để ít nhất mỗi bài còn có ảnh minh hoạ khác nhau theo chuyên mục.
+      coverImageUrl = pickCategoryCover('ai-cong-nghe');
     }
 
     // content đến từ tool ngoài (A-AI Ads) là text thuần, đoạn cách nhau bằng
