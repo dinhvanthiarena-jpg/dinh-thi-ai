@@ -13,7 +13,7 @@ const path = require('path');
 const crypto = require('crypto');
 const BlogPost = require('../models/BlogPost');
 const { markdownToHtml } = require('../utils/markdownToHtml');
-const { fetchStockImage } = require('../services/newsFactoryService');
+const { fetchStockImage, suggestImageQuery } = require('../services/newsFactoryService');
 
 const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
 
@@ -47,19 +47,22 @@ router.post('/', checkToken, async (req, res) => {
     } else {
       // Tool ngoài đôi khi gửi bài không kèm ảnh — thầy yêu cầu rõ PHẢI là
       // ảnh thật, tuyệt đối không dùng icon vẽ minh hoạ (đã thử 1 lần, bị
-      // nhắc lại). Dùng đúng pipeline tìm ảnh thật (Wikimedia/Openverse/
-      // Pixabay, có Claude xác thực độ liên quan) mà "Nhà máy tin tức AI"
-      // đang dùng cho chính nó — không truyền specificQuery vì không có bài
-      // viết gốc để sinh từ khoá, fetchStockImage tự rơi về từ khoá chung
-      // theo chuyên mục. Nếu không tìm/tải được ảnh thật nào (hiếm), để
-      // trống — cột coverImageUrl có default là 1 ảnh JPG thật (không phải
-      // SVG vẽ), vẫn đúng yêu cầu "phải là ảnh thật" của thầy.
+      // nhắc lại), và ảnh phải SÁT ĐÚNG nội dung bài chứ không phải 1 từ
+      // khoá chung chung theo chuyên mục (VD "smartphone" cho mọi bài AI —
+      // bị nhắc lại lần 2, thầy chỉ thẳng ảnh không liên quan tiêu đề).
+      // suggestImageQuery nhờ Claude đọc TIÊU ĐỀ bài rồi sinh 1 cụm từ tiếng
+      // Anh mô tả đúng cảnh minh hoạ — đây là bước ĐANG THIẾU trước đó (đã
+      // truyền thẳng null, khiến fetchStockImage luôn rơi về từ khoá chung
+      // của chuyên mục). Nếu suggestImageQuery lỗi (Claude tạm không gọi
+      // được) thì trả về null, fetchStockImage tự rơi về từ khoá chung —
+      // không làm gãy luồng đăng bài.
       const usedImages = await BlogPost.findAll({
         where: { coverImageSourceId: { [require('sequelize').Op.ne]: null } },
         attributes: ['coverImageSourceId'],
       });
       const usedPageIds = new Set(usedImages.map((p) => p.coverImageSourceId));
-      const stockImage = await fetchStockImage('ai-cong-nghe', usedPageIds, null, title);
+      const imageQuery = await suggestImageQuery(title);
+      const stockImage = await fetchStockImage('ai-cong-nghe', usedPageIds, imageQuery, title);
       if (stockImage) {
         coverImageUrl = stockImage.url;
         coverImageSourceId = stockImage.sourceId;
