@@ -21,6 +21,8 @@ const CourseRegistration = require('./CourseRegistration');
 const BattlePlayer = require('./BattlePlayer');
 const BattleMatch = require('./BattleMatch');
 const MathSkill = require('./MathSkill');
+const WalletTransaction = require('./WalletTransaction');
+const ToolLicense = require('./ToolLicense');
 
 Course.hasMany(Lesson, { foreignKey: 'CourseId', onDelete: 'CASCADE' });
 Lesson.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
@@ -54,6 +56,16 @@ BlogPost.belongsTo(User, { foreignKey: 'AuthorId', as: 'author' });
 User.hasMany(MathSkill, { foreignKey: 'UserId', onDelete: 'CASCADE' });
 MathSkill.belongsTo(User, { foreignKey: 'UserId', as: 'user' });
 
+User.hasMany(WalletTransaction, { foreignKey: 'UserId', onDelete: 'CASCADE' });
+WalletTransaction.belongsTo(User, { foreignKey: 'UserId', as: 'user' });
+
+User.hasMany(ToolLicense, { foreignKey: 'UserId', onDelete: 'CASCADE' });
+ToolLicense.belongsTo(User, { foreignKey: 'UserId', as: 'user' });
+Tool.hasMany(ToolLicense, { foreignKey: 'ToolId', onDelete: 'CASCADE' });
+ToolLicense.belongsTo(Tool, { foreignKey: 'ToolId', as: 'tool' });
+WalletTransaction.hasOne(ToolLicense, { foreignKey: 'WalletTransactionId' });
+ToolLicense.belongsTo(WalletTransaction, { foreignKey: 'WalletTransactionId', as: 'transaction' });
+
 const NhacHoc = require("./NhacHoc");
 
 module.exports = {
@@ -81,4 +93,6 @@ module.exports = {
   BattleMatch,
   MathSkill,
   NhacHoc,
+  WalletTransaction,
+  ToolLicense,
 };

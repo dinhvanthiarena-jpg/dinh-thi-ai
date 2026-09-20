@@ -289,6 +289,33 @@ exports.proOrderConfirm = async (req, res) => {
   res.redirect('/admin/pro-orders');
 };
 
+exports.walletTransactionList = async (req, res) => {
+  const { WalletTransaction } = require('../models');
+  const wallet = require('../services/walletService');
+  const transactions = await WalletTransaction.findAll({
+    where: { type: 'topup' },
+    include: [{ model: User, as: 'user', attributes: ['name', 'email', 'walletBalance'] }],
+    order: [['createdAt', 'DESC']],
+    limit: 200,
+  });
+  res.render('admin/wallet', {
+    title: 'Ví — Nạp tiền',
+    transactions,
+    sanSang: wallet.sanSangNhanTien(),
+  });
+};
+
+/** Duyệt tay 1 giao dịch nạp ví — giống hệt cơ chế duyệt tay gói Pro. */
+exports.walletTransactionConfirm = async (req, res) => {
+  const { WalletTransaction } = require('../models');
+  const wallet = require('../services/walletService');
+  const tx = await WalletTransaction.findByPk(req.params.id);
+  if (tx && tx.status !== 'paid') {
+    await wallet.ghiNhanNapVi(tx, { boi: 'tay:' + (res.locals.currentUser?.email || 'admin') });
+  }
+  res.redirect('/admin/wallet');
+};
+
 exports.studentList = async (req, res) => {
   const students = await User.findAll({ where: { role: 'student' }, order: [['createdAt', 'DESC']] });
   // Ai chỉ có số điện thoại là đăng ký từ trong app Mon.L, còn web thì bắt buộc email.
@@ -531,6 +558,7 @@ exports.toolCreate = async (req, res) => {
     driveUrl: body.driveUrl,
     driveFileId: parseDriveFileId(body.driveUrl),
     webAppUrl: body.webAppUrl || null,
+    price: Number(body.price) || 0,
     isPublished: body.isPublished === 'on',
     coverImageUrl: cover ? `/uploads/${cover.filename}` : undefined,
     galleryImages: gallery.map((f) => `/uploads/${f.filename}`),
@@ -563,6 +591,7 @@ exports.toolUpdate = async (req, res, next) => {
     driveUrl: body.driveUrl,
     driveFileId: parseDriveFileId(body.driveUrl),
     webAppUrl: body.webAppUrl || null,
+    price: Number(body.price) || 0,
     isPublished: body.isPublished === 'on',
     ...(cover ? { coverImageUrl: `/uploads/${cover.filename}` } : {}),
     ...(gallery.length

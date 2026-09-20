@@ -24,6 +24,10 @@ const User = sequelize.define(
     familyOwner: { type: DataTypes.BOOLEAN, defaultValue: false },
     // Dùng thử 7 ngày, mỗi tài khoản chỉ một lần.
     trialUsed: { type: DataTypes.BOOLEAN, defaultValue: false },
+    // Số dư ví (VNĐ) — cache cập nhật cùng lúc với mỗi WalletTransaction, xem
+    // services/walletService.js. Nguồn sự thật cho LỊCH SỬ là bảng
+    // wallet_transactions; cột này chỉ để đọc nhanh số dư hiện tại.
+    walletBalance: { type: DataTypes.INTEGER, defaultValue: 0 },
   },
   {
     tableName: 'users',

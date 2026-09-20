@@ -26,8 +26,20 @@
     </div>
   </div>
 
-  <form action="/courses/<%= course.slug %>/checkout" method="POST" class="mt-6">
-    <button type="submit" class="btn-primary w-full text-base py-3">Tiến hành thanh toán</button>
+  <% const tongTien = course.salePrice != null ? course.salePrice : course.price; %>
+  <% if (typeof soDu !== 'undefined' && soDu >= tongTien) { %>
+    <form action="/courses/<%= course.slug %>/checkout/vi" method="POST" class="mt-6">
+      <button type="submit" class="btn-primary w-full text-base py-3">💰 Đóng học phí bằng ví — Số dư: <%= soDu.toLocaleString('vi-VN') %>đ</button>
+    </form>
+    <p class="text-xs text-muted text-center mt-2">Số dư ví sẽ bị trừ <%= tongTien.toLocaleString('vi-VN') %>đ ngay khi bấm.</p>
+  <% } else { %>
+    <div class="card p-4 mt-6 bg-amber-50 border border-amber-200 text-sm text-amber-800">
+      Số dư ví hiện có <%= typeof soDu !== 'undefined' ? soDu.toLocaleString('vi-VN') : 0 %>đ, chưa đủ để đóng học phí.
+      <a href="/vi" class="font-semibold underline">Nạp thêm vào ví</a>
+    </div>
+  <% } %>
+  <form action="/courses/<%= course.slug %>/checkout" method="POST" class="mt-3">
+    <button type="submit" class="btn-outline w-full text-base py-3">Thanh toán bằng phương thức khác</button>
   </form>
   <p class="text-xs text-muted text-center mt-3">Bằng việc thanh toán, bạn đồng ý với điều khoản dịch vụ của Đinh Thi Ai.</p>
 </section>

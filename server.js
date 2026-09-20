@@ -42,6 +42,7 @@ const gameApiRoutes = require('./routes/gameApi');
 const battleApiRoutes = require('./routes/battleApi');
 const englishAirApiRoutes = require('./routes/englishAirApi');
 const proRoutes = require('./routes/pro');
+const walletRoutes = require('./routes/wallet');
 const autopostRoutes = require('./routes/autopost');
 
 const app = express();
@@ -203,6 +204,7 @@ app.use('/api/game', gameApiRoutes);
 app.use('/api/battle', battleApiRoutes);
 app.use('/api/english-air', englishAirApiRoutes);
 app.use('/pro', proRoutes);
+app.use('/vi', walletRoutes);
 // Mounted as /fb-events rather than /webhook: hosting's security layer
 // blocks GET requests to any "/webhook*" path (a common signature used by
 // scanners to probe for SSRF), which also silently ate Facebook's own

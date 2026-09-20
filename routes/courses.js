@@ -9,5 +9,6 @@ router.get('/:slug', courseController.show);
 
 router.get('/:slug/checkout', requireAuth, checkoutController.showCheckout);
 router.post('/:slug/checkout', requireAuth, checkoutController.startPayment);
+router.post('/:slug/checkout/vi', requireAuth, checkoutController.payWithWallet);
 
 module.exports = router;

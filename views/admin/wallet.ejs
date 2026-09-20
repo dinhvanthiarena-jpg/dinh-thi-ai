@@ -1,0 +1,65 @@
+<div class="flex items-center justify-between gap-4 flex-wrap">
+  <h1 class="text-2xl font-extrabold text-ink">Ví — Nạp tiền</h1>
+  <% if (!sanSang) { %>
+    <span class="rounded-full bg-amber-100 text-amber-800 font-bold px-3 py-1 text-sm">Chưa cấu hình tài khoản nhận tiền</span>
+  <% } %>
+</div>
+
+<div class="card mt-6 overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="text-left text-muted border-b border-slate-100">
+      <tr>
+        <th class="px-4 py-3 font-semibold">Mã giao dịch</th>
+        <th class="px-4 py-3 font-semibold">Người nạp</th>
+        <th class="px-4 py-3 font-semibold text-right">Số tiền</th>
+        <th class="px-4 py-3 font-semibold">Trạng thái</th>
+        <th class="px-4 py-3 font-semibold text-right">Số dư ví hiện tại</th>
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% if (!transactions.length) { %>
+        <tr><td colspan="6" class="px-4 py-10 text-center text-muted">Chưa có giao dịch nào.</td></tr>
+      <% } %>
+      <% transactions.forEach(function (tx) { %>
+        <tr>
+          <td class="px-4 py-3 font-mono font-bold text-ink"><%= tx.code %></td>
+          <td class="px-4 py-3">
+            <div class="font-semibold text-ink"><%= tx.user ? tx.user.name : '—' %></div>
+            <div class="text-muted text-xs"><%= tx.user ? tx.user.email : '' %></div>
+          </td>
+          <td class="px-4 py-3 text-right font-semibold text-ink"><%= tx.amount.toLocaleString('vi-VN') %>đ</td>
+          <td class="px-4 py-3">
+            <% if (tx.status === 'paid') { %>
+              <span class="rounded-full bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 text-xs">Đã cộng ví</span>
+              <% if (tx.confirmedBy && tx.confirmedBy.indexOf('tay:') === 0) { %>
+                <div class="text-xs text-muted mt-1">duyệt tay</div>
+              <% } %>
+            <% } else if (tx.bankAmount && tx.bankAmount < tx.amount) { %>
+              <span class="rounded-full bg-amber-100 text-amber-800 font-bold px-2.5 py-1 text-xs">Chuyển thiếu</span>
+              <div class="text-xs text-muted mt-1">nhận <%= tx.bankAmount.toLocaleString('vi-VN') %>đ</div>
+            <% } else { %>
+              <span class="rounded-full bg-slate-100 text-slate-600 font-bold px-2.5 py-1 text-xs">Chờ tiền</span>
+            <% } %>
+          </td>
+          <td class="px-4 py-3 text-right text-muted">
+            <%= tx.user ? (tx.user.walletBalance || 0).toLocaleString('vi-VN') + 'đ' : '—' %>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <% if (tx.status !== 'paid') { %>
+              <form method="POST" action="/admin/wallet/<%= tx.id %>/confirm"
+                    onsubmit="return confirm('Xác nhận đã nhận đủ <%= tx.amount.toLocaleString('vi-VN') %>đ cho giao dịch <%= tx.code %>?')">
+                <button class="btn-outline text-xs px-3 py-1.5">Đã nhận tiền</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<p class="text-xs text-muted mt-4">
+  Bình thường ngân hàng báo sang là hệ thống tự cộng vào ví trong vài giây. Nút “Đã nhận tiền”
+  chỉ dùng khi người nạp ghi sai nội dung chuyển khoản, hoặc thầy nhận tiền theo cách khác.
+</p>

@@ -38,6 +38,9 @@ router.post('/blog/:id/delete', adminController.blogDelete);
 router.get('/orders', adminController.orderList);
 router.get('/pro-orders', adminController.proOrderList);
 router.post('/pro-orders/:id/confirm', adminController.proOrderConfirm);
+
+router.get('/wallet', adminController.walletTransactionList);
+router.post('/wallet/:id/confirm', adminController.walletTransactionConfirm);
 router.get('/students', adminController.studentList);
 
 router.get('/messages', adminController.messageList);

@@ -2,6 +2,7 @@ const Course = require('../models/Course');
 const Order = require('../models/Order');
 const Enrollment = require('../models/Enrollment');
 const paymentService = require('../services/paymentService');
+const wallet = require('../services/walletService');
 
 exports.showCheckout = async (req, res, next) => {
   const course = await Course.findOne({ where: { slug: req.params.slug, isPublished: true } });
@@ -13,7 +14,21 @@ exports.showCheckout = async (req, res, next) => {
     return res.redirect(`/dashboard/learn/${course.slug}`);
   }
 
-  res.render('courses/checkout', { title: `Thanh toán - ${course.title}`, course });
+  res.render('courses/checkout', { title: `Thanh toán - ${course.title}`, course, soDu: wallet.soDu(req.user) });
+};
+
+exports.payWithWallet = async (req, res, next) => {
+  const course = await Course.findOne({ where: { slug: req.params.slug, isPublished: true } });
+  if (!course) return next();
+
+  try {
+    await wallet.thanhToanHocPhiBangVi(req.user, course);
+    req.flash('success', `Đóng học phí thành công! Bạn đã có thể học "${course.title}".`);
+    res.redirect(`/dashboard/learn/${course.slug}`);
+  } catch (err) {
+    req.flash('error', err.message);
+    res.redirect(`/courses/${course.slug}/checkout`);
+  }
 };
 
 exports.startPayment = async (req, res, next) => {

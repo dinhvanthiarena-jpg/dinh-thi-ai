@@ -12,7 +12,34 @@
       </div>
     </div>
 
-    <% if (tool.webAppUrl && !tool.driveFileId) { %>
+    <% if (tool.price > 0) { %>
+      <% if (license) { %>
+        <div class="mt-8 rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <p class="font-bold text-emerald-800">✅ Bạn đã sở hữu tool này</p>
+            <p class="text-sm text-emerald-700 mt-1 font-mono">Key: <%= license.licenseKey %></p>
+          </div>
+        </div>
+      <% } else { %>
+        <div class="mt-8 rounded-2xl border-2 border-primary-200 bg-primary-50 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <p class="font-bold text-ink text-lg"><%= tool.price.toLocaleString('vi-VN') %>đ</p>
+            <p class="text-sm text-muted mt-1">Mua 1 lần, dùng vĩnh viễn — thanh toán bằng số dư ví trên web.</p>
+          </div>
+          <% if (typeof soDu !== 'undefined' && soDu >= tool.price) { %>
+            <form action="/kho-tai-nguyen/<%= tool.slug %>/mua" method="POST">
+              <button type="submit" class="btn-primary whitespace-nowrap">🛒 Mua ngay — Số dư: <%= soDu.toLocaleString('vi-VN') %>đ</button>
+            </form>
+          <% } else { %>
+            <a href="/vi" class="btn-primary whitespace-nowrap">💰 Nạp ví để mua<% if (typeof soDu !== 'undefined') { %> (hiện có <%= soDu.toLocaleString('vi-VN') %>đ)<% } %></a>
+          <% } %>
+        </div>
+      <% } %>
+    <% } %>
+
+    <% if (tool.price > 0 && !license) { %>
+      <!-- Tool trả phí chưa mua: ẩn hẳn khối tải/chơi bên dưới, chỉ hiện banner mua ở trên. -->
+    <% } else if (tool.webAppUrl && !tool.driveFileId) { %>
       <!-- Web-only tool: no desktop installer exists, so show a single wide
            "open in browser" card instead of the download + phone pair. -->
       <div class="mt-10 rounded-3xl border-2 border-accent-200 bg-white p-6 sm:p-8 shadow-card">

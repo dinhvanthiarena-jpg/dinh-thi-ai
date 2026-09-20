@@ -2,6 +2,8 @@ const express = require('express');
 const { ProOrder, User } = require('../models');
 const { requireAuth } = require('../middleware/auth');
 const pro = require('../services/proService');
+const wallet = require('../services/walletService');
+const { WalletTransaction } = require('../models');
 
 const router = express.Router();
 
@@ -210,10 +212,31 @@ router.post('/webhook/sepay', express.json(), an(async (req, res) => {
     const chieu = String(b.transferType || 'in').toLowerCase();
     if (chieu !== 'in' || vao <= 0) return res.json({ success: true, bo_qua: 'không phải tiền vào' });
 
-    const ma = (noiDung.match(/MONL[A-Z0-9]{6}/) || [])[0];
-    if (!ma) return res.json({ success: true, bo_qua: 'nội dung không có mã đơn' });
+    // Mã nạp ví (VI...) và mã gói Pro (MONL...) cùng đi qua 1 webhook duy nhất
+    // — không phải cấu hình thêm URL thứ hai bên SePay.
+    const maVi = (noiDung.match(/VI[A-Z0-9]{6}/) || [])[0];
+    const maPro = (noiDung.match(/MONL[A-Z0-9]{6}/) || [])[0];
 
-    const order = await ProOrder.findOne({ where: { code: ma } });
+    if (maVi) {
+      const tx = await WalletTransaction.findOne({ where: { code: maVi } });
+      if (!tx) return res.json({ success: true, bo_qua: 'không có giao dịch nạp ví nào mang mã này' });
+      if (tx.status === 'paid') return res.json({ success: true, bo_qua: 'giao dịch đã ghi nhận rồi' });
+      if (vao < tx.amount) {
+        await tx.update({ bankAmount: vao, bankRef: String(b.referenceCode || b.id || ''), rawPayload: JSON.stringify(b).slice(0, 4000) });
+        return res.json({ success: true, bo_qua: 'chuyển thiếu tiền' });
+      }
+      await wallet.ghiNhanNapVi(tx, {
+        bankRef: String(b.referenceCode || b.id || ''),
+        bankAmount: vao,
+        raw: b,
+        boi: 'sepay',
+      });
+      return res.json({ success: true });
+    }
+
+    if (!maPro) return res.json({ success: true, bo_qua: 'nội dung không có mã đơn' });
+
+    const order = await ProOrder.findOne({ where: { code: maPro } });
     if (!order) return res.json({ success: true, bo_qua: 'không có đơn nào mang mã này' });
     if (order.status === 'paid') return res.json({ success: true, bo_qua: 'đơn đã ghi nhận rồi' });
 

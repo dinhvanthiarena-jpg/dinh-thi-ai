@@ -32,6 +32,12 @@
     </div>
 
     <div>
+      <label class="label">Giá bán (VNĐ)</label>
+      <input class="input" type="number" name="price" min="0" step="1000" value="<%= tool.price || 0 %>" placeholder="0" />
+      <p class="text-xs text-muted mt-1">Để 0 = tool miễn phí, tải trực tiếp như bình thường. Nhập số tiền > 0 thì khách phải mua bằng số dư ví trước khi tải, hệ thống tự cấp key sau khi mua.</p>
+    </div>
+
+    <div>
       <label class="label">Link chơi/tải trên điện thoại (không bắt buộc)</label>
       <input class="input" type="text" name="webAppUrl" value="<%= tool.webAppUrl || '' %>" placeholder="https://3dvietpro.com/game/" />
       <p class="text-xs text-muted mt-1">Nếu tool có bản web/PWA chơi được ngay trên điện thoại, dán link ở đây — trang sẽ hiện thêm 1 nút "Chơi trên điện thoại" song song với nút tải máy tính.</p>

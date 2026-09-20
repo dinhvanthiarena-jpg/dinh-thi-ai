@@ -1,0 +1,85 @@
+<section class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-14">
+  <h1 class="text-2xl sm:text-3xl font-extrabold text-ink">Ví của tôi</h1>
+
+  <div class="card p-6 mt-6 bg-gradient-to-br from-primary-600 to-primary-700 text-white">
+    <p class="text-sm text-white/80">Số dư hiện có</p>
+    <p class="text-4xl font-extrabold mt-1"><%= soDu.toLocaleString('vi-VN') %>đ</p>
+  </div>
+
+  <% if (!sanSang) { %>
+    <div class="mt-5 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+      Web chưa cấu hình tài khoản nhận tiền, chưa nạp ví được. Liên hệ quản trị viên.
+    </div>
+  <% } else { %>
+    <form action="/vi/nap" method="POST" class="card p-6 mt-5">
+      <label class="label" for="amount">Nạp thêm vào ví</label>
+      <div class="flex gap-3 mt-1">
+        <input class="input flex-1" type="number" id="amount" name="amount" min="10000" step="1000" placeholder="VD: 200000" required />
+        <button type="submit" class="btn-primary shrink-0">Nạp tiền</button>
+      </div>
+      <div class="flex flex-wrap gap-2 mt-3">
+        <% [50000, 100000, 200000, 500000].forEach(function(v) { %>
+          <button type="button" onclick="document.getElementById('amount').value=<%= v %>" class="text-xs px-3 py-1.5 rounded-full bg-primary-50 text-primary-700 hover:bg-primary-100">
+            <%= v.toLocaleString('vi-VN') %>đ
+          </button>
+        <% }); %>
+      </div>
+      <p class="text-xs text-muted mt-3">Nạp tối thiểu 10.000đ — chuyển khoản qua VietQR, tiền về là hệ thống tự cộng vào ví.</p>
+    </form>
+  <% } %>
+
+  <% if (licenses.length) { %>
+    <div class="card overflow-hidden mt-8">
+      <div class="px-5 py-4 border-b border-primary-100 font-semibold text-ink">Tool đã mua</div>
+      <div class="divide-y divide-primary-50">
+        <% licenses.forEach(function(l) { %>
+          <div class="px-5 py-4 flex items-center justify-between gap-4">
+            <div class="min-w-0">
+              <a href="/kho-tai-nguyen/<%= l.tool.slug %>" class="font-semibold text-ink hover:text-primary-700 truncate block"><%= l.tool.title %></a>
+              <p class="text-xs text-muted mt-1 font-mono"><%= l.licenseKey %></p>
+            </div>
+            <a href="/kho-tai-nguyen/<%= l.tool.slug %>/download" class="btn-outline text-xs shrink-0">Tải về</a>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  <% } %>
+
+  <div class="card overflow-hidden mt-8">
+    <div class="px-5 py-4 border-b border-primary-100 font-semibold text-ink">Lịch sử giao dịch</div>
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-muted border-b border-primary-100">
+          <th class="py-2 px-5">Thời gian</th>
+          <th class="py-2 px-5">Nội dung</th>
+          <th class="py-2 px-5 text-right">Số tiền</th>
+          <th class="py-2 px-5 text-right">Trạng thái</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!transactions.length) { %>
+          <tr><td colspan="4" class="py-8 text-center text-muted">Chưa có giao dịch nào.</td></tr>
+        <% } %>
+        <% transactions.forEach(function(tx) { %>
+          <tr class="border-b border-primary-50 last:border-0">
+            <td class="py-2 px-5 text-muted whitespace-nowrap"><%= new Date(tx.createdAt).toLocaleString('vi-VN') %></td>
+            <td class="py-2 px-5 text-ink">
+              <%= tx.description || (tx.type === 'topup' ? 'Nạp tiền vào ví' : tx.type) %>
+              <% if (tx.type === 'topup' && tx.status === 'pending') { %>
+                <a href="/vi/nap/<%= tx.code %>" class="text-primary-600 hover:underline text-xs ml-1">(tiếp tục thanh toán)</a>
+              <% } %>
+            </td>
+            <td class="py-2 px-5 text-right font-semibold tabular-nums <%= tx.amount >= 0 ? 'text-emerald-600' : 'text-red-600' %>">
+              <%= tx.amount >= 0 ? '+' : '' %><%= tx.amount.toLocaleString('vi-VN') %>đ
+            </td>
+            <td class="py-2 px-5 text-right">
+              <span class="badge <%= tx.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : tx.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600' %>">
+                <%= tx.status === 'paid' ? 'Thành công' : tx.status === 'pending' ? 'Đang chờ' : tx.status %>
+              </span>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -26,6 +26,9 @@ const Tool = sequelize.define(
     webAppUrl: { type: DataTypes.STRING, allowNull: true },
     downloadCount: { type: DataTypes.INTEGER, defaultValue: 0 },
     isPublished: { type: DataTypes.BOOLEAN, defaultValue: true },
+    // 0 = miễn phí, tải trực tiếp như trước giờ. > 0 = phải mua bằng số dư ví
+    // trước khi tải (xem toolController.js:download).
+    price: { type: DataTypes.INTEGER, defaultValue: 0 },
   },
   {
     tableName: 'tools',
