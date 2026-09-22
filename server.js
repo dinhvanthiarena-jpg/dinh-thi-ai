@@ -14,6 +14,7 @@ const expressLayouts = require('express-ejs-layouts');
 
 const connectDB = require('./config/db');
 const { attachUser } = require('./middleware/auth');
+const { affiliateTracking } = require('./middleware/affiliateTracking');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const { startScheduler } = require('./services/contentScheduler');
 const { batDauNhacHoc } = require('./services/nhacHocService');
@@ -43,6 +44,7 @@ const battleApiRoutes = require('./routes/battleApi');
 const englishAirApiRoutes = require('./routes/englishAirApi');
 const proRoutes = require('./routes/pro');
 const walletRoutes = require('./routes/wallet');
+const referralRoutes = require('./routes/referral');
 const autopostRoutes = require('./routes/autopost');
 
 const app = express();
@@ -156,6 +158,7 @@ const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30 });
 app.use(['/auth/login', '/auth/register'], authLimiter);
 
 app.use(attachUser);
+app.use(affiliateTracking);
 
 // The hosting's LiteSpeed edge cache defaults to caching any GET response
 // that doesn't explicitly opt out, including dynamic, per-session pages like
@@ -205,6 +208,10 @@ app.use('/api/battle', battleApiRoutes);
 app.use('/api/english-air', englishAirApiRoutes);
 app.use('/pro', proRoutes);
 app.use('/vi', walletRoutes);
+// LƯU Ý: "/gioi-thieu" (không có "-ban-be") đã là trang "Giới thiệu" (About)
+// có sẵn, xử lý bởi indexRoutes (routes/index.js -> homeController.about) —
+// tuyệt đối không trùng path đó, sẽ bị nuốt mất bởi route có sẵn.
+app.use('/gioi-thieu-ban-be', referralRoutes);
 // Mounted as /fb-events rather than /webhook: hosting's security layer
 // blocks GET requests to any "/webhook*" path (a common signature used by
 // scanners to probe for SSRF), which also silently ate Facebook's own

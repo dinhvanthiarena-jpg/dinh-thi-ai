@@ -23,6 +23,8 @@ const BattleMatch = require('./BattleMatch');
 const MathSkill = require('./MathSkill');
 const WalletTransaction = require('./WalletTransaction');
 const ToolLicense = require('./ToolLicense');
+const WithdrawRequest = require('./WithdrawRequest');
+const Setting = require('./Setting');
 
 Course.hasMany(Lesson, { foreignKey: 'CourseId', onDelete: 'CASCADE' });
 Lesson.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
@@ -66,6 +68,15 @@ ToolLicense.belongsTo(Tool, { foreignKey: 'ToolId', as: 'tool' });
 WalletTransaction.hasOne(ToolLicense, { foreignKey: 'WalletTransactionId' });
 ToolLicense.belongsTo(WalletTransaction, { foreignKey: 'WalletTransactionId', as: 'transaction' });
 
+// Hệ thống "Giới thiệu bạn bè" — cây 2 cấp tự tham chiếu qua parentId, và
+// yêu cầu rút hoa hồng về ngân hàng cá nhân. Xem models/User.js +
+// services/commissionService.js.
+User.belongsTo(User, { foreignKey: 'parentId', as: 'nguoiGioiThieu' });
+User.hasMany(User, { foreignKey: 'parentId', as: 'nguoiDuocGioiThieu' });
+
+User.hasMany(WithdrawRequest, { foreignKey: 'UserId', onDelete: 'CASCADE' });
+WithdrawRequest.belongsTo(User, { foreignKey: 'UserId', as: 'user' });
+
 const NhacHoc = require("./NhacHoc");
 
 module.exports = {
@@ -95,4 +106,6 @@ module.exports = {
   NhacHoc,
   WalletTransaction,
   ToolLicense,
+  WithdrawRequest,
+  Setting,
 };

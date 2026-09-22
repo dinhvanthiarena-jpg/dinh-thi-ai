@@ -17,7 +17,10 @@ const WalletTransaction = sequelize.define(
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     _id: { type: DataTypes.VIRTUAL, get() { return this.id; } },
     code: { type: DataTypes.STRING, allowNull: true, unique: true },
-    type: { type: DataTypes.ENUM('topup', 'purchase', 'refund', 'adjustment'), allowNull: false },
+    type: {
+      type: DataTypes.ENUM('topup', 'purchase', 'refund', 'adjustment', 'commission_l1', 'commission_l2', 'withdraw'),
+      allowNull: false,
+    },
     // Số tiền có dấu: dương là cộng vào ví (nạp/hoàn tiền), âm là trừ (mua hàng).
     amount: { type: DataTypes.INTEGER, allowNull: false },
     balanceAfter: { type: DataTypes.INTEGER, allowNull: true },

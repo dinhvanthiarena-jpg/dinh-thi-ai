@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const User = require('../models/User');
+const { getReferrerId } = require('../middleware/affiliateTracking');
 
 function signToken(user) {
   return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
@@ -41,7 +42,8 @@ exports.register = async (req, res) => {
     });
   }
 
-  const user = await User.create({ name, email, password });
+  const parentId = await getReferrerId(req);
+  const user = await User.create({ name, email, password, parentId });
   const token = signToken(user);
   setAuthCookie(res, token);
   req.flash('success', `Chào mừng ${user.name} đã tham gia Đinh Thi Ai!`);

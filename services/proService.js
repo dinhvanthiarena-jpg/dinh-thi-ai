@@ -24,6 +24,7 @@
 
 const { ProOrder, User } = require('../models');
 const telegram = require('./telegramService');
+const commission = require('./commissionService');
 
 const PLANS = {
   month: { months: 1, amount: 29000, ten: 'Gói tháng', nguoi: 1 },
@@ -179,6 +180,7 @@ async function ghiNhanDaTra(order, { bankRef = '', bankAmount = null, raw = '', 
     rawPayload: typeof raw === 'string' ? raw.slice(0, 4000) : JSON.stringify(raw).slice(0, 4000),
     confirmedBy: boi,
   });
+  await commission.distributeCommission(user, order.amount, 'Pro', order.id);
   return order;
 }
 

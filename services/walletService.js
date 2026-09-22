@@ -18,6 +18,7 @@
  */
 const { WalletTransaction, ToolLicense, Tool, User, Order, Course, Enrollment } = require('../models');
 const telegram = require('./telegramService');
+const commission = require('./commissionService');
 
 /** Mã ngắn, dễ đọc, không có ký tự dễ nhìn nhầm (0/O, 1/I) — giống proService. */
 function chuoiNgau(n) {
@@ -157,6 +158,7 @@ async function muaTool(user, tool) {
   });
 
   baoThay(`${user.name} vừa mua tool "${tool.title}" — ${tool.price.toLocaleString('vi-VN')}đ (trừ từ ví).`);
+  await commission.distributeCommission(user, tool.price, 'Tool', tool.id);
   return { transaction: tx, license, daSoHuu: false };
 }
 
@@ -197,6 +199,7 @@ async function thanhToanHocPhiBangVi(user, course) {
   await user.update({ walletBalance: balanceAfter });
 
   baoThay(`${user.name} vừa đóng học phí "${course.title}" — ${amount.toLocaleString('vi-VN')}đ (trừ từ ví).`);
+  await commission.distributeCommission(user, amount, 'Course', course.id);
   return { order, enrollment };
 }
 

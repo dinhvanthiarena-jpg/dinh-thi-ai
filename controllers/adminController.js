@@ -316,6 +316,48 @@ exports.walletTransactionConfirm = async (req, res) => {
   res.redirect('/admin/wallet');
 };
 
+// --- Giới thiệu bạn bè (affiliate nội bộ 2 cấp) ---
+exports.referralWithdrawList = async (req, res) => {
+  const { WithdrawRequest } = require('../models');
+  const requests = await WithdrawRequest.findAll({
+    include: [{ model: User, as: 'user', attributes: ['name', 'email'] }],
+    order: [['createdAt', 'DESC']],
+    limit: 200,
+  });
+  res.render('admin/referral-withdraws', { title: 'Rút hoa hồng giới thiệu', requests });
+};
+
+exports.referralWithdrawApprove = async (req, res) => {
+  const commission = require('../services/commissionService');
+  try {
+    await commission.duyetRutTien(req.params.id, 'tay:' + (res.locals.currentUser?.email || 'admin'));
+    req.flash('success', 'Đã duyệt và trừ ví.');
+  } catch (e) {
+    req.flash('error', e.message);
+  }
+  res.redirect('/admin/gioi-thieu/rut-tien');
+};
+
+exports.referralWithdrawReject = async (req, res) => {
+  const commission = require('../services/commissionService');
+  await commission.tuChoiRutTien(req.params.id, 'tay:' + (res.locals.currentUser?.email || 'admin'), req.body.note);
+  req.flash('success', 'Đã từ chối yêu cầu.');
+  res.redirect('/admin/gioi-thieu/rut-tien');
+};
+
+exports.referralSettingsForm = async (req, res) => {
+  const commission = require('../services/commissionService');
+  const rates = await commission.getRates();
+  res.render('admin/referral-settings', { title: 'Cấu hình hoa hồng giới thiệu', rates });
+};
+
+exports.referralSettingsUpdate = async (req, res) => {
+  const commission = require('../services/commissionService');
+  await commission.setRates({ l1Percent: Number(req.body.l1Percent) || 0, l2Percent: Number(req.body.l2Percent) || 0 });
+  req.flash('success', 'Đã cập nhật tỷ lệ hoa hồng.');
+  res.redirect('/admin/gioi-thieu/cau-hinh');
+};
+
 exports.studentList = async (req, res) => {
   const students = await User.findAll({ where: { role: 'student' }, order: [['createdAt', 'DESC']] });
   // Ai chỉ có số điện thoại là đăng ký từ trong app Mon.L, còn web thì bắt buộc email.

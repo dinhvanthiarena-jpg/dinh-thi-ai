@@ -3,6 +3,7 @@ const Order = require('../models/Order');
 const Enrollment = require('../models/Enrollment');
 const paymentService = require('../services/paymentService');
 const wallet = require('../services/walletService');
+const commission = require('../services/commissionService');
 
 exports.showCheckout = async (req, res, next) => {
   const course = await Course.findOne({ where: { slug: req.params.slug, isPublished: true } });
@@ -70,6 +71,7 @@ exports.mockPayConfirm = async (req, res, next) => {
 
     await Enrollment.create({ UserId: req.user.id, CourseId: order.course.id, OrderId: order.id });
     await Course.increment('enrollmentCount', { by: 1, where: { id: order.course.id } });
+    await commission.distributeCommission(req.user, order.amount, 'Course', order.course.id);
   }
 
   req.flash('success', `Thanh toán thành công! Bạn đã có thể học "${order.course.title}".`);

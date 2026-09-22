@@ -1,0 +1,55 @@
+<div class="flex items-center justify-between gap-4 flex-wrap">
+  <h1 class="text-2xl font-extrabold text-ink">Rút hoa hồng giới thiệu</h1>
+  <a href="/admin/gioi-thieu/cau-hinh" class="btn-outline text-sm">Cấu hình tỷ lệ hoa hồng</a>
+</div>
+
+<div class="card mt-6 overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="text-left text-muted border-b border-slate-100">
+      <tr>
+        <th class="px-4 py-3 font-semibold">Người rút</th>
+        <th class="px-4 py-3 font-semibold text-right">Số tiền</th>
+        <th class="px-4 py-3 font-semibold">Ngân hàng nhận</th>
+        <th class="px-4 py-3 font-semibold">Trạng thái</th>
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% if (!requests.length) { %>
+        <tr><td colspan="5" class="px-4 py-10 text-center text-muted">Chưa có yêu cầu nào.</td></tr>
+      <% } %>
+      <% requests.forEach(function (r) { %>
+        <tr>
+          <td class="px-4 py-3">
+            <div class="font-semibold text-ink"><%= r.user ? r.user.name : '—' %></div>
+            <div class="text-muted text-xs"><%= r.user ? r.user.email : '' %></div>
+          </td>
+          <td class="px-4 py-3 text-right font-semibold text-ink"><%= r.amount.toLocaleString('vi-VN') %>đ</td>
+          <td class="px-4 py-3 text-xs text-muted"><%= r.bankName %> · <%= r.bankAccount %> · <%= r.bankAccountName %></td>
+          <td class="px-4 py-3">
+            <% if (r.status === 'approved') { %>
+              <span class="rounded-full bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 text-xs">Đã duyệt</span>
+            <% } else if (r.status === 'rejected') { %>
+              <span class="rounded-full bg-red-100 text-red-700 font-bold px-2.5 py-1 text-xs">Từ chối</span>
+            <% } else { %>
+              <span class="rounded-full bg-amber-100 text-amber-800 font-bold px-2.5 py-1 text-xs">Chờ duyệt</span>
+            <% } %>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <% if (r.status === 'pending') { %>
+              <div class="flex gap-2 justify-end">
+                <form method="POST" action="/admin/gioi-thieu/rut-tien/<%= r.id %>/duyet"
+                      onsubmit="return confirm('Duyệt và trừ <%= r.amount.toLocaleString('vi-VN') %>đ khỏi ví?')">
+                  <button class="btn-primary text-xs px-3 py-1.5">Duyệt</button>
+                </form>
+                <form method="POST" action="/admin/gioi-thieu/rut-tien/<%= r.id %>/tu-choi">
+                  <button class="btn-outline text-xs px-3 py-1.5">Từ chối</button>
+                </form>
+              </div>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
