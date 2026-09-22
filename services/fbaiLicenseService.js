@@ -71,7 +71,7 @@ function issueKey(note) {
   const check = checksumFor(body);
   const key = formatKey(body, check);
   const list = loadKeys();
-  const entry = { key, note: note || '', issuedAt: Date.now(), expiresAt: Date.now() + LICENSE_DURATION_MS, active: true, boundMachine: null };
+  const entry = { key, note: note || '', issuedAt: Date.now(), expiresAt: Date.now() + LICENSE_DURATION_MS, active: true, boundMachine: null, boundDeviceId: null };
   list.unshift(entry);
   saveKeys(list);
   return entry;
@@ -118,6 +118,53 @@ function recordActivation(key, machineLabel) {
   }
 }
 
+// Khoá "1 thiết bị" thầy yêu cầu 2026-09-22: mỗi key chỉ chạy được trên ĐÚNG
+// 1 "danh tính thiết bị" (boundDeviceId - do tool desktop tự sinh ngẫu nhiên
+// 1 lần, KHÔNG đổi mỗi lần mở app) tại một thời điểm - chặn việc 1 khách đưa
+// key cho người khác dùng trên máy của họ. Desktop + hosting do CHÍNH khách
+// đó tự triển khai vẫn tính là "1 thiết bị", vì tool desktop tự đẩy ĐÚNG
+// deviceId của mình sang hosting khi đồng bộ (xem hosting:sync-automation ở
+// fb-ads-manager/main.js) - không phải deviceId hosting tự sinh riêng.
+//
+// deviceId rỗng/không gửi (client cũ, hoặc gọi thẳng bằng tay) thì BỎ QUA
+// việc khoá thiết bị, chỉ kiểm tra như isActiveLicense() bình thường - tránh
+// phá vỡ những nơi gọi verify mà chưa kịp gửi deviceId.
+function checkAndBindDevice(key, deviceId, label) {
+  if (!isWellFormed(key)) return { valid: false, reason: 'invalid_key' };
+  const formatted = normalizeAndFormat(key);
+  const list = loadKeys();
+  const entry = list.find((k) => k.key === formatted);
+  if (!entry || entry.active === false) return { valid: false, reason: 'revoked' };
+  if (entry.expiresAt && Date.now() > entry.expiresAt) return { valid: false, reason: 'expired' };
+
+  if (deviceId) {
+    if (!entry.boundDeviceId) {
+      entry.boundDeviceId = deviceId;
+      if (label) entry.boundMachine = label;
+      saveKeys(list);
+    } else if (entry.boundDeviceId !== deviceId) {
+      return { valid: false, reason: 'device_mismatch' };
+    } else if (label && label !== entry.boundMachine) {
+      entry.boundMachine = label;
+      saveKeys(list);
+    }
+  }
+  return { valid: true };
+}
+
+// Cho khách đổi máy hợp lệ (máy cũ hỏng/thầy xác nhận thủ công) - gỡ khoá
+// thiết bị hiện tại, lần verify kế tiếp với deviceId bất kỳ sẽ bind lại.
+function resetDevice(key) {
+  const list = loadKeys();
+  const entry = list.find((k) => k.key === normalizeAndFormat(key));
+  if (entry) {
+    entry.boundDeviceId = null;
+    entry.boundMachine = null;
+    saveKeys(list);
+  }
+  return entry;
+}
+
 function normalizeAndFormat(input) {
   let payload = normalizeKey(input);
   if (payload.startsWith(PREFIX)) payload = payload.slice(PREFIX.length);
@@ -142,6 +189,8 @@ module.exports = {
   renewKey,
   recordActivation,
   isActiveLicense,
+  checkAndBindDevice,
+  resetDevice,
   isWellFormed,
   normalizeAndFormat,
 };

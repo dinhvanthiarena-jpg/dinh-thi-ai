@@ -70,6 +70,7 @@ router.post('/fbai-license-keys', adminController.fbaiLicenseKeyIssue);
 router.post('/fbai-license-keys/:key/revoke', adminController.fbaiLicenseKeyRevoke);
 router.post('/fbai-license-keys/:key/reactivate', adminController.fbaiLicenseKeyReactivate);
 router.post('/fbai-license-keys/:key/renew', adminController.fbaiLicenseKeyRenew);
+router.post('/fbai-license-keys/:key/reset-device', adminController.fbaiLicenseKeyResetDevice);
 
 router.get('/aai-ads', adminController.aaiAdsPage);
 router.get('/aai-ads/connect', adminController.aaiAdsConnect);

@@ -712,6 +712,12 @@ exports.fbaiLicenseKeyRenew = (req, res) => {
   res.redirect('/admin/fbai-license-keys');
 };
 
+exports.fbaiLicenseKeyResetDevice = (req, res) => {
+  fbaiLicense.resetDevice(req.params.key);
+  req.flash('success', 'Đã gỡ khoá thiết bị - lần kích hoạt/đồng bộ kế tiếp (từ máy bất kỳ) sẽ tự gắn thiết bị mới.');
+  res.redirect('/admin/fbai-license-keys');
+};
+
 // ---------------- A-AI Ads (tạo chiến dịch Facebook Ads từ web) ----------------
 // Port của phần tạo chiến dịch trong tool desktop fb-ads-manager — xem
 // services/aaiAdsService.js để biết lý do kiến trúc + nhắc đồng bộ 2 bên.

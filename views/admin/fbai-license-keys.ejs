@@ -9,6 +9,10 @@
       cứ lúc nào, dù ai đang cầm source code cũng không tự cấp được key mới hợp lệ (server này mới là
       nơi quyết định key có "sống" hay không). Mỗi key cấp ra chạy đúng <strong>30 ngày</strong>, hết
       hạn tự khoá — khách trả phí tiếp thì bấm "Gia hạn" để cộng thêm 30 ngày.
+      Từ 2026-09-22, mỗi key còn tự <strong>khoá vào đúng 1 thiết bị</strong> ngay lần kích hoạt đầu
+      tiên (chặn khách chia sẻ key cho người khác dùng máy riêng) — desktop + hosting của CHÍNH khách
+      đó vẫn tính là 1 thiết bị. Khách đổi máy hợp lệ thì bấm "Đổi thiết bị" để gỡ khoá, lần kích hoạt
+      kế tiếp sẽ tự gắn vào máy mới.
     </p>
     <form action="/admin/fbai-license-keys" method="POST" class="flex flex-wrap gap-3">
       <input
@@ -46,6 +50,11 @@
               <form action="/admin/fbai-license-keys/<%= encodeURIComponent(k.key) %>/renew" method="POST">
                 <button type="submit" class="btn-outline text-xs">Gia hạn +30 ngày</button>
               </form>
+              <% if (k.boundDeviceId) { %>
+                <form action="/admin/fbai-license-keys/<%= encodeURIComponent(k.key) %>/reset-device" method="POST" onsubmit="return confirm('Gỡ khoá thiết bị hiện tại của key này? Máy đang dùng sẽ bị đăng xuất, lần kích hoạt kế tiếp (từ máy bất kỳ) sẽ tự gắn thiết bị mới.');">
+                  <button type="submit" class="btn-outline text-xs">Đổi thiết bị</button>
+                </form>
+              <% } %>
               <% if (k.active === false) { %>
                 <form action="/admin/fbai-license-keys/<%= encodeURIComponent(k.key) %>/reactivate" method="POST">
                   <button type="submit" class="btn-outline text-xs">Kích hoạt lại</button>

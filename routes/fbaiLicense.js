@@ -7,8 +7,10 @@ const fbaiLicenseService = require('../services/fbaiLicenseService');
 
 router.get('/verify', (req, res) => {
   const key = req.query.key || '';
-  const valid = fbaiLicenseService.isActiveLicense(key);
-  res.json({ valid });
+  const deviceId = req.query.deviceId || '';
+  const label = req.query.label || '';
+  const result = fbaiLicenseService.checkAndBindDevice(key, deviceId, label);
+  res.json(result);
 });
 
 module.exports = router;
