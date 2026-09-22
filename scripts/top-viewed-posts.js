@@ -24,22 +24,25 @@ async function topPages(days, limit) {
   const { Op } = require('sequelize');
   const posts = await BlogPost.findAll({
     where: { slug: { [Op.in]: rows.map((r) => r.postSlug) } },
-    attributes: ['slug', 'title'],
+    attributes: ['slug', 'title', 'category'],
   });
-  const titleBySlug = new Map(posts.map((p) => [p.slug, p.title]));
-  return rows.map((r) => ({ title: titleBySlug.get(r.postSlug) || r.postSlug, total: Number(r.total) }));
+  const bySlug = new Map(posts.map((p) => [p.slug, p]));
+  return rows.map((r) => {
+    const p = bySlug.get(r.postSlug);
+    return { title: p ? p.title : r.postSlug, category: p ? p.category : '?', total: Number(r.total) };
+  });
 }
 
 async function run() {
   await connectDB();
 
-  console.log('\n=== TOÀN THỜI GIAN (top 10) ===');
-  const allTime = await topPages(null, 10);
-  allTime.forEach((r, i) => console.log(`${i + 1}. ${r.title} — ${r.total} lượt`));
+  console.log('\n=== TOÀN THỜI GIAN (top 15) ===');
+  const allTime = await topPages(null, 15);
+  allTime.forEach((r, i) => console.log(`${i + 1}. [${r.category}] ${r.title} — ${r.total} lượt`));
 
-  console.log('\n=== 30 NGÀY GẦN NHẤT (top 10) ===');
-  const last30 = await topPages(30, 10);
-  last30.forEach((r, i) => console.log(`${i + 1}. ${r.title} — ${r.total} lượt`));
+  console.log('\n=== 30 NGÀY GẦN NHẤT (top 15) ===');
+  const last30 = await topPages(30, 15);
+  last30.forEach((r, i) => console.log(`${i + 1}. [${r.category}] ${r.title} — ${r.total} lượt`));
 
   process.exit(0);
 }
