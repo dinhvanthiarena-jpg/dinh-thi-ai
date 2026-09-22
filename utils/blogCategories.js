@@ -7,6 +7,7 @@ const BLOG_CATEGORIES = [
   { slug: 'kinh-doanh', label: 'Kinh doanh & Chuyển đổi số', emoji: '💼' },
   { slug: 'doi-song', label: 'Đời sống & Kỹ năng', emoji: '🌿' },
   { slug: 'giai-tri', label: 'Giải trí & Mạng xã hội', emoji: '🎬' },
+  { slug: 'dep', label: 'Đẹp', emoji: '✨' },
 ];
 
 const DEFAULT_CATEGORY = 'ai-cong-nghe';
