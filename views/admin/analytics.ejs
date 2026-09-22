@@ -88,9 +88,9 @@
   </div>
 
   <div class="card p-5">
-    <h2 class="text-lg font-bold text-ink mb-3">Lượt xem bài viết</h2>
-    <div class="grid sm:grid-cols-5 gap-5">
-      <div class="sm:col-span-3">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div>
+        <h2 class="text-sm font-bold text-ink mb-0.5">Lượt xem bài viết</h2>
         <p class="text-xs text-muted mb-2">Theo ngày — 30 ngày gần nhất</p>
         <div class="max-h-72 overflow-y-auto rounded-lg border border-primary-50">
           <table class="w-full text-sm">
@@ -115,7 +115,8 @@
         </div>
       </div>
 
-      <div class="sm:col-span-2">
+      <div>
+        <h2 class="text-sm font-bold text-ink mb-0.5">&nbsp;</h2>
         <p class="text-xs text-muted mb-2">Theo tháng — 12 tháng gần nhất</p>
         <div class="rounded-lg border border-primary-50 divide-y divide-primary-50">
           <% if (!viewsByMonth.length) { %>
@@ -129,13 +130,9 @@
           <% }); %>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="card p-5">
-    <h2 class="text-lg font-bold text-ink mb-3">Lượt bấm link Shopee</h2>
-    <div class="grid sm:grid-cols-5 gap-5">
-      <div class="sm:col-span-3">
+      <div>
+        <h2 class="text-sm font-bold text-ink mb-0.5">Lượt bấm link Shopee</h2>
         <p class="text-xs text-muted mb-2">Theo ngày — 30 ngày gần nhất</p>
         <div class="max-h-72 overflow-y-auto rounded-lg border border-primary-50">
           <table class="w-full text-sm">
@@ -160,7 +157,8 @@
         </div>
       </div>
 
-      <div class="sm:col-span-2">
+      <div>
+        <h2 class="text-sm font-bold text-ink mb-0.5">&nbsp;</h2>
         <p class="text-xs text-muted mb-2">Theo tháng — 12 tháng gần nhất</p>
         <div class="rounded-lg border border-primary-50 divide-y divide-primary-50">
           <% if (!clicksByMonth.length) { %>
