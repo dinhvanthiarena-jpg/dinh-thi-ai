@@ -665,7 +665,7 @@ exports.aaiLicenseKeyRenew = (req, res) => {
 // hỏi lại đây nên KHÔNG thu hồi được sau khi đã gửi khách — xem ghi chú đầu
 // services/vaiLicenseService.js. Trang này chỉ có Cấp key + sổ ghi lại.
 exports.vaiLicenseKeysPage = (req, res) => {
-  res.render('admin/vai-license-keys', { title: 'Key V-AI', keys: vaiLicense.listKeys() });
+  res.render('admin/vai-license-keys', { title: 'Key 3DVIETPRO AI STUDIO', keys: vaiLicense.listKeys() });
 };
 
 exports.vaiLicenseKeyIssue = (req, res) => {
@@ -681,7 +681,7 @@ exports.vaiLicenseKeyIssue = (req, res) => {
 // ---------------- Key desktop AAi-3dvietpro (online, thu hồi được) ----------------
 
 exports.fbaiLicenseKeysPage = (req, res) => {
-  res.render('admin/fbai-license-keys', { title: 'Key AAi-3dvietpro (Desktop)', keys: fbaiLicense.listKeys() });
+  res.render('admin/fbai-license-keys', { title: 'Key SA-AI BOT (Desktop)', keys: fbaiLicense.listKeys() });
 };
 
 exports.fbaiLicenseKeyIssue = (req, res) => {
