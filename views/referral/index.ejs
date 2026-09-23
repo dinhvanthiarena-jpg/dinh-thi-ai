@@ -42,7 +42,12 @@
       <input class="input flex-1" type="text" readonly value="<%= appUrl %>/auth/register?ref=<%= refCode %>" onclick="this.select()" />
       <button type="button" class="btn-outline shrink-0" onclick="navigator.clipboard.writeText(this.previousElementSibling.value); this.textContent='Đã chép!'">Chép link</button>
     </div>
-    <p class="text-xs text-muted mt-2">Mã giới thiệu của bạn: <strong class="text-ink"><%= refCode %></strong> — gắn <code>?ref=<%= refCode %></code> vào bất kỳ trang khóa học/tool nào để tính hoa hồng khi bạn bè mua.</p>
+    <div class="flex items-center gap-2 mt-3">
+      <p class="text-xs text-muted">Mã giới thiệu của bạn:</p>
+      <code class="text-sm font-bold text-ink bg-primary-50 rounded px-2 py-0.5"><%= refCode %></code>
+      <button type="button" class="text-xs text-primary-700 font-semibold hover:underline" data-code="<%= refCode %>" onclick="navigator.clipboard.writeText(this.dataset.code); this.textContent='Đã chép!'">Chép mã</button>
+    </div>
+    <p class="text-xs text-muted mt-2">Gửi riêng mã này cho ai đó cũng được — họ chỉ cần gõ vào ô "Mã giới thiệu" lúc đăng ký tài khoản là tính hoa hồng cho bạn.</p>
   </div>
 
   <div class="card p-6 mt-6">
