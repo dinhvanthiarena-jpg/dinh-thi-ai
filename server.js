@@ -19,7 +19,16 @@ const { notFound, errorHandler } = require('./middleware/errorHandler');
 const { startScheduler } = require('./services/contentScheduler');
 const { batDauNhacHoc } = require('./services/nhacHocService');
 const telegramService = require('./services/telegramService');
-const zaloAutoService = require('./services/zaloAutoService');
+// Zalo tu dong la phan DANG LAM DO: tep dich vu va goi zca-js co the chua co
+// tren may chu. Truoc day require thang o day, nen mot lan day server.js len la
+// ca SITE chet 503 voi loi MODULE_NOT_FOUND. Thieu thi bo qua, phan con lai cua
+// site van phai chay.
+let zaloAutoService = null;
+try {
+  zaloAutoService = require('./services/zaloAutoService');
+} catch (e) {
+  console.warn('[zaloAutoService] chua san sang, bo qua:', e.message);
+}
 
 // Express 4 does not catch errors thrown inside async route handlers, so an
 // unhandled rejection there would otherwise crash the whole process (Node
@@ -261,7 +270,9 @@ connectDB()
     startScheduler();
     batDauNhacHoc();   // nhắc học cho English Air
     telegramService.ensureWebhook();
-    zaloAutoService.init().catch((e) => console.error('[zaloAutoService] init lỗi:', e.message));
+    if (zaloAutoService) {
+      zaloAutoService.init().catch((e) => console.error('[zaloAutoService] init lỗi:', e.message));
+    }
 
     // Tự động duyệt hoa hồng AFF đã chờ đủ hạn (mặc định 7 ngày, xem
     // services/commissionService.js) — chạy ngay lúc khởi động + mỗi giờ.
