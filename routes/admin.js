@@ -57,6 +57,10 @@ router.post('/aff/cau-hinh', adminController.referralSettingsUpdate);
 router.get('/aff/audit-log', adminController.affAuditLog);
 
 router.get('/students', adminController.studentList);
+router.get('/students/:id/sua', adminController.studentEdit);
+router.post('/students/:id/sua', adminController.studentUpdate);
+router.post('/students/:id/khoa', adminController.studentToggleActive);
+router.post('/students/:id/xoa', adminController.studentDelete);
 
 router.get('/messages', adminController.messageList);
 router.post('/messages/:id/read', adminController.messageMarkRead);

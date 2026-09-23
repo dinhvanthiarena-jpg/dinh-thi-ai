@@ -509,6 +509,95 @@ exports.studentList = async (req, res) => {
   res.render('admin/students', { title: 'Học viên', students, tuApp, moiHomNay });
 };
 
+exports.studentEdit = async (req, res) => {
+  const student = await User.findByPk(req.params.id);
+  if (!student) return res.status(404).render('errors/404', { layout: 'layouts/main' });
+  res.render('admin/student-edit', { title: `Sửa — ${student.name}`, student });
+};
+
+exports.studentUpdate = async (req, res) => {
+  const student = await User.findByPk(req.params.id);
+  if (!student) return res.status(404).render('errors/404', { layout: 'layouts/main' });
+  try {
+    await student.update({
+      name: String(req.body.name || '').trim(),
+      email: req.body.email ? String(req.body.email).trim().toLowerCase() : null,
+      phone: req.body.phone ? String(req.body.phone).trim() : null,
+      role: req.body.role === 'admin' ? 'admin' : 'student',
+    });
+    req.flash('success', 'Đã cập nhật tài khoản.');
+  } catch (err) {
+    req.flash('error', err.name === 'SequelizeUniqueConstraintError' ? 'Email hoặc số điện thoại đã được dùng bởi tài khoản khác.' : err.message);
+  }
+  res.redirect('/admin/students');
+};
+
+// Khoá đăng nhập chứ không xoá dữ liệu — đảo ngược được, an toàn cho tài
+// khoản đã có đơn hàng/lịch sử thật (middleware/auth.js chặn user isActive=false).
+exports.studentToggleActive = async (req, res) => {
+  const student = await User.findByPk(req.params.id);
+  if (!student) return res.status(404).render('errors/404', { layout: 'layouts/main' });
+  await student.update({ isActive: !student.isActive });
+  req.flash('success', student.isActive ? 'Đã mở khoá tài khoản.' : 'Đã khoá tài khoản.');
+  res.redirect('/admin/students');
+};
+
+// Xoá VĨNH VIỄN — cascade xoá luôn Order/ProOrder/Enrollment/WalletTransaction/
+// ToolLicense/AffiliateLink/WithdrawRequest/Review/MathSkill của user này (xem
+// models/index.js). Chặn nếu user này đang là người giới thiệu của ai (parentId
+// không có ON DELETE CASCADE) để tránh lỗi khoá ngoại hoặc để lại dữ liệu mồ côi
+// — dùng "Khoá" thay vì "Xoá" cho trường hợp đó.
+exports.studentDelete = async (req, res) => {
+  const { Op } = require('sequelize');
+  const { Order, ProOrder, ToolLicense, WalletTransaction } = require('../models');
+  const student = await User.findByPk(req.params.id);
+  if (!student) return res.status(404).render('errors/404', { layout: 'layouts/main' });
+
+  const soNguoiDuocGioiThieu = await User.count({ where: { parentId: student.id } });
+  if (soNguoiDuocGioiThieu > 0) {
+    req.flash('error', `Không thể xoá — tài khoản này đang là người giới thiệu của ${soNguoiDuocGioiThieu} tài khoản khác. Hãy dùng "Khoá" thay vì xoá.`);
+    return res.redirect('/admin/students');
+  }
+
+  try {
+    // WalletTransaction chỉ tham chiếu MỀM tới đơn hàng qua relatedType/
+    // relatedId (không phải khoá ngoại thật), nên xoá Order/ProOrder/
+    // ToolLicense của user này (cascade tự động) KHÔNG tự dọn hoa hồng đã
+    // chia cho người giới thiệu của họ — phải dọn tay ở đây, kẻo hoa hồng
+    // "ma" vẫn còn nằm trong ví người giới thiệu / trong Tổng quan AFF sau
+    // khi tài khoản mua hàng đã bị xoá.
+    const [donKhoaHoc, donPro, donTool] = await Promise.all([
+      Order.findAll({ where: { UserId: student.id }, attributes: ['CourseId'] }),
+      ProOrder.findAll({ where: { UserId: student.id }, attributes: ['id'] }),
+      ToolLicense.findAll({ where: { UserId: student.id }, attributes: ['ToolId'] }),
+    ]);
+    const dieuKienHoaHong = [
+      ...donKhoaHoc.map((o) => ({ relatedType: 'Course', relatedId: o.CourseId })),
+      ...donPro.map((o) => ({ relatedType: 'Pro', relatedId: o.id })),
+      ...donTool.map((o) => ({ relatedType: 'Tool', relatedId: o.ToolId })),
+    ];
+
+    if (dieuKienHoaHong.length) {
+      const hoaHongLienQuan = await WalletTransaction.findAll({
+        where: { type: { [Op.in]: ['commission_l1', 'commission_l2', 'commission_l3'] }, [Op.or]: dieuKienHoaHong },
+      });
+      for (const tx of hoaHongLienQuan) {
+        if (tx.status === 'paid') {
+          const nguoiNhan = await User.findByPk(tx.UserId);
+          if (nguoiNhan) await nguoiNhan.update({ walletBalance: Math.max(0, (nguoiNhan.walletBalance || 0) - tx.amount) });
+        }
+        await tx.destroy();
+      }
+    }
+
+    await student.destroy();
+    req.flash('success', `Đã xoá tài khoản ${student.name} và dọn sạch hoa hồng liên quan.`);
+  } catch (err) {
+    req.flash('error', 'Không thể xoá: ' + err.message);
+  }
+  res.redirect('/admin/students');
+};
+
 // --- Messages ---
 exports.messageList = async (req, res) => {
   const messages = await ContactMessage.findAll({ order: [['createdAt', 'DESC']] });

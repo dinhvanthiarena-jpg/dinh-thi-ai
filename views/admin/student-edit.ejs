@@ -1,0 +1,30 @@
+<div class="flex items-center gap-3 mb-4">
+  <a href="/admin/students" class="text-muted hover:text-ink text-sm">&larr; Học viên</a>
+</div>
+
+<h1 class="text-2xl font-extrabold text-ink mb-6">Sửa tài khoản</h1>
+
+<div class="card p-6 max-w-lg">
+  <form action="/admin/students/<%= student.id %>/sua" method="POST" class="space-y-4">
+    <div>
+      <label class="label" for="name">Họ và tên</label>
+      <input class="input" type="text" id="name" name="name" value="<%= student.name %>" required />
+    </div>
+    <div>
+      <label class="label" for="email">Email</label>
+      <input class="input" type="email" id="email" name="email" value="<%= student.email || '' %>" />
+    </div>
+    <div>
+      <label class="label" for="phone">Số điện thoại</label>
+      <input class="input" type="tel" id="phone" name="phone" value="<%= student.phone || '' %>" />
+    </div>
+    <div>
+      <label class="label" for="role">Vai trò</label>
+      <select class="input" id="role" name="role">
+        <option value="student" <%= student.role === 'student' ? 'selected' : '' %>>Học viên</option>
+        <option value="admin" <%= student.role === 'admin' ? 'selected' : '' %>>Admin</option>
+      </select>
+    </div>
+    <button type="submit" class="btn-primary">Lưu thay đổi</button>
+  </form>
+</div>
