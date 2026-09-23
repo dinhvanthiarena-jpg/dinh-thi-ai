@@ -25,6 +25,7 @@ const WalletTransaction = require('./WalletTransaction');
 const ToolLicense = require('./ToolLicense');
 const WithdrawRequest = require('./WithdrawRequest');
 const Setting = require('./Setting');
+const AffiliateLink = require('./AffiliateLink');
 
 Course.hasMany(Lesson, { foreignKey: 'CourseId', onDelete: 'CASCADE' });
 Lesson.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
@@ -77,6 +78,9 @@ User.hasMany(User, { foreignKey: 'parentId', as: 'nguoiDuocGioiThieu' });
 User.hasMany(WithdrawRequest, { foreignKey: 'UserId', onDelete: 'CASCADE' });
 WithdrawRequest.belongsTo(User, { foreignKey: 'UserId', as: 'user' });
 
+User.hasMany(AffiliateLink, { foreignKey: 'UserId', onDelete: 'CASCADE' });
+AffiliateLink.belongsTo(User, { foreignKey: 'UserId', as: 'user' });
+
 const NhacHoc = require("./NhacHoc");
 
 module.exports = {
@@ -108,4 +112,5 @@ module.exports = {
   ToolLicense,
   WithdrawRequest,
   Setting,
+  AffiliateLink,
 };

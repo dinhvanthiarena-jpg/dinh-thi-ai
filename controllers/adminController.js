@@ -319,12 +319,16 @@ exports.walletTransactionConfirm = async (req, res) => {
 // --- Giới thiệu bạn bè (affiliate nội bộ 2 cấp) ---
 exports.referralWithdrawList = async (req, res) => {
   const { WithdrawRequest } = require('../models');
-  const requests = await WithdrawRequest.findAll({
-    include: [{ model: User, as: 'user', attributes: ['name', 'email'] }],
-    order: [['createdAt', 'DESC']],
-    limit: 200,
-  });
-  res.render('admin/referral-withdraws', { title: 'Rút hoa hồng giới thiệu', requests });
+  const commission = require('../services/commissionService');
+  const [requests, baoCao] = await Promise.all([
+    WithdrawRequest.findAll({
+      include: [{ model: User, as: 'user', attributes: ['name', 'email'] }],
+      order: [['createdAt', 'DESC']],
+      limit: 200,
+    }),
+    commission.baoCaoTaiChinh(),
+  ]);
+  res.render('admin/referral-withdraws', { title: 'Rút hoa hồng giới thiệu', requests, baoCao });
 };
 
 exports.referralWithdrawApprove = async (req, res) => {

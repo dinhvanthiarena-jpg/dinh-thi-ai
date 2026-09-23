@@ -16,7 +16,7 @@
  *   - controllers/checkoutController.js#mockPayConfirm
  *   - services/proService.js#ghiNhanDaTra
  */
-const { Setting, User, WalletTransaction, WithdrawRequest } = require('../models');
+const { Setting, User, WalletTransaction, WithdrawRequest, Order, ProOrder } = require('../models');
 
 async function getRates() {
   const [l1, l2] = await Promise.all([
@@ -137,4 +137,27 @@ async function tuChoiRutTien(withdrawRequestId, boi, note) {
   return req_;
 }
 
-module.exports = { getRates, setRates, distributeCommission, duyetRutTien, tuChoiRutTien };
+/**
+ * Báo cáo tài chính tổng cho Admin — 3 con số theo đúng yêu cầu:
+ *   - tongThuNhap: tổng doanh thu toàn web từ 3 nguồn có tính hoa hồng
+ *     (khóa học + tool + gói Pro), CHỈ tính giao dịch đã PAID thật.
+ *   - tongHoaHongDaChiTra: tổng đã duyệt rút về ngân hàng cho đại lý.
+ *   - tongHoaHongChoRut: hoa hồng đã cộng nhưng chưa rút (đã cộng - đã rút).
+ */
+async function baoCaoTaiChinh() {
+  const [doanhThuKhoaHoc, doanhThuPro, doanhThuTool, tongHoaHongCong, tongDaRut] = await Promise.all([
+    Order.sum('amount', { where: { status: 'paid' } }),
+    ProOrder.sum('amount', { where: { status: 'paid' } }),
+    WalletTransaction.sum('amount', { where: { type: 'purchase', relatedType: 'Tool' } }),
+    WalletTransaction.sum('amount', { where: { type: ['commission_l1', 'commission_l2'] } }),
+    WalletTransaction.sum('amount', { where: { type: 'withdraw' } }),
+  ]);
+
+  const tongThuNhap = (doanhThuKhoaHoc || 0) + (doanhThuPro || 0) + Math.abs(doanhThuTool || 0);
+  const tongHoaHongDaChiTra = Math.abs(tongDaRut || 0);
+  const tongHoaHongChoRut = (tongHoaHongCong || 0) - tongHoaHongDaChiTra;
+
+  return { tongThuNhap, tongHoaHongDaChiTra, tongHoaHongChoRut };
+}
+
+module.exports = { getRates, setRates, distributeCommission, duyetRutTien, tuChoiRutTien, baoCaoTaiChinh };

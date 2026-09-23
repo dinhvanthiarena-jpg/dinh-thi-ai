@@ -1,6 +1,17 @@
+const crypto = require('crypto');
 const { Op } = require('sequelize');
-const { User, WalletTransaction, WithdrawRequest } = require('../models');
+const { User, WalletTransaction, WithdrawRequest, AffiliateLink } = require('../models');
 const wallet = require('../services/walletService');
+
+const SAFE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function chuoiNgau(n) {
+  return Array.from(crypto.randomFillSync(new Uint8Array(n))).map((b) => SAFE_CHARS[b % SAFE_CHARS.length]).join('');
+}
+async function maLinkDuyNhat() {
+  let ma = chuoiNgau(8);
+  for (let i = 0; i < 5 && (await AffiliateLink.findOne({ where: { affiliateCode: ma } })); i += 1) ma = chuoiNgau(8);
+  return ma;
+}
 
 exports.index = async (req, res) => {
   const user = req.user;
@@ -32,6 +43,12 @@ exports.index = async (req, res) => {
     limit: 10,
   });
 
+  const affiliateLinks = await AffiliateLink.findAll({
+    where: { UserId: user.id },
+    order: [['createdAt', 'DESC']],
+    limit: 20,
+  });
+
   res.render('referral/index', {
     title: 'Giới thiệu bạn bè',
     refCode: user.refCode,
@@ -41,7 +58,30 @@ exports.index = async (req, res) => {
     commissionHistory,
     totalCommission,
     withdrawRequests,
+    affiliateLinks,
   });
+};
+
+// Đại lý tự tạo link riêng cho 1 trang cụ thể (khóa học/tool) kèm nhãn
+// nguồn/chiến dịch — path phải là đường dẫn NỘI BỘ (bắt đầu bằng "/"), tránh
+// bị lợi dụng làm open-redirect qua originalUrl.
+exports.createLink = async (req, res) => {
+  const user = req.user;
+  const originalUrl = String(req.body.originalUrl || '/').trim();
+  const utmSource = String(req.body.utmSource || '').trim().slice(0, 100);
+  const utmCampaign = String(req.body.utmCampaign || '').trim().slice(0, 100);
+
+  try {
+    if (!originalUrl.startsWith('/') || originalUrl.startsWith('//')) {
+      throw new Error('Đường dẫn phải bắt đầu bằng "/", ví dụ: /courses/ten-khoa-hoc');
+    }
+    const affiliateCode = await maLinkDuyNhat();
+    await AffiliateLink.create({ UserId: user.id, originalUrl, affiliateCode, utmSource, utmCampaign });
+    req.flash('success', 'Đã tạo link tracking riêng.');
+  } catch (err) {
+    req.flash('error', err.message);
+  }
+  res.redirect('/gioi-thieu-ban-be');
 };
 
 exports.requestWithdraw = async (req, res) => {

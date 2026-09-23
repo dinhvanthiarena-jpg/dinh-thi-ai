@@ -24,6 +24,32 @@
     <p class="text-xs text-muted mt-2">Mã giới thiệu của bạn: <strong class="text-ink"><%= refCode %></strong> — gắn <code>?ref=<%= refCode %></code> vào bất kỳ trang khóa học/tool nào để tính hoa hồng khi bạn bè mua.</p>
   </div>
 
+  <div class="card p-6 mt-6">
+    <p class="font-semibold text-ink mb-1">Tạo link tracking riêng cho 1 trang cụ thể</p>
+    <p class="text-xs text-muted mb-3">Ví dụ: link riêng cho 1 khóa học, dán vào bài đăng Facebook — đo được đúng bài nào ra đơn.</p>
+    <form action="/gioi-thieu-ban-be/links" method="POST" class="grid sm:grid-cols-3 gap-2">
+      <input class="input sm:col-span-3" type="text" name="originalUrl" placeholder="/courses/ten-khoa-hoc hoặc /kho-tai-nguyen/ten-tool" required />
+      <input class="input" type="text" name="utmSource" placeholder="Nguồn (vd: facebook)" />
+      <input class="input sm:col-span-2" type="text" name="utmCampaign" placeholder="Chiến dịch (vd: bai-dang-thang-9)" />
+      <button class="btn-outline sm:col-span-3" type="submit">Tạo link</button>
+    </form>
+
+    <% if (affiliateLinks.length) { %>
+      <p class="text-xs uppercase tracking-wide text-muted font-semibold mt-5 mb-2">Link đã tạo</p>
+      <div class="space-y-1.5">
+        <% affiliateLinks.forEach(function(l) { %>
+          <div class="flex items-center justify-between gap-3 text-sm border-b border-primary-50 py-2">
+            <div class="min-w-0">
+              <code class="text-xs block truncate"><%= appUrl %><%= l.originalUrl %>?ref=<%= l.affiliateCode %></code>
+              <p class="text-xs text-muted mt-0.5"><%= l.utmSource || '—' %> <%= l.utmCampaign ? '· ' + l.utmCampaign : '' %></p>
+            </div>
+            <span class="text-xs text-muted shrink-0"><%= l.clicksCount %> click</span>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+
   <div class="grid sm:grid-cols-2 gap-4 mt-6">
     <div class="card overflow-hidden">
       <div class="px-5 py-4 border-b border-primary-100 font-semibold text-ink">Bạn giới thiệu trực tiếp (<%= f1.length %>)</div>
