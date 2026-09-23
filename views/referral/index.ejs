@@ -64,7 +64,10 @@
               <code class="text-xs block truncate"><%= appUrl %><%= l.originalUrl %>?ref=<%= l.affiliateCode %></code>
               <p class="text-xs text-muted mt-0.5"><%= l.utmSource || '—' %> <%= l.utmCampaign ? '· ' + l.utmCampaign : '' %></p>
             </div>
-            <span class="text-xs text-muted shrink-0"><%= l.clicksCount %> click</span>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-xs text-muted"><%= l.clicksCount %> click</span>
+              <button type="button" class="btn-outline text-xs px-2.5 py-1" data-link="<%= appUrl %><%= l.originalUrl %>?ref=<%= l.affiliateCode %>" onclick="navigator.clipboard.writeText(this.dataset.link); this.textContent='Đã chép!'">Chép</button>
+            </div>
           </div>
         <% }); %>
       </div>
