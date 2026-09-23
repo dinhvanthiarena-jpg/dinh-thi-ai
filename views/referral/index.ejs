@@ -180,7 +180,10 @@
   </div>
 
   <div class="card p-6 mt-6">
-    <p class="font-semibold text-ink mb-3">Rút hoa hồng về ngân hàng</p>
+    <div class="flex items-center justify-between mb-3">
+      <p class="font-semibold text-ink">Rút hoa hồng về ngân hàng</p>
+      <a href="/tai-khoan/thanh-toan" class="text-xs text-primary-700 hover:underline">Thiết lập thông tin nhận tiền mặc định</a>
+    </div>
     <form action="/gioi-thieu-ban-be/rut-tien" method="POST" class="space-y-3">
       <div>
         <label class="label">Số tiền muốn rút (tối thiểu 50.000đ)</label>
@@ -188,11 +191,11 @@
       </div>
       <div>
         <label class="label">Ngân hàng</label>
-        <input class="input" type="text" name="bankName" placeholder="VD: Vietcombank" required />
+        <input class="input" type="text" name="bankName" value="<%= currentUser.bankName || '' %>" placeholder="VD: Vietcombank" required />
       </div>
       <div class="grid grid-cols-2 gap-2">
-        <input class="input" type="text" name="bankAccount" placeholder="Số tài khoản" required />
-        <input class="input" type="text" name="bankAccountName" placeholder="Tên chủ tài khoản" required />
+        <input class="input" type="text" name="bankAccount" value="<%= currentUser.bankAccount || '' %>" placeholder="Số tài khoản" required />
+        <input class="input" type="text" name="bankAccountName" value="<%= currentUser.bankAccountName || '' %>" placeholder="Tên chủ tài khoản" required />
       </div>
       <button class="btn-primary w-full" type="submit">Gửi yêu cầu rút tiền</button>
     </form>

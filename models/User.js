@@ -58,6 +58,12 @@ const User = sequelize.define(
     // 'rejected' = bị từ chối, có thể đăng ký lại (xem
     // controllers/referralController.js#dangKyDaiLy).
     agentStatus: { type: DataTypes.ENUM('none', 'pending', 'approved', 'rejected'), defaultValue: 'none' },
+    // Thông tin nhận tiền mặc định — lưu lại 1 lần ở trang "Thiết lập thanh
+    // toán" để form rút hoa hồng tự điền sẵn, khỏi phải gõ lại mỗi lần rút
+    // (xem controllers/accountController.js).
+    bankName: { type: DataTypes.STRING, defaultValue: '' },
+    bankAccount: { type: DataTypes.STRING, defaultValue: '' },
+    bankAccountName: { type: DataTypes.STRING, defaultValue: '' },
   },
   {
     tableName: 'users',

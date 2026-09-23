@@ -1,0 +1,26 @@
+<section class="mx-auto max-w-xl px-4 sm:px-6 lg:px-8 py-14">
+  <h1 class="text-2xl sm:text-3xl font-extrabold text-ink">Thiết lập thanh toán</h1>
+  <p class="mt-1 text-muted">Thông tin ngân hàng mặc định — dùng để tự điền sẵn mỗi khi bạn gửi yêu cầu rút hoa hồng.</p>
+
+  <div class="card p-6 mt-6">
+    <form action="/tai-khoan/thanh-toan" method="POST" class="space-y-4">
+      <div>
+        <label class="label" for="bankName">Ngân hàng</label>
+        <input class="input" type="text" id="bankName" name="bankName" value="<%= currentUser.bankName || '' %>" placeholder="VD: Vietcombank" />
+      </div>
+      <div>
+        <label class="label" for="bankAccount">Số tài khoản</label>
+        <input class="input" type="text" id="bankAccount" name="bankAccount" value="<%= currentUser.bankAccount || '' %>" />
+      </div>
+      <div>
+        <label class="label" for="bankAccountName">Tên chủ tài khoản</label>
+        <input class="input" type="text" id="bankAccountName" name="bankAccountName" value="<%= currentUser.bankAccountName || '' %>" />
+      </div>
+      <button type="submit" class="btn-primary">Lưu thông tin nhận tiền</button>
+    </form>
+  </div>
+
+  <div class="mt-6">
+    <a href="/tai-khoan" class="text-primary-700 font-medium hover:underline">&larr; Thiết lập tài khoản</a>
+  </div>
+</section>

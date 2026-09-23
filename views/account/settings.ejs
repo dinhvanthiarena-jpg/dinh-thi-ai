@@ -1,0 +1,48 @@
+<section class="mx-auto max-w-xl px-4 sm:px-6 lg:px-8 py-14">
+  <h1 class="text-2xl sm:text-3xl font-extrabold text-ink">Thiết lập tài khoản</h1>
+  <p class="mt-1 text-muted">Thông tin cá nhân và mật khẩu đăng nhập.</p>
+
+  <div class="card p-6 mt-6">
+    <p class="font-semibold text-ink mb-4">Thông tin cá nhân</p>
+    <form action="/tai-khoan" method="POST" class="space-y-4">
+      <div>
+        <label class="label" for="name">Họ và tên</label>
+        <input class="input" type="text" id="name" name="name" value="<%= currentUser.name %>" required />
+      </div>
+      <div>
+        <label class="label">Email</label>
+        <input class="input bg-slate-50" type="email" value="<%= currentUser.email || '' %>" disabled />
+        <p class="text-xs text-muted mt-1">Email dùng để đăng nhập, không thể đổi ở đây.</p>
+      </div>
+      <div>
+        <label class="label" for="phone">Số điện thoại</label>
+        <input class="input" type="tel" id="phone" name="phone" value="<%= currentUser.phone || '' %>" />
+      </div>
+      <button type="submit" class="btn-primary">Lưu thông tin</button>
+    </form>
+  </div>
+
+  <div class="card p-6 mt-6">
+    <p class="font-semibold text-ink mb-4">Đổi mật khẩu</p>
+    <form action="/tai-khoan/mat-khau" method="POST" class="space-y-4">
+      <div>
+        <label class="label" for="currentPassword">Mật khẩu hiện tại</label>
+        <input class="input" type="password" id="currentPassword" name="currentPassword" required />
+      </div>
+      <div>
+        <label class="label" for="newPassword">Mật khẩu mới</label>
+        <input class="input" type="password" id="newPassword" name="newPassword" minlength="6" required />
+        <p class="text-xs text-muted mt-1">Tối thiểu 6 ký tự.</p>
+      </div>
+      <div>
+        <label class="label" for="confirmPassword">Xác nhận mật khẩu mới</label>
+        <input class="input" type="password" id="confirmPassword" name="confirmPassword" minlength="6" required />
+      </div>
+      <button type="submit" class="btn-primary">Đổi mật khẩu</button>
+    </form>
+  </div>
+
+  <div class="mt-6">
+    <a href="/tai-khoan/thanh-toan" class="text-primary-700 font-medium hover:underline">Thiết lập thông tin nhận tiền &rarr;</a>
+  </div>
+</section>

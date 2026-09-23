@@ -45,6 +45,7 @@ const englishAirApiRoutes = require('./routes/englishAirApi');
 const proRoutes = require('./routes/pro');
 const walletRoutes = require('./routes/wallet');
 const referralRoutes = require('./routes/referral');
+const accountRoutes = require('./routes/account');
 const autopostRoutes = require('./routes/autopost');
 
 const app = express();
@@ -212,6 +213,7 @@ app.use('/vi', walletRoutes);
 // có sẵn, xử lý bởi indexRoutes (routes/index.js -> homeController.about) —
 // tuyệt đối không trùng path đó, sẽ bị nuốt mất bởi route có sẵn.
 app.use('/gioi-thieu-ban-be', referralRoutes);
+app.use('/tai-khoan', accountRoutes);
 // Mounted as /fb-events rather than /webhook: hosting's security layer
 // blocks GET requests to any "/webhook*" path (a common signature used by
 // scanners to probe for SSRF), which also silently ate Facebook's own
