@@ -27,9 +27,11 @@
   .aff-node:hover { border-color: #a855f7; box-shadow: 0 2px 8px rgba(168,85,247,.15); }
   .aff-node-root { background: #4c1d95; border-color: #4c1d95; }
   .aff-node-root span { color: #fff !important; }
+  .aff-node-muted { border-color: #e2e8f0; background: #f8fafc; }
+  .aff-node-muted:hover { border-color: #94a3b8; box-shadow: none; }
 </style>
 
-<p class="text-sm text-muted mb-4">Sơ đồ mạng lưới giới thiệu — bấm vào 1 thành viên để xem doanh thu, hoa hồng, khách hàng chi tiết của người đó. Chỉ hiện tối đa 3 cấp (A/B/C tính hoa hồng); nếu có cấp sâu hơn sẽ không hiển thị ở đây.</p>
+<p class="text-sm text-muted mb-4">Sơ đồ mạng lưới giới thiệu — bấm vào 1 thành viên để xem doanh thu, hoa hồng, khách hàng chi tiết của người đó. Hoa hồng chỉ tính tới Cấp 1-3 (viền tím); Cấp 4 trở đi (viền xám) không ăn hoa hồng nhưng vẫn hiển thị để thống kê ai đã tham gia mạng lưới.</p>
 
 <div class="card p-6">
   <% if (!cay.length) { %>

@@ -352,9 +352,11 @@ exports.affOverview = async (req, res) => {
 
 // Sơ đồ Mindmap (mục 7 đặc tả) — "WEB CHỦ" là nút gốc ẢO (không phải 1 user
 // cụ thể), các user KHÔNG có parentId nhưng ĐÃ giới thiệu được ai đó trở
-// thành nhánh con trực tiếp của WEB (= cấp A). Chỉ hiện tối đa 3 cấp con
-// (A/B/C) — người ở cấp 4 trở đi (nếu có) không hiển thị, tránh sơ đồ vỡ
-// bố cục (mô hình affiliate của web chỉ trả hoa hồng tới cấp 3).
+// thành nhánh con trực tiếp của WEB (= cấp A). Hoa hồng chỉ trả tới cấp 3,
+// nhưng cấp 4 trở đi VẪN hiển thị đầy đủ để thống kê ai đã vào mạng lưới
+// (yêu cầu 2026-09-23: "cấp 4 không được ăn hoa hồng nhưng cũng phải hiển
+// thị ra chứ... để còn thống kê người vào") — chỉ khác màu (view tô tím nhạt
+// cho cấp 1-3, xám cho cấp 4 trở lên) để phân biệt trực quan ai ăn hoa hồng.
 exports.affNetwork = async (req, res) => {
   const { Op } = require('sequelize');
   // Hiện MỌI đại lý đã duyệt ngay dưới "WEB CHỦ" (Cấp A) dù họ chưa giới

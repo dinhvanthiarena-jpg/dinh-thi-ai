@@ -1,7 +1,8 @@
 <li>
-  <a href="/admin/aff/thanh-vien/<%= node.id %>" class="aff-node">
+  <a href="/admin/aff/thanh-vien/<%= node.id %>" class="aff-node <%= node.cap > 3 ? 'aff-node-muted' : '' %>">
     <span class="block font-semibold text-ink text-sm truncate"><%= node.name %></span>
     <span class="block text-[11px] text-muted font-mono"><%= node.refCode %></span>
+    <span class="block text-[10px] text-muted mt-0.5">Cấp <%= node.cap %><%= node.cap > 3 ? ' · không hưởng hoa hồng' : '' %></span>
   </a>
   <% if (node.children && node.children.length) { %>
     <ul>
