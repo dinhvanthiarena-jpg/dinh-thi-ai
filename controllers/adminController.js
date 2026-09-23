@@ -376,19 +376,22 @@ exports.affNetwork = async (req, res) => {
     conCuaId.get(key).push(u);
   });
 
-  function xayCay(parentKey, capConLai) {
+  // cap = 51 là chốt an toàn phòng dữ liệu lỗi tạo vòng lặp parentId — không
+  // phải giới hạn nghiệp vụ (mạng lưới thật không sâu tới mức đó).
+  function xayCay(parentKey, cap) {
     const con = conCuaId.get(parentKey) || [];
-    if (capConLai <= 0) return [];
+    if (cap > 50) return [];
     return con.map((u) => ({
       id: u.id,
       name: u.name,
       email: u.email,
       refCode: u.refCode,
-      children: xayCay(u.id, capConLai - 1),
+      cap,
+      children: xayCay(u.id, cap + 1),
     }));
   }
 
-  const cay = xayCay('root', 3);
+  const cay = xayCay('root', 1);
   res.render('admin/aff-network', { title: 'AFF — Mạng lưới giới thiệu', cay });
 };
 
