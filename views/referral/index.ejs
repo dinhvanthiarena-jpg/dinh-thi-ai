@@ -49,7 +49,7 @@
     <p class="font-semibold text-ink mb-1">Tạo link tracking riêng cho 1 trang cụ thể</p>
     <p class="text-xs text-muted mb-3">Ví dụ: link riêng cho 1 khóa học, dán vào bài đăng Facebook — đo được đúng bài nào ra đơn.</p>
     <form action="/gioi-thieu-ban-be/links" method="POST" class="grid sm:grid-cols-3 gap-2">
-      <input class="input sm:col-span-3" type="text" name="originalUrl" placeholder="/courses/ten-khoa-hoc hoặc /kho-tai-nguyen/ten-tool" required />
+      <input class="input sm:col-span-3" type="text" name="originalUrl" placeholder="Dán nguyên link trang (VD: <%= appUrl %>/courses/ten-khoa-hoc)" required />
       <input class="input" type="text" name="utmSource" placeholder="Nguồn (vd: facebook)" />
       <input class="input sm:col-span-2" type="text" name="utmCampaign" placeholder="Chiến dịch (vd: bai-dang-thang-9)" />
       <button class="btn-outline sm:col-span-3" type="submit">Tạo link</button>

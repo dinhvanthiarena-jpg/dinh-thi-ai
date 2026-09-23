@@ -14,6 +14,34 @@ async function maLinkDuyNhat() {
   return ma;
 }
 
+// Đại lý hay dán nguyên link copy từ thanh địa chỉ trình duyệt (VD
+// "https://3dvietpro.com/courses/ten-khoa-hoc") thay vì tự gõ đường dẫn rút
+// gọn "/courses/ten-khoa-hoc" — chấp nhận cả 2 kiểu cho dễ dùng, nhưng vẫn
+// CHỈ cho link thuộc chính site này (yêu cầu 2026-09-23: "chỉ tracking được
+// link trên 3dvietpro thôi"), tránh bị lợi dụng làm open-redirect sang site
+// khác qua originalUrl.
+function chuanHoaDuongDan(input, req) {
+  const raw = String(input || '').trim();
+  if (raw.startsWith('/')) {
+    if (raw.startsWith('//')) throw new Error('Đường dẫn không hợp lệ.');
+    return raw;
+  }
+
+  let url;
+  try {
+    url = new URL(raw.includes('://') ? raw : `https://${raw}`);
+  } catch (err) {
+    throw new Error('Link không hợp lệ. Dán nguyên link trang trên 3dvietpro.com hoặc đường dẫn dạng /courses/ten-khoa-hoc.');
+  }
+
+  const hostHienTai = req.hostname.replace(/^www\./, '');
+  const hostLink = url.hostname.replace(/^www\./, '');
+  if (hostLink !== hostHienTai) {
+    throw new Error(`Chỉ tạo link tracking cho trang trên ${req.hostname} thôi, không dùng được link ngoài.`);
+  }
+  return `${url.pathname}${url.search}${url.hash}` || '/';
+}
+
 // Chưa đăng ký hoặc bị từ chối trước đó -> chỉ thấy form đăng ký làm đại lý.
 // Đang chờ duyệt -> chỉ thấy thông báo chờ. Chỉ 'approved' mới thấy dashboard
 // đầy đủ (ví, mạng lưới, đơn hàng & hoa hồng của cấp dưới) — xem yêu cầu
@@ -108,19 +136,16 @@ exports.dangKyDaiLy = async (req, res) => {
 };
 
 // Đại lý tự tạo link riêng cho 1 trang cụ thể (khóa học/tool) kèm nhãn
-// nguồn/chiến dịch — path phải là đường dẫn NỘI BỘ (bắt đầu bằng "/"), tránh
-// bị lợi dụng làm open-redirect qua originalUrl.
+// nguồn/chiến dịch — xem chuanHoaDuongDan() ở trên cho quy tắc chấp nhận
+// link.
 exports.createLink = async (req, res) => {
   const user = req.user;
-  const originalUrl = String(req.body.originalUrl || '/').trim();
   const utmSource = String(req.body.utmSource || '').trim().slice(0, 100);
   const utmCampaign = String(req.body.utmCampaign || '').trim().slice(0, 100);
 
   try {
     if (user.agentStatus !== 'approved') throw new Error('Bạn cần được duyệt làm đại lý trước.');
-    if (!originalUrl.startsWith('/') || originalUrl.startsWith('//')) {
-      throw new Error('Đường dẫn phải bắt đầu bằng "/", ví dụ: /courses/ten-khoa-hoc');
-    }
+    const originalUrl = chuanHoaDuongDan(req.body.originalUrl, req);
     const affiliateCode = await maLinkDuyNhat();
     await AffiliateLink.create({ UserId: user.id, originalUrl, affiliateCode, utmSource, utmCampaign });
     req.flash('success', 'Đã tạo link tracking riêng.');
