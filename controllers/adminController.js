@@ -357,10 +357,13 @@ exports.affOverview = async (req, res) => {
 // bố cục (mô hình affiliate của web chỉ trả hoa hồng tới cấp 3).
 exports.affNetwork = async (req, res) => {
   const { Op } = require('sequelize');
-  const nguoiGioiThieu = await User.findAll({ where: { parentId: { [Op.ne]: null } }, attributes: ['parentId'] });
-  const idsCoLienQuan = new Set(nguoiGioiThieu.map((u) => u.parentId));
+  // Hiện MỌI đại lý đã duyệt ngay dưới "WEB CHỦ" (Cấp A) dù họ chưa giới
+  // thiệu được ai — trước đây chỉ hiện ai đã CÓ quan hệ giới thiệu (đã được
+  // giới thiệu hoặc đã giới thiệu ai đó), nên đại lý mới duyệt xong bị "biến
+  // mất" khỏi sơ đồ cho tới khi có người đăng ký qua link của họ (yêu cầu
+  // 2026-09-23: "cho hiện ngay bên dưới web luôn").
   const users = await User.findAll({
-    where: { [Op.or]: [{ parentId: { [Op.ne]: null } }, { id: { [Op.in]: Array.from(idsCoLienQuan) } }] },
+    where: { [Op.or]: [{ parentId: { [Op.ne]: null } }, { agentStatus: 'approved' }] },
     attributes: ['id', 'name', 'email', 'refCode', 'parentId'],
   });
 
