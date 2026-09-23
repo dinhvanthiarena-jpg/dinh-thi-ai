@@ -19,16 +19,22 @@ function setAuthCookie(res, token) {
 }
 
 exports.showRegister = (req, res) => {
-  res.render('auth/register', { title: 'Đăng ký tài khoản', errors: [], old: {} });
+  res.render('auth/register', { title: 'Đăng ký tài khoản', errors: [], old: {}, agent: req.query.agent === '1' });
 };
 
+// ?agent=1 (từ dropdown "Đăng ký" trên header, mục "Đăng ký đại lý") giữ qua
+// hidden input wantAgent trên form — gộp 2 bước "tạo tài khoản" + "đăng ký
+// làm đại lý" thành 1 lần bấm cho gọn (yêu cầu 2026-09-23), thay vì bắt user
+// tạo tài khoản xong phải tự vào /gioi-thieu-ban-be bấm đăng ký lần nữa.
 exports.register = async (req, res) => {
+  const wantAgent = req.body.wantAgent === '1';
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).render('auth/register', {
       title: 'Đăng ký tài khoản',
       errors: errors.array(),
       old: req.body,
+      agent: wantAgent,
     });
   }
 
@@ -39,13 +45,25 @@ exports.register = async (req, res) => {
       title: 'Đăng ký tài khoản',
       errors: [{ msg: 'Email này đã được sử dụng.' }],
       old: req.body,
+      agent: wantAgent,
     });
   }
 
   const parentId = await getReferrerId(req);
-  const user = await User.create({ name, email, password, parentId });
+  const user = await User.create({
+    name,
+    email,
+    password,
+    parentId,
+    agentStatus: wantAgent ? 'pending' : 'none',
+  });
   const token = signToken(user);
   setAuthCookie(res, token);
+
+  if (wantAgent) {
+    req.flash('success', `Chào mừng ${user.name}! Đã gửi đăng ký làm đại lý, vui lòng chờ admin duyệt.`);
+    return res.redirect('/gioi-thieu-ban-be');
+  }
   req.flash('success', `Chào mừng ${user.name} đã tham gia Đinh Thi Ai!`);
   res.redirect('/dashboard');
 };

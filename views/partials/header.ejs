@@ -50,7 +50,14 @@
           </form>
         <% } else { %>
           <a href="/auth/login" class="btn-ghost">Đăng nhập</a>
-          <a href="/auth/register" class="btn-primary">Đăng ký</a>
+          <div class="relative group">
+            <a href="/auth/register" class="btn-primary block">Đăng ký</a>
+            <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-opacity absolute right-0 top-full pt-1 w-48 z-10">
+              <div class="rounded-xl border border-primary-100 bg-white shadow-lg py-1">
+                <a href="/auth/register?agent=1" class="block px-4 py-2 text-sm text-ink hover:bg-primary-50 hover:text-primary-700">Đăng ký đại lý</a>
+              </div>
+            </div>
+          </div>
         <% } %>
       </div>
 
@@ -93,6 +100,7 @@
         <% } else { %>
           <a href="/auth/login" class="btn-ghost w-full">Đăng nhập</a>
           <a href="/auth/register" class="btn-primary w-full">Đăng ký miễn phí</a>
+          <a href="/auth/register?agent=1" class="btn-outline w-full">Đăng ký đại lý</a>
         <% } %>
       </div>
     </div>

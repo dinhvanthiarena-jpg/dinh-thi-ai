@@ -5,6 +5,11 @@
   </div>
 
   <div class="card p-8">
+    <% if (agent) { %>
+      <div class="mb-5 rounded-lg bg-orange-50 border border-orange-200 px-4 py-3 text-sm text-orange-800">
+        Bạn đang đăng ký làm <strong>đại lý</strong> — sau khi tạo tài khoản, đăng ký của bạn sẽ được gửi tới admin duyệt.
+      </div>
+    <% } %>
     <% if (errors && errors.length) { %>
       <div class="mb-5 rounded-lg bg-red-50 border border-danger/30 px-4 py-3 text-sm text-red-800">
         <% errors.forEach(function(e) { %><p><%= e.msg %></p><% }); %>
@@ -12,6 +17,9 @@
     <% } %>
 
     <form action="/auth/register" method="POST" class="space-y-5">
+      <% if (agent) { %>
+        <input type="hidden" name="wantAgent" value="1" />
+      <% } %>
       <div>
         <label class="label" for="name">Họ và tên</label>
         <input class="input" type="text" id="name" name="name" value="<%= old.name || '' %>" required autofocus />
@@ -25,7 +33,13 @@
         <input class="input" type="password" id="password" name="password" minlength="6" required />
         <p class="text-xs text-muted mt-1">Tối thiểu 6 ký tự.</p>
       </div>
-      <button type="submit" class="btn-primary w-full">Đăng ký</button>
+      <% if (!agent) { %>
+        <label class="flex items-center gap-2 text-sm text-ink">
+          <input type="checkbox" name="wantAgent" value="1" class="rounded border-primary-200" />
+          Đăng ký làm đại lý luôn (chờ admin duyệt)
+        </label>
+      <% } %>
+      <button type="submit" class="btn-primary w-full"><%= agent ? 'Đăng ký làm đại lý' : 'Đăng ký' %></button>
     </form>
 
     <p class="text-sm text-muted text-center mt-6">
