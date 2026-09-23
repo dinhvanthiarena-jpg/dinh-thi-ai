@@ -1,21 +1,26 @@
 <h1 class="text-2xl font-extrabold text-ink mb-4">AFF</h1>
 <%- include('../partials/aff-tabs') %>
 
-<div class="grid sm:grid-cols-3 gap-4">
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
   <div class="card p-5">
     <p class="text-xs uppercase tracking-wide text-muted font-semibold">Tổng thu nhập toàn web</p>
     <p class="text-2xl font-extrabold text-primary-700 mt-1 tabular-nums"><%= Number(baoCao.tongThuNhap).toLocaleString('vi-VN') %>đ</p>
     <p class="text-xs text-muted mt-1">Khóa học + Tool + Gói Pro (đã thanh toán)</p>
   </div>
   <div class="card p-5">
-    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Tổng hoa hồng đã chi trả</p>
-    <p class="text-2xl font-extrabold text-ink mt-1 tabular-nums"><%= Number(baoCao.tongHoaHongDaChiTra).toLocaleString('vi-VN') %>đ</p>
-    <p class="text-xs text-muted mt-1">Đã duyệt rút về ngân hàng</p>
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Hoa hồng chờ duyệt</p>
+    <p class="text-2xl font-extrabold text-amber-600 mt-1 tabular-nums"><%= Number(baoCao.hoaHongChoDuyet).toLocaleString('vi-VN') %>đ</p>
+    <p class="text-xs text-muted mt-1">Trong 7 ngày chờ, chưa khả dụng</p>
   </div>
   <div class="card p-5">
-    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Tổng hoa hồng chờ rút</p>
-    <p class="text-2xl font-extrabold text-amber-600 mt-1 tabular-nums"><%= Number(baoCao.tongHoaHongChoRut).toLocaleString('vi-VN') %>đ</p>
-    <p class="text-xs text-muted mt-1">Đang nằm trong ví đại lý</p>
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Hoa hồng đã duyệt</p>
+    <p class="text-2xl font-extrabold text-ink mt-1 tabular-nums"><%= Number(baoCao.hoaHongDaDuyet).toLocaleString('vi-VN') %>đ</p>
+    <p class="text-xs text-muted mt-1">Khả dụng, đang nằm trong ví</p>
+  </div>
+  <div class="card p-5">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Hoa hồng đã chi trả</p>
+    <p class="text-2xl font-extrabold text-emerald-600 mt-1 tabular-nums"><%= Number(baoCao.hoaHongDaChiTra).toLocaleString('vi-VN') %>đ</p>
+    <p class="text-xs text-muted mt-1">Đã duyệt rút về ngân hàng</p>
   </div>
 </div>
 

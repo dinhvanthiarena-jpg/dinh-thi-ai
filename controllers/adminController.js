@@ -331,7 +331,7 @@ exports.affOverview = async (req, res) => {
     // ONLY_FULL_GROUP_BY cua MySQL khi GROUP BY cung include), roi tra cuu
     // ten/email rieng cho dung 10 UserId top nhat.
     WalletTransaction.findAll({
-      where: { type: { [Op.in]: ['commission_l1', 'commission_l2'] } },
+      where: { type: { [Op.in]: ['commission_l1', 'commission_l2', 'commission_l3'] } },
       attributes: ['UserId', [fn('SUM', col('amount')), 'tongHoaHong']],
       group: ['UserId'],
       order: [[fn('SUM', col('amount')), 'DESC']],
@@ -350,19 +350,61 @@ exports.affOverview = async (req, res) => {
   res.render('admin/aff-overview', { title: 'AFF — Tổng quan', baoCao, topHang });
 };
 
+// Sơ đồ Mindmap (mục 7 đặc tả) — "WEB CHỦ" là nút gốc ẢO (không phải 1 user
+// cụ thể), các user KHÔNG có parentId nhưng ĐÃ giới thiệu được ai đó trở
+// thành nhánh con trực tiếp của WEB (= cấp A). Chỉ hiện tối đa 3 cấp con
+// (A/B/C) — người ở cấp 4 trở đi (nếu có) không hiển thị, tránh sơ đồ vỡ
+// bố cục (mô hình affiliate của web chỉ trả hoa hồng tới cấp 3).
 exports.affNetwork = async (req, res) => {
   const { Op } = require('sequelize');
-  // Chỉ hiện user đang co-ai-do-gioi-thieu HOẶC co-nguoi-duoc-minh-gioi-thieu —
-  // tranh liet ke het toan bo hoc vien khong lien quan gi den affiliate.
   const nguoiGioiThieu = await User.findAll({ where: { parentId: { [Op.ne]: null } }, attributes: ['parentId'] });
   const idsCoLienQuan = new Set(nguoiGioiThieu.map((u) => u.parentId));
   const users = await User.findAll({
     where: { [Op.or]: [{ parentId: { [Op.ne]: null } }, { id: { [Op.in]: Array.from(idsCoLienQuan) } }] },
-    attributes: ['id', 'name', 'email', 'refCode', 'parentId', 'createdAt'],
-    order: [['parentId', 'ASC'], ['createdAt', 'ASC']],
+    attributes: ['id', 'name', 'email', 'refCode', 'parentId'],
   });
-  const tenTheoId = new Map(users.map((u) => [u.id, u.name]));
-  res.render('admin/aff-network', { title: 'AFF — Mạng lưới giới thiệu', users, tenTheoId });
+
+  const conCuaId = new Map();
+  users.forEach((u) => {
+    const key = u.parentId || 'root';
+    if (!conCuaId.has(key)) conCuaId.set(key, []);
+    conCuaId.get(key).push(u);
+  });
+
+  function xayCay(parentKey, capConLai) {
+    const con = conCuaId.get(parentKey) || [];
+    if (capConLai <= 0) return [];
+    return con.map((u) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      refCode: u.refCode,
+      children: xayCay(u.id, capConLai - 1),
+    }));
+  }
+
+  const cay = xayCay('root', 3);
+  res.render('admin/aff-network', { title: 'AFF — Mạng lưới giới thiệu', cay });
+};
+
+exports.affMemberDetail = async (req, res) => {
+  const commission = require('../services/commissionService');
+  const wallet = require('../services/walletService');
+  const member = await User.findByPk(req.params.id);
+  if (!member) return res.status(404).render('errors/404', { layout: 'layouts/main' });
+  const chiTiet = await commission.chiTietThanhVien(member.id);
+  res.render('admin/aff-member', {
+    title: `AFF — ${member.name}`,
+    member,
+    chiTiet,
+    soDuVi: wallet.soDu(member),
+  });
+};
+
+exports.affAuditLog = async (req, res) => {
+  const { AuditLog } = require('../models');
+  const logs = await AuditLog.findAll({ order: [['createdAt', 'DESC']], limit: 200 });
+  res.render('admin/aff-audit', { title: 'AFF — Audit Log', logs });
 };
 
 exports.affLinks = async (req, res) => {
@@ -411,7 +453,14 @@ exports.referralSettingsForm = async (req, res) => {
 
 exports.referralSettingsUpdate = async (req, res) => {
   const commission = require('../services/commissionService');
-  await commission.setRates({ l1Percent: Number(req.body.l1Percent) || 0, l2Percent: Number(req.body.l2Percent) || 0 });
+  await commission.setRates(
+    {
+      l1Percent: Number(req.body.l1Percent) || 0,
+      l2Percent: Number(req.body.l2Percent) || 0,
+      l3Percent: Number(req.body.l3Percent) || 0,
+    },
+    'tay:' + (res.locals.currentUser?.email || 'admin')
+  );
   req.flash('success', 'Đã cập nhật tỷ lệ hoa hồng.');
   res.redirect('/admin/aff/cau-hinh');
 };

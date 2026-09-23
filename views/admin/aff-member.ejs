@@ -1,0 +1,65 @@
+<div class="flex items-center gap-3 mb-4">
+  <a href="/admin/aff/mang-luoi" class="text-muted hover:text-ink text-sm">&larr; Mạng lưới</a>
+</div>
+
+<div class="flex items-center justify-between flex-wrap gap-3 mb-6">
+  <div>
+    <h1 class="text-2xl font-extrabold text-ink"><%= member.name %></h1>
+    <p class="text-sm text-muted"><%= member.email %> · Mã giới thiệu <span class="font-mono"><%= member.refCode %></span></p>
+  </div>
+</div>
+
+<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  <div class="card p-5">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Tổng doanh thu mạng lưới</p>
+    <p class="text-xl font-extrabold text-primary-700 mt-1 tabular-nums"><%= Number(chiTiet.tongDoanhThuMang).toLocaleString('vi-VN') %>đ</p>
+  </div>
+  <div class="card p-5">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Số dư ví (khả dụng)</p>
+    <p class="text-xl font-extrabold text-ink mt-1 tabular-nums"><%= Number(soDuVi).toLocaleString('vi-VN') %>đ</p>
+  </div>
+  <div class="card p-5">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Khách hàng trực tiếp</p>
+    <p class="text-xl font-extrabold text-ink mt-1 tabular-nums"><%= chiTiet.tongKhachHangTrucTiep %></p>
+  </div>
+  <div class="card p-5">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Đơn hàng trực tiếp</p>
+    <p class="text-xl font-extrabold text-ink mt-1 tabular-nums"><%= chiTiet.tongDonHang %></p>
+  </div>
+</div>
+
+<div class="grid sm:grid-cols-3 gap-4 mt-6">
+  <div class="card p-5">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Doanh thu trực tiếp</p>
+    <p class="text-lg font-bold text-ink mt-1 tabular-nums"><%= Number(chiTiet.doanhThuTrucTiep).toLocaleString('vi-VN') %>đ</p>
+    <p class="text-xs text-muted mt-1">Khách do chính người này giới thiệu</p>
+  </div>
+  <div class="card p-5">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Doanh thu từ cấp B</p>
+    <p class="text-lg font-bold text-ink mt-1 tabular-nums"><%= Number(chiTiet.doanhThuCapB).toLocaleString('vi-VN') %>đ</p>
+    <p class="text-xs text-muted mt-1">Khách của người được người này giới thiệu</p>
+  </div>
+  <div class="card p-5">
+    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Doanh thu từ cấp C</p>
+    <p class="text-lg font-bold text-ink mt-1 tabular-nums"><%= Number(chiTiet.doanhThuCapC).toLocaleString('vi-VN') %>đ</p>
+    <p class="text-xs text-muted mt-1">Cấp thứ 3 tính từ người này</p>
+  </div>
+</div>
+
+<div class="card p-6 mt-6 max-w-2xl">
+  <p class="font-semibold text-ink mb-4">Hoa hồng</p>
+  <div class="grid sm:grid-cols-3 gap-4">
+    <div>
+      <p class="text-xs text-muted">Chờ duyệt (7 ngày)</p>
+      <p class="text-lg font-bold text-amber-600 tabular-nums"><%= Number(chiTiet.hoaHongChoDuyet).toLocaleString('vi-VN') %>đ</p>
+    </div>
+    <div>
+      <p class="text-xs text-muted">Đã duyệt (chưa rút)</p>
+      <p class="text-lg font-bold text-ink tabular-nums"><%= Number(chiTiet.hoaHongDaDuyet).toLocaleString('vi-VN') %>đ</p>
+    </div>
+    <div>
+      <p class="text-xs text-muted">Đã chi trả</p>
+      <p class="text-lg font-bold text-emerald-600 tabular-nums"><%= Number(chiTiet.hoaHongDaChiTra).toLocaleString('vi-VN') %>đ</p>
+    </div>
+  </div>
+</div>

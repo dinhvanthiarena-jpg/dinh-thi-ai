@@ -2,16 +2,21 @@
 <%- include('../partials/aff-tabs') %>
 
 <div class="card p-6 max-w-md">
-  <p class="text-sm text-muted mb-4">Áp dụng cho mọi giao dịch mua tool/đóng học phí/mua gói Pro kể từ lúc lưu — không hồi tố các giao dịch đã chia hoa hồng trước đó.</p>
+  <p class="text-sm text-muted mb-4">Mô hình 3 cấp WEB → A → B → C: khách mua qua link của C thì C nhận Cấp 1, B (giới thiệu C) nhận Cấp 2, A (giới thiệu B) nhận Cấp 3 — trên cùng 1 đơn hàng. Áp dụng cho mọi giao dịch mua tool/đóng học phí/mua gói Pro kể từ lúc lưu, không hồi tố các giao dịch trước đó.</p>
   <form action="/admin/aff/cau-hinh" method="POST" class="space-y-4">
     <div>
       <label class="label">Hoa hồng Cấp 1 — người giới thiệu trực tiếp (%)</label>
       <input class="input" type="number" step="0.1" min="0" max="100" name="l1Percent" value="<%= rates.l1Percent %>" required />
     </div>
     <div>
-      <label class="label">Hoa hồng Cấp 2 — người giới thiệu của người giới thiệu (%)</label>
+      <label class="label">Hoa hồng Cấp 2 — giới thiệu của người giới thiệu (%)</label>
       <input class="input" type="number" step="0.1" min="0" max="100" name="l2Percent" value="<%= rates.l2Percent %>" required />
+    </div>
+    <div>
+      <label class="label">Hoa hồng Cấp 3 — giới thiệu của giới thiệu của người giới thiệu (%)</label>
+      <input class="input" type="number" step="0.1" min="0" max="100" name="l3Percent" value="<%= rates.l3Percent %>" required />
     </div>
     <button class="btn-primary w-full" type="submit">Lưu cấu hình</button>
   </form>
+  <p class="text-xs text-muted mt-4">Hoa hồng mới phát sinh sẽ ở trạng thái "chờ duyệt" 7 ngày trước khi cộng vào số dư khả dụng (rút được) — xem tab Tổng quan.</p>
 </div>

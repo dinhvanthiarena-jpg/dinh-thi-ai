@@ -9,9 +9,12 @@
       <a href="/vi" class="text-xs text-white/80 hover:text-white underline mt-2 inline-block">Xem chi tiết ví &rarr;</a>
     </div>
     <div class="card p-6">
-      <p class="text-sm text-muted">Tổng hoa hồng đã nhận</p>
+      <p class="text-sm text-muted">Tổng hoa hồng</p>
       <p class="text-3xl font-extrabold text-ink mt-1"><%= totalCommission.toLocaleString('vi-VN') %>đ</p>
-      <p class="text-xs text-muted mt-2"><%= f1.length %> người bạn giới thiệu trực tiếp, <%= f2.length %> người ở cấp 2</p>
+      <% if (hoaHongChoDuyet > 0) { %>
+        <p class="text-xs text-amber-600 mt-2">Trong đó <%= hoaHongChoDuyet.toLocaleString('vi-VN') %>đ đang chờ duyệt (7 ngày kể từ lúc phát sinh)</p>
+      <% } %>
+      <p class="text-xs text-muted mt-1"><%= f1.length %> cấp 1, <%= f2.length %> cấp 2, <%= f3.length %> cấp 3</p>
     </div>
   </div>
 
@@ -50,9 +53,9 @@
     <% } %>
   </div>
 
-  <div class="grid sm:grid-cols-2 gap-4 mt-6">
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
     <div class="card overflow-hidden">
-      <div class="px-5 py-4 border-b border-primary-100 font-semibold text-ink">Bạn giới thiệu trực tiếp (<%= f1.length %>)</div>
+      <div class="px-5 py-4 border-b border-primary-100 font-semibold text-ink">Cấp 1 — trực tiếp (<%= f1.length %>)</div>
       <div class="divide-y divide-primary-50 max-h-72 overflow-y-auto">
         <% if (!f1.length) { %><p class="px-5 py-6 text-sm text-muted">Chưa có ai đăng ký qua link của bạn.</p><% } %>
         <% f1.forEach(function(u) { %>
@@ -64,10 +67,22 @@
       </div>
     </div>
     <div class="card overflow-hidden">
-      <div class="px-5 py-4 border-b border-primary-100 font-semibold text-ink">Cấp 2 — bạn của bạn bạn (<%= f2.length %>)</div>
+      <div class="px-5 py-4 border-b border-primary-100 font-semibold text-ink">Cấp 2 (<%= f2.length %>)</div>
       <div class="divide-y divide-primary-50 max-h-72 overflow-y-auto">
         <% if (!f2.length) { %><p class="px-5 py-6 text-sm text-muted">Chưa có dữ liệu.</p><% } %>
         <% f2.forEach(function(u) { %>
+          <div class="px-5 py-3 flex justify-between text-sm">
+            <span class="text-ink"><%= u.name %></span>
+            <span class="text-muted text-xs"><%= new Date(u.createdAt).toLocaleDateString('vi-VN') %></span>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+    <div class="card overflow-hidden">
+      <div class="px-5 py-4 border-b border-primary-100 font-semibold text-ink">Cấp 3 (<%= f3.length %>)</div>
+      <div class="divide-y divide-primary-50 max-h-72 overflow-y-auto">
+        <% if (!f3.length) { %><p class="px-5 py-6 text-sm text-muted">Chưa có dữ liệu.</p><% } %>
+        <% f3.forEach(function(u) { %>
           <div class="px-5 py-3 flex justify-between text-sm">
             <span class="text-ink"><%= u.name %></span>
             <span class="text-muted text-xs"><%= new Date(u.createdAt).toLocaleDateString('vi-VN') %></span>
@@ -118,17 +133,23 @@
           <th class="py-2 px-5">Thời gian</th>
           <th class="py-2 px-5">Nội dung</th>
           <th class="py-2 px-5 text-right">Số tiền</th>
+          <th class="py-2 px-5 text-right">Trạng thái</th>
         </tr>
       </thead>
       <tbody>
         <% if (!commissionHistory.length) { %>
-          <tr><td colspan="3" class="py-8 text-center text-muted">Chưa có hoa hồng nào.</td></tr>
+          <tr><td colspan="4" class="py-8 text-center text-muted">Chưa có hoa hồng nào.</td></tr>
         <% } %>
         <% commissionHistory.forEach(function(tx) { %>
           <tr class="border-b border-primary-50 last:border-0">
             <td class="py-2 px-5 text-muted whitespace-nowrap"><%= new Date(tx.createdAt).toLocaleString('vi-VN') %></td>
             <td class="py-2 px-5 text-ink"><%= tx.description %></td>
             <td class="py-2 px-5 text-right font-semibold tabular-nums text-emerald-600">+<%= tx.amount.toLocaleString('vi-VN') %>đ</td>
+            <td class="py-2 px-5 text-right">
+              <span class="badge <%= tx.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' %>">
+                <%= tx.status === 'paid' ? 'Khả dụng' : 'Chờ duyệt' %>
+              </span>
+            </td>
           </tr>
         <% }); %>
       </tbody>

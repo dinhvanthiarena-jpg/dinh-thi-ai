@@ -1,0 +1,13 @@
+<li>
+  <a href="/admin/aff/thanh-vien/<%= node.id %>" class="aff-node">
+    <span class="block font-semibold text-ink text-sm truncate"><%= node.name %></span>
+    <span class="block text-[11px] text-muted font-mono"><%= node.refCode %></span>
+  </a>
+  <% if (node.children && node.children.length) { %>
+    <ul>
+      <% node.children.forEach(function (con) { %>
+        <%- include('aff-tree-node', { node: con }) %>
+      <% }); %>
+    </ul>
+  <% } %>
+</li>

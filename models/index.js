@@ -26,6 +26,7 @@ const ToolLicense = require('./ToolLicense');
 const WithdrawRequest = require('./WithdrawRequest');
 const Setting = require('./Setting');
 const AffiliateLink = require('./AffiliateLink');
+const AuditLog = require('./AuditLog');
 
 Course.hasMany(Lesson, { foreignKey: 'CourseId', onDelete: 'CASCADE' });
 Lesson.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
@@ -113,4 +114,5 @@ module.exports = {
   WithdrawRequest,
   Setting,
   AffiliateLink,
+  AuditLog,
 };

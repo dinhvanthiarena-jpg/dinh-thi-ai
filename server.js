@@ -254,6 +254,14 @@ connectDB()
     startScheduler();
     batDauNhacHoc();   // nhắc học cho English Air
     telegramService.ensureWebhook();
+
+    // Tự động duyệt hoa hồng AFF đã chờ đủ hạn (mặc định 7 ngày, xem
+    // services/commissionService.js) — chạy ngay lúc khởi động + mỗi giờ.
+    const commissionService = require('./services/commissionService');
+    const duyetHoaHong = () =>
+      commissionService.duyetHoaHongDaHan().catch((e) => console.error('[commissionService] lỗi tự duyệt hoa hồng:', e.message));
+    duyetHoaHong();
+    setInterval(duyetHoaHong, 60 * 60 * 1000);
   })
   .catch((err) => {
     console.error('[server] Khong the ket noi database:', err.message);

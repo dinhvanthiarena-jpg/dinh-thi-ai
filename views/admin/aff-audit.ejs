@@ -1,0 +1,35 @@
+<h1 class="text-2xl font-extrabold text-ink mb-4">AFF</h1>
+<%- include('../partials/aff-tabs') %>
+
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="text-left text-muted border-b border-slate-100">
+      <tr>
+        <th class="px-4 py-3 font-semibold">Thời gian</th>
+        <th class="px-4 py-3 font-semibold">Người thực hiện</th>
+        <th class="px-4 py-3 font-semibold">Hành động</th>
+        <th class="px-4 py-3 font-semibold">Đối tượng</th>
+        <th class="px-4 py-3 font-semibold">Giá trị cũ → mới</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% if (!logs.length) { %>
+        <tr><td colspan="5" class="px-4 py-10 text-center text-muted">Chưa có nhật ký nào.</td></tr>
+      <% } %>
+      <% const tenHanhDong = { change_commission_rate: 'Đổi tỷ lệ hoa hồng', approve_withdraw: 'Duyệt rút tiền', reject_withdraw: 'Từ chối rút tiền', approve_commission_early: 'Duyệt hoa hồng sớm' }; %>
+      <% logs.forEach(function (l) { %>
+        <tr>
+          <td class="px-4 py-3 text-muted whitespace-nowrap text-xs"><%= new Date(l.createdAt).toLocaleString('vi-VN') %></td>
+          <td class="px-4 py-3 text-ink"><%= l.actor %></td>
+          <td class="px-4 py-3"><%= tenHanhDong[l.action] || l.action %></td>
+          <td class="px-4 py-3 text-xs text-muted"><%= l.targetType %> <%= l.targetId ? '#' + l.targetId : '' %></td>
+          <td class="px-4 py-3 text-xs">
+            <% if (l.oldValue) { %><span class="text-muted line-through"><%= l.oldValue %></span> → <% } %>
+            <span class="text-ink font-semibold"><%= l.newValue %></span>
+            <% if (l.reason) { %><span class="text-muted"> (<%= l.reason %>)</span><% } %>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>

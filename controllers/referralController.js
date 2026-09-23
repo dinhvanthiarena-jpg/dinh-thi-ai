@@ -29,13 +29,24 @@ exports.index = async (req, res) => {
         order: [['createdAt', 'DESC']],
       })
     : [];
+  const f2Ids = f2.map((u) => u.id);
+  const f3 = f2Ids.length
+    ? await User.findAll({
+        where: { parentId: { [Op.in]: f2Ids } },
+        attributes: ['id', 'name', 'email', 'parentId', 'createdAt'],
+        order: [['createdAt', 'DESC']],
+      })
+    : [];
 
   const commissionHistory = await WalletTransaction.findAll({
-    where: { UserId: user.id, type: { [Op.in]: ['commission_l1', 'commission_l2'] } },
+    where: { UserId: user.id, type: { [Op.in]: ['commission_l1', 'commission_l2', 'commission_l3'] } },
     order: [['createdAt', 'DESC']],
     limit: 50,
   });
   const totalCommission = commissionHistory.reduce((sum, tx) => sum + tx.amount, 0);
+  const hoaHongChoDuyet = commissionHistory
+    .filter((tx) => tx.status === 'pending')
+    .reduce((sum, tx) => sum + tx.amount, 0);
 
   const withdrawRequests = await WithdrawRequest.findAll({
     where: { UserId: user.id },
@@ -55,8 +66,10 @@ exports.index = async (req, res) => {
     soDu: wallet.soDu(user),
     f1,
     f2,
+    f3,
     commissionHistory,
     totalCommission,
+    hoaHongChoDuyet,
     withdrawRequests,
     affiliateLinks,
   });
