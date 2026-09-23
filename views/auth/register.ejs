@@ -33,6 +33,11 @@
         <input class="input" type="password" id="password" name="password" minlength="6" required />
         <p class="text-xs text-muted mt-1">Tối thiểu 6 ký tự.</p>
       </div>
+      <div>
+        <label class="label" for="refCode">Mã giới thiệu (nếu có)</label>
+        <input class="input uppercase" type="text" id="refCode" name="refCode" value="<%= refCode || '' %>" placeholder="VD: 7ENU9Z" maxlength="20" />
+        <p class="text-xs text-muted mt-1">Nếu ai đó giới thiệu bạn, nhập mã của họ vào đây để họ nhận được hoa hồng.</p>
+      </div>
       <% if (!agent) { %>
         <label class="flex items-center gap-2 text-sm text-ink">
           <input type="checkbox" name="wantAgent" value="1" class="rounded border-primary-200" />

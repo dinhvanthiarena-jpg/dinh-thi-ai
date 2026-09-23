@@ -19,9 +19,21 @@ function setAuthCookie(res, token) {
 }
 
 exports.showRegister = (req, res) => {
-  res.render('auth/register', { title: 'Đăng ký tài khoản', errors: [], old: {}, agent: req.query.agent === '1' });
+  res.render('auth/register', {
+    title: 'Đăng ký tài khoản',
+    errors: [],
+    old: {},
+    agent: req.query.agent === '1',
+    refCode: req.query.ref || '',
+  });
 };
 
+// Mã giới thiệu có thể tới bằng 2 đường: (1) link có sẵn ?ref=... (tự điền
+// qua cookie, xem middleware/affiliateTracking.js#getReferrerId), hoặc (2)
+// khách chỉ được đọc/gửi riêng MÃ (không phải link) nên tự gõ vào ô "Mã
+// giới thiệu" trên form — ưu tiên mã tự gõ vì đó là lựa chọn rõ ràng nhất
+// của người dùng tại thời điểm đăng ký.
+//
 // ?agent=1 (từ dropdown "Đăng ký" trên header, mục "Đăng ký đại lý") giữ qua
 // hidden input wantAgent trên form — gộp 2 bước "tạo tài khoản" + "đăng ký
 // làm đại lý" thành 1 lần bấm cho gọn (yêu cầu 2026-09-23), thay vì bắt user
@@ -35,6 +47,7 @@ exports.register = async (req, res) => {
       errors: errors.array(),
       old: req.body,
       agent: wantAgent,
+      refCode: req.body.refCode || '',
     });
   }
 
@@ -46,10 +59,18 @@ exports.register = async (req, res) => {
       errors: [{ msg: 'Email này đã được sử dụng.' }],
       old: req.body,
       agent: wantAgent,
+      refCode: req.body.refCode || '',
     });
   }
 
-  const parentId = await getReferrerId(req);
+  const maGoTay = String(req.body.refCode || '').trim().toUpperCase();
+  let parentId = null;
+  if (maGoTay) {
+    const nguoiGioiThieu = await User.findOne({ where: { refCode: maGoTay, agentStatus: 'approved' } });
+    if (nguoiGioiThieu) parentId = nguoiGioiThieu.id;
+  }
+  if (!parentId) parentId = await getReferrerId(req);
+
   const user = await User.create({
     name,
     email,
