@@ -409,6 +409,17 @@ exports.affMemberDetail = async (req, res) => {
   });
 };
 
+exports.affApproveCommissionEarly = async (req, res) => {
+  const commission = require('../services/commissionService');
+  try {
+    await commission.duyetHoaHongSom(req.params.id, 'tay:' + (res.locals.currentUser?.email || 'admin'));
+    req.flash('success', 'Đã duyệt sớm dòng hoa hồng này.');
+  } catch (e) {
+    req.flash('error', e.message);
+  }
+  res.redirect('back');
+};
+
 exports.affAuditLog = async (req, res) => {
   const { AuditLog } = require('../models');
   const logs = await AuditLog.findAll({ order: [['createdAt', 'DESC']], limit: 200 });

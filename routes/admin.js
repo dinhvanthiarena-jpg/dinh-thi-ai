@@ -45,6 +45,7 @@ router.post('/wallet/:id/confirm', adminController.walletTransactionConfirm);
 router.get('/aff', adminController.affOverview);
 router.get('/aff/mang-luoi', adminController.affNetwork);
 router.get('/aff/thanh-vien/:id', adminController.affMemberDetail);
+router.post('/aff/hoa-hong/:id/duyet-som', adminController.affApproveCommissionEarly);
 router.get('/aff/links', adminController.affLinks);
 router.get('/aff/dai-ly', adminController.affAgentList);
 router.post('/aff/dai-ly/:id/duyet', adminController.affAgentApprove);

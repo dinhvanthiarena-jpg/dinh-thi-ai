@@ -73,11 +73,12 @@
         <th class="py-2 px-5">Nội dung</th>
         <th class="py-2 px-5 text-right">Số tiền</th>
         <th class="py-2 px-5 text-right">Trạng thái</th>
+        <th class="py-2 px-5"></th>
       </tr>
     </thead>
     <tbody>
       <% if (!lichSuHoaHong.length) { %>
-        <tr><td colspan="4" class="py-8 text-center text-muted">Chưa có hoa hồng nào.</td></tr>
+        <tr><td colspan="5" class="py-8 text-center text-muted">Chưa có hoa hồng nào.</td></tr>
       <% } %>
       <% lichSuHoaHong.forEach(function(tx) { %>
         <tr class="border-b border-primary-50 last:border-0">
@@ -88,6 +89,13 @@
             <span class="badge <%= tx.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' %>">
               <%= tx.status === 'paid' ? 'Khả dụng' : 'Chờ duyệt' %>
             </span>
+          </td>
+          <td class="py-2 px-5 text-right">
+            <% if (tx.status === 'pending') { %>
+              <form method="POST" action="/admin/aff/hoa-hong/<%= tx.id %>/duyet-som">
+                <button class="btn-outline text-xs px-2.5 py-1">Duyệt sớm</button>
+              </form>
+            <% } %>
           </td>
         </tr>
       <% }); %>
