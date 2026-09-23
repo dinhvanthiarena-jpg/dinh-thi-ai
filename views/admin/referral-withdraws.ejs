@@ -1,27 +1,7 @@
-<div class="flex items-center justify-between gap-4 flex-wrap">
-  <h1 class="text-2xl font-extrabold text-ink">Rút hoa hồng giới thiệu</h1>
-  <a href="/admin/gioi-thieu/cau-hinh" class="btn-outline text-sm">Cấu hình tỷ lệ hoa hồng</a>
-</div>
+<h1 class="text-2xl font-extrabold text-ink mb-4">AFF</h1>
+<%- include('../partials/aff-tabs') %>
 
-<div class="grid sm:grid-cols-3 gap-4 mt-6">
-  <div class="card p-5">
-    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Tổng thu nhập toàn web</p>
-    <p class="text-2xl font-extrabold text-primary-700 mt-1 tabular-nums"><%= Number(baoCao.tongThuNhap).toLocaleString('vi-VN') %>đ</p>
-    <p class="text-xs text-muted mt-1">Khóa học + Tool + Gói Pro (đã thanh toán)</p>
-  </div>
-  <div class="card p-5">
-    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Tổng hoa hồng đã chi trả</p>
-    <p class="text-2xl font-extrabold text-ink mt-1 tabular-nums"><%= Number(baoCao.tongHoaHongDaChiTra).toLocaleString('vi-VN') %>đ</p>
-    <p class="text-xs text-muted mt-1">Đã duyệt rút về ngân hàng</p>
-  </div>
-  <div class="card p-5">
-    <p class="text-xs uppercase tracking-wide text-muted font-semibold">Tổng hoa hồng chờ rút</p>
-    <p class="text-2xl font-extrabold text-amber-600 mt-1 tabular-nums"><%= Number(baoCao.tongHoaHongChoRut).toLocaleString('vi-VN') %>đ</p>
-    <p class="text-xs text-muted mt-1">Đang nằm trong ví đại lý</p>
-  </div>
-</div>
-
-<div class="card mt-6 overflow-x-auto">
+<div class="card overflow-x-auto">
   <table class="w-full text-sm">
     <thead class="text-left text-muted border-b border-slate-100">
       <tr>
@@ -56,11 +36,11 @@
           <td class="px-4 py-3 text-right">
             <% if (r.status === 'pending') { %>
               <div class="flex gap-2 justify-end">
-                <form method="POST" action="/admin/gioi-thieu/rut-tien/<%= r.id %>/duyet"
+                <form method="POST" action="/admin/aff/rut-tien/<%= r.id %>/duyet"
                       onsubmit="return confirm('Duyệt và trừ <%= r.amount.toLocaleString('vi-VN') %>đ khỏi ví?')">
                   <button class="btn-primary text-xs px-3 py-1.5">Duyệt</button>
                 </form>
-                <form method="POST" action="/admin/gioi-thieu/rut-tien/<%= r.id %>/tu-choi">
+                <form method="POST" action="/admin/aff/rut-tien/<%= r.id %>/tu-choi">
                   <button class="btn-outline text-xs px-3 py-1.5">Từ chối</button>
                 </form>
               </div>

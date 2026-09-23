@@ -316,19 +316,73 @@ exports.walletTransactionConfirm = async (req, res) => {
   res.redirect('/admin/wallet');
 };
 
-// --- Giới thiệu bạn bè (affiliate nội bộ 2 cấp) ---
+// --- AFF: khu quản trị gộp chung cho toàn bộ hệ thống "Giới thiệu bạn bè"
+// (affiliate nội bộ 2 cấp) — Tổng quan / Mạng lưới / Link tracking / Rút
+// hoa hồng / Cấu hình, tất cả nằm dưới 1 mục "AFF" trên sidebar thay vì
+// rải rác nhiều mục riêng lẻ (thầy yêu cầu 2026-09-23).
+exports.affOverview = async (req, res) => {
+  const { WalletTransaction } = require('../models');
+  const { Op, fn, col } = require('sequelize');
+  const commission = require('../services/commissionService');
+
+  const [baoCao, congDon] = await Promise.all([
+    commission.baoCaoTaiChinh(),
+    // Gom theo UserId truoc (khong include User o day de tranh loi
+    // ONLY_FULL_GROUP_BY cua MySQL khi GROUP BY cung include), roi tra cuu
+    // ten/email rieng cho dung 10 UserId top nhat.
+    WalletTransaction.findAll({
+      where: { type: { [Op.in]: ['commission_l1', 'commission_l2'] } },
+      attributes: ['UserId', [fn('SUM', col('amount')), 'tongHoaHong']],
+      group: ['UserId'],
+      order: [[fn('SUM', col('amount')), 'DESC']],
+      limit: 10,
+      raw: true,
+    }),
+  ]);
+
+  const nguoiDung = await User.findAll({
+    where: { id: { [Op.in]: congDon.map((h) => h.UserId) } },
+    attributes: ['id', 'name', 'email'],
+  });
+  const nguoiTheoId = new Map(nguoiDung.map((u) => [u.id, u]));
+  const topHang = congDon.map((h) => ({ user: nguoiTheoId.get(h.UserId), tongHoaHong: Number(h.tongHoaHong) }));
+
+  res.render('admin/aff-overview', { title: 'AFF — Tổng quan', baoCao, topHang });
+};
+
+exports.affNetwork = async (req, res) => {
+  const { Op } = require('sequelize');
+  // Chỉ hiện user đang co-ai-do-gioi-thieu HOẶC co-nguoi-duoc-minh-gioi-thieu —
+  // tranh liet ke het toan bo hoc vien khong lien quan gi den affiliate.
+  const nguoiGioiThieu = await User.findAll({ where: { parentId: { [Op.ne]: null } }, attributes: ['parentId'] });
+  const idsCoLienQuan = new Set(nguoiGioiThieu.map((u) => u.parentId));
+  const users = await User.findAll({
+    where: { [Op.or]: [{ parentId: { [Op.ne]: null } }, { id: { [Op.in]: Array.from(idsCoLienQuan) } }] },
+    attributes: ['id', 'name', 'email', 'refCode', 'parentId', 'createdAt'],
+    order: [['parentId', 'ASC'], ['createdAt', 'ASC']],
+  });
+  const tenTheoId = new Map(users.map((u) => [u.id, u.name]));
+  res.render('admin/aff-network', { title: 'AFF — Mạng lưới giới thiệu', users, tenTheoId });
+};
+
+exports.affLinks = async (req, res) => {
+  const { AffiliateLink } = require('../models');
+  const links = await AffiliateLink.findAll({
+    include: [{ model: User, as: 'user', attributes: ['name', 'email'] }],
+    order: [['clicksCount', 'DESC']],
+    limit: 200,
+  });
+  res.render('admin/aff-links', { title: 'AFF — Link tracking', links });
+};
+
 exports.referralWithdrawList = async (req, res) => {
   const { WithdrawRequest } = require('../models');
-  const commission = require('../services/commissionService');
-  const [requests, baoCao] = await Promise.all([
-    WithdrawRequest.findAll({
-      include: [{ model: User, as: 'user', attributes: ['name', 'email'] }],
-      order: [['createdAt', 'DESC']],
-      limit: 200,
-    }),
-    commission.baoCaoTaiChinh(),
-  ]);
-  res.render('admin/referral-withdraws', { title: 'Rút hoa hồng giới thiệu', requests, baoCao });
+  const requests = await WithdrawRequest.findAll({
+    include: [{ model: User, as: 'user', attributes: ['name', 'email'] }],
+    order: [['createdAt', 'DESC']],
+    limit: 200,
+  });
+  res.render('admin/referral-withdraws', { title: 'AFF — Rút hoa hồng', requests });
 };
 
 exports.referralWithdrawApprove = async (req, res) => {
@@ -339,27 +393,27 @@ exports.referralWithdrawApprove = async (req, res) => {
   } catch (e) {
     req.flash('error', e.message);
   }
-  res.redirect('/admin/gioi-thieu/rut-tien');
+  res.redirect('/admin/aff/rut-tien');
 };
 
 exports.referralWithdrawReject = async (req, res) => {
   const commission = require('../services/commissionService');
   await commission.tuChoiRutTien(req.params.id, 'tay:' + (res.locals.currentUser?.email || 'admin'), req.body.note);
   req.flash('success', 'Đã từ chối yêu cầu.');
-  res.redirect('/admin/gioi-thieu/rut-tien');
+  res.redirect('/admin/aff/rut-tien');
 };
 
 exports.referralSettingsForm = async (req, res) => {
   const commission = require('../services/commissionService');
   const rates = await commission.getRates();
-  res.render('admin/referral-settings', { title: 'Cấu hình hoa hồng giới thiệu', rates });
+  res.render('admin/referral-settings', { title: 'AFF — Cấu hình hoa hồng', rates });
 };
 
 exports.referralSettingsUpdate = async (req, res) => {
   const commission = require('../services/commissionService');
   await commission.setRates({ l1Percent: Number(req.body.l1Percent) || 0, l2Percent: Number(req.body.l2Percent) || 0 });
   req.flash('success', 'Đã cập nhật tỷ lệ hoa hồng.');
-  res.redirect('/admin/gioi-thieu/cau-hinh');
+  res.redirect('/admin/aff/cau-hinh');
 };
 
 exports.studentList = async (req, res) => {

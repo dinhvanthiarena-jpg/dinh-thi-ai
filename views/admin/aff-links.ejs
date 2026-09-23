@@ -1,0 +1,35 @@
+<h1 class="text-2xl font-extrabold text-ink mb-4">AFF</h1>
+<%- include('../partials/aff-tabs') %>
+
+<div class="card overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead class="text-left text-muted border-b border-slate-100">
+      <tr>
+        <th class="px-4 py-3 font-semibold">Chủ link</th>
+        <th class="px-4 py-3 font-semibold">Link</th>
+        <th class="px-4 py-3 font-semibold">Nguồn / Chiến dịch</th>
+        <th class="px-4 py-3 font-semibold text-right">Clicks</th>
+        <th class="px-4 py-3 font-semibold">Ngày tạo</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% if (!links.length) { %>
+        <tr><td colspan="5" class="px-4 py-10 text-center text-muted">Chưa có link tracking riêng nào được tạo.</td></tr>
+      <% } %>
+      <% links.forEach(function (l) { %>
+        <tr>
+          <td class="px-4 py-3">
+            <div class="font-semibold text-ink"><%= l.user ? l.user.name : '—' %></div>
+            <div class="text-muted text-xs"><%= l.user ? l.user.email : '' %></div>
+          </td>
+          <td class="px-4 py-3">
+            <code class="text-xs"><%= l.originalUrl %>?ref=<%= l.affiliateCode %></code>
+          </td>
+          <td class="px-4 py-3 text-xs text-muted"><%= l.utmSource || '—' %><%= l.utmCampaign ? ' · ' + l.utmCampaign : '' %></td>
+          <td class="px-4 py-3 text-right font-semibold text-primary-700 tabular-nums"><%= l.clicksCount %></td>
+          <td class="px-4 py-3 text-muted text-xs"><%= new Date(l.createdAt).toLocaleDateString('vi-VN') %></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>

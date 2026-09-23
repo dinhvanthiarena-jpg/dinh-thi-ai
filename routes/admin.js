@@ -42,11 +42,14 @@ router.post('/pro-orders/:id/confirm', adminController.proOrderConfirm);
 router.get('/wallet', adminController.walletTransactionList);
 router.post('/wallet/:id/confirm', adminController.walletTransactionConfirm);
 
-router.get('/gioi-thieu/rut-tien', adminController.referralWithdrawList);
-router.post('/gioi-thieu/rut-tien/:id/duyet', adminController.referralWithdrawApprove);
-router.post('/gioi-thieu/rut-tien/:id/tu-choi', adminController.referralWithdrawReject);
-router.get('/gioi-thieu/cau-hinh', adminController.referralSettingsForm);
-router.post('/gioi-thieu/cau-hinh', adminController.referralSettingsUpdate);
+router.get('/aff', adminController.affOverview);
+router.get('/aff/mang-luoi', adminController.affNetwork);
+router.get('/aff/links', adminController.affLinks);
+router.get('/aff/rut-tien', adminController.referralWithdrawList);
+router.post('/aff/rut-tien/:id/duyet', adminController.referralWithdrawApprove);
+router.post('/aff/rut-tien/:id/tu-choi', adminController.referralWithdrawReject);
+router.get('/aff/cau-hinh', adminController.referralSettingsForm);
+router.post('/aff/cau-hinh', adminController.referralSettingsUpdate);
 
 router.get('/students', adminController.studentList);
 
