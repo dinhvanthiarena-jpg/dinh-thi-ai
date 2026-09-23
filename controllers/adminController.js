@@ -417,6 +417,33 @@ exports.affLinks = async (req, res) => {
   res.render('admin/aff-links', { title: 'AFF — Link tracking', links });
 };
 
+// Danh sách user đang chờ duyệt làm đại lý (agentStatus='pending') — Admin
+// duyệt/từ chối tại đây trước khi link giới thiệu của họ hoạt động (xem
+// affiliateTracking.js#affiliateTracking và yêu cầu 2026-09-23).
+exports.affAgentList = async (req, res) => {
+  const dangCho = await User.findAll({ where: { agentStatus: 'pending' }, order: [['updatedAt', 'DESC']] });
+  const daDuyet = await User.findAll({
+    where: { agentStatus: 'approved' },
+    order: [['updatedAt', 'DESC']],
+    limit: 200,
+  });
+  res.render('admin/aff-agents', { title: 'AFF — Duyệt đại lý', dangCho, daDuyet });
+};
+
+exports.affAgentApprove = async (req, res) => {
+  const commission = require('../services/commissionService');
+  await commission.duyetDaiLy(req.params.id, 'tay:' + (res.locals.currentUser?.email || 'admin'));
+  req.flash('success', 'Đã duyệt làm đại lý.');
+  res.redirect('/admin/aff/dai-ly');
+};
+
+exports.affAgentReject = async (req, res) => {
+  const commission = require('../services/commissionService');
+  await commission.tuChoiDaiLy(req.params.id, 'tay:' + (res.locals.currentUser?.email || 'admin'));
+  req.flash('success', 'Đã từ chối đăng ký đại lý.');
+  res.redirect('/admin/aff/dai-ly');
+};
+
 exports.referralWithdrawList = async (req, res) => {
   const { WithdrawRequest } = require('../models');
   const requests = await WithdrawRequest.findAll({

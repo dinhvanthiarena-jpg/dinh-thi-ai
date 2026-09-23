@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const { Op } = require('sequelize');
 const { User, WalletTransaction, WithdrawRequest, AffiliateLink } = require('../models');
 const wallet = require('../services/walletService');
+const commission = require('../services/commissionService');
 
 const SAFE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 function chuoiNgau(n) {
@@ -13,8 +14,21 @@ async function maLinkDuyNhat() {
   return ma;
 }
 
+// Chưa đăng ký hoặc bị từ chối trước đó -> chỉ thấy form đăng ký làm đại lý.
+// Đang chờ duyệt -> chỉ thấy thông báo chờ. Chỉ 'approved' mới thấy dashboard
+// đầy đủ (ví, mạng lưới, đơn hàng & hoa hồng của cấp dưới) — xem yêu cầu
+// 2026-09-23: "đại lý đăng ký mà mình sẽ duyệt, trên tài khoản đại lý có ví,
+// có thông tin, có cả các thông tin về đơn hàng, về hoa hồng về hoa hồng
+// cấp dưới của họ".
 exports.index = async (req, res) => {
   const user = req.user;
+
+  if (user.agentStatus !== 'approved') {
+    return res.render('referral/index', {
+      title: 'Giới thiệu bạn bè',
+      agentStatus: user.agentStatus,
+    });
+  }
 
   const f1 = await User.findAll({
     where: { parentId: user.id },
@@ -60,8 +74,12 @@ exports.index = async (req, res) => {
     limit: 20,
   });
 
+  const chiTiet = await commission.chiTietThanhVien(user.id);
+  const donHangMang = await commission.danhSachDonHangMang(user.id, 20);
+
   res.render('referral/index', {
     title: 'Giới thiệu bạn bè',
+    agentStatus: user.agentStatus,
     refCode: user.refCode,
     soDu: wallet.soDu(user),
     f1,
@@ -72,7 +90,21 @@ exports.index = async (req, res) => {
     hoaHongChoDuyet,
     withdrawRequests,
     affiliateLinks,
+    chiTiet,
+    donHangMang,
   });
+};
+
+// User bấm "Đăng ký làm đại lý" -> chuyển sang 'pending', chờ Admin duyệt ở
+// /admin/aff/dai-ly. Chỉ cho đăng ký lại từ 'none' hoặc 'rejected' — tránh 1
+// người bấm gửi nhiều lần khi đang 'pending' hoặc đã 'approved' rồi.
+exports.dangKyDaiLy = async (req, res) => {
+  const user = req.user;
+  if (user.agentStatus === 'none' || user.agentStatus === 'rejected') {
+    await user.update({ agentStatus: 'pending' });
+    req.flash('success', 'Đã gửi đăng ký làm đại lý, vui lòng chờ admin duyệt.');
+  }
+  res.redirect('/gioi-thieu-ban-be');
 };
 
 // Đại lý tự tạo link riêng cho 1 trang cụ thể (khóa học/tool) kèm nhãn
@@ -85,6 +117,7 @@ exports.createLink = async (req, res) => {
   const utmCampaign = String(req.body.utmCampaign || '').trim().slice(0, 100);
 
   try {
+    if (user.agentStatus !== 'approved') throw new Error('Bạn cần được duyệt làm đại lý trước.');
     if (!originalUrl.startsWith('/') || originalUrl.startsWith('//')) {
       throw new Error('Đường dẫn phải bắt đầu bằng "/", ví dụ: /courses/ten-khoa-hoc');
     }
@@ -103,6 +136,7 @@ exports.requestWithdraw = async (req, res) => {
   const { bankName, bankAccount, bankAccountName } = req.body;
 
   try {
+    if (user.agentStatus !== 'approved') throw new Error('Bạn cần được duyệt làm đại lý trước.');
     if (!Number.isInteger(amount) || amount < 50000) throw new Error('Số tiền rút tối thiểu 50.000đ.');
     if (amount > wallet.soDu(user)) throw new Error('Số dư ví không đủ.');
     if (!bankName || !bankAccount || !bankAccountName) throw new Error('Vui lòng nhập đầy đủ thông tin ngân hàng.');

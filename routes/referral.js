@@ -10,6 +10,7 @@ const referralActionLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
 
 router.use(requireAuth);
 router.get('/', referralController.index);
+router.post('/dang-ky', referralActionLimiter, referralController.dangKyDaiLy);
 router.post('/rut-tien', referralActionLimiter, referralController.requestWithdraw);
 router.post('/links', referralActionLimiter, referralController.createLink);
 

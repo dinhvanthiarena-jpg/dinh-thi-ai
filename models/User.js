@@ -49,6 +49,15 @@ const User = sequelize.define(
     // sau đó (xem controllers/authController.js#register).
     refCode: { type: DataTypes.STRING, allowNull: true, unique: true },
     parentId: { type: DataTypes.INTEGER, allowNull: true },
+    // Trạng thái ĐĂNG KÝ LÀM ĐẠI LÝ — tách biệt hoàn toàn với `role`, vì 1
+    // học viên (role='student') vẫn có thể vừa học vừa là đại lý cùng lúc.
+    // 'none' = chưa từng đăng ký (mặc định mọi user mới) — không có link
+    // giới thiệu hoạt động, không nhận hoa hồng. 'pending' = đã đăng ký,
+    // đang chờ Admin duyệt. 'approved' = đã duyệt, link giới thiệu bắt đầu
+    // hoạt động TỪ LÚC NÀY (không hồi tố những lượt click trước khi duyệt).
+    // 'rejected' = bị từ chối, có thể đăng ký lại (xem
+    // controllers/referralController.js#dangKyDaiLy).
+    agentStatus: { type: DataTypes.ENUM('none', 'pending', 'approved', 'rejected'), defaultValue: 'none' },
   },
   {
     tableName: 'users',

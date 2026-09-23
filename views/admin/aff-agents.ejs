@@ -1,0 +1,73 @@
+<h1 class="text-2xl font-extrabold text-ink mb-4">AFF</h1>
+<%- include('../partials/aff-tabs') %>
+
+<div class="card overflow-x-auto mb-6">
+  <div class="px-4 py-3 border-b border-slate-100 font-bold text-ink">Đang chờ duyệt (<%= dangCho.length %>)</div>
+  <table class="w-full text-sm">
+    <thead class="text-left text-muted border-b border-slate-100">
+      <tr>
+        <th class="px-4 py-3 font-semibold">Người đăng ký</th>
+        <th class="px-4 py-3 font-semibold">Mã giới thiệu</th>
+        <th class="px-4 py-3 font-semibold">Ngày đăng ký</th>
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% if (!dangCho.length) { %>
+        <tr><td colspan="4" class="px-4 py-10 text-center text-muted">Không có đăng ký nào đang chờ duyệt.</td></tr>
+      <% } %>
+      <% dangCho.forEach(function (u) { %>
+        <tr>
+          <td class="px-4 py-3">
+            <div class="font-semibold text-ink"><%= u.name %></div>
+            <div class="text-muted text-xs"><%= u.email || u.phone || '' %></div>
+          </td>
+          <td class="px-4 py-3"><code class="text-xs"><%= u.refCode %></code></td>
+          <td class="px-4 py-3 text-muted text-xs"><%= new Date(u.updatedAt).toLocaleDateString('vi-VN') %></td>
+          <td class="px-4 py-3 text-right">
+            <div class="flex gap-2 justify-end">
+              <form method="POST" action="/admin/aff/dai-ly/<%= u.id %>/duyet">
+                <button class="btn-primary text-xs px-3 py-1.5">Duyệt</button>
+              </form>
+              <form method="POST" action="/admin/aff/dai-ly/<%= u.id %>/tu-choi">
+                <button class="btn-outline text-xs px-3 py-1.5">Từ chối</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<div class="card overflow-x-auto">
+  <div class="px-4 py-3 border-b border-slate-100 font-bold text-ink">Đại lý đã duyệt (<%= daDuyet.length %>)</div>
+  <table class="w-full text-sm">
+    <thead class="text-left text-muted border-b border-slate-100">
+      <tr>
+        <th class="px-4 py-3 font-semibold">Đại lý</th>
+        <th class="px-4 py-3 font-semibold">Mã giới thiệu</th>
+        <th class="px-4 py-3 font-semibold">Ngày duyệt</th>
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% if (!daDuyet.length) { %>
+        <tr><td colspan="4" class="px-4 py-10 text-center text-muted">Chưa có đại lý nào được duyệt.</td></tr>
+      <% } %>
+      <% daDuyet.forEach(function (u) { %>
+        <tr>
+          <td class="px-4 py-3">
+            <div class="font-semibold text-ink"><%= u.name %></div>
+            <div class="text-muted text-xs"><%= u.email || u.phone || '' %></div>
+          </td>
+          <td class="px-4 py-3"><code class="text-xs"><%= u.refCode %></code></td>
+          <td class="px-4 py-3 text-muted text-xs"><%= new Date(u.updatedAt).toLocaleDateString('vi-VN') %></td>
+          <td class="px-4 py-3 text-right">
+            <a href="/admin/aff/thanh-vien/<%= u.id %>" class="btn-outline text-xs px-3 py-1.5">Chi tiết</a>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>

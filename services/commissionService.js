@@ -30,7 +30,7 @@
  *   - services/proService.js#ghiNhanDaTra
  */
 const { Op } = require('sequelize');
-const { Setting, User, WalletTransaction, WithdrawRequest, Order, ProOrder, AuditLog } = require('../models');
+const { Setting, User, WalletTransaction, WithdrawRequest, Order, ProOrder, AuditLog, Course, Tool } = require('../models');
 
 const PENDING_DAYS = 7;
 
@@ -226,6 +226,23 @@ async function tuChoiRutTien(withdrawRequestId, boi, note) {
   return req_;
 }
 
+/** Admin duyệt đăng ký đại lý — chỉ tác dụng khi đang 'pending' (tránh duyệt trùng). */
+async function duyetDaiLy(userId, boi) {
+  const user = await User.findByPk(userId);
+  if (!user || user.agentStatus !== 'pending') return user;
+  await user.update({ agentStatus: 'approved' });
+  await ghiAuditLog(boi, 'approve_agent', 'User', user.id, 'pending', 'approved');
+  return user;
+}
+
+async function tuChoiDaiLy(userId, boi) {
+  const user = await User.findByPk(userId);
+  if (!user || user.agentStatus !== 'pending') return user;
+  await user.update({ agentStatus: 'rejected' });
+  await ghiAuditLog(boi, 'reject_agent', 'User', user.id, 'pending', 'rejected');
+  return user;
+}
+
 /**
  * Báo cáo tài chính tổng cho Admin — đúng 4 số theo mục 12 của đặc tả:
  *   - tongThuNhap: doanh thu toàn web (khóa học + tool + gói Pro, đã PAID).
@@ -283,18 +300,25 @@ async function demSoDonHang(buyerIds) {
   return khoaHoc + pro + tool;
 }
 
+/** 3 tầng buyer/con cháu (F1/F2/F3) của 1 thành viên — dùng chung cho
+ * chiTietThanhVien và danhSachDonHangMang, tránh lặp lại 3 query giống hệt. */
+async function layCacCapDuoi(memberId) {
+  const capF1 = await User.findAll({ where: { parentId: memberId }, attributes: ['id', 'name'] });
+  const idsF1 = capF1.map((u) => u.id);
+  const capF2 = idsF1.length ? await User.findAll({ where: { parentId: { [Op.in]: idsF1 } }, attributes: ['id', 'name'] }) : [];
+  const idsF2 = capF2.map((u) => u.id);
+  const capF3 = idsF2.length ? await User.findAll({ where: { parentId: { [Op.in]: idsF2 } }, attributes: ['id', 'name'] }) : [];
+  const idsF3 = capF3.map((u) => u.id);
+  return { capF1, idsF1, capF2, idsF2, capF3, idsF3 };
+}
+
 /**
  * Dashboard chi tiết 1 thành viên khi Admin click vào node trên Mindmap
  * (mục 8 của đặc tả) — doanh thu trực tiếp/từ cấp B/từ cấp C, hoa hồng theo
  * trạng thái, số dư ví, tổng khách hàng, tổng đơn hàng.
  */
 async function chiTietThanhVien(memberId) {
-  const capF1 = await User.findAll({ where: { parentId: memberId }, attributes: ['id'] });
-  const idsF1 = capF1.map((u) => u.id);
-  const capF2 = idsF1.length ? await User.findAll({ where: { parentId: { [Op.in]: idsF1 } }, attributes: ['id'] }) : [];
-  const idsF2 = capF2.map((u) => u.id);
-  const capF3 = idsF2.length ? await User.findAll({ where: { parentId: { [Op.in]: idsF2 } }, attributes: ['id'] }) : [];
-  const idsF3 = capF3.map((u) => u.id);
+  const { idsF1, idsF2, idsF3 } = await layCacCapDuoi(memberId);
 
   const [doanhThuTrucTiep, doanhThuCapB, doanhThuCapC, tongHoaHongCho, tongHoaHongDaDuyet, tongDaRut, tongDonHang] =
     await Promise.all([
@@ -326,6 +350,71 @@ async function chiTietThanhVien(memberId) {
   };
 }
 
+/**
+ * Danh sách đơn hàng CỤ THỂ (không chỉ đếm tổng) do cả mạng lưới của 1
+ * thành viên tạo ra — dùng cho dashboard đại lý xem "đơn hàng của cấp
+ * dưới mình" (yêu cầu 2026-09-23). Gộp cả 3 nguồn (khóa học/Pro/tool),
+ * kèm cấp độ buyer (1/2/3 tính từ memberId) và tên người mua.
+ */
+async function danhSachDonHangMang(memberId, limit = 20) {
+  const { capF1, capF2, capF3, idsF1, idsF2, idsF3 } = await layCacCapDuoi(memberId);
+  const tenTheoId = new Map([...capF1, ...capF2, ...capF3].map((u) => [u.id, u.name]));
+  const capTheoId = new Map([
+    ...idsF1.map((id) => [id, 1]),
+    ...idsF2.map((id) => [id, 2]),
+    ...idsF3.map((id) => [id, 3]),
+  ]);
+  const tatCaIds = [...idsF1, ...idsF2, ...idsF3];
+  if (!tatCaIds.length) return [];
+
+  const [donKhoaHoc, donPro, donTool] = await Promise.all([
+    Order.findAll({
+      where: { status: 'paid', UserId: { [Op.in]: tatCaIds } },
+      include: [{ model: Course, as: 'course', attributes: ['title'] }],
+      order: [['createdAt', 'DESC']],
+      limit,
+    }),
+    ProOrder.findAll({ where: { status: 'paid', UserId: { [Op.in]: tatCaIds } }, order: [['createdAt', 'DESC']], limit }),
+    WalletTransaction.findAll({
+      where: { type: 'purchase', relatedType: 'Tool', UserId: { [Op.in]: tatCaIds } },
+      order: [['createdAt', 'DESC']],
+      limit,
+    }),
+  ]);
+
+  const toolIds = [...new Set(donTool.map((tx) => tx.relatedId))];
+  const tools = toolIds.length ? await Tool.findAll({ where: { id: { [Op.in]: toolIds } }, attributes: ['id', 'title'] }) : [];
+  const tenToolTheoId = new Map(tools.map((t) => [t.id, t.title]));
+
+  const goiPro = { month: 'Gói tháng', year: 'Gói năm', family: 'Gói gia đình' };
+
+  const gopLai = [
+    ...donKhoaHoc.map((o) => ({
+      ngay: o.createdAt,
+      nguoiMua: tenTheoId.get(o.UserId) || '—',
+      capDo: capTheoId.get(o.UserId),
+      sanPham: `Khóa học: ${o.course ? o.course.title : '—'}`,
+      soTien: o.amount,
+    })),
+    ...donPro.map((o) => ({
+      ngay: o.createdAt,
+      nguoiMua: tenTheoId.get(o.UserId) || '—',
+      capDo: capTheoId.get(o.UserId),
+      sanPham: `Gói Pro: ${goiPro[o.plan] || o.plan}`,
+      soTien: o.amount,
+    })),
+    ...donTool.map((tx) => ({
+      ngay: tx.createdAt,
+      nguoiMua: tenTheoId.get(tx.UserId) || '—',
+      capDo: capTheoId.get(tx.UserId),
+      sanPham: `Tool: ${tenToolTheoId.get(tx.relatedId) || '—'}`,
+      soTien: Math.abs(tx.amount),
+    })),
+  ];
+  gopLai.sort((a, b) => new Date(b.ngay) - new Date(a.ngay));
+  return gopLai.slice(0, limit);
+}
+
 module.exports = {
   getRates,
   setRates,
@@ -334,7 +423,10 @@ module.exports = {
   duyetHoaHongSom,
   duyetRutTien,
   tuChoiRutTien,
+  duyetDaiLy,
+  tuChoiDaiLy,
   baoCaoTaiChinh,
   chiTietThanhVien,
+  danhSachDonHangMang,
   PENDING_DAYS,
 };

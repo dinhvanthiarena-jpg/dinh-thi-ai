@@ -2,6 +2,24 @@
   <h1 class="text-2xl sm:text-3xl font-extrabold text-ink">Giới thiệu bạn bè</h1>
   <p class="text-sm text-muted mt-1">Chia sẻ link của bạn — bạn bè mua tool, đóng học phí hay mua gói Pro, bạn đều nhận hoa hồng vào ví.</p>
 
+  <% if (agentStatus === 'none' || agentStatus === 'rejected') { %>
+    <div class="card p-6 mt-6">
+      <% if (agentStatus === 'rejected') { %>
+        <p class="text-sm text-red-600 font-semibold mb-2">Đăng ký trước đó đã bị từ chối.</p>
+      <% } %>
+      <p class="font-semibold text-ink mb-1">Đăng ký làm đại lý</p>
+      <p class="text-sm text-muted mb-4">Trở thành đại lý để nhận link giới thiệu riêng, theo dõi mạng lưới và nhận hoa hồng khi bạn bè mua hàng qua link của bạn. Admin sẽ duyệt đăng ký trước khi link hoạt động.</p>
+      <form action="/gioi-thieu-ban-be/dang-ky" method="POST">
+        <button class="btn-primary" type="submit">Gửi đăng ký làm đại lý</button>
+      </form>
+    </div>
+  <% } else if (agentStatus === 'pending') { %>
+    <div class="card p-6 mt-6">
+      <p class="font-semibold text-ink mb-1">Đăng ký của bạn đang chờ duyệt</p>
+      <p class="text-sm text-muted">Admin sẽ xem xét và duyệt sớm. Sau khi được duyệt, link giới thiệu và toàn bộ dashboard đại lý (ví, mạng lưới, hoa hồng) sẽ hiện ra ở đây.</p>
+    </div>
+  <% } else { %>
+
   <div class="grid sm:grid-cols-2 gap-4 mt-6">
     <div class="card p-6 bg-gradient-to-br from-primary-600 to-primary-700 text-white">
       <p class="text-sm text-white/80">Số dư ví hiện có</p>
@@ -93,6 +111,72 @@
   </div>
 
   <div class="card p-6 mt-6">
+    <p class="font-semibold text-ink mb-3">Doanh thu & hoa hồng mạng lưới của bạn</p>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+      <div>
+        <p class="text-muted text-xs">Doanh thu cấp 1</p>
+        <p class="font-bold text-ink tabular-nums"><%= chiTiet.doanhThuTrucTiep.toLocaleString('vi-VN') %>đ</p>
+      </div>
+      <div>
+        <p class="text-muted text-xs">Doanh thu cấp 2</p>
+        <p class="font-bold text-ink tabular-nums"><%= chiTiet.doanhThuCapB.toLocaleString('vi-VN') %>đ</p>
+      </div>
+      <div>
+        <p class="text-muted text-xs">Doanh thu cấp 3</p>
+        <p class="font-bold text-ink tabular-nums"><%= chiTiet.doanhThuCapC.toLocaleString('vi-VN') %>đ</p>
+      </div>
+      <div>
+        <p class="text-muted text-xs">Tổng doanh thu mạng lưới</p>
+        <p class="font-bold text-primary-700 tabular-nums"><%= chiTiet.tongDoanhThuMang.toLocaleString('vi-VN') %>đ</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm mt-4 pt-4 border-t border-primary-50">
+      <div>
+        <p class="text-muted text-xs">Hoa hồng chờ duyệt</p>
+        <p class="font-bold text-amber-600 tabular-nums"><%= chiTiet.hoaHongChoDuyet.toLocaleString('vi-VN') %>đ</p>
+      </div>
+      <div>
+        <p class="text-muted text-xs">Hoa hồng đã duyệt</p>
+        <p class="font-bold text-emerald-600 tabular-nums"><%= chiTiet.hoaHongDaDuyet.toLocaleString('vi-VN') %>đ</p>
+      </div>
+      <div>
+        <p class="text-muted text-xs">Đã rút</p>
+        <p class="font-bold text-ink tabular-nums"><%= chiTiet.hoaHongDaChiTra.toLocaleString('vi-VN') %>đ</p>
+      </div>
+    </div>
+    <p class="text-xs text-muted mt-4"><%= chiTiet.tongKhachHangTrucTiep %> khách trực tiếp · <%= chiTiet.tongDonHang %> đơn hàng trong mạng lưới</p>
+  </div>
+
+  <div class="card overflow-hidden mt-6">
+    <div class="px-5 py-4 border-b border-primary-100 font-semibold text-ink">Đơn hàng của mạng lưới cấp dưới</div>
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-muted border-b border-primary-100">
+          <th class="py-2 px-5">Thời gian</th>
+          <th class="py-2 px-5">Người mua</th>
+          <th class="py-2 px-5">Cấp</th>
+          <th class="py-2 px-5">Sản phẩm</th>
+          <th class="py-2 px-5 text-right">Giá trị</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (!donHangMang.length) { %>
+          <tr><td colspan="5" class="py-8 text-center text-muted">Chưa có đơn hàng nào trong mạng lưới của bạn.</td></tr>
+        <% } %>
+        <% donHangMang.forEach(function(d) { %>
+          <tr class="border-b border-primary-50 last:border-0">
+            <td class="py-2 px-5 text-muted whitespace-nowrap"><%= new Date(d.ngay).toLocaleString('vi-VN') %></td>
+            <td class="py-2 px-5 text-ink"><%= d.nguoiMua %></td>
+            <td class="py-2 px-5 text-muted">Cấp <%= d.capDo %></td>
+            <td class="py-2 px-5 text-ink"><%= d.sanPham %></td>
+            <td class="py-2 px-5 text-right font-semibold tabular-nums"><%= d.soTien.toLocaleString('vi-VN') %>đ</td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card p-6 mt-6">
     <p class="font-semibold text-ink mb-3">Rút hoa hồng về ngân hàng</p>
     <form action="/gioi-thieu-ban-be/rut-tien" method="POST" class="space-y-3">
       <div>
@@ -155,4 +239,6 @@
       </tbody>
     </table>
   </div>
+
+  <% } %>
 </section>

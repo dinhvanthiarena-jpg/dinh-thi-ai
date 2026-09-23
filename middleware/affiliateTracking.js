@@ -24,13 +24,19 @@ async function affiliateTracking(req, res, next) {
   try {
     let refCodeDeLuu = null;
 
+    // Chỉ đại lý đã được Admin DUYỆT (agentStatus='approved') mới có link
+    // hoạt động — user thường/đại lý đang chờ duyệt thì ?ref=<mã của họ>
+    // bị bỏ qua êm, không set cookie gì cả (xem yêu cầu 2026-09-23: "đại lý
+    // đăng ký mà mình sẽ duyệt").
     const link = await AffiliateLink.findOne({ where: { affiliateCode: ma } });
     if (link) {
-      await link.increment('clicksCount');
       const chuLink = await User.findByPk(link.UserId);
-      if (chuLink) refCodeDeLuu = chuLink.refCode;
+      if (chuLink && chuLink.agentStatus === 'approved') {
+        await link.increment('clicksCount');
+        refCodeDeLuu = chuLink.refCode;
+      }
     } else {
-      const nguoiGioiThieu = await User.findOne({ where: { refCode: ma } });
+      const nguoiGioiThieu = await User.findOne({ where: { refCode: ma, agentStatus: 'approved' } });
       if (nguoiGioiThieu) refCodeDeLuu = nguoiGioiThieu.refCode;
     }
 
