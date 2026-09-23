@@ -6247,7 +6247,11 @@ $("#btnThoat").addEventListener("click", () => {
 /* ĐĂNG NHẬP BẰNG GMAIL
    Ai đã có Gmail thì khỏi phải nghĩ mật khẩu mới. Máy chủ tự hỏi Google xem tấm
    vé có thật không — không bao giờ tin lời trình duyệt nói nó là ai. */
+/* Kiểu dáng nút Google — để một chỗ vì dùng ở hai nhánh. */
+const GSI_KIEU = { theme: "filled_blue", size: "large", shape: "pill",
+                   text: "continue_with", locale: "vi", width: 300 };
 let gsiDaNap = false;
+let gsiDaDung = false;   // đã khởi tạo rồi thì thôi, xem ghi chú trong dung()
 async function batGoogle() {
   const oNut = $("#gsiNut");
   if (!oNut) return;
@@ -6260,6 +6264,12 @@ async function batGoogle() {
 
   const dung = () => {
     if (!window.google || !google.accounts || !google.accounts.id) return;
+    // CHỈ khởi tạo MỘT LẦN. batGoogle() chạy mỗi lần mở màn đăng nhập, mà gọi
+    // initialize() nhiều lần thì Google cảnh báo thẳng trong console: "only the
+    // last initialized instance will be used" — tức là những lần trước bị vứt
+    // đi, và chỗ nhận kết quả đăng nhập có thể gắn vào cái đã bị vứt.
+    if (gsiDaDung) { google.accounts.id.renderButton(oNut, GSI_KIEU); $("#congGoogle").hidden = false; return; }
+    gsiDaDung = true;
     google.accounts.id.initialize({
       client_id: tin.clientId,
       callback: async res => {
@@ -6285,10 +6295,7 @@ async function batGoogle() {
         }
       },
     });
-    google.accounts.id.renderButton(oNut, {
-      theme: "filled_blue", size: "large", shape: "pill",
-      text: "continue_with", locale: "vi", width: 300,
-    });
+    google.accounts.id.renderButton(oNut, GSI_KIEU);
     $("#congGoogle").hidden = false;
   };
 

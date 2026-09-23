@@ -19,6 +19,7 @@ const { notFound, errorHandler } = require('./middleware/errorHandler');
 const { startScheduler } = require('./services/contentScheduler');
 const { batDauNhacHoc } = require('./services/nhacHocService');
 const telegramService = require('./services/telegramService');
+const zaloAutoService = require('./services/zaloAutoService');
 
 // Express 4 does not catch errors thrown inside async route handlers, so an
 // unhandled rejection there would otherwise crash the whole process (Node
@@ -72,7 +73,11 @@ app.use(
           'https://*.doubleclick.net',
           'https://*.gstatic.com',
         ],
-        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        // accounts.google.com PHAI co o day: nut dang nhap Google tu tai bang dinh
+        // dang tu https://accounts.google.com/gsi/style. Thieu dong nay thi trinh
+        // duyet chan thang, nut hien ra tran trui va bao loi do trong console.
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com',
+          'https://accounts.google.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
         imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
         connectSrc: [
@@ -256,6 +261,7 @@ connectDB()
     startScheduler();
     batDauNhacHoc();   // nhắc học cho English Air
     telegramService.ensureWebhook();
+    zaloAutoService.init().catch((e) => console.error('[zaloAutoService] init lỗi:', e.message));
 
     // Tự động duyệt hoa hồng AFF đã chờ đủ hạn (mặc định 7 ngày, xem
     // services/commissionService.js) — chạy ngay lúc khởi động + mỗi giờ.
