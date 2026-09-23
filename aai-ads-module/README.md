@@ -43,9 +43,12 @@ Facebook App cần bật các quyền: `ads_management`, `ads_read`,
 ## Kích hoạt bằng license key
 
 Trước khi cấu hình bất cứ gì, trang `/aai-ads` sẽ hiện màn hình yêu cầu nhập
-key (dạng `AIWEB-XXXX-XXXX-XXXX`). Vào **Quản trị Vietpro → 🔑 Key A-AI Ads
-(Web)** (`/admin/aai-license-keys`, trên 3dvietpro.com) để cấp key mới cho
-khách — ghi chú tên khách/tên miền để dễ quản lý.
+key — chấp nhận **CẢ 2 dạng**: `FBAI-XXXX-XXXX-XXXX` (key chính, dùng CHUNG
+với tool desktop SA-AI BOT — khách chỉ cần 1 key cho cả 2 nơi, cấp tại
+**🔑 Key SA-AI BOT (Desktop)**, `/admin/fbai-license-keys`) hoặc
+`AIWEB-XXXX-XXXX-XXXX` (key cũ, giữ lại cho khách đã mua từ trước, cấp tại
+**🔑 Key A-AI Ads (Web)**, `/admin/aai-license-keys`) — ghi chú tên khách/tên
+miền để dễ quản lý.
 
 Key cần **online** để kích hoạt (gọi về server trung tâm xác nhận) — sau đó
 tự tái xác minh mỗi 24h, có 3 ngày "grace period" nếu server trung tâm tạm

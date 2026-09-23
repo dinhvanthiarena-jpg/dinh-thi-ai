@@ -11,10 +11,22 @@
 // không tới được (bảo trì, mất mạng...) mà không khoá nhầm khách hàng đang
 // trả phí đầy đủ — chỉ khoá thật khi server trung tâm XÁC NHẬN RÕ là key đã
 // bị thu hồi (trả về valid:false), không phải khi không liên lạc được.
+//
+// Thầy yêu cầu 2026-09-23: "2 cái này về bản chất là 1 cái tool... cho dùng
+// chung kể cả trên web lẫn trên tool" - từ nay module này chấp nhận CẢ 2 dạng
+// key: FBAI-XXXX (key chính, dùng chung với tool desktop SA-AI BOT - khách
+// mới chỉ cần 1 key cho cả 2 nơi) và AIWEB-XXXX (key cũ, giữ lại để không làm
+// gián đoạn khách đã mua trước đây). Mỗi dạng verify với đúng server tương
+// ứng (fbai-license hoặc aai-license) - KHÔNG gửi kèm deviceId khi verify
+// FBAI ở đây, vì đây là web chạy trên SERVER của khách (không phải 1 thiết bị
+// đơn lẻ như desktop) - server fbai-license/verify bỏ qua khoá thiết bị khi
+// không có deviceId, nên không tranh giành "1 thiết bị" với app desktop của
+// cùng khách đó.
 const fs = require('fs');
 const path = require('path');
 
-const VERIFY_URL = process.env.AAI_LICENSE_VERIFY_URL || 'https://3dvietpro.com/api/aai-license/verify';
+const FBAI_VERIFY_URL = process.env.FBAI_LICENSE_VERIFY_URL || 'https://3dvietpro.com/api/fbai-license/verify';
+const AIWEB_VERIFY_URL = process.env.AAI_LICENSE_VERIFY_URL || 'https://3dvietpro.com/api/aai-license/verify';
 const GRACE_PERIOD_MS = 3 * 24 * 60 * 60 * 1000; // 3 ngày
 const STATE_PATH = path.join(__dirname, 'data', 'aai-ads-activation.json');
 
@@ -32,12 +44,17 @@ function saveState(state) {
 
 function isWellFormed(input) {
   const normalized = String(input || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-  return /^AIWEB[A-Z0-9]{12}$/.test(normalized);
+  return /^AIWEB[A-Z0-9]{12}$/.test(normalized) || /^FBAI[A-Z0-9]{12}$/.test(normalized);
+}
+
+function verifyUrlFor(key) {
+  const normalized = String(key || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return normalized.startsWith('FBAI') ? FBAI_VERIFY_URL : AIWEB_VERIFY_URL;
 }
 
 async function verifyOnline(key) {
   try {
-    const res = await fetch(`${VERIFY_URL}?key=${encodeURIComponent(key)}`);
+    const res = await fetch(`${verifyUrlFor(key)}?key=${encodeURIComponent(key)}`);
     if (!res.ok) return { ok: false, networkError: true };
     const data = await res.json();
     return { ok: true, valid: !!data.valid };
@@ -52,7 +69,7 @@ async function verifyOnline(key) {
 // sau này, không áp dụng cho lần đầu).
 async function activate(key) {
   if (!isWellFormed(key)) {
-    return { ok: false, error: 'Key sai định dạng — đúng dạng phải là AIWEB-XXXX-XXXX-XXXX.' };
+    return { ok: false, error: 'Key sai định dạng — đúng dạng phải là FBAI-XXXX-XXXX-XXXX (key SA-AI BOT) hoặc AIWEB-XXXX-XXXX-XXXX.' };
   }
   const result = await verifyOnline(key);
   if (!result.ok) {
@@ -124,10 +141,10 @@ function renderActivationPage(errorMessage) {
 <body>
   <div class="box">
     <h1>🚀 Kích hoạt A-AI Ads</h1>
-    <p>Nhập license key được cấp để bắt đầu sử dụng công cụ quảng cáo AI tự động.</p>
+    <p>Nhập license key SA-AI BOT được cấp (dùng chung với tool desktop) để bắt đầu sử dụng công cụ quảng cáo AI tự động.</p>
     ${errorMessage ? `<div class="error">${errorMessage}</div>` : ''}
     <form method="POST" action="/aai-ads/activate">
-      <input name="key" placeholder="AIWEB-XXXX-XXXX-XXXX" autocomplete="off" autofocus required />
+      <input name="key" placeholder="FBAI-XXXX-XXXX-XXXX" autocomplete="off" autofocus required />
       <button type="submit">Kích hoạt</button>
     </form>
   </div>
