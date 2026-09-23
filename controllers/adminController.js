@@ -388,16 +388,24 @@ exports.affNetwork = async (req, res) => {
 };
 
 exports.affMemberDetail = async (req, res) => {
+  const { Op } = require('sequelize');
+  const { WalletTransaction } = require('../models');
   const commission = require('../services/commissionService');
   const wallet = require('../services/walletService');
   const member = await User.findByPk(req.params.id);
   if (!member) return res.status(404).render('errors/404', { layout: 'layouts/main' });
   const chiTiet = await commission.chiTietThanhVien(member.id);
+  const lichSuHoaHong = await WalletTransaction.findAll({
+    where: { UserId: member.id, type: { [Op.in]: ['commission_l1', 'commission_l2', 'commission_l3'] } },
+    order: [['createdAt', 'DESC']],
+    limit: 50,
+  });
   res.render('admin/aff-member', {
     title: `AFF — ${member.name}`,
     member,
     chiTiet,
     soDuVi: wallet.soDu(member),
+    lichSuHoaHong,
   });
 };
 
