@@ -14,9 +14,17 @@ exports.list = async (req, res) => {
     order: [['createdAt', 'DESC']],
   });
 
+  // "Công cụ" tách riêng lên đầu trang, đứng 1 mình giữa màn hình — khác hẳn
+  // Ứng dụng/Game (đám học tập cho học viên) nên cần nổi bật riêng, không
+  // trộn chung lưới (yêu cầu 2026-09-24).
+  const congCu = tools.filter((t) => t.category === 'Công cụ');
+  const conLai = tools.filter((t) => t.category !== 'Công cụ');
+
   res.render('tools/index', {
     title: 'Tool & Game',
     description: 'Kho ứng dụng, tool và game do Vietpro xây dựng — tải miễn phí, dùng ngay.',
+    congCu,
+    conLai,
     tools,
   });
 };
