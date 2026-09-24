@@ -31,8 +31,29 @@
  */
 const { Op } = require('sequelize');
 const { Setting, User, WalletTransaction, WithdrawRequest, Order, ProOrder, AuditLog, Course, Tool } = require('../models');
+const { sequelize } = require('../config/db');
 
 const PENDING_DAYS = 7;
+// Chỉ Cấp 1-3 tính từ WEB CHỦ mới được là đại lý (đúng mô hình WEB->A->B->C
+// trong đặc tả) — Cấp 4 trở đi LUÔN LUÔN là khách hàng thông thường, không
+// đăng ký/đăng nhập với vai trò đại lý được, dù hoa hồng vẫn tính bình
+// thường CHO 3 người giới thiệu phía trên họ khi họ mua hàng (yêu cầu
+// 2026-09-24: "cấu hình toàn bộ cứ cấp 4 chỉ là khách hàng thông thường").
+const CAP_TOI_DA_LAM_DAI_LY = 3;
+
+/** Đếm Cấp của 1 user tính từ WEB CHỦ (Cấp 1 = không có parentId). Có chốt
+ * an toàn 50 vòng phòng dữ liệu lỗi tạo vòng lặp parentId. */
+async function doSauTuWeb(userId) {
+  let cap = 1;
+  let currentId = userId;
+  for (let i = 0; i < 50; i += 1) {
+    const u = await User.findByPk(currentId, { attributes: ['parentId'] });
+    if (!u || !u.parentId) return cap;
+    cap += 1;
+    currentId = u.parentId;
+  }
+  return cap;
+}
 
 async function ghiAuditLog(actor, action, targetType, targetId, oldValue, newValue, reason) {
   try {
@@ -176,12 +197,21 @@ async function duyetHoaHongDaHan() {
   return dsChoDuyet.length;
 }
 
+/** Khoá dòng WalletTransaction + user trong 1 transaction DB thật, kiểm tra
+ * lại status='pending' ngay trong đó — chặn trường hợp bấm "Duyệt sớm" 2
+ * lần liền tay (hoặc trùng với job tự động duyệt sau 7 ngày chạy cùng lúc)
+ * cộng tiền vào ví 2 lần cho cùng 1 dòng hoa hồng. */
 async function duyetMotHoaHong(tx, boi) {
-  const user = await User.findByPk(tx.UserId);
-  if (!user) return;
-  const balanceAfter = (user.walletBalance || 0) + tx.amount;
-  await user.update({ walletBalance: balanceAfter });
-  await tx.update({ status: 'paid', balanceAfter, paidAt: new Date(), confirmedBy: boi });
+  return sequelize.transaction(async (t) => {
+    const txKhoa = await WalletTransaction.findByPk(tx.id, { transaction: t, lock: t.LOCK.UPDATE });
+    if (!txKhoa || txKhoa.status !== 'pending') return txKhoa;
+    const user = await User.findByPk(txKhoa.UserId, { transaction: t, lock: t.LOCK.UPDATE });
+    if (!user) return txKhoa;
+    const balanceAfter = (user.walletBalance || 0) + txKhoa.amount;
+    await user.update({ walletBalance: balanceAfter }, { transaction: t });
+    await txKhoa.update({ status: 'paid', balanceAfter, paidAt: new Date(), confirmedBy: boi }, { transaction: t });
+    return txKhoa;
+  });
 }
 
 /** Admin duyệt SỚM 1 dòng hoa hồng cụ thể (chưa đủ 7 ngày) — có audit log. */
@@ -193,29 +223,40 @@ async function duyetHoaHongSom(walletTransactionId, boi) {
   return tx;
 }
 
-/** Admin duyệt yêu cầu rút tiền — trừ ví + ghi 1 WalletTransaction (idempotent theo status). */
+/**
+ * Admin duyệt yêu cầu rút tiền — trừ ví + ghi 1 WalletTransaction. Khoá dòng
+ * WithdrawRequest + user trong 1 transaction DB thật và kiểm tra lại
+ * status='pending' cùng số dư NGAY TRONG đó — bấm "Duyệt" 2 lần liền tay
+ * (double-click) không thể trừ ví 2 lần cho cùng 1 yêu cầu rút tiền, đây là
+ * thao tác động tới tiền thật nên phải chặn chắc nhất trong cả hệ thống.
+ */
 async function duyetRutTien(withdrawRequestId, boi) {
-  const req_ = await WithdrawRequest.findByPk(withdrawRequestId);
-  if (!req_ || req_.status !== 'pending') return req_;
+  return sequelize.transaction(async (t) => {
+    const req_ = await WithdrawRequest.findByPk(withdrawRequestId, { transaction: t, lock: t.LOCK.UPDATE });
+    if (!req_ || req_.status !== 'pending') return req_;
 
-  const user = await User.findByPk(req_.UserId);
-  if (!user) throw new Error('Không tìm thấy người rút tiền.');
-  if ((user.walletBalance || 0) < req_.amount) throw new Error('Số dư ví không đủ tại thời điểm duyệt.');
+    const user = await User.findByPk(req_.UserId, { transaction: t, lock: t.LOCK.UPDATE });
+    if (!user) throw new Error('Không tìm thấy người rút tiền.');
+    if ((user.walletBalance || 0) < req_.amount) throw new Error('Số dư ví không đủ tại thời điểm duyệt.');
 
-  const balanceAfter = user.walletBalance - req_.amount;
-  await user.update({ walletBalance: balanceAfter });
-  await WalletTransaction.create({
-    type: 'withdraw',
-    amount: -req_.amount,
-    status: 'paid',
-    balanceAfter,
-    description: `Rút hoa hồng về ${req_.bankName} - ${req_.bankAccount}`,
-    paidAt: new Date(),
-    UserId: user.id,
+    const balanceAfter = user.walletBalance - req_.amount;
+    await user.update({ walletBalance: balanceAfter }, { transaction: t });
+    await WalletTransaction.create(
+      {
+        type: 'withdraw',
+        amount: -req_.amount,
+        status: 'paid',
+        balanceAfter,
+        description: `Rút hoa hồng về ${req_.bankName} - ${req_.bankAccount}`,
+        paidAt: new Date(),
+        UserId: user.id,
+      },
+      { transaction: t }
+    );
+    await req_.update({ status: 'approved', approvedBy: boi, approvedAt: new Date() }, { transaction: t });
+    await ghiAuditLog(boi, 'approve_withdraw', 'WithdrawRequest', req_.id, '', `${req_.amount}đ`);
+    return req_;
   });
-  await req_.update({ status: 'approved', approvedBy: boi, approvedAt: new Date() });
-  await ghiAuditLog(boi, 'approve_withdraw', 'WithdrawRequest', req_.id, '', `${req_.amount}đ`);
-  return req_;
 }
 
 async function tuChoiRutTien(withdrawRequestId, boi, note) {
@@ -226,10 +267,17 @@ async function tuChoiRutTien(withdrawRequestId, boi, note) {
   return req_;
 }
 
-/** Admin duyệt đăng ký đại lý — chỉ tác dụng khi đang 'pending' (tránh duyệt trùng). */
+/** Admin duyệt đăng ký đại lý — chỉ tác dụng khi đang 'pending' (tránh duyệt
+ * trùng), và chặn nếu user đã ở Cấp 4 trở đi (chỉ Cấp 1-3 được là đại lý). */
 async function duyetDaiLy(userId, boi) {
   const user = await User.findByPk(userId);
   if (!user || user.agentStatus !== 'pending') return user;
+  const cap = await doSauTuWeb(userId);
+  if (cap > CAP_TOI_DA_LAM_DAI_LY) {
+    await user.update({ agentStatus: 'rejected' });
+    await ghiAuditLog(boi, 'reject_agent_qua_sau', 'User', user.id, 'pending', 'rejected', `Cấp ${cap} > ${CAP_TOI_DA_LAM_DAI_LY}`);
+    return user;
+  }
   await user.update({ agentStatus: 'approved' });
   await ghiAuditLog(boi, 'approve_agent', 'User', user.id, 'pending', 'approved');
   return user;
@@ -448,5 +496,7 @@ module.exports = {
   baoCaoTaiChinh,
   chiTietThanhVien,
   danhSachDonHangMang,
+  doSauTuWeb,
   PENDING_DAYS,
+  CAP_TOI_DA_LAM_DAI_LY,
 };

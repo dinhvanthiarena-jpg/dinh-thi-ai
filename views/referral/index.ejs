@@ -3,7 +3,12 @@
   <h1 class="text-2xl sm:text-3xl font-extrabold text-ink">Giới thiệu bạn bè</h1>
   <p class="text-sm text-muted mt-1">Chia sẻ link của bạn — bạn bè mua tool, đóng học phí hay mua gói Pro, bạn đều nhận hoa hồng vào ví.</p>
 
-  <% if (agentStatus === 'none' || agentStatus === 'rejected') { %>
+  <% if (agentStatus === 'khach-hang') { %>
+    <div class="card p-6 mt-6">
+      <p class="font-semibold text-ink mb-1">Bạn là khách hàng của Đinh Thi Ai</p>
+      <p class="text-sm text-muted">Cảm ơn bạn đã ủng hộ! Mạng lưới giới thiệu chỉ áp dụng cho 3 cấp gần Web Chủ nhất, nên tài khoản của bạn không mở link giới thiệu riêng được — nhưng người đã giới thiệu bạn vẫn nhận hoa hồng bình thường mỗi khi bạn mua hàng.</p>
+    </div>
+  <% } else if (agentStatus === 'none' || agentStatus === 'rejected') { %>
     <div class="card p-6 mt-6">
       <% if (agentStatus === 'rejected') { %>
         <p class="text-sm text-red-600 font-semibold mb-2">Đăng ký trước đó đã bị từ chối.</p>

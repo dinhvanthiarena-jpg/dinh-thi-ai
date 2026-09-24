@@ -51,10 +51,17 @@ function chuanHoaDuongDan(input, req) {
 exports.index = async (req, res) => {
   const user = req.user;
 
-  if (user.agentStatus !== 'approved') {
+  // Cấp 4 trở đi LUÔN là khách hàng thường — không có link/không có dashboard
+  // đại lý, dù trong DB agentStatus lỡ đang là gì (yêu cầu 2026-09-24). Kiểm
+  // tra ở đây (không chỉ chặn lúc đăng ký) để chắc chắn không lọt trường hợp
+  // cũ/lỗi dữ liệu nào.
+  const cap = await commission.doSauTuWeb(user.id);
+  const laKhachHangCuoi = cap > commission.CAP_TOI_DA_LAM_DAI_LY;
+
+  if (laKhachHangCuoi || user.agentStatus !== 'approved') {
     return res.render('referral/index', {
       title: 'Giới thiệu bạn bè',
-      agentStatus: user.agentStatus,
+      agentStatus: laKhachHangCuoi ? 'khach-hang' : user.agentStatus,
     });
   }
 
@@ -125,9 +132,16 @@ exports.index = async (req, res) => {
 
 // User bấm "Đăng ký làm đại lý" -> chuyển sang 'pending', chờ Admin duyệt ở
 // /admin/aff/dai-ly. Chỉ cho đăng ký lại từ 'none' hoặc 'rejected' — tránh 1
-// người bấm gửi nhiều lần khi đang 'pending' hoặc đã 'approved' rồi.
+// người bấm gửi nhiều lần khi đang 'pending' hoặc đã 'approved' rồi. Chặn
+// luôn nếu user đã ở Cấp 4 trở đi — chỉ Cấp 1-3 được là đại lý (yêu cầu
+// 2026-09-24: "cấu hình toàn bộ cứ cấp 4 chỉ là khách hàng thông thường").
 exports.dangKyDaiLy = async (req, res) => {
   const user = req.user;
+  const cap = await commission.doSauTuWeb(user.id);
+  if (cap > commission.CAP_TOI_DA_LAM_DAI_LY) {
+    req.flash('error', 'Tài khoản của bạn đã ở tầng khách hàng cuối trong mạng lưới, không đăng ký làm đại lý được nữa — vẫn mua hàng bình thường và người giới thiệu bạn vẫn nhận hoa hồng.');
+    return res.redirect('/gioi-thieu-ban-be');
+  }
   if (user.agentStatus === 'none' || user.agentStatus === 'rejected') {
     await user.update({ agentStatus: 'pending' });
     req.flash('success', 'Đã gửi đăng ký làm đại lý, vui lòng chờ admin duyệt.');
@@ -145,6 +159,9 @@ exports.createLink = async (req, res) => {
 
   try {
     if (user.agentStatus !== 'approved') throw new Error('Bạn cần được duyệt làm đại lý trước.');
+    if ((await commission.doSauTuWeb(user.id)) > commission.CAP_TOI_DA_LAM_DAI_LY) {
+      throw new Error('Tài khoản của bạn không còn là đại lý.');
+    }
     const originalUrl = chuanHoaDuongDan(req.body.originalUrl, req);
     const affiliateCode = await maLinkDuyNhat();
     await AffiliateLink.create({ UserId: user.id, originalUrl, affiliateCode, utmSource, utmCampaign });

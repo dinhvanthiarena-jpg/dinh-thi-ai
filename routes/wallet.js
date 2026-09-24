@@ -1,8 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const { requireAuth } = require('../middleware/auth');
 const { WalletTransaction, ToolLicense, Tool } = require('../models');
 const wallet = require('../services/walletService');
+
+// Chống spam tạo lệnh nạp ví hàng loạt (mỗi lệnh sinh 1 mã VietQR riêng) —
+// cùng giới hạn với các API tiền khác trong routes/referral.js.
+const napViLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
 
 router.use(requireAuth);
 
@@ -20,7 +25,7 @@ router.get('/', async (req, res) => {
   });
 });
 
-router.post('/nap', async (req, res) => {
+router.post('/nap', napViLimiter, async (req, res) => {
   const amount = Number(req.body.amount);
   if (!wallet.sanSangNhanTien()) {
     req.flash('error', 'Chưa cấu hình tài khoản nhận tiền.');

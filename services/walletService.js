@@ -17,6 +17,7 @@
  * SEPAY_WEBHOOK_KEY với gói Pro — cùng 1 tài khoản ngân hàng nhận tiền.
  */
 const { WalletTransaction, ToolLicense, Tool, User, Order, Course, Enrollment } = require('../models');
+const { sequelize } = require('../config/db');
 const telegram = require('./telegramService');
 const commission = require('./commissionService');
 
@@ -98,105 +99,152 @@ async function taoDonNapVi(userId, amount) {
   return tx;
 }
 
-/** Ghi nhận nạp ví thành công — idempotent, gọi lại nhiều lần không cộng trùng. */
+/**
+ * Ghi nhận nạp ví thành công — idempotent, gọi lại nhiều lần không cộng
+ * trùng. Khoá cả 2 dòng (giao dịch + user) trong 1 transaction DB thật —
+ * webhook SePay có thể gọi lại (retry) đúng lúc admin cũng đang bấm duyệt
+ * tay, nếu không khoá thì cả 2 đường đều đọc thấy status='pending' cùng
+ * lúc và CỘNG TIỀN 2 LẦN trước khi dòng nào kịp ghi 'paid' xong.
+ */
 async function ghiNhanNapVi(tx, { bankRef = '', bankAmount = null, raw = '', boi = '' } = {}) {
-  if (tx.status === 'paid') return tx;
-  const user = await User.findByPk(tx.UserId);
-  if (!user) throw new Error('Không tìm thấy người nạp của giao dịch này');
+  return sequelize.transaction(async (t) => {
+    const txKhoa = await WalletTransaction.findByPk(tx.id, { transaction: t, lock: t.LOCK.UPDATE });
+    if (!txKhoa || txKhoa.status === 'paid') return txKhoa || tx;
+    const user = await User.findByPk(txKhoa.UserId, { transaction: t, lock: t.LOCK.UPDATE });
+    if (!user) throw new Error('Không tìm thấy người nạp của giao dịch này');
 
-  const balanceAfter = soDu(user) + tx.amount;
-  await user.update({ walletBalance: balanceAfter });
-  await tx.update({
-    status: 'paid',
-    balanceAfter,
-    paidAt: new Date(),
-    bankRef,
-    bankAmount,
-    rawPayload: typeof raw === 'string' ? raw.slice(0, 4000) : JSON.stringify(raw).slice(0, 4000),
-    confirmedBy: boi,
+    const balanceAfter = soDu(user) + txKhoa.amount;
+    await user.update({ walletBalance: balanceAfter }, { transaction: t });
+    await txKhoa.update(
+      {
+        status: 'paid',
+        balanceAfter,
+        paidAt: new Date(),
+        bankRef,
+        bankAmount,
+        rawPayload: typeof raw === 'string' ? raw.slice(0, 4000) : JSON.stringify(raw).slice(0, 4000),
+        confirmedBy: boi,
+      },
+      { transaction: t }
+    );
+
+    baoThay(
+      `Đã cộng ${txKhoa.amount.toLocaleString('vi-VN')}đ vào ví của ${user.name} (${user.email || user.phone || ''})\n` +
+      `Giao dịch ${txKhoa.code} — số dư mới ${balanceAfter.toLocaleString('vi-VN')}đ` +
+      (boi === 'sepay' ? '' : ` — duyệt bởi ${boi || 'tay'}`)
+    );
+    return txKhoa;
   });
-
-  baoThay(
-    `Đã cộng ${tx.amount.toLocaleString('vi-VN')}đ vào ví của ${user.name} (${user.email || user.phone || ''})\n` +
-    `Giao dịch ${tx.code} — số dư mới ${balanceAfter.toLocaleString('vi-VN')}đ` +
-    (boi === 'sepay' ? '' : ` — duyệt bởi ${boi || 'tay'}`)
-  );
-  return tx;
 }
 
-/** Mua 1 tool trả phí bằng số dư ví — trừ tiền, sinh license key, trả về cả hai. */
+/**
+ * Mua 1 tool trả phí bằng số dư ví — trừ tiền, sinh license key, trả về cả
+ * hai. Khoá dòng user trong transaction + kiểm tra lại số dư/đã-mua-chưa
+ * NGAY TRONG transaction đó — bấm mua 2 lần liền tay (double-click) không
+ * thể trừ tiền 2 lần trước khi lần đầu kịp ghi xong.
+ */
 async function muaTool(user, tool) {
   if (!tool.price || tool.price <= 0) throw new Error('Tool này không phải trả phí.');
-  const daMua = await ToolLicense.findOne({ where: { UserId: user.id, ToolId: tool.id } });
-  if (daMua) return { transaction: null, license: daMua, daSoHuu: true };
+  const daMuaTruoc = await ToolLicense.findOne({ where: { UserId: user.id, ToolId: tool.id } });
+  if (daMuaTruoc) return { transaction: null, license: daMuaTruoc, daSoHuu: true };
 
-  if (soDu(user) < tool.price) {
-    throw new Error(`Số dư ví không đủ. Cần ${tool.price.toLocaleString('vi-VN')}đ, hiện có ${soDu(user).toLocaleString('vi-VN')}đ.`);
+  const ketQua = await sequelize.transaction(async (t) => {
+    const userKhoa = await User.findByPk(user.id, { transaction: t, lock: t.LOCK.UPDATE });
+    const daMua = await ToolLicense.findOne({ where: { UserId: user.id, ToolId: tool.id }, transaction: t });
+    if (daMua) return { transaction: null, license: daMua, daSoHuu: true };
+
+    if (soDu(userKhoa) < tool.price) {
+      throw new Error(`Số dư ví không đủ. Cần ${tool.price.toLocaleString('vi-VN')}đ, hiện có ${soDu(userKhoa).toLocaleString('vi-VN')}đ.`);
+    }
+
+    const balanceAfter = soDu(userKhoa) - tool.price;
+    const tx = await WalletTransaction.create(
+      {
+        type: 'purchase',
+        amount: -tool.price,
+        status: 'paid',
+        balanceAfter,
+        description: `Mua tool: ${tool.title}`,
+        relatedType: 'Tool',
+        relatedId: tool.id,
+        paidAt: new Date(),
+        UserId: user.id,
+      },
+      { transaction: t }
+    );
+    await userKhoa.update({ walletBalance: balanceAfter }, { transaction: t });
+
+    let licenseKey = taoLicenseKey();
+    for (let i = 0; i < 5 && (await ToolLicense.findOne({ where: { licenseKey }, transaction: t })); i += 1) licenseKey = taoLicenseKey();
+    const license = await ToolLicense.create(
+      { licenseKey, UserId: user.id, ToolId: tool.id, WalletTransactionId: tx.id },
+      { transaction: t }
+    );
+
+    return { transaction: tx, license, daSoHuu: false };
+  });
+
+  if (!ketQua.daSoHuu) {
+    baoThay(`${user.name} vừa mua tool "${tool.title}" — ${tool.price.toLocaleString('vi-VN')}đ (trừ từ ví).`);
+    await commission.distributeCommission(user, tool.price, 'Tool', tool.id);
   }
-
-  const balanceAfter = soDu(user) - tool.price;
-  const tx = await WalletTransaction.create({
-    type: 'purchase',
-    amount: -tool.price,
-    status: 'paid',
-    balanceAfter,
-    description: `Mua tool: ${tool.title}`,
-    relatedType: 'Tool',
-    relatedId: tool.id,
-    paidAt: new Date(),
-    UserId: user.id,
-  });
-  await user.update({ walletBalance: balanceAfter });
-
-  let licenseKey = taoLicenseKey();
-  for (let i = 0; i < 5 && (await ToolLicense.findOne({ where: { licenseKey } })); i += 1) licenseKey = taoLicenseKey();
-  const license = await ToolLicense.create({
-    licenseKey,
-    UserId: user.id,
-    ToolId: tool.id,
-    WalletTransactionId: tx.id,
-  });
-
-  baoThay(`${user.name} vừa mua tool "${tool.title}" — ${tool.price.toLocaleString('vi-VN')}đ (trừ từ ví).`);
-  await commission.distributeCommission(user, tool.price, 'Tool', tool.id);
-  return { transaction: tx, license, daSoHuu: false };
+  return ketQua;
 }
 
-/** Đóng học phí 1 khóa học bằng số dư ví — trừ tiền, mở khóa học ngay. */
+/**
+ * Đóng học phí 1 khóa học bằng số dư ví — trừ tiền, mở khóa học ngay. Khoá
+ * dòng user + kiểm tra lại "đã ghi danh chưa"/"đủ tiền chưa" NGAY TRONG
+ * transaction, cùng lý do với muaTool() ở trên.
+ */
 async function thanhToanHocPhiBangVi(user, course) {
-  const alreadyEnrolled = await Enrollment.findOne({ where: { UserId: user.id, CourseId: course.id } });
-  if (alreadyEnrolled) throw new Error('Bạn đã sở hữu khóa học này rồi.');
+  const daGhiDanhTruoc = await Enrollment.findOne({ where: { UserId: user.id, CourseId: course.id } });
+  if (daGhiDanhTruoc) throw new Error('Bạn đã sở hữu khóa học này rồi.');
 
   const amount = course.salePrice != null ? course.salePrice : course.price;
-  if (soDu(user) < amount) {
-    throw new Error(`Số dư ví không đủ. Cần ${amount.toLocaleString('vi-VN')}đ, hiện có ${soDu(user).toLocaleString('vi-VN')}đ.`);
-  }
 
-  const order = await Order.create({
-    UserId: user.id,
-    CourseId: course.id,
-    amount,
-    provider: 'mock',
-    status: 'paid',
-    paidAt: new Date(),
-    transactionRef: `VI-${Date.now().toString(36)}`,
-  });
-  const enrollment = await Enrollment.create({ UserId: user.id, CourseId: course.id, OrderId: order.id });
-  await Course.increment('enrollmentCount', { by: 1, where: { id: course.id } });
+  const { order, enrollment } = await sequelize.transaction(async (t) => {
+    const userKhoa = await User.findByPk(user.id, { transaction: t, lock: t.LOCK.UPDATE });
+    const alreadyEnrolled = await Enrollment.findOne({ where: { UserId: user.id, CourseId: course.id }, transaction: t });
+    if (alreadyEnrolled) throw new Error('Bạn đã sở hữu khóa học này rồi.');
 
-  const balanceAfter = soDu(user) - amount;
-  await WalletTransaction.create({
-    type: 'purchase',
-    amount: -amount,
-    status: 'paid',
-    balanceAfter,
-    description: `Đóng học phí: ${course.title}`,
-    relatedType: 'Course',
-    relatedId: course.id,
-    paidAt: new Date(),
-    UserId: user.id,
+    if (soDu(userKhoa) < amount) {
+      throw new Error(`Số dư ví không đủ. Cần ${amount.toLocaleString('vi-VN')}đ, hiện có ${soDu(userKhoa).toLocaleString('vi-VN')}đ.`);
+    }
+
+    const order_ = await Order.create(
+      {
+        UserId: user.id,
+        CourseId: course.id,
+        amount,
+        provider: 'mock',
+        status: 'paid',
+        paidAt: new Date(),
+        transactionRef: `VI-${Date.now().toString(36)}`,
+      },
+      { transaction: t }
+    );
+    const enrollment_ = await Enrollment.create({ UserId: user.id, CourseId: course.id, OrderId: order_.id }, { transaction: t });
+    await Course.increment('enrollmentCount', { by: 1, where: { id: course.id }, transaction: t });
+
+    const balanceAfter = soDu(userKhoa) - amount;
+    await WalletTransaction.create(
+      {
+        type: 'purchase',
+        amount: -amount,
+        status: 'paid',
+        balanceAfter,
+        description: `Đóng học phí: ${course.title}`,
+        relatedType: 'Course',
+        relatedId: course.id,
+        paidAt: new Date(),
+        UserId: user.id,
+      },
+      { transaction: t }
+    );
+    await userKhoa.update({ walletBalance: balanceAfter }, { transaction: t });
+
+    return { order: order_, enrollment: enrollment_ };
   });
-  await user.update({ walletBalance: balanceAfter });
 
   baoThay(`${user.name} vừa đóng học phí "${course.title}" — ${amount.toLocaleString('vi-VN')}đ (trừ từ ví).`);
   await commission.distributeCommission(user, amount, 'Course', course.id);
