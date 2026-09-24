@@ -320,26 +320,46 @@ async function layCacCapDuoi(memberId) {
 async function chiTietThanhVien(memberId) {
   const { idsF1, idsF2, idsF3 } = await layCacCapDuoi(memberId);
 
-  const [doanhThuTrucTiep, doanhThuCapB, doanhThuCapC, tongHoaHongCho, tongHoaHongDaDuyet, tongDaRut, tongDonHang] =
-    await Promise.all([
-      doanhThuCuaNhomNguoiMua(idsF1),
-      doanhThuCuaNhomNguoiMua(idsF2),
-      doanhThuCuaNhomNguoiMua(idsF3),
-      WalletTransaction.sum('amount', {
-        where: { UserId: memberId, type: { [Op.in]: ['commission_l1', 'commission_l2', 'commission_l3'] }, status: 'pending' },
-      }),
-      WalletTransaction.sum('amount', {
-        where: { UserId: memberId, type: { [Op.in]: ['commission_l1', 'commission_l2', 'commission_l3'] }, status: 'paid' },
-      }),
-      WalletTransaction.sum('amount', { where: { UserId: memberId, type: 'withdraw' } }),
-      demSoDonHang(idsF1),
-    ]);
+  const [
+    doanhThuTrucTiep,
+    doanhThuCapB,
+    doanhThuCapC,
+    tongHoaHongCho,
+    tongHoaHongDaDuyet,
+    tongDaRut,
+    tongDonHang,
+    hoaHongTrucTiep,
+    hoaHongCapB,
+    hoaHongCapC,
+  ] = await Promise.all([
+    doanhThuCuaNhomNguoiMua(idsF1),
+    doanhThuCuaNhomNguoiMua(idsF2),
+    doanhThuCuaNhomNguoiMua(idsF3),
+    WalletTransaction.sum('amount', {
+      where: { UserId: memberId, type: { [Op.in]: ['commission_l1', 'commission_l2', 'commission_l3'] }, status: 'pending' },
+    }),
+    WalletTransaction.sum('amount', {
+      where: { UserId: memberId, type: { [Op.in]: ['commission_l1', 'commission_l2', 'commission_l3'] }, status: 'paid' },
+    }),
+    WalletTransaction.sum('amount', { where: { UserId: memberId, type: 'withdraw' } }),
+    demSoDonHang(idsF1),
+    // Hoa hồng chính người này nhận ứng với TỪNG tầng doanh thu — commission_l1
+    // là hoa hồng từ doanh thu trực tiếp (F1), l2 từ cấp B (F2), l3 từ cấp C
+    // (F3) — xem distributeCommission() ở trên (yêu cầu 2026-09-24: hiện luôn
+    // hoa hồng ngay trong ô doanh thu tương ứng).
+    WalletTransaction.sum('amount', { where: { UserId: memberId, type: 'commission_l1' } }),
+    WalletTransaction.sum('amount', { where: { UserId: memberId, type: 'commission_l2' } }),
+    WalletTransaction.sum('amount', { where: { UserId: memberId, type: 'commission_l3' } }),
+  ]);
 
   const hoaHongDaChiTra = Math.abs(tongDaRut || 0);
   return {
     doanhThuTrucTiep,
     doanhThuCapB,
     doanhThuCapC,
+    hoaHongTrucTiep: hoaHongTrucTiep || 0,
+    hoaHongCapB: hoaHongCapB || 0,
+    hoaHongCapC: hoaHongCapC || 0,
     tongDoanhThuMang: doanhThuTrucTiep + doanhThuCapB + doanhThuCapC,
     hoaHongChoDuyet: tongHoaHongCho || 0,
     hoaHongDaDuyet: (tongHoaHongDaDuyet || 0) - hoaHongDaChiTra,
