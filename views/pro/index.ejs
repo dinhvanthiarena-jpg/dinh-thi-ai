@@ -2,8 +2,11 @@
   const dinhDang = (n) => n.toLocaleString('vi-VN');
   const ngay = (d) => new Date(d).toLocaleDateString('vi-VN');
   const goiNam = plans.year;
-  const goiNha = plans.family;
+  const goiSau = plans.half;
   const goiThang = plans.month;
+  // Rẻ hơn bao nhiêu so với trả từng tháng — TÍNH RA chứ đừng viết chết số,
+  // đổi giá mà quên sửa dòng quảng cáo là nói sai với người mua.
+  const reHon = (g) => Math.round((1 - g.amount / (goiThang.amount * g.months)) * 100);
 %>
 
 <!-- Hero: ON-Language đứng trong phòng, chữ đè lên như màn gọi trong app -->
@@ -74,7 +77,7 @@
         <span class="font-extrabold text-violet-700"><%= dinhDang(goiNam.amount) %> đ/năm</span>
       </div>
       <p class="mt-4 rounded-xl bg-violet-50 text-violet-800 text-sm font-semibold text-center py-2">
-        Rẻ hơn 28% so với trả từng tháng
+        Rẻ hơn <%= reHon(goiNam) %>% so với trả từng tháng
       </p>
       <% if (sanSang && currentUser) { %>
         <form method="POST" action="/pro/mua" class="mt-4">
@@ -84,28 +87,28 @@
       <% } %>
     </div>
 
-    <!-- Gói gia đình -->
+    <!-- Gói 6 tháng -->
     <div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
       <div class="flex items-baseline justify-between gap-3">
-        <h3 class="text-xl font-extrabold text-ink">Gói gia đình</h3>
+        <h3 class="text-xl font-extrabold text-ink">Gói 6 tháng</h3>
         <p class="text-right shrink-0">
-          <span class="text-lg font-extrabold text-ink"><%= dinhDang(giaThang.family) %> đ</span>
+          <span class="text-lg font-extrabold text-ink"><%= dinhDang(giaThang.half) %> đ</span>
           <span class="text-muted text-sm">/thg</span>
         </p>
       </div>
-      <p class="text-muted text-sm mt-1">Dành cho tối đa <%= toiDaNhom %> thành viên.</p>
+      <p class="text-muted text-sm mt-1">Trả một lần, dùng trọn nửa năm.</p>
       <div class="border-t border-dashed border-slate-200 my-4"></div>
       <div class="flex items-center justify-between gap-3">
-        <span class="text-muted">Trả một lần cả năm</span>
-        <span class="font-extrabold text-ink"><%= dinhDang(goiNha.amount) %> đ/năm</span>
+        <span class="text-muted">Trả một lần 6 tháng</span>
+        <span class="font-extrabold text-ink"><%= dinhDang(goiSau.amount) %> đ</span>
       </div>
       <p class="mt-3 text-sm text-muted">
-        Chỉ <%= dinhDang(Math.round(goiNha.amount / toiDaNhom / 12)) %> đ mỗi người mỗi tháng nếu đủ <%= toiDaNhom %> người.
+        Rẻ hơn <%= reHon(goiSau) %>% so với trả từng tháng.
       </p>
       <% if (sanSang && currentUser) { %>
         <form method="POST" action="/pro/mua" class="mt-4">
-          <input type="hidden" name="plan" value="family" />
-          <button class="btn btn-outline w-full">Mua gói gia đình</button>
+          <input type="hidden" name="plan" value="half" />
+          <button class="btn btn-outline w-full">Mua gói 6 tháng</button>
         </form>
       <% } %>
     </div>

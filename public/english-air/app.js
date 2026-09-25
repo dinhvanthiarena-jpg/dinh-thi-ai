@@ -5371,12 +5371,12 @@ function veManPro() {
   }
 
   // Xếp gói năm lên trước cho nổi bật, đúng kiểu các app hay làm.
-  const thuTu = ["year", "family", "month"];
-  thuTu.forEach(ma => {
-    const g = d.goi.find(x => x.ma === ma);
-    if (!g) return;
-    b.append(theGoi(g, ma === "year", d));
-  });
+  // Xếp gói DÀI TRƯỚC, ngắn sau — gói đáng mua nhất đứng đầu. Trước đây viết
+  // cứng ["year","family","month"], nên thêm gói 6 tháng vào bảng giá mà app
+  // vẫn không hiện ra. Nay cứ máy chủ trả về gói nào thì bày gói đó, sắp theo
+  // số tháng giảm dần; gói dài nhất là gói "Đề xuất".
+  const dsGoi = (d.goi || []).slice().sort((x, y) => (y.thang || 0) - (x.thang || 0));
+  dsGoi.forEach((g, i) => b.append(theGoi(g, i === 0, d)));
 
   if (!d.dangNhap) {
     const nut = el("button", "pro-cta", "Đăng nhập để bắt đầu");
@@ -5415,8 +5415,11 @@ function theGoi(g, noiBat, d) {
   if (g.thang > 1) {
     the.append(el("div", "pro-dash"));
     const full = el("div", "pro-full");
-    full.append(el("span", null, "Trả một lần cả năm"));
-    full.append(document.createTextNode(tien(g.tien) + "/năm"));
+    // Chữ phải theo ĐÚNG số tháng của gói. Viết cứng "cả năm" thì gói 6 tháng
+    // hiện ra "Trả một lần cả năm — 499.000 đ/năm", tức là nói sai với người mua.
+    const kyHan = g.thang === 12 ? "cả năm" : g.thang + " tháng";
+    full.append(el("span", null, "Trả một lần " + kyHan));
+    full.append(document.createTextNode(tien(g.tien) + (g.thang === 12 ? "/năm" : "/" + g.thang + " tháng")));
     the.append(full);
     if (g.nguoi > 1) {
       the.append(el("div", "pro-save",

@@ -37,11 +37,11 @@ async function veTrangPro(req, res, loiNhom) {
   const maNhom = u && u.familyCode ? u.familyCode : '';
   res.render('pro/index', {
     title: 'ON-Language Pro',
-    plans: pro.PLANS,
+    plans: pro.goiDangBan(),
     giaThang: {
       month: pro.giaMoiThang('month'),
+      half: pro.giaMoiThang('half'),
       year: pro.giaMoiThang('year'),
-      family: pro.giaMoiThang('family'),
     },
     trialDays: pro.NGAY_DUNG_THU,
     toiDaNhom: pro.TOI_DA_GIA_DINH,
@@ -122,7 +122,8 @@ router.get('/api/quyen', an((req, res) => {
 router.get('/api/goi', an(async (req, res) => {
   const u = res.locals.currentUser;
   const maNhom = u && u.familyCode ? u.familyCode : '';
-  const ds = Object.entries(pro.PLANS).map(([ma, g]) => ({
+  // Chỉ trả về gói ĐANG BÁN, gói đã ẩn thì app không hiện.
+  const ds = Object.entries(pro.goiDangBan()).map(([ma, g]) => ({
     ma,
     ten: g.ten,
     tien: g.amount,

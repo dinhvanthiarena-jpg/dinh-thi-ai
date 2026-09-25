@@ -27,10 +27,19 @@ const telegram = require('./telegramService');
 const commission = require('./commissionService');
 
 const PLANS = {
-  month: { months: 1, amount: 29000, ten: 'Gói tháng', nguoi: 1 },
-  year: { months: 12, amount: 249000, ten: 'Gói năm', nguoi: 1 },
-  family: { months: 12, amount: 349000, ten: 'Gói gia đình', nguoi: 5 },
+  month: { months: 1, amount: 199000, ten: 'Gói tháng', nguoi: 1 },
+  half: { months: 6, amount: 499000, ten: 'Gói 6 tháng', nguoi: 1 },
+  year: { months: 12, amount: 699000, ten: 'Gói năm', nguoi: 1 },
+  // TẠM ẨN: giá cũ 349.000đ/năm cho 5 người, tức rẻ hơn một nửa gói năm một
+  // người. Để hiện thì không ai mua gói năm nữa. Giữ lại trong bảng để đơn đã
+  // mua trước đây vẫn tra ra tên gói. Thầy chốt giá mới thì bỏ dòng `an` đi.
+  family: { months: 12, amount: 349000, ten: 'Gói gia đình', nguoi: 5, an: true },
 };
+
+/** Các gói ĐANG BÁN — bỏ những gói đã ẩn. Dùng cho trang bán và cho app. */
+function goiDangBan() {
+  return Object.fromEntries(Object.entries(PLANS).filter(([, g]) => !g.an));
+}
 
 const NGAY_DUNG_THU = 7;
 const TOI_DA_GIA_DINH = 5;
@@ -245,7 +254,7 @@ function duocDung(user) {
 }
 
 module.exports = {
-  PLANS,
+  PLANS, goiDangBan,
   tuDongDoiSoat,
   baoThay,
   NGAY_DUNG_THU,
