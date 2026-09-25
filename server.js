@@ -68,6 +68,16 @@ app.set('trust proxy', 1);
 
 app.use(
   helmet({
+    // Helmet mặc định gắn "Cross-Origin-Resource-Policy: same-origin" lên MỌI
+    // response (kể cả ảnh tĩnh /uploads, /images) — chặn các trình thu thập
+    // dữ liệu cross-origin (facebookexternalhit khi Facebook lấy ảnh xem
+    // trước link, Zalo, các mạng xã hội khác) tải được ảnh, dù ảnh vẫn load
+    // bình thường khi vào thẳng trình duyệt hay fetch cùng-origin. Phát hiện
+    // 2026-09-25: dán link bài blog lên Facebook, tiêu đề/mô tả hiện đúng
+    // (Facebook đọc được HTML) nhưng ảnh trống trơn (Facebook bị CORP chặn
+    // tải ảnh og:image). Site này là nội dung công khai, ảnh vốn dùng để chia
+    // sẻ lên mạng xã hội — nên nới CORP thành "cross-origin" cho toàn site.
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
