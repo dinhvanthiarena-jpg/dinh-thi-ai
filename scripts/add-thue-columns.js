@@ -10,6 +10,12 @@
  *    thời điểm bán. Không tính lại về sau: thuế suất đổi theo năm, đơn cũ phải
  *    giữ đúng con số cũ.
  *
+ * 3. THÊM CỘT familyCode nếu còn thiếu. Không liên quan thuế, nhưng phát hiện
+ *    ra khi kiểm thử trên máy chủ 2026-09-26: model đã có cột này từ trước
+ *    (cho gói gia đình) nhưng chưa ai ALTER lên bảng thật — mọi đơn xác nhận
+ *    thanh toán, không riêng gì đơn có tính thuế, đều lỗi "Unknown column
+ *    familyCode in field list". Thêm luôn ở đây cho gọn một chỗ chạy.
+ *
  * Chạy trên máy chủ:
  *   cd ~/dinh-thi-ai
  *   source ~/nodevenv/dinh-thi-ai/20/bin/activate
@@ -26,6 +32,11 @@ const COT = [
   ['thueTncn', 'INT NOT NULL DEFAULT 0'],
   ['thueTyLe', 'INT NOT NULL DEFAULT 0'],
   ['thueDaTinh', 'TINYINT(1) NOT NULL DEFAULT 0'],
+  // Khong lien quan thue, nhung phat hien ra khi kiem thu: model co san cot
+  // familyCode tu truoc (cho goi gia dinh) ma chua bao gio duoc ALTER len
+  // may chu that — moi don xac nhan thanh toan (khong rieng gi don thue) deu
+  // loi "Unknown column familyCode". Them luon o day cho gon mot cho.
+  ['familyCode', "VARCHAR(255) NOT NULL DEFAULT ('')"],
 ];
 
 async function coCot(bang, cot) {
