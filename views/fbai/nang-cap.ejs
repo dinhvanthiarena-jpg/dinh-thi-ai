@@ -1,0 +1,46 @@
+<section class="mx-auto max-w-xl px-4 sm:px-6 lg:px-8 py-14">
+
+  <h1 class="text-2xl sm:text-3xl font-extrabold text-ink">Nâng cấp gói Website — SA-AI BOT</h1>
+  <p class="text-muted mt-2">Mỗi gói cơ bản đi kèm 1 Website (+ 1 Fanpage + 1 Group). Mua thêm slot để quản lý nhiều Website hơn — <span class="font-bold text-ink"><%= pricePerWeb.toLocaleString('vi-VN') %>đ / web thêm / tháng</span>.</p>
+
+  <% if (!sanSang) { %>
+    <div class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-amber-900">
+      Trang chưa sẵn sàng nhận thanh toán — liên hệ trực tiếp để được hỗ trợ.
+    </div>
+  <% } %>
+
+  <% if (loi) { %>
+    <div class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-rose-900"><%= loi %></div>
+  <% } %>
+
+  <form method="post" action="/fbai-nang-cap/mua" class="card p-6 mt-6 space-y-5">
+    <div>
+      <label class="text-sm font-bold text-ink">License key (FBAI-XXXX-XXXX-XXXX)</label>
+      <input type="text" name="key" value="<%= key %>" required
+             class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-mono tracking-wider"
+             placeholder="FBAI-XXXX-XXXX-XXXX" />
+      <% if (key) { %>
+        <% if (!wellFormed) { %>
+          <p class="text-xs text-rose-600 mt-2">Mã không đúng định dạng.</p>
+        <% } else if (!active) { %>
+          <p class="text-xs text-rose-600 mt-2">Mã không tồn tại hoặc đã hết hạn/bị thu hồi.</p>
+        <% } else { %>
+          <p class="text-xs text-emerald-600 mt-2">Đang dùng được <%= currentLimit %> Website.</p>
+        <% } %>
+      <% } %>
+    </div>
+
+    <div>
+      <label class="text-sm font-bold text-ink">Số Website muốn dùng THÊM (ngoài mức cơ bản)</label>
+      <select name="soWeb" class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3">
+        <% for (let n = 1; n <= 10; n++) { %>
+          <option value="<%= n %>">+<%= n %> web — <%= (n * pricePerWeb).toLocaleString('vi-VN') %>đ/tháng</option>
+        <% } %>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-full" <%= sanSang ? '' : 'disabled' %>>Tạo đơn thanh toán</button>
+    <p class="text-xs text-muted">Gói nâng cấp tính theo THÁNG — hết hạn 30 ngày không gia hạn sẽ tự động rơi về mức cơ bản (1 Website).</p>
+  </form>
+
+</section>

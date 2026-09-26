@@ -233,6 +233,7 @@ app.use('/api/battle', battleApiRoutes);
 app.use('/api/english-air', englishAirApiRoutes);
 app.use('/pro', proRoutes);
 app.use('/vi', walletRoutes);
+app.use('/fbai-nang-cap', require('./routes/fbaiWebUpgrade'));
 // LƯU Ý: "/gioi-thieu" (không có "-ban-be") đã là trang "Giới thiệu" (About)
 // có sẵn, xử lý bởi indexRoutes (routes/index.js -> homeController.about) —
 // tuyệt đối không trùng path đó, sẽ bị nuốt mất bởi route có sẵn.

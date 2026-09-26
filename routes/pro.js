@@ -3,6 +3,7 @@ const { ProOrder, User } = require('../models');
 const { requireAuth } = require('../middleware/auth');
 const pro = require('../services/proService');
 const wallet = require('../services/walletService');
+const fbaiWebUpgrade = require('../services/fbaiWebUpgradeService');
 const { WalletTransaction } = require('../models');
 
 const router = express.Router();
@@ -213,10 +214,21 @@ router.post('/webhook/sepay', express.json(), an(async (req, res) => {
     const chieu = String(b.transferType || 'in').toLowerCase();
     if (chieu !== 'in' || vao <= 0) return res.json({ success: true, bo_qua: 'không phải tiền vào' });
 
-    // Mã nạp ví (VI...) và mã gói Pro (MONL...) cùng đi qua 1 webhook duy nhất
-    // — không phải cấu hình thêm URL thứ hai bên SePay.
+    // Mã nạp ví (VI...), mã gói Pro (MONL...), và mã nâng cấp gói Website
+    // SA-AI BOT (WEBAI...) cùng đi qua 1 webhook duy nhất — không phải cấu
+    // hình thêm URL thứ hai bên SePay.
     const maVi = (noiDung.match(/VI[A-Z0-9]{6}/) || [])[0];
     const maPro = (noiDung.match(/MONL[A-Z0-9]{6}/) || [])[0];
+    const maWebUpgrade = (noiDung.match(/WEBAI[A-Z0-9]{6}/) || [])[0];
+
+    if (maWebUpgrade) {
+      const order = fbaiWebUpgrade.getOrder(maWebUpgrade);
+      if (!order) return res.json({ success: true, bo_qua: 'không có đơn nâng cấp web nào mang mã này' });
+      if (order.status === 'paid') return res.json({ success: true, bo_qua: 'đơn đã ghi nhận rồi' });
+      if (vao < order.amount) return res.json({ success: true, bo_qua: 'chuyển thiếu tiền' });
+      fbaiWebUpgrade.confirmOrder(maWebUpgrade, { bankRef: String(b.referenceCode || b.id || '') });
+      return res.json({ success: true });
+    }
 
     if (maVi) {
       const tx = await WalletTransaction.findOne({ where: { code: maVi } });

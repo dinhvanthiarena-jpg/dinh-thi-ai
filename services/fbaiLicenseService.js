@@ -23,6 +23,14 @@ const ALPHABET = '23456789ABCDEFGHJKLMNPQRSTVWXYZ';
 const PREFIX = 'FBAI';
 const LICENSE_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // bán theo tháng, giống hệt aaiLicenseService
 
+// Giới hạn số Website nhận bài — gói cơ bản (mua tool) luôn đi kèm 1 Website
+// (+ 1 Fanpage + 1 Group tương ứng, enforce ở phía desktop tool). Mua thêm
+// web qua fbaiWebUpgradeService tính THEO THÁNG (200k/web/tháng, giống hệt
+// chu kỳ 30 ngày của bản thân license) — hết hạn KHÔNG gia hạn thì tự động
+// rơi về lại đúng 1 web, không cần thầy tay thu hồi thủ công.
+const BASE_WEBSITE_LIMIT = 1;
+const EXTRA_WEB_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+
 const KEYS_PATH = path.join(__dirname, '..', 'data', 'fbai-desktop-licenses.json');
 
 function loadKeys() {
@@ -149,7 +157,7 @@ function checkAndBindDevice(key, deviceId, label) {
       saveKeys(list);
     }
   }
-  return { valid: true };
+  return { valid: true, websiteLimit: effectiveWebsiteLimit(entry) };
 }
 
 // Cho khách đổi máy hợp lệ (máy cũ hỏng/thầy xác nhận thủ công) - gỡ khoá
@@ -170,6 +178,36 @@ function normalizeAndFormat(input) {
   if (payload.startsWith(PREFIX)) payload = payload.slice(PREFIX.length);
   if (payload.length !== 12) return normalizeKey(input);
   return formatKey(payload.slice(0, 8), payload.slice(8, 12));
+}
+
+// Số Website (+Fanpage+Group) hiệu lực TẠI THỜI ĐIỂM GỌI — tính động từ
+// extraWebs/extraWebsExpiresAt thay vì lưu sẵn 1 con số tĩnh, để tự rơi về
+// mức cơ bản ngay khi hết hạn mà không cần 1 tiến trình dọn dẹp nào chạy nền.
+function effectiveWebsiteLimit(entry) {
+  if (!entry) return BASE_WEBSITE_LIMIT;
+  if (entry.extraWebs && entry.extraWebsExpiresAt && Date.now() < entry.extraWebsExpiresAt) {
+    return BASE_WEBSITE_LIMIT + entry.extraWebs;
+  }
+  return BASE_WEBSITE_LIMIT;
+}
+
+// Gọi sau khi xác nhận thanh toán thật (SePay webhook) — set lại (KHÔNG cộng
+// dồn) số web thêm + đặt lại hạn 30 ngày kể từ lúc trả tiền. Trả tiền lần sau
+// cho số lượng khác sẽ THAY THẾ mức cũ (không cộng dồn 2 lần mua).
+function setExtraWebs(key, extraWebs) {
+  const list = loadKeys();
+  const entry = list.find((k) => k.key === normalizeAndFormat(key));
+  if (!entry) return null;
+  entry.extraWebs = extraWebs;
+  entry.extraWebsExpiresAt = Date.now() + EXTRA_WEB_DURATION_MS;
+  saveKeys(list);
+  return entry;
+}
+
+function getWebsiteLimit(key) {
+  if (!isWellFormed(key)) return BASE_WEBSITE_LIMIT;
+  const entry = loadKeys().find((k) => k.key === normalizeAndFormat(key));
+  return effectiveWebsiteLimit(entry);
 }
 
 function isActiveLicense(input) {
@@ -193,4 +231,8 @@ module.exports = {
   resetDevice,
   isWellFormed,
   normalizeAndFormat,
+  effectiveWebsiteLimit,
+  setExtraWebs,
+  getWebsiteLimit,
+  BASE_WEBSITE_LIMIT,
 };
