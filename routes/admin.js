@@ -38,6 +38,10 @@ router.post('/blog/:id/delete', adminController.blogDelete);
 
 router.get('/orders', adminController.orderList);
 router.get('/pro-orders', adminController.proOrderList);
+
+// Sổ thuế — tính sẵn phần phải trích từ mỗi đơn, và xuất bảng kê đi khai.
+router.get('/thue', adminController.thuePage);
+router.get('/thue/xuat', adminController.thueXuat);
 router.post('/pro-orders/:id/confirm', adminController.proOrderConfirm);
 
 router.get('/wallet', adminController.walletTransactionList);

@@ -259,6 +259,64 @@ exports.orderList = async (req, res) => {
   res.render('admin/orders', { title: 'Đơn hàng', orders });
 };
 
+/* ══════════ SỔ THUẾ ══════════
+   Xem services/thueService.js để biết vì sao KHÔNG tự nộp thuế được. */
+exports.thuePage = async (req, res) => {
+  const thue = require('../services/thueService');
+  const namNay = new Date().getFullYear();
+  const nam = Math.min(namNay, Math.max(2024, parseInt(req.query.nam, 10) || namNay));
+
+  const [nam_, banThang] = await Promise.all([thue.tinhHinhNam(nam), thue.banThang(nam)]);
+  delete nam_.donHang;
+
+  const banQuy = [];
+  for (let q = 1; q <= 4; q += 1) {
+    const t = await thue.tongHop('quy', nam, q);
+    delete t.donHang;
+    banQuy.push({ quy: q, ...t });
+  }
+
+  const cacNam = [];
+  for (let y = namNay; y >= 2024; y -= 1) cacNam.push(y);
+
+  res.render('admin/thue', {
+    title: 'Sổ thuế', nam, cacNam, nam_, banThang, banQuy,
+    cauHinh: thue.cauHinh(),
+  });
+};
+
+/* Hai hằng này viết bằng MÃ KÝ TỰ, không viết "\r\n" hay ký tự BOM thẳng:
+   chuỗi đi qua mấy lớp công cụ hay bị nuốt mất một lớp dấu gạch chéo ngược,
+   đã dính đúng bẫy đó ở chính dòng dưới. */
+const BOM = String.fromCharCode(0xFEFF);
+const XUONG_DONG = String.fromCharCode(13) + String.fromCharCode(10);
+
+/** Bảng kê CSV để mở bằng Excel lúc đi khai thuế. */
+exports.thueXuat = async (req, res) => {
+  const thue = require('../services/thueService');
+  const nam = parseInt(req.query.nam, 10) || new Date().getFullYear();
+  const n = await thue.tongHop('nam', nam);
+
+  const dong = [['Ma don', 'Ngay thu tien', 'Goi', 'Doanh thu', 'Thue GTGT', 'Thue TNCN', 'Tong thue', 'Thuc nhan']];
+  n.donHang.forEach((d) => {
+    const g = (d.thueGtgt || 0) + (d.thueTncn || 0);
+    dong.push([
+      d.code,
+      d.paidAt ? new Date(d.paidAt).toLocaleDateString('vi-VN') : '',
+      d.plan,
+      d.amount, d.thueGtgt || 0, d.thueTncn || 0, g, d.amount - g,
+    ]);
+  });
+  dong.push([]);
+  dong.push(['TONG NAM ' + nam, '', '', n.doanhThu, n.gtgt, n.tncn, n.tongThue, n.thucNhan]);
+
+  // BOM ﻿ để Excel trên Windows đọc đúng tiếng Việt, thiếu là ra chữ vuông.
+  const csv = BOM + dong.map((r) => r.join(",")).join(XUONG_DONG);
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="so-thue-${nam}.csv"`);
+  res.send(csv);
+};
+
 exports.proOrderList = async (req, res) => {
   const { ProOrder } = require('../models');
   const pro = require('../services/proService');

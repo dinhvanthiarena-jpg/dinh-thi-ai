@@ -25,6 +25,7 @@
 const { ProOrder, User } = require('../models');
 const telegram = require('./telegramService');
 const commission = require('./commissionService');
+const thue = require('./thueService');
 
 const PLANS = {
   month: { months: 1, amount: 199000, ten: 'Gói tháng', nguoi: 1 },
@@ -180,6 +181,10 @@ async function ghiNhanDaTra(order, { bankRef = '', bankAmount = null, raw = '', 
     (boi === 'sepay' ? '' : ` — duyệt bởi ${boi || 'tay'}`)
   );
 
+  // Chốt số thuế NGAY LÚC NÀY rồi lưu vào đơn. Không tính lại về sau: thuế
+  // suất đổi theo năm, mà đơn cũ phải giữ đúng con số của thời điểm bán.
+  const t = thue.tinhThue(order.amount);
+
   await order.update({
     familyCode: order.plan === 'family' ? maNha : '',
     status: 'paid',
@@ -188,6 +193,10 @@ async function ghiNhanDaTra(order, { bankRef = '', bankAmount = null, raw = '', 
     bankAmount,
     rawPayload: typeof raw === 'string' ? raw.slice(0, 4000) : JSON.stringify(raw).slice(0, 4000),
     confirmedBy: boi,
+    thueGtgt: t.gtgt,
+    thueTncn: t.tncn,
+    thueTyLe: t.tyLe,
+    thueDaTinh: true,
   });
   await commission.distributeCommission(user, order.amount, 'Pro', order.id);
   return order;

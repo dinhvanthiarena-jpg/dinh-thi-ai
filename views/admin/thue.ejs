@@ -1,0 +1,150 @@
+<%
+  const tien = (n) => Number(n || 0).toLocaleString('vi-VN') + 'đ';
+  const TEN_THANG = ['', 'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+                     'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+%>
+
+<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+  <div>
+    <h1 class="text-2xl font-extrabold text-ink">Sổ thuế — gói Pro</h1>
+    <p class="text-muted text-sm mt-1">
+      Doanh thu và phần thuế phải trích, tính sẵn theo từng đơn đã thu tiền.
+    </p>
+  </div>
+  <form method="GET" class="flex items-center gap-2">
+    <label class="text-sm font-semibold text-muted">Năm</label>
+    <select name="nam" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm" onchange="this.form.submit()">
+      <% cacNam.forEach((y) => { %>
+        <option value="<%= y %>" <%= y === nam ? 'selected' : '' %>><%= y %></option>
+      <% }) %>
+    </select>
+    <a href="/admin/thue/xuat?nam=<%= nam %>" class="btn btn-outline text-sm">Tải bảng kê (CSV)</a>
+  </form>
+</div>
+
+<% if (!cauHinh.bat) { %>
+  <div class="rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-amber-900 mb-6">
+    <p class="font-bold">Đang TẮT phần tính thuế.</p>
+    <p class="text-sm mt-1">
+      Mọi đơn ghi thuế bằng 0. Muốn bật thì thêm biến <code class="font-mono">THUE_BAT</code> = <code class="font-mono">on</code>
+      trong cPanel → Setup Node.js App → dinh-thi-ai → Environment variables.
+    </p>
+  </div>
+<% } %>
+
+<!-- Tình hình so với ngưỡng miễn thuế -->
+<div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 mb-6">
+  <div class="flex flex-wrap items-baseline justify-between gap-3">
+    <h2 class="text-lg font-extrabold text-ink">Doanh thu năm <%= nam %></h2>
+    <span class="text-2xl font-extrabold text-violet-700"><%= tien(nam_.doanhThu) %></span>
+  </div>
+
+  <div class="mt-4 h-3 w-full rounded-full bg-slate-100 overflow-hidden">
+    <div class="h-full rounded-full <%= nam_.daVuot ? 'bg-rose-500' : 'bg-emerald-500' %>"
+         style="width: <%= nam_.phanTram %>%"></div>
+  </div>
+
+  <p class="mt-3 text-sm <%= nam_.daVuot ? 'text-rose-700 font-semibold' : 'text-muted' %>">
+    <% if (nam_.daVuot) { %>
+      Đã vượt ngưỡng <%= tien(nam_.nguong) %> — năm nay phải kê khai và nộp thuế.
+    <% } else { %>
+      Còn <%= tien(nam_.conCachNguong) %> nữa mới chạm ngưỡng <%= tien(nam_.nguong) %>.
+      Dưới ngưỡng thì được miễn, nhưng vẫn nên giữ sổ cho rõ ràng.
+    <% } %>
+  </p>
+
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-dashed border-slate-200">
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wide text-muted">Số đơn</p>
+      <p class="text-xl font-extrabold text-ink mt-1"><%= nam_.soDon %></p>
+    </div>
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wide text-muted">Thuế GTGT (<%= cauHinh.gtgt %>%)</p>
+      <p class="text-xl font-extrabold text-ink mt-1"><%= tien(nam_.gtgt) %></p>
+    </div>
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wide text-muted">Thuế TNCN (<%= cauHinh.tncn %>%)</p>
+      <p class="text-xl font-extrabold text-ink mt-1"><%= tien(nam_.tncn) %></p>
+    </div>
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wide text-muted">Thầy thực nhận</p>
+      <p class="text-xl font-extrabold text-emerald-700 mt-1"><%= tien(nam_.thucNhan) %></p>
+    </div>
+  </div>
+</div>
+
+<!-- Bảng theo tháng -->
+<div class="rounded-2xl border border-slate-200 bg-white overflow-hidden mb-6">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-left">
+        <tr>
+          <th class="px-4 py-3 font-bold text-ink">Kỳ</th>
+          <th class="px-4 py-3 font-bold text-ink text-right">Số đơn</th>
+          <th class="px-4 py-3 font-bold text-ink text-right">Doanh thu</th>
+          <th class="px-4 py-3 font-bold text-ink text-right">GTGT</th>
+          <th class="px-4 py-3 font-bold text-ink text-right">TNCN</th>
+          <th class="px-4 py-3 font-bold text-ink text-right">Tổng thuế</th>
+          <th class="px-4 py-3 font-bold text-ink text-right">Thực nhận</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <% banThang.forEach((t) => { %>
+          <tr class="<%= t.soDon ? '' : 'text-slate-400' %>">
+            <td class="px-4 py-3 font-semibold"><%= TEN_THANG[t.thang] %></td>
+            <td class="px-4 py-3 text-right tabular-nums"><%= t.soDon || '—' %></td>
+            <td class="px-4 py-3 text-right tabular-nums"><%= t.soDon ? tien(t.doanhThu) : '—' %></td>
+            <td class="px-4 py-3 text-right tabular-nums"><%= t.soDon ? tien(t.gtgt) : '—' %></td>
+            <td class="px-4 py-3 text-right tabular-nums"><%= t.soDon ? tien(t.tncn) : '—' %></td>
+            <td class="px-4 py-3 text-right tabular-nums font-semibold"><%= t.soDon ? tien(t.tongThue) : '—' %></td>
+            <td class="px-4 py-3 text-right tabular-nums"><%= t.soDon ? tien(t.thucNhan) : '—' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+      <tfoot class="bg-slate-50 font-extrabold text-ink">
+        <tr>
+          <td class="px-4 py-3">Cả năm</td>
+          <td class="px-4 py-3 text-right tabular-nums"><%= nam_.soDon %></td>
+          <td class="px-4 py-3 text-right tabular-nums"><%= tien(nam_.doanhThu) %></td>
+          <td class="px-4 py-3 text-right tabular-nums"><%= tien(nam_.gtgt) %></td>
+          <td class="px-4 py-3 text-right tabular-nums"><%= tien(nam_.tncn) %></td>
+          <td class="px-4 py-3 text-right tabular-nums"><%= tien(nam_.gtgt + nam_.tncn) %></td>
+          <td class="px-4 py-3 text-right tabular-nums"><%= tien(nam_.thucNhan) %></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<!-- Theo quý, vì khai thuế thường theo quý -->
+<div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 mb-6">
+  <h2 class="text-lg font-extrabold text-ink mb-4">Theo quý — dùng số này để kê khai</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <% banQuy.forEach((q) => { %>
+      <div class="rounded-xl border border-slate-200 p-4">
+        <p class="font-bold text-ink">Quý <%= q.quy %></p>
+        <p class="text-xs text-muted mt-0.5"><%= q.soDon %> đơn</p>
+        <p class="text-lg font-extrabold text-ink mt-2"><%= tien(q.doanhThu) %></p>
+        <div class="border-t border-dashed border-slate-200 my-3"></div>
+        <p class="text-sm flex justify-between"><span class="text-muted">GTGT</span><span class="tabular-nums"><%= tien(q.gtgt) %></span></p>
+        <p class="text-sm flex justify-between"><span class="text-muted">TNCN</span><span class="tabular-nums"><%= tien(q.tncn) %></span></p>
+        <p class="text-sm flex justify-between font-bold mt-1"><span>Phải nộp</span><span class="tabular-nums"><%= tien(q.tongThue) %></span></p>
+      </div>
+    <% }) %>
+  </div>
+</div>
+
+<div class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-muted">
+  <p class="font-bold text-ink mb-1">Mấy điều cần nhớ</p>
+  <ul class="list-disc pl-5 space-y-1">
+    <li>App <b>không tự nộp thuế được</b>. Không có cổng nào cho phép nộp thay cá nhân.
+        Thầy nộp qua <b>eTax Mobile</b> hoặc cổng Thuế điện tử bằng tài khoản của mình.</li>
+    <li>Sổ này tính theo <b>tỷ lệ trên doanh thu</b> — <%= cauHinh.gtgt %>% GTGT + <%= cauHinh.tncn %>% TNCN
+        = <%= cauHinh.tong %>%, không trừ chi phí. Đây là cách áp dụng cho cá nhân kinh doanh.</li>
+    <li>Đây là <b>công cụ ghi sổ, không phải lời tư vấn thuế</b>. Trước khi khai thật,
+        thầy hỏi lại cơ quan thuế hoặc kế toán xem app xếp vào nhóm ngành nào và
+        ngưỡng năm nay bao nhiêu, rồi chỉnh lại mấy biến môi trường cho khớp.</li>
+    <li>Số thuế được chốt <b>ngay lúc thu tiền</b> và giữ nguyên. Đổi thuế suất về sau
+        không làm thay đổi đơn cũ.</li>
+  </ul>
+</div>
