@@ -30,6 +30,30 @@ function checkToken(req, res, next) {
   next();
 }
 
+// Tra cứu bài viết CÓ SẴN trên site theo chủ đề — dùng cho tool desktop lấy
+// lại đúng link bài đã đăng để chia sẻ vào Group, thay vì luôn phải viết bài
+// mới. Cùng URL/token với endpoint đăng bài ở trên, chỉ khác method (GET) và
+// không ghi gì vào DB — an toàn để mở thêm mà không cần route/target mới.
+router.get('/', checkToken, async (req, res) => {
+  try {
+    const q = String(req.query.q || '').trim();
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 5, 1), 20);
+    const { Op } = require('sequelize');
+    const where = { isPublished: true };
+    if (q) where[Op.or] = [{ title: { [Op.like]: `%${q}%` } }, { content: { [Op.like]: `%${q}%` } }];
+    const posts = await BlogPost.findAll({
+      where,
+      order: [['publishedAt', 'DESC']],
+      limit,
+      attributes: ['title', 'slug', 'excerpt', 'publishedAt'],
+    });
+    res.json({ ok: true, posts: posts.map((p) => ({ title: p.title, url: `/blog/${p.slug}`, excerpt: p.excerpt })) });
+  } catch (e) {
+    console.error('[autopost] search error', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 router.post('/', checkToken, async (req, res) => {
   try {
     const { title, content, link, imageBase64 } = req.body || {};
