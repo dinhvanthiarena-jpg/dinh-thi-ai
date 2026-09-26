@@ -410,15 +410,13 @@ exports.affOverview = async (req, res) => {
 
 // Sơ đồ Mindmap (mục 7 đặc tả) — "WEB CHỦ" là nút gốc ẢO (không phải 1 user
 // cụ thể), các user KHÔNG có parentId nhưng ĐÃ giới thiệu được ai đó trở
-// thành nhánh con trực tiếp của WEB (= cấp A). "Cấp" ở đây CHỈ LÀ độ sâu
-// hiển thị tính từ WEB CHỦ cho dễ thống kê (yêu cầu 2026-09-23: "cấp 4...
-// cũng phải hiển thị ra chứ... để còn thống kê người vào") — KHÔNG liên
-// quan tới cách tính hoa hồng. Hoa hồng (services/commissionService.js
-// #distributeCommission) luôn đi lùi ĐÚNG 3 cấp từ NGƯỜI MUA, bất kể người
-// mua đứng "Cấp" bao nhiêu trên sơ đồ này — ai đứng Cấp 4+ vẫn tạo ra hoa
-// hồng bình thường cho 3 người giới thiệu trực tiếp phía trên họ. View chỉ
-// tô màu khác (tím nhạt Cấp 1-3, xám Cấp 4+) để dễ nhìn, không phải để nói
-// "cấp này không ăn hoa hồng".
+// thành nhánh con trực tiếp của WEB (= Cấp 1, đại lý). "Cấp" ở đây CHỈ LÀ độ
+// sâu hiển thị tính từ WEB CHỦ cho dễ thống kê người vào — KHÔNG liên quan
+// tới cách tính hoa hồng. Từ 2026-09-27, hoa hồng (services/commissionService.js
+// #distributeCommission) CHỈ còn trả cho ĐÚNG 1 người giới thiệu trực tiếp
+// phía trên người mua (mô hình 1 cấp, không còn Cấp 2/Cấp 3 nữa). View tô
+// màu khác (tím nhạt Cấp 1 = đại lý, xám Cấp 2+ = khách hàng/đội nhóm) để dễ
+// nhìn ai còn là đại lý.
 exports.affNetwork = async (req, res) => {
   const { Op } = require('sequelize');
   // Hiện MỌI đại lý đã duyệt ngay dưới "WEB CHỦ" (Cấp A) dù họ chưa giới

@@ -1,15 +1,18 @@
 /**
- * Hoa hồng "Giới thiệu bạn bè" — mô hình 3 cấp WEB -> A -> B -> C (đúng theo
- * đặc tả thầy gửi 23/09/2026, "Dac_ta_he_thong_ban_hang_Affiliate_3_cap"):
- *   - Khách mua hàng qua link của C -> C nhận hoa hồng Cấp 1 (trực tiếp).
- *   - B (người giới thiệu C) nhận hoa hồng Cấp 2 trên CHÍNH đơn hàng đó.
- *   - A (người giới thiệu B) nhận hoa hồng Cấp 3 trên CHÍNH đơn hàng đó.
- * Hệ thống hiện KHÔNG có role A/B/C cố định riêng — MỌI user đều bình đẳng,
- * "là A hay B hay C" chỉ là vị trí tương đối trong cây parentId tại thời
- * điểm 1 đơn hàng cụ thể phát sinh (một người có thể vừa là B của đơn này
- * vừa là A của đơn khác). Điều này đơn giản hơn nhiều so với việc quản lý
- * role/quyền tách biệt theo cấp, mà vẫn tự nhiên thỏa "chỉ xem được mình +
- * cấp dưới" (mỗi dashboard vốn đã tự lọc theo req.user.id).
+ * Hoa hồng "Giới thiệu bạn bè" — mô hình 1 cấp (đổi từ mô hình 3 cấp cũ theo
+ * yêu cầu 2026-09-27: "phần web mình chỉ phát triển 1 cấp và trả hoa hồng
+ * cho 1 cấp thôi... còn bên dưới là đội nhóm thôi"):
+ *   - Chỉ Cấp 1 (được WEB CHỦ giới thiệu trực tiếp, tức không có parentId)
+ *     mới được đăng ký/duyệt làm đại lý — xem CAP_TOI_DA_LAM_DAI_LY bên dưới.
+ *   - Khách mua hàng qua link của 1 đại lý -> CHỈ người giới thiệu trực tiếp
+ *     (đại lý đó) nhận hoa hồng. Không còn hoa hồng Cấp 2/Cấp 3 trả ngược
+ *     lên nữa, dù cây parentId có sâu hơn 1 cấp từ dữ liệu cũ.
+ *   - Người được 1 đại lý giới thiệu (Cấp 2 trở đi) LUÔN LUÔN là khách hàng
+ *     thường/"đội nhóm" của đại lý đó — mua hàng vẫn tạo hoa hồng cho đúng 1
+ *     người giới thiệu trực tiếp phía trên, nhưng bản thân họ không đăng ký
+ *     làm đại lý được và không có link giới thiệu hoạt động (xem
+ *     middleware/affiliateTracking.js — chỉ refCode của agentStatus=
+ *     'approved' mới được ghi nhận).
  *
  * WALLET LEDGER — Pending -> Available (mục 13 trong đặc tả, "không sửa
  * trực tiếp số dư ví"): mỗi hoa hồng khi phát sinh được ghi
@@ -34,12 +37,12 @@ const { Setting, User, WalletTransaction, WithdrawRequest, Order, ProOrder, Audi
 const { sequelize } = require('../config/db');
 
 const PENDING_DAYS = 7;
-// Chỉ Cấp 1-3 tính từ WEB CHỦ mới được là đại lý (đúng mô hình WEB->A->B->C
-// trong đặc tả) — Cấp 4 trở đi LUÔN LUÔN là khách hàng thông thường, không
-// đăng ký/đăng nhập với vai trò đại lý được, dù hoa hồng vẫn tính bình
-// thường CHO 3 người giới thiệu phía trên họ khi họ mua hàng (yêu cầu
-// 2026-09-24: "cấu hình toàn bộ cứ cấp 4 chỉ là khách hàng thông thường").
-const CAP_TOI_DA_LAM_DAI_LY = 3;
+// Chỉ Cấp 1 tính từ WEB CHỦ mới được là đại lý (yêu cầu 2026-09-27: "đổi cả
+// 2 còn bên dưới là đội nhóm thôi") — Cấp 2 trở đi LUÔN LUÔN là khách hàng
+// thường/đội nhóm, không đăng ký/đăng nhập với vai trò đại lý được, dù mua
+// hàng vẫn tạo hoa hồng bình thường cho đúng 1 người giới thiệu trực tiếp
+// phía trên họ (xem distributeCommission bên dưới — chỉ còn trả Cấp 1).
+const CAP_TOI_DA_LAM_DAI_LY = 1;
 
 /** Đếm Cấp của 1 user tính từ WEB CHỦ (Cấp 1 = không có parentId). Có chốt
  * an toàn 50 vòng phòng dữ liệu lỗi tạo vòng lặp parentId. */
@@ -141,7 +144,11 @@ async function distributeCommission(buyer, amount, relatedType, relatedId) {
   const rates = await getRates();
   const tenSanPham = relatedType === 'Course' ? 'khóa học' : relatedType === 'Tool' ? 'tool' : 'gói Pro';
 
-  const c = await User.findByPk(buyer.parentId); // người giới thiệu trực tiếp (Cấp 1)
+  // Chỉ còn trả hoa hồng cho ĐÚNG 1 người — người giới thiệu trực tiếp
+  // (yêu cầu 2026-09-27: "chỉ phát triển 1 cấp và trả hoa hồng cho 1 cấp
+  // thôi"). Không còn truy ngược lên Cấp 2/Cấp 3 nữa, kể cả với cây parentId
+  // sâu hơn từ dữ liệu cũ trước khi đổi mô hình.
+  const c = await User.findByPk(buyer.parentId); // người giới thiệu trực tiếp
   if (!c) return;
   await ghiHoaHongCho(
     c,
@@ -149,31 +156,7 @@ async function distributeCommission(buyer, amount, relatedType, relatedId) {
     'L1',
     relatedType,
     relatedId,
-    `Hoa hồng Cấp 1 (${rates.l1Percent}%) từ ${buyer.name} mua ${tenSanPham}`
-  );
-
-  if (!c.parentId) return;
-  const b = await User.findByPk(c.parentId); // Cấp 2
-  if (!b) return;
-  await ghiHoaHongCho(
-    b,
-    Math.round((amount * rates.l2Percent) / 100),
-    'L2',
-    relatedType,
-    relatedId,
-    `Hoa hồng Cấp 2 (${rates.l2Percent}%) từ ${buyer.name} (qua ${c.name})`
-  );
-
-  if (!b.parentId) return;
-  const a = await User.findByPk(b.parentId); // Cấp 3
-  if (!a) return;
-  await ghiHoaHongCho(
-    a,
-    Math.round((amount * rates.l3Percent) / 100),
-    'L3',
-    relatedType,
-    relatedId,
-    `Hoa hồng Cấp 3 (${rates.l3Percent}%) từ ${buyer.name} (qua ${b.name})`
+    `Hoa hồng giới thiệu (${rates.l1Percent}%) từ ${buyer.name} mua ${tenSanPham}`
   );
 }
 
@@ -268,7 +251,7 @@ async function tuChoiRutTien(withdrawRequestId, boi, note) {
 }
 
 /** Admin duyệt đăng ký đại lý — chỉ tác dụng khi đang 'pending' (tránh duyệt
- * trùng), và chặn nếu user đã ở Cấp 4 trở đi (chỉ Cấp 1-3 được là đại lý). */
+ * trùng), và chặn nếu user đã ở Cấp 2 trở đi (chỉ Cấp 1 được là đại lý). */
 async function duyetDaiLy(userId, boi) {
   const user = await User.findByPk(userId);
   if (!user || user.agentStatus !== 'pending') return user;
