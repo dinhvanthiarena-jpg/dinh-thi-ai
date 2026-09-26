@@ -15,6 +15,7 @@ const expressLayouts = require('express-ejs-layouts');
 const connectDB = require('./config/db');
 const { attachUser } = require('./middleware/auth');
 const { affiliateTracking } = require('./middleware/affiliateTracking');
+const csrf = require('./middleware/csrf');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const { startScheduler } = require('./services/contentScheduler');
 const { batDauNhacHoc } = require('./services/nhacHocService');
@@ -135,6 +136,8 @@ app.use(
   })
 );
 app.use(cookieParser());
+app.use(csrf.issueToken);
+app.use(csrf.verifyTokenSkippingMultipart);
 app.use(methodOverride('_method'));
 // The game's PWA app-shell files (index.html/app.js/style.css/sw.js/manifest)
 // get redeployed often via `git pull` on the server — without an explicit

@@ -14,6 +14,7 @@
   <meta name="description" content="<%= metaDesc %>" />
   <% if (pageUrl) { %><link rel="canonical" href="<%= pageUrl %>" /><% } %>
   <meta name="google-site-verification" content="FeFP6JE5FW25omeNqpfic8CLHHiKomqylD3EG_9u-7o" />
+  <meta name="csrf-token" content="<%= csrfToken %>" />
 
   <meta property="og:site_name" content="Vietpro" />
   <!-- App "Dinh Thi Ai Website" (1364909193363859) — app riêng cho web,
@@ -116,6 +117,7 @@
   <%- include('../partials/shopee-floating') %>
   <%- include('../partials/chatbot-widget') %>
 
+  <script src="/js/csrf.js" defer></script>
   <script src="/js/main.js" defer></script>
   <script src="/js/chatbot.js" defer></script>
   <%- include('../partials/facebook-chat') %>
