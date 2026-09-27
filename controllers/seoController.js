@@ -39,6 +39,15 @@ exports.robots = (req, res) => {
   );
 };
 
+// Bing/Yandex xác minh quyền sở hữu domain bằng cách yêu cầu file
+// <key>.txt ở gốc web trả về ĐÚNG nội dung là chính key đó — xem
+// services/publishAutomationService.js#pingIndexNow.
+exports.indexNowKeyFile = (req, res) => {
+  const key = process.env.INDEXNOW_KEY;
+  if (!key || req.params.key !== key) return res.status(404).end();
+  res.type('text/plain').send(key);
+};
+
 exports.sitemap = async (req, res) => {
   const appUrl = res.locals.appUrl;
   const [courses, posts, tools] = await Promise.all([

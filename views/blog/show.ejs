@@ -208,3 +208,10 @@
   </div>
 </section>
 <% } %>
+
+<!-- "Bám đuổi tự nhiên": trình duyệt tự nhớ chuyên mục hay đọc (localStorage,
+     không cookie/quảng cáo trả phí) rồi gợi ý bài mới cùng chuyên mục ở lần
+     truy cập sau — xem public/js/blog-personalize.js -->
+<section id="personalizedPicks" class="hidden mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16"></section>
+<script>window.__blogPostMeta = { id: <%= post.id %>, category: <%- JSON.stringify(post.category) %> };</script>
+<script src="/js/blog-personalize.js" defer></script>

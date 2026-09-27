@@ -54,6 +54,21 @@ const BlogPost = sequelize.define(
           post.content += `\n<!-- hero-shopee:${link} -->`;
         }
       },
+      // Tự động: (1) gắn internal link từ vài bài cũ cùng chuyên mục đang
+      // hot vào bài mới này, (2) báo Bing/Yandex biết có URL mới ngay (xem
+      // services/publishAutomationService.js). Chạy SAU khi bài đã lưu xong
+      // (afterCreate) và KHÔNG bao giờ được làm hỏng việc tạo bài nếu lỗi —
+      // đây là automation phụ trợ SEO, không phải nghiệp vụ lõi.
+      afterCreate: async (post) => {
+        try {
+          const { linkOldPostsToNew, pingIndexNow } = require('../services/publishAutomationService');
+          await linkOldPostsToNew(post);
+          const appUrl = (process.env.APP_URL || 'https://3dvietpro.com').replace(/\/$/, '');
+          await pingIndexNow(`${appUrl}/blog/${post.slug}`);
+        } catch (err) {
+          console.error('[BlogPost] afterCreate automation lỗi:', err.message);
+        }
+      },
     },
   }
 );

@@ -20,5 +20,6 @@ router.post('/dang-ky-hoc-mien-phi', courseRegistrationController.submit);
 
 router.get('/robots.txt', seoController.robots);
 router.get('/sitemap.xml', seoController.sitemap);
+router.get('/:key([a-f0-9]{32}).txt', seoController.indexNowKeyFile);
 
 module.exports = router;

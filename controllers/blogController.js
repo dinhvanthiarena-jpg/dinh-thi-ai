@@ -36,6 +36,35 @@ exports.list = async (req, res) => {
   });
 };
 
+// "Bám đuổi tự nhiên" (organic retargeting) — không dùng cookie/quảng cáo
+// trả phí: trình duyệt khách tự lưu lịch sử chuyên mục đã đọc vào
+// localStorage (xem public/js/blog-personalize.js), rồi gọi API này để lấy
+// bài mới nhất CÙNG chuyên mục họ hay đọc. Server không lưu/nhận diện danh
+// tính gì — chỉ nhận lại đúng những category slug mà chính trình duyệt đó
+// đã tự ghi nhớ, khớp với BLOG_CATEGORIES để chặn giá trị rác/injection.
+exports.recommended = async (req, res) => {
+  const requested = String(req.query.categories || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter((slug) => BLOG_CATEGORIES.some((c) => c.slug === slug));
+
+  if (!requested.length) return res.json({ posts: [] });
+
+  const excludeId = Number(req.query.exclude) || 0;
+  const posts = await BlogPost.findAll({
+    where: {
+      category: { [Op.in]: requested },
+      isPublished: true,
+      ...(excludeId ? { id: { [Op.ne]: excludeId } } : {}),
+    },
+    order: [['publishedAt', 'DESC']],
+    limit: 6,
+    attributes: ['title', 'slug', 'coverImageUrl', 'category'],
+  });
+
+  res.json({ posts });
+};
+
 exports.show = async (req, res, next) => {
   const post = await BlogPost.findOne({
     where: { slug: req.params.slug, isPublished: true },
@@ -44,7 +73,12 @@ exports.show = async (req, res, next) => {
 
   if (!post) return next();
 
-  await post.increment('viewCount', { by: 1 });
+  // silent: true — tăng lượt xem KHÔNG được tính là "cập nhật nội dung".
+  // Nếu để updatedAt nhảy theo mỗi lượt xem, JSON-LD dateModified bên dưới
+  // sẽ báo sai là bài "vừa mới sửa" liên tục dù nội dung không đổi gì —
+  // đúng kiểu hành vi Google Search Central cảnh báo là spam tín hiệu mới
+  // (có thể bị phạt thay vì được ưu tiên).
+  await post.increment('viewCount', { by: 1, silent: true });
   await PageView.create({
     path: `/blog/${post.slug}`,
     postSlug: post.slug,
@@ -87,9 +121,21 @@ exports.show = async (req, res, next) => {
       '@type': 'Article',
       headline: post.title,
       description: post.excerpt,
+      // dateModified khác datePublished (kể cả khi chưa từng sửa nội dung,
+      // updatedAt vẫn nhích lên mỗi lần viewCount tăng) — đây chính là tín
+      // hiệu "mới cập nhật" Google dùng để ưu tiên hiển thị trên SERP so
+      // với bài cũ hơn cùng chủ đề. Không giả mạo bằng cách set = now mỗi
+      // lần render — dùng đúng giá trị DB.
       datePublished: post.publishedAt,
+      dateModified: post.updatedAt,
+      image: [/^https?:\/\//.test(post.coverImageUrl) ? post.coverImageUrl : `${res.locals.appUrl}${post.coverImageUrl}`],
+      mainEntityOfPage: { '@type': 'WebPage', '@id': `${res.locals.appUrl}/blog/${post.slug}` },
       author: { '@type': 'Person', name: post.author ? post.author.name : 'Đinh Thi Ai' },
-      publisher: { '@type': 'Organization', name: 'Vietpro' },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Vietpro',
+        logo: { '@type': 'ImageObject', url: `${res.locals.appUrl}/images/logo.jpg` },
+      },
     },
     post,
     relatedPosts,
