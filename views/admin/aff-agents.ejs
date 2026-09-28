@@ -47,13 +47,14 @@
       <tr>
         <th class="px-4 py-3 font-semibold">Đại lý</th>
         <th class="px-4 py-3 font-semibold">Mã giới thiệu</th>
+        <th class="px-4 py-3 font-semibold">% hoa hồng riêng</th>
         <th class="px-4 py-3 font-semibold">Ngày duyệt</th>
         <th class="px-4 py-3"></th>
       </tr>
     </thead>
     <tbody class="divide-y divide-slate-100">
       <% if (!daDuyet.length) { %>
-        <tr><td colspan="4" class="px-4 py-10 text-center text-muted">Chưa có đại lý nào được duyệt.</td></tr>
+        <tr><td colspan="5" class="px-4 py-10 text-center text-muted">Chưa có đại lý nào được duyệt.</td></tr>
       <% } %>
       <% daDuyet.forEach(function (u) { %>
         <tr>
@@ -62,6 +63,15 @@
             <div class="text-muted text-xs"><%= u.email || u.phone || '' %></div>
           </td>
           <td class="px-4 py-3"><code class="text-xs"><%= u.refCode %></code></td>
+          <td class="px-4 py-3">
+            <form method="POST" action="/admin/aff/dai-ly/<%= u.id %>/hoa-hong" class="flex items-center gap-1.5">
+              <input class="input" type="number" min="0" max="100" step="0.5" name="commissionRateOverride"
+                     value="<%= u.commissionRateOverride != null ? u.commissionRateOverride : '' %>"
+                     placeholder="Mặc định" style="width:90px;" />
+              <span class="text-muted text-xs">%</span>
+              <button class="btn-outline text-xs px-2 py-1">Lưu</button>
+            </form>
+          </td>
           <td class="px-4 py-3 text-muted text-xs"><%= new Date(u.updatedAt).toLocaleDateString('vi-VN') %></td>
           <td class="px-4 py-3 text-right">
             <a href="/admin/aff/thanh-vien/<%= u.id %>" class="btn-outline text-xs px-3 py-1.5">Chi tiết</a>

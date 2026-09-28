@@ -20,6 +20,9 @@ const { WalletTransaction, ToolLicense, Tool, User, Order, Course, Enrollment } 
 const { sequelize } = require('../config/db');
 const telegram = require('./telegramService');
 const commission = require('./commissionService');
+const exchangeRate = require('./exchangeRateService');
+
+const PHI_TAO_WEB_USD = 50; // "24h ra web" (SA-AI BOT) — mỗi lần tạo 1 web thu $50, quy đổi VNĐ theo tỷ giá thị trường lúc trừ tiền.
 
 /** Mã ngắn, dễ đọc, không có ký tự dễ nhìn nhầm (0/O, 1/I) — giống proService. */
 function chuoiNgau(n) {
@@ -251,6 +254,46 @@ async function thanhToanHocPhiBangVi(user, course) {
   return { order, enrollment };
 }
 
+/**
+ * Thu phí "tạo 1 web" trong SA-AI BOT — $50 quy đổi VNĐ theo tỷ giá thị
+ * trường lúc trừ tiền, trừ thẳng vào ví (không qua bước QR/chờ duyệt như
+ * nạp ví, vì đây là TRỪ số dư đã có sẵn). Khoá dòng user trong transaction
+ * + kiểm tra lại số dư NGAY TRONG đó, giống hệt lý do khoá của muaTool() —
+ * bấm "Tạo web" 2 lần liền tay không trừ tiền 2 lần cho cùng 1 lần tạo.
+ * Trả về cả `usdRate` đã dùng để tool có thể hiển thị minh bạch cho khách.
+ */
+async function thuPhiTaoWeb(user, websiteDomain) {
+  const rate = await exchangeRate.layTyGiaUsdVnd();
+  const amountVnd = Math.round(PHI_TAO_WEB_USD * rate);
+
+  const ketQua = await sequelize.transaction(async (t) => {
+    const userKhoa = await User.findByPk(user.id, { transaction: t, lock: t.LOCK.UPDATE });
+    if (soDu(userKhoa) < amountVnd) {
+      throw new Error(`Số dư ví không đủ để tạo web. Cần ${amountVnd.toLocaleString('vi-VN')}đ (~$${PHI_TAO_WEB_USD}), hiện có ${soDu(userKhoa).toLocaleString('vi-VN')}đ.`);
+    }
+    const balanceAfter = soDu(userKhoa) - amountVnd;
+    const tx = await WalletTransaction.create(
+      {
+        type: 'purchase',
+        amount: -amountVnd,
+        status: 'paid',
+        balanceAfter,
+        description: `Tạo web (SA-AI BOT): ${websiteDomain || ''} — $${PHI_TAO_WEB_USD} x ${rate.toLocaleString('vi-VN')}đ`,
+        relatedType: 'WebsiteBuild',
+        paidAt: new Date(),
+        UserId: user.id,
+      },
+      { transaction: t }
+    );
+    await userKhoa.update({ walletBalance: balanceAfter }, { transaction: t });
+    return { transaction: tx, balanceAfter };
+  });
+
+  baoThay(`${user.name} vừa tạo 1 web qua SA-AI BOT — thu ${amountVnd.toLocaleString('vi-VN')}đ (~$${PHI_TAO_WEB_USD}, tỷ giá ${rate.toLocaleString('vi-VN')}).`);
+  await commission.distributeCommission(user, amountVnd, 'WebsiteBuild', ketQua.transaction.id);
+  return { ...ketQua, amountVnd, usdRate: rate };
+}
+
 module.exports = {
   tuDongDoiSoat,
   sanSangNhanTien,
@@ -261,4 +304,6 @@ module.exports = {
   ghiNhanNapVi,
   muaTool,
   thanhToanHocPhiBangVi,
+  thuPhiTaoWeb,
+  PHI_TAO_WEB_USD,
 };

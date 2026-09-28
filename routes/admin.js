@@ -55,6 +55,7 @@ router.get('/aff/links', adminController.affLinks);
 router.get('/aff/dai-ly', adminController.affAgentList);
 router.post('/aff/dai-ly/:id/duyet', adminController.affAgentApprove);
 router.post('/aff/dai-ly/:id/tu-choi', adminController.affAgentReject);
+router.post('/aff/dai-ly/:id/hoa-hong', adminController.affAgentSetRate);
 router.get('/aff/rut-tien', adminController.referralWithdrawList);
 router.post('/aff/rut-tien/:id/duyet', adminController.referralWithdrawApprove);
 router.post('/aff/rut-tien/:id/tu-choi', adminController.referralWithdrawReject);

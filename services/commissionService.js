@@ -150,13 +150,16 @@ async function distributeCommission(buyer, amount, relatedType, relatedId) {
   // sâu hơn từ dữ liệu cũ trước khi đổi mô hình.
   const c = await User.findByPk(buyer.parentId); // người giới thiệu trực tiếp
   if (!c) return;
+  // Đại lý có thể được thầy cài % hoa hồng RIÊNG (commissionRateOverride) —
+  // ưu tiên dùng mức này thay vì mức mặc định chung nếu đã set (khác null).
+  const phanTram = c.commissionRateOverride != null ? Number(c.commissionRateOverride) : rates.l1Percent;
   await ghiHoaHongCho(
     c,
-    Math.round((amount * rates.l1Percent) / 100),
+    Math.round((amount * phanTram) / 100),
     'L1',
     relatedType,
     relatedId,
-    `Hoa hồng giới thiệu (${rates.l1Percent}%) từ ${buyer.name} mua ${tenSanPham}`
+    `Hoa hồng giới thiệu (${phanTram}%) từ ${buyer.name} mua ${tenSanPham}`
   );
 }
 

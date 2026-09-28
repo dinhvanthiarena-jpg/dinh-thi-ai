@@ -58,6 +58,10 @@ const User = sequelize.define(
     // 'rejected' = bị từ chối, có thể đăng ký lại (xem
     // controllers/referralController.js#dangKyDaiLy).
     agentStatus: { type: DataTypes.ENUM('none', 'pending', 'approved', 'rejected'), defaultValue: 'none' },
+    // % hoa hồng RIÊNG cho đại lý này, admin (thầy) cài chủ động từng người
+    // — khác mức mặc định chung (commissionL1Percent trong Setting). NULL =
+    // dùng mức mặc định chung, không override. Xem commissionService.js.
+    commissionRateOverride: { type: DataTypes.FLOAT, allowNull: true },
     // Thông tin nhận tiền mặc định — lưu lại 1 lần ở trang "Thiết lập thanh
     // toán" để form rút hoa hồng tự điền sẵn, khỏi phải gõ lại mỗi lần rút
     // (xem controllers/accountController.js).

@@ -531,6 +531,25 @@ exports.affAgentReject = async (req, res) => {
   res.redirect('/admin/aff/dai-ly');
 };
 
+// Đặt % hoa hồng RIÊNG cho 1 đại lý (khác mức mặc định chung) — thầy chủ
+// động cài từng đại lý 1, để trống ô số = xoá override, quay về dùng mức
+// mặc định chung (xem commissionRateOverride trong models/User.js).
+exports.affAgentSetRate = async (req, res) => {
+  const user = await User.findByPk(req.params.id);
+  if (!user) { req.flash('error', 'Không tìm thấy đại lý.'); return res.redirect('/admin/aff/dai-ly'); }
+  const raw = (req.body.commissionRateOverride || '').trim();
+  const value = raw === '' ? null : Number(raw);
+  if (value !== null && (Number.isNaN(value) || value < 0 || value > 100)) {
+    req.flash('error', '% hoa hồng phải từ 0 đến 100.');
+    return res.redirect('/admin/aff/dai-ly');
+  }
+  await user.update({ commissionRateOverride: value });
+  req.flash('success', value === null
+    ? `Đã bỏ mức hoa hồng riêng của ${user.name}, dùng lại mức mặc định chung.`
+    : `Đã đặt hoa hồng riêng ${value}% cho ${user.name}.`);
+  res.redirect('/admin/aff/dai-ly');
+};
+
 exports.referralWithdrawList = async (req, res) => {
   const { WithdrawRequest } = require('../models');
   const requests = await WithdrawRequest.findAll({
