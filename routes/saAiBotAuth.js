@@ -14,7 +14,7 @@ function signToken(user) {
   return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '30d' });
 }
 function publicUser(user) {
-  return { id: user.id, name: user.name, email: user.email, phone: user.phone || '', role: user.role };
+  return { id: user.id, name: user.name, email: user.email, phone: user.phone || '', role: user.role, walletBalance: user.walletBalance || 0 };
 }
 
 function an(fn) {
