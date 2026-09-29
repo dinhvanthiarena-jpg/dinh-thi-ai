@@ -125,6 +125,7 @@ app.use('/api/aai-license', express.json(), require('./routes/aaiLicense'));
 app.use('/api/fbai-license', express.json(), require('./routes/fbaiLicense'));
 app.use('/api/sa-ai-bot/auth', require('./routes/saAiBotAuth'));
 app.use('/api/sa-ai-bot/wallet', require('./routes/saAiBotWallet'));
+app.use('/api/sa-ai-bot/settings', require('./routes/saAiBotSettingsImport'));
 app.use(express.urlencoded({ extended: true, limit: '200kb' }));
 app.use(
   express.json({
