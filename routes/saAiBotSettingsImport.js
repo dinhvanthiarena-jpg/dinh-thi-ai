@@ -35,6 +35,7 @@ const SCHEMA_DESC = `{
   "hostingPort": "Cổng SSH (số, mặc định 22 nếu không thấy)",
   "hostingUsername": "Tên đăng nhập SSH",
   "hostingPassword": "Mật khẩu SSH",
+  "cloudflareApiToken": "API Token Cloudflare (dùng để tự động gắn tên miền vào web mới tạo — KHÔNG phải Global API Key, phải là API Token dạng chuỗi dài, thường thấy nhãn 'Cloudflare API Token' hoặc 'CF_API_TOKEN')",
   "telegramBotToken": "Token bot Telegram (dạng số:chữ...)",
   "websiteTargetName": "Tên gợi nhớ cho 'Website nhận bài' nếu có nhắc tới website đích để đăng bài tự động",
   "websiteTargetApiUrl": "Địa chỉ API nhận bài (URL đầy đủ, VD https://domain.com/api/auto-post)",
