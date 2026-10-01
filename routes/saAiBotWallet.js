@@ -34,6 +34,7 @@ router.get('/', an(async (req, res) => {
     ok: true,
     soDu: wallet.soDu(user),
     sanSang: wallet.sanSangNhanTien(),
+    websiteBuildCredits: user.websiteBuildCredits || 0,
     transactions: transactions.map((t) => ({
       code: t.code,
       type: t.type,
@@ -85,6 +86,42 @@ router.get('/website-build-fee', an(async (req, res) => {
   res.json({ ok: true, usd: wallet.PHI_TAO_WEB_USD, vnd: Math.round(wallet.PHI_TAO_WEB_USD * rate), usdRate: rate });
 }));
 
+// Xem trước giá GÓI nhiều web (tỷ giá CỐ ĐỊNH, đã gồm thuế, giảm theo số
+// lượng) — không trừ tiền, chỉ để tool hiện bảng giá cho khách chọn số
+// lượng trước khi quyết định mua.
+router.get('/website-build-package-price', an(async (req, res) => {
+  const qty = Math.max(1, Math.min(50, parseInt(req.query.qty, 10) || 1));
+  const donGiaUsd = wallet.donGiaTaoWebTheoSoLuong(qty);
+  const tongUsd = donGiaUsd * qty;
+  const tongVnd = Math.round(tongUsd * wallet.TY_GIA_CO_DINH_GOI_WEB);
+  const phanTramGiam = Math.round((1 - donGiaUsd / wallet.PHI_TAO_WEB_USD) * 100);
+  res.json({ ok: true, qty, donGiaUsd, tongUsd, tongVnd, phanTramGiam, usdRate: wallet.TY_GIA_CO_DINH_GOI_WEB });
+}));
+
+// Tạo đơn mua gói — trả về QR giống hệt nạp ví, chỉ khác nội dung mô tả.
+router.post('/buy-website-build-package', express.json(), an(async (req, res) => {
+  if (!wallet.sanSangNhanTien()) {
+    return res.status(400).json({ error: 'Chưa cấu hình tài khoản nhận tiền, liên hệ thầy Đinh Thi Ai.' });
+  }
+  const qty = parseInt((req.body || {}).qty, 10);
+  try {
+    const { tx, donGiaUsd, tongUsd, tongVnd } = await wallet.taoDonMuaGoiTaoWeb(req.authUser.id, qty);
+    res.json({
+      ok: true,
+      code: tx.code,
+      qty,
+      donGiaUsd,
+      tongUsd,
+      amount: tongVnd,
+      status: tx.status,
+      qr: wallet.anhQR(tx),
+      ck: wallet.thongTinChuyenKhoan(tx),
+    });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}));
+
 // "24h ra web" — thu phí $50 (quy đổi VNĐ theo tỷ giá thị trường lúc gọi)
 // trực tiếp từ ví, TRƯỚC KHI tool thật sự chạy SSH deploy — tool chỉ được
 // tiến hành deploy khi endpoint này trả ok:true.
@@ -95,7 +132,14 @@ router.post('/charge-website-build', express.json(), an(async (req, res) => {
   const { domain } = req.body || {};
   try {
     const result = await wallet.thuPhiTaoWeb(user, domain);
-    res.json({ ok: true, amountVnd: result.amountVnd, usdRate: result.usdRate, soDuConLai: result.balanceAfter });
+    res.json({
+      ok: true,
+      amountVnd: result.amountVnd,
+      usdRate: result.usdRate,
+      soDuConLai: result.balanceAfter,
+      dungCredit: !!result.dungCredit,
+      creditsConLai: result.creditsConLai,
+    });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -106,7 +150,7 @@ router.get('/nap/:code/trang-thai', an(async (req, res) => {
   const tx = await WalletTransaction.findOne({ where: { code: req.params.code, UserId: req.authUser.id } });
   if (!tx) return res.status(404).json({ error: 'Không tìm thấy giao dịch.' });
   const user = await User.findByPk(req.authUser.id);
-  res.json({ ok: true, status: tx.status, soDu: wallet.soDu(user) });
+  res.json({ ok: true, status: tx.status, soDu: wallet.soDu(user), websiteBuildCredits: user.websiteBuildCredits || 0 });
 }));
 
 module.exports = router;

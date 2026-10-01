@@ -62,6 +62,11 @@ const User = sequelize.define(
     // — khác mức mặc định chung (commissionL1Percent trong Setting). NULL =
     // dùng mức mặc định chung, không override. Xem commissionService.js.
     commissionRateOverride: { type: DataTypes.FLOAT, allowNull: true },
+    // Số lượt "tạo web" (SA-AI BOT "24h ra web") đã MUA TRƯỚC qua gói nhiều
+    // web giảm giá (xem walletService.js#taoDonMuaGoiTaoWeb) — mỗi lần
+    // triển khai web thật trừ đi 1, hết thì quay lại trừ ví theo giá lẻ
+    // $50/tỷ giá thị trường như cũ (xem routes/saAiBotWallet.js).
+    websiteBuildCredits: { type: DataTypes.INTEGER, defaultValue: 0 },
     // Thông tin nhận tiền mặc định — lưu lại 1 lần ở trang "Thiết lập thanh
     // toán" để form rút hoa hồng tự điền sẵn, khỏi phải gõ lại mỗi lần rút
     // (xem controllers/accountController.js).

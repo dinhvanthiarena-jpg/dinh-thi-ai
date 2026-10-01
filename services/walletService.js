@@ -24,6 +24,20 @@ const exchangeRate = require('./exchangeRateService');
 
 const PHI_TAO_WEB_USD = 50; // "24h ra web" (SA-AI BOT) — mỗi lần tạo 1 web thu $50, quy đổi VNĐ theo tỷ giá thị trường lúc trừ tiền.
 
+// Mua GÓI nhiều web trả trước (thầy chốt 2026-10-01) — tỷ giá CỐ ĐỊNH (khác
+// tỷ giá thị trường tự động dùng cho phí lẻ $50/web ở trên), giá NIÊM YẾT
+// đã gồm thuế, giảm theo số lượng mua 1 lần:
+//   1 web: không giảm (50$/web)
+//   2-3 web: giảm 10% (45$/web)
+//   4 web: giảm 15% (42.5$/web) — mốc giảm sâu nhất
+//   5 web trở lên: về lại mức giảm 10% (45$/web), không giảm thêm nữa
+const TY_GIA_CO_DINH_GOI_WEB = 26000;
+function donGiaTaoWebTheoSoLuong(soLuong) {
+  if (soLuong <= 1) return PHI_TAO_WEB_USD;
+  if (soLuong === 4) return PHI_TAO_WEB_USD * 0.85;
+  return PHI_TAO_WEB_USD * 0.9; // 2-3 web và 5+ web đều ở mức giảm 10%
+}
+
 /** Mã ngắn, dễ đọc, không có ký tự dễ nhìn nhầm (0/O, 1/I) — giống proService. */
 function chuoiNgau(n) {
   const CHU = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -103,6 +117,47 @@ async function taoDonNapVi(userId, amount) {
 }
 
 /**
+ * Tạo đơn mua GÓI nhiều lượt "tạo web" trả trước — CHƯA cộng credit, chỉ
+ * cộng khi xác nhận đã trả (giống hệt cơ chế taoDonNapVi ở trên, dùng LẠI
+ * nguyên QR/mã giao dịch/trang xác nhận — chỉ khác relatedType để
+ * ghiNhanNapVi() biết đường cộng CREDIT thay vì cộng thẳng vào walletBalance).
+ */
+async function taoDonMuaGoiTaoWeb(userId, soLuong) {
+  const qty = Number(soLuong);
+  if (!Number.isInteger(qty) || qty < 1 || qty > 50) {
+    throw new Error('Số lượng web phải là số nguyên từ 1 đến 50.');
+  }
+  const donGiaUsd = donGiaTaoWebTheoSoLuong(qty);
+  const tongUsd = donGiaUsd * qty;
+  const tongVnd = Math.round(tongUsd * TY_GIA_CO_DINH_GOI_WEB);
+
+  let code = taoMaNap();
+  for (let i = 0; i < 5 && (await WalletTransaction.findOne({ where: { code } })); i += 1) code = taoMaNap();
+
+  const tx = await WalletTransaction.create({
+    code,
+    type: 'topup',
+    amount: tongVnd,
+    status: 'pending',
+    description: `Mua gói ${qty} lượt tạo web (SA-AI BOT) — ${donGiaUsd}$/web${qty > 1 ? ` (đã giảm giá)` : ''}`,
+    relatedType: 'WebsiteBuildPackage',
+    relatedId: qty,
+    UserId: userId,
+  });
+
+  const user = await User.findByPk(userId);
+  baoThay(
+    `Có người tạo lệnh mua gói ${qty} lượt tạo web — ${tongVnd.toLocaleString('vi-VN')}đ (~$${tongUsd})\n` +
+    `Người mua: ${user ? user.name + ' (' + (user.email || user.phone || '') + ')' : '#' + userId}\n` +
+    `Nội dung chuyển khoản: ${code}\n` +
+    (tuDongDoiSoat()
+      ? 'Tiền về là hệ thống tự cộng credit.'
+      : 'Chưa nối SePay — xem tiền về thì vào 3dvietpro.com/admin/wallet bấm duyệt.')
+  );
+  return { tx, donGiaUsd, tongUsd, tongVnd, qty };
+}
+
+/**
  * Ghi nhận nạp ví thành công — idempotent, gọi lại nhiều lần không cộng
  * trùng. Khoá cả 2 dòng (giao dịch + user) trong 1 transaction DB thật —
  * webhook SePay có thể gọi lại (retry) đúng lúc admin cũng đang bấm duyệt
@@ -110,14 +165,21 @@ async function taoDonNapVi(userId, amount) {
  * lúc và CỘNG TIỀN 2 LẦN trước khi dòng nào kịp ghi 'paid' xong.
  */
 async function ghiNhanNapVi(tx, { bankRef = '', bankAmount = null, raw = '', boi = '' } = {}) {
-  return sequelize.transaction(async (t) => {
+  const ketQua = await sequelize.transaction(async (t) => {
     const txKhoa = await WalletTransaction.findByPk(tx.id, { transaction: t, lock: t.LOCK.UPDATE });
-    if (!txKhoa || txKhoa.status === 'paid') return txKhoa || tx;
+    if (!txKhoa || txKhoa.status === 'paid') return { txKhoa: txKhoa || tx, laGoiTaoWeb: false };
     const user = await User.findByPk(txKhoa.UserId, { transaction: t, lock: t.LOCK.UPDATE });
     if (!user) throw new Error('Không tìm thấy người nạp của giao dịch này');
 
-    const balanceAfter = soDu(user) + txKhoa.amount;
-    await user.update({ walletBalance: balanceAfter }, { transaction: t });
+    // Đơn mua GÓI "tạo web" trả trước: KHÔNG cộng vào walletBalance, cộng
+    // vào websiteBuildCredits (số lượt) thay vào đó — relatedId lúc tạo đơn
+    // (taoDonMuaGoiTaoWeb) chính là số lượng đã mua.
+    const laGoiTaoWeb = txKhoa.relatedType === 'WebsiteBuildPackage';
+    const balanceAfter = soDu(user) + (laGoiTaoWeb ? 0 : txKhoa.amount);
+    const capNhat = laGoiTaoWeb
+      ? { websiteBuildCredits: (user.websiteBuildCredits || 0) + (txKhoa.relatedId || 0) }
+      : { walletBalance: balanceAfter };
+    await user.update(capNhat, { transaction: t });
     await txKhoa.update(
       {
         status: 'paid',
@@ -132,12 +194,25 @@ async function ghiNhanNapVi(tx, { bankRef = '', bankAmount = null, raw = '', boi
     );
 
     baoThay(
-      `Đã cộng ${txKhoa.amount.toLocaleString('vi-VN')}đ vào ví của ${user.name} (${user.email || user.phone || ''})\n` +
-      `Giao dịch ${txKhoa.code} — số dư mới ${balanceAfter.toLocaleString('vi-VN')}đ` +
-      (boi === 'sepay' ? '' : ` — duyệt bởi ${boi || 'tay'}`)
+      laGoiTaoWeb
+        ? `Đã cộng ${txKhoa.relatedId} lượt tạo web cho ${user.name} (${user.email || user.phone || ''})\n` +
+          `Giao dịch ${txKhoa.code} — ${txKhoa.amount.toLocaleString('vi-VN')}đ` +
+          (boi === 'sepay' ? '' : ` — duyệt bởi ${boi || 'tay'}`)
+        : `Đã cộng ${txKhoa.amount.toLocaleString('vi-VN')}đ vào ví của ${user.name} (${user.email || user.phone || ''})\n` +
+          `Giao dịch ${txKhoa.code} — số dư mới ${balanceAfter.toLocaleString('vi-VN')}đ` +
+          (boi === 'sepay' ? '' : ` — duyệt bởi ${boi || 'tay'}`)
     );
-    return txKhoa;
+    return { txKhoa, laGoiTaoWeb };
   });
+
+  // Hoa hồng cho đại lý tính NGAY LÚC MUA GÓI (không phải lúc tiêu từng
+  // lượt) — đây mới là lúc tiền thật đã về, nhất quán với cách thuPhiTaoWeb
+  // tính hoa hồng ngay lúc trừ ví.
+  if (ketQua.laGoiTaoWeb) {
+    const user = await User.findByPk(ketQua.txKhoa.UserId);
+    if (user) await commission.distributeCommission(user, ketQua.txKhoa.amount, 'WebsiteBuildPackage', ketQua.txKhoa.id);
+  }
+  return ketQua.txKhoa;
 }
 
 /**
@@ -263,6 +338,22 @@ async function thanhToanHocPhiBangVi(user, course) {
  * Trả về cả `usdRate` đã dùng để tool có thể hiển thị minh bạch cho khách.
  */
 async function thuPhiTaoWeb(user, websiteDomain) {
+  // Ưu tiên TIÊU LƯỢT ĐÃ MUA TRƯỚC (gói nhiều web giảm giá) nếu còn — không
+  // đụng ví, không tính hoa hồng lại (hoa hồng đã tính 1 lần lúc mua gói ở
+  // ghiNhanNapVi). Hết lượt mới quay về trừ ví theo giá lẻ + tỷ giá thị
+  // trường như cũ.
+  const dungCreditTruoc = await sequelize.transaction(async (t) => {
+    const userKhoa = await User.findByPk(user.id, { transaction: t, lock: t.LOCK.UPDATE });
+    if ((userKhoa.websiteBuildCredits || 0) <= 0) return null;
+    const conLai = userKhoa.websiteBuildCredits - 1;
+    await userKhoa.update({ websiteBuildCredits: conLai }, { transaction: t });
+    return conLai;
+  });
+  if (dungCreditTruoc !== null) {
+    baoThay(`${user.name} vừa tạo 1 web qua SA-AI BOT — dùng 1 lượt đã mua trước (còn lại ${dungCreditTruoc} lượt), không trừ ví.`);
+    return { amountVnd: 0, usdRate: 0, dungCredit: true, creditsConLai: dungCreditTruoc };
+  }
+
   const rate = await exchangeRate.layTyGiaUsdVnd();
   const amountVnd = Math.round(PHI_TAO_WEB_USD * rate);
 
@@ -291,7 +382,7 @@ async function thuPhiTaoWeb(user, websiteDomain) {
 
   baoThay(`${user.name} vừa tạo 1 web qua SA-AI BOT — thu ${amountVnd.toLocaleString('vi-VN')}đ (~$${PHI_TAO_WEB_USD}, tỷ giá ${rate.toLocaleString('vi-VN')}).`);
   await commission.distributeCommission(user, amountVnd, 'WebsiteBuild', ketQua.transaction.id);
-  return { ...ketQua, amountVnd, usdRate: rate };
+  return { ...ketQua, amountVnd, usdRate: rate, dungCredit: false };
 }
 
 module.exports = {
@@ -305,5 +396,8 @@ module.exports = {
   muaTool,
   thanhToanHocPhiBangVi,
   thuPhiTaoWeb,
+  taoDonMuaGoiTaoWeb,
+  donGiaTaoWebTheoSoLuong,
   PHI_TAO_WEB_USD,
+  TY_GIA_CO_DINH_GOI_WEB,
 };
