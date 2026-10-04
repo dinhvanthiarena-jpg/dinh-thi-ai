@@ -14,7 +14,7 @@ function signToken(user) {
   return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '30d' });
 }
 function publicUser(user) {
-  return { id: user.id, name: user.name, email: user.email, phone: user.phone || '', role: user.role, walletBalance: user.walletBalance || 0 };
+  return { id: user.id, name: user.name, email: user.email, phone: user.phone || '', role: user.role, walletBalance: user.walletBalance || 0, refCode: user.refCode || '' };
 }
 
 function an(fn) {
@@ -28,10 +28,18 @@ function an(fn) {
 
 // Bước 1: gửi OTP về email
 router.post('/register', express.json(), an(async (req, res) => {
-  const { name, email, phone, password } = req.body || {};
+  const { name, email, phone, password, refCode } = req.body || {};
   if (!name || !email || !password) return res.status(400).json({ error: 'Thiếu tên, email hoặc mật khẩu.' });
   if (String(password).length < 6) return res.status(400).json({ error: 'Mật khẩu cần ít nhất 6 ký tự.' });
-  const ketQua = await authOtp.yeuCauDangKy({ name, email, phone, password });
+  // Mã giới thiệu (tuỳ chọn): của đại lý/người đã dùng tool — người này được hoa hồng khi khách mua key/tạo web.
+  let parentId = null;
+  const ma = String(refCode || '').trim().toUpperCase();
+  if (ma) {
+    const nguoiGioiThieu = await User.findOne({ where: { refCode: ma } });
+    if (!nguoiGioiThieu) return res.status(400).json({ error: 'Mã giới thiệu không đúng — kiểm tra lại hoặc để trống.' });
+    parentId = nguoiGioiThieu.id;
+  }
+  const ketQua = await authOtp.yeuCauDangKy({ name, email, phone, password, parentId });
   if (ketQua.loi) return res.status(400).json({ error: ketQua.loi });
   res.json({ ok: true, token: ketQua.token, email: ketQua.email });
 }));

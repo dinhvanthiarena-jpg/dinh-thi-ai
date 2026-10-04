@@ -142,7 +142,7 @@ async function ghiHoaHongCho(recipient, amount, cap, relatedType, relatedId, moT
 async function distributeCommission(buyer, amount, relatedType, relatedId) {
   if (!buyer.parentId || !amount) return;
   const rates = await getRates();
-  const tenSanPham = relatedType === 'Course' ? 'khóa học' : relatedType === 'Tool' ? 'tool' : 'gói Pro';
+  const tenSanPham = relatedType === 'Course' ? 'khóa học' : relatedType === 'Tool' ? 'tool' : relatedType === 'FbaiKey' ? 'key SA-BOTAI' : relatedType === 'WebsiteBuild' ? 'tạo web SA-BOTAI' : 'gói Pro';
 
   // Chỉ còn trả hoa hồng cho ĐÚNG 1 người — người giới thiệu trực tiếp
   // (yêu cầu 2026-09-27: "chỉ phát triển 1 cấp và trả hoa hồng cho 1 cấp

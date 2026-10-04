@@ -1,0 +1,35 @@
+<div class="space-y-6 max-w-3xl">
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-1">Giá bán key SA-BOTAI (30 ngày) — khách tự mua bằng ví</h2>
+    <p class="text-sm text-muted mb-4">
+      Khách đăng nhập trong tool SA-BOTAI, nạp ví rồi bấm <strong>Mua key</strong>: hệ thống tự trừ tiền,
+      <strong>tự cấp key</strong> (hoặc cộng thêm 30 ngày vào key đang dùng) và kích hoạt luôn — không cần thầy duyệt.
+      Hoa hồng cho người giới thiệu tính theo % đại lý như các sản phẩm khác.
+      <strong>Để trống hoặc 0 = chưa bán tự động</strong> (tool chỉ hiện "nhắn Zalo nhận key").
+    </p>
+    <% if (saved) { %><p class="text-sm mb-3" style="color:#16a34a;">✓ Đã lưu giá.</p><% } %>
+    <form action="/admin/gia-key-sa-botai" method="POST" class="flex flex-wrap gap-3 items-center">
+      <input name="giaVnd" type="text" inputmode="numeric" class="input" style="max-width:220px;" placeholder="VD: 500000" value="<%= giaVnd || '' %>" />
+      <span class="text-sm text-muted">đồng / 30 ngày</span>
+      <button type="submit" class="btn-primary">💾 Lưu giá</button>
+    </form>
+    <p class="text-sm text-muted mt-3">Hiện tại: <strong><%= giaVnd ? giaVnd.toLocaleString('vi-VN') + 'đ / 30 ngày — ĐANG BÁN TỰ ĐỘNG' : 'chưa đặt giá — chưa bán tự động' %></strong></p>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-4">Khách đã tự mua gần đây (<%= giaoDich.length %>)</h2>
+    <% if (!giaoDich.length) { %>
+      <p class="text-sm text-muted">Chưa có lượt mua nào.</p>
+    <% } else { %>
+      <div class="space-y-2">
+        <% giaoDich.forEach(t => { %>
+          <div class="flex items-center justify-between gap-3 rounded-lg border border-primary-100 px-4 py-3 text-sm">
+            <div><strong><%= t.user ? t.user.name : '(đã xoá)' %></strong> <span class="text-muted"><%= t.user ? t.user.email : '' %></span></div>
+            <div class="text-right"><%= Math.abs(t.amount).toLocaleString('vi-VN') %>đ · <span class="text-muted"><%= new Date(t.createdAt).toLocaleString('vi-VN') %></span></div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+    <p class="text-xs text-muted mt-3">Danh sách key và thu hồi/đổi thiết bị: <a href="/admin/fbai-license-keys" class="underline">Key SA-BOTAI (Desktop)</a></p>
+  </div>
+</div>

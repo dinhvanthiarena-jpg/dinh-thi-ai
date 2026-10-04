@@ -74,15 +74,38 @@ function isWellFormed(input) {
   return checksumFor(body) === check;
 }
 
-function issueKey(note) {
+// owner (tuỳ chọn): { userId, email } — key khách TỰ MUA bằng ví trong tool được gắn vào
+// đúng tài khoản mua (xem walletService.muaKeyFbai); key thầy cấp tay thì không có owner.
+function issueKey(note, owner) {
   const body = randomBodyChars(8);
   const check = checksumFor(body);
   const key = formatKey(body, check);
   const list = loadKeys();
   const entry = { key, note: note || '', issuedAt: Date.now(), expiresAt: Date.now() + LICENSE_DURATION_MS, active: true, boundMachine: null, boundDeviceId: null };
+  if (owner && owner.userId) { entry.ownerUserId = owner.userId; entry.ownerEmail = owner.email || ''; }
   list.unshift(entry);
   saveKeys(list);
   return entry;
+}
+
+// Gia hạn key khách đang dùng khi họ mua tiếp: cộng thêm 30 ngày vào hạn CÒN LẠI (không mất ngày
+// đã trả), giữ nguyên khoá thiết bị. Trả { entry } nếu được; { error } nếu không gia hạn được
+// (không có key / bị thu hồi / thuộc tài khoản khác) — khi đó nơi gọi sẽ cấp key MỚI thay thế.
+function extendKey(key, owner) {
+  if (!isWellFormed(key)) return { error: 'invalid' };
+  const list = loadKeys();
+  const entry = list.find((k) => k.key === normalizeAndFormat(key));
+  if (!entry) return { error: 'not_found' };
+  if (entry.active === false) return { error: 'revoked' };
+  if (entry.ownerUserId && owner && entry.ownerUserId !== owner.userId) return { error: 'other_owner' };
+  entry.expiresAt = Math.max(Date.now(), entry.expiresAt || 0) + LICENSE_DURATION_MS;
+  if (!entry.ownerUserId && owner && owner.userId) { entry.ownerUserId = owner.userId; entry.ownerEmail = owner.email || ''; }
+  saveKeys(list);
+  return { entry };
+}
+
+function listKeysByOwner(userId) {
+  return loadKeys().filter((k) => k.ownerUserId === userId);
 }
 
 function renewKey(key) {
@@ -221,6 +244,8 @@ function isActiveLicense(input) {
 
 module.exports = {
   issueKey,
+  extendKey,
+  listKeysByOwner,
   listKeys,
   revokeKey,
   reactivateKey,

@@ -8,6 +8,8 @@ const router = express.Router();
 const { WalletTransaction } = require('../models');
 const wallet = require('../services/walletService');
 const exchangeRate = require('../services/exchangeRateService');
+const fbaiLicense = require('../services/fbaiLicenseService');
+const fbaiKeyPricing = require('../services/fbaiKeyPricing');
 const { requireBearerAuth } = require('./saAiBotAuth');
 
 function an(fn) {
@@ -140,6 +142,37 @@ router.post('/charge-website-build', express.json(), an(async (req, res) => {
       dungCredit: !!result.dungCredit,
       creditsConLai: result.creditsConLai,
     });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+}));
+
+// Bảng giá KEY SA-BOTAI 30 ngày + số dư ví + các key đã mua (gắn với tài khoản này).
+// giaVnd = null nghĩa là thầy chưa mở bán tự động -> tool chỉ hiện "nhắn Zalo nhận key".
+router.get('/key-info', an(async (req, res) => {
+  const User = require('../models/User');
+  const user = await User.findByPk(req.authUser.id);
+  if (!user) return res.status(401).json({ error: 'Tài khoản không còn tồn tại.' });
+  res.json({
+    ok: true,
+    giaVnd: fbaiKeyPricing.getPriceVnd(),
+    soNgay: 30,
+    soDu: wallet.soDu(user),
+    sanSang: wallet.sanSangNhanTien(),
+    refCode: user.refCode || '',
+    keys: fbaiLicense.listKeysByOwner(user.id).map((k) => ({ key: k.key, expiresAt: k.expiresAt, active: k.active !== false })),
+  });
+}));
+
+// Khách TỰ MUA key bằng ví: trừ tiền -> tự cấp (hoặc gia hạn key đang dùng) -> trả key để tool tự kích hoạt.
+router.post('/mua-key', express.json(), an(async (req, res) => {
+  const User = require('../models/User');
+  const user = await User.findByPk(req.authUser.id);
+  if (!user) return res.status(401).json({ error: 'Tài khoản không còn tồn tại.' });
+  const currentKey = String((req.body || {}).currentKey || '').slice(0, 40);
+  try {
+    const r = await wallet.muaKeyFbai(user, { currentKey });
+    res.json({ ok: true, key: r.key, expiresAt: r.expiresAt, giaHan: r.giaHan, soDuConLai: r.soDuConLai, gia: r.gia });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

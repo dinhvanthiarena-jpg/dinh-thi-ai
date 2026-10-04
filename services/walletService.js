@@ -21,6 +21,8 @@ const { sequelize } = require('../config/db');
 const telegram = require('./telegramService');
 const commission = require('./commissionService');
 const exchangeRate = require('./exchangeRateService');
+const fbaiLicense = require('./fbaiLicenseService');
+const fbaiKeyPricing = require('./fbaiKeyPricing');
 
 const PHI_TAO_WEB_USD = 50; // "24h ra web" (SA-AI BOT) — mỗi lần tạo 1 web thu $50, quy đổi VNĐ theo tỷ giá thị trường lúc trừ tiền.
 
@@ -385,7 +387,57 @@ async function thuPhiTaoWeb(user, websiteDomain) {
   return { ...ketQua, amountVnd, usdRate: rate, dungCredit: false };
 }
 
+/**
+ * KHÁCH TỰ MUA KEY SA-BOTAI (FBAI-…) 30 ngày bằng số dư ví — trừ tiền, tự cấp key (hoặc cộng thêm 30
+ * ngày vào key đang dùng) và gắn vào đúng tài khoản, KHÔNG cần thầy duyệt (thầy chốt 2026-10-03/04).
+ * Giá lấy từ fbaiKeyPricing (thầy đặt trong trang quản trị); chưa đặt giá thì không bán tự động.
+ * Khoá dòng user + kiểm tra số dư NGAY TRONG transaction (cùng lý do với muaTool/thuPhiTaoWeb); cấp
+ * key là bước CUỐI trong transaction nên lỗi ở đâu thì tiền cũng được hoàn (rollback).
+ * Hoa hồng giới thiệu tính như mọi sản phẩm khác qua commission.distributeCommission.
+ */
+async function muaKeyFbai(user, { currentKey } = {}) {
+  const gia = fbaiKeyPricing.getPriceVnd();
+  if (!gia) throw new Error('Key chưa mở bán tự động — nhắn Zalo 0977317988 để nhận mã kích hoạt.');
+
+  const owner = { userId: user.id, email: user.email || user.phone || String(user.id) };
+  const ketQua = await sequelize.transaction(async (t) => {
+    const userKhoa = await User.findByPk(user.id, { transaction: t, lock: t.LOCK.UPDATE });
+    if (soDu(userKhoa) < gia) {
+      throw new Error(`Số dư ví không đủ để mua key. Cần ${gia.toLocaleString('vi-VN')}đ, hiện có ${soDu(userKhoa).toLocaleString('vi-VN')}đ.`);
+    }
+    const balanceAfter = soDu(userKhoa) - gia;
+    const tx = await WalletTransaction.create(
+      {
+        type: 'purchase',
+        amount: -gia,
+        status: 'paid',
+        balanceAfter,
+        description: 'Mua key SA-BOTAI 30 ngày',
+        relatedType: 'FbaiKey',
+        paidAt: new Date(),
+        UserId: user.id,
+      },
+      { transaction: t }
+    );
+    await userKhoa.update({ walletBalance: balanceAfter }, { transaction: t });
+
+    let entry = null;
+    let giaHan = false;
+    if (currentKey) {
+      const r = fbaiLicense.extendKey(currentKey, owner);
+      if (r.entry) { entry = r.entry; giaHan = true; }
+    }
+    if (!entry) entry = fbaiLicense.issueKey(`Tự mua qua ví — ${owner.email}`, owner);
+    return { tx, entry, giaHan, balanceAfter };
+  });
+
+  baoThay(`${user.name} vừa ${ketQua.giaHan ? 'gia hạn' : 'mua'} key SA-BOTAI 30 ngày — ${gia.toLocaleString('vi-VN')}đ (trừ từ ví).`);
+  await commission.distributeCommission(user, gia, 'FbaiKey', ketQua.tx.id);
+  return { key: ketQua.entry.key, expiresAt: ketQua.entry.expiresAt, giaHan: ketQua.giaHan, soDuConLai: ketQua.balanceAfter, gia };
+}
+
 module.exports = {
+  muaKeyFbai,
   tuDongDoiSoat,
   sanSangNhanTien,
   anhQR,
