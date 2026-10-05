@@ -505,11 +505,14 @@ async function taoDonMuaGoiKey(userId, months, currentKey) {
   if (!goi) throw new Error('Gói này chưa mở bán tự động.');
   let code = taoMaNap();
   for (let i = 0; i < 5 && (await WalletTransaction.findOne({ where: { code } })); i += 1) code = taoMaNap();
+  const user0 = await User.findByPk(userId);
+  // Chỉ thu phần CÒN THIẾU so với số dư ví (tối thiểu 10.000đ); tiền về → cộng ví → tự mua gói trừ đủ giá.
+  const soTien = Math.max(goi.vnd - soDu(user0), 10000);
   const mo = `Mua gói SA-BOTAI ${goi.months} tháng (${goi.usd}$)`;
   const tx = await WalletTransaction.create({
     code,
     type: 'topup',
-    amount: goi.vnd,
+    amount: soTien,
     status: 'pending',
     description: (currentKey ? `${mo}|${String(currentKey).slice(0, 24)}` : mo).slice(0, 250),
     relatedType: 'FbaiKeyPlan',
