@@ -1,0 +1,42 @@
+<% const donVi = legal.ten; %>
+<section class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12 legal-doc">
+  <style>
+    .legal-doc h1 { font-size: 1.6rem; font-weight: 800; text-align: center; margin: 0 0 .25rem; }
+    .legal-doc h2 { font-size: 1.1rem; font-weight: 700; margin: 1.6rem 0 .5rem; }
+    .legal-doc p, .legal-doc li { line-height: 1.7; margin: .35rem 0; }
+    .legal-doc ul { padding-left: 1.4rem; list-style: disc; }
+  </style>
+  <h1>CHÍNH SÁCH BẢO MẬT – SA-BOTAI</h1>
+  <p style="text-align:center;"><em>Phiên bản <%= version %></em></p>
+  <p>Chính sách này giải thích <strong><%= donVi %></strong> (“chúng tôi”) thu thập, sử dụng và bảo vệ dữ liệu của bạn khi dùng phần mềm SA-BOTAI và website 3dvietpro.com, phù hợp Luật Bảo vệ dữ liệu cá nhân và Nghị định 13/2023/NĐ-CP.</p>
+
+  <h2>1. Dữ liệu chúng tôi thu thập</h2>
+  <ul>
+    <li><strong>Tài khoản:</strong> họ tên, email, số điện thoại, mật khẩu (lưu dạng băm, không đọc được).</li>
+    <li><strong>Giao dịch:</strong> lịch sử nạp ví, mua key/gia hạn, tạo website (tên miền đã dùng để đếm số web), hoa hồng giới thiệu nếu có.</li>
+    <li><strong>Bản quyền:</strong> mã key, thời hạn, định danh thiết bị và tên máy gắn với key.</li>
+    <li><strong>Ghi nhận đồng ý điều khoản:</strong> địa chỉ IP, thời điểm, phiên bản điều khoản, thông tin trình duyệt/thiết bị.</li>
+  </ul>
+
+  <h2>2. Dữ liệu lưu trên máy của bạn</h2>
+  <ul>
+    <li>Khóa API (AI, Facebook, hosting…), cấu hình và nội dung bạn nhập được lưu <strong>trên máy bạn</strong> (khóa được mã hóa bằng cơ chế của hệ điều hành). Chúng tôi không lưu các khóa này trên máy chủ.</li>
+    <li>Tính năng “Cổng nhận thông tin” gửi đoạn văn bản bạn dán lên máy chủ để AI tách thành từng ô cấu hình rồi trả về máy bạn; nội dung này được xử lý tạm thời để trả kết quả, không được lưu lại.</li>
+    <li>Nội dung website do AI soạn được gửi tới dịch vụ AI để xử lý theo yêu cầu của bạn; ảnh và logo bạn tải lên được dùng để dựng website của chính bạn.</li>
+  </ul>
+
+  <h2>3. Mục đích sử dụng</h2>
+  <p>Cung cấp và duy trì dịch vụ; xác thực bản quyền; xử lý thanh toán; hỗ trợ kỹ thuật; thông báo hết hạn/gia hạn; ngăn chặn gian lận và lưu bằng chứng giao dịch điện tử. Chúng tôi <strong>không bán</strong> dữ liệu cá nhân của bạn.</p>
+
+  <h2>4. Chia sẻ dữ liệu</h2>
+  <p>Chỉ chia sẻ khi cần thiết cho dịch vụ (cổng thanh toán/ngân hàng, dịch vụ gửi email, dịch vụ AI) hoặc khi cơ quan nhà nước có thẩm quyền yêu cầu theo quy định pháp luật.</p>
+
+  <h2>5. Thời gian lưu trữ và bảo mật</h2>
+  <p>Dữ liệu được lưu trong thời gian bạn sử dụng dịch vụ và thêm thời hạn cần thiết theo quy định pháp luật (ví dụ chứng từ giao dịch). Chúng tôi áp dụng các biện pháp kỹ thuật hợp lý để bảo vệ dữ liệu, nhưng không có hệ thống nào an toàn tuyệt đối.</p>
+
+  <h2>6. Quyền của bạn</h2>
+  <p>Bạn có quyền được biết, truy cập, chỉnh sửa, yêu cầu xóa, rút lại sự đồng ý và khiếu nại về dữ liệu cá nhân của mình. Liên hệ: Zalo / điện thoại <strong>0977 317 988</strong><% if (legal.email) { %> hoặc email <%= legal.email %><% } %>. Địa chỉ: <%= legal.diaChi %>.</p>
+
+  <h2>7. Thay đổi chính sách</h2>
+  <p>Khi chính sách thay đổi, phiên bản mới được đăng tại đây và bạn sẽ được yêu cầu xác nhận lại trong phần mềm.</p>
+</section>

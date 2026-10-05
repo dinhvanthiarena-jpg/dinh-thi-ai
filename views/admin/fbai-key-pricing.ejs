@@ -1,35 +1,91 @@
-<div class="space-y-6 max-w-3xl">
-  <div class="card p-6">
-    <h2 class="font-semibold text-ink mb-1">Giá bán key SA-BOTAI (30 ngày) — khách tự mua bằng ví</h2>
-    <p class="text-sm text-muted mb-4">
-      Khách đăng nhập trong tool SA-BOTAI, nạp ví rồi bấm <strong>Mua key</strong>: hệ thống tự trừ tiền,
-      <strong>tự cấp key</strong> (hoặc cộng thêm 30 ngày vào key đang dùng) và kích hoạt luôn — không cần thầy duyệt.
-      Hoa hồng cho người giới thiệu tính theo % đại lý như các sản phẩm khác.
-      <strong>Để trống hoặc 0 = chưa bán tự động</strong> (tool chỉ hiện "nhắn Zalo nhận key").
-    </p>
-    <% if (saved) { %><p class="text-sm mb-3" style="color:#16a34a;">✓ Đã lưu giá.</p><% } %>
-    <form action="/admin/gia-key-sa-botai" method="POST" class="flex flex-wrap gap-3 items-center">
-      <input name="giaVnd" type="text" inputmode="numeric" class="input" style="max-width:220px;" placeholder="VD: 500000" value="<%= giaVnd || '' %>" />
-      <span class="text-sm text-muted">đồng / 30 ngày</span>
-      <button type="submit" class="btn-primary">💾 Lưu giá</button>
-    </form>
-    <p class="text-sm text-muted mt-3">Hiện tại: <strong><%= giaVnd ? giaVnd.toLocaleString('vi-VN') + 'đ / 30 ngày — ĐANG BÁN TỰ ĐỘNG' : 'chưa đặt giá — chưa bán tự động' %></strong></p>
-  </div>
+<% const f = (n) => Number(n).toLocaleString('vi-VN'); %>
+<div class="space-y-6 max-w-4xl">
+  <form action="/admin/gia-key-sa-botai" method="POST" class="space-y-6">
+    <div class="card p-6">
+      <h2 class="font-semibold text-ink mb-1">Bảng giá SA-BOTAI (USD → VNĐ theo tỷ giá cố định <%= f(usdRate) %>đ/$, đã gồm thuế)</h2>
+      <p class="text-sm text-muted mb-4">
+        Key cấp lần đầu chạy <strong><%= firstKeyDays %> ngày</strong>; sau đó khách đóng phí theo các gói bên dưới ngay trong tool
+        (nạp QR hoặc dùng ví) — tiền về là <strong>tự cấp/gia hạn key và mở lại tool</strong>, không cần thầy duyệt.
+        Web đầu tiên kèm key miễn phí (đếm theo tên miền, sửa/đưa lên lại cùng tên miền không giới hạn); từ tên miền thứ 2 thu phí tạo web.
+      </p>
+      <% if (saved) { %><p class="text-sm mb-3" style="color:#16a34a;">✓ Đã lưu.</p><% } %>
+
+      <div class="mb-4">
+        <label class="text-sm font-semibold">Phí tạo web mới (từ tên miền thứ 2)</label>
+        <div class="flex items-center gap-2 mt-1">
+          <input name="webFeeUsd" type="text" class="input" style="max-width:120px;" value="<%= cfg.webFeeUsd %>" /> <span class="text-sm text-muted">USD = <strong><%= f(toVnd(cfg.webFeeUsd)) %>đ</strong></span>
+        </div>
+      </div>
+
+      <table class="w-full text-sm">
+        <thead><tr class="text-left text-muted"><th class="py-1">Đang bán</th><th>Gói</th><th>Giá (USD)</th><th>= VNĐ</th></tr></thead>
+        <tbody>
+          <% cfg.plans.forEach(p => { %>
+            <tr>
+              <td class="py-1"><input type="checkbox" name="enabled" value="<%= p.months %>" <%= p.enabled ? 'checked' : '' %> /></td>
+              <td><input type="hidden" name="months" value="<%= p.months %>" /><%= p.months %> tháng (<%= p.months * 30 %> ngày)</td>
+              <td><input name="usd" type="text" class="input" style="max-width:110px;" value="<%= p.usd %>" /></td>
+              <td><strong><%= f(toVnd(p.usd)) %>đ</strong></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <p class="text-xs text-muted mt-2">⚠️ Gói 2 tháng (49$) và 5 tháng (129$) đang TẮT sẵn vì thấp hơn cả gói 1 tháng (55$) / 3 tháng (149$) — thầy xác nhận đúng giá rồi tích bật.</p>
+    </div>
+
+    <div class="card p-6">
+      <h2 class="font-semibold text-ink mb-1">Thông tin Bên A hiển thị trên Điều khoản dịch vụ</h2>
+      <div class="grid gap-3 mt-3">
+        <input name="ten" class="input" placeholder="Tên đơn vị / cá nhân" value="<%= cfg.legal.ten %>" />
+        <input name="mst" class="input" placeholder="Mã số thuế / ĐKKD" value="<%= cfg.legal.mst %>" />
+        <input name="diaChi" class="input" placeholder="Địa chỉ" value="<%= cfg.legal.diaChi %>" />
+        <input name="email" class="input" placeholder="Email hỗ trợ (tuỳ chọn)" value="<%= cfg.legal.email %>" />
+      </div>
+      <p class="text-xs text-muted mt-2">Xem trang công khai: <a class="underline" href="/phap-ly-sa-botai/dieu-khoan" target="_blank">Điều khoản dịch vụ</a> · <a class="underline" href="/phap-ly-sa-botai/bao-mat" target="_blank">Chính sách bảo mật</a> · phiên bản hiện hành <strong><%= termsVersion %></strong> (đổi nội dung điều khoản thì đổi số phiên bản trong services/termsService.js để khách phải tích đồng ý lại).</p>
+    </div>
+    <button type="submit" class="btn-primary">💾 Lưu bảng giá & thông tin</button>
+  </form>
 
   <div class="card p-6">
-    <h2 class="font-semibold text-ink mb-4">Khách đã tự mua gần đây (<%= giaoDich.length %>)</h2>
-    <% if (!giaoDich.length) { %>
-      <p class="text-sm text-muted">Chưa có lượt mua nào.</p>
-    <% } else { %>
+    <h2 class="font-semibold text-ink mb-3">Khách thanh toán gần đây (<%= giaoDich.length %>)</h2>
+    <% if (!giaoDich.length) { %><p class="text-sm text-muted">Chưa có.</p><% } else { %>
       <div class="space-y-2">
         <% giaoDich.forEach(t => { %>
-          <div class="flex items-center justify-between gap-3 rounded-lg border border-primary-100 px-4 py-3 text-sm">
-            <div><strong><%= t.user ? t.user.name : '(đã xoá)' %></strong> <span class="text-muted"><%= t.user ? t.user.email : '' %></span></div>
-            <div class="text-right"><%= Math.abs(t.amount).toLocaleString('vi-VN') %>đ · <span class="text-muted"><%= new Date(t.createdAt).toLocaleString('vi-VN') %></span></div>
+          <div class="flex items-center justify-between gap-3 rounded-lg border border-primary-100 px-4 py-2 text-sm">
+            <div><strong><%= t.user ? t.user.name : '(đã xoá)' %></strong> <span class="text-muted"><%= t.user ? t.user.email : '' %></span><br><span class="text-muted"><%= t.description %></span></div>
+            <div class="text-right"><%= f(Math.abs(t.amount)) %>đ<br><span class="text-muted"><%= new Date(t.createdAt).toLocaleString('vi-VN') %></span></div>
           </div>
         <% }) %>
       </div>
     <% } %>
-    <p class="text-xs text-muted mt-3">Danh sách key và thu hồi/đổi thiết bị: <a href="/admin/fbai-license-keys" class="underline">Key SA-BOTAI (Desktop)</a></p>
   </div>
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-3">Tên miền đã dùng để tạo web (<%= webs.length %> gần nhất)</h2>
+    <% if (!webs.length) { %><p class="text-sm text-muted">Chưa có.</p><% } else { %>
+      <div class="space-y-1 text-sm">
+        <% webs.forEach(w => { const u = userMap[w.UserId]; %>
+          <div class="flex justify-between gap-3 border-b border-primary-100 py-1">
+            <span><strong><%= w.domain %></strong> — <%= u ? u.name + ' (' + u.email + ')' : '#' + w.UserId %></span>
+            <span class="text-muted"><%= w.feeVnd ? f(w.feeVnd) + 'đ' : (w.freeReason === 'web_dau_tien' ? 'web đầu tiên (miễn phí)' : (w.freeReason || 'miễn phí')) %> · đưa lên <%= w.deployCount %> lần</span>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-3">Nhật ký đồng ý điều khoản (<%= dongY.length %> gần nhất)</h2>
+    <% if (!dongY.length) { %><p class="text-sm text-muted">Chưa có.</p><% } else { %>
+      <div class="space-y-1 text-sm">
+        <% dongY.forEach(d => { const u = dongYUsers[d.UserId]; %>
+          <div class="flex justify-between gap-3 border-b border-primary-100 py-1">
+            <span><%= u ? u.name + ' (' + u.email + ')' : '#' + d.UserId %></span>
+            <span class="text-muted">v<%= d.version %> · IP <%= d.ip %> · <%= d.source %> · <%= new Date(d.acceptedAt).toLocaleString('vi-VN') %></span>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+  <p class="text-xs text-muted">Danh sách key và thu hồi/đổi thiết bị: <a href="/admin/fbai-license-keys" class="underline">Key SA-BOTAI (Desktop)</a></p>
 </div>

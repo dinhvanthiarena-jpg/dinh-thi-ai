@@ -9,6 +9,10 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const authOtp = require('../services/authOtpService');
+const terms = require('../services/termsService');
+
+// token phiên đăng ký -> thông tin đồng ý điều khoản lúc bấm Đăng ký (ghi vào nhật ký khi OTP xác nhận xong)
+const choDongY = new Map();
 
 function signToken(user) {
   return jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -28,8 +32,9 @@ function an(fn) {
 
 // Bước 1: gửi OTP về email
 router.post('/register', express.json(), an(async (req, res) => {
-  const { name, email, phone, password, refCode } = req.body || {};
+  const { name, email, phone, password, refCode, acceptTerms } = req.body || {};
   if (!name || !email || !password) return res.status(400).json({ error: 'Thiếu tên, email hoặc mật khẩu.' });
+  if (acceptTerms !== true) return res.status(400).json({ error: 'Bạn cần tích chọn đồng ý Điều khoản dịch vụ và Chính sách bảo mật để đăng ký.' });
   if (String(password).length < 6) return res.status(400).json({ error: 'Mật khẩu cần ít nhất 6 ký tự.' });
   // Mã giới thiệu (tuỳ chọn): của đại lý/người đã dùng tool — người này được hoa hồng khi khách mua key/tạo web.
   let parentId = null;
@@ -41,6 +46,8 @@ router.post('/register', express.json(), an(async (req, res) => {
   }
   const ketQua = await authOtp.yeuCauDangKy({ name, email, phone, password, parentId });
   if (ketQua.loi) return res.status(400).json({ error: ketQua.loi });
+  choDongY.set(ketQua.token, { ip: terms.layIp(req), ua: String(req.headers['user-agent'] || '').slice(0, 300), at: new Date() });
+  setTimeout(() => choDongY.delete(ketQua.token), 30 * 60 * 1000).unref?.();
   res.json({ ok: true, token: ketQua.token, email: ketQua.email });
 }));
 
@@ -50,7 +57,12 @@ router.post('/verify-otp', express.json(), an(async (req, res) => {
   if (!token || !code) return res.status(400).json({ error: 'Thiếu mã xác nhận.' });
   const ketQua = await authOtp.xacNhanDangKy({ token, code });
   if (ketQua.loi) return res.status(400).json({ error: ketQua.loi });
-  res.json({ ok: true, token: signToken(ketQua.user), user: publicUser(ketQua.user) });
+  // Ghi nhật ký đồng ý điều khoản đúng thời điểm/IP lúc khách bấm Đăng ký (bằng chứng pháp lý).
+  const dongY = choDongY.get(token);
+  choDongY.delete(token);
+  const { TermsAcceptance } = require('../models');
+  await TermsAcceptance.create({ UserId: ketQua.user.id, version: terms.VERSION, ip: dongY ? dongY.ip : terms.layIp(req), userAgent: dongY ? dongY.ua : String(req.headers['user-agent'] || '').slice(0, 300), source: 'register', acceptedAt: dongY ? dongY.at : new Date() });
+  res.json({ ok: true, token: signToken(ketQua.user), user: publicUser(ketQua.user), termsOk: true });
 }));
 
 router.post('/resend-otp', express.json(), an(async (req, res) => {
@@ -116,6 +128,19 @@ router.get('/me', requireBearerAuth, an(async (req, res) => {
   const user = await User.findByPk(req.authUser.id);
   if (!user) return res.status(401).json({ error: 'Tài khoản không còn tồn tại.' });
   res.json({ ok: true, user: publicUser(user) });
+}));
+
+// ---- Điều khoản dịch vụ: phiên bản hiện hành, tình trạng đồng ý của tài khoản, ghi nhận đồng ý (cổng đăng nhập) ----
+router.get('/terms', (req, res) => {
+  res.json({ ok: true, version: terms.VERSION, termsUrl: terms.TERMS_URL, privacyUrl: terms.PRIVACY_URL });
+});
+router.get('/terms/status', requireBearerAuth, an(async (req, res) => {
+  res.json({ ok: true, version: terms.VERSION, accepted: await terms.daDongY(req.authUser.id), termsUrl: terms.TERMS_URL, privacyUrl: terms.PRIVACY_URL });
+}));
+router.post('/terms/accept', express.json(), requireBearerAuth, an(async (req, res) => {
+  if ((req.body || {}).accept !== true) return res.status(400).json({ error: 'Cần tích chọn đồng ý.' });
+  if (!(await terms.daDongY(req.authUser.id))) await terms.ghiDongY(req.authUser.id, req, 'login-gate');
+  res.json({ ok: true, version: terms.VERSION });
 }));
 
 module.exports = router;

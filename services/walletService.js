@@ -23,8 +23,11 @@ const commission = require('./commissionService');
 const exchangeRate = require('./exchangeRateService');
 const fbaiLicense = require('./fbaiLicenseService');
 const fbaiKeyPricing = require('./fbaiKeyPricing');
+const { WebsiteDomain } = require('../models');
 
-const PHI_TAO_WEB_USD = 50; // "24h ra web" (SA-AI BOT) — mỗi lần tạo 1 web thu $50, quy đổi VNĐ theo tỷ giá thị trường lúc trừ tiền.
+// "24h ra web" (SA-BOTAI): web ĐẦU TIÊN kèm key lần đầu miễn phí; mỗi TÊN MIỀN MỚI từ tên miền thứ 2 thu 35$ (thầy chốt
+// 2026-10-05), quy đổi VNĐ theo tỷ giá CỐ ĐỊNH 26.000đ/$ — xem fbaiKeyPricing.js. Giá lấy từ cấu hình, không hard-code.
+const PHI_TAO_WEB_USD = fbaiKeyPricing.getWebFee().usd; // chỉ dùng làm mốc tính giá gói nhiều web bên dưới
 
 // Mua GÓI nhiều web trả trước (thầy chốt 2026-10-01) — tỷ giá CỐ ĐỊNH (khác
 // tỷ giá thị trường tự động dùng cho phí lẻ $50/web ở trên), giá NIÊM YẾT
@@ -33,7 +36,7 @@ const PHI_TAO_WEB_USD = 50; // "24h ra web" (SA-AI BOT) — mỗi lần tạo 1 
 //   2-3 web: giảm 10% (45$/web)
 //   4 web: giảm 15% (42.5$/web) — mốc giảm sâu nhất
 //   5 web trở lên: về lại mức giảm 10% (45$/web), không giảm thêm nữa
-const TY_GIA_CO_DINH_GOI_WEB = 26000;
+const TY_GIA_CO_DINH_GOI_WEB = fbaiKeyPricing.USD_RATE;
 function donGiaTaoWebTheoSoLuong(soLuong) {
   if (soLuong <= 1) return PHI_TAO_WEB_USD;
   if (soLuong === 4) return PHI_TAO_WEB_USD * 0.85;
@@ -169,7 +172,7 @@ async function taoDonMuaGoiTaoWeb(userId, soLuong) {
 async function ghiNhanNapVi(tx, { bankRef = '', bankAmount = null, raw = '', boi = '' } = {}) {
   const ketQua = await sequelize.transaction(async (t) => {
     const txKhoa = await WalletTransaction.findByPk(tx.id, { transaction: t, lock: t.LOCK.UPDATE });
-    if (!txKhoa || txKhoa.status === 'paid') return { txKhoa: txKhoa || tx, laGoiTaoWeb: false };
+    if (!txKhoa || txKhoa.status === 'paid') return { txKhoa: txKhoa || tx, laGoiTaoWeb: false, laGoiKey: false };
     const user = await User.findByPk(txKhoa.UserId, { transaction: t, lock: t.LOCK.UPDATE });
     if (!user) throw new Error('Không tìm thấy người nạp của giao dịch này');
 
@@ -204,7 +207,7 @@ async function ghiNhanNapVi(tx, { bankRef = '', bankAmount = null, raw = '', boi
           `Giao dịch ${txKhoa.code} — số dư mới ${balanceAfter.toLocaleString('vi-VN')}đ` +
           (boi === 'sepay' ? '' : ` — duyệt bởi ${boi || 'tay'}`)
     );
-    return { txKhoa, laGoiTaoWeb };
+    return { txKhoa, laGoiTaoWeb, laGoiKey: txKhoa.relatedType === 'FbaiKeyPlan' };
   });
 
   // Hoa hồng cho đại lý tính NGAY LÚC MUA GÓI (không phải lúc tiêu từng
@@ -213,6 +216,17 @@ async function ghiNhanNapVi(tx, { bankRef = '', bankAmount = null, raw = '', boi
   if (ketQua.laGoiTaoWeb) {
     const user = await User.findByPk(ketQua.txKhoa.UserId);
     if (user) await commission.distributeCommission(user, ketQua.txKhoa.amount, 'WebsiteBuildPackage', ketQua.txKhoa.id);
+  }
+  // Đơn mua GÓI THÁNG SA-BOTAI: tiền đã cộng vào ví ở trên → TỰ MUA/GIA HẠN luôn (idempotent: chỉ chạy ở lần xác nhận
+  // ĐẦU TIÊN vì lần gọi lại đã bị chặn bởi status='paid'). Lỗi ở đây không làm mất tiền — số dư vẫn nằm trong ví.
+  if (ketQua.laGoiKey) {
+    try {
+      const user = await User.findByPk(ketQua.txKhoa.UserId);
+      const [, cur] = String(ketQua.txKhoa.description || '').split('|');
+      if (user) await muaKeyFbai(user, { months: ketQua.txKhoa.relatedId, currentKey: cur || '' });
+    } catch (e) {
+      console.error('[wallet] tự mua gói key sau khi tiền về lỗi:', e.message);
+    }
   }
   return ketQua.txKhoa;
 }
@@ -339,39 +353,74 @@ async function thanhToanHocPhiBangVi(user, course) {
  * bấm "Tạo web" 2 lần liền tay không trừ tiền 2 lần cho cùng 1 lần tạo.
  * Trả về cả `usdRate` đã dùng để tool có thể hiển thị minh bạch cho khách.
  */
-async function thuPhiTaoWeb(user, websiteDomain) {
-  // Ưu tiên TIÊU LƯỢT ĐÃ MUA TRƯỚC (gói nhiều web giảm giá) nếu còn — không
-  // đụng ví, không tính hoa hồng lại (hoa hồng đã tính 1 lần lúc mua gói ở
-  // ghiNhanNapVi). Hết lượt mới quay về trừ ví theo giá lẻ + tỷ giá thị
-  // trường như cũ.
-  const dungCreditTruoc = await sequelize.transaction(async (t) => {
-    const userKhoa = await User.findByPk(user.id, { transaction: t, lock: t.LOCK.UPDATE });
-    if ((userKhoa.websiteBuildCredits || 0) <= 0) return null;
-    const conLai = userKhoa.websiteBuildCredits - 1;
-    await userKhoa.update({ websiteBuildCredits: conLai }, { transaction: t });
-    return conLai;
-  });
-  if (dungCreditTruoc !== null) {
-    baoThay(`${user.name} vừa tạo 1 web qua SA-AI BOT — dùng 1 lượt đã mua trước (còn lại ${dungCreditTruoc} lượt), không trừ ví.`);
-    return { amountVnd: 0, usdRate: 0, dungCredit: true, creditsConLai: dungCreditTruoc };
-  }
+function chuanHoaTenMien(raw) {
+  return String(raw || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/[\/?#].*$/, '').replace(/:\d+$/, '');
+}
 
-  const rate = await exchangeRate.layTyGiaUsdVnd();
-  const amountVnd = Math.round(PHI_TAO_WEB_USD * rate);
+/**
+ * XEM TRƯỚC phí tạo web cho 1 tên miền (không trừ gì): miễn phí nếu là tên miền đã tạo trước đó (sửa/đưa
+ * lên lại không giới hạn) hoặc là tên miền ĐẦU TIÊN của khách có key còn hạn; còn lại thu phí web mới
+ * (35$ x 26.000đ = 910.000đ) — dùng lượt trả trước nếu có.
+ */
+async function xemPhiTaoWeb(user, websiteDomain, licenseKey) {
+  const domain = chuanHoaTenMien(websiteDomain);
+  const phi = fbaiKeyPricing.getWebFee();
+  if (!domain) return { domain: '', mienPhi: false, lyDo: 'thieu_ten_mien', usd: phi.usd, vnd: phi.vnd };
+  const daCo = await WebsiteDomain.findOne({ where: { UserId: user.id, domain } });
+  if (daCo) return { domain, mienPhi: true, lyDo: 'cung_ten_mien', usd: 0, vnd: 0, daDeploy: daCo.deployCount };
+  const soTenMien = await WebsiteDomain.count({ where: { UserId: user.id } });
+  const coKey = !!(licenseKey && fbaiLicense.isActiveLicense(licenseKey));
+  if (soTenMien === 0 && coKey) return { domain, mienPhi: true, lyDo: 'web_dau_tien', usd: 0, vnd: 0 };
+  const credits = user.websiteBuildCredits || 0;
+  return { domain, mienPhi: false, lyDo: soTenMien === 0 ? 'chua_co_key' : 'ten_mien_moi', usd: phi.usd, vnd: phi.vnd, dungCredit: credits > 0, soDu: soDu(user) };
+}
+
+/**
+ * Thu phí tạo web THEO TÊN MIỀN (gọi TRƯỚC khi tool chạy deploy thật):
+ *  - tên miền đã tạo trước đó → miễn phí (khách sửa tới khi hài lòng, đưa lên lại bao nhiêu lần cũng được);
+ *  - tên miền ĐẦU TIÊN của khách + key còn hạn → miễn phí (web tặng kèm key lần đầu);
+ *  - tên miền mới khác → thu 35$ x 26.000đ: ưu tiên lượt trả trước (gói), hết lượt mới trừ ví.
+ * Khoá dòng user trong transaction: bấm 2 lần liền tay không đếm/thu 2 lần.
+ */
+async function thuPhiTaoWeb(user, websiteDomain, { licenseKey } = {}) {
+  const domain = chuanHoaTenMien(websiteDomain);
+  if (!domain || !/^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/.test(domain)) throw new Error('Cần nhập tên miền hợp lệ (VD abc.com) — hệ thống đếm số web theo tên miền.');
+  const phi = fbaiKeyPricing.getWebFee();
+  const coKey = !!(licenseKey && fbaiLicense.isActiveLicense(licenseKey));
 
   const ketQua = await sequelize.transaction(async (t) => {
     const userKhoa = await User.findByPk(user.id, { transaction: t, lock: t.LOCK.UPDATE });
-    if (soDu(userKhoa) < amountVnd) {
-      throw new Error(`Số dư ví không đủ để tạo web. Cần ${amountVnd.toLocaleString('vi-VN')}đ (~$${PHI_TAO_WEB_USD}), hiện có ${soDu(userKhoa).toLocaleString('vi-VN')}đ.`);
+    const daCo = await WebsiteDomain.findOne({ where: { UserId: user.id, domain }, transaction: t, lock: t.LOCK.UPDATE });
+    if (daCo) {
+      await daCo.update({ deployCount: daCo.deployCount + 1, lastDeployedAt: new Date() }, { transaction: t });
+      return { mienPhi: true, lyDo: 'cung_ten_mien', amountVnd: 0, usdRate: 0, balanceAfter: soDu(userKhoa) };
     }
-    const balanceAfter = soDu(userKhoa) - amountVnd;
+    const soTenMien = await WebsiteDomain.count({ where: { UserId: user.id }, transaction: t });
+    if (soTenMien === 0 && coKey) {
+      await WebsiteDomain.create({ UserId: user.id, domain, feeVnd: 0, freeReason: 'web_dau_tien', licenseKey: String(licenseKey).slice(0, 40) }, { transaction: t });
+      return { mienPhi: true, lyDo: 'web_dau_tien', amountVnd: 0, usdRate: 0, balanceAfter: soDu(userKhoa) };
+    }
+
+    // Tên miền MỚI phải trả phí: lượt trả trước trước, rồi tới ví.
+    if ((userKhoa.websiteBuildCredits || 0) > 0) {
+      const conLai = userKhoa.websiteBuildCredits - 1;
+      await userKhoa.update({ websiteBuildCredits: conLai }, { transaction: t });
+      await WebsiteDomain.create({ UserId: user.id, domain, feeVnd: 0, freeReason: 'dung_luot_tra_truoc', licenseKey: licenseKey ? String(licenseKey).slice(0, 40) : null }, { transaction: t });
+      return { mienPhi: false, dungCredit: true, creditsConLai: conLai, lyDo: 'ten_mien_moi', amountVnd: 0, usdRate: 0, balanceAfter: soDu(userKhoa) };
+    }
+    if (soDu(userKhoa) < phi.vnd) {
+      const err = new Error(`Tên miền ${domain} là web mới (từ web thứ 2 trở đi) — phí ${phi.vnd.toLocaleString('vi-VN')}đ (${phi.usd}$). Số dư ví hiện có ${soDu(userKhoa).toLocaleString('vi-VN')}đ, cần nạp thêm ${(phi.vnd - soDu(userKhoa)).toLocaleString('vi-VN')}đ.`);
+      err.thieu = phi.vnd - soDu(userKhoa);
+      throw err;
+    }
+    const balanceAfter = soDu(userKhoa) - phi.vnd;
     const tx = await WalletTransaction.create(
       {
         type: 'purchase',
-        amount: -amountVnd,
+        amount: -phi.vnd,
         status: 'paid',
         balanceAfter,
-        description: `Tạo web (SA-AI BOT): ${websiteDomain || ''} — $${PHI_TAO_WEB_USD} x ${rate.toLocaleString('vi-VN')}đ`,
+        description: `Tạo web SA-BOTAI: ${domain} — ${phi.usd}$ x ${fbaiKeyPricing.USD_RATE.toLocaleString('vi-VN')}đ`,
         relatedType: 'WebsiteBuild',
         paidAt: new Date(),
         UserId: user.id,
@@ -379,31 +428,40 @@ async function thuPhiTaoWeb(user, websiteDomain) {
       { transaction: t }
     );
     await userKhoa.update({ walletBalance: balanceAfter }, { transaction: t });
-    return { transaction: tx, balanceAfter };
+    await WebsiteDomain.create({ UserId: user.id, domain, feeVnd: phi.vnd, freeReason: null, licenseKey: licenseKey ? String(licenseKey).slice(0, 40) : null }, { transaction: t });
+    return { mienPhi: false, lyDo: 'ten_mien_moi', amountVnd: phi.vnd, usdRate: fbaiKeyPricing.USD_RATE, balanceAfter, txId: tx.id };
   });
 
-  baoThay(`${user.name} vừa tạo 1 web qua SA-AI BOT — thu ${amountVnd.toLocaleString('vi-VN')}đ (~$${PHI_TAO_WEB_USD}, tỷ giá ${rate.toLocaleString('vi-VN')}).`);
-  await commission.distributeCommission(user, amountVnd, 'WebsiteBuild', ketQua.transaction.id);
-  return { ...ketQua, amountVnd, usdRate: rate, dungCredit: false };
+  if (ketQua.mienPhi) {
+    baoThay(`${user.name} ${ketQua.lyDo === 'web_dau_tien' ? 'tạo WEB ĐẦU TIÊN (miễn phí kèm key)' : 'đưa lại web lên'} qua SA-BOTAI — tên miền ${domain}.`);
+  } else if (ketQua.dungCredit) {
+    baoThay(`${user.name} tạo web mới ${domain} qua SA-BOTAI — dùng 1 lượt trả trước (còn ${ketQua.creditsConLai} lượt).`);
+  } else {
+    baoThay(`${user.name} tạo web mới ${domain} qua SA-BOTAI — thu ${ketQua.amountVnd.toLocaleString('vi-VN')}đ (${phi.usd}$ x ${fbaiKeyPricing.USD_RATE.toLocaleString('vi-VN')}).`);
+    await commission.distributeCommission(user, ketQua.amountVnd, 'WebsiteBuild', ketQua.txId);
+  }
+  return { ...ketQua, domain, dungCredit: !!ketQua.dungCredit };
 }
 
 /**
- * KHÁCH TỰ MUA KEY SA-BOTAI (FBAI-…) 30 ngày bằng số dư ví — trừ tiền, tự cấp key (hoặc cộng thêm 30
- * ngày vào key đang dùng) và gắn vào đúng tài khoản, KHÔNG cần thầy duyệt (thầy chốt 2026-10-03/04).
- * Giá lấy từ fbaiKeyPricing (thầy đặt trong trang quản trị); chưa đặt giá thì không bán tự động.
- * Khoá dòng user + kiểm tra số dư NGAY TRONG transaction (cùng lý do với muaTool/thuPhiTaoWeb); cấp
- * key là bước CUỐI trong transaction nên lỗi ở đâu thì tiền cũng được hoàn (rollback).
- * Hoa hồng giới thiệu tính như mọi sản phẩm khác qua commission.distributeCommission.
+ * KHÁCH TỰ MUA/GIA HẠN SA-BOTAI theo gói tháng bằng số dư ví — trừ tiền, tự cấp key mới (hoặc cộng thêm
+ * số ngày của gói vào key đang dùng) và gắn vào đúng tài khoản, KHÔNG cần thầy duyệt (thầy chốt
+ * 2026-10-05: "khi khách đóng tiền xong tự mở cho tool chạy tiếp"). Giá từng gói lấy từ fbaiKeyPricing
+ * (35$/55$/149$... x 26.000đ). Khoá dòng user + kiểm tra số dư NGAY TRONG transaction; cấp key là bước CUỐI
+ * trong transaction nên lỗi ở đâu thì tiền cũng được hoàn (rollback). Hoa hồng giới thiệu như mọi sản phẩm.
  */
-async function muaKeyFbai(user, { currentKey } = {}) {
-  const gia = fbaiKeyPricing.getPriceVnd();
-  if (!gia) throw new Error('Key chưa mở bán tự động — nhắn Zalo 0977317988 để nhận mã kích hoạt.');
+async function muaKeyFbai(user, { currentKey, months } = {}) {
+  const goi = fbaiKeyPricing.getPlan(months || 1);
+  if (!goi) throw new Error('Gói này chưa mở bán tự động — nhắn Zalo 0977317988 để được hỗ trợ.');
+  const gia = goi.vnd;
 
   const owner = { userId: user.id, email: user.email || user.phone || String(user.id) };
   const ketQua = await sequelize.transaction(async (t) => {
     const userKhoa = await User.findByPk(user.id, { transaction: t, lock: t.LOCK.UPDATE });
     if (soDu(userKhoa) < gia) {
-      throw new Error(`Số dư ví không đủ để mua key. Cần ${gia.toLocaleString('vi-VN')}đ, hiện có ${soDu(userKhoa).toLocaleString('vi-VN')}đ.`);
+      const err = new Error(`Số dư ví không đủ để mua gói ${goi.months} tháng. Cần ${gia.toLocaleString('vi-VN')}đ, hiện có ${soDu(userKhoa).toLocaleString('vi-VN')}đ.`);
+      err.thieu = gia - soDu(userKhoa);
+      throw err;
     }
     const balanceAfter = soDu(userKhoa) - gia;
     const tx = await WalletTransaction.create(
@@ -412,8 +470,9 @@ async function muaKeyFbai(user, { currentKey } = {}) {
         amount: -gia,
         status: 'paid',
         balanceAfter,
-        description: 'Mua key SA-BOTAI 30 ngày',
+        description: `Gia hạn SA-BOTAI ${goi.months} tháng (${goi.usd}$)`,
         relatedType: 'FbaiKey',
+        relatedId: goi.months,
         paidAt: new Date(),
         UserId: user.id,
       },
@@ -424,20 +483,53 @@ async function muaKeyFbai(user, { currentKey } = {}) {
     let entry = null;
     let giaHan = false;
     if (currentKey) {
-      const r = fbaiLicense.extendKey(currentKey, owner);
+      const r = fbaiLicense.extendKey(currentKey, owner, goi.days);
       if (r.entry) { entry = r.entry; giaHan = true; }
     }
-    if (!entry) entry = fbaiLicense.issueKey(`Tự mua qua ví — ${owner.email}`, owner);
+    if (!entry) entry = fbaiLicense.issueKey(`Tự mua qua ví (${goi.months} tháng) — ${owner.email}`, owner, goi.days);
     return { tx, entry, giaHan, balanceAfter };
   });
 
-  baoThay(`${user.name} vừa ${ketQua.giaHan ? 'gia hạn' : 'mua'} key SA-BOTAI 30 ngày — ${gia.toLocaleString('vi-VN')}đ (trừ từ ví).`);
+  baoThay(`${user.name} vừa ${ketQua.giaHan ? 'gia hạn' : 'mua'} SA-BOTAI ${goi.months} tháng — ${gia.toLocaleString('vi-VN')}đ (${goi.usd}$).`);
   await commission.distributeCommission(user, gia, 'FbaiKey', ketQua.tx.id);
-  return { key: ketQua.entry.key, expiresAt: ketQua.entry.expiresAt, giaHan: ketQua.giaHan, soDuConLai: ketQua.balanceAfter, gia };
+  return { key: ketQua.entry.key, expiresAt: ketQua.entry.expiresAt, giaHan: ketQua.giaHan, soDuConLai: ketQua.balanceAfter, gia, months: goi.months };
+}
+
+/**
+ * Tạo đơn mua gói tháng bằng QR chuyển khoản (khách chưa nạp ví): khi tiền về (SePay webhook → ghiNhanNapVi),
+ * hệ thống cộng ví RỒI TỰ MUA/GIA HẠN luôn gói đã chọn — khách không phải bấm thêm gì, tool tự mở lại.
+ * currentKey lưu tạm trong description sau dấu "|" để biết gia hạn key nào.
+ */
+async function taoDonMuaGoiKey(userId, months, currentKey) {
+  const goi = fbaiKeyPricing.getPlan(months);
+  if (!goi) throw new Error('Gói này chưa mở bán tự động.');
+  let code = taoMaNap();
+  for (let i = 0; i < 5 && (await WalletTransaction.findOne({ where: { code } })); i += 1) code = taoMaNap();
+  const mo = `Mua gói SA-BOTAI ${goi.months} tháng (${goi.usd}$)`;
+  const tx = await WalletTransaction.create({
+    code,
+    type: 'topup',
+    amount: goi.vnd,
+    status: 'pending',
+    description: (currentKey ? `${mo}|${String(currentKey).slice(0, 24)}` : mo).slice(0, 250),
+    relatedType: 'FbaiKeyPlan',
+    relatedId: goi.months,
+    UserId: userId,
+  });
+  const user = await User.findByPk(userId);
+  baoThay(
+    `Có người tạo lệnh mua gói SA-BOTAI ${goi.months} tháng — ${goi.vnd.toLocaleString('vi-VN')}đ (${goi.usd}$)\n` +
+    `Người mua: ${user ? user.name + ' (' + (user.email || user.phone || '') + ')' : '#' + userId}\nNội dung chuyển khoản: ${code}\n` +
+    (tuDongDoiSoat() ? 'Tiền về là hệ thống tự cấp/gia hạn key.' : 'Chưa nối SePay — xem tiền về thì vào 3dvietpro.com/admin/wallet bấm duyệt.')
+  );
+  return { tx, goi };
 }
 
 module.exports = {
   muaKeyFbai,
+  taoDonMuaGoiKey,
+  xemPhiTaoWeb,
+  chuanHoaTenMien,
   tuDongDoiSoat,
   sanSangNhanTien,
   anhQR,

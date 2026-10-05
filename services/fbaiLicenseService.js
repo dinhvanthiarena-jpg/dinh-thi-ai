@@ -21,7 +21,8 @@ const crypto = require('crypto');
 const SECRET = 'FBAdsManager-DinhThiAi-K3y-S3cr3t-2026'; // giống hệt license-core.js — KHÔNG đổi, nếu không mọi key cũ sẽ sai checksum
 const ALPHABET = '23456789ABCDEFGHJKLMNPQRSTVWXYZ';
 const PREFIX = 'FBAI';
-const LICENSE_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // bán theo tháng, giống hệt aaiLicenseService
+const LICENSE_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 1 tháng = 30 ngày (gia hạn tay ở admin, gói theo tháng)
+const FIRST_KEY_DURATION_MS = 90 * 24 * 60 * 60 * 1000; // thầy chốt 2026-10-05: key cấp LẦN ĐẦU chạy đúng 90 ngày, hết 90 ngày phải đóng phí theo tháng
 
 // Giới hạn số Website nhận bài — gói cơ bản (mua tool) luôn đi kèm 1 Website
 // (+ 1 Fanpage + 1 Group tương ứng, enforce ở phía desktop tool). Mua thêm
@@ -76,12 +77,13 @@ function isWellFormed(input) {
 
 // owner (tuỳ chọn): { userId, email } — key khách TỰ MUA bằng ví trong tool được gắn vào
 // đúng tài khoản mua (xem walletService.muaKeyFbai); key thầy cấp tay thì không có owner.
-function issueKey(note, owner) {
+function issueKey(note, owner, days) {
   const body = randomBodyChars(8);
   const check = checksumFor(body);
   const key = formatKey(body, check);
   const list = loadKeys();
-  const entry = { key, note: note || '', issuedAt: Date.now(), expiresAt: Date.now() + LICENSE_DURATION_MS, active: true, boundMachine: null, boundDeviceId: null };
+  const duration = days ? days * 24 * 60 * 60 * 1000 : FIRST_KEY_DURATION_MS;
+  const entry = { key, note: note || '', issuedAt: Date.now(), expiresAt: Date.now() + duration, active: true, boundMachine: null, boundDeviceId: null };
   if (owner && owner.userId) { entry.ownerUserId = owner.userId; entry.ownerEmail = owner.email || ''; }
   list.unshift(entry);
   saveKeys(list);
@@ -91,14 +93,14 @@ function issueKey(note, owner) {
 // Gia hạn key khách đang dùng khi họ mua tiếp: cộng thêm 30 ngày vào hạn CÒN LẠI (không mất ngày
 // đã trả), giữ nguyên khoá thiết bị. Trả { entry } nếu được; { error } nếu không gia hạn được
 // (không có key / bị thu hồi / thuộc tài khoản khác) — khi đó nơi gọi sẽ cấp key MỚI thay thế.
-function extendKey(key, owner) {
+function extendKey(key, owner, days) {
   if (!isWellFormed(key)) return { error: 'invalid' };
   const list = loadKeys();
   const entry = list.find((k) => k.key === normalizeAndFormat(key));
   if (!entry) return { error: 'not_found' };
   if (entry.active === false) return { error: 'revoked' };
   if (entry.ownerUserId && owner && entry.ownerUserId !== owner.userId) return { error: 'other_owner' };
-  entry.expiresAt = Math.max(Date.now(), entry.expiresAt || 0) + LICENSE_DURATION_MS;
+  entry.expiresAt = Math.max(Date.now(), entry.expiresAt || 0) + (days ? days * 24 * 60 * 60 * 1000 : LICENSE_DURATION_MS);
   if (!entry.ownerUserId && owner && owner.userId) { entry.ownerUserId = owner.userId; entry.ownerEmail = owner.email || ''; }
   saveKeys(list);
   return { entry };
@@ -180,7 +182,7 @@ function checkAndBindDevice(key, deviceId, label) {
       saveKeys(list);
     }
   }
-  return { valid: true, websiteLimit: effectiveWebsiteLimit(entry) };
+  return { valid: true, websiteLimit: effectiveWebsiteLimit(entry), expiresAt: entry.expiresAt || null };
 }
 
 // Cho khách đổi máy hợp lệ (máy cũ hỏng/thầy xác nhận thủ công) - gỡ khoá

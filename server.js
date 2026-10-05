@@ -233,6 +233,7 @@ app.use('/blog', blogRoutes);
 // the same way it blocks "/webhook*" (see the webhookRoutes mount below).
 app.use('/kho-tai-nguyen', toolRoutes);
 app.use('/admin/gia-key-sa-botai', require('./routes/adminFbaiPricing'));
+app.use('/phap-ly-sa-botai', require('./routes/saAiBotLegal'));
 app.use('/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/game', gameApiRoutes);

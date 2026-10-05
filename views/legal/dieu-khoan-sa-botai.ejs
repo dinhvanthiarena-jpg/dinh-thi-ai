@@ -1,0 +1,100 @@
+<%
+  const fmt = (n) => Number(n).toLocaleString('vi-VN');
+  const donVi = legal.ten;
+  const goiBan = plans; // gói gia hạn đang bán
+%>
+<section class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12 legal-doc">
+  <style>
+    .legal-doc h1 { font-size: 1.6rem; font-weight: 800; text-align: center; margin: 0 0 .25rem; }
+    .legal-doc h2 { font-size: 1.1rem; font-weight: 700; margin: 1.6rem 0 .5rem; }
+    .legal-doc p, .legal-doc li { line-height: 1.7; margin: .35rem 0; }
+    .legal-doc ul, .legal-doc ol { padding-left: 1.4rem; }
+    .legal-doc ul { list-style: disc; } .legal-doc ol { list-style: decimal; }
+    .legal-doc .center { text-align: center; }
+    .legal-doc table { border-collapse: collapse; width: 100%; margin: .6rem 0; font-size: .95rem; }
+    .legal-doc th, .legal-doc td { border: 1px solid #d4d4d8; padding: .45rem .6rem; text-align: left; }
+    .legal-doc .note { background: #f4f4f5; border-radius: .6rem; padding: .7rem .9rem; font-size: .92rem; }
+  </style>
+
+  <p class="center"><strong>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</strong><br>Độc lập – Tự do – Hạnh phúc</p>
+  <h1>ĐIỀU KHOẢN DỊCH VỤ VÀ HỢP ĐỒNG CUNG CẤP DỊCH VỤ PHẦN MỀM SA-BOTAI</h1>
+  <p class="center"><em>(Hợp đồng điện tử – áp dụng cho giao dịch trực tuyến) · Phiên bản <%= version %></em></p>
+
+  <p>Căn cứ Bộ luật Dân sự số 91/2015/QH13 ngày 24/11/2015;</p>
+  <p>Căn cứ Luật Giao dịch điện tử số 20/2023/QH15 ngày 22/6/2023;</p>
+  <p>Căn cứ Luật Bảo vệ quyền lợi người tiêu dùng số 19/2023/QH15 ngày 20/6/2023;</p>
+  <p>Căn cứ Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 và Nghị định số 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân (trong phạm vi còn hiệu lực);</p>
+  <p>Hôm nay, thông qua hệ thống giao dịch điện tử trực tuyến, các bên gồm:</p>
+
+  <p><strong>BÊN CUNG CẤP DỊCH VỤ (BÊN A):</strong></p>
+  <ul>
+    <li>Đơn vị/cá nhân: <strong><%= donVi %></strong></li>
+    <li>Mã số thuế / đăng ký kinh doanh: <%= legal.mst %></li>
+    <li>Địa chỉ: <%= legal.diaChi %></li>
+    <li>Hỗ trợ: Zalo / điện thoại <strong>0977 317 988</strong><% if (legal.email) { %> · Email: <%= legal.email %><% } %></li>
+  </ul>
+  <p><strong>BÊN SỬ DỤNG DỊCH VỤ (BÊN B):</strong> là khách hàng thực hiện đăng ký tài khoản, kích hoạt/thanh toán và tích chọn “Đồng ý với Điều khoản dịch vụ” trên phần mềm hoặc website của Bên A.</p>
+  <p>Hai bên thống nhất các điều khoản sau:</p>
+
+  <h2>ĐIỀU 1. NỘI DUNG DỊCH VỤ VÀ BIỂU PHÍ</h2>
+  <ol>
+    <li><strong>Dịch vụ:</strong> quyền sử dụng phần mềm SA-BOTAI (bản Windows) gồm trợ lý AI, tạo website nhanh (“24h ra web”), đăng bài tự động, tự động hóa trên các nền tảng bên thứ ba (Zalo, Facebook…) và các tính năng đi kèm; có hỗ trợ kỹ thuật trong thời gian dịch vụ còn hiệu lực.</li>
+    <li><strong>Thời hạn sử dụng:</strong> thời hạn tính theo <strong>ngày</strong> kể từ ngày cấp mã bản quyền (key). Key được cấp <strong>lần đầu</strong> có thời hạn <strong><%= firstKeyDays %> ngày (03 tháng)</strong>. Trước ngày tạm ngừng, hệ thống thông báo cho Bên B thanh toán phí duy trì theo tháng; nếu không thanh toán, phần mềm được <strong>tạm ngừng</strong> cho tới khi Bên B thanh toán.</li>
+    <li><strong>Phí duy trì / gia hạn</strong> (quy đổi tỷ giá cố định <strong>1 USD = <%= fmt(usdRate) %> đồng</strong>, đã bao gồm thuế nếu có; 01 tháng = 30 ngày):
+      <table>
+        <tr><th>Gói</th><th>Phí (USD)</th><th>Phí thanh toán (VNĐ)</th></tr>
+        <% goiBan.forEach(function(p) { %>
+          <tr><td><%= p.months %> tháng (<%= p.days %> ngày)</td><td><%= fmt(p.usd) %> USD</td><td><strong><%= fmt(p.vnd) %> đồng</strong></td></tr>
+        <% }) %>
+      </table>
+      Mức phí của gói khởi đầu (key cấp lần đầu) do Bên A thông báo tại thời điểm bán/bàn giao key.
+    </li>
+    <li><strong>Dịch vụ thiết kế và đưa website lên hosting:</strong>
+      <ul>
+        <li>Key cấp lần đầu được kèm <strong>01 (một) website miễn phí</strong>. Số lượng website được tính theo <strong>tên miền</strong> mà Bên B cung cấp.</li>
+        <li>Với tên miền đó, Bên B được <strong>chỉnh sửa và đưa lên hosting lại không giới hạn số lần</strong> cho đến khi hài lòng.</li>
+        <li>Từ <strong>tên miền thứ hai</strong> trở đi (đưa lên hosting lần đầu cho tên miền mới): phí <strong><%= fmt(webFee.usd) %> USD = <%= fmt(webFee.vnd) %> đồng</strong> cho mỗi tên miền mới. Sau khi thanh toán, hệ thống tự động mở cho Bên B tạo website mới.</li>
+        <li>Các khoản phí trên <strong>chưa bao gồm</strong> chi phí tên miền (domain) và máy chủ/hosting, trừ khi có thỏa thuận khác.</li>
+      </ul>
+    </li>
+    <li><strong>Đăng bài tự động:</strong> tối đa <strong>04 (bốn) bài/ngày cho mỗi website</strong> của Bên B.</li>
+  </ol>
+
+  <h2>ĐIỀU 2. THANH TOÁN VÀ HOÀN TIỀN</h2>
+  <ol>
+    <li>Thanh toán trả trước bằng chuyển khoản ngân hàng (mã QR) vào tài khoản của Bên A hoặc bằng số dư ví trên hệ thống. Khi Bên A xác nhận đã nhận tiền, hệ thống tự động cấp/gia hạn key và mở lại phần mềm.</li>
+    <li>Do đặc thù sản phẩm số và tài nguyên lập trình, các khoản phí đã thanh toán <strong>không được hoàn lại</strong> sau khi giao dịch thành công, trừ trường hợp lỗi hoàn toàn thuộc về Bên A mà không khắc phục được trong vòng <strong>15 ngày làm việc</strong> kể từ khi Bên B thông báo.</li>
+    <li>Điều khoản này không loại trừ các quyền của Bên B theo quy định của pháp luật về bảo vệ quyền lợi người tiêu dùng.</li>
+  </ol>
+
+  <h2>ĐIỀU 3. QUYỀN VÀ TRÁCH NHIỆM CỦA BÊN A</h2>
+  <ol>
+    <li>Cung cấp quyền sử dụng phần mềm và hỗ trợ kỹ thuật trong suốt thời gian dịch vụ còn hiệu lực.</li>
+    <li>Bảo mật thông tin Bên B theo <a href="<%= privacyUrl %>" class="underline">Chính sách bảo mật</a>.</li>
+    <li><strong>Miễn trừ trách nhiệm:</strong> Bên A không chịu trách nhiệm trong trường hợp tài khoản Zalo, Facebook hoặc tài khoản bên thứ ba khác của Bên B bị khóa, hạn chế tính năng do Bên B vi phạm chính sách của nền tảng đó (gửi tin nhắn rác, bị người dùng khiếu nại, vi phạm bản quyền nội dung…), hoặc do nền tảng thay đổi chính sách/kỹ thuật; cũng như đối với gián đoạn nằm ngoài khả năng kiểm soát hợp lý (mất mạng, sự cố hosting/tên miền do bên thứ ba).</li>
+  </ol>
+
+  <h2>ĐIỀU 4. QUYỀN VÀ TRÁCH NHIỆM CỦA BÊN B</h2>
+  <ol>
+    <li>Thanh toán đầy đủ, đúng hạn các khoản phí theo Điều 1.</li>
+    <li>Tuân thủ pháp luật Việt Nam và chính sách của các nền tảng bên thứ ba (Zalo, Facebook…) khi sử dụng tính năng tự động hóa. <strong>Tuyệt đối không</strong> dùng phần mềm để phát tán tin nhắn rác, lừa đảo hoặc nội dung vi phạm pháp luật.</li>
+    <li>Tự chịu trách nhiệm về nội dung, hình ảnh, thông tin sản phẩm/dịch vụ do mình cung cấp hoặc đăng tải trên website và các kênh khác (kể cả nội dung do AI soạn thảo theo yêu cầu của Bên B – Bên B có trách nhiệm kiểm tra trước khi đăng).</li>
+    <li>Mỗi key chỉ sử dụng trên <strong>một thiết bị</strong> tại một thời điểm; không chia sẻ, bán lại key. Muốn đổi thiết bị phải liên hệ Bên A.</li>
+    <li>Bảo quản tài khoản, mật khẩu, khóa API (VD: khóa AI) và thông tin đăng nhập hosting của mình; chịu trách nhiệm về mọi thao tác thực hiện bằng tài khoản của mình.</li>
+  </ol>
+
+  <h2>ĐIỀU 5. DỮ LIỆU CÁ NHÂN VÀ GHI NHẬN ĐỒNG Ý</h2>
+  <ol>
+    <li>Bên B đồng ý để Bên A xử lý dữ liệu cá nhân cần thiết cho việc cung cấp dịch vụ theo <a href="<%= privacyUrl %>" class="underline">Chính sách bảo mật</a>.</li>
+    <li>Khi Bên B tích chọn đồng ý, hệ thống ghi lại <strong>địa chỉ IP, thời điểm và phiên bản điều khoản</strong> để làm bằng chứng giao dịch điện tử.</li>
+  </ol>
+
+  <h2>ĐIỀU 6. HIỆU LỰC, THAY ĐỔI VÀ GIẢI QUYẾT TRANH CHẤP</h2>
+  <ol>
+    <li>Hợp đồng điện tử này có hiệu lực ngay khi Bên B đăng ký tài khoản và tích chọn đồng ý trên hệ thống của Bên A.</li>
+    <li>Bên A có thể cập nhật điều khoản; phiên bản mới được thông báo trên phần mềm/website và Bên B tích chọn đồng ý lại để tiếp tục sử dụng. Thay đổi về giá không áp dụng cho khoản đã thanh toán.</li>
+    <li>Tranh chấp được ưu tiên giải quyết bằng thương lượng. Nếu không đạt thỏa thuận, các bên có quyền đưa vụ việc ra Tòa án có thẩm quyền theo quy định của pháp luật Việt Nam.</li>
+  </ol>
+
+  <p class="note">Bằng việc tích chọn đồng ý, Bên B xác nhận đã đọc, hiểu rõ và chấp nhận toàn bộ điều khoản trên, đặc biệt các điều kiện về sử dụng tự động hóa trên nền tảng bên thứ ba (Zalo, Facebook…).</p>
+</section>

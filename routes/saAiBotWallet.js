@@ -84,8 +84,11 @@ router.get('/nap/:code', an(async (req, res) => {
 // Xem trước phí tạo web (không trừ tiền) — để tool hiện giá cho khách TRƯỚC
 // khi họ bấm nút tạo web thật.
 router.get('/website-build-fee', an(async (req, res) => {
-  const rate = await exchangeRate.layTyGiaUsdVnd();
-  res.json({ ok: true, usd: wallet.PHI_TAO_WEB_USD, vnd: Math.round(wallet.PHI_TAO_WEB_USD * rate), usdRate: rate });
+  const User = require('../models/User');
+  const user = await User.findByPk(req.authUser.id);
+  if (!user) return res.status(401).json({ error: 'Tài khoản không còn tồn tại.' });
+  const r = await wallet.xemPhiTaoWeb(user, req.query.domain, String(req.query.key || '').slice(0, 40));
+  res.json({ ok: true, ...r, usdRate: fbaiKeyPricing.USD_RATE });
 }));
 
 // Xem trước giá GÓI nhiều web (tỷ giá CỐ ĐỊNH, đã gồm thuế, giảm theo số
@@ -131,9 +134,9 @@ router.post('/charge-website-build', express.json(), an(async (req, res) => {
   const User = require('../models/User');
   const user = await User.findByPk(req.authUser.id);
   if (!user) return res.status(401).json({ error: 'Tài khoản không còn tồn tại.' });
-  const { domain } = req.body || {};
+  const { domain, licenseKey } = req.body || {};
   try {
-    const result = await wallet.thuPhiTaoWeb(user, domain);
+    const result = await wallet.thuPhiTaoWeb(user, domain, { licenseKey: String(licenseKey || '').slice(0, 40) });
     res.json({
       ok: true,
       amountVnd: result.amountVnd,
@@ -141,22 +144,27 @@ router.post('/charge-website-build', express.json(), an(async (req, res) => {
       soDuConLai: result.balanceAfter,
       dungCredit: !!result.dungCredit,
       creditsConLai: result.creditsConLai,
+      mienPhi: !!result.mienPhi,
+      lyDo: result.lyDo,
+      domain: result.domain,
     });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: err.message, thieu: err.thieu || 0 });
   }
 }));
 
-// Bảng giá KEY SA-BOTAI 30 ngày + số dư ví + các key đã mua (gắn với tài khoản này).
-// giaVnd = null nghĩa là thầy chưa mở bán tự động -> tool chỉ hiện "nhắn Zalo nhận key".
+// Bảng giá SA-BOTAI (gia hạn theo gói tháng + phí tạo web mới) + số dư ví + key của tài khoản này.
+// Giá USD đổi VNĐ theo tỷ giá CỐ ĐỊNH 26.000đ/$. plans rỗng = thầy chưa bật gói nào -> tool chỉ hiện "nhắn Zalo".
 router.get('/key-info', an(async (req, res) => {
   const User = require('../models/User');
   const user = await User.findByPk(req.authUser.id);
   if (!user) return res.status(401).json({ error: 'Tài khoản không còn tồn tại.' });
   res.json({
     ok: true,
-    giaVnd: fbaiKeyPricing.getPriceVnd(),
-    soNgay: 30,
+    plans: fbaiKeyPricing.getPlans(),
+    webFee: fbaiKeyPricing.getWebFee(),
+    usdRate: fbaiKeyPricing.USD_RATE,
+    firstKeyDays: fbaiKeyPricing.FIRST_KEY_DAYS,
     soDu: wallet.soDu(user),
     sanSang: wallet.sanSangNhanTien(),
     refCode: user.refCode || '',
@@ -164,15 +172,31 @@ router.get('/key-info', an(async (req, res) => {
   });
 }));
 
-// Khách TỰ MUA key bằng ví: trừ tiền -> tự cấp (hoặc gia hạn key đang dùng) -> trả key để tool tự kích hoạt.
+// Khách TỰ MUA/GIA HẠN bằng số dư ví: trừ tiền -> tự cấp (hoặc cộng ngày vào key đang dùng) -> tool tự kích hoạt.
 router.post('/mua-key', express.json(), an(async (req, res) => {
   const User = require('../models/User');
   const user = await User.findByPk(req.authUser.id);
   if (!user) return res.status(401).json({ error: 'Tài khoản không còn tồn tại.' });
   const currentKey = String((req.body || {}).currentKey || '').slice(0, 40);
+  const months = parseInt((req.body || {}).months, 10) || 1;
   try {
-    const r = await wallet.muaKeyFbai(user, { currentKey });
-    res.json({ ok: true, key: r.key, expiresAt: r.expiresAt, giaHan: r.giaHan, soDuConLai: r.soDuConLai, gia: r.gia });
+    const r = await wallet.muaKeyFbai(user, { currentKey, months });
+    res.json({ ok: true, key: r.key, expiresAt: r.expiresAt, giaHan: r.giaHan, soDuConLai: r.soDuConLai, gia: r.gia, months: r.months });
+  } catch (err) {
+    res.status(400).json({ error: err.message, thieu: err.thieu || 0 });
+  }
+}));
+
+// Chưa có tiền trong ví: tạo đơn QR mua thẳng gói tháng — tiền về là hệ thống TỰ mua/gia hạn (xem ghiNhanNapVi).
+router.post('/mua-key-qr', express.json(), an(async (req, res) => {
+  if (!wallet.sanSangNhanTien()) {
+    return res.status(400).json({ error: 'Chưa cấu hình tài khoản nhận tiền, liên hệ thầy Đinh Thi Ai.' });
+  }
+  const months = parseInt((req.body || {}).months, 10) || 1;
+  const currentKey = String((req.body || {}).currentKey || '').slice(0, 24);
+  try {
+    const { tx, goi } = await wallet.taoDonMuaGoiKey(req.authUser.id, months, currentKey);
+    res.json({ ok: true, code: tx.code, months: goi.months, amount: tx.amount, status: tx.status, qr: wallet.anhQR(tx), ck: wallet.thongTinChuyenKhoan(tx) });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -183,7 +207,13 @@ router.get('/nap/:code/trang-thai', an(async (req, res) => {
   const tx = await WalletTransaction.findOne({ where: { code: req.params.code, UserId: req.authUser.id } });
   if (!tx) return res.status(404).json({ error: 'Không tìm thấy giao dịch.' });
   const user = await User.findByPk(req.authUser.id);
-  res.json({ ok: true, status: tx.status, soDu: wallet.soDu(user), websiteBuildCredits: user.websiteBuildCredits || 0 });
+  res.json({
+    ok: true,
+    status: tx.status,
+    soDu: wallet.soDu(user),
+    websiteBuildCredits: user.websiteBuildCredits || 0,
+    keys: fbaiLicense.listKeysByOwner(user.id).map((k) => ({ key: k.key, expiresAt: k.expiresAt, active: k.active !== false })),
+  });
 }));
 
 module.exports = router;
