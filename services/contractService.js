@@ -82,7 +82,7 @@ function thuHopDong(c, ten) {
   const lienHe = pricing.getLegal().dienThoai || pricing.getLegal().email || '';
   return {
     subject: `Hợp đồng dịch vụ phần mềm SA-BOTAI số ${c.contractNo}`,
-    text: `Chào ${ten},\n\nBạn vừa đồng ý Điều khoản dịch vụ SA-BOTAI. ${donVi} đã lập hợp đồng điện tử số ${c.contractNo} (bản đầy đủ đính kèm email này) và lưu trữ trên hệ thống.\nXem / in / lưu PDF: ${url}\n\nBạn nên lưu lại email này làm bằng chứng giao kết.${lienHe ? '\\nHỗ trợ: ' + lienHe : ''}`,
+    text: `Chào ${ten},\n\nBạn vừa đồng ý Điều khoản dịch vụ SA-BOTAI. ${donVi} đã lập hợp đồng điện tử số ${c.contractNo} (bản đầy đủ đính kèm email này) và lưu trữ trên hệ thống.\nXem / in / lưu PDF: ${url}\n\nBạn nên lưu lại email này làm bằng chứng giao kết.${lienHe ? '\nHỗ trợ: ' + lienHe : ''}`,
     html: `<p>Chào <strong>${ten}</strong>,</p><p>Bạn vừa đồng ý Điều khoản dịch vụ phần mềm <strong>SA-BOTAI</strong>. <strong>${donVi}</strong> đã lập <strong>hợp đồng điện tử số ${c.contractNo}</strong> (bản đầy đủ đính kèm email này) và lưu trữ trên hệ thống.</p><p>Xem / in / lưu PDF hợp đồng tại: <a href="${url}">${url}</a></p><p style="color:#52525b;font-size:13px">Bạn nên lưu lại email này làm bằng chứng giao kết.${lienHe ? ' Hỗ trợ: ' + lienHe + '.' : ''}</p>`,
   };
 }
