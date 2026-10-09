@@ -35,7 +35,7 @@
   <p>Dữ liệu được lưu trong thời gian bạn sử dụng dịch vụ và thêm thời hạn cần thiết theo quy định pháp luật (ví dụ chứng từ giao dịch). Chúng tôi áp dụng các biện pháp kỹ thuật hợp lý để bảo vệ dữ liệu, nhưng không có hệ thống nào an toàn tuyệt đối.</p>
 
   <h2>6. Quyền của bạn</h2>
-  <p>Bạn có quyền được biết, truy cập, chỉnh sửa, yêu cầu xóa, rút lại sự đồng ý và khiếu nại về dữ liệu cá nhân của mình. Liên hệ: Zalo / điện thoại <strong>0977 317 988</strong><% if (legal.email) { %> hoặc email <%= legal.email %><% } %>. Địa chỉ: <%= legal.diaChi %>.</p>
+  <p>Bạn có quyền được biết, truy cập, chỉnh sửa, yêu cầu xóa, rút lại sự đồng ý và khiếu nại về dữ liệu cá nhân của mình. Liên hệ:<% if (legal.dienThoai) { %> Zalo / điện thoại <strong><%= legal.dienThoai %></strong><% } %><% if (legal.email) { %><%= legal.dienThoai ? ' hoặc' : '' %> email <%= legal.email %><% } %><% if (!legal.dienThoai && !legal.email) { %> qua kênh hỗ trợ trong phần mềm<% } %>. Địa chỉ: <%= legal.diaChi %>.</p>
 
   <h2>7. Thay đổi chính sách</h2>
   <p>Khi chính sách thay đổi, phiên bản mới được đăng tại đây và bạn sẽ được yêu cầu xác nhận lại trong phần mềm.</p>

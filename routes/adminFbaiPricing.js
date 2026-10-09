@@ -56,7 +56,7 @@ router.post('/', (req, res) => {
     usdRate: Number(String(b.usdRate || '').replace(/[^0-9]/g, '')) || undefined,
     webFeeUsd: Number(String(b.webFeeUsd || '').replace(/[^0-9.]/g, '')) || undefined,
     plans: plans.length ? plans : undefined,
-    legal: { ten: String(b.ten || '').slice(0, 200), mst: String(b.mst || '').slice(0, 100), diaChi: String(b.diaChi || '').slice(0, 300), email: String(b.email || '').slice(0, 120) },
+    legal: { ten: String(b.ten || '').slice(0, 200), mst: String(b.mst || '').slice(0, 100), diaChi: String(b.diaChi || '').slice(0, 300), email: String(b.email || '').slice(0, 120), dienThoai: String(b.dienThoai || '').slice(0, 40) },
   });
   res.redirect('/admin/gia-key-sa-botai?saved=1');
 });

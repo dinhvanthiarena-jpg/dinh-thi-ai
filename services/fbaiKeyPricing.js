@@ -27,7 +27,7 @@ const DEFAULT_PLANS = [
 const DEFAULTS = {
   usdRate: DEFAULT_RATE,
   webFeeUsd: 35,
-  legal: { ten: 'ĐINH VĂN THI (thương hiệu Đinh Thi Ai – 3dvietpro.com)', mst: 'Đang cập nhật', diaChi: 'Đang cập nhật', email: '' },
+  legal: { ten: 'HỢP TÁC XÃ CÔNG NGHỆ AFF (HTX Công nghệ AFF)', mst: 'Đang cập nhật', diaChi: 'Đang cập nhật', email: '', dienThoai: '' },
 };
 
 function read() {

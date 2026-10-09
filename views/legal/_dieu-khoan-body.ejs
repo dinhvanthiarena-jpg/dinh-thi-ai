@@ -31,7 +31,7 @@
     <li>Đơn vị/cá nhân: <strong><%= donVi %></strong></li>
     <li>Mã số thuế / đăng ký kinh doanh: <%= legal.mst %></li>
     <li>Địa chỉ: <%= legal.diaChi %></li>
-    <li>Hỗ trợ: Zalo / điện thoại <strong>0977 317 988</strong><% if (legal.email) { %> · Email: <%= legal.email %><% } %></li>
+    <% if (legal.dienThoai || legal.email) { %><li>Hỗ trợ:<% if (legal.dienThoai) { %> Zalo / điện thoại <strong><%= legal.dienThoai %></strong><% } %><% if (legal.email) { %><%= legal.dienThoai ? ' · ' : ' ' %>Email: <%= legal.email %><% } %></li><% } %>
   </ul>
   <% if (typeof partyB !== 'undefined' && partyB) { %>
   <p><strong>BÊN SỬ DỤNG DỊCH VỤ (BÊN B):</strong></p>
@@ -61,7 +61,7 @@
         <% }) %>
         <tr><td><%= ++stt %></td><td><strong>Website tạo mới theo yêu cầu</strong> — từ tên miền thứ hai trở đi</td><td>Trả một lần cho mỗi tên miền mới</td><td><strong><%= fmt(webFee.vnd) %> đồng / website</strong></td></tr>
       </table>
-      Trước ngày tạm ngừng, hệ thống thông báo để Bên B thanh toán phí duy trì từ tháng thứ 4. Mã bản quyền (key) lần đầu được bán qua quản trị viên của Bên A (liên hệ Zalo 0977 317 988) và/hoặc ngay trong phần mềm khi Bên A mở bán tự động.
+      Trước ngày tạm ngừng, hệ thống thông báo để Bên B thanh toán phí duy trì từ tháng thứ 4. Mã bản quyền (key) lần đầu được bán qua quản trị viên của Bên A (liên hệ qua kênh hỗ trợ của Bên A) và/hoặc ngay trong phần mềm khi Bên A mở bán tự động.
     </li>
     <li><strong>Quyền lợi của Bên B trong gói AI tự động hóa doanh nghiệp:</strong>
       <ul>

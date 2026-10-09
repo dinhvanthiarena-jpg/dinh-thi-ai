@@ -71,17 +71,49 @@ async function taoHopDong(userId, { version, ip, userAgent, source, acceptedAt }
   return rec;
 }
 
+function layTransporter() {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) return null;
+  return nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT) || 587, secure: Number(process.env.SMTP_PORT) === 465, auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } });
+}
+
+function thuHopDong(c, ten) {
+  const url = urlHopDong(c);
+  const donVi = pricing.getLegal().ten;
+  const lienHe = pricing.getLegal().dienThoai || pricing.getLegal().email || '';
+  return {
+    subject: `Hợp đồng dịch vụ phần mềm SA-BOTAI số ${c.contractNo}`,
+    text: `Chào ${ten},\n\nBạn vừa đồng ý Điều khoản dịch vụ SA-BOTAI. ${donVi} đã lập hợp đồng điện tử số ${c.contractNo} (bản đầy đủ đính kèm email này) và lưu trữ trên hệ thống.\nXem / in / lưu PDF: ${url}\n\nBạn nên lưu lại email này làm bằng chứng giao kết.${lienHe ? '\\nHỗ trợ: ' + lienHe : ''}`,
+    html: `<p>Chào <strong>${ten}</strong>,</p><p>Bạn vừa đồng ý Điều khoản dịch vụ phần mềm <strong>SA-BOTAI</strong>. <strong>${donVi}</strong> đã lập <strong>hợp đồng điện tử số ${c.contractNo}</strong> (bản đầy đủ đính kèm email này) và lưu trữ trên hệ thống.</p><p>Xem / in / lưu PDF hợp đồng tại: <a href="${url}">${url}</a></p><p style="color:#52525b;font-size:13px">Bạn nên lưu lại email này làm bằng chứng giao kết.${lienHe ? ' Hỗ trợ: ' + lienHe + '.' : ''}</p>`,
+  };
+}
+
 async function guiEmail(c, user) {
-  if (!user.email || !process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) return;
-  const t = nodemailer.createTransport({ host: process.env.SMTP_HOST, port: Number(process.env.SMTP_PORT) || 587, secure: Number(process.env.SMTP_PORT) === 465, auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } });
+  const t = layTransporter();
+  if (!user.email || !t) { console.error('[contract] bỏ qua gửi email (thiếu email khách hoặc chưa cấu hình SMTP)'); return; }
+  const noi = thuHopDong(c, user.name);
   await t.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    from: `"${pricing.getLegal().ten.replace(/"/g, '')}" <${process.env.SMTP_USER}>`,
     to: user.email,
-    subject: `Hợp đồng dịch vụ SA-BOTAI số ${c.contractNo}`,
-    html: `<p>Chào ${user.name},</p><p>Bạn vừa đồng ý Điều khoản dịch vụ SA-BOTAI. Hệ thống đã lập <strong>hợp đồng điện tử số ${c.contractNo}</strong> và lưu trữ trên 3dvietpro.com.</p><p>Xem / in / lưu PDF hợp đồng tại: <a href="${urlHopDong(c)}">${urlHopDong(c)}</a></p><p>Hỗ trợ: Zalo 0977 317 988.</p>`,
+    bcc: process.env.ADMIN_EMAIL || undefined, // bản lưu cho Bên A
+    ...noi,
     attachments: [{ filename: `${c.contractNo}.html`, content: c.html, contentType: 'text/html; charset=utf-8' }],
   });
   await c.update({ emailedAt: new Date() });
+}
+
+/** Gửi thử email hợp đồng MẪU (không tạo hợp đồng thật) để kiểm tra SMTP + giao diện thư. */
+async function guiThuMau(email) {
+  const t = layTransporter();
+  if (!t) throw new Error('Chưa cấu hình SMTP');
+  const terms = require('./termsService');
+  const html = await renderHopDong({
+    version: terms.VERSION,
+    partyB: { name: 'Khách hàng mẫu', email, phone: '', registeredAt: fmtVN(new Date()) },
+    contract: { contractNo: 'HD-SABOTAI-MẪU', version: terms.VERSION, acceptedAtText: fmtVN(new Date()), ip: '0.0.0.0', sourceText: 'Email gửi thử — không có giá trị giao kết' },
+  });
+  const fake = { contractNo: 'HD-SABOTAI-MẪU', UserId: 0 };
+  const noi = thuHopDong(fake, 'Khách hàng mẫu');
+  await t.sendMail({ from: `"${pricing.getLegal().ten.replace(/"/g, '')}" <${process.env.SMTP_USER}>`, to: email, subject: '[GỬI THỬ] ' + noi.subject, text: noi.text, html: noi.html, attachments: [{ filename: 'HD-SABOTAI-MAU.html', content: html, contentType: 'text/html; charset=utf-8' }] });
 }
 
 async function hopDongMoiNhat(userId) {
@@ -94,4 +126,4 @@ function kiemTraToanVen(c) {
   return crypto.createHash('sha256').update(c.html, 'utf8').digest('hex') === c.contentHash;
 }
 
-module.exports = { renderHopDong, fmtVN, taoHopDong, urlHopDong, tokenHopLe, hopDongMoiNhat, theoSo, kiemTraToanVen };
+module.exports = { guiThuMau, renderHopDong, fmtVN, taoHopDong, urlHopDong, tokenHopLe, hopDongMoiNhat, theoSo, kiemTraToanVen };
