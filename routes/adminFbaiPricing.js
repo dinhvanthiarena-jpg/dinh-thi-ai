@@ -4,8 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireAdmin } = require('../middleware/auth');
-const { WalletTransaction, User, WebsiteDomain, TermsAcceptance, Contract } = require('../models');
-const contractSvc = require('../services/contractService');
+const { WalletTransaction, User, WebsiteDomain, TermsAcceptance } = require('../models');
 const pricing = require('../services/fbaiKeyPricing');
 const terms = require('../services/termsService');
 const { Op } = require('sequelize');
@@ -31,9 +30,7 @@ router.get('/', async (req, res, next) => {
     const dongY = await TermsAcceptance.findAll({ order: [['acceptedAt', 'DESC']], limit: 20 });
     const dongYUsers = {};
     (await User.findAll({ where: { id: dongY.map((d) => d.UserId) }, attributes: ['id', 'name', 'email'] })).forEach((u) => { dongYUsers[u.id] = u; });
-    const hopDong = await Contract.findAll({ attributes: ['contractNo', 'customerName', 'customerEmail', 'customerPhone', 'ip', 'version', 'acceptedAt', 'emailedAt', 'UserId'], order: [['acceptedAt', 'DESC']], limit: 30 });
     res.render('admin/fbai-key-pricing', {
-      hopDong,
       title: 'Bảng giá & thanh toán SA-BOTAI',
       cfg: pricing.getConfig(),
       usdRate: pricing.USD_RATE,
@@ -45,16 +42,6 @@ router.get('/', async (req, res, next) => {
       capKey: String(req.query.capkey || ''), giaHanKey: String(req.query.giahan || ''), soThang: parseInt(req.query.thang, 10) || 0, loi: String(req.query.loi || ''),
     });
   } catch (err) { next(err); }
-});
-
-// Xem nguyên văn 1 hợp đồng đã lưu (admin không cần mã).
-router.get('/hop-dong/:no', async (req, res, next) => {
-  try {
-    const c = await contractSvc.theoSo(req.params.no);
-    if (!c) return res.status(404).send('Không tìm thấy hợp đồng.');
-    const footer = '<div style="max-width:48rem;margin:0 auto;padding:0 1rem 2rem;font:13px system-ui;color:#52525b"><hr><p>SHA-256: <code style="word-break:break-all">' + c.contentHash + '</code> — ' + (contractSvc.kiemTraToanVen(c) ? '✓ nội dung khớp' : '⚠️ KHÔNG khớp') + '</p></div>';
-    res.send(c.html.replace('</body>', footer + '</body>'));
-  } catch (e) { next(e); }
 });
 
 router.post('/', (req, res) => {

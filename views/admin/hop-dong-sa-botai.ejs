@@ -1,0 +1,31 @@
+<div class="space-y-6">
+  <div class="card p-6">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-1">
+      <h1 class="text-xl font-bold text-ink">📄 Hợp đồng điện tử SA-BOTAI</h1>
+      <a href="/admin/hop-dong-sa-botai/mau" target="_blank" class="text-sm px-3 py-1.5 rounded-lg border">Xem bản mẫu hiện hành</a>
+    </div>
+    <p class="text-sm text-muted">Hệ thống tự lập một hợp đồng cho mỗi khách khi họ tích đồng ý Điều khoản (phiên bản <strong><%= termsVersion %></strong>). Hợp đồng lưu bất biến, kèm mã băm SHA-256, IP và giờ đồng ý. Tổng: <strong><%= tong %></strong>. Giá trong hợp đồng lấy từ <a class="underline" href="/admin/gia-key-sa-botai">bảng giá</a> (VNĐ).</p>
+    <form method="GET" class="flex gap-2 mt-4">
+      <input name="q" value="<%= q %>" placeholder="Tìm theo số hợp đồng, tên, email, SĐT, IP…" class="border rounded-lg px-3 py-2 text-sm flex-1">
+      <button class="px-4 py-2 rounded-lg bg-primary-600 text-white text-sm">Tìm</button>
+    </form>
+  </div>
+  <div class="card p-6">
+    <% if (!dsHopDong.length) { %><p class="text-sm text-muted">Chưa có hợp đồng nào<%= q ? ' khớp từ khóa' : '' %>.</p><% } else { %>
+      <div class="overflow-x-auto"><table class="w-full text-sm">
+        <thead><tr class="text-left text-muted border-b"><th class="py-2 pr-3">Số hợp đồng</th><th class="pr-3">Khách hàng</th><th class="pr-3">Liên hệ</th><th class="pr-3">IP</th><th class="pr-3">Thời điểm đồng ý</th><th>Email</th></tr></thead>
+        <tbody>
+        <% dsHopDong.forEach(c => { %>
+          <tr class="border-b border-primary-100">
+            <td class="py-2 pr-3"><a class="underline font-semibold" target="_blank" href="/admin/hop-dong-sa-botai/<%= encodeURIComponent(c.contractNo) %>"><%= c.contractNo %></a></td>
+            <td class="pr-3"><%= c.customerName %></td>
+            <td class="pr-3"><%= c.customerEmail || '' %><%= c.customerPhone ? ' · ' + c.customerPhone : '' %></td>
+            <td class="pr-3"><%= c.ip %></td>
+            <td class="pr-3"><%= new Date(c.acceptedAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }) %></td>
+            <td><%= c.emailedAt ? '✓ đã gửi' : '—' %></td>
+          </tr>
+        <% }) %>
+        </tbody></table></div>
+    <% } %>
+  </div>
+</div>

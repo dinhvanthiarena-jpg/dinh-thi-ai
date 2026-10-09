@@ -51,21 +51,35 @@
   <ol>
     <li><strong>Dịch vụ:</strong> quyền sử dụng phần mềm SA-BOTAI (bản Windows) gồm trợ lý AI, tạo website nhanh (“24h ra web”), đăng bài tự động, tự động hóa trên các nền tảng bên thứ ba (Zalo, Facebook…) và các tính năng đi kèm; có hỗ trợ kỹ thuật trong thời gian dịch vụ còn hiệu lực.</li>
     <li><strong>Thời hạn sử dụng:</strong> thời hạn tính theo <strong>ngày</strong> kể từ ngày cấp mã bản quyền (key). Key được cấp <strong>lần đầu</strong> có thời hạn <strong><%= firstKeyDays %> ngày (03 tháng)</strong>. Trước ngày tạm ngừng, hệ thống thông báo cho Bên B thanh toán phí duy trì theo tháng; nếu không thanh toán, phần mềm được <strong>tạm ngừng</strong> cho tới khi Bên B thanh toán.</li>
-    <li><strong>Phí duy trì / gia hạn</strong> (quy đổi tỷ giá cố định <strong>1 USD = <%= fmt(usdRate) %> đồng</strong>, đã bao gồm thuế nếu có; 01 tháng = 30 ngày):
+    <li><strong>Biểu phí</strong> (mọi khoản tiền tính bằng <strong>đồng Việt Nam (VNĐ)</strong>, là mức quy đổi cố định, không thay đổi theo biến động tỷ giá; 01 tháng = 30 ngày; đã bao gồm thuế nếu có):
       <table>
-        <tr><th>Gói</th><th>Phí (USD)</th><th>Phí thanh toán (VNĐ)</th></tr>
-        <% if (firstOffer) { %><tr><td>Gói khởi đầu — <%= firstOffer.months %> tháng (<%= firstOffer.days %> ngày), key cấp lần đầu</td><td><%= fmt(firstOffer.usd) %> USD</td><td><strong><%= fmt(firstOffer.vnd) %> đồng</strong></td></tr><% } %>
+        <tr><th>STT</th><th>Hạng mục</th><th>Loại phí</th><th>Mức phí (VNĐ)</th></tr>
+        <% let stt = 0; %>
+        <% if (firstOffer) { %><tr><td><%= ++stt %></td><td><strong>Gói AI tự động hóa doanh nghiệp</strong> — <%= firstOffer.months %> tháng đầu (<%= firstOffer.days %> ngày), key cấp lần đầu, kèm 01 website miễn phí</td><td>Trả một lần, giá cố định ban đầu</td><td><strong><%= fmt(firstOffer.vnd) %> đồng</strong></td></tr><% } %>
         <% goiBan.forEach(function(p) { %>
-          <tr><td><%= p.months %> tháng (<%= p.days %> ngày)</td><td><%= fmt(p.usd) %> USD</td><td><strong><%= fmt(p.vnd) %> đồng</strong></td></tr>
+          <tr><td><%= ++stt %></td><td><strong>Phí duy trì đăng bài tự động</strong> — gói <%= p.months %> tháng (<%= p.days %> ngày); áp dụng từ tháng thứ 4 trở đi</td><td>Định kỳ, trả trước<%= p.months === 1 ? ' theo tháng' : '' %></td><td><strong><%= fmt(p.vnd) %> đồng<%= p.months === 1 ? ' / tháng' : '' %></strong></td></tr>
         <% }) %>
+        <tr><td><%= ++stt %></td><td><strong>Website tạo mới theo yêu cầu</strong> — từ tên miền thứ hai trở đi</td><td>Trả một lần cho mỗi tên miền mới</td><td><strong><%= fmt(webFee.vnd) %> đồng / website</strong></td></tr>
       </table>
-      Từ tháng thứ 4, Bên B đóng phí duy trì đăng bài tự động theo gói tháng nêu trên. Gói khởi đầu được bán qua quản trị viên của Bên A (liên hệ Zalo 0977 317 988) và/hoặc ngay trong phần mềm khi Bên A mở bán tự động.
+      Trước ngày tạm ngừng, hệ thống thông báo để Bên B thanh toán phí duy trì từ tháng thứ 4. Mã bản quyền (key) lần đầu được bán qua quản trị viên của Bên A (liên hệ Zalo 0977 317 988) và/hoặc ngay trong phần mềm khi Bên A mở bán tự động.
+    </li>
+    <li><strong>Quyền lợi của Bên B trong gói AI tự động hóa doanh nghiệp:</strong>
+      <ul>
+        <li>Tạo 01 website riêng cho doanh nghiệp;</li>
+        <li>AI tự động đăng bài lên website mỗi ngày, chỉ cần ra lệnh một lần;</li>
+        <li>Tự động đăng bài lên Fanpage Facebook;</li>
+        <li>Cài Zalo chăm sóc khách hàng tự động, bot trả lời theo thông tin sản phẩm và giá cả;</li>
+        <li>Viết bài cho các nhóm Facebook (việc đăng vào nhóm cần Bên B thao tác tay để an toàn cho tài khoản);</li>
+        <li>Tự động SEO website, SEO theo từ khóa;</li>
+        <li>Chấm điểm website;</li>
+        <li>Có thể tạo thêm website với chi phí nhỏ ngoài gói ban đầu (theo biểu phí trên).</li>
+      </ul>
     </li>
     <li><strong>Dịch vụ thiết kế và đưa website lên hosting:</strong>
       <ul>
         <li>Key cấp lần đầu được kèm <strong>01 (một) website miễn phí</strong>. Số lượng website được tính theo <strong>tên miền</strong> mà Bên B cung cấp.</li>
         <li>Với tên miền đó, Bên B được <strong>chỉnh sửa và đưa lên hosting lại không giới hạn số lần</strong> cho đến khi hài lòng.</li>
-        <li>Từ <strong>tên miền thứ hai</strong> trở đi (đưa lên hosting lần đầu cho tên miền mới): phí <strong><%= fmt(webFee.usd) %> USD = <%= fmt(webFee.vnd) %> đồng</strong> cho mỗi tên miền mới. Sau khi thanh toán, hệ thống tự động mở cho Bên B tạo website mới.</li>
+        <li>Từ <strong>tên miền thứ hai</strong> trở đi (đưa lên hosting lần đầu cho tên miền mới): phí <strong><%= fmt(webFee.vnd) %> đồng</strong> cho mỗi tên miền mới (theo biểu phí tại mục 3). Sau khi thanh toán, hệ thống tự động mở cho Bên B tạo website mới.</li>
         <li>Các khoản phí trên <strong>chưa bao gồm</strong> chi phí tên miền (domain) và máy chủ/hosting, trừ khi có thỏa thuận khác.</li>
       </ul>
     </li>

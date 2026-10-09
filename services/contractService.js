@@ -30,16 +30,10 @@ async function soThuTu() {
   return `HD-SABOTAI-${d}-${String(n + 1).padStart(6, '0')}`;
 }
 
-/** Sinh hợp đồng cá nhân hoá cho khách `userId`; lưu nguyên văn + mã băm. Trả về bản ghi Contract. */
-async function taoHopDong(userId, { version, ip, userAgent, source, acceptedAt }) {
-  const user = await User.findByPk(userId);
-  if (!user) throw new Error('Không tìm thấy tài khoản để lập hợp đồng.');
-  const at = acceptedAt || new Date();
-  let contractNo = await soThuTu();
-  for (let i = 0; i < 5 && (await Contract.findOne({ where: { contractNo } })); i += 1) contractNo += 'x';
-
+/** Render hợp đồng với bảng giá HIỆN HÀNH (mọi số tiền quy ra VNĐ). Dùng cho hợp đồng thật và bản mẫu trong admin. */
+function renderHopDong({ version, partyB, contract }) {
   const terms = require('./termsService');
-  const html = await ejs.renderFile(path.join(VIEWS, 'hop-dong-khung.ejs'), {
+  return ejs.renderFile(path.join(VIEWS, 'hop-dong-khung.ejs'), {
     version,
     legal: pricing.getLegal(),
     privacyUrl: terms.PRIVACY_URL,
@@ -49,6 +43,21 @@ async function taoHopDong(userId, { version, ip, userAgent, source, acceptedAt }
     webFee: pricing.getWebFee(),
     usdRate: pricing.USD_RATE,
     firstKeyDays: pricing.FIRST_KEY_DAYS,
+    partyB,
+    contract,
+  });
+}
+
+/** Sinh hợp đồng cá nhân hoá cho khách `userId`; lưu nguyên văn + mã băm. Trả về bản ghi Contract. */
+async function taoHopDong(userId, { version, ip, userAgent, source, acceptedAt }) {
+  const user = await User.findByPk(userId);
+  if (!user) throw new Error('Không tìm thấy tài khoản để lập hợp đồng.');
+  const at = acceptedAt || new Date();
+  let contractNo = await soThuTu();
+  for (let i = 0; i < 5 && (await Contract.findOne({ where: { contractNo } })); i += 1) contractNo += 'x';
+
+  const html = await renderHopDong({
+    version,
     partyB: { name: user.name, email: user.email || '', phone: user.phone || '', registeredAt: fmtVN(user.createdAt) },
     contract: { contractNo, version, acceptedAtText: fmtVN(at), ip: ip || '', sourceText: SOURCE_TEXT[source] || SOURCE_TEXT.register },
   });
@@ -85,4 +94,4 @@ function kiemTraToanVen(c) {
   return crypto.createHash('sha256').update(c.html, 'utf8').digest('hex') === c.contentHash;
 }
 
-module.exports = { taoHopDong, urlHopDong, tokenHopLe, hopDongMoiNhat, theoSo, kiemTraToanVen };
+module.exports = { renderHopDong, fmtVN, taoHopDong, urlHopDong, tokenHopLe, hopDongMoiNhat, theoSo, kiemTraToanVen };
