@@ -13,7 +13,8 @@ router.get('/dieu-khoan', (req, res) => {
   res.render('legal/dieu-khoan-sa-botai', {
     title: 'Điều khoản dịch vụ SA-BOTAI',
     ...commonData(),
-    plans: pricing.getPlans(),
+    plans: pricing.getPlans().filter((p) => p.kind !== 'first'),
+    firstOffer: pricing.getFirstOffer(),
     webFee: pricing.getWebFee(),
     usdRate: pricing.USD_RATE,
     firstKeyDays: pricing.FIRST_KEY_DAYS,

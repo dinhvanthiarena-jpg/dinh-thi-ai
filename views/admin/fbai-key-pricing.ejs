@@ -1,36 +1,72 @@
 <% const f = (n) => Number(n).toLocaleString('vi-VN'); %>
 <div class="space-y-6 max-w-4xl">
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-1">🔑 Cấp key theo SỐ THÁNG (không cần key riêng cho từng gói)</h2>
+    <p class="text-sm text-muted mb-4">
+      Mọi key đều cùng dạng <code>FBAI-XXXX-XXXX-XXXX</code>; <strong>hạn dùng nằm trên máy chủ</strong> (thầy chọn số tháng lúc cấp/gia hạn),
+      tool chỉ hỏi lại máy chủ và hiện "còn N ngày" — nên không phải lập trình key riêng theo tháng. 1 tháng = 30 ngày.
+      Khách mua gói khởi đầu 3 tháng thì thầy cấp <strong>3 tháng</strong>.
+    </p>
+    <% if (capKey) { %><p class="text-sm mb-3" style="color:#16a34a;">✓ Đã cấp key <strong class="font-mono"><%= capKey %></strong> — dùng <strong><%= soThang %> tháng</strong> (<%= soThang * 30 %> ngày). Gửi key này cho khách.</p><% } %>
+    <% if (giaHanKey) { %><p class="text-sm mb-3" style="color:#16a34a;">✓ Đã gia hạn <strong class="font-mono"><%= giaHanKey %></strong> thêm <strong><%= soThang %> tháng</strong>.</p><% } %>
+    <% if (loi) { %><p class="text-sm mb-3" style="color:#dc2626;"><%= loi %></p><% } %>
+    <form action="/admin/gia-key-sa-botai/cap-key" method="POST" class="flex flex-wrap gap-3 items-center mb-4">
+      <input name="note" type="text" class="input flex-1 min-w-[220px]" placeholder="Ghi chú (tên khách, SĐT...)" />
+      <select name="months" class="input" style="max-width:150px;">
+        <% [1,2,3,4,5,6,9,12,24].forEach(m => { %><option value="<%= m %>" <%= m === 3 ? 'selected' : '' %>><%= m %> tháng</option><% }) %>
+      </select>
+      <button type="submit" class="btn-primary">Cấp key mới</button>
+    </form>
+    <form action="/admin/gia-key-sa-botai/gia-han" method="POST" class="flex flex-wrap gap-3 items-center">
+      <input name="key" type="text" class="input flex-1 min-w-[220px]" placeholder="Key cần gia hạn: FBAI-XXXX-XXXX-XXXX" />
+      <select name="months" class="input" style="max-width:150px;">
+        <% [1,2,3,4,5,6,9,12,24].forEach(m => { %><option value="<%= m %>" <%= m === 1 ? 'selected' : '' %>>+<%= m %> tháng</option><% }) %>
+      </select>
+      <button type="submit" class="btn-outline">Gia hạn</button>
+    </form>
+    <p class="text-xs text-muted mt-3">Danh sách key, thu hồi, đổi thiết bị: <a href="/admin/fbai-license-keys" class="underline">Key SA-BOTAI (Desktop)</a>. Key cấp lần đầu ở trang đó mặc định <%= firstKeyDays %> ngày.</p>
+  </div>
+
   <form action="/admin/gia-key-sa-botai" method="POST" class="space-y-6">
     <div class="card p-6">
-      <h2 class="font-semibold text-ink mb-1">Bảng giá SA-BOTAI (USD → VNĐ theo tỷ giá cố định <%= f(usdRate) %>đ/$, đã gồm thuế)</h2>
+      <h2 class="font-semibold text-ink mb-1">Bảng giá (gốc USD → tool hiển thị VNĐ)</h2>
       <p class="text-sm text-muted mb-4">
-        Key cấp lần đầu chạy <strong><%= firstKeyDays %> ngày</strong>; sau đó khách đóng phí theo các gói bên dưới ngay trong tool
-        (nạp QR hoặc dùng ví) — tiền về là <strong>tự cấp/gia hạn key và mở lại tool</strong>, không cần thầy duyệt.
-        Web đầu tiên kèm key miễn phí (đếm theo tên miền, sửa/đưa lên lại cùng tên miền không giới hạn); từ tên miền thứ 2 thu phí tạo web.
+        Trong tool CHỈ hiện tiền Việt. Khách gia hạn trong tool bằng QR, tiền về là <strong>tự cấp/gia hạn key và mở lại tool</strong>.
+        Web đầu tiên kèm key miễn phí (đếm theo tên miền); từ tên miền thứ 2 thu phí tạo web.
       </p>
       <% if (saved) { %><p class="text-sm mb-3" style="color:#16a34a;">✓ Đã lưu.</p><% } %>
 
-      <div class="mb-4">
-        <label class="text-sm font-semibold">Phí tạo web mới (từ tên miền thứ 2)</label>
-        <div class="flex items-center gap-2 mt-1">
-          <input name="webFeeUsd" type="text" class="input" style="max-width:120px;" value="<%= cfg.webFeeUsd %>" /> <span class="text-sm text-muted">USD = <strong><%= f(toVnd(cfg.webFeeUsd)) %>đ</strong></span>
+      <div class="grid gap-4 sm:grid-cols-2 mb-4">
+        <div>
+          <label class="text-sm font-semibold">Tỷ giá quy đổi (đồng / 1$)</label>
+          <input name="usdRate" type="text" class="input mt-1" style="max-width:160px;" value="<%= usdRate %>" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold">Web tạo mới (từ tên miền thứ 2)</label>
+          <div class="flex items-center gap-2 mt-1">
+            <input name="webFeeUsd" type="text" class="input" style="max-width:110px;" value="<%= cfg.webFeeUsd %>" /> <span class="text-sm text-muted">USD = <strong><%= f(toVnd(cfg.webFeeUsd)) %>đ</strong></span>
+          </div>
         </div>
       </div>
 
       <table class="w-full text-sm">
-        <thead><tr class="text-left text-muted"><th class="py-1">Đang bán</th><th>Gói</th><th>Giá (USD)</th><th>= VNĐ</th></tr></thead>
+        <thead><tr class="text-left text-muted"><th class="py-1">Tự bán trong tool</th><th>Gói</th><th>Giá (USD)</th><th>= VNĐ</th></tr></thead>
         <tbody>
           <% cfg.plans.forEach(p => { %>
             <tr>
-              <td class="py-1"><input type="checkbox" name="enabled" value="<%= p.months %>" <%= p.enabled ? 'checked' : '' %> /></td>
-              <td><input type="hidden" name="months" value="<%= p.months %>" /><%= p.months %> tháng (<%= p.months * 30 %> ngày)</td>
-              <td><input name="usd" type="text" class="input" style="max-width:110px;" value="<%= p.usd %>" /></td>
+              <td class="py-1"><input type="checkbox" name="enabled" value="<%= p.id %>" <%= p.enabled ? 'checked' : '' %> /></td>
+              <td><input type="hidden" name="planId" value="<%= p.id %>" /><input type="hidden" name="months" value="<%= p.months %>" /><%= p.kind === 'first' ? 'Gói KHỞI ĐẦU (key lần đầu)' : 'Gia hạn' %> — <%= p.months %> tháng (<%= p.months * 30 %> ngày)</td>
+              <td><input name="usd" type="text" class="input" style="max-width:100px;" value="<%= p.usd %>" /></td>
               <td><strong><%= f(toVnd(p.usd)) %>đ</strong></td>
             </tr>
           <% }) %>
         </tbody>
       </table>
-      <p class="text-xs text-muted mt-2">⚠️ Gói 2 tháng (49$) và 5 tháng (129$) đang TẮT sẵn vì thấp hơn cả gói 1 tháng (55$) / 3 tháng (149$) — thầy xác nhận đúng giá rồi tích bật.</p>
+      <p class="text-xs text-muted mt-2">
+        • Gói khởi đầu 199$/3 tháng: mặc định KHÔNG tự bán — khách liên hệ Zalo, thầy cấp key 3 tháng ở khung phía trên. Muốn khách tự mua bằng QR thì tích bật.<br>
+        • Gói 2 tháng (49$), 3 tháng (149$), 5 tháng (129$) không có trong bảng giá chính thức nên đang TẮT.
+      </p>
     </div>
 
     <div class="card p-6">
@@ -41,7 +77,7 @@
         <input name="diaChi" class="input" placeholder="Địa chỉ" value="<%= cfg.legal.diaChi %>" />
         <input name="email" class="input" placeholder="Email hỗ trợ (tuỳ chọn)" value="<%= cfg.legal.email %>" />
       </div>
-      <p class="text-xs text-muted mt-2">Xem trang công khai: <a class="underline" href="/phap-ly-sa-botai/dieu-khoan" target="_blank">Điều khoản dịch vụ</a> · <a class="underline" href="/phap-ly-sa-botai/bao-mat" target="_blank">Chính sách bảo mật</a> · phiên bản hiện hành <strong><%= termsVersion %></strong> (đổi nội dung điều khoản thì đổi số phiên bản trong services/termsService.js để khách phải tích đồng ý lại).</p>
+      <p class="text-xs text-muted mt-2">Xem trang công khai: <a class="underline" href="/phap-ly-sa-botai/dieu-khoan" target="_blank">Điều khoản dịch vụ</a> · <a class="underline" href="/phap-ly-sa-botai/bao-mat" target="_blank">Chính sách bảo mật</a> · phiên bản hiện hành <strong><%= termsVersion %></strong>.</p>
     </div>
     <button type="submit" class="btn-primary">💾 Lưu bảng giá & thông tin</button>
   </form>
@@ -87,5 +123,4 @@
       </div>
     <% } %>
   </div>
-  <p class="text-xs text-muted">Danh sách key và thu hồi/đổi thiết bị: <a href="/admin/fbai-license-keys" class="underline">Key SA-BOTAI (Desktop)</a></p>
 </div>

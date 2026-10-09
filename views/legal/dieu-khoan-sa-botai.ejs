@@ -43,11 +43,12 @@
     <li><strong>Phí duy trì / gia hạn</strong> (quy đổi tỷ giá cố định <strong>1 USD = <%= fmt(usdRate) %> đồng</strong>, đã bao gồm thuế nếu có; 01 tháng = 30 ngày):
       <table>
         <tr><th>Gói</th><th>Phí (USD)</th><th>Phí thanh toán (VNĐ)</th></tr>
+        <% if (firstOffer) { %><tr><td>Gói khởi đầu — <%= firstOffer.months %> tháng (<%= firstOffer.days %> ngày), key cấp lần đầu</td><td><%= fmt(firstOffer.usd) %> USD</td><td><strong><%= fmt(firstOffer.vnd) %> đồng</strong></td></tr><% } %>
         <% goiBan.forEach(function(p) { %>
           <tr><td><%= p.months %> tháng (<%= p.days %> ngày)</td><td><%= fmt(p.usd) %> USD</td><td><strong><%= fmt(p.vnd) %> đồng</strong></td></tr>
         <% }) %>
       </table>
-      Mức phí của gói khởi đầu (key cấp lần đầu) do Bên A thông báo tại thời điểm bán/bàn giao key.
+      Từ tháng thứ 4, Bên B đóng phí duy trì đăng bài tự động theo gói tháng nêu trên. Gói khởi đầu được bán qua quản trị viên của Bên A (liên hệ Zalo 0977 317 988) và/hoặc ngay trong phần mềm khi Bên A mở bán tự động.
     </li>
     <li><strong>Dịch vụ thiết kế và đưa website lên hosting:</strong>
       <ul>

@@ -88,7 +88,7 @@ router.get('/website-build-fee', an(async (req, res) => {
   const user = await User.findByPk(req.authUser.id);
   if (!user) return res.status(401).json({ error: 'Tài khoản không còn tồn tại.' });
   const r = await wallet.xemPhiTaoWeb(user, req.query.domain, String(req.query.key || '').slice(0, 40));
-  res.json({ ok: true, ...r, usdRate: fbaiKeyPricing.USD_RATE });
+  res.json({ ok: true, ...r });
 }));
 
 // Xem trước giá GÓI nhiều web (tỷ giá CỐ ĐỊNH, đã gồm thuế, giảm theo số
@@ -162,8 +162,8 @@ router.get('/key-info', an(async (req, res) => {
   res.json({
     ok: true,
     plans: fbaiKeyPricing.getPlans(),
+    firstOffer: fbaiKeyPricing.getFirstOffer(),
     webFee: fbaiKeyPricing.getWebFee(),
-    usdRate: fbaiKeyPricing.USD_RATE,
     firstKeyDays: fbaiKeyPricing.FIRST_KEY_DAYS,
     soDu: wallet.soDu(user),
     sanSang: wallet.sanSangNhanTien(),
@@ -179,8 +179,9 @@ router.post('/mua-key', express.json(), an(async (req, res) => {
   if (!user) return res.status(401).json({ error: 'Tài khoản không còn tồn tại.' });
   const currentKey = String((req.body || {}).currentKey || '').slice(0, 40);
   const months = parseInt((req.body || {}).months, 10) || 1;
+  const planId = String((req.body || {}).planId || '').slice(0, 20);
   try {
-    const r = await wallet.muaKeyFbai(user, { currentKey, months });
+    const r = await wallet.muaKeyFbai(user, { currentKey, months, planId: planId || undefined });
     res.json({ ok: true, key: r.key, expiresAt: r.expiresAt, giaHan: r.giaHan, soDuConLai: r.soDuConLai, gia: r.gia, months: r.months });
   } catch (err) {
     res.status(400).json({ error: err.message, thieu: err.thieu || 0 });
@@ -194,8 +195,9 @@ router.post('/mua-key-qr', express.json(), an(async (req, res) => {
   }
   const months = parseInt((req.body || {}).months, 10) || 1;
   const currentKey = String((req.body || {}).currentKey || '').slice(0, 24);
+  const planId = String((req.body || {}).planId || '').slice(0, 20);
   try {
-    const { tx, goi } = await wallet.taoDonMuaGoiKey(req.authUser.id, months, currentKey);
+    const { tx, goi } = await wallet.taoDonMuaGoiKey(req.authUser.id, months, currentKey, planId || undefined);
     res.json({ ok: true, code: tx.code, months: goi.months, amount: tx.amount, status: tx.status, qr: wallet.anhQR(tx), ck: wallet.thongTinChuyenKhoan(tx) });
   } catch (err) {
     res.status(400).json({ error: err.message });
