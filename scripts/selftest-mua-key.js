@@ -82,6 +82,7 @@ async function purge() {
 
     // Bật bán tự động gói khởi đầu: key MỚI 90 ngày
     pricing.saveConfig({ plans: plans(true) });
+    await buyer.update({ walletBalance: 6000000 });
     const rk = await wallet.muaKeyFbai(buyer, { planId: 'khoi-dau' });
     check('gói khởi đầu (đã bật): cấp key MỚI 90 ngày, trừ 5.193.900đ', !rk.giaHan && rk.key !== k0.key && Math.abs(rk.expiresAt - Date.now() - 90 * DAY) < 60000 && rk.gia === 5193900, String(rk.gia));
     pricing.saveConfig({ plans: plans(false) });
