@@ -31,6 +31,9 @@ const check = (name, ok, extra) => { (ok ? pass++ : fail++); console.log(`${ok ?
     check('phí tạo web 35$ = 910.000đ', pricing.getWebFee().vnd === 910000);
     check('gói 2 và 5 tháng đang tắt (chưa bán)', pricing.getPlan(2) === null && pricing.getPlan(5) === null);
 
+    // Dọn sót từ lần chạy trước (nếu có) để không dính user thử cũ.
+    const cu = await User.findAll({ where: { email: { [require('sequelize').Op.like]: 'selftest-%@invalid.test' } } });
+    for (const u of cu) { await WalletTransaction.destroy({ where: { UserId: u.id } }); await WebsiteDomain.destroy({ where: { UserId: u.id } }).catch(() => {}); await TermsAcceptance.destroy({ where: { UserId: u.id } }).catch(() => {}); await u.destroy(); }
     const referrer = await User.create({ name: 'Selftest Referrer', email: `selftest-ref-${stamp}@invalid.test`, password: 'Selftest#12345', role: 'student' });
     const buyer = await User.create({ name: 'Selftest Buyer', email: `selftest-buy-${stamp}@invalid.test`, password: 'Selftest#12345', role: 'student', parentId: referrer.id, walletBalance: 100000 });
     const other = await User.create({ name: 'Selftest Other', email: `selftest-oth-${stamp}@invalid.test`, password: 'Selftest#12345', role: 'student', walletBalance: 5000000 });
@@ -46,11 +49,11 @@ const check = (name, ok, extra) => { (ok ? pass++ : fail++); console.log(`${ok ?
     await buyer.reload();
     check('thiếu tiền: ví không bị trừ', buyer.walletBalance === 100000);
 
-    await buyer.update({ walletBalance: 5000000 });
+    await buyer.update({ walletBalance: 6000000 });
     const r1 = await wallet.muaKeyFbai(buyer, { months: 1, currentKey: k0.key });
     await buyer.reload();
     check('gia hạn 1 tháng: giữ key, +30 ngày vào hạn còn lại (90+30)', r1.key === k0.key && r1.giaHan && Math.abs(r1.expiresAt - Date.now() - 120 * DAY) < 60000);
-    check('gia hạn 1 tháng: ví trừ 1.430.000đ', buyer.walletBalance === 5000000 - 1430000, String(buyer.walletBalance));
+    check('gia hạn 1 tháng: ví trừ 1.430.000đ', buyer.walletBalance === 6000000 - 1430000, String(buyer.walletBalance));
     const r3 = await wallet.muaKeyFbai(buyer, { months: 3 });
     check('mua 3 tháng khi chưa gửi key: cấp key MỚI 90 ngày', !r3.giaHan && r3.key !== k0.key && Math.abs(r3.expiresAt - Date.now() - 90 * DAY) < 60000);
     const commTx = await WalletTransaction.findAll({ where: { UserId: referrer.id } });
