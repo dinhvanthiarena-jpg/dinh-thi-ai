@@ -93,6 +93,7 @@ async function purge() {
     check('verify trả về hạn dùng (expiresAt)', typeof fbai.checkAndBindDevice(k0.key, 'dev-a').expiresAt === 'number');
 
     // ---- Phí tạo web theo TÊN MIỀN ----
+    await buyer.update({ walletBalance: 3000000 });
     const mf1 = await wallet.xemPhiTaoWeb(buyer, 'https://www.Abc.com/trang', k0.key);
     check('xem trước: tên miền đầu tiên + có key → miễn phí', mf1.mienPhi && mf1.lyDo === 'web_dau_tien' && mf1.domain === 'abc.com');
     const a1 = await wallet.thuPhiTaoWeb(buyer, 'abc.com', { licenseKey: k0.key });
