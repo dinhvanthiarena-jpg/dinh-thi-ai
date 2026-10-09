@@ -111,6 +111,20 @@
   </div>
 
   <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-3">Hợp đồng điện tử đã lập (<%= hopDong.length %> gần nhất)</h2>
+    <% if (!hopDong.length) { %><p class="text-sm text-muted">Chưa có.</p><% } else { %>
+      <div class="space-y-1 text-sm">
+        <% hopDong.forEach(c => { %>
+          <div class="flex justify-between gap-3 border-b border-primary-100 py-1">
+            <span><a class="underline" href="/admin/gia-key-sa-botai/hop-dong/<%= encodeURIComponent(c.contractNo) %>" target="_blank"><%= c.contractNo %></a> — <%= c.customerName %> (<%= c.customerEmail || c.customerPhone || '' %>)</span>
+            <span class="text-muted">IP <%= c.ip %> · <%= new Date(c.acceptedAt).toLocaleString('vi-VN') %><%= c.emailedAt ? ' · đã email' : '' %></span>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="card p-6">
     <h2 class="font-semibold text-ink mb-3">Nhật ký đồng ý điều khoản (<%= dongY.length %> gần nhất)</h2>
     <% if (!dongY.length) { %><p class="text-sm text-muted">Chưa có.</p><% } else { %>
       <div class="space-y-1 text-sm">

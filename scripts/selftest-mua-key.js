@@ -5,7 +5,8 @@
 require('dotenv').config();
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/db');
-const { User, WalletTransaction, WebsiteDomain, TermsAcceptance } = require('../models');
+const { User, WalletTransaction, WebsiteDomain, TermsAcceptance, Contract } = require('../models');
+const contractSvc = require('../services/contractService');
 const wallet = require('../services/walletService');
 const fbai = require('../services/fbaiLicenseService');
 const pricing = require('../services/fbaiKeyPricing');
@@ -27,6 +28,7 @@ async function purge() {
     await WalletTransaction.destroy({ where: { UserId: u.id } });
     await WebsiteDomain.destroy({ where: { UserId: u.id } }).catch(() => {});
     await TermsAcceptance.destroy({ where: { UserId: u.id } }).catch(() => {});
+    await Contract.destroy({ where: { UserId: u.id } }).catch(() => {});
     await u.destroy();
   }
 }
@@ -116,8 +118,13 @@ async function purge() {
 
     // ---- Nhật ký đồng ý điều khoản ----
     const fakeReq = { headers: { 'x-forwarded-for': '203.0.113.9, 10.0.0.1', 'user-agent': 'selftest-agent' }, ip: '127.0.0.1' };
-    await terms.ghiDongY(buyer.id, fakeReq, 'login-gate');
+    const acc = await terms.ghiDongY(buyer.id, fakeReq, 'login-gate');
     check('đồng ý điều khoản: ghi IP thật + phiên bản', (await terms.daDongY(buyer.id)) && (await TermsAcceptance.findOne({ where: { UserId: buyer.id } })).ip === '203.0.113.9');
+    const hd = acc.contract;
+    check('tự lập hợp đồng khi đồng ý', !!hd && /^HD-SABOTAI-/.test(hd.contractNo));
+    check('hợp đồng chứa thông tin người đăng ký + IP', !!hd && hd.html.includes(buyer.name) && hd.html.includes(buyer.email) && hd.html.includes('203.0.113.9') && hd.html.includes(hd.contractNo));
+    check('hợp đồng: mã băm toàn vẹn khớp', !!hd && contractSvc.kiemTraToanVen(hd));
+    check('link hợp đồng có token hợp lệ, sai token bị từ chối', !!hd && contractSvc.tokenHopLe(hd, new URL(contractSvc.urlHopDong(hd)).searchParams.get('t')) && !contractSvc.tokenHopLe(hd, 'x'.repeat(32)));
     check('chưa đồng ý thì daDongY = false', (await terms.daDongY(other.id)) === false);
   } catch (e) {
     fail++;

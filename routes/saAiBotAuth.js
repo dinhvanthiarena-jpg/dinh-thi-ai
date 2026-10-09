@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const authOtp = require('../services/authOtpService');
 const terms = require('../services/termsService');
+const contractSvc = require('../services/contractService');
 
 // token phiên đăng ký -> thông tin đồng ý điều khoản lúc bấm Đăng ký (ghi vào nhật ký khi OTP xác nhận xong)
 const choDongY = new Map();
@@ -60,9 +61,8 @@ router.post('/verify-otp', express.json(), an(async (req, res) => {
   // Ghi nhật ký đồng ý điều khoản đúng thời điểm/IP lúc khách bấm Đăng ký (bằng chứng pháp lý).
   const dongY = choDongY.get(token);
   choDongY.delete(token);
-  const { TermsAcceptance } = require('../models');
-  await TermsAcceptance.create({ UserId: ketQua.user.id, version: terms.VERSION, ip: dongY ? dongY.ip : terms.layIp(req), userAgent: dongY ? dongY.ua : String(req.headers['user-agent'] || '').slice(0, 300), source: 'register', acceptedAt: dongY ? dongY.at : new Date() });
-  res.json({ ok: true, token: signToken(ketQua.user), user: publicUser(ketQua.user), termsOk: true });
+  const acc = await terms.ghiDongY(ketQua.user.id, req, 'register', dongY ? { ip: dongY.ip, ua: dongY.ua, at: dongY.at } : {});
+  res.json({ ok: true, token: signToken(ketQua.user), user: publicUser(ketQua.user), termsOk: true, contractUrl: acc.contract ? contractSvc.urlHopDong(acc.contract) : '' });
 }));
 
 router.post('/resend-otp', express.json(), an(async (req, res) => {
@@ -139,8 +139,16 @@ router.get('/terms/status', requireBearerAuth, an(async (req, res) => {
 }));
 router.post('/terms/accept', express.json(), requireBearerAuth, an(async (req, res) => {
   if ((req.body || {}).accept !== true) return res.status(400).json({ error: 'Cần tích chọn đồng ý.' });
-  if (!(await terms.daDongY(req.authUser.id))) await terms.ghiDongY(req.authUser.id, req, 'login-gate');
-  res.json({ ok: true, version: terms.VERSION });
+  let contract = null;
+  if (!(await terms.daDongY(req.authUser.id))) contract = (await terms.ghiDongY(req.authUser.id, req, 'login-gate')).contract || null;
+  if (!contract) contract = await contractSvc.hopDongMoiNhat(req.authUser.id);
+  res.json({ ok: true, version: terms.VERSION, contractNo: contract ? contract.contractNo : '', contractUrl: contract ? contractSvc.urlHopDong(contract) : '' });
+}));
+// Link xem/in hợp đồng của chính khách (hợp đồng mới nhất).
+router.get('/terms/contract', requireBearerAuth, an(async (req, res) => {
+  const c = await contractSvc.hopDongMoiNhat(req.authUser.id);
+  if (!c) return res.json({ ok: true, has: false });
+  res.json({ ok: true, has: true, contractNo: c.contractNo, acceptedAt: c.acceptedAt, contractUrl: contractSvc.urlHopDong(c) });
 }));
 
 module.exports = router;

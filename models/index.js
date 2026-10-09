@@ -25,6 +25,7 @@ const WalletTransaction = require('./WalletTransaction');
 const ToolLicense = require('./ToolLicense');
 const WebsiteDomain = require('./WebsiteDomain');
 const TermsAcceptance = require('./TermsAcceptance');
+const Contract = require('./Contract');
 const WithdrawRequest = require('./WithdrawRequest');
 const Setting = require('./Setting');
 const AffiliateLink = require('./AffiliateLink');
@@ -87,6 +88,7 @@ AffiliateLink.belongsTo(User, { foreignKey: 'UserId', as: 'user' });
 const NhacHoc = require("./NhacHoc");
 
 module.exports = {
+  Contract,
   WebsiteDomain,
   TermsAcceptance,
   User,

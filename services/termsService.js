@@ -12,15 +12,22 @@ function layIp(req) {
   return (xff || req.ip || (req.socket && req.socket.remoteAddress) || '').replace(/^::ffff:/, '').slice(0, 64);
 }
 
-async function ghiDongY(userId, req, source) {
-  return TermsAcceptance.create({
-    UserId: userId,
-    version: VERSION,
-    ip: layIp(req),
-    userAgent: String(req.headers['user-agent'] || '').slice(0, 300),
+async function ghiDongY(userId, req, source, over = {}) {
+  const info = {
+    ip: over.ip !== undefined ? over.ip : layIp(req),
+    userAgent: String(over.ua !== undefined ? over.ua : (req.headers['user-agent'] || '')).slice(0, 300),
     source: source || 'register',
-    acceptedAt: new Date(),
-  });
+    acceptedAt: over.at || new Date(),
+  };
+  const acc = await TermsAcceptance.create({ UserId: userId, version: VERSION, ...info });
+  // Tự lập HỢP ĐỒNG điện tử cá nhân hoá (thông tin người đăng ký + giá + IP/giờ) và lưu bất biến (thầy yêu cầu 2026-10-09).
+  try {
+    const contract = await require('./contractService').taoHopDong(userId, { version: VERSION, ...info });
+    acc.contract = contract;
+  } catch (e) {
+    console.error('[terms] không lập được hợp đồng cho user', userId, e.message);
+  }
+  return acc;
 }
 
 async function daDongY(userId) {
