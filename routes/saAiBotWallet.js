@@ -165,6 +165,7 @@ router.get('/key-info', an(async (req, res) => {
     firstOffer: fbaiKeyPricing.getFirstOffer(),
     webFee: fbaiKeyPricing.getWebFee(),
     firstKeyDays: fbaiKeyPricing.FIRST_KEY_DAYS,
+    contactPhone: (fbaiKeyPricing.getLegal().dienThoai || '').trim() || '0977 317 988',
     soDu: wallet.soDu(user),
     sanSang: wallet.sanSangNhanTien(),
     refCode: user.refCode || '',
