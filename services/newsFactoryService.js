@@ -457,7 +457,7 @@ NHIỆM VỤ: Viết MỘT bài viết CHUYÊN SÂU bằng tiếng Việt về c
 TỪ KHOÁ SEO CẦN NHẮM TỚI: "${keyword}" — đưa từ khoá này (hoặc biến thể tự nhiên) vào tiêu đề, đoạn mở đầu và ít nhất 2 heading phụ.
 
 YÊU CẦU:
-1. Bài dài 800-1200 từ tiếng Việt, chia nhiều đoạn/heading phụ dạng "## Tiêu đề phụ" rõ ràng — đi sâu phân tích, giải thích bối cảnh, ý nghĩa và ứng dụng thực tế của chủ đề, KHÔNG chỉ tóm tắt lại tin gốc trong vài dòng.
+1. Bài dài 800-1200 từ tiếng Việt (tức khoảng 1.500-2.200 chữ đếm theo dấu cách, TUYỆT ĐỐI không dưới 1.400 chữ), chia ÍT NHẤT 5 heading phụ dạng "## Tiêu đề phụ" rõ ràng, mỗi mục viết 2-3 đoạn đầy đặn — đi sâu phân tích, giải thích bối cảnh, ý nghĩa và ứng dụng thực tế của chủ đề, KHÔNG chỉ tóm tắt lại tin gốc trong vài dòng. Tránh câu sáo rỗng kiểu "tạo đà bứt phá", "khẳng định vị thế" — mỗi đoạn phải có thông tin hoặc lời khuyên cụ thể.
 2. Có thể mở rộng thêm góc nhìn, giải thích khái niệm liên quan, gợi ý ứng dụng thực tế cho người đọc — miễn là dựa trên kiến thức chung hợp lý, KHÔNG bịa thêm số liệu, trích dẫn hay sự kiện cụ thể ngoài thông tin gốc được cung cấp.
 3. VIẾT HOÀN TOÀN BẰNG TIẾNG VIỆT THUẦN — TUYỆT ĐỐI không chen từ/cụm từ tiếng Anh vào giữa câu tiếng Việt (VD: không viết "obligations", "proactive", "mindset", "aspects", "accumulate"...). Chỉ giữ nguyên các từ viết tắt kỹ thuật đã quá quen thuộc với người Việt như AI, SEO nếu thật sự cần. Đây là lỗi NGHIÊM TRỌNG cần tránh tuyệt đối.
 4. Giọng văn chuyên nghiệp, mạch lạc, phù hợp độc giả Việt Nam quan tâm đến chuyên mục "${categoryLabel}".
