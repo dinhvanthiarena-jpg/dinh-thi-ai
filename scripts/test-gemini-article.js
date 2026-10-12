@@ -1,6 +1,7 @@
 // Chạy thử việc viết bài bằng Gemini (KHÔNG đăng lên web, chỉ in ra màn hình).
 // Dùng: source ~/nodevenv/dinh-thi-ai/20/bin/activate && node scripts/test-gemini-article.js
 require('dotenv').config();
+require('../config/db'); // nạp db trước để các model khỏi bị import vòng
 const articleAi = require('../services/articleAi');
 const { generateArticle } = require('../services/newsFactoryService');
 
