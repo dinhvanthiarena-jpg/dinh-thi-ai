@@ -3,9 +3,7 @@ const Course = require('../models/Course');
 const BlogPost = require('../models/BlogPost');
 const SocialPost = require('../models/SocialPost');
 
-const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
-const ANTHROPIC_VERSION = '2023-06-01';
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
+const articleAi = require('./articleAi');
 const GRAPH_API_VERSION = 'v21.0';
 const PAGE_ID = process.env.FB_PAGE_ID || '484619608292305';
 
@@ -82,9 +80,7 @@ async function pickNextContent() {
 }
 
 async function generateCaption(content) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
   const fallback = `${content.title}\n\n${content.description}\n\nXem chi tiết: ${content.url}\n\n#DinhThiAi #DaoTaoAI #HocAI #PromptEngineering #AIchoDoanhNghiep`;
-  if (!apiKey) return fallback;
 
   const systemPrompt = `Bạn là chuyên gia content marketing cho Fanpage Facebook "Đào Tạo Ứng dụng Ai x100" của Vietpro — nền tảng đào tạo AI ứng dụng cho người đi làm và doanh nghiệp tại Việt Nam.
 
@@ -105,33 +101,7 @@ Chủ đề/danh mục: ${content.category || ''}
 Link: ${content.url}`;
 
   try {
-    const response = await fetch(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': ANTHROPIC_VERSION,
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 600,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userMessage }],
-      }),
-    });
-
-    if (!response.ok) {
-      console.error('[facebookPostService] Anthropic API error', response.status, await response.text());
-      return fallback;
-    }
-
-    const data = await response.json();
-    const text = (data.content || [])
-      .filter((block) => block.type === 'text')
-      .map((block) => block.text)
-      .join('\n')
-      .trim();
-
+    const text = await articleAi.complete({ system: systemPrompt, user: userMessage, maxTokens: 2048 });
     return text || fallback;
   } catch (err) {
     console.error('[facebookPostService] Failed to generate caption', err);

@@ -12,9 +12,7 @@ const { markdownToHtml } = require('../utils/markdownToHtml');
 
 const AUTO_IMAGE_DIR = path.join(__dirname, '..', 'public', 'images', 'blog', 'auto');
 
-const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
-const ANTHROPIC_VERSION = '2023-06-01';
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
+const articleAi = require('./articleAi');
 
 // Nguồn RSS công khai theo từng chuyên mục — cơ sở để tìm chủ đề, không phải
 // để copy. Bài viết cuối cùng luôn được Claude viết lại hoàn toàn bằng lời
@@ -295,37 +293,26 @@ async function searchOpenverse(query, usedPageIds) {
 // nhầm vào bài viết về điện thoại). Trả về true khi không chắc chắn (thiếu
 // API key, lỗi mạng) để không làm gãy cả pipeline vì 1 lần gọi lỗi.
 async function isImageRelevant(localPath, postTitle) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey || !postTitle) return true;
+  if (!postTitle) return true;
 
   try {
     const absPath = path.join(__dirname, '..', 'public', localPath.replace(/^\//, ''));
     const buffer = fs.readFileSync(absPath);
     const mediaType = /\.png$/i.test(localPath) ? 'image/png' : 'image/jpeg';
 
-    const response = await fetch(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': ANTHROPIC_VERSION },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 10,
-        system:
-          'Bạn xét duyệt ảnh bìa cho 1 bài blog tin tức. Đây là ảnh MINH HOẠ chung, KHÔNG phải ảnh báo chí phải khớp đúng sự kiện cụ thể — tiêu chuẩn chấp nhận PHẢI RỘNG, giống cách các trang tin dùng ảnh stock chung chung (văn phòng, biểu đồ, thành phố, bàn làm việc, con người đang làm việc...) cho hầu hết mọi bài. Trả lời DUY NHẤT 1 từ: "CO" nếu ảnh thuộc cùng LĨNH VỰC/NGỮ CẢNH LỚN với tiêu đề (VD: bất kỳ ảnh văn phòng/biểu đồ/tài chính/thành phố nào đều hợp lệ cho bài kinh doanh dù không khớp đúng công ty hay sự kiện cụ thể trong tiêu đề; ảnh laptop/mạch điện tử/máy tính đều hợp lệ cho bài công nghệ nói chung), chỉ trả lời "KHONG" khi: (1) ảnh thuộc HẲN MỘT LĨNH VỰC KHÁC không liên quan gì (VD: sơ đồ khoa học nhận thức/sinh học cho bài về điện thoại, ảnh động vật cho bài tài chính, ảnh chiếc xe hơi cho bài về smartphone); (2) ảnh cận mặt 1 người có tên cụ thể không hề được nhắc tới trong tiêu đề; hoặc (3) ảnh có LOGO/TÊN THƯƠNG HIỆU, TÊN ĐÀI TRUYỀN HÌNH/KÊNH TRUYỀN THÔNG hiện rõ, dễ đọc trong khung hình mà thương hiệu/đài đó không được nhắc tới trong tiêu đề (dễ gây hiểu lầm là quảng cáo/liên kết với thương hiệu đó). Khi phân vân, LUÔN trả lời "CO". Không giải thích gì thêm.',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: mediaType, data: buffer.toString('base64') } },
-              { type: 'text', text: `Tiêu đề bài viết: "${postTitle}"` },
-            ],
-          },
-        ],
-      }),
+    const systemPrompt =
+          'Bạn xét duyệt ảnh bìa cho 1 bài blog tin tức. Đây là ảnh MINH HOẠ chung, KHÔNG phải ảnh báo chí phải khớp đúng sự kiện cụ thể — tiêu chuẩn chấp nhận PHẢI RỘNG, giống cách các trang tin dùng ảnh stock chung chung (văn phòng, biểu đồ, thành phố, bàn làm việc, con người đang làm việc...) cho hầu hết mọi bài. Trả lời DUY NHẤT 1 từ: "CO" nếu ảnh thuộc cùng LĨNH VỰC/NGỮ CẢNH LỚN với tiêu đề (VD: bất kỳ ảnh văn phòng/biểu đồ/tài chính/thành phố nào đều hợp lệ cho bài kinh doanh dù không khớp đúng công ty hay sự kiện cụ thể trong tiêu đề; ảnh laptop/mạch điện tử/máy tính đều hợp lệ cho bài công nghệ nói chung), chỉ trả lời "KHONG" khi: (1) ảnh thuộc HẲN MỘT LĨNH VỰC KHÁC không liên quan gì (VD: sơ đồ khoa học nhận thức/sinh học cho bài về điện thoại, ảnh động vật cho bài tài chính, ảnh chiếc xe hơi cho bài về smartphone); (2) ảnh cận mặt 1 người có tên cụ thể không hề được nhắc tới trong tiêu đề; hoặc (3) ảnh có LOGO/TÊN THƯƠNG HIỆU, TÊN ĐÀI TRUYỀN HÌNH/KÊNH TRUYỀN THÔNG hiện rõ, dễ đọc trong khung hình mà thương hiệu/đài đó không được nhắc tới trong tiêu đề (dễ gây hiểu lầm là quảng cáo/liên kết với thương hiệu đó). Khi phân vân, LUÔN trả lời "CO". Không giải thích gì thêm.';
+
+    const answer = await articleAi.complete({
+      system: systemPrompt,
+      user: `Tiêu đề bài viết: "${postTitle}"`,
+      imageBase64: buffer.toString('base64'),
+      mimeType: mediaType,
+      maxTokens: 1024,
     });
-    if (!response.ok) return true;
-    const data = await response.json();
-    const text = (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('').trim().toUpperCase();
-    return text.startsWith('CO');
+    // Lỗi AI (hết hạn mức, mạng...) -> không chắc thì chấp nhận ảnh, đúng như trước.
+    if (!answer) return true;
+    return answer.toUpperCase().startsWith('CO');
   } catch (err) {
     console.error('[newsFactory] isImageRelevant failed', err.message);
     return true;
@@ -461,9 +448,6 @@ function stripCodeFence(text) {
 // đây trước khi lưu, nếu không tiêu đề phụ/link nguồn sẽ hiện ra thành chữ
 // thô "## ..." / "[...](...)" ngay trên trang.
 async function generateArticle(categorySlug, keyword, item) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return null;
-
   const categoryLabel = (BLOG_CATEGORIES.find((c) => c.slug === categorySlug) || {}).label || categorySlug;
 
   const systemPrompt = `Bạn là biên tập viên chuyên mục "${categoryLabel}" của website Vietpro (nền tảng đào tạo ứng dụng AI cho người đi làm và doanh nghiệp tại Việt Nam).
@@ -485,28 +469,8 @@ YÊU CẦU:
   const userMessage = `Chủ đề gốc: "${item.title}"\nTóm tắt: ${item.description}\nLink: ${item.link}`;
 
   try {
-    const response = await fetch(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': ANTHROPIC_VERSION },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 3000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userMessage }],
-      }),
-    });
-
-    if (!response.ok) {
-      console.error('[newsFactory] Anthropic API error', response.status, await response.text());
-      return null;
-    }
-
-    const data = await response.json();
-    const rawText = (data.content || [])
-      .filter((block) => block.type === 'text')
-      .map((block) => block.text)
-      .join('\n')
-      .trim();
+    const rawText = await articleAi.complete({ system: systemPrompt, user: userMessage, maxTokens: 8192, json: true });
+    if (!rawText) return null;
     const parsed = JSON.parse(stripCodeFence(rawText));
     if (!parsed.title || !parsed.content) return null;
     return parsed;
@@ -568,28 +532,11 @@ async function createTrendingPost(forcedSlug) {
 // vào tiêu đề bài — dùng cho script backfill nâng cấp ảnh của các bài đã đăng
 // trước khi có trường imageQuery (xem generateArticle ở trên).
 async function suggestImageQuery(title) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return null;
   try {
-    const response = await fetch(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': ANTHROPIC_VERSION },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 60,
-        system:
-          'Trả về DUY NHẤT 1 cụm từ tiếng Anh (3-6 từ) mô tả 1 cảnh thật, cụ thể, có thể chụp được bằng ảnh, minh hoạ đúng nội dung tiêu đề bài viết tiếng Việt được cung cấp — không phải khái niệm trừu tượng, không dùng tên thương hiệu/tên báo/tên đài/tên chương trình. Trừ khi tiêu đề thực sự nêu tên 1 chính khách, TUYỆT ĐỐI không mô tả kiểu "chân dung/khuôn mặt 1 người" (không dùng portrait, headshot, politician, president, leader...) vì rất dễ vô tình trúng ảnh 1 nguyên thủ quốc gia không liên quan — ưu tiên mô tả CẢNH/HOẠT ĐỘNG/ĐỒ VẬT. Nếu tiêu đề nói về 1 diễn viên/ca sĩ/người nổi tiếng showbiz cụ thể (không phải chính khách), Wikimedia hầu như không có ảnh tự do của họ nên ĐỪNG cố mô tả người đó — thay vào đó mô tả 1 khung cảnh giải trí chung phù hợp (VD: "red carpet event photography", "fashion runway show lights", "film festival crowd evening"). Nếu tiêu đề nói về Ô TÔ/XE MÁY cụ thể (VD "Geely EX5", "Kia Sonet"), ĐÂY LÀ NGOẠI LỆ DUY NHẤT cho quy tắc không dùng tên thương hiệu: LUÔN trả về đúng tên hãng + tên dòng xe kèm loại xe (VD "Geely EX5 electric SUV", "Kia Sonet compact SUV") vì cộng đồng chụp ảnh xe đăng rất nhiều ảnh xe cụ thể lên Wikimedia dưới giấy phép tự do — dùng đúng tên xe mới tìm ra đúng ảnh xe đó, ảnh chung chung "SUV" dễ ra xe khác hãng khác đời trông giống chứ không đúng chiếc đang nói tới. Nếu tiêu đề nói về 1 thiết bị/sản phẩm công nghệ cụ thể khác (điện thoại, laptop...) kể cả sản phẩm tin đồn/chưa ra mắt, LUÔN mô tả cảnh cầm/sử dụng/chụp cận thiết bị thật cùng loại (VD: "person holding smartphone close-up", "hands using foldable phone screen") — KHÔNG mô tả sơ đồ mạch điện tử hay khái niệm AI trừu tượng. Không giải thích, không dấu ngoặc kép, chỉ trả về đúng cụm từ.',
-        messages: [{ role: 'user', content: title }],
-      }),
-    });
-    if (!response.ok) return null;
-    const data = await response.json();
-    const text = (data.content || [])
-      .filter((b) => b.type === 'text')
-      .map((b) => b.text)
-      .join(' ')
-      .trim();
-    return text || null;
+    const systemPrompt =
+          'Trả về DUY NHẤT 1 cụm từ tiếng Anh (3-6 từ) mô tả 1 cảnh thật, cụ thể, có thể chụp được bằng ảnh, minh hoạ đúng nội dung tiêu đề bài viết tiếng Việt được cung cấp — không phải khái niệm trừu tượng, không dùng tên thương hiệu/tên báo/tên đài/tên chương trình. Trừ khi tiêu đề thực sự nêu tên 1 chính khách, TUYỆT ĐỐI không mô tả kiểu "chân dung/khuôn mặt 1 người" (không dùng portrait, headshot, politician, president, leader...) vì rất dễ vô tình trúng ảnh 1 nguyên thủ quốc gia không liên quan — ưu tiên mô tả CẢNH/HOẠT ĐỘNG/ĐỒ VẬT. Nếu tiêu đề nói về 1 diễn viên/ca sĩ/người nổi tiếng showbiz cụ thể (không phải chính khách), Wikimedia hầu như không có ảnh tự do của họ nên ĐỪNG cố mô tả người đó — thay vào đó mô tả 1 khung cảnh giải trí chung phù hợp (VD: "red carpet event photography", "fashion runway show lights", "film festival crowd evening"). Nếu tiêu đề nói về Ô TÔ/XE MÁY cụ thể (VD "Geely EX5", "Kia Sonet"), ĐÂY LÀ NGOẠI LỆ DUY NHẤT cho quy tắc không dùng tên thương hiệu: LUÔN trả về đúng tên hãng + tên dòng xe kèm loại xe (VD "Geely EX5 electric SUV", "Kia Sonet compact SUV") vì cộng đồng chụp ảnh xe đăng rất nhiều ảnh xe cụ thể lên Wikimedia dưới giấy phép tự do — dùng đúng tên xe mới tìm ra đúng ảnh xe đó, ảnh chung chung "SUV" dễ ra xe khác hãng khác đời trông giống chứ không đúng chiếc đang nói tới. Nếu tiêu đề nói về 1 thiết bị/sản phẩm công nghệ cụ thể khác (điện thoại, laptop...) kể cả sản phẩm tin đồn/chưa ra mắt, LUÔN mô tả cảnh cầm/sử dụng/chụp cận thiết bị thật cùng loại (VD: "person holding smartphone close-up", "hands using foldable phone screen") — KHÔNG mô tả sơ đồ mạch điện tử hay khái niệm AI trừu tượng. Không giải thích, không dấu ngoặc kép, chỉ trả về đúng cụm từ.';
+
+    return await articleAi.complete({ system: systemPrompt, user: title, maxTokens: 1024 });
   } catch (err) {
     console.error('[newsFactory] suggestImageQuery failed', err.message);
     return null;
