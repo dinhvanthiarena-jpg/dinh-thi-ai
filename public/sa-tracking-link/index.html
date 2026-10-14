@@ -91,6 +91,27 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
 .guide code{word-break:break-all}
 .guide .lk{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#150a26;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:6px}
 .guide .lk code{flex:1;min-width:200px;font-size:13px}
+
+nav{overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:1 0 auto;padding-left:12px;padding-right:12px}
+.promo{display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:100%;text-align:left;border:0;cursor:pointer;color:#fff;font:inherit;border-radius:16px;padding:12px 16px;margin-bottom:14px;background:var(--grad);animation:pulse 1.6s ease-in-out infinite;box-shadow:0 0 0 0 rgba(236,72,153,.7)}
+.promo b{font-size:15px}.promo span{font-size:13px;opacity:.95;flex:1;min-width:200px}
+.promo i{font-style:normal;background:#fff;color:#a21caf;font-weight:800;font-size:12px;border-radius:99px;padding:6px 14px;animation:blink 1s steps(2,start) infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(236,72,153,.65)}70%{box-shadow:0 0 0 14px rgba(236,72,153,0)}100%{box-shadow:0 0 0 0 rgba(236,72,153,0)}}
+@keyframes blink{50%{opacity:.45}}
+@media(prefers-reduced-motion:reduce){.promo,.promo i{animation:none}}
+.flow{display:grid;gap:0;margin:8px 0 4px}
+.step{display:flex;gap:14px;align-items:flex-start;position:relative;padding:12px 0}
+.step:not(:last-child)::after{content:"";position:absolute;left:21px;top:56px;bottom:-12px;width:2px;background:linear-gradient(var(--pri),var(--pink));opacity:.6}
+.num{flex:none;width:44px;height:44px;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-weight:800;font-size:18px;box-shadow:0 4px 16px rgba(217,70,239,.4)}
+.step h3{margin:2px 0 2px;font-size:15px}.step p{margin:0;color:#e4d6fb;font-size:14px}
+.step.win .num{background:linear-gradient(135deg,#10b981,#34d399)}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.cta a{text-decoration:none;display:inline-block}
+.mini{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 14px;font-size:13px}
+.mini span{background:#150a26;border:1px solid var(--line);border-radius:99px;padding:5px 12px}
+.mini em{font-style:normal;color:var(--pink);font-weight:800}
 </style>
 </head>
 <body>
@@ -104,11 +125,18 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
     <div class="ver" id="ver">v…</div>
   </header>
 
+  <button class="promo" id="promo" type="button">
+    <b>💰 MUA HÀNG ĐƯỢC HOÀN TIỀN HOA HỒNG!</b>
+    <span>Nhận hoa hồng ngay trên chính đơn hàng của bạn — hoahongaff.com</span>
+    <i>XEM CÁCH LÀM ›</i>
+  </button>
+
   <nav>
     <button data-tab="work" class="on">⚡ Tạo link</button>
     <button data-tab="hist">🕘 Lịch sử</button>
     <button data-tab="set">⚙️ Cài đặt</button>
     <button data-tab="help">📖 Hướng dẫn</button>
+    <button data-tab="cash">💰 Hoàn tiền</button>
   </nav>
 
   <!-- LÀM VIỆC -->
@@ -349,13 +377,36 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
     </div>
   </section>
 
-  <footer>SA-TRACKING LINK · © 3DVIETPRO</footer>
+  <!-- HOÀN TIỀN -->
+  <section id="tab-cash" class="hide guide">
+    <div class="card">
+      <h2>💰 Mua hàng được hoàn tiền hoa hồng trên chính đơn của mình</h2>
+      <p class="d">Bạn mua hàng trên Shopee, Lazada, TikTok Shop như bình thường, nhưng đi qua link của <b>hoahongaff.com</b> để phần hoa hồng affiliate được hoàn lại cho chính bạn.</p>
+      <div class="mini"><span>🛒 Link sản phẩm</span><em>→</em><span>💬 Gửi Zalo</span><em>→</em><span>🤖 Bot trả link mới</span><em>→</em><span>🛍️ Mua bằng link mới</span><em>→</em><span>💸 Nhận hoa hồng</span></div>
+
+      <div class="flow">
+        <div class="step"><div class="num">1</div><div><h3>🛒 Lấy link sản phẩm trên sàn</h3><p>Mở sản phẩm bạn muốn mua trên Shopee / Lazada / TikTok Shop, bấm <b>Chia sẻ → Sao chép liên kết</b>.</p></div></div>
+        <div class="step"><div class="num">2</div><div><h3>💬 Gửi link vào Zalo</h3><p>Dán link đó vào nhóm/bot Zalo của hoahongaff.com (nút tham gia ở bên dưới).</p></div></div>
+        <div class="step"><div class="num">3</div><div><h3>🤖 Zalo bot trả lại link mua hàng mới</h3><p>Bot tự động gắn mã theo dõi và gửi lại cho bạn một <b>link mới</b> của cùng sản phẩm đó.</p></div></div>
+        <div class="step"><div class="num">4</div><div><h3>🛍️ Bấm vào link mới để mua</h3><p>Đặt hàng <b>qua đúng link mới</b>. Nếu mua bằng link cũ thì đơn không được ghi nhận.</p></div></div>
+        <div class="step win"><div class="num">5</div><div><h3>💸 Nhận hoa hồng trên chính đơn của bạn</h3><p>Đơn hàng thành công thì phần hoa hồng được hoàn cho bạn, thay vì để người khác hưởng.</p></div></div>
+      </div>
+      <p class="note" style="font-size:13px;color:#fde68a;background:rgba(251,191,36,.08);border-left:3px solid var(--warn);padding:8px 12px;border-radius:8px">Hoa hồng chỉ được tính khi đơn hàng thành công, theo quy định của từng sàn (có thể bị trừ khi đơn bị huỷ / hoàn trả). Mức hoàn và thời gian nhận hoa hồng, hỏi admin để được tư vấn cụ thể.</p>
+
+      <div class="cta">
+        <a class="btn" href="https://hoahongaff.com" target="_blank" rel="noopener">🌐 Vào hoahongaff.com</a>
+        <a class="btn ok" href="https://zalo.me/g/1cnzpyymhxffik85tqns" target="_blank" rel="noopener">💬 Vào nhóm Zalo — liên hệ admin để hợp tác</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>SA-TRACKING LINK · © 3DVIETPRO · <a href="https://hoahongaff.com" target="_blank" rel="noopener" style="color:var(--pink)">hoahongaff.com</a></footer>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
 "use strict";
-const APP_VERSION = "1.0.3";
+const APP_VERSION = "1.0.4";
 const KEY = "sa-tracking-link.v1";
 const HKEY = "sa-tracking-link.hist.v1";
 
@@ -530,7 +581,7 @@ function csvOut() {
 /* ---------- SỰ KIỆN ---------- */
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
   document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
-  for (const t of ["work", "hist", "set", "help"]) $("tab-" + t).classList.toggle("hide", t !== b.dataset.tab);
+  for (const t of ["work", "hist", "set", "help", "cash"]) $("tab-" + t).classList.toggle("hide", t !== b.dataset.tab);
   if (b.dataset.tab === "hist") renderHist();
 });
 $("go").onclick = generate;
@@ -575,6 +626,7 @@ $("impF").onchange = e => {
 $("gOpen").onclick = () => document.querySelectorAll(".guide details").forEach(d => d.open = true);
 $("gClose").onclick = () => document.querySelectorAll(".guide details").forEach(d => d.open = false);
 document.querySelectorAll(".cplink").forEach(b => b.onclick = () => copy(b.dataset.copy));
+$("promo").onclick = () => { document.querySelector('nav button[data-tab="cash"]').click(); window.scrollTo({ top: 0, behavior: "smooth" }); };
 $("gStart").onclick = () => document.querySelector('nav button[data-tab="set"]').click();
 
 /* ---------- TỰ ĐỘNG CẬP NHẬT ---------- */
