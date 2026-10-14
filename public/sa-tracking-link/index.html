@@ -8,6 +8,9 @@
 <meta name="theme-color" content="#1a0b2e">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SA-TRACKING">
 <style>
 :root{
   --bg:#12081f; --bg2:#1a0b2e; --card:#21123a; --card2:#2a1749; --line:#3b2563;
@@ -118,6 +121,14 @@ nav button{flex:1 0 auto;padding-left:12px;padding-right:12px}
 .qrbox .big{font-size:26px;line-height:1.2;font-weight:900;margin:0 0 10px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;text-transform:uppercase}
 .qrbox .tx{flex:1;min-width:200px;text-align:left}.qrbox h3{margin:0 0 6px;font-size:16px}.qrbox p{margin:0 0 10px;color:#e4d6fb;font-size:14px}
 @media(max-width:520px){.qrbox{flex-direction:column;text-align:center}.qrbox .tx{text-align:center}}
+
+.dl{display:grid;gap:14px;grid-template-columns:repeat(2,1fr);margin-top:6px}
+@media(max-width:720px){.dl{grid-template-columns:1fr}}
+.dlc{border:1px solid var(--line);border-radius:16px;padding:16px;background:rgba(21,10,38,.6);display:flex;flex-direction:column;gap:8px}
+.dlc h3{margin:0;font-size:16px}.dlc .ic{font-size:30px}.dlc p,.dlc li{color:#e4d6fb;font-size:14px;margin:0}
+.dlc ol{padding-left:20px;margin:4px 0}
+.dlc .btn{text-align:center;text-decoration:none;display:block;margin-top:auto}
+.dlbtn{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -142,6 +153,7 @@ nav button{flex:1 0 auto;padding-left:12px;padding-right:12px}
     <button data-tab="hist">🕘 Lịch sử</button>
     <button data-tab="set">⚙️ Cài đặt</button>
     <button data-tab="help">📖 Hướng dẫn</button>
+    <button data-tab="dl">⬇️ Tải về</button>
     <button data-tab="cash">💰 Hoàn tiền</button>
   </nav>
 
@@ -383,6 +395,36 @@ nav button{flex:1 0 auto;padding-left:12px;padding-right:12px}
     </div>
   </section>
 
+  <!-- TẢI VỀ -->
+  <section id="tab-dl" class="hide guide">
+    <div class="card">
+      <h2>⬇️ Tải SA-TRACKING LINK về máy — miễn phí</h2>
+      <p class="d">Dùng được trên <b>điện thoại</b> (Android, iPhone) và <b>máy tính</b> (Windows, Mac). Bản nào cũng <b>tự cập nhật</b> khi có mạng, không phải tải lại.</p>
+      <div class="dl">
+        <div class="dlc" id="dlWin">
+          <div class="ic">🖥️</div><h3>Máy tính Windows — file cài .exe</h3>
+          <p>Cài như phần mềm thật, có biểu tượng ngoài màn hình Desktop.</p>
+          <ol><li>Bấm nút tải bên dưới (khoảng 82 MB)</li><li>Mở file vừa tải, bấm cài đặt</li><li>Mở “SA-TRACKING LINK” ngoài Desktop</li></ol>
+          <p style="font-size:12px;color:#fde68a">Nếu Windows hiện “Windows protected your PC”: bấm <b>More info</b> → <b>Run anyway</b> (file chưa có chữ ký số trả phí).</p>
+          <a class="btn dlbtn" id="exeBtn" href="https://github.com/dinhvanthiarena-jpg/dinh-thi-ai/releases/download/sa-tracking-link/SA-TRACKING-LINK-Setup.exe">⬇ Tải bản Windows (.exe)</a>
+        </div>
+        <div class="dlc" id="dlPwa">
+          <div class="ic">📱</div><h3>Điện thoại Android / Máy tính (Chrome, Edge)</h3>
+          <p>Cài thẳng từ trình duyệt, không qua cửa hàng ứng dụng, nhẹ và tự cập nhật.</p>
+          <button class="btn" id="pwaBtn" type="button">⬇ Cài về máy</button>
+          <p id="pwaHint" style="font-size:12px;color:var(--mut)"></p>
+        </div>
+        <div class="dlc" id="dlIos" style="grid-column:1/-1">
+          <div class="ic">🍎</div><h3>iPhone / iPad (Safari)</h3>
+          <ol><li>Mở trang này bằng <b>Safari</b> (không dùng Chrome hay Zalo)</li><li>Bấm nút <b>Chia sẻ</b> (ô vuông có mũi tên lên)</li><li>Chọn <b>Thêm vào MH chính</b> → <b>Thêm</b></li><li>Biểu tượng SA-TRACKING hiện ngoài màn hình, mở như app thật</li></ol>
+          <p style="font-size:12px;color:var(--mut)">Mở link từ Zalo thì bấm “…” → “Mở bằng trình duyệt” (Safari/Chrome) trước rồi mới cài.</p>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:12px">Địa chỉ dùng thẳng, không cần cài: <code>https://3dvietpro.com/sa-tracking-link/</code></p>
+      <div class="bar" style="margin-top:8px"><button class="btn sm ghost" id="shareLink" type="button">Copy link tool để gửi bạn bè</button></div>
+    </div>
+  </section>
+
   <!-- HOÀN TIỀN -->
   <section id="tab-cash" class="hide guide">
     <div class="card">
@@ -421,7 +463,7 @@ nav button{flex:1 0 auto;padding-left:12px;padding-right:12px}
 
 <script>
 "use strict";
-const APP_VERSION = "1.0.6";
+const APP_VERSION = "1.0.7";
 const KEY = "sa-tracking-link.v1";
 const HKEY = "sa-tracking-link.hist.v1";
 
@@ -596,7 +638,7 @@ function csvOut() {
 /* ---------- SỰ KIỆN ---------- */
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
   document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
-  for (const t of ["work", "hist", "set", "help", "cash"]) $("tab-" + t).classList.toggle("hide", t !== b.dataset.tab);
+  for (const t of ["work", "hist", "set", "help", "dl", "cash"]) $("tab-" + t).classList.toggle("hide", t !== b.dataset.tab);
   if (b.dataset.tab === "hist") renderHist();
 });
 $("go").onclick = generate;
@@ -643,6 +685,22 @@ $("gClose").onclick = () => document.querySelectorAll(".guide details").forEach(
 document.querySelectorAll(".cplink").forEach(b => b.onclick = () => copy(b.dataset.copy));
 $("promo").onclick = () => { document.querySelector('nav button[data-tab="cash"]').click(); window.scrollTo({ top: 0, behavior: "smooth" }); };
 $("gStart").onclick = () => document.querySelector('nav button[data-tab="set"]').click();
+
+
+/* ---------- TẢI VỀ ---------- */
+let deferredInstall = null;
+const isApp = /Electron/i.test(navigator.userAgent) || matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+if (isApp) { $("dlWin").classList.add("hide"); $("dlPwa").classList.add("hide"); $("dlIos").classList.add("hide"); }
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; $("pwaHint").textContent = "Bấm nút để cài. Cài xong biểu tượng hiện ở màn hình chính / Desktop."; });
+window.addEventListener("appinstalled", () => { deferredInstall = null; toast("Đã cài xong ✓"); });
+$("pwaBtn").onclick = async () => {
+  if (deferredInstall) { deferredInstall.prompt(); await deferredInstall.userChoice.catch(() => {}); deferredInstall = null; return; }
+  $("pwaHint").textContent = isIos
+    ? "iPhone: làm theo khung Safari bên dưới (Chia sẻ → Thêm vào MH chính)."
+    : "Chưa cài được tự động. Trong Chrome bấm menu ⋮ → “Cài đặt ứng dụng” (hoặc “Thêm vào màn hình chính”). Đang mở trong Zalo/Facebook thì mở bằng Chrome trước.";
+};
+$("shareLink").onclick = () => copy("https://3dvietpro.com/sa-tracking-link/");
 
 /* ---------- TỰ ĐỘNG CẬP NHẬT ---------- */
 // Cơ chế: (1) service worker luôn lấy file mới từ mạng trước, chỉ dùng bản lưu khi mất mạng;
