@@ -88,6 +88,8 @@ function thuHopDong(c, ten) {
 }
 
 async function guiEmail(c, user) {
+  // Tạm thời KHÔNG gửi hợp đồng qua email cho khách (thầy chốt 2026-10-15): chỉ lưu trên hệ thống. Bật lại bằng CONTRACT_EMAIL=on trong .env.
+  if (process.env.CONTRACT_EMAIL !== 'on') return;
   const t = layTransporter();
   if (!user.email || !t) { console.error('[contract] bỏ qua gửi email (thiếu email khách hoặc chưa cấu hình SMTP)'); return; }
   const noi = thuHopDong(c, user.name);
