@@ -89,6 +89,8 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
 .guide table.gt th,.guide table.gt td{border:1px solid var(--line);padding:8px 10px;vertical-align:top}
 .guide table.gt td{font-size:13.5px}
 .guide code{word-break:break-all}
+.guide .lk{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:#150a26;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:6px}
+.guide .lk code{flex:1;min-width:200px;font-size:13px}
 </style>
 </head>
 <body>
@@ -198,37 +200,51 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
 
     <div class="card">
       <details open><summary>1. Tool này làm gì?</summary>
-        <p>Khi làm affiliate (tiếp thị liên kết), thầy phải gắn <b>mã của mình</b> vào link sản phẩm thì sàn mới biết đơn hàng đó là do thầy giới thiệu và trả hoa hồng. Làm tay từng link rất mất thời gian và dễ sai.</p>
-        <p>SA-TRACKING LINK làm thay thầy 4 việc trong vài giây, cho 1 hoặc hàng chục link cùng lúc:</p>
+        <p>Khi làm affiliate (tiếp thị liên kết), bạn phải gắn <b>mã của mình</b> vào link sản phẩm thì sàn mới biết đơn hàng đó là do bạn giới thiệu và trả hoa hồng. Làm tay từng link rất mất thời gian và dễ sai.</p>
+        <p>SA-TRACKING LINK làm thay bạn 4 việc trong vài giây, cho 1 hoặc hàng chục link cùng lúc:</p>
         <ol>
           <li><b>Nhận ra sàn</b> của link: Shopee, Lazada hay TikTok Shop.</li>
           <li><b>Làm sạch link:</b> bỏ các đuôi rác (<code>?sp_atk=…</code>, <code>utm_…</code>, mã giới thiệu cũ của người khác).</li>
-          <li><b>Gắn mã affiliate</b> của thầy theo đúng cấu trúc link của từng sàn.</li>
+          <li><b>Gắn mã affiliate</b> của bạn theo đúng cấu trúc link của từng sàn.</li>
           <li><b>Gắn nhãn kênh</b> (SubID + UTM) để sau này biết đơn đến từ Facebook, TikTok hay Telegram.</li>
         </ol>
-        <p class="note">Tool chỉ ghép link. Tool <b>không</b> đăng ký tài khoản affiliate hộ thầy và không gọi vào hệ thống của sàn. Thầy phải có tài khoản affiliate trước (xem mục 2).</p>
+        <p class="note">Tool chỉ ghép link. Tool <b>không</b> đăng ký tài khoản affiliate hộ bạn và không gọi vào hệ thống của sàn. Bạn phải có tài khoản affiliate trước (xem mục 2).</p>
       </details>
 
       <details><summary>2. Chuẩn bị: lấy mã định danh ở đâu?</summary>
-        <p>Mã định danh là chuỗi số/chữ sàn hoặc mạng affiliate cấp riêng cho thầy. Thầy lấy một lần rồi lưu vào tool.</p>
-        <p><b>Shopee</b> — đăng ký chương trình Shopee Affiliate, vào trang tài khoản/cài đặt tìm <b>Affiliate ID</b> (dãy số). Mẫu mặc định của tool dùng dạng link <code>s.shopee.vn/an_redir</code> của chính Shopee.</p>
-        <p><b>Lazada và TikTok Shop</b> — mẫu mặc định đi qua mạng <b>Accesstrade</b> (link bắt đầu bằng <code>go.isclix.com/deep_link/</code>). Cách lấy mã chính xác nhất:</p>
+        <p>Mã định danh là chuỗi số/chữ sàn hoặc mạng affiliate cấp riêng cho bạn. Bạn lấy một lần rồi lưu vào tool. Bạn cần <b>đã có tài khoản affiliate được duyệt</b> trước.</p>
+        <p class="note"><b>Cách làm nhanh:</b> bấm nút <b>Copy link</b> bên dưới → mở một tab mới của trình duyệt đang <b>đăng nhập tài khoản affiliate</b> → dán link vào thanh địa chỉ → Enter. Không cần tự tìm trong menu.</p>
+
+        <p><b>🟠 Shopee — Affiliate ID</b></p>
+        <div class="lk"><code>https://seller-affiliate.shopee.vn/</code><button class="btn sm cplink" data-copy="https://seller-affiliate.shopee.vn/">Copy link</button></div>
         <ol>
-          <li>Trong Accesstrade, vào chiến dịch Lazada (hoặc TikTok Shop) đã được duyệt, dùng công cụ tạo link/deeplink để tạo thử <b>1 link</b>.</li>
-          <li>Link ra sẽ có dạng <code>https://go.isclix.com/deep_link/<b>AAAAAA/BBBBBB</b>?…</code></li>
-          <li>Copy đúng phần <code>AAAAAA/BBBBBB</code> (giữa <code>deep_link/</code> và dấu <code>?</code>), dán vào ô mã của sàn đó. Giữ nguyên dấu gạch chéo.</li>
+          <li>Dán link vào trình duyệt đã đăng nhập tài khoản Shopee Affiliate.</li>
+          <li>Bấm vào <b>tên tài khoản</b> của bạn → chọn <b>Thiết lập tài khoản</b>.</li>
+          <li>Mã <b>Affiliate ID</b> hiện ở đó (dãy số). Copy và dán vào ô “Shopee — Affiliate ID” trong tab Cài đặt.</li>
         </ol>
-        <p class="note">Mỗi sàn trong Accesstrade có mã chiến dịch riêng nên mã Lazada khác mã TikTok. Nếu thầy dùng mạng affiliate khác (không phải Accesstrade), đọc mục 4 để sửa mẫu link.</p>
+        <p>Dùng điện thoại: mở app Shopee → <b>Tôi</b> → <b>Shopee Tiếp thị liên kết</b> → <b>Tài khoản</b>, mã nằm ngay dưới tên bạn.</p>
+
+        <p><b>🔵 Lazada và 🩷 TikTok Shop</b> — mẫu mặc định đi qua mạng <b>Accesstrade</b>:</p>
+        <div class="lk"><code>https://pub2.accesstrade.vn/</code><button class="btn sm cplink" data-copy="https://pub2.accesstrade.vn/">Copy link</button></div>
+        <ol>
+          <li>Dán link vào trình duyệt, đăng nhập tài khoản Publisher Accesstrade.</li>
+          <li>Vào mục <b>Chiến dịch</b>, mở chiến dịch <b>Lazada</b> (hoặc <b>TikTok Shop</b>) mà bạn đã được duyệt. Chưa được duyệt thì bấm đăng ký tham gia và chờ.</li>
+          <li>Dùng công cụ <b>tạo link / deeplink</b> của chiến dịch để tạo thử <b>1 link</b> cho bất kỳ sản phẩm nào.</li>
+          <li>Link tạo ra có dạng <code>https://go.isclix.com/deep_link/<b>AAAAAA/BBBBBB</b>?…</code></li>
+          <li>Copy đúng phần <code>AAAAAA/BBBBBB</code> (giữa <code>deep_link/</code> và dấu <code>?</code>), dán vào ô mã của sàn đó. <b>Giữ nguyên dấu gạch chéo.</b></li>
+        </ol>
+        <p class="note">Mỗi sàn trong Accesstrade có mã chiến dịch riêng nên mã Lazada khác mã TikTok. Tên menu trong Accesstrade có thể thay đổi theo thời gian: nếu không thấy đúng tên, tìm mục tạo link/deeplink trong trang chiến dịch.</p>
+        <p><b>Nếu bạn tham gia chương trình affiliate riêng của Lazada hoặc TikTok Shop</b> (không qua Accesstrade): vào trang affiliate của họ tạo thử 1 link, rồi sửa “Mẫu link” ở mục 4 cho giống cấu trúc link đó và dùng mã của chính họ.</p>
       </details>
 
       <details><summary>3. Cài đặt lần đầu (làm 1 lần)</summary>
         <ol>
           <li>Bấm tab <b>⚙️ Cài đặt</b>.</li>
-          <li>Ở khung <b>Mã định danh</b>: dán mã Shopee, Lazada, TikTok. Sàn nào thầy không làm thì để trống.</li>
+          <li>Ở khung <b>Mã định danh</b>: dán mã Shopee, Lazada, TikTok. Sàn nào bạn không làm thì để trống.</li>
           <li>Cuộn xuống <b>Kênh phân phối & UTM</b> để xem hoặc sửa các kênh (mục 5).</li>
-          <li>Không cần bấm “Lưu”. Mọi thứ tự lưu ngay khi thầy gõ, và nằm trên máy của thầy.</li>
+          <li>Không cần bấm “Lưu”. Mọi thứ tự lưu ngay khi bạn gõ, và nằm trên máy của bạn.</li>
         </ol>
-        <p class="note">Mã được lưu trong trình duyệt/ứng dụng trên máy thầy, không gửi lên máy chủ nào. Đổi sang máy khác thì dùng mục 9 để chuyển cài đặt sang.</p>
+        <p class="note">Mã được lưu trong trình duyệt/ứng dụng trên máy bạn, không gửi lên máy chủ nào. Đổi sang máy khác thì dùng mục 9 để chuyển cài đặt sang.</p>
       </details>
 
       <details><summary>4. Mẫu link affiliate — hiểu và chỉnh</summary>
@@ -244,12 +260,12 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
           <tr><td><code>{source}</code> <code>{medium}</code></td><td>utm_source và utm_medium của kênh</td></tr>
           <tr><td><code>{campaign}</code></td><td>Tên chiến dịch ở ô “Chiến dịch”</td></tr>
         </table>
-        <p><b>Khi nào cần sửa mẫu?</b> Khi thầy dùng mạng affiliate khác, hoặc Shopee/Accesstrade đổi cấu trúc link. Cách làm: tạo thử 1 link trong trang của mạng đó, thay các phần của thầy bằng <code>{url}</code>, <code>{id}</code>, <code>{sub}</code>… rồi dán vào ô mẫu.</p>
+        <p><b>Khi nào cần sửa mẫu?</b> Khi bạn dùng mạng affiliate khác, hoặc Shopee/Accesstrade đổi cấu trúc link. Cách làm: tạo thử 1 link trong trang của mạng đó, thay các phần của bạn bằng <code>{url}</code>, <code>{id}</code>, <code>{sub}</code>… rồi dán vào ô mẫu.</p>
         <p><b>Công tắc “Gắn thêm UTM vào cuối link”:</b> bật thì tool nối thêm <code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code> vào cuối link (chỉ khi mẫu chưa có sẵn). Sàn thường bỏ qua các tham số này, nên tắt đi cũng không ảnh hưởng hoa hồng. Nút <b>Khôi phục mẫu mặc định</b> đưa các mẫu về ban đầu nếu lỡ sửa hỏng.</p>
       </details>
 
       <details><summary>5. Kênh phân phối & UTM — để làm gì?</summary>
-        <p><b>Mục đích:</b> thầy đăng cùng một sản phẩm ở nhiều nơi. Nếu link giống hệt nhau thì khi có đơn thầy không biết nơi nào ra đơn. Mỗi kênh có “dấu riêng” gắn vào link để phân biệt.</p>
+        <p><b>Mục đích:</b> bạn đăng cùng một sản phẩm ở nhiều nơi. Nếu link giống hệt nhau thì khi có đơn bạn không biết nơi nào ra đơn. Mỗi kênh có “dấu riêng” gắn vào link để phân biệt.</p>
         <table class="gt">
           <tr><th>Ô</th><th>Ý nghĩa</th><th>Ví dụ</th></tr>
           <tr><td><b>Tên kênh</b></td><td>Tên hiện trong danh sách chọn, đặt tuỳ ý</td><td>Facebook Group</td></tr>
@@ -259,15 +275,15 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
         </table>
         <p><b>Quy tắc đặt tên:</b> viết liền, không dấu, không khoảng trắng, ngắn gọn (<code>tiktokbio</code>, <code>zalo</code>). Mỗi kênh một SubID khác nhau.</p>
         <p><b>Thêm kênh:</b> bấm <b>+ Thêm kênh</b>, điền 4 ô. <b>Xoá kênh:</b> bấm Xoá (phải giữ lại ít nhất 1 kênh). Kênh mới hiện ngay ở danh sách chọn bên tab “Tạo link”.</p>
-        <p><b>Ví dụ:</b> thầy đăng ở nhóm Facebook, link ra có đuôi <code>sub_id=fbgroup&amp;utm_source=facebook&amp;utm_medium=group</code>. Cuối tuần xem báo cáo ở Shopee Affiliate hoặc Accesstrade, lọc theo SubID: <code>fbgroup</code> ra 20 đơn, <code>telegram</code> ra 2 đơn. Thầy biết nên dồn sức vào kênh nào.</p>
-        <p class="note">Với link đi thẳng sang Shopee/Lazada, <b>SubID</b> là thứ có tác dụng thật trong báo cáo. Các tham số <code>utm_*</code> chủ yếu dùng khi link đi qua trang web của thầy có Google Analytics.</p>
+        <p><b>Ví dụ:</b> bạn đăng ở nhóm Facebook, link ra có đuôi <code>sub_id=fbgroup&amp;utm_source=facebook&amp;utm_medium=group</code>. Cuối tuần xem báo cáo ở Shopee Affiliate hoặc Accesstrade, lọc theo SubID: <code>fbgroup</code> ra 20 đơn, <code>telegram</code> ra 2 đơn. Bạn biết nên dồn sức vào kênh nào.</p>
+        <p class="note">Với link đi thẳng sang Shopee/Lazada, <b>SubID</b> là thứ có tác dụng thật trong báo cáo. Các tham số <code>utm_*</code> chủ yếu dùng khi link đi qua trang web của bạn có Google Analytics.</p>
       </details>
 
       <details><summary>6. Tạo link — từng bước</summary>
         <ol>
           <li>Vào tab <b>⚡ Tạo link</b>.</li>
           <li>Dán link sản phẩm gốc vào ô lớn. Dán nhiều link được: mỗi link một dòng, hoặc dán cả đoạn tin nhắn có chữ lẫn link, tool tự tìm link trong đó. Link trùng nhau chỉ tính một lần.</li>
-          <li>Chọn <b>Kênh phân phối</b> thầy sắp đăng link lên.</li>
+          <li>Chọn <b>Kênh phân phối</b> bạn sắp đăng link lên.</li>
           <li>(Tuỳ chọn) gõ tên <b>Chiến dịch</b>, ví dụ <code>sale-10-10</code>. Để trống thì tool tự lấy theo SubID của kênh.</li>
           <li>Bấm <b>✨ Tạo Tracking Link</b>.</li>
         </ol>
@@ -276,25 +292,25 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
       </details>
 
       <details><summary>7. Đọc và dùng kết quả</summary>
-        <p>Bảng kết quả có 4 cột: <b>Sàn</b> · <b>Link gốc</b> · <b>Link Affiliate</b> (link thầy đem đi đăng) · nút <b>Copy</b>.</p>
+        <p>Bảng kết quả có 4 cột: <b>Sàn</b> · <b>Link gốc</b> · <b>Link Affiliate</b> (link bạn đem đi đăng) · nút <b>Copy</b>.</p>
         <ul>
           <li><b>Copy</b> (từng dòng): copy 1 link affiliate vào bộ nhớ tạm, dán đi đâu cũng được.</li>
           <li><b>Copy tất cả:</b> mỗi link một dòng, tiện dán vào bài đăng nhiều sản phẩm.</li>
           <li><b>Tải CSV:</b> xuất file bảng tính (mở bằng Excel) gồm sàn, kênh, link gốc, link affiliate.</li>
           <li><b>Xoá:</b> dọn bảng kết quả (lịch sử vẫn còn).</li>
         </ul>
-        <p><b>Dấu ⚠ vàng</b> dưới một link nghĩa là thầy chưa nhập mã của sàn đó trong Cài đặt. Link vẫn được tạo nhưng chưa có mã, <b>đừng đăng</b> cho tới khi nhập mã và tạo lại.</p>
+        <p><b>Dấu ⚠ vàng</b> dưới một link nghĩa là bạn chưa nhập mã của sàn đó trong Cài đặt. Link vẫn được tạo nhưng chưa có mã, <b>đừng đăng</b> cho tới khi nhập mã và tạo lại.</p>
         <p><b>Dòng báo đỏ</b> nghĩa là link đó không hợp lệ hoặc sàn chưa được hỗ trợ.</p>
       </details>
 
       <details><summary>8. Kiểm tra link đã đúng chưa (nên làm lần đầu)</summary>
-        <p>Vì mỗi mạng affiliate có thể đổi cấu trúc link, thầy nên thử <b>1 link</b> trước khi đăng hàng loạt:</p>
+        <p>Vì mỗi mạng affiliate có thể đổi cấu trúc link, bạn nên thử <b>1 link</b> trước khi đăng hàng loạt:</p>
         <ol>
           <li>Tạo 1 link, bấm Copy, dán vào trình duyệt (tốt nhất là cửa sổ ẩn danh).</li>
-          <li>Link phải mở ra đúng trang sản phẩm. Nếu báo lỗi hoặc ra trang chủ, mẫu link ở mục 4 chưa khớp với mạng của thầy: so sánh với link do chính Shopee/Accesstrade tạo và sửa mẫu.</li>
+          <li>Link phải mở ra đúng trang sản phẩm. Nếu báo lỗi hoặc ra trang chủ, mẫu link ở mục 4 chưa khớp với mạng của bạn: so sánh với link do chính Shopee/Accesstrade tạo và sửa mẫu.</li>
           <li>Đợi một thời gian (thường vài giờ tới một ngày) rồi xem trong báo cáo của Shopee/Accesstrade có ghi nhận lượt bấm kèm đúng SubID không.</li>
         </ol>
-        <p class="note">Mỗi sàn/mạng có luật riêng về việc đăng link affiliate ở đâu và cách đăng. Thầy tự kiểm tra điều khoản của chương trình mình tham gia.</p>
+        <p class="note">Mỗi sàn/mạng có luật riêng về việc đăng link affiliate ở đâu và cách đăng. Bạn tự kiểm tra điều khoản của chương trình mình tham gia.</p>
       </details>
 
       <details><summary>9. Lịch sử, sao lưu và đổi máy</summary>
@@ -308,8 +324,8 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
         <p><b>Cài trên máy tính:</b> bằng Chrome/Edge bấm biểu tượng cài đặt ở thanh địa chỉ, hoặc dùng file <code>SA-TRACKING-LINK-Setup.exe</code>.</p>
         <p><b>Tự cập nhật:</b> mỗi khi có mạng (lúc mở tool, khi nối mạng lại, khi quay lại cửa sổ, và cứ 10 phút một lần) tool tự kiểm tra bản mới.</p>
         <ul>
-          <li>Thầy chưa dán gì: tool tự nạp lại và lên bản mới.</li>
-          <li>Thầy đang làm dở: hiện thanh thông báo, bấm <b>Cập nhật ngay</b> khi tiện.</li>
+          <li>Bạn chưa dán gì: tool tự nạp lại và lên bản mới.</li>
+          <li>Bạn đang làm dở: hiện thanh thông báo, bấm <b>Cập nhật ngay</b> khi tiện.</li>
           <li>Cài đặt và lịch sử không mất khi cập nhật.</li>
           <li>Mất mạng: tool vẫn chạy bằng bản đã lưu lần trước.</li>
         </ul>
@@ -338,7 +354,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
 
 <script>
 "use strict";
-const APP_VERSION = "1.0.1";
+const APP_VERSION = "1.0.2";
 const KEY = "sa-tracking-link.v1";
 const HKEY = "sa-tracking-link.hist.v1";
 
@@ -557,6 +573,7 @@ $("impF").onchange = e => {
 
 $("gOpen").onclick = () => document.querySelectorAll(".guide details").forEach(d => d.open = true);
 $("gClose").onclick = () => document.querySelectorAll(".guide details").forEach(d => d.open = false);
+document.querySelectorAll(".cplink").forEach(b => b.onclick = () => copy(b.dataset.copy));
 $("gStart").onclick = () => document.querySelector('nav button[data-tab="set"]').click();
 
 /* ---------- TỰ ĐỘNG CẬP NHẬT ---------- */
