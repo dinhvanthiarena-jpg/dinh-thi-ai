@@ -10,12 +10,18 @@ function inlineMarkdown(text) {
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 }
 
+// Khối chỉ có link YouTube -> khung phát video (chỉ nhận ID 11 ký tự đúng chuẩn nên không chèn được HTML lạ).
+const YT_LINE = /^(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:[^\s#]*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})[^\s]*$/i;
+const youtubeEmbed = (id) => '<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin:20px 0;background:#000"><iframe src="https://www.youtube.com/embed/' + id + '" title="Video" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+
 function markdownToHtml(markdown) {
   return String(markdown || '')
     .split(/\n{2,}/)
     .map((block) => block.trim())
     .filter(Boolean)
     .map((block) => {
+      const yt = block.match(YT_LINE);
+      if (yt) return youtubeEmbed(yt[1]);
       const heading = block.match(/^#{1,3}\s+(.+)$/);
       if (heading) return `<h2>${inlineMarkdown(heading[1])}</h2>`;
       return `<p>${inlineMarkdown(block).replace(/\n/g, '<br>')}</p>`;
