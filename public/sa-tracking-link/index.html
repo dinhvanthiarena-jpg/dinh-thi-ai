@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SA-TRACKING LINK</title>
+<meta name="description" content="Tạo link affiliate Shopee, Lazada, TikTok Shop kèm UTM/SubID theo kênh — tự cập nhật khi có mạng.">
+<meta name="theme-color" content="#1a0b2e">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{
+  --bg:#12081f; --bg2:#1a0b2e; --card:#21123a; --card2:#2a1749; --line:#3b2563;
+  --tx:#f5eeff; --mut:#b9a6d9; --pri:#a855f7; --pink:#ec4899; --ok:#34d399; --warn:#fbbf24; --err:#fb7185;
+  --grad:linear-gradient(135deg,#8b5cf6 0%,#d946ef 55%,#ec4899 100%);
+  --r:16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--tx);min-height:100vh;
+  background:radial-gradient(900px 500px at 10% -10%,rgba(168,85,247,.28),transparent 60%),
+             radial-gradient(800px 500px at 100% 0,rgba(236,72,153,.22),transparent 60%),var(--bg)}
+.wrap{max-width:1080px;margin:0 auto;padding:16px}
+header{display:flex;align-items:center;gap:12px;padding:6px 0 18px}
+.logo{width:44px;height:44px;border-radius:13px;background:var(--grad);display:grid;place-items:center;box-shadow:0 6px 22px rgba(217,70,239,.45)}
+.logo svg{width:24px;height:24px}
+h1{font-size:20px;margin:0;letter-spacing:.5px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{font-size:12px;color:var(--mut)}
+.sp{flex:1}
+.ver{font-size:11px;color:var(--mut);border:1px solid var(--line);padding:3px 9px;border-radius:99px;white-space:nowrap}
+.ver.new{border-color:var(--ok);color:var(--ok)}
+nav{display:flex;gap:6px;background:var(--bg2);border:1px solid var(--line);padding:5px;border-radius:14px;margin-bottom:16px}
+nav button{flex:1;border:0;background:transparent;color:var(--mut);font:inherit;font-weight:600;padding:9px 6px;border-radius:10px;cursor:pointer}
+nav button.on{background:var(--grad);color:#fff;box-shadow:0 4px 16px rgba(217,70,239,.35)}
+.card{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px}
+.card h2{margin:0 0 4px;font-size:16px}
+.card p.d{margin:0 0 14px;color:var(--mut);font-size:13px}
+label{display:block;font-size:12px;font-weight:600;color:var(--mut);margin:0 0 5px}
+textarea,input,select{width:100%;background:#150a26;color:var(--tx);border:1px solid var(--line);border-radius:12px;padding:11px 13px;font:inherit;outline:none}
+textarea:focus,input:focus,select:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(168,85,247,.25)}
+textarea{min-height:150px;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.row{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+.row3{display:grid;gap:12px;grid-template-columns:repeat(3,1fr)}
+@media(max-width:720px){.row,.row3{grid-template-columns:1fr}}
+.btn{border:0;border-radius:12px;padding:11px 18px;font:inherit;font-weight:700;color:#fff;background:var(--grad);cursor:pointer;box-shadow:0 6px 20px rgba(217,70,239,.35);transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn.big{width:100%;padding:15px;font-size:16px;margin-top:14px}
+.btn.ghost{background:transparent;border:1px solid var(--line);box-shadow:none;color:var(--tx)}
+.btn.sm{padding:7px 13px;font-size:13px;border-radius:10px}
+.btn.ok{background:linear-gradient(135deg,#10b981,#34d399);box-shadow:none}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.6px;padding:8px;border-bottom:1px solid var(--line)}
+td{padding:10px 8px;border-bottom:1px solid rgba(59,37,99,.6);vertical-align:top}
+td .u{font-family:ui-monospace,Consolas,monospace;font-size:12px;word-break:break-all;max-width:360px}
+td .u.o{color:var(--mut)}
+td .u.n{color:#f0abfc}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;background:rgba(168,85,247,.2);color:#d8b4fe;white-space:nowrap}
+.tag.shopee{background:rgba(249,115,22,.2);color:#fdba74}
+.tag.lazada{background:rgba(59,130,246,.2);color:#93c5fd}
+.tag.tiktok{background:rgba(236,72,153,.2);color:#f9a8d4}
+.tag.err{background:rgba(251,113,133,.2);color:var(--err)}
+.warn{color:var(--warn);font-size:12px;margin-top:4px}
+.empty{text-align:center;color:var(--mut);padding:30px 10px}
+.hint{font-size:12px;color:var(--mut);margin-top:5px}
+.hint code,.card code{background:#150a26;border:1px solid var(--line);padding:1px 6px;border-radius:6px;font-size:11.5px;color:#f0abfc}
+.ch{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;background:rgba(21,10,38,.5)}
+.ch .top{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.ch .top input{font-weight:700}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,30px);opacity:0;background:var(--grad);color:#fff;padding:11px 20px;border-radius:99px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.5);transition:.25s;pointer-events:none;z-index:50;max-width:92vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.upd{position:fixed;left:16px;right:16px;top:12px;max-width:520px;margin:auto;z-index:60;background:var(--card2);border:1px solid var(--ok);border-radius:14px;padding:12px 14px;display:none;gap:10px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.upd.on{display:flex}
+.upd span{flex:1;font-size:13px}
+.hide{display:none!important}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
+</style>
+</head>
+<body>
+<div class="upd" id="upd"><span id="updTx">Có bản mới</span><button class="btn sm ok" id="updGo">Cập nhật ngay</button></div>
+
+<div class="wrap">
+  <header>
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg></div>
+    <div><h1>SA-TRACKING LINK</h1><div class="sub">Tạo link affiliate + UTM/SubID theo kênh, 1 chạm</div></div>
+    <div class="sp"></div>
+    <div class="ver" id="ver">v…</div>
+  </header>
+
+  <nav>
+    <button data-tab="work" class="on">⚡ Tạo link</button>
+    <button data-tab="hist">🕘 Lịch sử</button>
+    <button data-tab="set">⚙️ Cài đặt</button>
+  </nav>
+
+  <!-- LÀM VIỆC -->
+  <section id="tab-work">
+    <div class="card">
+      <h2>Dán link sản phẩm gốc</h2>
+      <p class="d">Dán 1 hoặc nhiều link (mỗi dòng một link, có chữ lẫn trong cũng được). Tự nhận Shopee / Lazada / TikTok Shop.</p>
+      <textarea id="input" placeholder="https://shopee.vn/Ao-thun-nam-i.123456.789012?sp_atk=abc&utm_source=cu&#10;https://www.lazada.vn/products/ten-san-pham-i123456789-s987654321.html?spm=a2o4n&#10;https://www.tiktok.com/view/product/1729384756?..."></textarea>
+      <div class="row" style="margin-top:12px">
+        <div><label>Kênh phân phối</label><select id="channel"></select></div>
+        <div><label>Chiến dịch (tuỳ chọn — thay {campaign})</label><input id="campaign" placeholder="vd: sale-10-10"></div>
+      </div>
+      <button class="btn big" id="go">✨ Tạo Tracking Link</button>
+    </div>
+
+    <div class="card" id="resCard">
+      <div class="bar">
+        <h2 style="margin:0;flex:1">Kết quả <span id="cnt" class="sub"></span></h2>
+        <button class="btn sm" id="copyAll">Copy tất cả</button>
+        <button class="btn sm ghost" id="csv">Tải CSV</button>
+        <button class="btn sm ghost" id="clr">Xoá</button>
+      </div>
+      <div class="tbl"><table>
+        <thead><tr><th style="width:90px">Sàn</th><th>Link gốc</th><th>Link Affiliate (đã gắn mã + UTM)</th><th style="width:84px"></th></tr></thead>
+        <tbody id="out"><tr><td colspan="4" class="empty">Chưa có kết quả. Dán link rồi bấm “Tạo Tracking Link”.</td></tr></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- LỊCH SỬ -->
+  <section id="tab-hist" class="hide">
+    <div class="card">
+      <div class="bar"><h2 style="margin:0;flex:1">Lịch sử (200 link gần nhất)</h2><button class="btn sm ghost" id="histClr">Xoá lịch sử</button></div>
+      <div class="tbl"><table>
+        <thead><tr><th style="width:90px">Sàn</th><th>Kênh</th><th>Link Affiliate</th><th style="width:84px"></th></tr></thead>
+        <tbody id="histOut"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- CÀI ĐẶT -->
+  <section id="tab-set" class="hide">
+    <div class="card">
+      <h2>Mã định danh (Affiliate / Tracking ID)</h2>
+      <p class="d">Lưu ngay trên máy của bạn, không gửi đi đâu.</p>
+      <div class="row3">
+        <div><label>Shopee — Affiliate ID</label><input id="id_shopee" placeholder="vd: 17xxxxxxxxx"></div>
+        <div><label>Lazada — Tracking ID</label><input id="id_lazada" placeholder="vd: ID Accesstrade/Lazada"></div>
+        <div><label>TikTok Shop — Affiliate ID</label><input id="id_tiktok" placeholder="vd: ID Accesstrade/TikTok"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Mẫu link affiliate theo sàn</h2>
+      <p class="d">Biến dùng được: <code>{url}</code> link gốc đã làm sạch (đã mã hoá) · <code>{rawurl}</code> chưa mã hoá · <code>{id}</code> mã định danh · <code>{sub}</code> SubID của kênh · <code>{source}</code> <code>{medium}</code> <code>{campaign}</code></p>
+      <div style="margin-bottom:12px"><label>Shopee</label><input id="tpl_shopee"><div class="hint">Mặc định theo dạng <code>an_redir</code> của Shopee Affiliate.</div></div>
+      <div style="margin-bottom:12px"><label>Lazada</label><input id="tpl_lazada"><div class="hint">Mặc định theo deep-link Accesstrade. Dùng mạng khác thì sửa mẫu cho khớp.</div></div>
+      <div style="margin-bottom:12px"><label>TikTok Shop</label><input id="tpl_tiktok"></div>
+      <label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" id="appendUtm" style="width:auto"> Gắn thêm UTM vào cuối link affiliate</label>
+      <div style="margin-top:12px"><button class="btn sm ghost" id="tplReset">Khôi phục mẫu mặc định</button></div>
+    </div>
+
+    <div class="card">
+      <div class="bar"><h2 style="margin:0;flex:1">Kênh phân phối & UTM</h2><button class="btn sm" id="chAdd">+ Thêm kênh</button></div>
+      <p class="d">Mỗi kênh có SubID + UTM riêng để biết đơn đến từ đâu.</p>
+      <div id="chList"></div>
+    </div>
+
+    <div class="card">
+      <h2>Sao lưu cài đặt</h2>
+      <p class="d">Đổi máy? Xuất ra file rồi nhập lại.</p>
+      <div class="bar"><button class="btn sm ghost" id="exp">Xuất file</button><button class="btn sm ghost" id="imp">Nhập file</button><input type="file" id="impF" accept=".json" class="hide"></div>
+    </div>
+
+    <div class="card">
+      <h2>Cập nhật</h2>
+      <p class="d" id="updInfo">Ứng dụng tự kiểm tra bản mới mỗi khi có mạng và tự cập nhật. Cài đặt của bạn được giữ nguyên.</p>
+      <button class="btn sm" id="chk">Kiểm tra bản mới ngay</button>
+    </div>
+  </section>
+
+  <footer>SA-TRACKING LINK · © 3DVIETPRO</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const APP_VERSION = "1.0.0";
+const KEY = "sa-tracking-link.v1";
+const HKEY = "sa-tracking-link.hist.v1";
+
+const DEFAULTS = {
+  ids: { shopee: "", lazada: "", tiktok: "" },
+  tpl: {
+    shopee: "https://s.shopee.vn/an_redir?origin_link={url}&affiliate_id={id}&sub_id={sub}",
+    lazada: "https://go.isclix.com/deep_link/{id}?url={url}&sub1={sub}",
+    tiktok: "https://go.isclix.com/deep_link/{id}?url={url}&sub1={sub}"
+  },
+  appendUtm: true,
+  channels: [
+    { name: "Facebook Group", sub: "fbgroup", source: "facebook", medium: "group" },
+    { name: "Facebook Fanpage", sub: "fbpage", source: "facebook", medium: "fanpage" },
+    { name: "TikTok Bio", sub: "tiktokbio", source: "tiktok", medium: "bio" },
+    { name: "Telegram", sub: "telegram", source: "telegram", medium: "channel" },
+    { name: "Zalo", sub: "zalo", source: "zalo", medium: "chat" }
+  ]
+};
+
+const $ = id => document.getElementById(id);
+const clone = o => JSON.parse(JSON.stringify(o));
+let S = load();
+let results = [];
+
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (s) return Object.assign(clone(DEFAULTS), s, { ids: Object.assign({}, DEFAULTS.ids, s.ids), tpl: Object.assign({}, DEFAULTS.tpl, s.tpl) });
+  } catch (e) {}
+  return clone(DEFAULTS);
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function hist() { try { return JSON.parse(localStorage.getItem(HKEY) || "[]"); } catch (e) { return []; } }
+function saveHist(h) { try { localStorage.setItem(HKEY, JSON.stringify(h.slice(0, 200))); } catch (e) {} }
+
+function toast(t) {
+  const el = $("toast"); el.textContent = t; el.classList.add("on");
+  clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("on"), 1800);
+}
+async function copy(t) {
+  try { await navigator.clipboard.writeText(t); }
+  catch (e) { const a = document.createElement("textarea"); a.value = t; document.body.appendChild(a); a.select(); document.execCommand("copy"); a.remove(); }
+  toast("Đã copy ✓");
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+/* ---------- XỬ LÝ LINK ---------- */
+const SHORT = /^(shope\.ee|s\.shopee\.vn|vn\.shp\.ee|shp\.ee|lzd\.co|s\.lazada\.vn|c\.lazada\.vn|vt\.tiktok\.com|vm\.tiktok\.com|vn\.tiktok\.com)$/;
+
+function detect(host) {
+  host = host.replace(/^www\./, "");
+  if (/(^|\.)(shopee\.vn|shope\.ee|shp\.ee)$/.test(host)) return "shopee";
+  if (/(^|\.)(lazada\.vn|lzd\.co)$/.test(host)) return "lazada";
+  if (/(^|\.)tiktok\.com$/.test(host)) return "tiktok";
+  return null;
+}
+
+// Làm sạch: bỏ query/fragment rác, chuẩn hoá về dạng ngắn nhất ổn định.
+function clean(u, platform) {
+  const host = u.hostname.toLowerCase();
+  if (SHORT.test(host.replace(/^www\./, ""))) return u.origin + u.pathname.replace(/\/+$/, "");
+  const path = decodeURIComponent(u.pathname);
+  if (platform === "shopee") {
+    let m = path.match(/-i\.(\d+)\.(\d+)/) || path.match(/\/product\/(\d+)\/(\d+)/);
+    if (m) return `https://shopee.vn/product/${m[1]}/${m[2]}`;
+    return "https://shopee.vn" + u.pathname.replace(/\/+$/, "");
+  }
+  if (platform === "lazada") return "https://www.lazada.vn" + u.pathname;
+  if (platform === "tiktok") return u.origin + u.pathname.replace(/\/+$/, "");
+  return u.origin + u.pathname;
+}
+
+function extractUrls(text) {
+  const found = text.match(/https?:\/\/[^\s<>"'，。]+/gi) || [];
+  const seen = new Set(), out = [];
+  for (let s of found) {
+    s = s.replace(/[)\].,;!]+$/, "");
+    if (!seen.has(s)) { seen.add(s); out.push(s); }
+  }
+  return out;
+}
+
+function fill(tpl, v) {
+  return tpl.replace(/\{(url|rawurl|id|sub|source|medium|campaign)\}/g, (_, k) => v[k] ?? "");
+}
+
+function build(raw, ch, campaign) {
+  let u;
+  try { u = new URL(raw); } catch (e) { return { raw, err: "Link không hợp lệ" }; }
+  const platform = detect(u.hostname);
+  if (!platform) return { raw, err: "Chưa hỗ trợ sàn này (chỉ Shopee, Lazada, TikTok)" };
+  const cleaned = clean(u, platform);
+  const id = (S.ids[platform] || "").trim();
+  const camp = (campaign || "").trim() || ch.sub;
+  const vars = {
+    url: encodeURIComponent(cleaned), rawurl: cleaned, id: encodeURIComponent(id),
+    sub: encodeURIComponent(ch.sub), source: encodeURIComponent(ch.source),
+    medium: encodeURIComponent(ch.medium), campaign: encodeURIComponent(camp)
+  };
+  let link = fill(S.tpl[platform], vars);
+  if (S.appendUtm && !/utm_source=/.test(link)) {
+    const q = `utm_source=${vars.source}&utm_medium=${vars.medium}&utm_campaign=${vars.campaign}`;
+    link += (link.includes("?") ? "&" : "?") + q;
+  }
+  return { raw, platform, cleaned, link, channel: ch.name, warn: id ? "" : "Chưa nhập mã định danh " + platform + " trong Cài đặt" };
+}
+
+/* ---------- GIAO DIỆN ---------- */
+function renderChannels() {
+  $("channel").innerHTML = S.channels.map((c, i) => `<option value="${i}">${esc(c.name)}</option>`).join("");
+  $("chList").innerHTML = S.channels.map((c, i) => `
+    <div class="ch" data-i="${i}">
+      <div class="top"><input data-f="name" value="${esc(c.name)}" placeholder="Tên kênh"><button class="btn sm ghost" data-del="${i}">Xoá</button></div>
+      <div class="row3">
+        <div><label>SubID</label><input data-f="sub" value="${esc(c.sub)}"></div>
+        <div><label>utm_source</label><input data-f="source" value="${esc(c.source)}"></div>
+        <div><label>utm_medium</label><input data-f="medium" value="${esc(c.medium)}"></div>
+      </div>
+    </div>`).join("");
+}
+
+function renderSettings() {
+  for (const p of ["shopee", "lazada", "tiktok"]) { $("id_" + p).value = S.ids[p]; $("tpl_" + p).value = S.tpl[p]; }
+  $("appendUtm").checked = !!S.appendUtm;
+  renderChannels();
+}
+
+function platTag(p) { return p ? `<span class="tag ${p}">${p === "tiktok" ? "TikTok" : p[0].toUpperCase() + p.slice(1)}</span>` : `<span class="tag err">?</span>`; }
+
+function renderResults() {
+  const body = $("out");
+  $("cnt").textContent = results.length ? `(${results.length})` : "";
+  if (!results.length) { body.innerHTML = `<tr><td colspan="4" class="empty">Chưa có kết quả. Dán link rồi bấm “Tạo Tracking Link”.</td></tr>`; return; }
+  body.innerHTML = results.map((r, i) => r.err
+    ? `<tr><td>${platTag(null)}</td><td><div class="u o">${esc(r.raw)}</div></td><td><span class="warn" style="color:var(--err)">${esc(r.err)}</span></td><td></td></tr>`
+    : `<tr><td>${platTag(r.platform)}</td>
+        <td><div class="u o">${esc(r.raw.length > 90 ? r.raw.slice(0, 90) + "…" : r.raw)}</div></td>
+        <td><div class="u n">${esc(r.link)}</div>${r.warn ? `<div class="warn">⚠ ${esc(r.warn)}</div>` : ""}</td>
+        <td><button class="btn sm" data-cp="${i}">Copy</button></td></tr>`).join("");
+}
+
+function renderHist() {
+  const h = hist();
+  $("histOut").innerHTML = h.length ? h.map((r, i) => `<tr><td>${platTag(r.platform)}</td><td>${esc(r.channel)}<div class="sub">${new Date(r.t).toLocaleString("vi-VN")}</div></td>
+    <td><div class="u n">${esc(r.link)}</div></td><td><button class="btn sm" data-hcp="${i}">Copy</button></td></tr>`).join("")
+    : `<tr><td colspan="4" class="empty">Chưa có lịch sử.</td></tr>`;
+}
+
+function generate() {
+  const urls = extractUrls($("input").value);
+  if (!urls.length) { toast("Hãy dán ít nhất 1 link bắt đầu bằng https://"); return; }
+  const ch = S.channels[+$("channel").value] || S.channels[0];
+  if (!ch) { toast("Chưa có kênh nào, hãy thêm trong Cài đặt"); return; }
+  results = urls.map(u => build(u, ch, $("campaign").value));
+  renderResults();
+  const h = hist(), now = Date.now();
+  results.filter(r => !r.err).reverse().forEach(r => h.unshift({ t: now, platform: r.platform, channel: r.channel, link: r.link }));
+  saveHist(h);
+  const ok = results.filter(r => !r.err).length;
+  toast(`Đã tạo ${ok}/${results.length} link`);
+}
+
+function csvOut() {
+  const q = s => '"' + String(s).replace(/"/g, '""') + '"';
+  const rows = [["San", "Kenh", "Link goc", "Link affiliate"]].concat(results.filter(r => !r.err).map(r => [r.platform, r.channel, r.cleaned, r.link]));
+  const blob = new Blob(["﻿" + rows.map(r => r.map(q).join(",")).join("\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "sa-tracking-link.csv"; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ---------- SỰ KIỆN ---------- */
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  for (const t of ["work", "hist", "set"]) $("tab-" + t).classList.toggle("hide", t !== b.dataset.tab);
+  if (b.dataset.tab === "hist") renderHist();
+});
+$("go").onclick = generate;
+$("clr").onclick = () => { results = []; renderResults(); };
+$("copyAll").onclick = () => { const l = results.filter(r => !r.err).map(r => r.link); l.length ? copy(l.join("\n")) : toast("Chưa có link để copy"); };
+$("csv").onclick = () => results.some(r => !r.err) ? csvOut() : toast("Chưa có link để tải");
+$("out").onclick = e => { const b = e.target.closest("[data-cp]"); if (b) copy(results[+b.dataset.cp].link); };
+$("histOut").onclick = e => { const b = e.target.closest("[data-hcp]"); if (b) copy(hist()[+b.dataset.hcp].link); };
+$("histClr").onclick = () => { if (confirm("Xoá toàn bộ lịch sử?")) { saveHist([]); renderHist(); } };
+
+for (const p of ["shopee", "lazada", "tiktok"]) {
+  $("id_" + p).oninput = e => { S.ids[p] = e.target.value; save(); };
+  $("tpl_" + p).oninput = e => { S.tpl[p] = e.target.value; save(); };
+}
+$("appendUtm").onchange = e => { S.appendUtm = e.target.checked; save(); };
+$("tplReset").onclick = () => { S.tpl = clone(DEFAULTS.tpl); save(); renderSettings(); toast("Đã khôi phục mẫu"); };
+$("chAdd").onclick = () => { S.channels.push({ name: "Kênh mới", sub: "kenhmoi", source: "source", medium: "medium" }); save(); renderChannels(); };
+$("chList").oninput = e => {
+  const box = e.target.closest(".ch"); if (!box || !e.target.dataset.f) return;
+  S.channels[+box.dataset.i][e.target.dataset.f] = e.target.value; save();
+  const sel = $("channel"), cur = sel.value;
+  sel.innerHTML = S.channels.map((c, i) => `<option value="${i}">${esc(c.name)}</option>`).join(""); sel.value = cur;
+};
+$("chList").onclick = e => {
+  const b = e.target.closest("[data-del]"); if (!b) return;
+  if (S.channels.length <= 1) { toast("Cần giữ ít nhất 1 kênh"); return; }
+  S.channels.splice(+b.dataset.del, 1); save(); renderChannels();
+};
+$("exp").onclick = () => {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(S, null, 2)], { type: "application/json" }));
+  a.download = "sa-tracking-link-settings.json"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+$("imp").onclick = () => $("impF").click();
+$("impF").onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => { try { const s = JSON.parse(r.result); if (!s.channels || !s.ids) throw 0; S = Object.assign(clone(DEFAULTS), s); save(); renderSettings(); toast("Đã nhập cài đặt ✓"); } catch (x) { toast("File không đúng định dạng"); } };
+  r.readAsText(f); e.target.value = "";
+};
+
+/* ---------- TỰ ĐỘNG CẬP NHẬT ---------- */
+// Cơ chế: (1) service worker luôn lấy file mới từ mạng trước, chỉ dùng bản lưu khi mất mạng;
+// (2) trang hỏi version.json (không cache) khi mở, khi có mạng lại, khi quay lại tab và mỗi 10 phút;
+// (3) thấy bản mới -> tải lại để nhận mã mới. Cài đặt/lịch sử nằm ở localStorage nên không mất.
+let reloading = false;
+function doReload() { if (reloading) return; reloading = true; location.reload(); }
+function idle() { return !$("input").value.trim() && !results.length; }
+
+function offerUpdate(v) {
+  // Chốt chặn: đã thử nạp lại cho đúng bản này trong phiên rồi mà vẫn lệch thì thôi, tránh lặp vô hạn.
+  try { if (sessionStorage.getItem("sa-upd") === v) return; sessionStorage.setItem("sa-upd", v); } catch (e) {}
+  if (idle()) { toast("Đang cập nhật lên v" + v + "…"); setTimeout(doReload, 900); return; }
+  $("updTx").textContent = "Đã có bản mới v" + v + " — bấm để cập nhật (công việc đang làm sẽ giữ trong Lịch sử).";
+  $("upd").classList.add("on");
+}
+$("updGo").onclick = doReload;
+
+async function checkUpdate(manual) {
+  if (!navigator.onLine) { if (manual) toast("Đang offline"); return; }
+  try {
+    const r = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
+    const j = await r.json();
+    const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration();
+    if (reg) reg.update().catch(() => {});
+    if (j.version && j.version !== APP_VERSION) {
+      $("ver").textContent = "v" + APP_VERSION + " → v" + j.version; $("ver").classList.add("new");
+      offerUpdate(j.version);
+    } else if (manual) toast("Bạn đang dùng bản mới nhất ✓");
+    $("updInfo").textContent = "Phiên bản hiện tại: v" + APP_VERSION + (j.notes ? " · Mới nhất: " + j.notes : "") + ". Ứng dụng tự kiểm tra mỗi khi có mạng.";
+  } catch (e) { if (manual) toast("Không kiểm tra được, thử lại sau"); }
+}
+$("chk").onclick = () => checkUpdate(true);
+window.addEventListener("online", () => checkUpdate());
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkUpdate(); });
+setInterval(() => checkUpdate(), 10 * 60 * 1000);
+
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+  let had = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (had && idle()) doReload(); had = true; });
+}
+
+/* ---------- KHỞI ĐỘNG ---------- */
+$("ver").textContent = "v" + APP_VERSION;
+renderSettings();
+renderResults();
+checkUpdate();
+</script>
+</body>
+</html>

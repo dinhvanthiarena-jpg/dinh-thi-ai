@@ -153,7 +153,7 @@ app.use(methodOverride('_method'));
 // Same applies to /english-air (the English-learning PWA) and /bibi-history
 // (the history-learning PWA), so all app shells are matched by one pattern here.
 const PWA_SHELL_FILES =
-  /\/(game|english-air|bibi-history)\/(index\.html|app\.js|style\.css|sw\.js|grades-data\.js|course(-[ab]\d|-lop\d+)?\.js|manifest\.(json|webmanifest))$/;
+  /\/(game|english-air|bibi-history|sa-tracking-link)\/(index\.html|version\.json|app\.js|style\.css|sw\.js|grades-data\.js|course(-[ab]\d|-lop\d+)?\.js|manifest\.(json|webmanifest))$/;
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders: (res, filePath) => {
     if (PWA_SHELL_FILES.test(filePath.replace(/\\/g, '/'))) {
