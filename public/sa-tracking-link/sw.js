@@ -1,6 +1,6 @@
 // Network-first: có mạng là luôn lấy bản mới nhất; mất mạng thì dùng bản đã lưu.
 const CACHE = "sa-tracking-link-shell";
-const SHELL = ["./", "index.html", "manifest.json", "icon.svg"];
+const SHELL = ["./", "index.html", "manifest.json", "icon.svg", "qr-zalo.svg"];
 
 self.addEventListener("install", e => {
   self.skipWaiting();

@@ -112,6 +112,11 @@ nav button{flex:1 0 auto;padding-left:12px;padding-right:12px}
 .mini{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 14px;font-size:13px}
 .mini span{background:#150a26;border:1px solid var(--line);border-radius:99px;padding:5px 12px}
 .mini em{font-style:normal;color:var(--pink);font-weight:800}
+
+.qrbox{display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:center;margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:16px;background:rgba(21,10,38,.6)}
+.qrbox img{width:200px;height:200px;border-radius:14px;background:#fff;padding:8px;box-shadow:0 0 0 3px rgba(236,72,153,.6),0 10px 30px rgba(217,70,239,.35)}
+.qrbox .tx{flex:1;min-width:200px;text-align:left}.qrbox h3{margin:0 0 6px;font-size:16px}.qrbox p{margin:0 0 10px;color:#e4d6fb;font-size:14px}
+@media(max-width:520px){.qrbox{flex-direction:column;text-align:center}.qrbox .tx{text-align:center}}
 </style>
 </head>
 <body>
@@ -397,6 +402,14 @@ nav button{flex:1 0 auto;padding-left:12px;padding-right:12px}
         <a class="btn" href="https://hoahongaff.com" target="_blank" rel="noopener">🌐 Vào hoahongaff.com</a>
         <a class="btn ok" href="https://zalo.me/g/1cnzpyymhxffik85tqns" target="_blank" rel="noopener">💬 Vào nhóm Zalo — liên hệ admin để hợp tác</a>
       </div>
+      <div class="qrbox">
+        <img src="qr-zalo.svg" alt="QR nhóm Zalo hoahongaff.com" width="200" height="200">
+        <div class="tx">
+          <h3>📲 Quét mã QR để vào nhóm Zalo</h3>
+          <p>Mở Zalo → bấm biểu tượng quét QR → quét mã bên cạnh. Vào nhóm rồi <b>liên hệ admin để hợp tác</b>.</p>
+          <a class="btn sm" href="qr-zalo.svg" download="qr-nhom-zalo-hoahongaff.svg">⬇ Tải ảnh QR</a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -406,7 +419,7 @@ nav button{flex:1 0 auto;padding-left:12px;padding-right:12px}
 
 <script>
 "use strict";
-const APP_VERSION = "1.0.4";
+const APP_VERSION = "1.0.5";
 const KEY = "sa-tracking-link.v1";
 const HKEY = "sa-tracking-link.hist.v1";
 
