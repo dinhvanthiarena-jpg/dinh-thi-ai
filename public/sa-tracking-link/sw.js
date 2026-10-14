@@ -14,7 +14,7 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
-  if (req.url.includes("version.json")) return; // luôn lấy thẳng từ mạng
+  if (req.url.includes("version.json") || /\.mp4(\?|$)/.test(req.url)) return; // video + version.json: lấy thẳng từ mạng // luôn lấy thẳng từ mạng
   e.respondWith(
     fetch(req, { cache: "no-cache" }).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
