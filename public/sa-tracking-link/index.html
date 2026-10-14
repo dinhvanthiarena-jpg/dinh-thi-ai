@@ -30,7 +30,7 @@ h1{font-size:20px;margin:0;letter-spacing:.5px;font-weight:800;background:var(--
 .ver{font-size:11px;color:var(--mut);border:1px solid var(--line);padding:3px 9px;border-radius:99px;white-space:nowrap}
 .ver.new{border-color:var(--ok);color:var(--ok)}
 nav{display:flex;gap:6px;background:var(--bg2);border:1px solid var(--line);padding:5px;border-radius:14px;margin-bottom:16px}
-nav button{flex:1;border:0;background:transparent;color:var(--mut);font:inherit;font-weight:600;padding:9px 6px;border-radius:10px;cursor:pointer}
+nav button{flex:1;white-space:nowrap;font-size:13px;border:0;background:transparent;color:var(--mut);font:inherit;font-weight:600;padding:9px 6px;border-radius:10px;cursor:pointer}
 nav button.on{background:var(--grad);color:#fff;box-shadow:0 4px 16px rgba(217,70,239,.35)}
 .card{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px}
 .card h2{margin:0 0 4px;font-size:16px}
@@ -75,6 +75,20 @@ td .u.n{color:#f0abfc}
 .upd span{flex:1;font-size:13px}
 .hide{display:none!important}
 footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
+
+.guide details{border-bottom:1px solid var(--line);padding:4px 0}
+.guide summary{cursor:pointer;font-weight:700;font-size:15px;padding:12px 4px;list-style:none;display:flex;align-items:center;gap:8px}
+.guide summary::-webkit-details-marker{display:none}
+.guide summary::before{content:"▸";color:var(--pink);transition:transform .15s}
+.guide details[open] summary::before{transform:rotate(90deg)}
+.guide details>*:not(summary){margin-left:6px;margin-right:6px}
+.guide p,.guide li{color:#e4d6fb;font-size:14px;line-height:1.65}
+.guide ol,.guide ul{padding-left:22px;margin-top:6px}
+.guide .note{background:rgba(251,191,36,.08);border-left:3px solid var(--warn);padding:8px 12px;border-radius:8px;color:#fde68a}
+.guide table.gt{margin:10px 6px;width:calc(100% - 12px)}
+.guide table.gt th,.guide table.gt td{border:1px solid var(--line);padding:8px 10px;vertical-align:top}
+.guide table.gt td{font-size:13.5px}
+.guide code{word-break:break-all}
 </style>
 </head>
 <body>
@@ -92,6 +106,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
     <button data-tab="work" class="on">⚡ Tạo link</button>
     <button data-tab="hist">🕘 Lịch sử</button>
     <button data-tab="set">⚙️ Cài đặt</button>
+    <button data-tab="help">📖 Hướng dẫn</button>
   </nav>
 
   <!-- LÀM VIỆC -->
@@ -139,8 +154,8 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
       <p class="d">Lưu ngay trên máy của bạn, không gửi đi đâu.</p>
       <div class="row3">
         <div><label>Shopee — Affiliate ID</label><input id="id_shopee" placeholder="vd: 17xxxxxxxxx"></div>
-        <div><label>Lazada — Tracking ID</label><input id="id_lazada" placeholder="vd: ID Accesstrade/Lazada"></div>
-        <div><label>TikTok Shop — Affiliate ID</label><input id="id_tiktok" placeholder="vd: ID Accesstrade/TikTok"></div>
+        <div><label>Lazada — Tracking ID</label><input id="id_lazada" placeholder="vd: 123456.../789012... (xem Hướng dẫn)"></div>
+        <div><label>TikTok Shop — Affiliate ID</label><input id="id_tiktok" placeholder="vd: 123456.../789012... (xem Hướng dẫn)"></div>
       </div>
     </div>
 
@@ -173,13 +188,157 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 24px}
     </div>
   </section>
 
+  <!-- HƯỚNG DẪN -->
+  <section id="tab-help" class="hide guide">
+    <div class="card">
+      <h2>📖 Hướng dẫn sử dụng SA-TRACKING LINK</h2>
+      <p class="d">Đọc theo thứ tự từ mục 1. Mỗi mục bấm vào để mở ra / thu lại. Làm xong mục 2, 3, 4 một lần là các lần sau chỉ cần dán link và bấm tạo.</p>
+      <div class="bar"><button class="btn sm ghost" id="gOpen">Mở tất cả</button><button class="btn sm ghost" id="gClose">Thu gọn tất cả</button><button class="btn sm" id="gStart">Bắt đầu cài đặt ngay →</button></div>
+    </div>
+
+    <div class="card">
+      <details open><summary>1. Tool này làm gì?</summary>
+        <p>Khi làm affiliate (tiếp thị liên kết), thầy phải gắn <b>mã của mình</b> vào link sản phẩm thì sàn mới biết đơn hàng đó là do thầy giới thiệu và trả hoa hồng. Làm tay từng link rất mất thời gian và dễ sai.</p>
+        <p>SA-TRACKING LINK làm thay thầy 4 việc trong vài giây, cho 1 hoặc hàng chục link cùng lúc:</p>
+        <ol>
+          <li><b>Nhận ra sàn</b> của link: Shopee, Lazada hay TikTok Shop.</li>
+          <li><b>Làm sạch link:</b> bỏ các đuôi rác (<code>?sp_atk=…</code>, <code>utm_…</code>, mã giới thiệu cũ của người khác).</li>
+          <li><b>Gắn mã affiliate</b> của thầy theo đúng cấu trúc link của từng sàn.</li>
+          <li><b>Gắn nhãn kênh</b> (SubID + UTM) để sau này biết đơn đến từ Facebook, TikTok hay Telegram.</li>
+        </ol>
+        <p class="note">Tool chỉ ghép link. Tool <b>không</b> đăng ký tài khoản affiliate hộ thầy và không gọi vào hệ thống của sàn. Thầy phải có tài khoản affiliate trước (xem mục 2).</p>
+      </details>
+
+      <details><summary>2. Chuẩn bị: lấy mã định danh ở đâu?</summary>
+        <p>Mã định danh là chuỗi số/chữ sàn hoặc mạng affiliate cấp riêng cho thầy. Thầy lấy một lần rồi lưu vào tool.</p>
+        <p><b>Shopee</b> — đăng ký chương trình Shopee Affiliate, vào trang tài khoản/cài đặt tìm <b>Affiliate ID</b> (dãy số). Mẫu mặc định của tool dùng dạng link <code>s.shopee.vn/an_redir</code> của chính Shopee.</p>
+        <p><b>Lazada và TikTok Shop</b> — mẫu mặc định đi qua mạng <b>Accesstrade</b> (link bắt đầu bằng <code>go.isclix.com/deep_link/</code>). Cách lấy mã chính xác nhất:</p>
+        <ol>
+          <li>Trong Accesstrade, vào chiến dịch Lazada (hoặc TikTok Shop) đã được duyệt, dùng công cụ tạo link/deeplink để tạo thử <b>1 link</b>.</li>
+          <li>Link ra sẽ có dạng <code>https://go.isclix.com/deep_link/<b>AAAAAA/BBBBBB</b>?…</code></li>
+          <li>Copy đúng phần <code>AAAAAA/BBBBBB</code> (giữa <code>deep_link/</code> và dấu <code>?</code>), dán vào ô mã của sàn đó. Giữ nguyên dấu gạch chéo.</li>
+        </ol>
+        <p class="note">Mỗi sàn trong Accesstrade có mã chiến dịch riêng nên mã Lazada khác mã TikTok. Nếu thầy dùng mạng affiliate khác (không phải Accesstrade), đọc mục 4 để sửa mẫu link.</p>
+      </details>
+
+      <details><summary>3. Cài đặt lần đầu (làm 1 lần)</summary>
+        <ol>
+          <li>Bấm tab <b>⚙️ Cài đặt</b>.</li>
+          <li>Ở khung <b>Mã định danh</b>: dán mã Shopee, Lazada, TikTok. Sàn nào thầy không làm thì để trống.</li>
+          <li>Cuộn xuống <b>Kênh phân phối & UTM</b> để xem hoặc sửa các kênh (mục 5).</li>
+          <li>Không cần bấm “Lưu”. Mọi thứ tự lưu ngay khi thầy gõ, và nằm trên máy của thầy.</li>
+        </ol>
+        <p class="note">Mã được lưu trong trình duyệt/ứng dụng trên máy thầy, không gửi lên máy chủ nào. Đổi sang máy khác thì dùng mục 9 để chuyển cài đặt sang.</p>
+      </details>
+
+      <details><summary>4. Mẫu link affiliate — hiểu và chỉnh</summary>
+        <p>Mỗi sàn có một <b>mẫu</b>: một dòng chữ có các chỗ trống trong ngoặc nhọn. Khi tạo link, tool điền các chỗ trống đó. Mẫu mặc định:</p>
+        <p><b>Shopee:</b> <code>https://s.shopee.vn/an_redir?origin_link={url}&amp;affiliate_id={id}&amp;sub_id={sub}</code></p>
+        <p><b>Lazada / TikTok:</b> <code>https://go.isclix.com/deep_link/{id}?url={url}&amp;sub1={sub}</code></p>
+        <table class="gt">
+          <tr><th>Chỗ trống</th><th>Được thay bằng</th></tr>
+          <tr><td><code>{url}</code></td><td>Link sản phẩm gốc đã làm sạch, đã mã hoá để nhét được vào link khác</td></tr>
+          <tr><td><code>{rawurl}</code></td><td>Như trên nhưng không mã hoá</td></tr>
+          <tr><td><code>{id}</code></td><td>Mã định danh của sàn (mục 2)</td></tr>
+          <tr><td><code>{sub}</code></td><td>SubID của kênh đang chọn (mục 5)</td></tr>
+          <tr><td><code>{source}</code> <code>{medium}</code></td><td>utm_source và utm_medium của kênh</td></tr>
+          <tr><td><code>{campaign}</code></td><td>Tên chiến dịch ở ô “Chiến dịch”</td></tr>
+        </table>
+        <p><b>Khi nào cần sửa mẫu?</b> Khi thầy dùng mạng affiliate khác, hoặc Shopee/Accesstrade đổi cấu trúc link. Cách làm: tạo thử 1 link trong trang của mạng đó, thay các phần của thầy bằng <code>{url}</code>, <code>{id}</code>, <code>{sub}</code>… rồi dán vào ô mẫu.</p>
+        <p><b>Công tắc “Gắn thêm UTM vào cuối link”:</b> bật thì tool nối thêm <code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code> vào cuối link (chỉ khi mẫu chưa có sẵn). Sàn thường bỏ qua các tham số này, nên tắt đi cũng không ảnh hưởng hoa hồng. Nút <b>Khôi phục mẫu mặc định</b> đưa các mẫu về ban đầu nếu lỡ sửa hỏng.</p>
+      </details>
+
+      <details><summary>5. Kênh phân phối & UTM — để làm gì?</summary>
+        <p><b>Mục đích:</b> thầy đăng cùng một sản phẩm ở nhiều nơi. Nếu link giống hệt nhau thì khi có đơn thầy không biết nơi nào ra đơn. Mỗi kênh có “dấu riêng” gắn vào link để phân biệt.</p>
+        <table class="gt">
+          <tr><th>Ô</th><th>Ý nghĩa</th><th>Ví dụ</th></tr>
+          <tr><td><b>Tên kênh</b></td><td>Tên hiện trong danh sách chọn, đặt tuỳ ý</td><td>Facebook Group</td></tr>
+          <tr><td><b>SubID</b></td><td>Nhãn gửi cho sàn/mạng affiliate. Báo cáo hoa hồng sẽ hiện nhãn này. <b>Đây là phần quan trọng nhất.</b></td><td>fbgroup</td></tr>
+          <tr><td><b>utm_source</b></td><td>Nguồn: nền tảng nào</td><td>facebook</td></tr>
+          <tr><td><b>utm_medium</b></td><td>Dạng: kiểu kênh trên nền tảng đó</td><td>group</td></tr>
+        </table>
+        <p><b>Quy tắc đặt tên:</b> viết liền, không dấu, không khoảng trắng, ngắn gọn (<code>tiktokbio</code>, <code>zalo</code>). Mỗi kênh một SubID khác nhau.</p>
+        <p><b>Thêm kênh:</b> bấm <b>+ Thêm kênh</b>, điền 4 ô. <b>Xoá kênh:</b> bấm Xoá (phải giữ lại ít nhất 1 kênh). Kênh mới hiện ngay ở danh sách chọn bên tab “Tạo link”.</p>
+        <p><b>Ví dụ:</b> thầy đăng ở nhóm Facebook, link ra có đuôi <code>sub_id=fbgroup&amp;utm_source=facebook&amp;utm_medium=group</code>. Cuối tuần xem báo cáo ở Shopee Affiliate hoặc Accesstrade, lọc theo SubID: <code>fbgroup</code> ra 20 đơn, <code>telegram</code> ra 2 đơn. Thầy biết nên dồn sức vào kênh nào.</p>
+        <p class="note">Với link đi thẳng sang Shopee/Lazada, <b>SubID</b> là thứ có tác dụng thật trong báo cáo. Các tham số <code>utm_*</code> chủ yếu dùng khi link đi qua trang web của thầy có Google Analytics.</p>
+      </details>
+
+      <details><summary>6. Tạo link — từng bước</summary>
+        <ol>
+          <li>Vào tab <b>⚡ Tạo link</b>.</li>
+          <li>Dán link sản phẩm gốc vào ô lớn. Dán nhiều link được: mỗi link một dòng, hoặc dán cả đoạn tin nhắn có chữ lẫn link, tool tự tìm link trong đó. Link trùng nhau chỉ tính một lần.</li>
+          <li>Chọn <b>Kênh phân phối</b> thầy sắp đăng link lên.</li>
+          <li>(Tuỳ chọn) gõ tên <b>Chiến dịch</b>, ví dụ <code>sale-10-10</code>. Để trống thì tool tự lấy theo SubID của kênh.</li>
+          <li>Bấm <b>✨ Tạo Tracking Link</b>.</li>
+        </ol>
+        <p><b>Loại link tool hiểu:</b> link sản phẩm Shopee (kể cả <code>shope.ee</code>, <code>s.shopee.vn</code>), Lazada (<code>lazada.vn</code>, <code>lzd.co</code>), TikTok (<code>tiktok.com</code>, <code>vt.tiktok.com</code>…). Link của sàn khác sẽ báo “Chưa hỗ trợ”.</p>
+        <p><b>Tool làm sạch link thế nào?</b> Link Shopee dạng <code>ten-san-pham-i.123.456?sp_atk=…</code> được đưa về dạng gọn <code>shopee.vn/product/123/456</code>. Link Lazada và TikTok được bỏ phần đuôi sau dấu <code>?</code>. Link rút gọn thì giữ nguyên phần đường dẫn.</p>
+      </details>
+
+      <details><summary>7. Đọc và dùng kết quả</summary>
+        <p>Bảng kết quả có 4 cột: <b>Sàn</b> · <b>Link gốc</b> · <b>Link Affiliate</b> (link thầy đem đi đăng) · nút <b>Copy</b>.</p>
+        <ul>
+          <li><b>Copy</b> (từng dòng): copy 1 link affiliate vào bộ nhớ tạm, dán đi đâu cũng được.</li>
+          <li><b>Copy tất cả:</b> mỗi link một dòng, tiện dán vào bài đăng nhiều sản phẩm.</li>
+          <li><b>Tải CSV:</b> xuất file bảng tính (mở bằng Excel) gồm sàn, kênh, link gốc, link affiliate.</li>
+          <li><b>Xoá:</b> dọn bảng kết quả (lịch sử vẫn còn).</li>
+        </ul>
+        <p><b>Dấu ⚠ vàng</b> dưới một link nghĩa là thầy chưa nhập mã của sàn đó trong Cài đặt. Link vẫn được tạo nhưng chưa có mã, <b>đừng đăng</b> cho tới khi nhập mã và tạo lại.</p>
+        <p><b>Dòng báo đỏ</b> nghĩa là link đó không hợp lệ hoặc sàn chưa được hỗ trợ.</p>
+      </details>
+
+      <details><summary>8. Kiểm tra link đã đúng chưa (nên làm lần đầu)</summary>
+        <p>Vì mỗi mạng affiliate có thể đổi cấu trúc link, thầy nên thử <b>1 link</b> trước khi đăng hàng loạt:</p>
+        <ol>
+          <li>Tạo 1 link, bấm Copy, dán vào trình duyệt (tốt nhất là cửa sổ ẩn danh).</li>
+          <li>Link phải mở ra đúng trang sản phẩm. Nếu báo lỗi hoặc ra trang chủ, mẫu link ở mục 4 chưa khớp với mạng của thầy: so sánh với link do chính Shopee/Accesstrade tạo và sửa mẫu.</li>
+          <li>Đợi một thời gian (thường vài giờ tới một ngày) rồi xem trong báo cáo của Shopee/Accesstrade có ghi nhận lượt bấm kèm đúng SubID không.</li>
+        </ol>
+        <p class="note">Mỗi sàn/mạng có luật riêng về việc đăng link affiliate ở đâu và cách đăng. Thầy tự kiểm tra điều khoản của chương trình mình tham gia.</p>
+      </details>
+
+      <details><summary>9. Lịch sử, sao lưu và đổi máy</summary>
+        <p><b>Tab 🕘 Lịch sử:</b> lưu 200 link gần nhất kèm sàn, kênh, giờ tạo. Bấm Copy để lấy lại link cũ. Nút <b>Xoá lịch sử</b> dọn sạch.</p>
+        <p><b>Sao lưu cài đặt</b> (tab Cài đặt): <b>Xuất file</b> tạo file <code>sa-tracking-link-settings.json</code> chứa mã, mẫu link và các kênh. Sang máy mới, bấm <b>Nhập file</b> chọn file đó là có lại đủ.</p>
+        <p class="note">Xoá dữ liệu trình duyệt hoặc gỡ cài đặt có thể làm mất cài đặt. Nên xuất file sao lưu sau khi cài đặt xong.</p>
+      </details>
+
+      <details><summary>10. Cài như một ứng dụng và tự cập nhật</summary>
+        <p><b>Cài trên điện thoại:</b> mở <code>3dvietpro.com/sa-tracking-link</code>, chọn “Thêm vào màn hình chính” (iPhone: nút Chia sẻ → Thêm vào MH chính).</p>
+        <p><b>Cài trên máy tính:</b> bằng Chrome/Edge bấm biểu tượng cài đặt ở thanh địa chỉ, hoặc dùng file <code>SA-TRACKING-LINK-Setup.exe</code>.</p>
+        <p><b>Tự cập nhật:</b> mỗi khi có mạng (lúc mở tool, khi nối mạng lại, khi quay lại cửa sổ, và cứ 10 phút một lần) tool tự kiểm tra bản mới.</p>
+        <ul>
+          <li>Thầy chưa dán gì: tool tự nạp lại và lên bản mới.</li>
+          <li>Thầy đang làm dở: hiện thanh thông báo, bấm <b>Cập nhật ngay</b> khi tiện.</li>
+          <li>Cài đặt và lịch sử không mất khi cập nhật.</li>
+          <li>Mất mạng: tool vẫn chạy bằng bản đã lưu lần trước.</li>
+        </ul>
+        <p>Muốn kiểm tra thủ công: tab Cài đặt → <b>Kiểm tra bản mới ngay</b>. Số phiên bản hiện ở góc trên bên phải.</p>
+      </details>
+
+      <details><summary>11. Gặp lỗi thì làm gì?</summary>
+        <table class="gt">
+          <tr><th>Hiện tượng</th><th>Cách xử lý</th></tr>
+          <tr><td>Bấm tạo nhưng báo “Hãy dán ít nhất 1 link”</td><td>Link phải bắt đầu bằng <code>https://</code> hoặc <code>http://</code></td></tr>
+          <tr><td>Báo “Chưa hỗ trợ sàn này”</td><td>Link không phải Shopee, Lazada hay TikTok. Kiểm tra lại link</td></tr>
+          <tr><td>Có dấu ⚠ vàng</td><td>Chưa nhập mã sàn đó ở Cài đặt (mục 3)</td></tr>
+          <tr><td>Link mở ra không đúng sản phẩm</td><td>Mẫu link chưa khớp mạng affiliate: làm mục 8</td></tr>
+          <tr><td>Link rút gọn (<code>shope.ee</code>…) cho kết quả lạ</td><td>Thử mở link rút gọn trong trình duyệt, copy link dài hiện ra rồi dán lại vào tool</td></tr>
+          <tr><td>Nút Copy không có phản ứng</td><td>Một số trình duyệt chặn copy: bấm lại, hoặc dùng “Tải CSV”</td></tr>
+          <tr><td>Mất cài đặt</td><td>Nhập lại từ file sao lưu (mục 9)</td></tr>
+          <tr><td>Không lên bản mới</td><td>Kiểm tra mạng, bấm “Kiểm tra bản mới ngay”, đóng mở lại tool</td></tr>
+        </table>
+      </details>
+    </div>
+  </section>
+
   <footer>SA-TRACKING LINK · © 3DVIETPRO</footer>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
 "use strict";
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "1.0.1";
 const KEY = "sa-tracking-link.v1";
 const HKEY = "sa-tracking-link.hist.v1";
 
@@ -276,7 +435,7 @@ function build(raw, ch, campaign) {
   const id = (S.ids[platform] || "").trim();
   const camp = (campaign || "").trim() || ch.sub;
   const vars = {
-    url: encodeURIComponent(cleaned), rawurl: cleaned, id: encodeURIComponent(id),
+    url: encodeURIComponent(cleaned), rawurl: cleaned, id: id.replace(/[\s?#&]/g, ""), // giữ nguyên dấu "/" (mã Accesstrade có dạng ID/ID-chiến-dịch)
     sub: encodeURIComponent(ch.sub), source: encodeURIComponent(ch.source),
     medium: encodeURIComponent(ch.medium), campaign: encodeURIComponent(camp)
   };
@@ -354,7 +513,7 @@ function csvOut() {
 /* ---------- SỰ KIỆN ---------- */
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
   document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
-  for (const t of ["work", "hist", "set"]) $("tab-" + t).classList.toggle("hide", t !== b.dataset.tab);
+  for (const t of ["work", "hist", "set", "help"]) $("tab-" + t).classList.toggle("hide", t !== b.dataset.tab);
   if (b.dataset.tab === "hist") renderHist();
 });
 $("go").onclick = generate;
@@ -394,6 +553,11 @@ $("impF").onchange = e => {
   r.onload = () => { try { const s = JSON.parse(r.result); if (!s.channels || !s.ids) throw 0; S = Object.assign(clone(DEFAULTS), s); save(); renderSettings(); toast("Đã nhập cài đặt ✓"); } catch (x) { toast("File không đúng định dạng"); } };
   r.readAsText(f); e.target.value = "";
 };
+
+
+$("gOpen").onclick = () => document.querySelectorAll(".guide details").forEach(d => d.open = true);
+$("gClose").onclick = () => document.querySelectorAll(".guide details").forEach(d => d.open = false);
+$("gStart").onclick = () => document.querySelector('nav button[data-tab="set"]').click();
 
 /* ---------- TỰ ĐỘNG CẬP NHẬT ---------- */
 // Cơ chế: (1) service worker luôn lấy file mới từ mạng trước, chỉ dùng bản lưu khi mất mạng;
