@@ -123,6 +123,7 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use('/api/auto-post', express.json({ limit: '8mb' }), autopostRoutes);
 app.use('/api/aai-license', express.json(), require('./routes/aaiLicense'));
 app.use('/api/fbai-license', express.json(), require('./routes/fbaiLicense'));
+app.use('/api/safilm-license', express.json(), require('./routes/safilmLicense'));
 app.use('/api/sa-ai-bot/auth', require('./routes/saAiBotAuth'));
 app.use('/api/sa-ai-bot/wallet', require('./routes/saAiBotWallet'));
 app.use('/api/sa-ai-bot/ai', require('./routes/saAiBotAi'));
@@ -234,6 +235,7 @@ app.use('/blog', blogRoutes);
 // the same way it blocks "/webhook*" (see the webhookRoutes mount below).
 app.use('/kho-tai-nguyen', toolRoutes);
 app.use('/admin/gia-key-sa-botai', require('./routes/adminFbaiPricing'));
+app.use('/admin/key-sa-film-ai', require('./routes/adminSafilmKeys'));
 app.use('/admin/hop-dong-sa-botai', require('./routes/adminContracts'));
 app.use('/phap-ly-sa-botai', require('./routes/saAiBotLegal'));
 app.use('/admin', adminRoutes);

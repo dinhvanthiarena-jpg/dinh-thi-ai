@@ -1,0 +1,80 @@
+<div class="space-y-6 max-w-3xl">
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-1">🎬 Key tool SA FILM-AI</h2>
+    <p class="text-sm text-muted mb-4">
+      Key dạng <code class="font-mono">SAFILM-XXXX-XXXX-XXXX</code>. Tool desktop SA FILM-AI <strong>bắt buộc có key</strong>
+      và hỏi lại trang này mỗi lần kích hoạt + mỗi 24h, nên thầy thu hồi / đặt hạn / đổi thiết bị được bất cứ lúc nào.
+      Mỗi key tự khoá vào <strong>1 thiết bị</strong> ngay lần kích hoạt đầu tiên.
+    </p>
+    <div class="flex items-center justify-between gap-3 rounded-lg border border-primary-100 px-4 py-3">
+      <div class="text-sm">
+        <strong>Chế độ miễn phí:</strong>
+        <% if (settings.freeMode) { %>
+          <span class="badge bg-emerald-100 text-emerald-700">ĐANG BẬT</span> — khách bấm "Nhận key miễn phí" trong tool là có key ngay (plan free, không hết hạn).
+        <% } else { %>
+          <span class="badge bg-rose-100 text-rose-700">ĐÃ TẮT</span> — chỉ key thầy cấp ở đây mới kích hoạt được.
+        <% } %>
+      </div>
+      <form action="/admin/key-sa-film-ai/free-mode" method="POST">
+        <input type="hidden" name="on" value="<%= settings.freeMode ? '0' : '1' %>" />
+        <button type="submit" class="btn-outline text-xs"><%= settings.freeMode ? 'Tắt miễn phí' : 'Bật miễn phí' %></button>
+      </form>
+    </div>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-3">Cấp key mới</h2>
+    <form action="/admin/key-sa-film-ai" method="POST" class="flex flex-wrap gap-3 items-center">
+      <input name="note" type="text" class="input flex-1 min-w-[220px]" placeholder="Ghi chú (VD: tên khách, số điện thoại)" />
+      <select name="plan" class="input w-32"><option value="free">Free</option><option value="pro">Pro (trả phí)</option></select>
+      <input name="days" type="number" min="0" class="input w-32" placeholder="Số ngày" title="0 hoặc để trống = không hết hạn" />
+      <button type="submit" class="btn-primary">🔑 Cấp key</button>
+    </form>
+    <p class="text-xs text-muted mt-2">Số ngày để trống hoặc 0 = không hết hạn.</p>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-4">Danh sách key (<%= keys.length %>)</h2>
+    <% if (!keys.length) { %>
+      <p class="text-sm text-muted">Chưa có key nào.</p>
+    <% } else { %>
+      <div class="space-y-2">
+        <% keys.forEach(k => { %>
+          <% const expired = k.expiresAt && Date.now() > k.expiresAt; %>
+          <div class="flex items-center justify-between gap-3 rounded-lg border border-primary-100 px-4 py-3 <%= (k.active === false || expired) ? 'opacity-50' : '' %>">
+            <div class="min-w-0">
+              <div class="font-mono font-semibold text-ink break-all"><%= k.key %> <span class="badge <%= k.plan === 'pro' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600' %>"><%= k.plan || 'free' %></span></div>
+              <div class="text-xs text-muted mt-0.5">
+                <%= k.note || '(không có ghi chú)' %><% if (k.email) { %> · <%= k.email %><% } %>
+                · Cấp <%= new Date(k.issuedAt).toLocaleString('vi-VN') %>
+                · <%= k.expiresAt ? ((expired ? 'Hết hạn ' : 'Hạn ') + new Date(k.expiresAt).toLocaleString('vi-VN')) : 'Không hết hạn' %>
+                <% if (k.boundMachine) { %> · Máy: <strong><%= k.boundMachine %></strong><% } %>
+                <% if (k.lastSeenAt) { %> · Thấy lần cuối <%= new Date(k.lastSeenAt).toLocaleString('vi-VN') %><% } %>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+              <span class="badge <%= (k.active === false || expired) ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' %>">
+                <%= k.active === false ? 'Đã thu hồi' : (expired ? 'Hết hạn' : 'Đang hoạt động') %>
+              </span>
+              <form action="/admin/key-sa-film-ai/<%= encodeURIComponent(k.key) %>/extend" method="POST"><button type="submit" class="btn-outline text-xs">+30 ngày</button></form>
+              <form action="/admin/key-sa-film-ai/<%= encodeURIComponent(k.key) %>/plan" method="POST">
+                <input type="hidden" name="plan" value="<%= k.plan === 'pro' ? 'free' : 'pro' %>" />
+                <button type="submit" class="btn-outline text-xs">→ <%= k.plan === 'pro' ? 'Free' : 'Pro' %></button>
+              </form>
+              <% if (k.boundDeviceId) { %>
+                <form action="/admin/key-sa-film-ai/<%= encodeURIComponent(k.key) %>/reset-device" method="POST" onsubmit="return confirm('Gỡ khoá thiết bị của key này? Lần kích hoạt kế tiếp sẽ gắn vào máy mới.');">
+                  <button type="submit" class="btn-outline text-xs">Đổi thiết bị</button>
+                </form>
+              <% } %>
+              <% if (k.active === false) { %>
+                <form action="/admin/key-sa-film-ai/<%= encodeURIComponent(k.key) %>/reactivate" method="POST"><button type="submit" class="btn-outline text-xs">Kích hoạt lại</button></form>
+              <% } else { %>
+                <form action="/admin/key-sa-film-ai/<%= encodeURIComponent(k.key) %>/revoke" method="POST"><button type="submit" class="text-rose-600 text-xs font-medium">Thu hồi</button></form>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>
