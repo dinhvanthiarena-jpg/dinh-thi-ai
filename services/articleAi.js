@@ -109,7 +109,9 @@ async function completeWithClaude({ system, user, imageBase64, mimeType, maxToke
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
     body: JSON.stringify({
-      model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',
+      // Haiku 5.5 (rẻ nhất), tắt suy nghĩ sâu — bài viết không cần. Đặt ARTICLE_CLAUDE_MODEL để đổi.
+      model: process.env.ARTICLE_CLAUDE_MODEL || 'claude-haiku-5-5',
+      thinking: { type: 'disabled' },
       max_tokens: maxTokens || 1024,
       ...(system ? { system } : {}),
       messages: [{ role: 'user', content }],
