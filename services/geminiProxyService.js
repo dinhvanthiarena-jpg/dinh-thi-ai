@@ -9,6 +9,9 @@ const FILE = path.join(__dirname, '..', 'data', 'ai-usage.json');
 const MODELS = (process.env.GEMINI_MODELS || 'gemini-flash-latest,gemini-3.1-flash-lite,gemini-flash-lite-latest').split(',').map((s) => s.trim()).filter(Boolean);
 const PER_USER = () => Number(process.env.GEMINI_DAILY_PER_USER) || 40;
 const GLOBAL = () => Number(process.env.GEMINI_DAILY_GLOBAL) || 800;
+// Trả lời tin nhắn tự động (Zalo/Telegram) tính RIÊNG để không làm cạn lượt viết bài và ngược lại.
+const CHAT_PER_USER = () => Number(process.env.GEMINI_CHAT_DAILY_PER_USER) || 200;
+const CHAT_GLOBAL = () => Number(process.env.GEMINI_CHAT_DAILY_GLOBAL) || 1200;
 
 const today = () => new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10); // ngày theo giờ Việt Nam
 function load() {
@@ -16,20 +19,36 @@ function load() {
     const j = JSON.parse(fs.readFileSync(FILE, 'utf8'));
     if (j.date === today()) return j;
   } catch (e) { /* chưa có */ }
-  return { date: today(), global: 0, users: {} };
+  return { date: today(), global: 0, users: {}, chatGlobal: 0, chatUsers: {} };
 }
 function save(u) {
   try { fs.mkdirSync(path.dirname(FILE), { recursive: true }); fs.writeFileSync(FILE, JSON.stringify(u)); } catch (e) { /* bỏ qua */ }
 }
-function quota(userId) {
+function quota(userId, kind) {
   const u = load();
+  if (kind === 'chat') return { used: (u.chatUsers || {})[userId] || 0, limit: CHAT_PER_USER(), globalUsed: u.chatGlobal || 0, globalLimit: CHAT_GLOBAL() };
   return { used: u.users[userId] || 0, limit: PER_USER(), globalUsed: u.global, globalLimit: GLOBAL() };
 }
-function count(userId) {
+function count(userId, kind) {
   const u = load();
-  u.global += 1;
-  u.users[userId] = (u.users[userId] || 0) + 1;
+  if (kind === 'chat') {
+    u.chatGlobal = (u.chatGlobal || 0) + 1;
+    u.chatUsers = u.chatUsers || {};
+    u.chatUsers[userId] = (u.chatUsers[userId] || 0) + 1;
+  } else {
+    u.global += 1;
+    u.users[userId] = (u.users[userId] || 0) + 1;
+  }
   save(u);
+}
+// Lịch sử hội thoại: chỉ nhận {role:user|assistant, content:chuỗi}, tối đa 12 lượt, bắt đầu bằng lượt của khách.
+function cleanHistory(history) {
+  const out = (Array.isArray(history) ? history : [])
+    .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim())
+    .slice(-12)
+    .map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content.slice(0, 4000) }] }));
+  while (out.length && out[0].role !== 'user') out.shift();
+  return out;
 }
 
 function post(model, key, body) {
@@ -59,12 +78,12 @@ function post(model, key, body) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** Viết bài: thử lần lượt các model, quá tải (503/500) thì thử lại 1 lần rồi sang model kế. Trả {ok,text,model} hoặc {ok:false,error}. */
-async function write({ system, user, maxTokens }) {
+async function write({ system, user, maxTokens, history }) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) return { ok: false, error: 'Máy chủ chưa cấu hình AI dùng chung.' };
   const body = {
     systemInstruction: { parts: [{ text: String(system || '').slice(0, 12000) }] },
-    contents: [{ role: 'user', parts: [{ text: String(user || '').slice(0, 12000) }] }],
+    contents: [...cleanHistory(history), { role: 'user', parts: [{ text: String(user || '').slice(0, 12000) }] }],
     generationConfig: { maxOutputTokens: Math.min(8192, Math.max(512, Number(maxTokens) || 2000)), temperature: 0.8 },
   };
   let last = '';

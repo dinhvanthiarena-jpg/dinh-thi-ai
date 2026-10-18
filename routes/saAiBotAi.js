@@ -17,12 +17,13 @@ router.post('/write', express.json({ limit: '200kb' }), async (req, res) => {
     if (!hopLe) return res.status(402).json({ error: 'Cần mã kích hoạt SA-BOTAI còn hạn để dùng AI viết bài dùng chung.' });
     const b = req.body || {};
     if (!b.user || typeof b.user !== 'string') return res.status(400).json({ error: 'Thiếu nội dung yêu cầu.' });
-    const q = gemini.quota(user.id);
-    if (q.used >= q.limit) return res.status(429).json({ error: 'Hôm nay đã dùng hết ' + q.limit + ' lượt AI viết bài dùng chung — ngày mai tự có lại (hoặc nhập khoá AI riêng trong Cài đặt).' });
+    const kind = b.kind === 'chat' ? 'chat' : 'write';
+    const q = gemini.quota(user.id, kind);
+    if (q.used >= q.limit) return res.status(429).json({ error: 'Hôm nay đã dùng hết ' + q.limit + ' lượt AI ' + (kind === 'chat' ? 'trả lời tin nhắn' : 'viết bài') + ' dùng chung — ngày mai tự có lại (hoặc nhập khoá AI riêng trong Cài đặt).' });
     if (q.globalUsed >= q.globalLimit) return res.status(429).json({ error: 'AI dùng chung đã hết hạn mức hôm nay, thử lại ngày mai.' });
-    const r = await gemini.write({ system: b.system, user: b.user, maxTokens: b.maxTokens });
+    const r = await gemini.write({ system: b.system, user: b.user, maxTokens: b.maxTokens, history: b.history });
     if (!r.ok) return res.status(503).json({ error: r.error });
-    gemini.count(user.id);
+    gemini.count(user.id, kind);
     res.json({ ok: true, text: r.text, model: r.model, conLai: Math.max(0, q.limit - q.used - 1) });
   } catch (e) {
     console.error('[sa-ai-bot-ai]', e);
