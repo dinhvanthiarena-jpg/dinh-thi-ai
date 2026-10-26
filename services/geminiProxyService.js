@@ -12,6 +12,11 @@ const GLOBAL = () => Number(process.env.GEMINI_DAILY_GLOBAL) || 800;
 // Trả lời tin nhắn tự động (Zalo/Telegram) tính RIÊNG để không làm cạn lượt viết bài và ngược lại.
 const CHAT_PER_USER = () => Number(process.env.GEMINI_CHAT_DAILY_PER_USER) || 200;
 const CHAT_GLOBAL = () => Number(process.env.GEMINI_CHAT_DAILY_GLOBAL) || 1200;
+// Bản ĐỐI TÁC (tặng, không cần mã kích hoạt): hạn mức RIÊNG, thấp hơn, để không làm cạn lượt của khách trả phí.
+const PARTNER_PER_USER = () => Number(process.env.GEMINI_PARTNER_DAILY_PER_USER) || 20;
+const PARTNER_GLOBAL = () => Number(process.env.GEMINI_PARTNER_DAILY_GLOBAL) || 300;
+const PARTNER_CHAT_PER_USER = () => Number(process.env.GEMINI_PARTNER_CHAT_DAILY_PER_USER) || 80;
+const PARTNER_CHAT_GLOBAL = () => Number(process.env.GEMINI_PARTNER_CHAT_DAILY_GLOBAL) || 600;
 
 const today = () => new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10); // ngày theo giờ Việt Nam
 function load() {
@@ -24,13 +29,25 @@ function load() {
 function save(u) {
   try { fs.mkdirSync(path.dirname(FILE), { recursive: true }); fs.writeFileSync(FILE, JSON.stringify(u)); } catch (e) { /* bỏ qua */ }
 }
-function quota(userId, kind) {
+function quota(userId, kind, pool) {
   const u = load();
+  if (pool === 'partner') {
+    const p = u.partner || {};
+    if (kind === 'chat') return { used: (p.chatUsers || {})[userId] || 0, limit: PARTNER_CHAT_PER_USER(), globalUsed: p.chatGlobal || 0, globalLimit: PARTNER_CHAT_GLOBAL() };
+    return { used: (p.users || {})[userId] || 0, limit: PARTNER_PER_USER(), globalUsed: p.global || 0, globalLimit: PARTNER_GLOBAL() };
+  }
   if (kind === 'chat') return { used: (u.chatUsers || {})[userId] || 0, limit: CHAT_PER_USER(), globalUsed: u.chatGlobal || 0, globalLimit: CHAT_GLOBAL() };
   return { used: u.users[userId] || 0, limit: PER_USER(), globalUsed: u.global, globalLimit: GLOBAL() };
 }
-function count(userId, kind) {
+function count(userId, kind, pool) {
   const u = load();
+  if (pool === 'partner') {
+    const p = (u.partner = u.partner || { global: 0, users: {}, chatGlobal: 0, chatUsers: {} });
+    if (kind === 'chat') { p.chatGlobal = (p.chatGlobal || 0) + 1; p.chatUsers = p.chatUsers || {}; p.chatUsers[userId] = (p.chatUsers[userId] || 0) + 1; }
+    else { p.global = (p.global || 0) + 1; p.users = p.users || {}; p.users[userId] = (p.users[userId] || 0) + 1; }
+    save(u);
+    return;
+  }
   if (kind === 'chat') {
     u.chatGlobal = (u.chatGlobal || 0) + 1;
     u.chatUsers = u.chatUsers || {};
