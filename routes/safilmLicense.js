@@ -13,6 +13,16 @@ const claimLimiter = rateLimit({
   message: { ok: false, error: 'too_many_requests' },
 });
 
+// Cho phép Flow Tool (chạy trong iframe của Google, origin lạ/null) gọi xác thực key từ trình duyệt.
+// Chỉ các endpoint công khai này, không kèm cookie nên mở '*' là an toàn.
+router.use((req, res, next) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 router.get('/verify', (req, res) => {
   const key = String(req.query.key || '').slice(0, 64);
   const deviceId = String(req.query.deviceId || '').slice(0, 80);
