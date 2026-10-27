@@ -129,6 +129,8 @@ nav button{flex:1 0 auto;padding-left:12px;padding-right:12px}
 .dlc ol{padding-left:20px;margin:4px 0}
 .dlc .btn{text-align:center;text-decoration:none;display:block;margin-top:auto}
 .dlbtn{white-space:nowrap}
+.guidelink{text-decoration:none;color:#fff;background:var(--grad);border:0;font-weight:700;font-size:12px;padding:5px 12px;box-shadow:0 4px 14px rgba(217,70,239,.35)}
+@media(max-width:520px){header{flex-wrap:wrap}.guidelink{order:5}}
 </style>
 </head>
 <body>
@@ -139,6 +141,7 @@ nav button{flex:1 0 auto;padding-left:12px;padding-right:12px}
     <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5"/></svg></div>
     <div><h1>SA-TRACKING LINK</h1><div class="sub">Tạo link affiliate + UTM/SubID theo kênh, 1 chạm</div></div>
     <div class="sp"></div>
+    <a class="ver guidelink" href="huong-dan.html" target="_blank" rel="noopener">📘 Hướng dẫn nhanh</a>
     <div class="ver" id="ver">v…</div>
   </header>
 
@@ -470,7 +473,7 @@ nav button{flex:1 0 auto;padding-left:12px;padding-right:12px}
 
 <script>
 "use strict";
-const APP_VERSION = "1.0.8";
+const APP_VERSION = "1.0.9";
 const KEY = "sa-tracking-link.v1";
 const HKEY = "sa-tracking-link.hist.v1";
 

@@ -14,6 +14,7 @@ const tool = {
   description:
     '<div style="margin:0 0 24px"><p style="font-weight:700;margin:0 0 10px">▶ Video: cài SA-TRACKING LINK lên iPhone chỉ trong 30 giây</p>' +
     '<video controls playsinline preload="none" poster="/sa-tracking-link/huong-dan-iphone.jpg" style="width:100%;max-width:300px;border-radius:18px;border:1px solid #e5e7eb;background:#000"><source src="/sa-tracking-link/huong-dan-iphone.mp4" type="video/mp4"></video></div>' +
+    '<p style="margin:0 0 20px"><a href="/sa-tracking-link/huong-dan.html" target="_blank" rel="noopener" style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;font-weight:700;padding:10px 18px;border-radius:12px;text-decoration:none">📘 Xem hướng dẫn nhanh (1 phút)</a></p>' +
     'SA-TRACKING LINK giúp người làm affiliate tạo link theo dõi hàng loạt chỉ trong vài giây.\n\n' +
     'Dán một hoặc nhiều link sản phẩm gốc, chọn kênh phân phối (Facebook Group, Fanpage, TikTok Bio, Telegram, Zalo…), bấm tạo: tool tự nhận sàn, loại bỏ tham số rác, ghép mã affiliate đã lưu và gắn UTM/SubID riêng của kênh. Kết quả hiện thành bảng, copy từng link hoặc tất cả, tải CSV.\n\n' +
     'Mã định danh, mẫu link và danh sách kênh lưu ngay trên máy bạn, có thể xuất/nhập để sao lưu. Tải về dùng được trên cả máy tính (file cài Windows) lẫn điện thoại (Android, iPhone). Ứng dụng tự kiểm tra và cập nhật bản mới mỗi khi có mạng, vẫn dùng được khi offline.',
