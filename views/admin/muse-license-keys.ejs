@@ -1,0 +1,100 @@
+<% const planLabel = (p) => p === 'active' ? 'Không giới hạn TK' : (p === 'free' ? '3 TK' : p + ' TK'); %>
+<div class="space-y-6 max-w-4xl">
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-1">🎞️ Key tool SA MUSE-AI</h2>
+    <p class="text-sm text-muted">
+      Key dạng <code class="font-mono">SAMUSE-XXXX-XXXX-XXXX</code>. Tool SA MUSE-AI <strong>không có key hợp lệ thì không chạy</strong>;
+      tool hỏi lại trang này khi kích hoạt và mỗi 6 giờ, mất mạng vẫn chạy tiếp tối đa 3 ngày kể từ lần kiểm tra được gần nhất.
+      Mỗi key gắn <strong>1 máy</strong> theo mã máy <code class="font-mono">MUSE-XXXX-XXXX-XXXX-XXXX</code> (khách copy trong tool).
+      Hạn mức là số tài khoản Muse được lưu trong tool.
+    </p>
+    <% if (msg) { %>
+      <div class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800 font-mono break-all"><%= msg %></div>
+    <% } %>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-3">Cấp key mới</h2>
+    <form action="/admin/key-muse" method="POST" class="grid gap-3 md:grid-cols-2">
+      <input name="note" type="text" class="input" placeholder="Ghi chú (VD: tên khách, số điện thoại)" />
+      <input name="machineId" type="text" class="input font-mono" placeholder="Mã máy MUSE-… (để trống = gắn máy kích hoạt đầu tiên)" />
+      <select name="plan" class="input">
+        <option value="active">Không giới hạn tài khoản</option>
+        <option value="50">50 tài khoản</option>
+        <option value="10">10 tài khoản</option>
+        <option value="free">3 tài khoản</option>
+      </select>
+      <div class="flex gap-3">
+        <input name="days" type="number" min="0" class="input flex-1" placeholder="Số ngày (trống = không hết hạn)" />
+        <button type="submit" class="btn-primary">🔑 Cấp key</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-4">Danh sách key (<%= keys.length %>)</h2>
+    <% if (!keys.length) { %>
+      <p class="text-sm text-muted">Chưa có key nào.</p>
+    <% } else { %>
+      <div class="space-y-3">
+        <% keys.forEach(k => { %>
+          <% const expired = k.expiresAt && Date.now() > k.expiresAt; const enc = encodeURIComponent(k.key); %>
+          <div class="rounded-lg border border-primary-100 px-4 py-3 <%= (k.active === false || expired) ? 'opacity-60' : '' %>">
+            <div class="flex items-start justify-between gap-3 flex-wrap">
+              <div class="min-w-0">
+                <div class="font-mono font-semibold text-ink break-all">
+                  <%= k.key %>
+                  <span class="badge bg-indigo-100 text-indigo-700"><%= planLabel(k.plan) %></span>
+                  <span class="badge <%= (k.active === false || expired) ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' %>">
+                    <%= k.active === false ? 'Đã thu hồi' : (expired ? 'Hết hạn' : 'Đang hoạt động') %>
+                  </span>
+                </div>
+                <div class="text-xs text-muted mt-1">
+                  <%= k.note || '(không có ghi chú)' %>
+                  · Cấp <%= new Date(k.issuedAt).toLocaleString('vi-VN') %>
+                  · <%= k.expiresAt ? ((expired ? 'Hết hạn ' : 'Hạn ') + new Date(k.expiresAt).toLocaleString('vi-VN')) : 'Không hết hạn' %>
+                </div>
+                <div class="text-xs text-muted mt-0.5">
+                  Máy: <strong class="font-mono"><%= k.machineId || 'chưa gắn (máy kích hoạt đầu tiên)' %></strong>
+                  <% if (k.machineLabel) { %> (<%= k.machineLabel %>)<% } %>
+                  <% if (k.lastSeenAt) { %> · Kiểm tra lần cuối <%= new Date(k.lastSeenAt).toLocaleString('vi-VN') %><% } %>
+                  <% if (k.lastVersion) { %> · v<%= k.lastVersion %><% } %>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap mt-3">
+              <form action="/admin/key-muse/<%= enc %>/extend" method="POST" class="flex items-center gap-1">
+                <input name="days" type="number" min="1" value="30" class="input w-20 text-xs py-1" />
+                <button type="submit" class="btn-outline text-xs">+ ngày</button>
+              </form>
+              <% if (k.expiresAt) { %>
+                <form action="/admin/key-muse/<%= enc %>/unlimited" method="POST"><button type="submit" class="btn-outline text-xs">Bỏ hạn</button></form>
+              <% } %>
+              <form action="/admin/key-muse/<%= enc %>/plan" method="POST" class="flex items-center gap-1">
+                <select name="plan" class="input text-xs py-1 w-36" onchange="this.form.submit()">
+                  <% Object.keys(plans).forEach(p => { %>
+                    <option value="<%= p %>" <%= (k.plan || 'active') === p ? 'selected' : '' %>><%= planLabel(p) %></option>
+                  <% }) %>
+                </select>
+              </form>
+              <form action="/admin/key-muse/<%= enc %>/machine" method="POST" class="flex items-center gap-1">
+                <input name="machineId" type="text" class="input font-mono text-xs py-1 w-60" placeholder="MUSE-XXXX-XXXX-XXXX-XXXX" />
+                <button type="submit" class="btn-outline text-xs">Gắn máy</button>
+              </form>
+              <% if (k.machineId) { %>
+                <form action="/admin/key-muse/<%= enc %>/reset-machine" method="POST" onsubmit="return confirm('Gỡ máy khỏi key này? Lần kích hoạt kế tiếp sẽ gắn vào máy mới.');">
+                  <button type="submit" class="btn-outline text-xs">Gỡ máy</button>
+                </form>
+              <% } %>
+              <% if (k.active === false) { %>
+                <form action="/admin/key-muse/<%= enc %>/reactivate" method="POST"><button type="submit" class="btn-outline text-xs">Kích hoạt lại</button></form>
+              <% } else { %>
+                <form action="/admin/key-muse/<%= enc %>/revoke" method="POST" onsubmit="return confirm('Thu hồi key này? Tool trên máy khách sẽ bị khoá ở lần kiểm tra kế tiếp.');"><button type="submit" class="text-rose-600 text-xs font-medium">Thu hồi</button></form>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>
