@@ -7,6 +7,8 @@ const Tool = require('../models/Tool');
 // Ảnh: public/images/tools/chua-online-cover.png, chua-online-1.png, chua-online-2.png
 // Chạy: cd ~/dinh-thi-ai && source ~/nodevenv/dinh-thi-ai/20/bin/activate && node scripts/create-chua-online-tool.js
 // (chỉ thay đổi dữ liệu, không cần restart app). Chạy lại sẽ cập nhật mục đã có thay vì tạo trùng.
+// CHÚ Ý (2026-11-05): mục trên web (id 8) đã được sửa tay trong /admin/tools/8/edit, ảnh đã thay bằng
+// ảnh tải lên /uploads/... — ĐỪNG chạy lại script này, nó sẽ ghi đè ảnh và mô tả trên web.
 const TITLE = 'Chùa Online 3D — kết nối trực tiếp TikTok LIVE';
 
 const DESCRIPTION = `Chùa Online 3D là ứng dụng biến buổi livestream TikTok của bạn thành một ngôi chùa 3D sống động. Người xem chỉ cần bình luận hoặc vào phòng live là có một nhân vật 3D xuất hiện, đi vào chùa, ngồi vào ghế rồi quỳ bái trước tượng Phật. Người xem rời đi, nhân vật tự đứng dậy đi ra.
