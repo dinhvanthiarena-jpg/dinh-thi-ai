@@ -69,8 +69,8 @@ function normalizeMachineId(input) {
   return MACHINE_RE.test(s) ? s : null;
 }
 
-// days: số ngày hiệu lực; 0/undefined = KHÔNG hết hạn.
-function issueKey({ note = '', plan = 'active', days = 0, machineId = '' } = {}) {
+// days: số ngày hiệu lực; mặc định 30 ngày; truyền 0 = KHÔNG hết hạn.
+function issueKey({ note = '', plan = 'active', days = 30, machineId = '' } = {}) {
   const body = randomBodyChars(8);
   const key = formatKey(body, checksumFor(body));
   const entry = {

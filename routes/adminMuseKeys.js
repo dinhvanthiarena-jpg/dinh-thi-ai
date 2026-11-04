@@ -25,7 +25,9 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
   const machineId = svc.normalizeMachineId(req.body.machineId);
   if (machineId === null) return back(res, 'Mã máy sai định dạng, cần dạng MUSE-XXXX-XXXX-XXXX-XXXX');
-  const days = Math.max(0, parseInt(req.body.days, 10) || 0);
+  // Key bán cho khách mặc định 30 ngày; gõ 0 mới ra key không hết hạn.
+  const raw = String(req.body.days === undefined ? '' : req.body.days).trim();
+  const days = raw === '' ? 30 : Math.max(0, parseInt(raw, 10) || 0);
   const entry = svc.issueKey({ note: String(req.body.note || '').slice(0, 200), plan: req.body.plan, days, machineId });
   back(res, `Đã cấp key ${entry.key}`);
 });
