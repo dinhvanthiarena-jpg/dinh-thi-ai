@@ -20,6 +20,8 @@ const PLANS = { free: 3, 10: 10, 50: 50, active: null };
 const MACHINE_RE = /^MUSE-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}$/;
 
 const KEYS_PATH = path.join(__dirname, '..', 'data', 'muse-licenses.json');
+// Bản phát hành tool để máy khách TỰ CẬP NHẬT: {version, url, notes} — thầy sửa trên /admin/key-muse.
+const APP_VERSION_PATH = path.join(__dirname, '..', 'data', 'muse-app-version.json');
 
 function readJson(p, fallback) {
   try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { return fallback; }
@@ -86,6 +88,26 @@ function issueKey({ note = '', plan = 'active', days = 30, machineId = '' } = {}
   return entry;
 }
 
+// Bản phát hành tool (máy khách hỏi mỗi 6h để tự cập nhật)
+function getAppVersion() {
+  const d = readJson(APP_VERSION_PATH, {});
+  return {
+    version: String(d.version || '').slice(0, 20),
+    url: String(d.url || '').slice(0, 300),
+    notes: String(d.notes || '').slice(0, 300),
+  };
+}
+function setAppVersion({ version = '', url = '', notes = '' } = {}) {
+  const data = {
+    version: String(version || '').trim().slice(0, 20),
+    url: String(url || '').trim().slice(0, 300),
+    notes: String(notes || '').trim().slice(0, 300),
+    updatedAt: Date.now(),
+  };
+  writeJson(APP_VERSION_PATH, data);
+  return data;
+}
+
 const findEntry = (list, key) => list.find((k) => k.key === normalizeAndFormat(key));
 
 function listKeys() { return loadKeys(); }
@@ -131,4 +153,5 @@ function verify(key, machineId, { label = '', version = '' } = {}) {
 module.exports = {
   PLANS, issueKey, listKeys, revokeKey, reactivateKey, resetMachine, setMachine, extendKey, setUnlimited, setPlan,
   verify, isWellFormed, normalizeAndFormat, normalizeMachineId,
+  getAppVersion, setAppVersion,
 };

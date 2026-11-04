@@ -21,4 +21,9 @@ router.get('/verify', verifyLimiter, (req, res) => {
   res.json(svc.verify(key, machineId, { label, version }));
 });
 
+// Máy khách hỏi mỗi 6h: có bản tool mới thì tự tải url về cài lại êm.
+router.get('/app-version', verifyLimiter, (req, res) => {
+  res.json(svc.getAppVersion());
+});
+
 module.exports = router;

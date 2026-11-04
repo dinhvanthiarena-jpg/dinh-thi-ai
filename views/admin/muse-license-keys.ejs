@@ -1,11 +1,11 @@
 <% const planLabel = (p) => p === 'active' ? 'Không giới hạn TK' : (p === 'free' ? '3 TK' : p + ' TK'); %>
 <div class="space-y-6 max-w-4xl">
   <div class="card p-6">
-    <h2 class="font-semibold text-ink mb-1">🎞️ Key tool SA MUSE-AI</h2>
+    <h2 class="font-semibold text-ink mb-1">🎞️ Key tool Sa Muse Ai</h2>
     <p class="text-sm text-muted">
-      Key dạng <code class="font-mono">SAMUSE-XXXX-XXXX-XXXX</code>. Tool SA MUSE-AI <strong>không có key hợp lệ thì không chạy</strong>;
+      Key dạng <code class="font-mono">SAMUSE-XXXX-XXXX-XXXX</code>. Tool Sa Muse Ai <strong>không có key hợp lệ thì không chạy</strong>;
       tool hỏi lại trang này khi kích hoạt và mỗi 6 giờ, mất mạng vẫn chạy tiếp tối đa 3 ngày kể từ lần kiểm tra được gần nhất.
-      Mỗi key gắn <strong>1 máy</strong> theo mã máy <code class="font-mono">MUSE-XXXX-XXXX-XXXX-XXXX</code> (khách copy trong tool).
+      Mỗi key tự gắn vào <strong>1 máy</strong> khi khách kích hoạt (mặc định key 30 ngày, gõ 0 nếu muốn key vĩnh viễn).
       Hạn mức là số tài khoản Muse được lưu trong tool.
     </p>
     <% if (msg) { %>
@@ -28,6 +28,25 @@
         <input name="days" type="number" min="0" value="30" class="input flex-1" placeholder="Số ngày (0 = không hết hạn)" title="Mặc định 30 ngày; gõ 0 nếu muốn key không hết hạn" />
         <button type="submit" class="btn-primary">🔑 Cấp key</button>
       </div>
+    </form>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-3">⬆️ Bản phát hành tool (máy khách tự cập nhật)</h2>
+    <p class="text-sm text-muted mb-3">
+      Khai báo bản mới ở đây sau khi upload file cài lên <code class="font-mono">public/downloads/</code>.
+      Mọi máy đã cài tool sẽ tự tải và cập nhật <strong>trong vòng 6 giờ</strong> khi có mạng.
+      <% if (appVersion && appVersion.version) { %>
+        Đang khai báo: <strong><%= appVersion.version %></strong> — <span class="font-mono break-all"><%= appVersion.url %></span>
+      <% } else { %>
+        <em>Chưa khai báo bản nào (máy khách sẽ không tự cập nhật).</em>
+      <% } %>
+    </p>
+    <form action="/admin/key-muse/app-version" method="POST" class="grid gap-3 md:grid-cols-3">
+      <input name="version" type="text" class="input font-mono" placeholder="Phiên bản (VD: 2.1.0)" value="<%= appVersion ? appVersion.version : '' %>" />
+      <input name="url" type="text" class="input font-mono md:col-span-2" placeholder="https://3dvietpro.com/downloads/Sa_Muse_Ai_Setup_2.1.0.exe" value="<%= appVersion ? appVersion.url : '' %>" />
+      <input name="notes" type="text" class="input md:col-span-2" placeholder="Ghi chú bản này (tuỳ chọn)" value="<%= appVersion ? appVersion.notes : '' %>" />
+      <button type="submit" class="btn-primary">💾 Lưu bản phát hành</button>
     </form>
   </div>
 

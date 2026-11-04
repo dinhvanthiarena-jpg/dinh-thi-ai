@@ -15,11 +15,18 @@ const back = (res, msg) => res.redirect('/admin/key-muse' + (msg ? `?msg=${encod
 
 router.get('/', (req, res) => {
   res.render('admin/muse-license-keys', {
-    title: 'Key SA MUSE-AI',
+    title: 'Key Sa Muse Ai',
     keys: svc.listKeys(),
     plans: svc.PLANS,
+    appVersion: svc.getAppVersion(),
     msg: String(req.query.msg || '').slice(0, 200),
   });
+});
+
+// Khai báo bản phát hành mới → mọi máy đã cài sẽ tự cập nhật trong vòng 6 giờ.
+router.post('/app-version', (req, res) => {
+  const data = svc.setAppVersion({ version: req.body.version, url: req.body.url, notes: req.body.notes });
+  back(res, data.version ? `Đã khai báo bản ${data.version} — máy khách sẽ tự cập nhật trong ~6 giờ` : 'Đã xóa khai báo bản cập nhật');
 });
 
 router.post('/', (req, res) => {
