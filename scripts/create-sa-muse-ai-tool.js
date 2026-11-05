@@ -27,6 +27,9 @@ CHỌN KHUNG HÌNH THEO NỀN TẢNG
 TỰ ĐỘNG CẬP NHẬT
 Có bản mới là tool tự tải về và tự cài lại khi máy có mạng — bạn không phải làm gì.
 
+DÙNG THỬ MIỄN PHÍ 5 NGÀY
+Tải về cài là dùng được ngay, MIỄN PHÍ 5 ngày đầu với đầy đủ tính năng — không cần key. Hết 5 ngày, nhập key bản quyền để dùng tiếp.
+
 BẢN QUYỀN & MUA KEY
 Mỗi key dùng cho đúng 1 máy tính, thời hạn 30 ngày (gia hạn qua admin). Nhập key vào tool là chạy, key tự gắn vào máy của bạn khi kích hoạt.
 Mua key / hỗ trợ: email dinhvanthi.arena@gmail.com hoặc nhắn Fanpage https://www.facebook.com/dinhthi.daotao
@@ -35,7 +38,7 @@ HƯỚNG DẪN CÀI ĐẶT
 Bước 1. Bấm nút Tải về trên trang này để tải file Sa_Muse_Ai_Setup.exe (khoảng 150 MB, dành cho Windows 10/11).
 Bước 2. Mở file vừa tải. Nếu Windows hiện cảnh báo "Windows protected your PC" (SmartScreen), bấm "More info" rồi "Run anyway".
 Bước 3. Cài xong, mở Sa Muse Ai từ biểu tượng ngoài màn hình. Lần đầu mở, tool tự chuẩn bị môi trường (cần mạng, mất vài phút).
-Bước 4. Nhập key bản quyền vào màn hình kích hoạt (liên hệ email/fanpage ở trên để được cấp key) — key tự gắn vào máy bạn.
+Bước 4. Mở lần đầu là chạy luôn — bạn có 5 NGÀY DÙNG THỬ MIỄN PHÍ (đầy đủ tính năng). Hết 5 ngày, nhập key bản quyền vào màn hình kích hoạt (liên hệ email/fanpage để mua key) — key tự gắn vào máy bạn.
 Bước 5. Vào "Tài khoản Muse" thêm tài khoản Muse của bạn, dán danh sách ý tưởng rồi bấm "Bắt đầu tạo video".
 
 YÊU CẦU
@@ -46,7 +49,7 @@ async function run() {
   const data = {
     title: TITLE,
     category: 'Ứng dụng',
-    shortDescription: 'Tạo video AI hàng loạt trên Muse: mỗi dòng ý tưởng là một video, giữ nguyên nhân vật bằng ảnh tham chiếu @tag, nối dài video tới 3 phút, chạy nhiều tài khoản nhiều luồng, tự tải MP4 về máy.',
+    shortDescription: 'DÙNG THỬ MIỄN PHÍ 5 NGÀY. Tạo video AI hàng loạt trên Muse: mỗi dòng ý tưởng là một video, giữ nguyên nhân vật bằng ảnh tham chiếu @tag, nối dài video tới 3 phút, chạy nhiều tài khoản nhiều luồng, tự tải MP4 về máy.',
     description: DESCRIPTION,
     coverImageUrl: '/images/tools/sa-muse-ai-cover.png',
     galleryImages: ['/images/tools/sa-muse-ai-1.jpg', '/images/tools/sa-muse-ai-2.jpg'],
