@@ -25,6 +25,10 @@ const APP_VERSION_PATH = path.join(__dirname, '..', 'data', 'muse-app-version.js
 // Token bí mật để TỰ ĐỘNG đẩy bản cài mới lên qua API (KHÔNG commit). Ưu tiên biến môi trường
 // SA_MUSE_UPLOAD_TOKEN, nếu không có thì đọc file data/muse-upload-token.txt. Không có token = tắt cổng upload.
 const UPLOAD_TOKEN_PATH = path.join(__dirname, '..', 'data', 'muse-upload-token.txt');
+// Dùng thử MIỄN PHÍ: đếm ngày theo MÃ MÁY trên server (chống reset bằng cài lại / xoá file cục bộ).
+const TRIALS_PATH = path.join(__dirname, '..', 'data', 'muse-trials.json');
+const TRIAL_DAYS = 5;        // số ngày dùng thử miễn phí
+const TRIAL_PLAN = 'free';   // gói áp dụng khi dùng thử (free = 3 tài khoản); đổi tại đây nếu muốn
 
 function readJson(p, fallback) {
   try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { return fallback; }
@@ -119,6 +123,33 @@ function getUploadToken() {
   try { return fs.readFileSync(UPLOAD_TOKEN_PATH, 'utf8').trim() || null; } catch (e) { return null; }
 }
 
+// Trạng thái dùng thử theo mã máy. LẦN GỌI ĐẦU của một máy = bắt đầu đếm TRIAL_DAYS ngày.
+// Không có key vẫn chạy được trong thời gian dùng thử; hết hạn thì tool khoá, đòi nhập key.
+function trialStatus(machineId, { version = '', label = '' } = {}) {
+  const mid = normalizeMachineId(machineId);
+  if (!mid) return { ok: false, trial: false, reason: 'invalid_machine' };
+  const trials = readJson(TRIALS_PATH, {});
+  const now = Date.now();
+  let rec = trials[mid];
+  if (!rec || typeof rec.startedAt !== 'number') {
+    rec = { startedAt: now };
+    trials[mid] = rec;
+  }
+  rec.lastSeenAt = now;
+  if (version) rec.lastVersion = String(version).slice(0, 20);
+  if (label) rec.label = String(label).slice(0, 80);
+  writeJson(TRIALS_PATH, trials);
+  const expiresAt = rec.startedAt + TRIAL_DAYS * DAY;
+  const active = now < expiresAt;
+  const daysLeft = Math.max(0, Math.ceil((expiresAt - now) / DAY));
+  return {
+    ok: true, trial: true, active,
+    plan: TRIAL_PLAN, maxAccounts: PLANS[TRIAL_PLAN],
+    startedAt: rec.startedAt, expiresAt, daysLeft, trialDays: TRIAL_DAYS,
+    reason: active ? '' : 'trial_expired', serverTime: now,
+  };
+}
+
 const findEntry = (list, key) => list.find((k) => k.key === normalizeAndFormat(key));
 
 function listKeys() { return loadKeys(); }
@@ -164,5 +195,5 @@ function verify(key, machineId, { label = '', version = '' } = {}) {
 module.exports = {
   PLANS, issueKey, listKeys, revokeKey, reactivateKey, resetMachine, setMachine, extendKey, setUnlimited, setPlan,
   verify, isWellFormed, normalizeAndFormat, normalizeMachineId,
-  getAppVersion, setAppVersion, getUploadToken,
+  getAppVersion, setAppVersion, getUploadToken, trialStatus,
 };

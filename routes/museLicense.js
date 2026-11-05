@@ -30,6 +30,14 @@ router.get('/app-version', verifyLimiter, (req, res) => {
   res.json(svc.getAppVersion());
 });
 
+// Dùng thử miễn phí: tool gọi khi CHƯA có key. Lần đầu của một mã máy bắt đầu đếm 5 ngày.
+router.get('/trial', verifyLimiter, (req, res) => {
+  const machineId = String(req.query.machineId || '').slice(0, 40);
+  const version = String(req.query.v || '').slice(0, 20);
+  const label = String(req.query.label || '').slice(0, 80);
+  res.json(svc.trialStatus(machineId, { version, label }));
+});
+
 // ---------------------------------------------------------------------------
 // TỰ ĐỘNG ĐẨY BẢN CÀI MỚI (thay cho việc upload tay qua File Manager).
 // Chỉ máy có token bí mật (header X-Upload-Token) mới gọi được. Đích ghi là tên
