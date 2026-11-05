@@ -22,6 +22,9 @@ const MACHINE_RE = /^MUSE-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}$/;
 const KEYS_PATH = path.join(__dirname, '..', 'data', 'muse-licenses.json');
 // Bản phát hành tool để máy khách TỰ CẬP NHẬT: {version, url, notes} — thầy sửa trên /admin/key-muse.
 const APP_VERSION_PATH = path.join(__dirname, '..', 'data', 'muse-app-version.json');
+// Token bí mật để TỰ ĐỘNG đẩy bản cài mới lên qua API (KHÔNG commit). Ưu tiên biến môi trường
+// SA_MUSE_UPLOAD_TOKEN, nếu không có thì đọc file data/muse-upload-token.txt. Không có token = tắt cổng upload.
+const UPLOAD_TOKEN_PATH = path.join(__dirname, '..', 'data', 'muse-upload-token.txt');
 
 function readJson(p, fallback) {
   try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { return fallback; }
@@ -108,6 +111,14 @@ function setAppVersion({ version = '', url = '', notes = '' } = {}) {
   return data;
 }
 
+// Token xác thực lệnh tự động đẩy bản cài mới (routes/museLicense.js → POST /upload-app).
+// Trả null nếu chưa cấu hình (cổng upload khi đó bị khoá hoàn toàn).
+function getUploadToken() {
+  const env = String(process.env.SA_MUSE_UPLOAD_TOKEN || '').trim();
+  if (env) return env;
+  try { return fs.readFileSync(UPLOAD_TOKEN_PATH, 'utf8').trim() || null; } catch (e) { return null; }
+}
+
 const findEntry = (list, key) => list.find((k) => k.key === normalizeAndFormat(key));
 
 function listKeys() { return loadKeys(); }
@@ -153,5 +164,5 @@ function verify(key, machineId, { label = '', version = '' } = {}) {
 module.exports = {
   PLANS, issueKey, listKeys, revokeKey, reactivateKey, resetMachine, setMachine, extendKey, setUnlimited, setPlan,
   verify, isWellFormed, normalizeAndFormat, normalizeMachineId,
-  getAppVersion, setAppVersion,
+  getAppVersion, setAppVersion, getUploadToken,
 };
