@@ -48,8 +48,15 @@ router.get('/trial', verifyLimiter, (req, res) => {
 const DOWNLOADS_DIR = path.join(__dirname, '..', 'public', 'downloads');
 const TMP_DIR = path.join(__dirname, '..', 'data', 'tmp-upload');
 const PUBLIC_URL = 'https://3dvietpro.com/downloads/Sa_Muse_Ai_Setup.exe';
-// Chỉ cho ghi vào các tên này (test để kiểm thử cơ chế mà không đụng file bán thật).
-const ALLOWED_DEST = { stable: 'Sa_Muse_Ai_Setup.exe', test: 'Sa_Muse_Ai_Setup.test.exe' };
+// Chỉ cho ghi vào các tên này:
+//  - stable: bản THẬT để bán (trang kho tài nguyên trỏ vào file này).
+//  - trial:  bản THỬ 5 ngày, link riêng thầy tự gửi cho khách muốn thử (không khai báo auto-update).
+//  - test:   để kiểm thử cơ chế mà không đụng file bán thật.
+const ALLOWED_DEST = {
+  stable: 'Sa_Muse_Ai_Setup.exe',
+  trial: 'Sa_Muse_Ai_Dung_Thu.exe',
+  test: 'Sa_Muse_Ai_Setup.test.exe',
+};
 
 const uploadLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
