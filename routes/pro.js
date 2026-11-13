@@ -108,7 +108,8 @@ router.get('/api/quyen', an((req, res) => {
   res.json({
     thuPhi: pro.dangThuPhi(),
     pro: pro.conHanPro(u),
-    duocGoi: pro.duocDung(u),
+    duocGoi: pro.quyenGoi(u).duoc,
+    duocHoc: pro.duocHoc(u),
     proUntil: u ? u.proUntil : null,
   });
 }));
@@ -139,8 +140,15 @@ router.get('/api/goi', an(async (req, res) => {
     sanSang: pro.sanSangNhanTien(),
     pro: pro.conHanPro(u),
     proUntil: u ? u.proUntil : null,
-    duocDungThu: Boolean(u) && !u.trialUsed && !pro.conHanPro(u),
+    // Dùng thử tự chạy 3 ngày từ lúc tạo tài khoản — không còn nút bấm.
+    duocDungThu: false,
     ngayDungThu: pro.NGAY_DUNG_THU,
+    dungThu: (() => { const d = pro.dungThu(u); return { con: d.con, ngayCon: d.ngayCon, hetHan: d.hetHan }; })(),
+    duocHoc: pro.duocHoc(u),
+    goiGoi: Object.entries(pro.goiGoiDangBan()).map(([ma, g]) => ({
+      ma, ten: g.ten, tien: g.amount, thang: g.months, moiThang: pro.giaMoiThang(ma),
+    })),
+    quyenGoi: (() => { const q = pro.quyenGoi(u); return { ...q, luotMotCuoc: pro.LUOT_MOT_CUOC, luotThang: pro.LUOT_MOI_THANG, luotThu: pro.LUOT_DUNG_THU }; })(),
     toiDaNhom: pro.TOI_DA_GIA_DINH,
     maNhom,
     soThanhVien: maNhom ? (await pro.nguoiTrongNhom(maNhom)).length : 0,
@@ -158,7 +166,7 @@ function canDangNhap(req, res) {
 router.post('/api/mua', express.json(), an(async (req, res) => {
   if (canDangNhap(req, res)) return;
   const plan = String((req.body || {}).plan || '');
-  if (!pro.PLANS[plan]) return res.status(400).json({ error: 'Gói không hợp lệ' });
+  if (!pro.PLANS[plan] || pro.PLANS[plan].an) return res.status(400).json({ error: 'Gói không hợp lệ' });
   if (!pro.sanSangNhanTien()) {
     return res.status(503).json({ error: 'Chưa cấu hình tài khoản nhận tiền.' });
   }

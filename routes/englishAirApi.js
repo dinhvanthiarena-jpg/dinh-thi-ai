@@ -35,17 +35,27 @@ router.post('/chat', async (req, res) => {
   if (rateLimited(ip)) {
     return res.status(429).json({ error: 'Bạn nói hơi nhanh rồi, nghỉ một lát rồi gọi lại nhé.' });
   }
-  // Cửa gói Pro. Khi PRO_MODE còn tắt thì duocDung() luôn trả về true —
-  // mọi người vẫn gọi thoải mái, đúng như đang để miễn phí.
-  if (!pro.duocDung(res.locals.currentUser)) {
-    return res.status(402).json({
-      error: 'Phần gọi tự do nằm trong gói Pro. Nâng cấp để nói chuyện thoải mái với ON-Language nhé.',
-      nangCap: '/pro',
-    });
+  // Cửa gói GỌI NHÂN VẬT. PRO_MODE tắt thì quyenGoi() luôn cho qua — vẫn miễn phí.
+  // Hạn mức đếm Ở MÁY CHỦ (theo tài khoản), không tin con số trên máy người dùng.
+  const user = res.locals.currentUser;
+  const quyen = pro.quyenGoi(user);
+  if (!quyen.duoc) {
+    const dangBan = Object.keys(pro.goiGoiDangBan()).length > 0;
+    const loi = !dangBan
+      ? 'Bạn đã dùng hết lượt gọi thử. Phần gọi nhân vật hiện đang tạm đóng, khi mở lại sẽ báo bạn nhé.'
+      : quyen.lyDo === 'het-thang'
+      ? 'Bạn đã dùng hết lượt gọi tháng này. Tháng sau lượt được làm mới, hoặc mua thêm gói để gọi tiếp nhé.'
+      : quyen.lyDo === 'het-thu'
+        ? 'Bạn đã dùng hết lượt gọi thử. Mua gói gọi nhân vật để nói chuyện thoải mái với ON-Language nhé.'
+        : 'Phần gọi nhân vật nằm trong gói gọi. Mua gói để nói chuyện thoải mái với ON-Language nhé.';
+    return res.status(402).json({ error: loi, nangCap: dangBan ? '/pro' : '', quyen });
   }
   try {
     const { history, level, words, mode, style } = req.body || {};
     const out = await tutor.reply({ history, level, words, mode, style });
+    // Chỉ trừ lượt khi AI đã trả lời được.
+    await pro.tieuLuot(user).catch((e) => console.error('[english-air/tieuLuot]', e.message));
+    out.quyen = pro.quyenGoi(user);
     res.json(out);
   } catch (err) {
     const noKey = err.code === 'NO_KEY';

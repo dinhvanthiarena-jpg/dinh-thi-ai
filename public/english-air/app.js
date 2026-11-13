@@ -4679,6 +4679,7 @@ function datVideo(dangNoi) {
     bấm vào rồi mới bị chặn. */
 function veLuotGoi() {
   const con = goiConLai();
+  const q = quyenGoi();
   const ghi = (id, chu) => {
     const n = $(id);
     if (!n) return;
@@ -4686,17 +4687,12 @@ function veLuotGoi() {
     if (!phu) { phu = el("small", "goi-con"); n.append(phu); }
     phu.textContent = chu;
   };
-  if (con === Infinity) {
-    ghi("#btnStartFree", "Gói Pro — gọi thoải mái");
-    ghi("#btnStartCall", "Gói Pro — gọi thoải mái");
-  } else if (con > 0) {
-    const chu = "Còn " + con + " / " + GOI_THU_TOI_DA + " cuộc gọi thử";
-    ghi("#btnStartFree", chu);
-    ghi("#btnStartCall", chu);
-  } else {
-    ghi("#btnStartFree", "Đã hết lượt thử — mở gói Pro để gọi tiếp");
-    ghi("#btnStartCall", "Đã hết lượt thử — mở gói Pro để gọi tiếp");
-  }
+  let chu;
+  if (con === Infinity) chu = "Đang miễn phí — gọi thoải mái";
+  else if (con > 0) chu = "Còn " + con + (q && q.loai === "goi" ? " cuộc gọi tháng này" : " cuộc gọi thử");
+  else chu = "Đã hết lượt — mở gói gọi để gọi tiếp";
+  ghi("#btnStartFree", chu);
+  ghi("#btnStartCall", chu);
 }
 
 function renderCall() {
@@ -4822,31 +4818,47 @@ function monSays(en, vi, after, py, audioUrl) {
 }
 
 /* ----- bắt đầu / kết thúc ----- */
-/* ───────── Giới hạn cuộc gọi thử ─────────
-   Hai chế độ gọi có dùng máy chủ thì mỗi tài khoản được thử 2 cuộc. Gọi Kaka
-   KHÔNG tính: đó là phần chơi cho vui, không gọi ra ngoài, nên để thoải mái. */
-const GOI_THU_TOI_DA = 2;
+/* ───────── Hạn mức gọi nhân vật ─────────
+   Máy chủ đếm lượt theo TÀI KHOẢN (dùng thử 3 ngày: 2 cuộc; gói gọi: 10 cuộc/tháng),
+   app chỉ hiển thị. Gọi Kaka KHÔNG tính: đó là phần chơi cho vui, không gọi ra ngoài. */
+const LUOT_MOT_CUOC = 15;
 
-/** Đang có gói Pro thì gọi không giới hạn. */
+/** Đang có gói Pro (gói học). */
 function laPro() { return !!(P2.data && P2.data.pro); }
 
-/** Còn mấy cuộc gọi thử. Pro thì trả về Vô cực. */
+/** Quyền gọi do máy chủ trả về; chưa biết (mạng chập chờn) thì cho qua, máy chủ vẫn chặn. */
+function quyenGoi() { return P2.data && P2.data.thuPhi ? P2.data.quyenGoi : null; }
+
+/** Còn mấy cuộc gọi (làm tròn lên). Miễn phí / chưa biết thì Vô cực. */
 function goiConLai() {
-  if (laPro()) return Infinity;
-  return Math.max(0, GOI_THU_TOI_DA - (S.goiThu || 0));
+  const q = quyenGoi();
+  if (!q || q.loai === "mien-phi") return Infinity;
+  if (!q.duoc) return 0;
+  return Math.max(1, Math.ceil(q.conLai / (q.luotMotCuoc || LUOT_MOT_CUOC)));
 }
 
 /** Chế độ này có bị tính vào hạn mức không. */
 const goiCoTinh = mode => mode === "free" || mode === "teach";
 
-/** Hết lượt thì mời mua Pro, và chỉ luôn hai đường vẫn miễn phí. */
+/** Hết lượt thì mời mua gói gọi, và chỉ luôn hai đường vẫn miễn phí. */
 function baoHetLuotGoi() {
+  const q = quyenGoi() || {};
+  if (!(P2.data && (P2.data.goiGoi || []).length)) {
+    openSheet({
+      title: "Bạn đã hết lượt gọi thử",
+      body: "Phần gọi nhân vật hiện đang tạm đóng, khi mở lại sẽ báo bạn. Gọi bà phù thuỷ Kaka thì vẫn thoải mái.",
+      yes: "Đã hiểu", no: "Đóng", onYes() {},
+    });
+    return;
+  }
+  const hetThang = q.lyDo === "het-thang";
   openSheet({
-    title: "Bạn đã dùng hết " + GOI_THU_TOI_DA + " cuộc gọi thử",
-    body: "Mỗi tài khoản được gọi thử " + GOI_THU_TOI_DA + " cuộc với ON-Language. "
-        + "Muốn gọi tiếp thì mở gói Pro. Còn gọi bà phù thuỷ Kaka thì vẫn thoải mái, "
-        + "và phần luyện nói trong mỗi bài học cũng không giới hạn.",
-    yes: "Xem gói Pro",
+    title: hetThang ? "Bạn đã dùng hết lượt gọi tháng này" : "Bạn đã hết lượt gọi",
+    body: (hetThang
+        ? "Lượt gọi sẽ được làm mới vào tháng sau. "
+        : "Dùng thử chỉ gồm " + Math.ceil((q.tong || 30) / LUOT_MOT_CUOC) + " cuộc gọi với ON-Language. Muốn gọi tiếp thì mua gói gọi nhân vật. ")
+        + "Còn gọi bà phù thuỷ Kaka thì vẫn thoải mái.",
+    yes: "Xem gói gọi",
     no: "Để sau",
     onYes() { moPro(); },
   });
@@ -4855,11 +4867,6 @@ function baoHetLuotGoi() {
 function startCall(mode, khongTinh) {
   // Hết lượt thì dừng ngay ở đây, đừng mở màn gọi rồi mới báo.
   if (goiCoTinh(mode) && !khongTinh && goiConLai() <= 0) { baoHetLuotGoi(); return; }
-  if (goiCoTinh(mode) && !khongTinh && !laPro()) {
-    S.goiThu = (S.goiThu || 0) + 1;
-    save();
-    veLuotGoi();
-  }
   C.mode = mode;
   // Luyện hội thoại trong bài luôn là tiếng Anh vì đó là lời thoại đã học.
   // Giờ học luôn là tiếng Anh; tán gẫu thì bắt đầu bằng tiếng của máy rồi
@@ -4948,16 +4955,17 @@ async function askTutor(first) {
     if (res.status === 402) {
       // Chưa có gói Pro. Mời nâng cấp chứ đừng báo lỗi chung chung.
       const j = await res.json().catch(() => ({}));
+      if (j.quyen && P2.data) { P2.data.quyenGoi = j.quyen; veLuotGoi(); }
       C.busy = false;
-      setState("Cần gói Pro");
-      $("#callSaid").textContent = j.error || "Phần này nằm trong gói Pro.";
+      setState("Hết lượt gọi");
+      $("#callSaid").textContent = j.error || "Phần gọi nhân vật nằm trong gói gọi.";
       $("#callSaidVi").textContent = "";
       chinhCuonNoi();
       openSheet({
-        title: "Nâng cấp ON-Language Pro",
-        body: "Học 60 bài thì miễn phí mãi. Riêng phần gọi nói chuyện tự do với ON-Language cần gói Pro.",
-        yes: "Xem gói Pro", no: "Để sau",
-        onYes() { endCall(false); moPro(); }   // mở ngay trong app
+        title: j.nangCap === "" ? "Hết lượt gọi thử" : "Mua gói gọi nhân vật",
+        body: j.error || "Phần gọi nói chuyện với ON-Language nằm trong gói gọi.",
+        yes: j.nangCap === "" ? "Đã hiểu" : "Xem gói gọi", no: "Để sau",
+        onYes() { endCall(false); if (j.nangCap !== "") moPro(); }   // mở ngay trong app
       });
       return;
     }
@@ -4966,6 +4974,7 @@ async function askTutor(first) {
       throw new Error(j.error || "Không gọi được máy chủ");
     }
     const data = await res.json();
+    if (data.quyen && P2.data) { P2.data.quyenGoi = data.quyen; veLuotGoi(); }
     // ON-Language đáp bằng thứ tiếng nào thì từ đây nói và nghe bằng thứ tiếng đó.
     if (/^[a-z]{2}$/.test(data.lang || "")) C.lang = data.lang;
     C.msgs.push({ role: "assistant", content: data.reply });
@@ -5346,11 +5355,18 @@ function veManPro() {
   b.textContent = "";
 
   const h = el("h1");
-  h.append(document.createTextNode("Gọi video với ON-Language, "));
-  h.append(el("em", null, `miễn phí ${d.ngayDungThu} ngày`));
+  h.append(document.createTextNode("Học và gọi với ON-Language, "));
+  h.append(el("em", null, `dùng thử ${d.ngayDungThu} ngày`));
   b.append(h);
-  b.append(el("p", "pro-sub", "Kèm toàn bộ tính năng Pro."));
+  b.append(el("p", "pro-sub", "Hai phần bán riêng: gói học và gói gọi nhân vật."));
 
+  if (d.dungThu && d.dungThu.con) {
+    const n = el("div", "pro-note have");
+    n.append(document.createTextNode(`Bạn đang dùng thử — còn ${d.dungThu.ngayCon} ngày (đến ${ngayVN(d.dungThu.hetHan)}).`));
+    b.append(n);
+  } else if (d.thuPhi && d.dangNhap && !d.pro) {
+    b.append(el("div", "pro-note warn", `Dùng thử ${d.ngayDungThu} ngày đã hết. Chọn gói bên dưới để học tiếp.`));
+  }
   if (!d.thuPhi) {
     const n = el("div", "pro-note free");
     n.append(document.createTextNode("Mọi thứ đang miễn phí cho tất cả mọi người."));
@@ -5359,39 +5375,47 @@ function veManPro() {
   }
   if (d.pro) {
     const n = el("div", "pro-note have");
-    n.append(document.createTextNode(`Bạn đang có gói Pro, hạn tới ${ngayVN(d.proUntil)}.`));
+    n.append(document.createTextNode(`Bạn đang có gói học, hạn tới ${ngayVN(d.proUntil)}.`));
     if (d.maNhom) {
       n.append(el("small", null,
         `Mã nhóm gia đình: ${d.maNhom} — đang có ${d.soThanhVien}/${d.toiDaNhom} người dùng chung.`));
     }
     b.append(n);
   }
+  const q = d.quyenGoi;
+  if (d.thuPhi && q && q.loai === "goi") {
+    b.append(el("div", "pro-note have",
+      `Gói gọi: còn ${Math.ceil(q.conLai / (q.luotMotCuoc || 15))} cuộc tháng này, hạn tới ${ngayVN(q.hetHan)}.`));
+  }
   if (!d.sanSang) {
     b.append(el("div", "pro-note warn", "Thầy chưa bật tài khoản nhận tiền, chưa mua được."));
   }
 
-  // Xếp gói năm lên trước cho nổi bật, đúng kiểu các app hay làm.
-  // Xếp gói DÀI TRƯỚC, ngắn sau — gói đáng mua nhất đứng đầu. Trước đây viết
-  // cứng ["year","family","month"], nên thêm gói 6 tháng vào bảng giá mà app
-  // vẫn không hiện ra. Nay cứ máy chủ trả về gói nào thì bày gói đó, sắp theo
-  // số tháng giảm dần; gói dài nhất là gói "Đề xuất".
+  // PHẦN 1 — GÓI HỌC. Xếp gói DÀI TRƯỚC, ngắn sau; gói dài nhất là "Đề xuất".
+  b.append(el("h2", "pro-sec", "1 · Gói học"));
+  b.append(el("p", "pro-sub", "Toàn bộ bài học, kho từ, luyện tập và giải đấu."));
   const dsGoi = (d.goi || []).slice().sort((x, y) => (y.thang || 0) - (x.thang || 0));
   dsGoi.forEach((g, i) => b.append(theGoi(g, i === 0, d)));
+
+  // PHẦN 2 — GỌI NHÂN VẬT, bán riêng vì mỗi lượt nói tốn tiền máy chủ AI.
+  if ((d.goiGoi || []).length) {
+    const cuoc = Math.round((q ? q.luotThang : 150) / (q ? q.luotMotCuoc : 15));
+    b.append(el("h2", "pro-sec", "2 · Gói gọi nhân vật"));
+    b.append(el("p", "pro-sub",
+      `Nói chuyện và luyện nói với nhân vật AI: ${cuoc} cuộc mỗi tháng, mỗi cuộc khoảng 5 phút. ` +
+      `Dùng thử được ${Math.round((q ? q.luotThu : 30) / (q ? q.luotMotCuoc : 15))} cuộc.`));
+    d.goiGoi.forEach(g => b.append(theGoi(g, false, d)));
+  }
 
   if (!d.dangNhap) {
     const nut = el("button", "pro-cta", "Đăng nhập để bắt đầu");
     nut.type = "button";
     nut.addEventListener("click", () => { location.href = "../auth/login?next=/english-air/"; });
     b.append(nut);
-  } else if (d.duocDungThu) {
-    const nut = el("button", "pro-cta", "Bắt đầu dùng thử miễn phí");
-    nut.type = "button";
-    nut.addEventListener("click", dungThu);
-    b.append(nut);
   }
 
   b.append(el("p", "pro-fine",
-    `Dùng thử ${d.ngayDungThu} ngày, không cần thẻ. Hết ${d.ngayDungThu} ngày tài khoản tự quay ` +
+    `Dùng thử ${d.ngayDungThu} ngày tính từ lúc tạo tài khoản, không cần thẻ. Hết ${d.ngayDungThu} ngày tài khoản tự quay ` +
     "về bản miễn phí — không tự trừ tiền của bạn, vì app không giữ thông tin thanh toán nào cả."));
 
   if (d.dangNhap && !d.maNhom) b.append(oVaoNhom());
@@ -5411,6 +5435,10 @@ function theGoi(g, noiBat, d) {
 
   if (g.nguoi > 1) the.append(el("p", "sub", `Dành cho tối đa ${g.nguoi} thành viên.`));
   else if (g.thang === 1) the.append(el("p", "sub", "Trả từng tháng, dừng lúc nào cũng được."));
+  if (g.ma && g.ma.indexOf("call") === 0) {
+    const q = (d && d.quyenGoi) || {};
+    the.append(el("p", "sub", `${Math.round((q.luotThang || 150) / (q.luotMotCuoc || 15))} cuộc gọi mỗi tháng, mỗi cuộc khoảng 5 phút.`));
+  }
 
   if (g.thang > 1) {
     the.append(el("div", "pro-dash"));
@@ -5425,7 +5453,8 @@ function theGoi(g, noiBat, d) {
       the.append(el("div", "pro-save",
         `Chỉ ${tien(Math.round(g.tien / g.nguoi / 12))} mỗi người mỗi tháng nếu đủ ${g.nguoi} người`));
     } else {
-      const thang = d.goi.find(x => x.ma === "month");
+      // Gói gọi nhân vật không có gói tháng để so, đừng so nhầm với gói học.
+      const thang = g.ma && g.ma.indexOf("call") === 0 ? null : d.goi.find(x => x.ma === "month");
       if (thang) {
         const re = Math.round((1 - g.moiThang / thang.moiThang) * 100);
         the.append(el("div", "pro-save", `Rẻ hơn ${re}% so với trả từng tháng`));
@@ -5611,11 +5640,29 @@ async function veThePro() {
       ? "Đang dùng Pro · hạn " + ngayVN(d.proUntil)
       : (d.thuPhi ? "Gọi thoải mái, không giới hạn" : "Đang mở miễn phí cho tất cả");
     const nut = d.pro ? "Gói của tôi" : (re ? "Từ " + tien(re.moiThang) + "/thg" : "Xem gói");
-    $("#pbSub, #pbSub2").forEach(x => { x.textContent = phu; });
-    $("#pbGia, #pbGia2").forEach(x => { x.textContent = nut; });
+    $$("#pbSub, #pbSub2").forEach(x => { x.textContent = phu; });
+    $$("#pbGia, #pbGia2").forEach(x => { x.textContent = nut; });
     // Biết có Pro hay không rồi thì ghi lại số lượt cho đúng.
     veLuotGoi();
+    veBannerThu();
   } catch { /* mất mạng thì cứ để chữ mặc định */ }
+}
+/** Banner "Còn N ngày dùng thử" ở đầu màn Học. Chỉ hiện khi đang thu phí và đang trong 3 ngày. */
+function veBannerThu() {
+  const d = P2.data;
+  const goc = $("#view-learn");
+  if (!goc) return;
+  let n = $("#trialBanner");
+  const hien = d && d.thuPhi && d.dungThu && d.dungThu.con && !d.pro;
+  if (!hien) { if (n) n.remove(); return; }
+  if (!n) {
+    n = el("button", "trial-banner"); n.id = "trialBanner"; n.type = "button";
+    n.addEventListener("click", moPro);
+    goc.prepend(n);
+  }
+  const c = d.dungThu.ngayCon;
+  n.textContent = c <= 1 ? "Hôm nay là ngày dùng thử cuối — bấm để xem gói" : `Còn ${c} ngày dùng thử — bấm để xem gói`;
+  n.classList.toggle("last", c <= 1);
 }
 veThePro();
 

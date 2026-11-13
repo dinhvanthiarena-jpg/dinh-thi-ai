@@ -52,6 +52,16 @@ async function synthLiveEn(text) {
   }
 }
 
+const articleAi = require('./articleAi');
+
+/**
+ * AI nào trả lời khi người học gọi Ai?
+ *   gemini (mặc định) — MIỄN PHÍ, thầy yêu cầu 2026-11-01
+ *   claude            — bản xịn cũ (Haiku), tốn tiền. Muốn quay lại: đặt TUTOR_AI_PROVIDER=claude
+ * Đường gọi Claude bên dưới giữ NGUYÊN, không sửa một chữ, để quay lại là chạy ngay.
+ */
+const TUTOR_PROVIDER = () => (process.env.TUTOR_AI_PROVIDER || 'gemini').toLowerCase();
+
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
@@ -529,8 +539,13 @@ function trimStyle(style) {
 async function reply({ history, level, words, mode, style }) {
   const teach = mode === 'teach';
   const soTay = teach ? null : trimStyle(style);
-  if (!process.env.ANTHROPIC_API_KEY) {
-    const err = new Error('ANTHROPIC_API_KEY chưa được cấu hình');
+  const dungClaude = TUTOR_PROVIDER() === 'claude';
+  const coKhoa = dungClaude
+    ? !!process.env.ANTHROPIC_API_KEY
+    : !!(process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY);
+  if (!coKhoa) {
+    const err = new Error(dungClaude ? 'ANTHROPIC_API_KEY chưa được cấu hình'
+      : 'GEMINI_API_KEY chưa được cấu hình');
     err.code = 'NO_KEY';
     throw err;
   }
@@ -559,30 +574,49 @@ async function reply({ history, level, words, mode, style }) {
     if (m) heard = { target: m[1], pct: Number(m[2]) };
   }
 
-  const res = await fetch(ANTHROPIC_API_URL, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': ANTHROPIC_VERSION,
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: MAX_TOKENS,
-      system: toCacheableSystem(teach ? teachPrompt(level, words, heard)
-        : freePrompt(level, words, forced, soTay, moMan, cauHoi)),
-      messages,
-    }),
-  });
+  const heThong = teach ? teachPrompt(level, words, heard)
+    : freePrompt(level, words, forced, soTay, moMan, cauHoi);
+  let text;
+  if (dungClaude) {
+    // ── ĐƯỜNG CŨ (bản xịn): giữ nguyên ──
+    const res = await fetch(ANTHROPIC_API_URL, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': ANTHROPIC_VERSION,
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
+        system: toCacheableSystem(heThong),
+        messages,
+      }),
+    });
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    const err = new Error(`Anthropic ${res.status}: ${body.slice(0, 200)}`);
-    err.code = 'UPSTREAM';
-    throw err;
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      const err = new Error(`Anthropic ${res.status}: ${body.slice(0, 200)}`);
+      err.code = 'UPSTREAM';
+      throw err;
+    }
+    const data = await res.json();
+    text = (data.content || []).map((c) => c.text || '').join('\n');
+  } else {
+    text = await articleAi.complete({
+      provider: TUTOR_PROVIDER(),
+      system: heThong,
+      messages,
+      maxTokens: MAX_TOKENS,
+      temperature: 0.7,
+    });
+    if (!text) {
+      // Gemini (và Groq nếu có) đều hết hạn mức hoặc lỗi. KHÔNG tự sang Claude.
+      const err = new Error('AI miễn phí tạm hết lượt hoặc đang lỗi');
+      err.code = 'UPSTREAM';
+      throw err;
+    }
   }
-  const data = await res.json();
-  const text = (data.content || []).map((c) => c.text || '').join('\n');
   const out = parseReply(text);
   // Mô hình hay quên dòng LANG hoặc ghi sai — soi lại chính câu nó vừa nói.
   // Giờ học thì luôn là tiếng Anh, dù người học có đáp bằng tiếng Việt.

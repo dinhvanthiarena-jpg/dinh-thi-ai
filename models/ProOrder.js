@@ -17,7 +17,7 @@ const ProOrder = sequelize.define(
     // 'half' = gói 6 tháng. ENUM trong MySQL không tự nới ra khi thêm gói mới —
     // sequelize.sync() chỉ TẠO bảng thiếu chứ không sửa bảng cũ. Thêm gói thì
     // phải chạy scripts/add-thue-columns.js, không thì đơn mua gói mới đổ lỗi.
-    plan: { type: DataTypes.ENUM('month', 'half', 'year', 'family'), allowNull: false },
+    plan: { type: DataTypes.ENUM('month', 'half', 'year', 'family', 'call_year'), allowNull: false },
     // Mã nhóm sinh ra khi mua gói gia đình, để người thân nhập vào mà vào chung.
     familyCode: { type: DataTypes.STRING, defaultValue: '' },
     amount: { type: DataTypes.INTEGER, allowNull: false },

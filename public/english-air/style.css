@@ -2790,3 +2790,10 @@ svg[viewBox="0 0 24 24"] { fill: none; stroke: currentColor; stroke-width: 2; st
    Nút gọi vốn là một dòng chữ; thêm dòng phụ nên phải xếp dọc lại. */
 #btnStartFree, #btnStartCall { display: flex; flex-direction: column; gap: 2px; }
 .goi-con { font-size: .74rem; font-weight: 700; opacity: .82; }
+
+/* ── Banner dùng thử & tiêu đề hai phần thanh toán ── */
+.trial-banner { display: block; width: 100%; margin: 0 0 var(--s3); padding: var(--s3) var(--s4);
+  border: 0; border-radius: var(--r3); background: var(--brand-soft); color: var(--brand-ink);
+  font: inherit; font-weight: 700; text-align: center; cursor: pointer; }
+.trial-banner.last { background: var(--amber-soft); color: var(--amber); }
+.pro-sec { margin: var(--s5) 0 var(--s1); font-size: 1.15rem; }

@@ -35,14 +35,30 @@ const PLANS = {
   // người. Để hiện thì không ai mua gói năm nữa. Giữ lại trong bảng để đơn đã
   // mua trước đây vẫn tra ra tên gói. Thầy chốt giá mới thì bỏ dòng `an` đi.
   family: { months: 12, amount: 349000, ten: 'Gói gia đình', nguoi: 5, an: true },
+  // Phần GỌI NHÂN VẬT (tốn tiền API Claude) bán riêng, có hạn mức lượt mỗi tháng.
+  call_year: { months: 12, amount: 699000, ten: 'Gói gọi nhân vật (năm)', nguoi: 1, loai: 'call',
+    // TẠM ẨN (thầy chốt 2026-11-13: hạn mức còn ít). Bỏ dòng `an` này là bán lại, app tự hiện phần 2.
+    an: true },
 };
 
 /** Các gói ĐANG BÁN — bỏ những gói đã ẩn. Dùng cho trang bán và cho app. */
 function goiDangBan() {
-  return Object.fromEntries(Object.entries(PLANS).filter(([, g]) => !g.an));
+  return Object.fromEntries(Object.entries(PLANS).filter(([, g]) => !g.an && g.loai !== 'call'));
 }
 
-const NGAY_DUNG_THU = 7;
+/** Các gói GỌI NHÂN VẬT đang bán (tách riêng khỏi gói học). */
+function goiGoiDangBan() {
+  return Object.fromEntries(Object.entries(PLANS).filter(([, g]) => !g.an && g.loai === 'call'));
+}
+
+// Dùng thử tính từ NGÀY TẠO TÀI KHOẢN (máy chủ giữ mốc, người dùng không sửa được).
+const NGAY_DUNG_THU = 3;
+// Hạn mức gọi nhân vật. Một lượt = một lần người học nói, một cuộc ~15 lượt (~5 phút).
+// Tính theo giá Claude Haiku 4.5, không cache: ~156đ/lượt → 150 lượt/tháng ≈ 23k/tháng
+// ≈ 281k/năm trên gói 699k (lãi ~60%). Đổi bằng biến môi trường khi đã đo token thật.
+const LUOT_MOT_CUOC = 15;
+const LUOT_DUNG_THU = Number(process.env.CALL_TRIAL_TURNS) || 30; // 2 cuộc
+const LUOT_MOI_THANG = Number(process.env.CALL_TURNS_MONTH) || 150; // 10 cuộc
 const TOI_DA_GIA_DINH = 5;
 
 /** Giá quy về mỗi tháng, để người ta so được gói năm rẻ hơn bao nhiêu. */
@@ -149,13 +165,15 @@ async function ghiNhanDaTra(order, { bankRef = '', bankAmount = null, raw = '', 
   const user = await User.findByPk(order.UserId);
   if (!user) throw new Error('Không tìm thấy người mua của đơn này');
 
-  const mocBatDau = user.proUntil && new Date(user.proUntil) > new Date()
-    ? new Date(user.proUntil)
+  const laGoiGoi = PLANS[order.plan] && PLANS[order.plan].loai === 'call';
+  const hanHienTai = laGoiGoi ? user.callUntil : user.proUntil;
+  const mocBatDau = hanHienTai && new Date(hanHienTai) > new Date()
+    ? new Date(hanHienTai)
     : new Date();
   const hetHan = new Date(mocBatDau);
   hetHan.setMonth(hetHan.getMonth() + order.months);
 
-  const thayDoi = { proUntil: hetHan };
+  const thayDoi = laGoiGoi ? { callUntil: hetHan } : { proUntil: hetHan };
   let maNha = order.familyCode || user.familyCode;
   if (order.plan === 'family') {
     // Chưa có nhóm thì lập nhóm mới, người mua làm chủ nhóm.
@@ -168,7 +186,7 @@ async function ghiNhanDaTra(order, { bankRef = '', bankAmount = null, raw = '', 
   await user.update(thayDoi);
 
   // Chủ nhóm gia hạn thì cả nhà được kéo hạn theo, khỏi ai phải làm gì.
-  if (user.familyOwner && maNha) {
+  if (!laGoiGoi && user.familyOwner && maNha) {
     await User.update({ proUntil: hetHan }, { where: { familyCode: maNha, familyOwner: false } });
   }
 
@@ -237,16 +255,11 @@ async function nguoiTrongNhom(ma) {
 }
 
 /**
- * Bật 7 ngày dùng thử. KHÔNG giữ thẻ, KHÔNG tự trừ tiền — hết 7 ngày là tự về
- * bản miễn phí. Mỗi tài khoản chỉ dùng thử một lần.
+ * Dùng thử nay TỰ BẮT ĐẦU khi tạo tài khoản (3 ngày), không còn nút bấm.
+ * Giữ hàm này để app/web cũ gọi vào không bị lỗi.
  */
-async function batDungThu(user) {
-  if (user.trialUsed) return { loi: 'Bạn đã dùng thử một lần rồi.' };
-  if (conHanPro(user)) return { loi: 'Bạn đang có gói Pro rồi.' };
-  const hetHan = new Date();
-  hetHan.setDate(hetHan.getDate() + NGAY_DUNG_THU);
-  await user.update({ proUntil: hetHan, trialUsed: true });
-  return { ok: true, hetHan };
+async function batDungThu() {
+  return { loi: 'Dùng thử 3 ngày tự bắt đầu từ lúc bạn tạo tài khoản.' };
 }
 
 /** Người này còn hạn Pro không. */
@@ -254,12 +267,73 @@ function conHanPro(user) {
   return Boolean(user && user.proUntil && new Date(user.proUntil) > new Date());
 }
 
+/** Mốc bắt đầu dùng thử: ngày tạo tài khoản, nhưng không sớm hơn ngày bật thu phí. */
+function mocDungThu(user) {
+  if (!user || !user.createdAt) return null;
+  let moc = new Date(user.createdAt);
+  const batDau = process.env.PRO_LAUNCH_AT ? new Date(process.env.PRO_LAUNCH_AT) : null;
+  if (batDau && !Number.isNaN(batDau.getTime()) && batDau > moc) moc = batDau;
+  return moc;
+}
+
+/** Hạn dùng thử và số ngày còn lại (làm tròn lên). */
+function dungThu(user) {
+  const moc = mocDungThu(user);
+  if (!moc) return { con: false, ngayCon: 0, hetHan: null };
+  const hetHan = new Date(moc.getTime() + NGAY_DUNG_THU * 86400000);
+  const ms = hetHan.getTime() - Date.now();
+  return { con: ms > 0, ngayCon: ms > 0 ? Math.ceil(ms / 86400000) : 0, hetHan };
+}
+
+const conHanGoi = (user) => Boolean(user && user.callUntil && new Date(user.callUntil) > new Date());
+const khoaThang = () => new Date().toISOString().slice(0, 7); // "2026-11"
+
 /**
- * Người này có được dùng tính năng trả phí không.
- * Khi PRO_MODE tắt thì AI CŨNG ĐƯỢC — đang để miễn phí cho mọi người.
+ * Người này được dùng PHẦN HỌC không. PRO_MODE tắt thì ai cũng được.
+ * Được khi: còn hạn gói học, còn trong 3 ngày dùng thử, hoặc đã mua gói gọi
+ * (gói gọi chỉ mở gọi, nên KHÔNG tính ở đây).
  */
+function duocHoc(user) {
+  return !dangThuPhi() || conHanPro(user) || dungThu(user).con;
+}
+
+/**
+ * Quyền GỌI NHÂN VẬT còn bao nhiêu lượt.
+ * - PRO_MODE tắt: thoải mái.
+ * - Có gói gọi còn hạn: hạn mức theo tháng.
+ * - Đang dùng thử: hạn mức dùng thử (không cộng dồn qua gói).
+ * - Còn lại: hết quyền, mời mua gói gọi.
+ */
+function quyenGoi(user) {
+  if (!dangThuPhi()) return { duoc: true, loai: 'mien-phi', conLai: null };
+  if (conHanGoi(user)) {
+    const dung = user.callMonth === khoaThang() ? (user.callUsed || 0) : 0;
+    const conLai = Math.max(0, LUOT_MOI_THANG - dung);
+    return { duoc: conLai > 0, loai: 'goi', conLai, tong: LUOT_MOI_THANG, hetHan: user.callUntil, lyDo: conLai > 0 ? '' : 'het-thang' };
+  }
+  if (dungThu(user).con) {
+    const conLai = Math.max(0, LUOT_DUNG_THU - (user.callTrialUsed || 0));
+    return { duoc: conLai > 0, loai: 'thu', conLai, tong: LUOT_DUNG_THU, lyDo: conLai > 0 ? '' : 'het-thu' };
+  }
+  return { duoc: false, loai: 'khong', conLai: 0, tong: 0, lyDo: 'can-mua' };
+}
+
+/** Ghi nhận đã dùng một lượt gọi (gọi SAU khi AI trả lời thành công). */
+async function tieuLuot(user) {
+  if (!user || !dangThuPhi()) return;
+  const q = quyenGoi(user);
+  if (q.loai === 'goi') {
+    const thang = khoaThang();
+    if (user.callMonth !== thang) await user.update({ callMonth: thang, callUsed: 1 });
+    else await user.update({ callUsed: (user.callUsed || 0) + 1 });
+  } else if (q.loai === 'thu') {
+    await user.update({ callTrialUsed: (user.callTrialUsed || 0) + 1 });
+  }
+}
+
+/** Giữ tên cũ cho chỗ nào còn gọi: bây giờ nghĩa là "được học". */
 function duocDung(user) {
-  return !dangThuPhi() || conHanPro(user);
+  return duocHoc(user);
 }
 
 module.exports = {
@@ -281,4 +355,13 @@ module.exports = {
   ghiNhanDaTra,
   conHanPro,
   duocDung,
+  duocHoc,
+  dungThu,
+  quyenGoi,
+  tieuLuot,
+  conHanGoi,
+  goiGoiDangBan,
+  LUOT_MOT_CUOC,
+  LUOT_DUNG_THU,
+  LUOT_MOI_THANG,
 };
