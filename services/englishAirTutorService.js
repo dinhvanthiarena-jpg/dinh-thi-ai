@@ -609,6 +609,10 @@ async function reply({ history, level, words, mode, style }) {
       messages,
       maxTokens: MAX_TOKENS,
       temperature: 0.7,
+      // Gọi bằng giọng nói phải nhanh: model nhẹ đứng đầu, mỗi model chờ tối đa 12 giây rồi sang model khác.
+      models: (process.env.TUTOR_GEMINI_MODELS || 'gemini-3.1-flash-lite,gemini-flash-lite-latest,gemini-flash-latest')
+        .split(',').map((x) => x.trim()).filter(Boolean),
+      timeoutMs: Number(process.env.TUTOR_GEMINI_TIMEOUT_MS) || 12000,
     });
     if (!text) {
       // Gemini (và Groq nếu có) đều hết hạn mức hoặc lỗi. KHÔNG tự sang Claude.

@@ -21,13 +21,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // Model nào đã báo không hiểu thinkingConfig thì lần sau khỏi gửi nữa.
 const modelsWithoutThinkingConfig = new Set();
 
-async function callGeminiOnce(model, key, body) {
+async function callGeminiOnce(model, key, body, timeoutMs) {
   try {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(90000),
+      signal: AbortSignal.timeout(timeoutMs || 90000),
     });
     let json = null;
     try {
@@ -63,7 +63,7 @@ function toGeminiContents(messages) {
   return ra;
 }
 
-async function completeWithGemini({ system, user, messages, imageBase64, mimeType, maxTokens, json, temperature }) {
+async function completeWithGemini({ system, user, messages, imageBase64, mimeType, maxTokens, json, temperature, models, timeoutMs }) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) {
     console.error('[articleAi] Thiếu GEMINI_API_KEY — không viết được bài.');
@@ -90,14 +90,14 @@ async function completeWithGemini({ system, user, messages, imageBase64, mimeTyp
   });
 
   let lastError = '';
-  for (const model of GEMINI_MODELS()) {
+  for (const model of (models && models.length ? models : GEMINI_MODELS())) { // models/timeoutMs: nơi cần nhanh (gia sư Ai) tự chọn
     for (let attempt = 0; attempt < 2; attempt += 1) {
       const useThinkingConfig = !modelsWithoutThinkingConfig.has(model);
-      let r = await callGeminiOnce(model, key, buildBody(useThinkingConfig));
+      let r = await callGeminiOnce(model, key, buildBody(useThinkingConfig), timeoutMs);
 
       if (r.status === 400 && useThinkingConfig) {
         modelsWithoutThinkingConfig.add(model);
-        r = await callGeminiOnce(model, key, buildBody(false));
+        r = await callGeminiOnce(model, key, buildBody(false), timeoutMs);
       }
 
       const text = extractText(r.json);
