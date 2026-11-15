@@ -8,11 +8,41 @@ const PushSubscription = require('../models/PushSubscription');
 const museLicense = require('./museLicenseService');
 const telegram = require('./telegramService');
 const wallet = require('./walletService');
+const Setting = require('../models/Setting');
 
 const GIA = 500000; // đ / 1 tháng
 const NGAY = 30;
 const ZALO = '0965896588';
 const PUSH_APP_ID = 'admin-muse';
+
+// Chat Telegram của thầy: ưu tiên biến môi trường; nếu chưa có thì dùng chat đã liên kết bằng mã /lienket.
+async function layAdminChat() {
+  if (process.env.TELEGRAM_ADMIN_CHAT) return String(process.env.TELEGRAM_ADMIN_CHAT);
+  try {
+    const row = await Setting.findByPk('museTelegramChat');
+    return row && row.value ? String(row.value) : '';
+  } catch (e) { return ''; }
+}
+
+/** Mã liên kết hiện tại (tạo nếu chưa có). Thầy gửi `/lienket MÃ` cho bot để gắn chat của mình. */
+async function layMaLienKet() {
+  let row = await Setting.findByPk('museLinkCode');
+  if (!row || !row.value) {
+    const ma = crypto.randomBytes(4).toString('hex').toUpperCase();
+    await Setting.upsert({ key: 'museLinkCode', value: ma });
+    return ma;
+  }
+  return row.value;
+}
+
+/** Trả true nếu mã đúng: lưu chat, xoá mã (dùng 1 lần). */
+async function lienKetTelegram(chatId, ma) {
+  const row = await Setting.findByPk('museLinkCode');
+  if (!row || !row.value || String(ma).trim().toUpperCase() !== row.value) return false;
+  await Setting.upsert({ key: 'museTelegramChat', value: String(chatId) });
+  await Setting.upsert({ key: 'museLinkCode', value: '' });
+  return true;
+}
 
 const siteUrl = () => (process.env.APP_URL || 'https://3dvietpro.com').replace(/\/$/, '');
 const linkTai = () => `${siteUrl()}/downloads/Sa_Muse_Ai_Setup.exe`;
@@ -91,7 +121,7 @@ async function guiMailKey(reg) {
 const vnd = (n) => `${Number(n).toLocaleString('vi-VN')}đ`;
 
 async function baoThayTelegram(reg) {
-  const chat = process.env.TELEGRAM_ADMIN_CHAT;
+  const chat = await layAdminChat();
   if (!chat) return;
   const text =
     `🔔 Có người đăng ký mua tool Sa Muse Ai\n${reg.name} · ${reg.phone}\n${reg.email}\n` +
@@ -201,7 +231,15 @@ async function xuLyXacNhan(id) {
     fresh.licenseKey = entry.key;
     await fresh.save();
   }
-  return { reg: fresh, ...(await guiLaiMail(fresh)) };
+  const kq = await guiLaiMail(fresh);
+  // Luôn nhắn key cho thầy để thầy chuyển tiếp cho khách nếu mail chưa đi được.
+  layAdminChat().then((chat) => chat && telegram.sendMessage(chat,
+    `🔑 Key của ${fresh.name} (${fresh.phone}): ${fresh.licenseKey}
+Link tải: ${linkTai()}
+` +
+    (kq.daGuiMail ? `Mail đã gửi tới ${fresh.email}.` : `⚠️ Mail CHƯA gửi được (${kq.loiMail}). Thầy gửi key này cho khách qua Zalo ${fresh.phone}.`)
+  )).catch((e) => console.error('[museReg/tgKey]', e.message));
+  return { reg: fresh, ...kq };
 }
 
-module.exports = { GIA, NGAY, ZALO, PUSH_APP_ID, dangKy, thongTinThanhToan, xacNhanDaNhanTien, guiLaiMail, linkTai };
+module.exports = { layAdminChat, layMaLienKet, lienKetTelegram, GIA, NGAY, ZALO, PUSH_APP_ID, dangKy, thongTinThanhToan, xacNhanDaNhanTien, guiLaiMail, linkTai };

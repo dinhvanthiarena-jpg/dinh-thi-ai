@@ -22,7 +22,8 @@ router.get('/', async (req, res) => {
     regs,
     pushCount,
     vapidPublic: process.env.VAPID_PUBLIC_KEY || '',
-    telegramOk: Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_ADMIN_CHAT),
+    telegramOk: Boolean(process.env.TELEGRAM_BOT_TOKEN && (await svc.layAdminChat())),
+    maLienKet: (await svc.layAdminChat()) ? '' : await svc.layMaLienKet(),
     mailOk: Boolean(process.env.MUSE_MAIL_PASS || (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS)),
     msg: String(req.query.msg || '').slice(0, 300),
   });

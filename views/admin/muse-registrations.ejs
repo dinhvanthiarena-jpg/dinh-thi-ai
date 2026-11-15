@@ -15,10 +15,16 @@
       <div class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800 break-all"><%= msg %></div>
     <% } %>
     <div class="mt-4 flex flex-wrap gap-3 text-sm">
-      <span class="badge <%= telegramOk ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-50 text-rose-700' %>">Telegram: <%= telegramOk ? 'đã cấu hình' : 'chưa cấu hình (TELEGRAM_BOT_TOKEN, TELEGRAM_ADMIN_CHAT)' %></span>
+      <span class="badge <%= telegramOk ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-50 text-rose-700' %>">Telegram: <%= telegramOk ? 'đã liên kết' : 'CHƯA liên kết' %></span>
       <span class="badge <%= mailOk ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-50 text-rose-700' %>">Gửi mail: <%= mailOk ? 'đã cấu hình' : 'chưa cấu hình (MUSE_MAIL_PASS)' %></span>
       <span class="badge bg-slate-100 text-slate-800">Thiết bị nhận thông báo: <span id="pushCount"><%= pushCount %></span></span>
     </div>
+    <% if (maLienKet) { %>
+      <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <strong>Liên kết Telegram (làm 1 lần):</strong> mở Telegram, nhắn cho bot <strong>@DinhthiAi_bot</strong> đúng dòng này:
+        <div class="mt-1 font-mono text-base font-bold select-all">/lienket <%= maLienKet %></div>
+      </div>
+    <% } %>
     <% if (vapidPublic) { %>
       <button id="btnPush" type="button" class="btn-primary mt-4">🔔 Bật thông báo trên thiết bị này (iPhone: thêm web vào Màn hình chính trước)</button>
       <span id="pushMsg" class="ml-3 text-sm text-muted"></span>

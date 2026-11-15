@@ -17,7 +17,7 @@ exports.receive = async (req, res) => {
   const cb = req.body && req.body.callback_query;
   if (cb) {
     try {
-      const adminChat = String(process.env.TELEGRAM_ADMIN_CHAT || '');
+      const adminChat = await require('../services/museRegistrationService').layAdminChat();
       const fromChat = String(cb.message && cb.message.chat && cb.message.chat.id);
       const m = /^muse_paid:(\d+)$/.exec(cb.data || '');
       if (!adminChat || fromChat !== adminChat || !m) {
@@ -43,6 +43,20 @@ exports.receive = async (req, res) => {
   const chatId = message && message.chat && message.chat.id;
   const text = message && message.text;
   if (!chatId || !text) return;
+
+  // Thầy gắn chat Telegram để nhận báo đăng ký: gửi `/lienket MÃ` (mã hiện ở /admin/dang-ky-muse).
+  const lk = /^\/lienket(?:@\w+)?\s+(\S+)/i.exec(text);
+  if (lk) {
+    try {
+      const ok = await require('../services/museRegistrationService').lienKetTelegram(chatId, lk[1]);
+      await telegramService.sendMessage(chatId, ok
+        ? '✅ Đã liên kết! Từ giờ có người đăng ký mua tool Sa Muse Ai, em báo ở đây kèm nút "Đã nhận tiền – gửi key".'
+        : 'Mã không đúng hoặc đã dùng. Vào 3dvietpro.com/admin/dang-ky-muse để lấy mã mới.');
+    } catch (err) {
+      console.error('[telegramController] lienket error', err);
+    }
+    return;
+  }
 
   try {
     const reply = await chatbotService.getReply({
