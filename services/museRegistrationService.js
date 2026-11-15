@@ -12,7 +12,7 @@ const Setting = require('../models/Setting');
 
 const GIA = 500000; // đ / 1 tháng
 const NGAY = 30;
-const ZALO = '0965896588';
+const ZALO = '0977317988';
 const PUSH_APP_ID = 'admin-muse';
 
 // Chat Telegram của thầy: ưu tiên biến môi trường; nếu chưa có thì dùng chat đã liên kết bằng mã /lienket.
