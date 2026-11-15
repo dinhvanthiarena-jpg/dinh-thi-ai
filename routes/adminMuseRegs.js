@@ -64,6 +64,15 @@ router.post('/:id/paid', async (req, res) => {
   return back(res, `Đã cấp key ${r.reg.licenseKey} nhưng gửi mail LỖI: ${r.loiMail}`);
 });
 
+// Xoá đăng ký (rác/đơn thử); nếu đã cấp key thì THU HỒI key luôn.
+router.post('/:id/delete', async (req, res) => {
+  const reg = await MuseRegistration.findByPk(req.params.id);
+  if (!reg) return back(res, 'Không tìm thấy đăng ký.');
+  if (reg.licenseKey) require('../services/museLicenseService').revokeKey(reg.licenseKey);
+  await reg.destroy();
+  return back(res, `Đã xoá đăng ký ${reg.code}${reg.licenseKey ? ' và thu hồi key ' + reg.licenseKey : ''}.`);
+});
+
 router.post('/:id/resend', async (req, res) => {
   const reg = await MuseRegistration.findByPk(req.params.id);
   if (!reg || !reg.licenseKey) return back(res, 'Chưa có key để gửi lại.');

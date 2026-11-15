@@ -63,6 +63,7 @@
               <% } %>
             </td>
             <td class="p-3">
+              <form action="/admin/dang-ky-muse/<%= r.id %>/delete" method="POST" class="mb-2" onsubmit="return confirm('Xoá đăng ký này (và thu hồi key nếu đã cấp)?');"><button class="text-xs text-rose-700 underline" type="submit">🗑 Xoá</button></form>
               <% if (r.status !== 'da-thanh-toan') { %>
                 <form action="/admin/dang-ky-muse/<%= r.id %>/paid" method="POST" onsubmit="return confirm('Xác nhận ĐÃ NHẬN TIỀN của <%= r.name.replace(/'/g, '') %>? Hệ thống sẽ cấp key và gửi mail ngay.');">
                   <button class="btn-primary" type="submit">✅ Đã nhận tiền – gửi key</button>
