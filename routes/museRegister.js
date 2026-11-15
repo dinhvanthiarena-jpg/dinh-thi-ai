@@ -22,6 +22,14 @@ router.post('/', limiter, async (req, res) => {
       errors: [{ msg: 'Vui lòng tick xác nhận bạn đã đọc và hiểu các yêu cầu.' }],
     });
   }
+  const e1 = String(req.body.email || '').trim().toLowerCase();
+  const e2 = String(req.body.email2 || '').trim().toLowerCase();
+  if (e1 !== e2) {
+    return res.status(400).render('muse-register', {
+      title: TITLE, gia: svc.GIA, ngay: svc.NGAY, zalo: svc.ZALO, old: req.body, done: null, pay: null,
+      errors: [{ msg: 'Hai ô Gmail chưa giống nhau, vui lòng kiểm tra lại để nhận được key.' }],
+    });
+  }
   try {
     const r = await svc.dangKy(req.body);
     if (r.loi) {

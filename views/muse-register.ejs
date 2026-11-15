@@ -99,6 +99,10 @@
               <input class="input" type="email" id="email" name="email" value="<%= old.email || '' %>" required />
             </div>
           </div>
+          <div>
+            <label class="label" for="email2">Nhập lại Gmail để chắc chắn nhận được key *</label>
+            <input class="input" type="email" id="email2" name="email2" value="<%= old.email2 || '' %>" autocomplete="off" required />
+          </div>
           <div class="grid sm:grid-cols-2 gap-4">
             <div>
               <label class="label" for="hasClaude">Bạn đã có Claude Pro (20 USD) chưa?</label>
