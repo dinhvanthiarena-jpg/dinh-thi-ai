@@ -7,7 +7,6 @@ const MuseRegistration = require('../models/MuseRegistration');
 const PushSubscription = require('../models/PushSubscription');
 const museLicense = require('./museLicenseService');
 const telegram = require('./telegramService');
-const wallet = require('./walletService');
 const Setting = require('../models/Setting');
 
 const GIA = 500000; // đ / 1 tháng
@@ -184,10 +183,20 @@ async function dangKy(data) {
   return { reg };
 }
 
+// Tài khoản nhận tiền RIÊNG cho tool Sa Muse Ai (thầy chốt 2026-11-16): MB Bank (BIN 970422).
+// Không dùng BANK_* chung của web để không ảnh hưởng các trang khác.
+const NHAN_TIEN = { bin: '970422', nganHang: 'MB Bank', soTaiKhoan: '0468263414999', chuTaiKhoan: 'TRINH THI CANH' };
+
 function thongTinThanhToan(reg) {
-  if (!wallet.sanSangNhanTien()) return null;
-  const tx = { amount: reg.amount, code: reg.code };
-  return { anh: wallet.anhQR(tx), ...wallet.thongTinChuyenKhoan(tx) };
+  const q = new URLSearchParams({ amount: String(reg.amount), addInfo: reg.code, accountName: NHAN_TIEN.chuTaiKhoan });
+  return {
+    anh: `https://img.vietqr.io/image/${NHAN_TIEN.bin}-${NHAN_TIEN.soTaiKhoan}-compact2.png?${q.toString()}`,
+    nganHang: NHAN_TIEN.nganHang,
+    soTaiKhoan: NHAN_TIEN.soTaiKhoan,
+    chuTaiKhoan: NHAN_TIEN.chuTaiKhoan,
+    soTien: reg.amount,
+    noiDung: reg.code,
+  };
 }
 
 async function guiLaiMail(reg) {
