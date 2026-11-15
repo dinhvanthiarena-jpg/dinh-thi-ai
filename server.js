@@ -238,6 +238,8 @@ app.use('/kho-tai-nguyen', toolRoutes);
 app.use('/admin/gia-key-sa-botai', require('./routes/adminFbaiPricing'));
 app.use('/admin/key-sa-film-ai', require('./routes/adminSafilmKeys'));
 app.use('/admin/key-muse', require('./routes/adminMuseKeys'));
+app.use('/admin/dang-ky-muse', require('./routes/adminMuseRegs'));
+app.use('/dang-ky-tool-muse', require('./routes/museRegister'));
 app.use('/admin/hop-dong-sa-botai', require('./routes/adminContracts'));
 app.use('/phap-ly-sa-botai', require('./routes/saAiBotLegal'));
 app.use('/admin', adminRoutes);

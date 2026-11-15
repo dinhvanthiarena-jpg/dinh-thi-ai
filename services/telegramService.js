@@ -68,4 +68,22 @@ async function ensureWebhook() {
   }
 }
 
-module.exports = { sendMessage, ensureWebhook };
+async function callApi(method, body) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return null;
+  const res = await fetch(`${TELEGRAM_API_URL}/bot${token}/${method}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) console.error(`[telegramService] ${method} error`, res.status, await res.text());
+  return res.ok;
+}
+
+// Tin nhắn có nút bấm (inline keyboard): buttons = [[{ text, callback_data }]]
+const sendMessageWithButtons = (chatId, text, buttons) =>
+  callApi('sendMessage', { chat_id: chatId, text, reply_markup: { inline_keyboard: buttons } });
+const answerCallbackQuery = (id, text) => callApi('answerCallbackQuery', { callback_query_id: id, text: text || '', show_alert: false });
+const editMessageText = (chatId, messageId, text) => callApi('editMessageText', { chat_id: chatId, message_id: messageId, text });
+
+module.exports = { sendMessage, ensureWebhook, sendMessageWithButtons, answerCallbackQuery, editMessageText };

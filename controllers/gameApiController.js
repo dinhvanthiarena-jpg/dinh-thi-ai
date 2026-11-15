@@ -88,6 +88,9 @@ exports.pushSubscribe = async (req, res) => {
   if (typeof endpoint !== 'string' || !endpoint.trim() || !keys || typeof keys.p256dh !== 'string' || typeof keys.auth !== 'string') {
     return res.status(400).json({ ok: false, message: 'Thiếu thông tin đăng ký thông báo.' });
   }
+  if (typeof appId === 'string' && appId.startsWith('admin')) {
+    return res.status(403).json({ ok: false, message: 'Không hợp lệ.' });
+  }
   try {
     const existing = await PushSubscription.findOne({ where: { endpoint: endpoint.trim() } });
     const data = {

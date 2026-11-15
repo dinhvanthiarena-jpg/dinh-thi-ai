@@ -1,0 +1,95 @@
+<%
+  const fmt = (d) => d ? new Date(d).toLocaleString('vi-VN') : '';
+  const vnd = (n) => Number(n).toLocaleString('vi-VN') + 'đ';
+  const choCount = regs.filter(r => r.status !== 'da-thanh-toan').length;
+%>
+<div class="space-y-6 max-w-6xl">
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-1">🛒 Đăng ký mua tool Sa Muse Ai</h2>
+    <p class="text-sm text-muted">
+      Trang khách: <a class="underline" href="/dang-ky-tool-muse" target="_blank">/dang-ky-tool-muse</a>.
+      Thấy tiền về thì bấm <strong>Đã nhận tiền</strong>: hệ thống tự cấp key 30 ngày và gửi mail key + link tải cho khách.
+      Đang chờ chuyển khoản: <strong><%= choCount %></strong>.
+    </p>
+    <% if (msg) { %>
+      <div class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-800 break-all"><%= msg %></div>
+    <% } %>
+    <div class="mt-4 flex flex-wrap gap-3 text-sm">
+      <span class="badge <%= telegramOk ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' %>">Telegram: <%= telegramOk ? 'đã cấu hình' : 'chưa cấu hình (TELEGRAM_BOT_TOKEN, TELEGRAM_ADMIN_CHAT)' %></span>
+      <span class="badge <%= mailOk ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' %>">Gửi mail: <%= mailOk ? 'đã cấu hình' : 'chưa cấu hình (MUSE_MAIL_PASS)' %></span>
+      <span class="badge bg-slate-100 text-slate-800">Thiết bị nhận thông báo: <span id="pushCount"><%= pushCount %></span></span>
+    </div>
+    <% if (vapidPublic) { %>
+      <button id="btnPush" type="button" class="btn-primary mt-4">🔔 Bật thông báo trên thiết bị này (iPhone: thêm web vào Màn hình chính trước)</button>
+      <span id="pushMsg" class="ml-3 text-sm text-muted"></span>
+    <% } else { %>
+      <p class="mt-3 text-sm text-rose-700">Chưa có khoá VAPID trên máy chủ nên chưa bật được thông báo đẩy của web (Telegram vẫn báo bình thường).</p>
+    <% } %>
+  </div>
+
+  <div class="card p-0 overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-left text-muted">
+        <tr><th class="p-3">Thời gian</th><th class="p-3">Khách</th><th class="p-3">Claude / Muse</th><th class="p-3">Mã CK</th><th class="p-3">Trạng thái</th><th class="p-3">Thao tác</th></tr>
+      </thead>
+      <tbody>
+        <% if (!regs.length) { %><tr><td class="p-4 text-muted" colspan="6">Chưa có ai đăng ký.</td></tr><% } %>
+        <% regs.forEach(function (r) { %>
+          <tr class="border-t align-top">
+            <td class="p-3 whitespace-nowrap"><%= fmt(r.createdAt) %></td>
+            <td class="p-3">
+              <div class="font-semibold"><%= r.name %></div>
+              <div><a class="underline" href="tel:<%= r.phone %>"><%= r.phone %></a> · <a class="underline" href="https://zalo.me/<%= r.phone %>" target="_blank" rel="noopener">Zalo</a></div>
+              <div class="break-all"><%= r.email %></div>
+              <% if (r.note) { %><div class="text-muted mt-1">“<%= r.note %>”</div><% } %>
+            </td>
+            <td class="p-3"><%= r.hasClaude || '-' %><br><%= r.hasMuse || '-' %></td>
+            <td class="p-3 font-mono"><%= r.code %><br><span class="text-muted"><%= vnd(r.amount) %></span></td>
+            <td class="p-3">
+              <% if (r.status === 'da-thanh-toan') { %>
+                <span class="badge bg-emerald-100 text-emerald-800">Đã nhận tiền</span>
+                <div class="font-mono text-xs break-all mt-1"><%= r.licenseKey %></div>
+                <div class="text-xs mt-1 <%= r.emailSentAt ? 'text-emerald-700' : 'text-rose-700' %>">
+                  <%= r.emailSentAt ? 'Đã gửi mail ' + fmt(r.emailSentAt) : 'Chưa gửi được mail: ' + (r.emailError || '') %>
+                </div>
+              <% } else { %>
+                <span class="badge bg-amber-100 text-amber-800">Chờ chuyển khoản</span>
+              <% } %>
+            </td>
+            <td class="p-3">
+              <% if (r.status !== 'da-thanh-toan') { %>
+                <form action="/admin/dang-ky-muse/<%= r.id %>/paid" method="POST" onsubmit="return confirm('Xác nhận ĐÃ NHẬN TIỀN của <%= r.name.replace(/'/g, '') %>? Hệ thống sẽ cấp key và gửi mail ngay.');">
+                  <button class="btn-primary" type="submit">✅ Đã nhận tiền – gửi key</button>
+                </form>
+              <% } else { %>
+                <form action="/admin/dang-ky-muse/<%= r.id %>/resend" method="POST"><button class="btn-secondary" type="submit">✉️ Gửi lại mail</button></form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<% if (vapidPublic) { %>
+<script>
+(function () {
+  var btn = document.getElementById('btnPush'), msg = document.getElementById('pushMsg');
+  function b64(s) { var p = '='.repeat((4 - s.length % 4) % 4), r = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')), o = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) o[i] = r.charCodeAt(i); return o; }
+  btn.addEventListener('click', async function () {
+    try {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) { msg.textContent = 'Thiết bị/trình duyệt này chưa hỗ trợ. Trên iPhone: bấm Chia sẻ → Thêm vào Màn hình chính, rồi mở từ biểu tượng đó.'; return; }
+      var perm = await Notification.requestPermission();
+      if (perm !== 'granted') { msg.textContent = 'Bạn chưa cho phép thông báo.'; return; }
+      var reg = await navigator.serviceWorker.register('/admin/dang-ky-muse/sw.js', { scope: '/admin/dang-ky-muse/' });
+      await navigator.serviceWorker.ready;
+      var sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64('<%= vapidPublic %>') });
+      var j = sub.toJSON();
+      var r = await fetch('/admin/dang-ky-muse/push-subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ endpoint: j.endpoint, keys: j.keys }) });
+      msg.textContent = r.ok ? 'Đã bật thông báo cho thiết bị này.' : 'Lưu không được, thử lại.';
+    } catch (e) { msg.textContent = 'Lỗi: ' + e.message; }
+  });
+})();
+</script>
+<% } %>

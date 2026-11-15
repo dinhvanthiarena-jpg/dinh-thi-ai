@@ -30,6 +30,7 @@ const WithdrawRequest = require('./WithdrawRequest');
 const Setting = require('./Setting');
 const AffiliateLink = require('./AffiliateLink');
 const AuditLog = require('./AuditLog');
+const MuseRegistration = require('./MuseRegistration');
 
 Course.hasMany(Lesson, { foreignKey: 'CourseId', onDelete: 'CASCADE' });
 Lesson.belongsTo(Course, { foreignKey: 'CourseId', as: 'course' });
@@ -121,4 +122,5 @@ module.exports = {
   Setting,
   AffiliateLink,
   AuditLog,
+  MuseRegistration,
 };
