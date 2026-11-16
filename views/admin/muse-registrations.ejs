@@ -55,6 +55,9 @@
               <% if (r.status === 'da-thanh-toan') { %>
                 <span class="badge bg-emerald-100 text-emerald-800">Đã nhận tiền</span>
                 <div class="font-mono text-xs break-all mt-1"><%= r.licenseKey %></div>
+                <% if (hanKey[r.licenseKey]) { const con = Math.ceil((hanKey[r.licenseKey] - Date.now()) / 86400000); %>
+                  <div class="text-xs mt-1 <%= con <= 3 ? 'text-rose-700 font-semibold' : 'text-muted' %>">Hạn: <%= new Date(hanKey[r.licenseKey]).toLocaleDateString('vi-VN') %> (<%= con > 0 ? 'còn ' + con + ' ngày' : 'ĐÃ HẾT HẠN' %>)</div>
+                <% } %>
                 <div class="text-xs mt-1 <%= r.emailSentAt ? 'text-emerald-800' : 'text-rose-700' %>">
                   <%= r.emailSentAt ? 'Đã gửi mail ' + fmt(r.emailSentAt) : 'Chưa gửi được mail: ' + (r.emailError || '') %>
                 </div>
@@ -69,6 +72,7 @@
                   <button class="btn-primary" type="submit">✅ Đã nhận tiền – gửi key</button>
                 </form>
               <% } else { %>
+                <form action="/admin/dang-ky-muse/<%= r.id %>/extend" method="POST" class="mb-2" onsubmit="return confirm('Gia hạn thêm 30 ngày cho khách này? (chỉ bấm khi đã nhận 500.000đ)');"><button class="btn-primary" type="submit">🔁 Gia hạn +30 ngày</button></form>
                 <form action="/admin/dang-ky-muse/<%= r.id %>/resend" method="POST"><button class="btn-secondary" type="submit">✉️ Gửi lại mail</button></form>
               <% } %>
             </td>

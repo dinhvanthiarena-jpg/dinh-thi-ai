@@ -17,9 +17,12 @@ const back = (res, msg) => res.redirect('/admin/dang-ky-muse' + (msg ? `?msg=${e
 router.get('/', async (req, res) => {
   const regs = await MuseRegistration.findAll({ order: [['createdAt', 'DESC']], limit: 500 });
   const pushCount = await PushSubscription.count({ where: { appId: svc.PUSH_APP_ID } });
+  const hanKey = {};
+  require('../services/museLicenseService').listKeys().forEach((k) => { hanKey[k.key] = k.expiresAt; });
   res.render('admin/muse-registrations', {
     title: 'Đăng ký tool Sa Muse Ai',
     regs,
+    hanKey,
     pushCount,
     vapidPublic: process.env.VAPID_PUBLIC_KEY || '',
     telegramOk: Boolean(process.env.TELEGRAM_BOT_TOKEN && (await svc.layAdminChat())),
@@ -71,6 +74,12 @@ router.post('/:id/delete', async (req, res) => {
   if (reg.licenseKey) require('../services/museLicenseService').revokeKey(reg.licenseKey);
   await reg.destroy();
   return back(res, `Đã xoá đăng ký ${reg.code}${reg.licenseKey ? ' và thu hồi key ' + reg.licenseKey : ''}.`);
+});
+
+router.post('/:id/extend', async (req, res) => {
+  const r = await svc.giaHan(req.params.id);
+  if (r.loi) return back(res, r.loi);
+  return back(res, `Đã gia hạn +${svc.NGAY} ngày cho ${r.reg.name}. Hạn mới: ${new Date(r.het).toLocaleDateString('vi-VN')}.`);
 });
 
 router.post('/:id/resend', async (req, res) => {

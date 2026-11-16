@@ -297,6 +297,7 @@ connectDB()
     startScheduler();
     batDauNhacHoc();   // nhắc học cho English Air
     telegramService.ensureWebhook();
+    require('./services/museRegistrationService').batDauNhacHetHan();
     if (zaloAutoService) {
       zaloAutoService.init().catch((e) => console.error('[zaloAutoService] init lỗi:', e.message));
     }

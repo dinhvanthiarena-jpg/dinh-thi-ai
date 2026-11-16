@@ -102,6 +102,7 @@ async function guiMailKey(reg) {
     '',
     'Cách dùng: tải và cài tool trên máy Windows, mở lên, dán key vào màn hình nhập key.',
     'Để tool tự chạy ngày đêm, bạn cần có Claude gói 20 USD/tháng và tài khoản Muse.',
+    `Key dùng ${NGAY} ngày. Hết hạn, nhắn Zalo admin ${ZALO} để gia hạn ${vnd(GIA)}/${NGAY} ngày.`,
     '',
     `Cần hỗ trợ cài đặt: nhắn Zalo admin ${ZALO}.`,
   ].join('\n');
@@ -112,6 +113,7 @@ async function guiMailKey(reg) {
     `<p><a href="${esc(linkTai())}" style="background:#0ea5e9;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:700">Tải tool Sa Muse Ai</a></p>` +
     `<p>Cách dùng: tải và cài tool trên máy Windows, mở lên, dán key vào màn hình nhập key.<br>` +
     `Để tool tự chạy ngày đêm, bạn cần có Claude gói 20 USD/tháng và tài khoản Muse.</p>` +
+    `<p>Key dùng <b>${NGAY} ngày</b>. Hết hạn, nhắn Zalo admin <b>${ZALO}</b> để gia hạn <b>${vnd(GIA)}/${NGAY} ngày</b>.</p>` +
     `<p>Cần hỗ trợ cài đặt: nhắn Zalo admin <b>${ZALO}</b>.</p>`;
   await m.t.sendMail({ from: `"Sa Muse Ai" <${m.from}>`, to: reg.email, subject: 'Key và link tải tool Sa Muse Ai của bạn', text, html });
 }
@@ -251,4 +253,48 @@ Link tải: ${linkTai()}
   return { reg: fresh, ...kq };
 }
 
-module.exports = { layAdminChat, layMaLienKet, lienKetTelegram, GIA, NGAY, ZALO, PUSH_APP_ID, dangKy, thongTinThanhToan, xacNhanDaNhanTien, guiLaiMail, linkTai };
+const DAY_MS = 24 * 60 * 60 * 1000;
+const dmy = (ms) => new Date(ms).toLocaleDateString('vi-VN');
+
+/** Gia hạn thêm 30 ngày (cộng vào hạn còn lại), nhắn thầy xác nhận. */
+async function giaHan(id) {
+  const reg = await MuseRegistration.findByPk(id);
+  if (!reg || !reg.licenseKey) return { loi: 'Đăng ký này chưa có key để gia hạn.' };
+  const entry = museLicense.extendKey(reg.licenseKey, NGAY);
+  if (!entry) return { loi: 'Không tìm thấy key.' };
+  const chat = await layAdminChat();
+  if (chat) telegram.sendMessage(chat, `🔁 Đã gia hạn +${NGAY} ngày cho ${reg.name} (${reg.phone}). Hạn mới: ${dmy(entry.expiresAt)}.`).catch(() => {});
+  return { reg, het: entry.expiresAt };
+}
+
+/** Quét key đã bán: nhắn thầy khi còn ≤3 ngày và khi đã hết hạn (mỗi mốc nhắn 1 lần). */
+async function nhacHetHan() {
+  const chat = await layAdminChat();
+  if (!chat) return;
+  const regs = await MuseRegistration.findAll({ where: { status: 'da-thanh-toan' } });
+  const keys = new Map(museLicense.listKeys().map((k) => [k.key, k]));
+  for (const reg of regs) {
+    const k = keys.get(reg.licenseKey);
+    if (!k || !k.expiresAt || k.active === false) continue;
+    const conLai = k.expiresAt - Date.now();
+    let moc = '';
+    if (conLai <= 0) moc = 'het';
+    else if (conLai <= 3 * DAY_MS) moc = 'sap';
+    if (!moc) continue;
+    const dau = `museNhacHan:${reg.id}:${k.expiresAt}:${moc}`;
+    if (await Setting.findByPk(dau)) continue;
+    await Setting.upsert({ key: dau, value: '1' });
+    const ngayCon = Math.max(0, Math.ceil(conLai / DAY_MS));
+    await telegram.sendMessage(chat, moc === 'het'
+      ? `⛔ Key của ${reg.name} (${reg.phone}) ĐÃ HẾT HẠN ${dmy(k.expiresAt)}. Liên hệ khách (Zalo ${reg.phone}) để gia hạn ${vnd(GIA)}/${NGAY} ngày, rồi vào /admin/dang-ky-muse bấm "Gia hạn +${NGAY} ngày".`
+      : `⏰ Key của ${reg.name} (${reg.phone}) còn ${ngayCon} ngày (hết ${dmy(k.expiresAt)}). Nhắc khách gia hạn ${vnd(GIA)}/${NGAY} ngày qua Zalo ${reg.phone}.`);
+  }
+}
+
+function batDauNhacHetHan() {
+  const chay = () => nhacHetHan().catch((e) => console.error('[museReg/nhacHetHan]', e.message));
+  setTimeout(chay, 60 * 1000);
+  setInterval(chay, 6 * 60 * 60 * 1000);
+}
+
+module.exports = { giaHan, nhacHetHan, batDauNhacHetHan, layAdminChat, layMaLienKet, lienKetTelegram, GIA, NGAY, ZALO, PUSH_APP_ID, dangKy, thongTinThanhToan, xacNhanDaNhanTien, guiLaiMail, linkTai };
