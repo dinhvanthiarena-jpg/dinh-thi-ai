@@ -11,6 +11,17 @@
   .mr-formcard { background: #fff; border-radius: 16px; padding: 28px; color: #111827; }
   .mr-err { border: 1px solid #fecdd3; background: #fff1f2; color: #be123c; border-radius: 10px; padding: 10px 14px; font-size: 14px; margin-bottom: 14px; }
   .mr-red { color: #e11d48; }
+  .mr-gal { background: #0b1220; padding: 44px 0 8px; }
+  .mr-gal h2 { color: #fff; font-weight: 800; font-size: 24px; text-align: center; }
+  .mr-gal p.sub { color: #cbd5e1; text-align: center; margin-top: 6px; font-size: 14px; }
+  .mr-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 22px; }
+  .mr-grid figure { margin: 0; border-radius: 14px; overflow: hidden; position: relative; background: #111827; }
+  .mr-grid img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .mr-grid figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 12px 10px; font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.8)); }
+  .mr-grid .wide { aspect-ratio: 16 / 9; }
+  .mr-grid .tall { aspect-ratio: 9 / 16; }
+  .mr-row-tall { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; max-width: 420px; margin-left: auto; margin-right: auto; }
+  @media (min-width: 720px) { .mr-grid { grid-template-columns: repeat(4, 1fr); } .mr-row-tall { max-width: 460px; } }
 </style>
 <%
   const vnd = (n) => Number(n).toLocaleString('vi-VN') + 'đ';
@@ -28,6 +39,24 @@
     <a href="#dk-form" class="mr-cta" style="margin-top:24px">
       🛒 Đăng ký mua tool
     </a>
+  </div>
+</section>
+
+<section class="mr-gal">
+  <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <h2>🎬 Các thể loại phim làm bằng Sa Muse Ai</h2>
+    <p class="sub">Hình ảnh thật từ các tập phim đã được tạo bằng tool. Mỗi thể loại là một "Loại phim" riêng trong tool.</p>
+    <div class="mr-grid">
+      <figure class="wide"><img src="/images/muse/co-trang-1.jpg" alt="Phim cổ trang – Hoàng đế xuyên không" loading="lazy" /><figcaption>Hoàng đế xuyên không</figcaption></figure>
+      <figure class="wide"><img src="/images/muse/co-trang-2.jpg" alt="Phim cổ trang – dạy dân làm việc" loading="lazy" /><figcaption>Cổ trang</figcaption></figure>
+      <figure class="wide"><img src="/images/muse/cung-dinh-1.jpg" alt="Phim cung đình" loading="lazy" /><figcaption>Cung đình</figcaption></figure>
+      <figure class="wide"><img src="/images/muse/xuyen-khong-1.jpg" alt="Phim xuyên không" loading="lazy" /><figcaption>Xuyên không</figcaption></figure>
+    </div>
+    <div class="mr-row-tall">
+      <figure class="tall mr-grid-figure" style="margin:0;border-radius:14px;overflow:hidden;position:relative"><img src="/images/muse/hoat-hinh-1.jpg" alt="Phim hoạt hình Bà phù thủy" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover" /></figure>
+      <figure class="tall mr-grid-figure" style="margin:0;border-radius:14px;overflow:hidden;position:relative"><img src="/images/muse/hoat-hinh-2.jpg" alt="Phim hoạt hình Bà phù thủy" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover" /></figure>
+    </div>
+    <p class="sub" style="margin-top:12px">Hoạt hình dọc 9:16 – Bà phù thủy Kaka</p>
   </div>
 </section>
 
