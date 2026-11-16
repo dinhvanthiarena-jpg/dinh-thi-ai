@@ -12,6 +12,17 @@
       </div>
     </div>
 
+    <% if (tool.slug && tool.slug.indexOf('sa-muse-ai') === 0) { %>
+      <div style="margin-top:28px;border:2px solid #facc15;background:linear-gradient(135deg,#06182b,#0b2a4a);color:#fff;border-radius:18px;padding:22px;display:flex;flex-wrap:wrap;align-items:center;gap:16px;justify-content:space-between">
+        <div style="min-width:220px">
+          <div style="font-weight:800;font-size:20px">🛒 Mua tool Sa Muse Ai</div>
+          <div style="margin-top:4px;color:#fde047;font-weight:800;font-size:22px">500.000đ <span style="color:#e5e7eb;font-size:14px;font-weight:600">/ 30 ngày</span></div>
+          <div style="margin-top:4px;color:#cbd5e1;font-size:13px">Đăng ký, chuyển khoản, nhận key và link tải qua Gmail.</div>
+        </div>
+        <a href="/dang-ky-tool-muse" style="background:#facc15;color:#111827;font-weight:800;font-size:17px;padding:13px 30px;border-radius:999px;text-decoration:none;box-shadow:0 8px 20px rgba(0,0,0,.3)">Đăng ký mua tool →</a>
+      </div>
+    <% } %>
+
     <%# Tool chạy thẳng trên web (không có file cài): ảnh giới thiệu đặt ngay dưới tên tool, trước nút mở. %>
     <% var galleryTop = !!(tool.webAppUrl && tool.galleryImages && tool.galleryImages.length && (tool.driveUrl === tool.webAppUrl || !tool.driveFileId)); %>
     <% if (galleryTop) { %>
