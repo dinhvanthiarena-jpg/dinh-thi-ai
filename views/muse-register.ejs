@@ -11,6 +11,22 @@
   .mr-formcard { background: #fff; border-radius: 16px; padding: 28px; color: #111827; }
   .mr-err { border: 1px solid #fecdd3; background: #fff1f2; color: #be123c; border-radius: 10px; padding: 10px 14px; font-size: 14px; margin-bottom: 14px; }
   .mr-red { color: #e11d48; }
+  .mr-info { background: #fff; padding: 44px 0 8px; color: #111827; }
+  .mr-info h2 { font-weight: 800; font-size: 24px; text-align: center; color: #0b2a4a; }
+  .mr-info p.sub { text-align: center; margin-top: 6px; color: #475569; font-size: 14px; }
+  .mr-steps { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 22px; }
+  .mr-step { border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; background: #f8fafc; }
+  .mr-step b.n { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 999px; background: #0b2a4a; color: #fde047; font-weight: 800; margin-right: 8px; }
+  .mr-step .t { font-weight: 800; color: #0b2a4a; }
+  .mr-step p { margin: 8px 0 0; font-size: 14px; color: #334155; }
+  .mr-feat { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 22px; }
+  .mr-feat div { border-left: 4px solid #facc15; background: #f8fafc; border-radius: 8px; padding: 12px 14px; font-size: 14px; color: #334155; }
+  .mr-feat div b { color: #0b2a4a; }
+  .mr-faq { margin-top: 26px; }
+  .mr-faq details { border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; margin-top: 8px; background: #fff; }
+  .mr-faq summary { cursor: pointer; font-weight: 700; color: #0b2a4a; }
+  .mr-faq details p { margin: 8px 0 0; font-size: 14px; color: #334155; }
+  @media (min-width: 720px) { .mr-steps { grid-template-columns: repeat(3, 1fr); } .mr-feat { grid-template-columns: repeat(2, 1fr); } }
   .mr-gal { background: #0b1220; padding: 44px 0 8px; }
   .mr-gal h2 { color: #fff; font-weight: 800; font-size: 24px; text-align: center; }
   .mr-gal p.sub { color: #cbd5e1; text-align: center; margin-top: 6px; font-size: 14px; }
@@ -39,6 +55,39 @@
     <a href="#dk-form" class="mr-cta" style="margin-top:24px">
       🛒 Đăng ký mua tool
     </a>
+  </div>
+</section>
+
+<section class="mr-info">
+  <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8" style="padding-bottom:36px">
+    <h2>Sa Muse Ai là gì?</h2>
+    <p class="sub">Phần mềm cài trên máy tính Windows, giúp bạn tạo video AI hàng loạt trên Muse mà không phải ngồi gõ và canh từng video.</p>
+
+    <div class="mr-steps">
+      <div class="mr-step"><span class="t"><b class="n">1</b>Nhập danh sách</span><p>Dán danh sách prompt vào tool, <b>mỗi dòng là một video</b>. Chọn khung hình dọc 9:16 hoặc ngang 16:9.</p></div>
+      <div class="mr-step"><span class="t"><b class="n">2</b>Bấm chạy</span><p>Tool tự gửi từng prompt lên Muse, theo dõi tiến độ và chờ video tạo xong.</p></div>
+      <div class="mr-step"><span class="t"><b class="n">3</b>Nhận video</span><p>Video xong được <b>tải về máy dưới dạng MP4</b>, sắp xếp sẵn trong danh sách để bạn xem và dùng.</p></div>
+    </div>
+
+    <div class="mr-feat">
+      <div><b>📋 Hàng đợi video:</b> thêm hàng chục, hàng trăm prompt một lần, tool tự chạy lần lượt.</div>
+      <div><b>👥 Nhiều tài khoản Muse:</b> chạy nhiều tài khoản cùng lúc để ra video nhanh hơn.</div>
+      <div><b>📂 Chia theo loại phim:</b> mỗi loại phim có hàng đợi và danh sách video riêng, không bị lẫn vào nhau.</div>
+      <div><b>🔁 Chạy lại khi lỗi:</b> video lỗi có thể bấm chạy lại ngay trong tool.</div>
+      <div><b>⬇️ Tải MP4 về máy:</b> xem, chọn và tải nhiều video cùng lúc.</div>
+      <div><b>🌙 Chạy tự động ngày đêm:</b> khi có <b>gói Claude 20 USD/tháng</b>, Claude điều khiển tool chạy thay bạn, không cần ngồi canh.</div>
+    </div>
+
+    <div class="mr-faq">
+      <h2 style="font-size:20px;text-align:left">Câu hỏi thường gặp</h2>
+      <details><summary>Tool này dùng được trên máy nào?</summary><p>Máy tính Windows. Cần bật máy và có mạng khi tool chạy. Video được lưu ngay trên máy của bạn.</p></details>
+      <details><summary>Mua một lần hay theo tháng?</summary><p>Theo tháng: <%= vnd(gia) %> cho <%= ngay %> ngày. Hết hạn bạn nhắn Zalo admin <%= zalo %> để gia hạn <%= vnd(gia) %>/<%= ngay %> ngày.</p></details>
+      <details><summary>Có dùng thử không?</summary><p>Hiện chưa có bản dùng thử. Bạn đăng ký mua, chuyển khoản là nhận key và link tải qua Gmail.</p></details>
+      <details><summary>Mất bao lâu để nhận key?</summary><p>Sau khi chuyển khoản, admin xác nhận và hệ thống gửi key kèm link tải vào Gmail bạn đã đăng ký. Cần hỗ trợ cài đặt, nhắn Zalo <%= zalo %>.</p></details>
+      <details><summary>Một key dùng được trên mấy máy?</summary><p>Mỗi key gắn với <b>1 máy tính</b> khi bạn kích hoạt lần đầu.</p></details>
+      <details><summary>Tại sao cần Claude 20 USD/tháng?</summary><p>Chỉ cần nếu bạn muốn tool <b>chạy tự động cả ngày lẫn đêm</b> mà không phải thao tác. Bạn tự mua gói chính chủ của Claude. Gói có hạn mức sử dụng nên tool chạy nhiều giờ trong hạn mức của gói.</p></details>
+      <details><summary>Tài khoản Muse lấy ở đâu?</summary><p>Tool tạo video trên Muse nên bạn cần có tài khoản Muse. Có thể tìm mua trên mạng, giá khoảng 15.000đ, bạn tự tìm và tự mua.</p></details>
+    </div>
   </div>
 </section>
 
