@@ -136,6 +136,7 @@
       <div class="mr-formcard">
         <h2 class="text-2xl font-extrabold mb-2">✅ Đã nhận đăng ký, <%= done.name %>!</h2>
         <p class="mb-4">Chuyển khoản <strong><%= vnd(gia) %></strong> để nhận key. <strong>Tiền về, key và link tải sẽ được gửi tới <span class="break-all"><%= done.email %></span></strong>.</p>
+        <p class="text-sm mb-4" style="color:#475569">Mail có thể rơi vào mục <strong>Spam / Thư rác / Quảng cáo</strong>. Nếu chuyển khoản xong vài phút mà chưa thấy, bạn kiểm tra các mục đó và bấm "Không phải thư rác", hoặc nhắn Zalo admin để được gửi key qua Zalo.</p>
         <% if (pay) { %>
           <div class="text-center mb-4">
             <img src="<%= pay.anh %>" alt="Mã QR chuyển khoản" class="mx-auto w-64 max-w-full rounded-lg border" />

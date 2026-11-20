@@ -45,6 +45,7 @@ async function lienKetTelegram(chatId, ma) {
 
 const siteUrl = () => (process.env.APP_URL || 'https://3dvietpro.com').replace(/\/$/, '');
 const linkTai = () => `${siteUrl()}/downloads/Sa_Muse_Ai_Setup.exe`;
+const linkTrangTai = () => `${siteUrl()}/dang-ky-tool-muse/tai-tool`;
 
 const esc = (s) =>
   String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -92,30 +93,45 @@ async function guiMailKey(reg) {
   const m = layTransporter();
   if (!m) throw new Error('Chưa cấu hình gửi mail (thiếu MUSE_MAIL_PASS hoặc SMTP_*)');
   const key = reg.licenseKey;
+  // Thư giao dịch (không phải quảng cáo): văn bản đơn giản, nêu rõ mã đơn + lý do nhận thư, KHÔNG nút/đồ hoạ,
+  // KHÔNG link tải .exe trực tiếp (bộ lọc spam rất ghét) mà trỏ về trang tải trên chính web 3dvietpro.com.
+  const trang = linkTrangTai();
   const text = [
     `Chào ${reg.name},`,
     '',
-    'Cảm ơn bạn đã mua tool Sa Muse Ai. Đã nhận được thanh toán của bạn.',
+    `Đây là thư tự động xác nhận đơn mua tool Sa Muse Ai (mã đơn ${reg.code}) bạn đã đăng ký trên 3dvietpro.com. Chúng tôi đã nhận được thanh toán của bạn, cảm ơn bạn.`,
     '',
-    `KEY của bạn: ${key}  (dùng 30 ngày, gắn với 1 máy tính)`,
-    `Link tải tool: ${linkTai()}`,
+    `Mã kích hoạt (key) của bạn: ${key}`,
+    `Key dùng ${NGAY} ngày, gắn với 1 máy tính.`,
+    '',
+    `Trang tải và hướng dẫn cài: ${trang}`,
     '',
     'Cách dùng: tải và cài tool trên máy Windows, mở lên, dán key vào màn hình nhập key.',
     'Để tool tự chạy ngày đêm, bạn cần có Claude gói 20 USD/tháng và tài khoản Muse.',
-    `Key dùng ${NGAY} ngày. Hết hạn, nhắn Zalo admin ${ZALO} để gia hạn ${vnd(GIA)}/${NGAY} ngày.`,
+    `Hết hạn, nhắn Zalo ${ZALO} để gia hạn ${vnd(GIA)}/${NGAY} ngày. Cần hỗ trợ cài đặt cũng nhắn Zalo ${ZALO}.`,
     '',
-    `Cần hỗ trợ cài đặt: nhắn Zalo admin ${ZALO}.`,
+    'Nếu thư này nằm trong mục Spam hoặc Quảng cáo, bạn bấm "Không phải thư rác" / kéo sang Hộp thư chính, và trả lời thư này một chữ "OK" để lần sau (thông báo gia hạn) vào thẳng hộp thư chính.',
   ].join('\n');
   const html =
-    `<p>Chào <b>${esc(reg.name)}</b>,</p><p>Cảm ơn bạn đã mua tool <b>Sa Muse Ai</b>. Đã nhận được thanh toán của bạn.</p>` +
-    `<p>KEY của bạn:<br><span style="font-size:22px;font-weight:800;letter-spacing:1px;font-family:monospace">${esc(key)}</span>` +
-    `<br><small>(dùng 30 ngày, gắn với 1 máy tính)</small></p>` +
-    `<p><a href="${esc(linkTai())}" style="background:#0ea5e9;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:700">Tải tool Sa Muse Ai</a></p>` +
+    `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#111">` +
+    `<p>Chào ${esc(reg.name)},</p>` +
+    `<p>Đây là thư tự động xác nhận đơn mua tool Sa Muse Ai (mã đơn <b>${esc(reg.code)}</b>) bạn đã đăng ký trên 3dvietpro.com. Chúng tôi đã nhận được thanh toán của bạn, cảm ơn bạn.</p>` +
+    `<p>Mã kích hoạt (key) của bạn: <b style="font-family:monospace;font-size:17px">${esc(key)}</b><br>Key dùng ${NGAY} ngày, gắn với 1 máy tính.</p>` +
+    `<p>Trang tải và hướng dẫn cài: <a href="${esc(trang)}">${esc(trang)}</a></p>` +
     `<p>Cách dùng: tải và cài tool trên máy Windows, mở lên, dán key vào màn hình nhập key.<br>` +
     `Để tool tự chạy ngày đêm, bạn cần có Claude gói 20 USD/tháng và tài khoản Muse.</p>` +
-    `<p>Key dùng <b>${NGAY} ngày</b>. Hết hạn, nhắn Zalo admin <b>${ZALO}</b> để gia hạn <b>${vnd(GIA)}/${NGAY} ngày</b>.</p>` +
-    `<p>Cần hỗ trợ cài đặt: nhắn Zalo admin <b>${ZALO}</b>.</p>`;
-  await m.t.sendMail({ from: `"Sa Muse Ai" <${m.from}>`, to: reg.email, subject: 'Key và link tải tool Sa Muse Ai của bạn', text, html });
+    `<p>Hết hạn, nhắn Zalo ${ZALO} để gia hạn ${vnd(GIA)}/${NGAY} ngày. Cần hỗ trợ cài đặt cũng nhắn Zalo ${ZALO}.</p>` +
+    `<p style="color:#555;font-size:13px">Nếu thư này nằm trong mục Spam hoặc Quảng cáo, bạn bấm "Không phải thư rác" / kéo sang Hộp thư chính, và trả lời thư này một chữ "OK" để lần sau (thông báo gia hạn) vào thẳng hộp thư chính.</p>` +
+    `</div>`;
+  await m.t.sendMail({
+    from: `"Sa Muse Ai" <${m.from}>`,
+    replyTo: m.from,
+    to: reg.email,
+    subject: `Xác nhận đơn ${reg.code} – key Sa Muse Ai của ${reg.name}`,
+    text,
+    html,
+    priority: 'high', // nodemailer gắn X-Priority/Importance: Outlook và vài app mail hiển thị "quan trọng"; Gmail thì tự quyết
+  });
 }
 
 // ---- Báo thầy ----
@@ -297,4 +313,4 @@ function batDauNhacHetHan() {
   setInterval(chay, 6 * 60 * 60 * 1000);
 }
 
-module.exports = { giaHan, nhacHetHan, batDauNhacHetHan, layAdminChat, layMaLienKet, lienKetTelegram, GIA, NGAY, ZALO, PUSH_APP_ID, dangKy, thongTinThanhToan, xacNhanDaNhanTien, guiLaiMail, linkTai };
+module.exports = { giaHan, nhacHetHan, batDauNhacHetHan, layAdminChat, layMaLienKet, lienKetTelegram, GIA, NGAY, ZALO, PUSH_APP_ID, dangKy, thongTinThanhToan, xacNhanDaNhanTien, guiLaiMail, linkTai, linkTrangTai };

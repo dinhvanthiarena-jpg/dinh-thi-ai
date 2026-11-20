@@ -13,6 +13,10 @@ const view = (res, extra) =>
 
 router.get('/', (req, res) => view(res, {}));
 
+// Trang tải tool (link trong mail trỏ về đây thay vì link .exe trực tiếp, để mail ít bị coi là spam).
+router.get('/tai-tool', (req, res) =>
+  res.render('muse-download', { title: 'Tải tool Sa Muse Ai', zalo: svc.ZALO, linkExe: svc.linkTai() }));
+
 router.post('/', limiter, async (req, res) => {
   // Ô bẫy chống bot: người thật không thấy nên không điền.
   if (req.body.website) return view(res, {});
