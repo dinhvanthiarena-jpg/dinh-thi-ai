@@ -4,6 +4,10 @@ const { requireAuth, requireAdmin } = require('../middleware/auth');
 const MuseRegistration = require('../models/MuseRegistration');
 const PushSubscription = require('../models/PushSubscription');
 const svc = require('../services/museRegistrationService');
+const promo = require('../services/musePromoService');
+
+// Đơn tạo trước mốc này là gói tháng cũ (500.000đ/30 ngày) — chỉ những đơn đó mới có nút "+30 ngày".
+const MOC_DOI_GIA = new Date('2026-11-21T00:00:00+07:00');
 
 const router = express.Router();
 router.use(requireAuth, requireAdmin);
@@ -24,6 +28,10 @@ router.get('/', async (req, res) => {
     han: svc.HAN_TEXT,
     gia: svc.GIA,
     giaCu: svc.GIA_CU,
+    mocDoiGia: MOC_DOI_GIA,
+    maList: promo.danhSach(),
+    maTheoDon: promo.banDoDon(),
+    siteUrl: (process.env.APP_URL || 'https://3dvietpro.com').replace(/\/$/, ''),
     regs,
     hanKey,
     pushCount,
@@ -76,7 +84,32 @@ router.post('/:id/delete', async (req, res) => {
   if (!reg) return back(res, 'Không tìm thấy đăng ký.');
   if (reg.licenseKey) require('../services/museLicenseService').revokeKey(reg.licenseKey);
   await reg.destroy();
+  promo.hoanTheoDon(reg.code); // trả lại lượt của mã ưu đãi (nếu đơn này có dùng)
   return back(res, `Đã xoá đăng ký ${reg.code}${reg.licenseKey ? ' và thu hồi key ' + reg.licenseKey : ''}.`);
+});
+
+// ---- Mã ưu đãi: tạo / khoá-mở / xoá (đặt TRƯỚC các route /:id/... cho dễ đọc; đường dẫn không trùng nhau) ----
+router.post('/ma/tao', (req, res) => {
+  const r = promo.them({
+    gia: String(req.body.gia || '').replace(/[^\d]/g, ''),
+    toiDa: String(req.body.toiDa || '').replace(/[^\d]/g, ''),
+    ma: req.body.ma,
+    ghiChu: req.body.ghiChu,
+    giaNiemYet: svc.GIA,
+  });
+  if (!r.ok) return back(res, r.loi);
+  return back(res, `Đã tạo mã ${r.ma}: giá ${Number(r.gia).toLocaleString('vi-VN')}đ, ${r.toiDa ? r.toiDa + ' lượt' : 'không giới hạn lượt'}.`);
+});
+
+router.post('/ma/:ma/khoa', (req, res) => {
+  const khoa = req.body.khoa === '1';
+  if (!promo.datKhoa(req.params.ma, khoa)) return back(res, 'Không tìm thấy mã.');
+  return back(res, `Đã ${khoa ? 'KHOÁ' : 'MỞ LẠI'} mã ${promo.chuanHoa(req.params.ma)}.`);
+});
+
+router.post('/ma/:ma/xoa', (req, res) => {
+  if (!promo.xoa(req.params.ma)) return back(res, 'Không tìm thấy mã.');
+  return back(res, `Đã xoá mã ${promo.chuanHoa(req.params.ma)} (các đơn đã dùng mã vẫn giữ nguyên giá).`);
 });
 
 router.post('/:id/extend', async (req, res) => {

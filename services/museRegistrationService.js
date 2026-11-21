@@ -9,6 +9,7 @@ const museLicense = require('./museLicenseService');
 const telegram = require('./telegramService');
 const Setting = require('../models/Setting');
 const User = require('../models/User');
+const promo = require('./musePromoService');
 
 // Từ 21/11/2026: 989.000đ / 1 năm (365 ngày). Trước đó là 500.000đ / 30 ngày — đơn cũ giữ nguyên
 // (số tiền lưu theo từng đơn, key cũ không đụng tới).
@@ -148,7 +149,7 @@ async function guiMailKey(reg) {
     `Đây là thư tự động xác nhận đơn mua tool Sa Muse Ai (mã đơn ${reg.code}) bạn đã đăng ký trên 3dvietpro.com. Chúng tôi đã nhận được thanh toán của bạn, cảm ơn bạn.`,
     '',
     `Mã kích hoạt (key) của bạn: ${key}`,
-    `Key dùng ${HAN_TEXT}, gắn với 1 máy tính.`,
+    `Key dùng ${HAN_TEXT}, gắn với 1 máy tính. Số tiền của đơn: ${vnd(reg.amount)}.`,
     '',
     `Trang tải và hướng dẫn cài: ${trang}`,
     '',
@@ -164,7 +165,7 @@ async function guiMailKey(reg) {
     `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#111">` +
     `<p>Chào ${esc(reg.name)},</p>` +
     `<p>Đây là thư tự động xác nhận đơn mua tool Sa Muse Ai (mã đơn <b>${esc(reg.code)}</b>) bạn đã đăng ký trên 3dvietpro.com. Chúng tôi đã nhận được thanh toán của bạn, cảm ơn bạn.</p>` +
-    `<p>Mã kích hoạt (key) của bạn: <b style="font-family:monospace;font-size:17px">${esc(key)}</b><br>Key dùng ${HAN_TEXT}, gắn với 1 máy tính.</p>` +
+    `<p>Mã kích hoạt (key) của bạn: <b style="font-family:monospace;font-size:17px">${esc(key)}</b><br>Key dùng ${HAN_TEXT}, gắn với 1 máy tính. Số tiền của đơn: ${vnd(reg.amount)}.</p>` +
     `<p>Trang tải và hướng dẫn cài: <a href="${esc(trang)}">${esc(trang)}</a></p>` +
     `<p>Cách dùng: tải và cài tool trên máy Windows, mở lên, dán key vào màn hình nhập key.<br>` +
     `Để tool tự chạy ngày đêm, bạn cần có Claude gói 20 USD/tháng và tài khoản Muse.</p>` +
@@ -189,10 +190,13 @@ const vnd = (n) => `${Number(n).toLocaleString('vi-VN')}đ`;
 async function baoThayTelegram(reg) {
   const chat = await layAdminChat();
   if (!chat) return;
+  const maDung = promo.timTheoDon(reg.code);
   const text =
     `🔔 Có người đăng ký mua tool Sa Muse Ai\n${reg.name} · ${reg.phone}\n${reg.email}\n` +
     `Claude Pro: ${reg.hasClaude || '-'} · Muse: ${reg.hasMuse || '-'}\n` +
-    `Mã chuyển khoản: ${reg.code} (${vnd(reg.amount)})\n\nKhi thấy tiền về, bấm nút dưới để tự gửi key.`;
+    `Mã chuyển khoản: ${reg.code} (${vnd(reg.amount)})\n` +
+    (maDung ? `🏷️ Dùng mã ưu đãi ${maDung.ma} (giá ${vnd(maDung.gia)}, giá niêm yết ${vnd(GIA)})\n` : '') +
+    `\nKhi thấy tiền về, bấm nút dưới để tự gửi key.`;
   await telegram.sendMessageWithButtons(chat, text, [[{ text: '✅ Đã nhận tiền – gửi key', callback_data: `muse_paid:${reg.id}` }]]);
 }
 
@@ -228,6 +232,16 @@ async function baoThay(reg) {
 async function dangKy(data) {
   const loi = kiemTra(data);
   if (loi.length) return { loi };
+  // Mã ưu đãi (không bắt buộc): mã đúng thì giá đơn = giá của mã; mã sai thì báo lỗi, KHÔNG tự đổi sang giá niêm yết.
+  let giaDon = GIA;
+  let maUuDai = '';
+  const nhap = String(data.promo || '').trim();
+  if (nhap) {
+    const kt = promo.kiemTra(nhap);
+    if (!kt.ok) return { loi: [kt.loi] };
+    giaDon = kt.gia;
+    maUuDai = kt.ma;
+  }
   let reg;
   for (let i = 0; i < 5 && !reg; i += 1) {
     try {
@@ -239,15 +253,23 @@ async function dangKy(data) {
         hasClaude: String(data.hasClaude || '').slice(0, 40),
         hasMuse: String(data.hasMuse || '').slice(0, 40),
         note: String(data.note || '').slice(0, 1000),
-        amount: GIA,
+        amount: giaDon,
       });
     } catch (e) {
       if (e.name !== 'SequelizeUniqueConstraintError') throw e;
     }
   }
   if (!reg) throw new Error('Không tạo được mã đăng ký');
+  if (maUuDai) {
+    // Giữ lượt ngay (đồng bộ). Nếu giữa chừng có người khác dùng hết lượt thì huỷ đơn này và báo lỗi.
+    const dat = promo.datCho(maUuDai, reg.code);
+    if (!dat.ok) {
+      await reg.destroy();
+      return { loi: [dat.loi] };
+    }
+  }
   baoThay(reg).catch((e) => console.error('[museReg/baoThay]', e.message));
-  return { reg };
+  return { reg, maUuDai };
 }
 
 // Tài khoản nhận tiền RIÊNG cho tool Sa Muse Ai (thầy chốt 2026-11-16): MB Bank (BIN 970422).

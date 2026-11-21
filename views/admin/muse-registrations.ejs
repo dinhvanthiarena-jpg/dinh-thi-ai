@@ -33,6 +33,50 @@
     <% } %>
   </div>
 
+  <div class="card p-6">
+    <h2 class="font-semibold text-ink mb-1">🏷️ Mã ưu đãi (giá thỏa thuận)</h2>
+    <p class="text-sm text-muted mb-4">
+      Thỏa thuận giá với khách xong thì gửi <strong>1 mã</strong> (hoặc <strong>link riêng</strong>). Khách đăng ký trên web như thường, nhập mã vào ô "Mã ưu đãi":
+      giá đơn, QR chuyển khoản, tin Telegram và mail đều theo giá của mã. Key vẫn <%= han %>. Mã sai hoặc hết lượt thì khách bị báo lỗi, không tự mua giá niêm yết.
+      Mã không hiện công khai trên trang.
+    </p>
+    <div class="overflow-x-auto mb-5">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-left text-muted">
+          <tr><th class="p-2">Mã</th><th class="p-2">Giá</th><th class="p-2">Lượt dùng</th><th class="p-2">Trạng thái</th><th class="p-2">Link riêng (gửi khách)</th><th class="p-2">Thao tác</th></tr>
+        </thead>
+        <tbody>
+          <% if (!maList.length) { %><tr><td class="p-3 text-muted" colspan="6">Chưa có mã nào.</td></tr><% } %>
+          <% maList.forEach(function (c) { const het = c.toiDa > 0 && c.dung.length >= c.toiDa; %>
+            <tr class="border-t align-top">
+              <td class="p-2 font-mono font-bold select-all"><%= c.ma %><% if (c.ghiChu) { %><div class="font-sans font-normal text-xs text-muted"><%= c.ghiChu %></div><% } %></td>
+              <td class="p-2 whitespace-nowrap font-semibold"><%= vnd(c.gia) %></td>
+              <td class="p-2 whitespace-nowrap"><%= c.dung.length %> / <%= c.toiDa > 0 ? c.toiDa : '∞' %></td>
+              <td class="p-2 whitespace-nowrap">
+                <% if (c.khoa) { %><span class="badge bg-rose-50 text-rose-700">Đã khoá</span>
+                <% } else if (het) { %><span class="badge bg-slate-100 text-slate-800">Hết lượt</span>
+                <% } else { %><span class="badge bg-emerald-100 text-emerald-800">Đang dùng được</span><% } %>
+              </td>
+              <td class="p-2 text-xs break-all select-all"><%= siteUrl %>/dang-ky-tool-muse?ma=<%= c.ma %>#dk-form</td>
+              <td class="p-2 whitespace-nowrap">
+                <form action="/admin/dang-ky-muse/ma/<%= encodeURIComponent(c.ma) %>/khoa" method="POST" class="inline"><input type="hidden" name="khoa" value="<%= c.khoa ? '0' : '1' %>"><button class="text-xs underline" type="submit"><%= c.khoa ? 'Mở lại' : 'Khoá' %></button></form>
+                ·
+                <form action="/admin/dang-ky-muse/ma/<%= encodeURIComponent(c.ma) %>/xoa" method="POST" class="inline" onsubmit="return confirm('Xoá mã <%= c.ma %>? Các đơn đã dùng mã vẫn giữ nguyên giá.');"><button class="text-xs text-rose-700 underline" type="submit">Xoá</button></form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <form action="/admin/dang-ky-muse/ma/tao" method="POST" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;align-items:end">
+      <div><label class="label" for="mgia">Giá (đ) *</label><input class="input" id="mgia" name="gia" inputmode="numeric" placeholder="799000" required /></div>
+      <div><label class="label" for="mtoida">Số lượt tối đa</label><input class="input" id="mtoida" name="toiDa" inputmode="numeric" placeholder="10 (0 = không giới hạn)" /></div>
+      <div><label class="label" for="mma">Mã (bỏ trống = tự sinh)</label><input class="input" id="mma" name="ma" maxlength="40" placeholder="tự sinh, khó đoán" /></div>
+      <div><label class="label" for="mghichu">Ghi chú</label><input class="input" id="mghichu" name="ghiChu" maxlength="120" placeholder="VD: khách Page" /></div>
+      <div><button class="btn-primary w-full" type="submit">➕ Tạo mã</button></div>
+    </form>
+  </div>
+
   <div class="card p-0 overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="bg-slate-50 text-left text-muted">
@@ -50,7 +94,7 @@
               <% if (r.note) { %><div class="text-muted mt-1">“<%= r.note %>”</div><% } %>
             </td>
             <td class="p-3"><%= r.hasClaude || '-' %><br><%= r.hasMuse || '-' %></td>
-            <td class="p-3 font-mono"><%= r.code %><br><span class="text-muted"><%= vnd(r.amount) %></span></td>
+            <td class="p-3 font-mono"><%= r.code %><br><span class="text-muted"><%= vnd(r.amount) %></span><% if (maTheoDon[r.code]) { %><br><span class="badge bg-amber-100 text-amber-800">Mã ưu đãi: <%= maTheoDon[r.code] %></span><% } %></td>
             <td class="p-3">
               <% if (r.status === 'da-thanh-toan') { %>
                 <span class="badge bg-emerald-100 text-emerald-800">Đã nhận tiền</span>
@@ -73,7 +117,7 @@
                 </form>
               <% } else { %>
                 <form action="/admin/dang-ky-muse/<%= r.id %>/extend" method="POST" class="mb-2" onsubmit="return confirm('Gia hạn thêm 365 ngày (1 năm) cho khách này? (chỉ bấm khi đã nhận <%= vnd(gia) %>)');"><button class="btn-primary" type="submit">🔁 Gia hạn +365 ngày (<%= vnd(gia) %>)</button></form>
-                <% if (Number(r.amount) < gia) { %>
+                <% if (new Date(r.createdAt) < mocDoiGia) { %>
                   <form action="/admin/dang-ky-muse/<%= r.id %>/extend" method="POST" class="mb-2" onsubmit="return confirm('Đơn CŨ gói tháng: gia hạn thêm 30 ngày? (chỉ bấm khi đã nhận <%= vnd(giaCu) %>)');"><input type="hidden" name="goi" value="thang"><button class="btn-secondary" type="submit">+30 ngày (gói tháng cũ, <%= vnd(giaCu) %>)</button></form>
                 <% } %>
                 <form action="/admin/dang-ky-muse/<%= r.id %>/resend" method="POST"><button class="btn-secondary" type="submit">✉️ Gửi lại mail</button></form>
