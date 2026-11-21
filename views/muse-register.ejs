@@ -1,66 +1,161 @@
 <style>
-  .mr-hero { background: linear-gradient(135deg, #06182b 0%, #0b2a4a 55%, #0a1a4d 100%); color: #fff; }
-  .mr-hero p, .mr-hero h1, .mr-hero span.mr-tag { color: #fff; }
+  /* ===== Trang đăng ký mua tool Sa Muse Ai — CSS riêng (Tailwind build sẵn không có class mới) ===== */
+  .mr-wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
   .mr-gold { color: #fde047 !important; }
-  .mr-tag { display: inline-block; padding: 4px 14px; border-radius: 999px; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); font-size: 13px; font-weight: 600; }
-  .mr-cta { display: inline-flex; align-items: center; gap: 8px; background: #facc15; color: #111827 !important; font-weight: 800; font-size: 18px; padding: 14px 40px; border-radius: 999px; box-shadow: 0 10px 25px rgba(0,0,0,.35); text-decoration: none; }
-  .mr-cta:hover { background: #fde047; }
-  .mr-warn { border: 2px solid #fcd34d; background: #fffbeb; color: #1f2937; border-radius: 16px; padding: 24px; }
-  .mr-warn li { margin-bottom: 10px; }
-  .mr-formbg { background: #0b1220; padding: 56px 0; }
-  .mr-formcard { background: #fff; border-radius: 16px; padding: 28px; color: #111827; }
-  .mr-err { border: 1px solid #fecdd3; background: #fff1f2; color: #be123c; border-radius: 10px; padding: 10px 14px; font-size: 14px; margin-bottom: 14px; }
-  .mr-red { color: #e11d48; }
-  .mr-info { background: #fff; padding: 44px 0 8px; color: #111827; }
-  .mr-info h2 { font-weight: 800; font-size: 24px; text-align: center; color: #0b2a4a; }
-  .mr-info p.sub { text-align: center; margin-top: 6px; color: #475569; font-size: 14px; }
-  .mr-steps { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 22px; }
-  .mr-step { border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; background: #f8fafc; }
-  .mr-step b.n { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 999px; background: #0b2a4a; color: #fde047; font-weight: 800; margin-right: 8px; }
-  .mr-step .t { font-weight: 800; color: #0b2a4a; }
-  .mr-step p { margin: 8px 0 0; font-size: 14px; color: #334155; }
-  .mr-feat { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 22px; }
-  .mr-feat div { border-left: 4px solid #facc15; background: #f8fafc; border-radius: 8px; padding: 12px 14px; font-size: 14px; color: #334155; }
+
+  /* Hero */
+  .mr-hero { color: #fff; position: relative; overflow: hidden;
+    background: radial-gradient(900px 420px at 50% -10%, rgba(250,204,21,.20), transparent 62%), linear-gradient(135deg, #06182b 0%, #0b2a4a 55%, #0a1a4d 100%); }
+  .mr-hero p, .mr-hero h1 { color: #fff; }
+  .mr-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .mr-tag { display: inline-block; padding: 5px 14px; border-radius: 999px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.28); font-size: 13px; font-weight: 600; color: #fff; }
+  .mr-pricebox { display: inline-block; margin-top: 22px; padding: 14px 28px; border-radius: 18px; background: rgba(0,0,0,.28); border: 1px solid rgba(250,204,21,.5); }
+  .mr-pricebox .big { font-size: 40px; font-weight: 800; line-height: 1.1; color: #fde047; }
+  .mr-pricebox .big small { font-size: 16px; font-weight: 600; color: #e2e8f0; }
+  .mr-pricebox .was { margin-top: 4px; font-size: 14px; color: #cbd5e1 !important; }
+  .mr-btns { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 24px; }
+  .mr-cta { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(180deg, #fde047, #facc15); color: #111827 !important; font-weight: 800; font-size: 18px; padding: 14px 36px; border-radius: 999px; box-shadow: 0 10px 25px rgba(0,0,0,.35); text-decoration: none; }
+  .mr-cta:hover { filter: brightness(1.06); }
+  .mr-cta2 { display: inline-flex; align-items: center; gap: 8px; color: #fff !important; font-weight: 700; font-size: 16px; padding: 13px 26px; border-radius: 999px; border: 1.5px solid rgba(255,255,255,.55); text-decoration: none; }
+  .mr-cta2:hover { background: rgba(255,255,255,.12); }
+
+  /* Giới thiệu */
+  .mr-info { background: #fff; padding: 48px 0 8px; color: #111827; }
+  .mr-info h2, .mr-faqsec h2 { font-weight: 800; font-size: 26px; text-align: center; color: #0b2a4a; }
+  .mr-info p.sub { text-align: center; margin: 8px auto 0; max-width: 640px; color: #475569; font-size: 15px; }
+  .mr-steps { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 26px; }
+  .mr-step { border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px; background: linear-gradient(180deg, #f8fafc, #fff); box-shadow: 0 6px 18px rgba(15,23,42,.05); }
+  .mr-step b.n { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 999px; background: #0b2a4a; color: #fde047; font-weight: 800; margin-right: 10px; }
+  .mr-step .t { font-weight: 800; color: #0b2a4a; font-size: 16px; }
+  .mr-step p { margin: 10px 0 0; font-size: 14px; color: #334155; line-height: 1.55; }
+  .mr-feat { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 18px; padding-bottom: 36px; }
+  .mr-feat div { border-left: 4px solid #facc15; background: #f8fafc; border-radius: 10px; padding: 12px 14px; font-size: 14px; color: #334155; line-height: 1.5; }
   .mr-feat div b { color: #0b2a4a; }
-  .mr-faq { margin-top: 26px; }
-  .mr-faq details { border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; margin-top: 8px; background: #fff; }
-  .mr-faq summary { cursor: pointer; font-weight: 700; color: #0b2a4a; }
-  .mr-faq details p { margin: 8px 0 0; font-size: 14px; color: #334155; }
   @media (min-width: 720px) { .mr-steps { grid-template-columns: repeat(3, 1fr); } .mr-feat { grid-template-columns: repeat(2, 1fr); } }
-  .mr-gal { background: #0b1220; padding: 44px 0 8px; }
-  .mr-gal h2 { color: #fff; font-weight: 800; font-size: 24px; text-align: center; }
-  .mr-gal p.sub { color: #cbd5e1; text-align: center; margin-top: 6px; font-size: 14px; }
-  .mr-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 22px; }
+
+  /* Thư viện ảnh thể loại */
+  .mr-gal { background: #0b1220; padding: 48px 0 12px; }
+  .mr-gal h2 { color: #fff; font-weight: 800; font-size: 26px; text-align: center; }
+  .mr-gal p.sub { color: #cbd5e1; text-align: center; margin-top: 8px; font-size: 14px; }
+  .mr-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 24px; }
   .mr-grid figure { margin: 0; border-radius: 14px; overflow: hidden; position: relative; background: #111827; }
   .mr-grid img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .mr-grid figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 12px 10px; font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.8)); }
   .mr-grid .wide { aspect-ratio: 16 / 9; }
   .mr-grid .tall { aspect-ratio: 9 / 16; }
-  .mr-row-tall { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; max-width: 420px; margin-left: auto; margin-right: auto; }
+  .mr-row-tall { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 12px auto 0; max-width: 420px; }
   @media (min-width: 720px) { .mr-grid { grid-template-columns: repeat(4, 1fr); } .mr-row-tall { max-width: 460px; } }
+
+  /* Cần chuẩn bị */
+  .mr-warnsec { background: #0b1220; padding: 36px 0 12px; }
+  .mr-warn { border: 2px solid #fcd34d; background: #fffbeb; color: #1f2937; border-radius: 18px; padding: 24px; max-width: 760px; margin: 0 auto; }
+  .mr-warn h2 { font-weight: 800; font-size: 20px; margin-bottom: 12px; color: #111827; }
+  .mr-warn ol { list-style: decimal; padding-left: 20px; }
+  .mr-warn li { margin-bottom: 10px; font-size: 15px; line-height: 1.55; }
+  .mr-warn .foot { margin-top: 12px; font-size: 14px; color: #475569; }
+
+  /* Video mẫu */
+  .mr-vid { background: radial-gradient(900px 380px at 50% 0%, rgba(250,204,21,.10), transparent 62%), #0b1220; padding: 56px 0 28px; scroll-margin-top: 60px; }
+  .mr-vid h2 { color: #fff; font-weight: 800; font-size: 28px; text-align: center; }
+  .mr-vid p.sub { color: #cbd5e1; text-align: center; margin: 8px auto 0; max-width: 620px; font-size: 15px; }
+  .mr-vids { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 28px; }
+  .mr-v { --h: 250px; position: relative; display: block; flex: 0 0 auto; height: var(--h); border-radius: 18px; overflow: hidden; background: #000; border: 1px solid rgba(255,255,255,.14); box-shadow: 0 14px 34px rgba(0,0,0,.45); text-decoration: none; cursor: pointer; transition: transform .2s, border-color .2s; }
+  .mr-v.l { aspect-ratio: 16 / 9; }
+  .mr-v.p { aspect-ratio: 9 / 16; }
+  .mr-v:hover { transform: translateY(-3px); border-color: rgba(250,204,21,.7); }
+  .mr-v.on { cursor: default; transform: none; }
+  .mr-v img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .mr-v .shade { position: absolute; inset: 0; background: linear-gradient(transparent 45%, rgba(0,0,0,.82)); }
+  .mr-v .play { position: absolute; left: 50%; top: 46%; width: 62px; height: 62px; margin: -31px 0 0 -31px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; color: #111827; background: #facc15; box-shadow: 0 8px 22px rgba(0,0,0,.5); padding-left: 4px; }
+  .mr-v .cap { position: absolute; left: 12px; right: 12px; bottom: 10px; color: #fff; font-size: 13px; font-weight: 700; line-height: 1.3; }
+  .mr-v .cap small { display: block; font-size: 11px; font-weight: 600; color: #fde047; }
+  .mr-v .ratio { position: absolute; top: 10px; right: 10px; padding: 2px 9px; border-radius: 999px; background: rgba(0,0,0,.6); color: #fff; font-size: 11px; font-weight: 700; }
+  .mr-v iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
+  .mr-vid .note { text-align: center; color: #94a3b8; font-size: 13px; margin-top: 16px; }
+  @media (max-width: 719px) {
+    .mr-vids { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; align-items: center; scroll-snap-type: x mandatory; margin: 24px -16px 0; padding: 4px 16px 14px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+    .mr-v { --h: 250px; scroll-snap-align: start; scroll-margin-left: 16px; }
+    .mr-v.l { --h: 180px; }
+  }
+
+  /* Đăng ký: ưu đãi bên trái + form bên phải */
+  .mr-reg { background: radial-gradient(900px 420px at 12% 0%, rgba(250,204,21,.12), transparent 60%), linear-gradient(180deg, #0b1220, #07101d); padding: 60px 0 72px; scroll-margin-top: 60px; }
+  .mr-reg h2.ttl { color: #fff; font-weight: 800; font-size: 30px; text-align: center; }
+  .mr-flow { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 18px 0 30px; }
+  .mr-flow span { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); color: #e2e8f0; font-size: 13px; font-weight: 600; }
+  .mr-flow b { width: 22px; height: 22px; border-radius: 50%; background: #facc15; color: #111827; display: inline-grid; place-items: center; font-size: 12px; }
+  .mr-reg-grid { display: grid; grid-template-columns: 1fr; gap: 22px; align-items: start; }
+  @media (min-width: 900px) { .mr-reg-grid { grid-template-columns: 5fr 7fr; gap: 30px; } .mr-offer { position: sticky; top: 24px; } }
+  .mr-offer { border-radius: 22px; padding: 28px; color: #fff; background: linear-gradient(160deg, #0b2a4a 0%, #0a1a4d 100%); border: 1px solid rgba(250,204,21,.5); box-shadow: 0 22px 54px rgba(0,0,0,.4); }
+  .mr-offer .lab { font-size: 12px; letter-spacing: .14em; font-weight: 800; color: #fde047; }
+  .mr-offer .price { font-size: 46px; font-weight: 800; line-height: 1.1; margin-top: 6px; color: #fde047; }
+  .mr-offer .price small { display: block; margin-top: 2px; font-size: 16px; color: #e2e8f0; font-weight: 600; }
+  .mr-offer .was { margin-top: 6px; font-size: 14px; color: #cbd5e1; }
+  .mr-offer ul { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 11px; }
+  .mr-offer li { display: flex; gap: 10px; font-size: 14px; color: #e2e8f0; line-height: 1.5; }
+  .mr-offer li::before { content: '✓'; flex: 0 0 22px; height: 22px; border-radius: 50%; background: rgba(250,204,21,.18); color: #fde047; font-weight: 800; display: grid; place-items: center; font-size: 13px; }
+  .mr-offer li.gift::before { content: '🎁'; background: transparent; font-size: 17px; }
+  .mr-offer .need { margin-top: 20px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,.25); font-size: 13px; color: #cbd5e1; line-height: 1.55; }
+  .mr-offer a { color: #fde047; text-decoration: underline; }
+  .mr-formcard { background: #fff; border-radius: 22px; padding: 30px; color: #111827; box-shadow: 0 22px 54px rgba(0,0,0,.4); border-top: 6px solid #facc15; }
+  .mr-formcard h3.ft { font-size: 22px; font-weight: 800; color: #0b2a4a; margin-bottom: 18px; }
+  .mr-err { border: 1px solid #fecdd3; background: #fff1f2; color: #be123c; border-radius: 10px; padding: 10px 14px; font-size: 14px; margin-bottom: 14px; }
+  .mr-red { color: #e11d48; }
+  .mr-submit { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px 20px; border: 0; border-radius: 14px; cursor: pointer; font-weight: 800; font-size: 18px; color: #111827; background: linear-gradient(180deg, #fde047, #facc15); box-shadow: 0 10px 24px rgba(250,204,21,.38); transition: transform .15s, filter .15s; }
+  .mr-submit:hover { filter: brightness(1.05); transform: translateY(-1px); }
+  .mr-done { max-width: 600px; margin: 0 auto; }
+  .mr-dl { display: grid; grid-template-columns: 112px 1fr; gap: 10px 14px; font-size: 14px; margin-bottom: 16px; padding: 14px 16px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; }
+  .mr-dl dt { color: #64748b; }
+  .mr-dl dd { margin: 0; font-weight: 700; color: #0f172a; word-break: break-word; }
+  .mr-dl dd.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .mr-dl dd.big { font-size: 18px; font-weight: 800; }
+
+  /* Câu hỏi thường gặp */
+  .mr-faqsec { background: #fff; padding: 52px 0 60px; color: #111827; }
+  .mr-faq { max-width: 780px; margin: 22px auto 0; }
+  .mr-faq details { border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 16px; margin-top: 10px; background: #fff; }
+  .mr-faq details[open] { background: #f8fafc; border-color: #cbd5e1; }
+  .mr-faq summary { cursor: pointer; font-weight: 700; color: #0b2a4a; }
+  .mr-faq details p { margin: 10px 0 0; font-size: 14px; color: #334155; line-height: 1.6; }
 </style>
 <%
   const vnd = (n) => Number(n).toLocaleString('vi-VN') + 'đ';
+  const videos = [
+    { id: '1RztiXN59-bsAjQInW9nU0F9JJ25pPMUF', p: 'vid-tap03', k: 'l', t: 'Phim cổ trang', s: 'Tập 3' },
+    { id: '1G7FLQZ5XzkVv6bSTbLQ5IoWXNgNKdUYx', p: 'vid-tap05', k: 'l', t: 'Phim cổ trang', s: 'Tập 5' },
+    { id: '1I3rTtieqCX0XFVVeUOBXcK4bv3ILitVd', p: 'vid-tap54', k: 'p', t: 'Hoạt hình dọc', s: 'Kaka · Tập 54' },
+    { id: '1iDWWiALY2wPrLvNl_8_gY8kr8sXxA3EJ', p: 'vid-tap45', k: 'l', t: 'Phim cổ trang', s: 'Tập 45' },
+    { id: '1yRTYOF-BOeVkR5qhYGNPeQDFQCNA_4Zg', p: 'vid-tap04', k: 'l', t: 'Phim cổ trang', s: 'Tập 4' },
+    { id: '1Xlj8Lba7FDAl2k2lwOEl-vjS1O6iMxhz', p: 'vid-tap56', k: 'p', t: 'Hoạt hình dọc', s: 'Kaka · Tập 56' }
+  ];
 %>
-<section class="mr-hero relative overflow-hidden">
-  <div class="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-14 sm:py-16 text-center">
-    <span class="mr-tag" style="margin-bottom:16px">🎞️ Tool cho Windows</span>
+
+<section class="mr-hero">
+  <div class="mr-wrap" style="max-width:900px;text-align:center;padding-top:56px;padding-bottom:60px">
+    <div class="mr-chips" style="margin-bottom:18px">
+      <span class="mr-tag">🎞️ Tool cho Windows</span>
+      <span class="mr-tag">🔑 Key <%= han %>, dùng trên 1 máy</span>
+      <span class="mr-tag">🎁 Tặng kèm app học ngoại ngữ Mon.L</span>
+    </div>
     <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight text-wrap-balance">
       Sa Muse Ai<br class="hidden sm:block" /> <span class="mr-gold">làm video AI hàng loạt</span>
     </h1>
     <p class="mt-5 text-lg text-white/90 max-w-2xl mx-auto">
       Dán danh sách prompt, bấm chạy — tool tự tạo hàng chục video trên Muse, tải về và xếp gọn theo từng loại phim.
     </p>
-    <p class="mt-4 text-2xl font-extrabold mr-gold"><%= vnd(gia) %> <span class="text-base font-semibold text-white/80">/ <%= han %></span></p>
-    <p class="mt-1 text-sm text-white/80">Trước đây <%= vnd(giaCu) %>/tháng — nay chỉ <%= vnd(gia) %> dùng cả năm.</p>
-    <a href="#dk-form" class="mr-cta" style="margin-top:24px">
-      🛒 Đăng ký mua tool
-    </a>
+    <div class="mr-pricebox">
+      <div class="big"><%= vnd(gia) %> <small>/ <%= han %></small></div>
+      <p class="was">Trước đây <%= vnd(giaCu) %>/tháng — nay chỉ <%= vnd(gia) %> dùng cả năm.</p>
+    </div>
+    <div class="mr-btns">
+      <a href="#dk-form" class="mr-cta">🛒 Đăng ký mua tool</a>
+      <a href="#video-mau" class="mr-cta2">▶ Xem video mẫu</a>
+    </div>
   </div>
 </section>
 
 <section class="mr-info">
-  <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8" style="padding-bottom:36px">
+  <div class="mr-wrap" style="max-width:900px">
     <h2>Sa Muse Ai là gì?</h2>
     <p class="sub">Phần mềm cài trên máy tính Windows, giúp bạn tạo video AI hàng loạt trên Muse mà không phải ngồi gõ và canh từng video.</p>
 
@@ -78,22 +173,11 @@
       <div><b>⬇️ Tải MP4 về máy:</b> xem, chọn và tải nhiều video cùng lúc.</div>
       <div><b>🌙 Chạy tự động ngày đêm:</b> khi có <b>gói Claude 20 USD/tháng</b>, Claude điều khiển tool chạy thay bạn, không cần ngồi canh.</div>
     </div>
-
-    <div class="mr-faq">
-      <h2 style="font-size:20px;text-align:left">Câu hỏi thường gặp</h2>
-      <details><summary>Tool này dùng được trên máy nào?</summary><p>Máy tính Windows. Cần bật máy và có mạng khi tool chạy. Video được lưu ngay trên máy của bạn.</p></details>
-      <details><summary>Mua một lần hay theo tháng?</summary><p>Bán theo năm: <%= vnd(gia) %> cho <%= han %>. Trước đây giá <%= vnd(giaCu) %>/tháng, nay gộp cả năm với giá thấp hơn nhiều. Hết hạn bạn nhắn Zalo admin <%= zalo %> để gia hạn <%= vnd(gia) %>/năm.</p></details>
-      <details><summary>Có dùng thử không?</summary><p>Hiện chưa có bản dùng thử. Bạn đăng ký mua, chuyển khoản là nhận key và link tải qua Gmail.</p></details>
-      <details><summary>Mất bao lâu để nhận key?</summary><p>Sau khi chuyển khoản, admin xác nhận và hệ thống gửi key kèm link tải vào Gmail bạn đã đăng ký. Cần hỗ trợ cài đặt, nhắn Zalo <%= zalo %>.</p></details>
-      <details><summary>Một key dùng được trên mấy máy?</summary><p>Mỗi key gắn với <b>1 máy tính</b> khi bạn kích hoạt lần đầu.</p></details>
-      <details><summary>Tại sao cần Claude 20 USD/tháng?</summary><p>Chỉ cần nếu bạn muốn tool <b>chạy tự động cả ngày lẫn đêm</b> mà không phải thao tác. Bạn tự mua gói chính chủ của Claude. Gói có hạn mức sử dụng nên tool chạy nhiều giờ trong hạn mức của gói.</p></details>
-      <details><summary>Tài khoản Muse lấy ở đâu?</summary><p>Tool tạo video trên Muse nên bạn cần có tài khoản Muse. Có thể tìm mua trên mạng, giá khoảng 15.000đ, bạn tự tìm và tự mua.</p></details>
-    </div>
   </div>
 </section>
 
 <section class="mr-gal">
-  <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+  <div class="mr-wrap" style="max-width:900px">
     <h2>🎬 Các thể loại phim làm bằng Sa Muse Ai</h2>
     <p class="sub">Hình ảnh thật từ các tập phim đã được tạo bằng tool. Mỗi thể loại là một "Loại phim" riêng trong tool.</p>
     <div class="mr-grid">
@@ -103,18 +187,18 @@
       <figure class="wide"><img src="/images/muse/xuyen-khong-1.jpg" alt="Phim xuyên không" loading="lazy" /><figcaption>Xuyên không</figcaption></figure>
     </div>
     <div class="mr-row-tall">
-      <figure class="tall mr-grid-figure" style="margin:0;border-radius:14px;overflow:hidden;position:relative"><img src="/images/muse/hoat-hinh-1.jpg" alt="Phim hoạt hình Bà phù thủy" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover" /></figure>
-      <figure class="tall mr-grid-figure" style="margin:0;border-radius:14px;overflow:hidden;position:relative"><img src="/images/muse/hoat-hinh-2.jpg" alt="Phim hoạt hình Bà phù thủy" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover" /></figure>
+      <figure class="tall" style="margin:0;border-radius:14px;overflow:hidden;position:relative"><img src="/images/muse/hoat-hinh-1.jpg" alt="Phim hoạt hình Bà phù thủy" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover" /></figure>
+      <figure class="tall" style="margin:0;border-radius:14px;overflow:hidden;position:relative"><img src="/images/muse/hoat-hinh-2.jpg" alt="Phim hoạt hình Bà phù thủy" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover" /></figure>
     </div>
     <p class="sub" style="margin-top:12px">Hoạt hình dọc 9:16 – Bà phù thủy Kaka</p>
   </div>
 </section>
 
-<section class="bg-surface py-12">
-  <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+<section class="mr-warnsec">
+  <div class="mr-wrap" style="max-width:900px">
     <div class="mr-warn">
-      <h2 class="font-extrabold text-ink text-xl mb-3">⚠️ Đọc kỹ trước khi mua — bạn cần chuẩn bị 3 thứ</h2>
-      <ol class="space-y-3 text-ink list-decimal pl-5">
+      <h2>⚠️ Đọc kỹ trước khi mua — bạn cần chuẩn bị 3 thứ</h2>
+      <ol>
         <li>
           <strong>Gói Claude 20 USD/tháng (Claude Pro) của chính bạn.</strong>
           Để tool <strong>tự chạy ngày đêm mà bạn không cần ngồi canh hay thao tác</strong>, tool cần Claude điều khiển.
@@ -126,15 +210,34 @@
         </li>
         <li><strong>Một máy tính Windows</strong> bật máy và có mạng khi tool chạy.</li>
       </ol>
-      <p class="mt-3 text-sm text-muted">Key dùng thật <strong><%= han %></strong>, gắn với 1 máy tính. Không có bản dùng thử. <strong>Hết hạn, bạn nhắn Zalo admin <%= zalo %> để gia hạn <%= vnd(gia) %>/năm.</strong></p>
+      <p class="foot">Key dùng thật <strong><%= han %></strong>, gắn với 1 máy tính. Không có bản dùng thử. <strong>Hết hạn, bạn nhắn Zalo admin <%= zalo %> để gia hạn <%= vnd(gia) %>/năm.</strong></p>
     </div>
   </div>
 </section>
 
-<section id="dk-form" class="mr-formbg">
-  <div class="mx-auto max-w-xl px-4 sm:px-6">
+<section id="video-mau" class="mr-vid">
+  <div class="mr-wrap">
+    <h2>▶ Video mẫu làm bằng Sa Muse Ai</h2>
+    <p class="sub">Các tập phim thật đã tạo hàng loạt từ danh sách prompt. Bấm vào video để xem ngay trên trang.</p>
+    <div class="mr-vids">
+      <% videos.forEach(function (v) { %>
+        <a class="mr-v <%= v.k %>" href="https://drive.google.com/file/d/<%= v.id %>/view" target="_blank" rel="noopener" data-id="<%= v.id %>" aria-label="Xem video: <%= v.t %> · <%= v.s %>">
+          <img src="/images/muse/<%= v.p %>.jpg" alt="<%= v.t %> · <%= v.s %>" loading="lazy" />
+          <span class="shade"></span>
+          <span class="ratio"><%= v.k === 'l' ? '16:9' : '9:16' %></span>
+          <span class="play">▶</span>
+          <span class="cap"><small><%= v.t %></small><%= v.s %></span>
+        </a>
+      <% }) %>
+    </div>
+    <p class="note">Video chạy trên Google Drive. Chưa xem được thì bấm mở sang tab mới.</p>
+  </div>
+</section>
+
+<section id="dk-form" class="mr-reg" <%- (done || (errors && errors.length)) ? 'data-mr-scroll="1"' : '' %>>
+  <div class="mr-wrap" style="max-width:1040px">
     <% if (done) { %>
-      <div class="mr-formcard">
+      <div class="mr-formcard mr-done">
         <h2 class="text-2xl font-extrabold mb-2">✅ Đã nhận đăng ký, <%= done.name %>!</h2>
         <p class="mb-4">Chuyển khoản <strong><%= vnd(gia) %></strong> để nhận key. <strong>Tiền về, key và link tải sẽ được gửi tới <span class="break-all"><%= done.email %></span></strong>.</p>
         <p class="text-sm mb-4" style="color:#475569">Mail có thể rơi vào mục <strong>Spam / Thư rác / Quảng cáo</strong>. Nếu chuyển khoản xong vài phút mà chưa thấy, bạn kiểm tra các mục đó và bấm "Không phải thư rác", hoặc nhắn Zalo admin để được gửi key qua Zalo.</p>
@@ -142,12 +245,12 @@
           <div class="text-center mb-4">
             <img src="<%= pay.anh %>" alt="Mã QR chuyển khoản" class="mx-auto w-64 max-w-full rounded-lg border" />
           </div>
-          <dl class="text-sm grid grid-cols-3 gap-y-2 mb-4">
-            <dt class="text-muted">Ngân hàng</dt><dd class="col-span-2 font-semibold"><%= pay.nganHang %></dd>
-            <dt class="text-muted">Số tài khoản</dt><dd class="col-span-2 font-semibold font-mono"><%= pay.soTaiKhoan %></dd>
-            <dt class="text-muted">Chủ tài khoản</dt><dd class="col-span-2 font-semibold"><%= pay.chuTaiKhoan %></dd>
-            <dt class="text-muted">Số tiền</dt><dd class="col-span-2 font-semibold"><%= vnd(pay.soTien) %></dd>
-            <dt class="text-muted">Nội dung CK</dt><dd class="col-span-2 font-extrabold font-mono text-lg"><%= pay.noiDung %></dd>
+          <dl class="mr-dl">
+            <dt>Ngân hàng</dt><dd><%= pay.nganHang %></dd>
+            <dt>Số tài khoản</dt><dd class="mono"><%= pay.soTaiKhoan %></dd>
+            <dt>Chủ tài khoản</dt><dd><%= pay.chuTaiKhoan %></dd>
+            <dt>Số tiền</dt><dd><%= vnd(pay.soTien) %></dd>
+            <dt>Nội dung CK</dt><dd class="mono big"><%= pay.noiDung %></dd>
           </dl>
           <p class="text-sm mr-red font-semibold mb-4">Nhớ ghi đúng nội dung chuyển khoản <span class="font-mono"><%= pay.noiDung %></span> để được xử lý nhanh.</p>
         <% } else { %>
@@ -156,63 +259,141 @@
         <a href="https://zalo.me/<%= zalo %>" target="_blank" rel="noopener" class="btn-primary w-full text-center block">💬 Chuyển khoản xong? Nhắn Zalo admin <%= zalo %> để được hỗ trợ cài đặt</a>
       </div>
     <% } else { %>
-      <div class="mr-formcard">
-        <h2 class="text-xl font-extrabold text-ink mb-5">Đăng ký mua tool Sa Muse Ai</h2>
-        <% if (errors && errors.length) { %>
-          <div class="mr-err">
-            <% errors.forEach(function (e) { %><div><%= e.msg %></div><% }) %>
-          </div>
-        <% } %>
-        <form action="/dang-ky-tool-muse" method="POST" class="space-y-4">
-          <div style="position:absolute;left:-9999px" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off" /></div>
-          <div>
-            <label class="label" for="name">Họ và tên *</label>
-            <input class="input" type="text" id="name" name="name" value="<%= old.name || '' %>" required />
-          </div>
-          <div class="grid sm:grid-cols-2 gap-4">
+      <h2 class="ttl">Đăng ký mua tool Sa Muse Ai</h2>
+      <div class="mr-flow">
+        <span><b>1</b> Điền thông tin</span>
+        <span><b>2</b> Chuyển khoản</span>
+        <span><b>3</b> Nhận key qua Gmail</span>
+      </div>
+      <div class="mr-reg-grid">
+        <aside class="mr-offer">
+          <div class="lab">GÓI 1 NĂM</div>
+          <div class="price"><%= vnd(gia) %> <small>/ <%= han %></small></div>
+          <p class="was">Trước đây <%= vnd(giaCu) %>/tháng — nay gộp cả năm với giá thấp hơn nhiều.</p>
+          <ul>
+            <li><span>Key dùng <strong><%= han %></strong>, gắn với 1 máy tính Windows</span></li>
+            <li><span>Tạo video AI hàng loạt, chia theo từng loại phim, tải MP4 về máy</span></li>
+            <li><span>Tool tự cập nhật bản mới khi máy có mạng</span></li>
+            <li><span>Chuyển khoản xong, key và link tải gửi thẳng vào Gmail của bạn</span></li>
+            <li><span>Hỗ trợ cài đặt qua Zalo admin <strong><%= zalo %></strong></span></li>
+            <li class="gift"><span>Tặng kèm app học ngoại ngữ <strong>Mon.L</strong> — <a href="/kho-tai-nguyen/english-air-hoc-tieng-anh-mtcafzju" target="_blank" rel="noopener">xem app</a></span></li>
+          </ul>
+          <p class="need"><strong>Bạn cần có:</strong> máy Windows, tài khoản Muse (khoảng 15.000đ, tự mua) và gói Claude 20 USD/tháng nếu muốn tool tự chạy ngày đêm.</p>
+        </aside>
+
+        <div class="mr-formcard">
+          <h3 class="ft">Thông tin của bạn</h3>
+          <% if (errors && errors.length) { %>
+            <div class="mr-err">
+              <% errors.forEach(function (e) { %><div><%= e.msg %></div><% }) %>
+            </div>
+          <% } %>
+          <form action="/dang-ky-tool-muse" method="POST" class="space-y-4">
+            <div style="position:absolute;left:-9999px" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off" /></div>
             <div>
-              <label class="label" for="phone">Số điện thoại *</label>
-              <input class="input" type="tel" id="phone" name="phone" value="<%= old.phone || '' %>" required />
+              <label class="label" for="name">Họ và tên *</label>
+              <input class="input" type="text" id="name" name="name" value="<%= old.name || '' %>" required />
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="label" for="phone">Số điện thoại *</label>
+                <input class="input" type="tel" id="phone" name="phone" value="<%= old.phone || '' %>" required />
+              </div>
+              <div>
+                <label class="label" for="email">Gmail (nhận key) *</label>
+                <input class="input" type="email" id="email" name="email" value="<%= old.email || '' %>" required />
+              </div>
             </div>
             <div>
-              <label class="label" for="email">Gmail (nhận key) *</label>
-              <input class="input" type="email" id="email" name="email" value="<%= old.email || '' %>" required />
+              <label class="label" for="email2">Nhập lại Gmail để chắc chắn nhận được key *</label>
+              <input class="input" type="email" id="email2" name="email2" value="<%= old.email2 || '' %>" autocomplete="off" required />
             </div>
-          </div>
-          <div>
-            <label class="label" for="email2">Nhập lại Gmail để chắc chắn nhận được key *</label>
-            <input class="input" type="email" id="email2" name="email2" value="<%= old.email2 || '' %>" autocomplete="off" required />
-          </div>
-          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="label" for="hasClaude">Bạn đã có Claude Pro (20 USD) chưa?</label>
+                <select class="input" id="hasClaude" name="hasClaude">
+                  <% ['Đã có', 'Chưa có', 'Có gói khác'].forEach(function (o) { %>
+                    <option <%= old.hasClaude === o ? 'selected' : '' %>><%= o %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div>
+                <label class="label" for="hasMuse">Bạn đã có tài khoản Muse chưa?</label>
+                <select class="input" id="hasMuse" name="hasMuse">
+                  <% ['Đã có', 'Chưa có'].forEach(function (o) { %>
+                    <option <%= old.hasMuse === o ? 'selected' : '' %>><%= o %></option>
+                  <% }) %>
+                </select>
+              </div>
+            </div>
             <div>
-              <label class="label" for="hasClaude">Bạn đã có Claude Pro (20 USD) chưa?</label>
-              <select class="input" id="hasClaude" name="hasClaude">
-                <% ['Đã có', 'Chưa có', 'Có gói khác'].forEach(function (o) { %>
-                  <option <%= old.hasClaude === o ? 'selected' : '' %>><%= o %></option>
-                <% }) %>
-              </select>
+              <label class="label" for="note">Ghi chú (không bắt buộc)</label>
+              <textarea class="input" id="note" name="note" rows="2"><%= old.note || '' %></textarea>
             </div>
-            <div>
-              <label class="label" for="hasMuse">Bạn đã có tài khoản Muse chưa?</label>
-              <select class="input" id="hasMuse" name="hasMuse">
-                <% ['Đã có', 'Chưa có'].forEach(function (o) { %>
-                  <option <%= old.hasMuse === o ? 'selected' : '' %>><%= o %></option>
-                <% }) %>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label class="label" for="note">Ghi chú (không bắt buộc)</label>
-            <textarea class="input" id="note" name="note" rows="2"><%= old.note || '' %></textarea>
-          </div>
-          <label class="flex items-start gap-2 text-sm text-ink">
-            <input type="checkbox" name="hieu" value="1" class="mt-1" <%= old.hieu ? 'checked' : '' %> required />
-            <span>Tôi đã đọc và hiểu: cần <strong>Claude 20 USD/tháng</strong> để tool tự chạy ngày đêm, cần <strong>tài khoản Muse</strong> (khoảng 15.000đ, tự mua), và key giá <strong><%= vnd(gia) %>/<%= han %></strong>.</span>
-          </label>
-          <button type="submit" class="btn-primary w-full">🛒 Đăng ký mua tool — <%= vnd(gia) %></button>
-          <p class="text-xs text-muted">Thông tin của bạn chỉ dùng để gửi key và hỗ trợ cài đặt, không công khai.</p>
-        </form>
+            <label class="flex items-start gap-2 text-sm text-ink">
+              <input type="checkbox" name="hieu" value="1" class="mt-1" <%= old.hieu ? 'checked' : '' %> required />
+              <span>Tôi đã đọc và hiểu: cần <strong>Claude 20 USD/tháng</strong> để tool tự chạy ngày đêm, cần <strong>tài khoản Muse</strong> (khoảng 15.000đ, tự mua), và key giá <strong><%= vnd(gia) %>/<%= han %></strong>.</span>
+            </label>
+            <button type="submit" class="mr-submit">🛒 Đăng ký mua tool — <%= vnd(gia) %></button>
+            <p class="text-xs text-muted">Thông tin của bạn chỉ dùng để gửi key và hỗ trợ cài đặt, không công khai.</p>
+          </form>
+        </div>
       </div>
     <% } %>
   </div>
 </section>
+
+<section class="mr-faqsec">
+  <div class="mr-wrap" style="max-width:900px">
+    <h2>Câu hỏi thường gặp</h2>
+    <div class="mr-faq">
+      <details><summary>Tool này dùng được trên máy nào?</summary><p>Máy tính Windows. Cần bật máy và có mạng khi tool chạy. Video được lưu ngay trên máy của bạn.</p></details>
+      <details><summary>Mua một lần hay theo tháng?</summary><p>Bán theo năm: <%= vnd(gia) %> cho <%= han %>. Trước đây giá <%= vnd(giaCu) %>/tháng, nay gộp cả năm với giá thấp hơn nhiều. Hết hạn bạn nhắn Zalo admin <%= zalo %> để gia hạn <%= vnd(gia) %>/năm.</p></details>
+      <details><summary>Có dùng thử không?</summary><p>Hiện chưa có bản dùng thử. Bạn đăng ký mua, chuyển khoản là nhận key và link tải qua Gmail.</p></details>
+      <details><summary>Mất bao lâu để nhận key?</summary><p>Sau khi chuyển khoản, admin xác nhận và hệ thống gửi key kèm link tải vào Gmail bạn đã đăng ký. Cần hỗ trợ cài đặt, nhắn Zalo <%= zalo %>.</p></details>
+      <details><summary>Một key dùng được trên mấy máy?</summary><p>Mỗi key gắn với <b>1 máy tính</b> khi bạn kích hoạt lần đầu.</p></details>
+      <details><summary>Tại sao cần Claude 20 USD/tháng?</summary><p>Chỉ cần nếu bạn muốn tool <b>chạy tự động cả ngày lẫn đêm</b> mà không phải thao tác. Bạn tự mua gói chính chủ của Claude. Gói có hạn mức sử dụng nên tool chạy nhiều giờ trong hạn mức của gói.</p></details>
+      <details><summary>Tài khoản Muse lấy ở đâu?</summary><p>Tool tạo video trên Muse nên bạn cần có tài khoản Muse. Có thể tìm mua trên mạng, giá khoảng 15.000đ, bạn tự tìm và tự mua.</p></details>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  // Video mẫu: bấm vào ảnh bìa mới nạp khung phát của Google Drive (trang nhẹ, không tải sẵn 6 trình phát).
+  var cards = document.querySelectorAll('.mr-v[data-id]');
+  function reset(c) {
+    if (c.dataset.html) {
+      c.innerHTML = c.dataset.html;
+      c.setAttribute('href', c.dataset.href);
+      c.classList.remove('on');
+      delete c.dataset.html;
+    }
+  }
+  cards.forEach(function (c) {
+    c.addEventListener('click', function (e) {
+      if (c.classList.contains('on')) return;
+      e.preventDefault();
+      cards.forEach(reset);
+      c.dataset.html = c.innerHTML;
+      c.dataset.href = c.getAttribute('href');
+      c.removeAttribute('href');
+      var f = document.createElement('iframe');
+      f.src = 'https://drive.google.com/file/d/' + c.dataset.id + '/preview';
+      f.allow = 'autoplay; fullscreen';
+      f.setAttribute('allowfullscreen', '');
+      f.title = c.getAttribute('aria-label') || 'Video mẫu';
+      c.innerHTML = '';
+      c.appendChild(f);
+      c.classList.add('on');
+    });
+  });
+  // Gửi form xong (hoặc báo lỗi) thì trang tải lại từ đầu: cuộn thẳng xuống khung đăng ký.
+  // Có báo lỗi thì cuộn tới đúng dòng lỗi (trên điện thoại khung ưu đãi nằm phía trên form).
+  var s = document.querySelector('[data-mr-scroll]');
+  if (s) {
+    var err = s.querySelector('.mr-err');
+    if (err) err.scrollIntoView({ block: 'center' }); else s.scrollIntoView();
+  }
+})();
+</script>
