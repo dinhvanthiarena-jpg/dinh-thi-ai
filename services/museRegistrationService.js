@@ -1,5 +1,5 @@
 // Đăng ký mua tool Sa Muse Ai: lưu đăng ký → báo thầy (Telegram có nút + thông báo web) →
-// thầy xác nhận đã nhận tiền → tự cấp key 30 ngày + gửi mail key & link tải cho khách.
+// thầy xác nhận đã nhận tiền → tự cấp key 1 năm (365 ngày) + gửi mail key & link tải cho khách.
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const webpush = require('web-push');
@@ -8,9 +8,16 @@ const PushSubscription = require('../models/PushSubscription');
 const museLicense = require('./museLicenseService');
 const telegram = require('./telegramService');
 const Setting = require('../models/Setting');
+const User = require('../models/User');
 
-const GIA = 500000; // đ / 1 tháng
-const NGAY = 30;
+// Từ 21/11/2026: 989.000đ / 1 năm (365 ngày). Trước đó là 500.000đ / 30 ngày — đơn cũ giữ nguyên
+// (số tiền lưu theo từng đơn, key cũ không đụng tới).
+const GIA = 989000; // đ / 1 năm
+const NGAY = 365;
+const HAN_TEXT = '1 năm (365 ngày)';
+const GIA_CU = 500000; // gói tháng cũ — chỉ để nhận ra đơn cũ
+const NGAY_CU = 30;
+const MONL_PATH = '/kho-tai-nguyen/english-air-hoc-tieng-anh-mtcafzju';
 const ZALO = '0977317988';
 const PUSH_APP_ID = 'admin-muse';
 
@@ -46,6 +53,7 @@ async function lienKetTelegram(chatId, ma) {
 const siteUrl = () => (process.env.APP_URL || 'https://3dvietpro.com').replace(/\/$/, '');
 const linkTai = () => `${siteUrl()}/downloads/Sa_Muse_Ai_Setup.exe`;
 const linkTrangTai = () => `${siteUrl()}/dang-ky-tool-muse/tai-tool`;
+const linkMonL = () => `${siteUrl()}${MONL_PATH}`;
 
 const esc = (s) =>
   String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -89,6 +97,43 @@ function layTransporter() {
   return transporter;
 }
 
+/**
+ * Quà tặng kèm: app học ngoại ngữ Mon.L (nói đúng sự thật, không hứa "vĩnh viễn/trọn đời").
+ * - PRO_MODE tắt (mặc định): Mon.L đang miễn phí → chỉ kèm link + lời tặng, KHÔNG ghi thời hạn.
+ * - PRO_MODE bật (có thu phí): cộng 30 ngày Pro (User.proUntil) cho tài khoản Mon.L trùng Gmail khách;
+ *   mỗi đơn chỉ cộng 1 lần (gửi lại mail không cộng thêm). Chưa có tài khoản thì dặn khách nhắn Zalo.
+ */
+async function quaMonL(reg) {
+  const link = linkMonL();
+  const lk = `<a href="${esc(link)}">${esc(link)}</a>`;
+  const proBat = String(process.env.PRO_MODE || 'off').toLowerCase() === 'on';
+  if (!proBat) {
+    return { text: `Quà tặng kèm: app học ngoại ngữ Mon.L. Mở tại: ${link}`, html: `Quà tặng kèm: app học ngoại ngữ Mon.L. Mở tại: ${lk}` };
+  }
+  try {
+    const email = String(reg.email || '').trim().toLowerCase();
+    const u = await User.findOne({ where: { email } });
+    if (u) {
+      const dau = `museQuaMonL:${reg.id}`;
+      const daCap = await Setting.findByPk(dau);
+      let het;
+      if (daCap && daCap.value) het = new Date(daCap.value);
+      else {
+        const nen = u.proUntil && new Date(u.proUntil).getTime() > Date.now() ? new Date(u.proUntil) : new Date();
+        het = new Date(nen.getTime() + 30 * 24 * 60 * 60 * 1000);
+        await u.update({ proUntil: het });
+        await Setting.upsert({ key: dau, value: het.toISOString() });
+      }
+      const t = `Quà tặng kèm: app học ngoại ngữ Mon.L, đã cộng 30 ngày dùng cho tài khoản ${email}, đến hết ngày ${dmy(het)}. Mở tại: `;
+      return { text: t + link, html: esc(t) + lk };
+    }
+  } catch (e) {
+    console.error('[museReg/quaMonL]', e.message);
+  }
+  const t = `Quà tặng kèm: app học ngoại ngữ Mon.L. Bạn đăng ký tài khoản Mon.L bằng đúng Gmail này rồi nhắn Zalo ${ZALO} để được cộng 30 ngày dùng. Mở tại: `;
+  return { text: t + link, html: esc(t) + lk };
+}
+
 async function guiMailKey(reg) {
   const m = layTransporter();
   if (!m) throw new Error('Chưa cấu hình gửi mail (thiếu MUSE_MAIL_PASS hoặc SMTP_*)');
@@ -96,19 +141,22 @@ async function guiMailKey(reg) {
   // Thư giao dịch (không phải quảng cáo): văn bản đơn giản, nêu rõ mã đơn + lý do nhận thư, KHÔNG nút/đồ hoạ,
   // KHÔNG link tải .exe trực tiếp (bộ lọc spam rất ghét) mà trỏ về trang tải trên chính web 3dvietpro.com.
   const trang = linkTrangTai();
+  const qua = await quaMonL(reg); // quà tặng kèm: app học ngoại ngữ Mon.L (nói đúng sự thật theo PRO_MODE)
   const text = [
     `Chào ${reg.name},`,
     '',
     `Đây là thư tự động xác nhận đơn mua tool Sa Muse Ai (mã đơn ${reg.code}) bạn đã đăng ký trên 3dvietpro.com. Chúng tôi đã nhận được thanh toán của bạn, cảm ơn bạn.`,
     '',
     `Mã kích hoạt (key) của bạn: ${key}`,
-    `Key dùng ${NGAY} ngày, gắn với 1 máy tính.`,
+    `Key dùng ${HAN_TEXT}, gắn với 1 máy tính.`,
     '',
     `Trang tải và hướng dẫn cài: ${trang}`,
     '',
     'Cách dùng: tải và cài tool trên máy Windows, mở lên, dán key vào màn hình nhập key.',
     'Để tool tự chạy ngày đêm, bạn cần có Claude gói 20 USD/tháng và tài khoản Muse.',
-    `Hết hạn, nhắn Zalo ${ZALO} để gia hạn ${vnd(GIA)}/${NGAY} ngày. Cần hỗ trợ cài đặt cũng nhắn Zalo ${ZALO}.`,
+    `Hết hạn, nhắn Zalo ${ZALO} để gia hạn ${vnd(GIA)}/năm. Cần hỗ trợ cài đặt cũng nhắn Zalo ${ZALO}.`,
+    '',
+    qua.text,
     '',
     'Nếu thư này nằm trong mục Spam hoặc Quảng cáo, bạn bấm "Không phải thư rác" / kéo sang Hộp thư chính, và trả lời thư này một chữ "OK" để lần sau (thông báo gia hạn) vào thẳng hộp thư chính.',
   ].join('\n');
@@ -116,11 +164,12 @@ async function guiMailKey(reg) {
     `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.55;color:#111">` +
     `<p>Chào ${esc(reg.name)},</p>` +
     `<p>Đây là thư tự động xác nhận đơn mua tool Sa Muse Ai (mã đơn <b>${esc(reg.code)}</b>) bạn đã đăng ký trên 3dvietpro.com. Chúng tôi đã nhận được thanh toán của bạn, cảm ơn bạn.</p>` +
-    `<p>Mã kích hoạt (key) của bạn: <b style="font-family:monospace;font-size:17px">${esc(key)}</b><br>Key dùng ${NGAY} ngày, gắn với 1 máy tính.</p>` +
+    `<p>Mã kích hoạt (key) của bạn: <b style="font-family:monospace;font-size:17px">${esc(key)}</b><br>Key dùng ${HAN_TEXT}, gắn với 1 máy tính.</p>` +
     `<p>Trang tải và hướng dẫn cài: <a href="${esc(trang)}">${esc(trang)}</a></p>` +
     `<p>Cách dùng: tải và cài tool trên máy Windows, mở lên, dán key vào màn hình nhập key.<br>` +
     `Để tool tự chạy ngày đêm, bạn cần có Claude gói 20 USD/tháng và tài khoản Muse.</p>` +
-    `<p>Hết hạn, nhắn Zalo ${ZALO} để gia hạn ${vnd(GIA)}/${NGAY} ngày. Cần hỗ trợ cài đặt cũng nhắn Zalo ${ZALO}.</p>` +
+    `<p>Hết hạn, nhắn Zalo ${ZALO} để gia hạn ${vnd(GIA)}/năm. Cần hỗ trợ cài đặt cũng nhắn Zalo ${ZALO}.</p>` +
+    `<p>${qua.html}</p>` +
     `<p style="color:#555;font-size:13px">Nếu thư này nằm trong mục Spam hoặc Quảng cáo, bạn bấm "Không phải thư rác" / kéo sang Hộp thư chính, và trả lời thư này một chữ "OK" để lần sau (thông báo gia hạn) vào thẳng hộp thư chính.</p>` +
     `</div>`;
   await m.t.sendMail({
@@ -272,18 +321,18 @@ Link tải: ${linkTai()}
 const DAY_MS = 24 * 60 * 60 * 1000;
 const dmy = (ms) => new Date(ms).toLocaleDateString('vi-VN');
 
-/** Gia hạn thêm 30 ngày (cộng vào hạn còn lại), nhắn thầy xác nhận. */
-async function giaHan(id) {
+/** Gia hạn thêm `ngay` ngày (mặc định 365 = gói năm; đơn cũ gói tháng có thể +30), cộng vào hạn còn lại, nhắn thầy xác nhận. */
+async function giaHan(id, ngay = NGAY) {
   const reg = await MuseRegistration.findByPk(id);
   if (!reg || !reg.licenseKey) return { loi: 'Đăng ký này chưa có key để gia hạn.' };
-  const entry = museLicense.extendKey(reg.licenseKey, NGAY);
+  const entry = museLicense.extendKey(reg.licenseKey, ngay);
   if (!entry) return { loi: 'Không tìm thấy key.' };
   const chat = await layAdminChat();
-  if (chat) telegram.sendMessage(chat, `🔁 Đã gia hạn +${NGAY} ngày cho ${reg.name} (${reg.phone}). Hạn mới: ${dmy(entry.expiresAt)}.`).catch(() => {});
-  return { reg, het: entry.expiresAt };
+  if (chat) telegram.sendMessage(chat, `🔁 Đã gia hạn +${ngay} ngày cho ${reg.name} (${reg.phone}). Hạn mới: ${dmy(entry.expiresAt)}.`).catch(() => {});
+  return { reg, het: entry.expiresAt, ngay };
 }
 
-/** Quét key đã bán: nhắn thầy khi còn ≤3 ngày và khi đã hết hạn (mỗi mốc nhắn 1 lần). */
+/** Quét key đã bán: nhắn thầy khi còn ≤7 ngày (gói năm cần nhắc sớm hơn) và khi đã hết hạn (mỗi mốc nhắn 1 lần). */
 async function nhacHetHan() {
   const chat = await layAdminChat();
   if (!chat) return;
@@ -295,15 +344,15 @@ async function nhacHetHan() {
     const conLai = k.expiresAt - Date.now();
     let moc = '';
     if (conLai <= 0) moc = 'het';
-    else if (conLai <= 3 * DAY_MS) moc = 'sap';
+    else if (conLai <= 7 * DAY_MS) moc = 'sap';
     if (!moc) continue;
     const dau = `museNhacHan:${reg.id}:${k.expiresAt}:${moc}`;
     if (await Setting.findByPk(dau)) continue;
     await Setting.upsert({ key: dau, value: '1' });
     const ngayCon = Math.max(0, Math.ceil(conLai / DAY_MS));
     await telegram.sendMessage(chat, moc === 'het'
-      ? `⛔ Key của ${reg.name} (${reg.phone}) ĐÃ HẾT HẠN ${dmy(k.expiresAt)}. Liên hệ khách (Zalo ${reg.phone}) để gia hạn ${vnd(GIA)}/${NGAY} ngày, rồi vào /admin/dang-ky-muse bấm "Gia hạn +${NGAY} ngày".`
-      : `⏰ Key của ${reg.name} (${reg.phone}) còn ${ngayCon} ngày (hết ${dmy(k.expiresAt)}). Nhắc khách gia hạn ${vnd(GIA)}/${NGAY} ngày qua Zalo ${reg.phone}.`);
+      ? `⛔ Key của ${reg.name} (${reg.phone}) ĐÃ HẾT HẠN ${dmy(k.expiresAt)}. Liên hệ khách (Zalo ${reg.phone}) để gia hạn ${vnd(GIA)}/năm, rồi vào /admin/dang-ky-muse bấm "Gia hạn +${NGAY} ngày".`
+      : `⏰ Key của ${reg.name} (${reg.phone}) còn ${ngayCon} ngày (hết ${dmy(k.expiresAt)}). Nhắc khách gia hạn ${vnd(GIA)}/năm qua Zalo ${reg.phone}.`);
   }
 }
 
@@ -313,4 +362,4 @@ function batDauNhacHetHan() {
   setInterval(chay, 6 * 60 * 60 * 1000);
 }
 
-module.exports = { giaHan, nhacHetHan, batDauNhacHetHan, layAdminChat, layMaLienKet, lienKetTelegram, GIA, NGAY, ZALO, PUSH_APP_ID, dangKy, thongTinThanhToan, xacNhanDaNhanTien, guiLaiMail, linkTai, linkTrangTai };
+module.exports = { giaHan, nhacHetHan, batDauNhacHetHan, layAdminChat, layMaLienKet, lienKetTelegram, GIA, NGAY, HAN_TEXT, GIA_CU, NGAY_CU, ZALO, PUSH_APP_ID, dangKy, thongTinThanhToan, xacNhanDaNhanTien, guiLaiMail, linkTai, linkTrangTai };

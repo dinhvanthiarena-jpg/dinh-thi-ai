@@ -8,7 +8,7 @@
     <h2 class="font-semibold text-ink mb-1">🛒 Đăng ký mua tool Sa Muse Ai</h2>
     <p class="text-sm text-muted">
       Trang khách: <a class="underline" href="/dang-ky-tool-muse" target="_blank">/dang-ky-tool-muse</a>.
-      Thấy tiền về thì bấm <strong>Đã nhận tiền</strong>: hệ thống tự cấp key 30 ngày và gửi mail key + link tải cho khách.
+      Thấy tiền về thì bấm <strong>Đã nhận tiền</strong>: hệ thống tự cấp key <%= han %> và gửi mail key + link tải cho khách (giá <%= vnd(gia) %>/năm; đơn cũ 500.000đ/30 ngày giữ nguyên).
       Đang chờ chuyển khoản: <strong><%= choCount %></strong>.
     </p>
     <% if (msg) { %>
@@ -72,7 +72,10 @@
                   <button class="btn-primary" type="submit">✅ Đã nhận tiền – gửi key</button>
                 </form>
               <% } else { %>
-                <form action="/admin/dang-ky-muse/<%= r.id %>/extend" method="POST" class="mb-2" onsubmit="return confirm('Gia hạn thêm 30 ngày cho khách này? (chỉ bấm khi đã nhận 500.000đ)');"><button class="btn-primary" type="submit">🔁 Gia hạn +30 ngày</button></form>
+                <form action="/admin/dang-ky-muse/<%= r.id %>/extend" method="POST" class="mb-2" onsubmit="return confirm('Gia hạn thêm 365 ngày (1 năm) cho khách này? (chỉ bấm khi đã nhận <%= vnd(gia) %>)');"><button class="btn-primary" type="submit">🔁 Gia hạn +365 ngày (<%= vnd(gia) %>)</button></form>
+                <% if (Number(r.amount) < gia) { %>
+                  <form action="/admin/dang-ky-muse/<%= r.id %>/extend" method="POST" class="mb-2" onsubmit="return confirm('Đơn CŨ gói tháng: gia hạn thêm 30 ngày? (chỉ bấm khi đã nhận <%= vnd(giaCu) %>)');"><input type="hidden" name="goi" value="thang"><button class="btn-secondary" type="submit">+30 ngày (gói tháng cũ, <%= vnd(giaCu) %>)</button></form>
+                <% } %>
                 <form action="/admin/dang-ky-muse/<%= r.id %>/resend" method="POST"><button class="btn-secondary" type="submit">✉️ Gửi lại mail</button></form>
               <% } %>
             </td>

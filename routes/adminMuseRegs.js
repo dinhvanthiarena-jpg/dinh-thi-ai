@@ -21,6 +21,9 @@ router.get('/', async (req, res) => {
   require('../services/museLicenseService').listKeys().forEach((k) => { hanKey[k.key] = k.expiresAt; });
   res.render('admin/muse-registrations', {
     title: 'Đăng ký tool Sa Muse Ai',
+    han: svc.HAN_TEXT,
+    gia: svc.GIA,
+    giaCu: svc.GIA_CU,
     regs,
     hanKey,
     pushCount,
@@ -77,9 +80,11 @@ router.post('/:id/delete', async (req, res) => {
 });
 
 router.post('/:id/extend', async (req, res) => {
-  const r = await svc.giaHan(req.params.id);
+  // Mặc định gói năm (+365 ngày). Chỉ đơn cũ gói tháng mới có nút riêng "+30 ngày" (goi=thang).
+  const ngay = req.body && req.body.goi === 'thang' ? svc.NGAY_CU : svc.NGAY;
+  const r = await svc.giaHan(req.params.id, ngay);
   if (r.loi) return back(res, r.loi);
-  return back(res, `Đã gia hạn +${svc.NGAY} ngày cho ${r.reg.name}. Hạn mới: ${new Date(r.het).toLocaleDateString('vi-VN')}.`);
+  return back(res, `Đã gia hạn +${r.ngay} ngày cho ${r.reg.name}. Hạn mới: ${new Date(r.het).toLocaleDateString('vi-VN')}.`);
 });
 
 router.post('/:id/resend', async (req, res) => {

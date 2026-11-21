@@ -28,14 +28,14 @@ TỰ ĐỘNG CẬP NHẬT
 Có bản mới là tool tự tải về và tự cài lại khi máy có mạng — bạn không phải làm gì.
 
 BẢN QUYỀN & MUA KEY
-Mỗi key dùng cho đúng 1 máy tính, thời hạn 30 ngày (gia hạn qua admin). Nhập key vào tool là chạy, key tự gắn vào máy của bạn khi kích hoạt.
-Mua key / hỗ trợ: email dinhvanthi.arena@gmail.com hoặc nhắn Fanpage https://www.facebook.com/dinhthi.daotao
+Mỗi key dùng cho đúng 1 máy tính, thời hạn 1 năm (365 ngày), giá 989.000đ/năm (gia hạn qua admin). Nhập key vào tool là chạy, key tự gắn vào máy của bạn khi kích hoạt.
+Mua key và xem cách liên hệ hỗ trợ tại https://3dvietpro.com/dang-ky-tool-muse (989.000đ/1 năm).
 
 HƯỚNG DẪN CÀI ĐẶT
 Bước 1. Bấm nút Tải về trên trang này để tải file Sa_Muse_Ai_Setup.exe (khoảng 150 MB, dành cho Windows 10/11).
 Bước 2. Mở file vừa tải. Nếu Windows hiện cảnh báo "Windows protected your PC" (SmartScreen), bấm "More info" rồi "Run anyway".
 Bước 3. Cài xong, mở Sa Muse Ai từ biểu tượng ngoài màn hình. Lần đầu mở, tool tự chuẩn bị môi trường (cần mạng, mất vài phút).
-Bước 4. Mở lần đầu, nhập key bản quyền vào màn hình kích hoạt (liên hệ email/fanpage để mua key) — key tự gắn vào máy bạn.
+Bước 4. Mở lần đầu, nhập key bản quyền vào màn hình kích hoạt (đăng ký mua key tại https://3dvietpro.com/dang-ky-tool-muse) — key tự gắn vào máy bạn.
 Bước 5. Vào "Tài khoản Muse" thêm tài khoản Muse của bạn, dán danh sách ý tưởng rồi bấm "Bắt đầu tạo video".
 
 YÊU CẦU
@@ -51,7 +51,7 @@ async function run() {
     coverImageUrl: '/images/tools/sa-muse-ai-cover.png',
     galleryImages: ['/images/tools/sa-muse-ai-1.jpg', '/images/tools/sa-muse-ai-2.jpg'],
     driveUrl: 'https://3dvietpro.com/downloads/Sa_Muse_Ai_Setup.exe',
-    price: 0, // tải miễn phí, thu phí key bản quyền (key 30 ngày / 1 máy, cấp ở /admin/key-muse)
+    price: 0, // tải miễn phí, thu phí key bản quyền (key 1 năm / 1 máy, cấp ở /admin/dang-ky-muse hoặc /admin/key-muse)
     isPublished: true,
   };
   const existing = await Tool.findOne({ where: { title: TITLE } });

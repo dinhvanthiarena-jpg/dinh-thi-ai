@@ -11,6 +11,13 @@ const TITLE = 'Đăng ký mua tool Sa Muse Ai — làm video AI hàng loạt';
 const view = (res, extra) =>
   res.render('muse-register', { title: TITLE, gia: svc.GIA, ngay: svc.NGAY, zalo: svc.ZALO, old: {}, errors: [], done: null, pay: null, ...extra });
 
+// Hạn và giá cũ dùng chung cho mọi lần render (hiển thị "1 năm (365 ngày)" thay vì "30 ngày").
+router.use((req, res, next) => {
+  res.locals.han = svc.HAN_TEXT;
+  res.locals.giaCu = svc.GIA_CU;
+  next();
+});
+
 router.get('/', (req, res) => view(res, {}));
 
 // Trang tải tool (link trong mail trỏ về đây thay vì link .exe trực tiếp, để mail ít bị coi là spam).

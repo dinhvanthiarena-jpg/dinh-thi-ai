@@ -51,7 +51,8 @@
     <p class="mt-5 text-lg text-white/90 max-w-2xl mx-auto">
       Dán danh sách prompt, bấm chạy — tool tự tạo hàng chục video trên Muse, tải về và xếp gọn theo từng loại phim.
     </p>
-    <p class="mt-4 text-2xl font-extrabold mr-gold"><%= vnd(gia) %> <span class="text-base font-semibold text-white/80">/ <%= ngay %> ngày</span></p>
+    <p class="mt-4 text-2xl font-extrabold mr-gold"><%= vnd(gia) %> <span class="text-base font-semibold text-white/80">/ <%= han %></span></p>
+    <p class="mt-1 text-sm text-white/80">Trước đây <%= vnd(giaCu) %>/tháng — nay chỉ <%= vnd(gia) %> dùng cả năm.</p>
     <a href="#dk-form" class="mr-cta" style="margin-top:24px">
       🛒 Đăng ký mua tool
     </a>
@@ -81,7 +82,7 @@
     <div class="mr-faq">
       <h2 style="font-size:20px;text-align:left">Câu hỏi thường gặp</h2>
       <details><summary>Tool này dùng được trên máy nào?</summary><p>Máy tính Windows. Cần bật máy và có mạng khi tool chạy. Video được lưu ngay trên máy của bạn.</p></details>
-      <details><summary>Mua một lần hay theo tháng?</summary><p>Theo tháng: <%= vnd(gia) %> cho <%= ngay %> ngày. Hết hạn bạn nhắn Zalo admin <%= zalo %> để gia hạn <%= vnd(gia) %>/<%= ngay %> ngày.</p></details>
+      <details><summary>Mua một lần hay theo tháng?</summary><p>Bán theo năm: <%= vnd(gia) %> cho <%= han %>. Trước đây giá <%= vnd(giaCu) %>/tháng, nay gộp cả năm với giá thấp hơn nhiều. Hết hạn bạn nhắn Zalo admin <%= zalo %> để gia hạn <%= vnd(gia) %>/năm.</p></details>
       <details><summary>Có dùng thử không?</summary><p>Hiện chưa có bản dùng thử. Bạn đăng ký mua, chuyển khoản là nhận key và link tải qua Gmail.</p></details>
       <details><summary>Mất bao lâu để nhận key?</summary><p>Sau khi chuyển khoản, admin xác nhận và hệ thống gửi key kèm link tải vào Gmail bạn đã đăng ký. Cần hỗ trợ cài đặt, nhắn Zalo <%= zalo %>.</p></details>
       <details><summary>Một key dùng được trên mấy máy?</summary><p>Mỗi key gắn với <b>1 máy tính</b> khi bạn kích hoạt lần đầu.</p></details>
@@ -125,7 +126,7 @@
         </li>
         <li><strong>Một máy tính Windows</strong> bật máy và có mạng khi tool chạy.</li>
       </ol>
-      <p class="mt-3 text-sm text-muted">Key dùng thật <strong><%= ngay %> ngày</strong>, gắn với 1 máy tính. Không có bản dùng thử. <strong>Hết hạn, bạn nhắn Zalo admin <%= zalo %> để gia hạn <%= vnd(gia) %>/<%= ngay %> ngày.</strong></p>
+      <p class="mt-3 text-sm text-muted">Key dùng thật <strong><%= han %></strong>, gắn với 1 máy tính. Không có bản dùng thử. <strong>Hết hạn, bạn nhắn Zalo admin <%= zalo %> để gia hạn <%= vnd(gia) %>/năm.</strong></p>
     </div>
   </div>
 </section>
@@ -206,7 +207,7 @@
           </div>
           <label class="flex items-start gap-2 text-sm text-ink">
             <input type="checkbox" name="hieu" value="1" class="mt-1" <%= old.hieu ? 'checked' : '' %> required />
-            <span>Tôi đã đọc và hiểu: cần <strong>Claude 20 USD/tháng</strong> để tool tự chạy ngày đêm, cần <strong>tài khoản Muse</strong> (khoảng 15.000đ, tự mua), và key giá <strong><%= vnd(gia) %>/<%= ngay %> ngày</strong>.</span>
+            <span>Tôi đã đọc và hiểu: cần <strong>Claude 20 USD/tháng</strong> để tool tự chạy ngày đêm, cần <strong>tài khoản Muse</strong> (khoảng 15.000đ, tự mua), và key giá <strong><%= vnd(gia) %>/<%= han %></strong>.</span>
           </label>
           <button type="submit" class="btn-primary w-full">🛒 Đăng ký mua tool — <%= vnd(gia) %></button>
           <p class="text-xs text-muted">Thông tin của bạn chỉ dùng để gửi key và hỗ trợ cài đặt, không công khai.</p>
